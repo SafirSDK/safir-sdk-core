@@ -163,7 +163,7 @@ namespace Internal
             ,m_file(ed->FileName(), shm->get_segment_manager())
             ,m_name(ed->GetName(), shm->get_segment_manager())
             ,m_enumerationValues(shm->get_segment_manager())
-            ,m_checkSum(ed->GetCheckSum())
+            ,m_checksum(ed->GetChecksum())
         {
             for (int i=0; i<ed->GetNumberOfValues(); ++i)
             {
@@ -175,7 +175,7 @@ namespace Internal
         const char* Summary() const {return NULL;}
         DotsC_TypeId GetTypeId() const {return m_typeId;}
         const char* GetName() const {return m_name.c_str();}
-        DotsC_TypeId GetCheckSum() const {return m_checkSum;}
+        DotsC_TypeId GetChecksum() const {return m_checksum;}
         int GetNumberOfValues() const {return static_cast<int>(m_enumerationValues.size());}
         const char* GetValueName(DotsC_EnumerationValue val) const {return m_enumerationValues[static_cast<size_t>(val)].c_str();}
         int GetIndexOfValue(const std::string& valueName) const {return TypeUtilities::GetIndexOfEnumValue(this, valueName);}
@@ -185,7 +185,7 @@ namespace Internal
         StringShm m_file;
         StringShm m_name;
         StringVectorShm m_enumerationValues;
-        DotsC_TypeId m_checkSum;
+        DotsC_TypeId m_checksum;
     };
     typedef MapShm<EnumDescriptionShm>::Type EnumMapShm;
 
@@ -559,6 +559,7 @@ namespace Internal
             ,m_members(shm->get_segment_manager())
             ,m_properties(shm->get_segment_manager())
             ,m_ownParameters(shm->get_segment_manager())
+            ,m_checksum(cd->GetChecksum())
         {
             int totalNumMembers=cd->GetNumberOfMembers();
             int startOwnMembers=totalNumMembers-cd->GetNumberOfOwnMembers();
@@ -578,7 +579,6 @@ namespace Internal
         int GetNumberOfOwnMembers() const {return static_cast<int>(m_members.size());}
         int GetNumberOfInheritedMembers() const {return m_base ? m_base->GetNumberOfMembers() : 0;}
         int GetNumberOfMembers() const {return GetNumberOfOwnMembers()+GetNumberOfInheritedMembers();}
-
 
         DotsC_MemberIndex GetMemberIndex(const std::string& memberName) const
         {
@@ -666,6 +666,7 @@ namespace Internal
         void AddOwnParameter(const ParameterDescriptionShmPtr& paramPtr) {m_ownParameters.push_back(paramPtr);}
         void AddPropertyMapping(const PropertyMappingDescriptionShm& property) {m_properties.push_back(property);}
 
+        DotsC_Int64 GetChecksum() const {return m_checksum;}
     private:
         DotsC_TypeId m_typeId;
         StringShm m_file;
@@ -676,6 +677,8 @@ namespace Internal
         MemberDescriptionVectorShm m_members;
         PropertyMappingVectorShm m_properties;
         ParameterPtrVectorShm m_ownParameters;
+
+        DotsC_Int64 m_checksum;
     };
     typedef MapShm<ClassDescriptionShm>::Type ClassMapShm;
 
@@ -704,22 +707,22 @@ namespace Internal
         {
         }
 
-        //Enmerations
+        //Enumerations
         const EnumDescriptionShm* GetEnum(DotsC_TypeId typeId) const {return GetPtr<EnumDescriptionShm>(m_enums, typeId);}
         int GetNumberOfEnums() const {return static_cast<int>(m_enums.size());}
         void GetAllEnumTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys<EnumDescriptionShm>(m_enums, typeIds);}
 
-        //properties
+        //Properties
         const PropertyDescriptionShm* GetProperty(DotsC_TypeId typeId) const {return GetPtr<PropertyDescriptionShm>(m_properties, typeId);}
         int GetNumberOfProperties() const {return static_cast<int>(m_properties.size());}
         void GetAllPropertyTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys<PropertyDescriptionShm>(m_properties, typeIds);}
 
-        //classes
+        //Classes
         const ClassDescriptionShm* GetClass(DotsC_TypeId typeId) const {return GetPtr<ClassDescriptionShm>(m_classes, typeId);}
         int GetNumberOfClasses() const {return static_cast<int>(m_classes.size());}
         void GetAllClassTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys<ClassDescriptionShm>(m_classes, typeIds);}
 
-        //exceptionsm_properties
+        //Exceptions
         const ExceptionDescriptionShm* GetException(DotsC_TypeId typeId) const {return GetPtr<ExceptionDescriptionShm>(m_exceptions, typeId);}
         int GetNumberOfExceptions() const {return static_cast<int>(m_exceptions.size());}
         void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys<ExceptionDescriptionShm>(m_exceptions, typeIds);}

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -45,51 +45,19 @@ namespace ToolSupport
     namespace
     {
         /**
-         * Selects files to parse and handles file override.
-         */
-        inline void SelectFiles(const std::vector<boost::filesystem::path>& roots,
-                                std::map<boost::filesystem::path, boost::filesystem::path>& douFiles,
-                                std::map<boost::filesystem::path, boost::filesystem::path>& domFiles)
+        * Selects files to parse and handles file override.
+        */
+        inline void SelectFiles(const std::vector<boost::filesystem::path>& files,
+                                std::map<boost::filesystem::path, boost::filesystem::path>& selected)
         {
-            std::set<boost::filesystem::path> thisRootFiles;
-            for (std::vector<boost::filesystem::path>::const_iterator rootDirIt=roots.begin(); rootDirIt!=roots.end(); ++rootDirIt)
+            for (const auto& file : files)
             {
-                thisRootFiles.clear();
-                boost::filesystem::recursive_directory_iterator fileIt(*rootDirIt), fileItend;
-                while (fileIt!=fileItend)
+                auto inserted = selected.insert(std::make_pair(file.filename(), file));
+                if (!inserted.second)
                 {
-                    const boost::filesystem::path& fp=fileIt->path();
-                    const boost::filesystem::path filename=fp.filename();
-
-                    std::map<boost::filesystem::path, boost::filesystem::path>* pmap=NULL;
-                    if (fp.extension()==".dou")
-                    {
-                        pmap=&douFiles;
-                    }
-                    else if (fp.extension()==".dom")
-                    {
-                        pmap=&domFiles;
-                    }
-
-                    if (pmap)
-                    {
-                        if (thisRootFiles.find(filename)!=thisRootFiles.end())
-                        {
-                            std::ostringstream os;
-                            os<<"The directory '"<<rootDirIt->string()<<"' constains duplicated version of file '"<<filename.string()<<"'"<<std::endl;
-                            throw ParseError("Duplicated dou/dom file", os.str(), rootDirIt->string(), 2);
-                        }
-                        thisRootFiles.insert(filename);
-
-                        std::pair<std::map<boost::filesystem::path, boost::filesystem::path>::iterator, bool> inserted=pmap->insert(std::make_pair(filename, fp));
-                        if (!inserted.second)
-                        {
-                            //log and update
-                            lllog(9)<<"The file '"<<inserted.first->second.string().c_str()<<"' will be overridden by file '"<<fp.string().c_str()<<"'"<<std::endl;
-                            inserted.first->second=fp; //update to overriding path
-                        }
-                    }
-                    ++fileIt;
+                    //log and update
+                    lllog(9)<<"The file '"<<inserted.first->second.string().c_str()<<"' will be overridden by file '"<<file.string().c_str()<<"'"<<std::endl;
+                    inserted.first->second=file; //update to overriding path
                 }
             }
         }
@@ -210,14 +178,15 @@ namespace ToolSupport
         };
     }
 
-    ParseJob::ParseJob(const std::vector<boost::filesystem::path>& roots)
+    ParseJob::ParseJob(const std::vector<boost::filesystem::path>& douFiles, const std::vector<boost::filesystem::path>& domFiles)
         :m_result(std::make_shared<RepositoryLocal>())
     {
         auto startTime = std::chrono::high_resolution_clock::now();
 
-        std::map<boost::filesystem::path, boost::filesystem::path> douFiles;
-        std::map<boost::filesystem::path, boost::filesystem::path> domFiles;
-        SelectFiles(roots, douFiles, domFiles);
+        std::map<boost::filesystem::path, boost::filesystem::path> douFilesSelected;
+        std::map<boost::filesystem::path, boost::filesystem::path> domFilesSelected;
+        SelectFiles(douFiles, douFilesSelected);
+        SelectFiles(domFiles, domFilesSelected);
 
         lllog(5) << "Starting ParseJob #files (dou/dom/tot): "
                  << douFiles.size() << "/"
@@ -225,11 +194,11 @@ namespace ToolSupport
                  << douFiles.size()+domFiles.size() << std::endl;
 
         // parse dou-files
-        auto dou = ReadFiles(douFiles);
+        auto dou = ReadFiles(douFilesSelected);
         ParseWorker<DouParser, DouCompletionAlgorithm>()(m_result, dou);
 
         // parse dom-files
-        auto dom = ReadFiles(domFiles);
+        auto dom = ReadFiles(domFilesSelected);
         ParseWorker<DomParser, DomCompletionAlgorithm>()(m_result, dom);
 
         auto endTime = std::chrono::high_resolution_clock::now();

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -34,21 +34,9 @@ namespace ToolSupport
 {
 namespace Internal
 {
-    std::shared_ptr<const TypeRepository> ParseTypeDefinitionsImpl(const std::vector<std::string>& sroots)
+    std::shared_ptr<const TypeRepository> ParseTypeDefinitionsImpl(const std::vector<boost::filesystem::path>& douFiles, const std::vector<boost::filesystem::path>& domFiles)
     {
-        std::vector<boost::filesystem::path> roots;
-        for (const auto& sroot: sroots)
-        {
-            const boost::filesystem::path root(sroot);
-            //Check paths are valid directories. We dont care about duplicates, that will only result in overriding with same file
-            if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root))
-            {
-                throw ParseError("Invalid directory path", "The specified root directory does not exist.", sroot, 8);
-            }
-            roots.push_back(root);
-        }
-
-        ParseJob job(roots);
+        ParseJob job(douFiles, domFiles);
         return job.GetResult();
     }
 }

@@ -960,7 +960,16 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "TYPEID":
         if dou.name == "": return ""
         return str(md5_first64(dou.name))
-    elif var == "CHECKSUM":
+    elif var == "CLASSCHECKSUM":
+        if len(dou.members) == 0 and len(dou.parameters) == 0: return 0
+        member_list = []
+        for mv in dou.members:
+            member_list.append(mv.name + ":" + mv.type)
+        for pv in dou.parameters:
+            member_list.append(pv.name + ":" + pv.type)
+        member_list.sort();
+        return str(md5_first64(",".join(member_list)))
+    elif var == "ENUMCHECKSUM":
         if dou.name == "": return ""
         checksum_str = dou.name
         for ev in dou.values:

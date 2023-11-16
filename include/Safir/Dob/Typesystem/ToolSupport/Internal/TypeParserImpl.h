@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <vector>
+#include <boost/filesystem.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalExportDefs.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 
@@ -38,7 +39,7 @@ namespace ToolSupport
 {
 namespace Internal
 {
-    DOTS_INTERNAL_API std::shared_ptr<const TypeRepository> ParseTypeDefinitionsImpl(const std::vector<std::string>& roots);
+    DOTS_INTERNAL_API std::shared_ptr<const TypeRepository> ParseTypeDefinitionsImpl(const std::vector<boost::filesystem::path>& douFiles, const std::vector<boost::filesystem::path>& domFiles);
 }
 }
 }

@@ -457,6 +457,7 @@ namespace @_NAMESPACEV_@
     //this can never be called directly by anyone (since it is anonymous)
     namespace
     {
+        const Safir::Dob::Typesystem::Int64 classChecksum = @_CLASSCHECKSUM_@LL;
         Safir::Dob::Typesystem::ObjectPtr CreateObject(Safir::Dob::Typesystem::Int64 handle)
         {
             if (handle == 0)
@@ -469,7 +470,7 @@ namespace @_NAMESPACEV_@
             }
         }
         const Unused registered =
-            Safir::Dob::Typesystem::ObjectFactory::Instance().RegisterClass(@_CLASS_@::ClassTypeId, CreateObject);
+            Safir::Dob::Typesystem::ObjectFactory::Instance().RegisterClass(@_CLASS_@::ClassTypeId, classChecksum, CreateObject);
     }
 
     static bool isInitialised = false;

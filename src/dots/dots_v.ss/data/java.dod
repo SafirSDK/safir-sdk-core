@@ -1501,7 +1501,7 @@ public enum @_CLASS_@
     public static final long EnumerationId = @_TYPEID_@L;
 
     /** Checksum for @_CLASS_@. */
-    public static final long Checksum = @_CHECKSUM_@L;
+    public static final long Checksum = @_ENUMCHECKSUM_@L;
 
     /**
      * Convert an enum value to the string as it is specified in the Dou file.

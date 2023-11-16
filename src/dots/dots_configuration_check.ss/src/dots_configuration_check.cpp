@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2023 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joot
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -24,10 +24,16 @@
 #include <iostream>
 #include <boost/range/algorithm.hpp>
 #include <boost/program_options.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
+#include <Safir/Dob/Typesystem/Members.h>
+#include <Safir/Dob/Typesystem/Parameters.h>
+#include "dou_diff_helper.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -147,6 +153,38 @@ void TypeIdLookup(const std::string& typeIdString, const std::map<std::string, D
     }
 }
 
+DouDiffHelper::NameTypeVector GetMembers(DotsC_TypeId typeId)
+{
+    DouDiffHelper::NameTypeVector members;
+    auto totalCount = DotsC_GetNumberOfMembers(typeId);
+    auto inherited = DotsC_GetNumberOfInheritedMembers(typeId);
+    for (auto i = inherited; i < totalCount; ++i)
+    {
+        auto name = Safir::Dob::Typesystem::Members::GetName(typeId, i);
+        auto type = Safir::Dob::Typesystem::Members::GetTypeName(typeId, i);
+        members.emplace_back(Safir::Dob::Typesystem::Utilities::ToUtf8(name), Safir::Dob::Typesystem::Utilities::ToUtf8(type));
+    }
+    return members;
+}
+
+DouDiffHelper::NameTypeVector GetParameters(DotsC_TypeId typeId)
+{
+    DouDiffHelper::NameTypeVector parameters;
+    auto totalCount = DotsC_GetNumberOfParameters(typeId);
+    auto inherited = DotsC_GetNumberOfInheritedParameters(typeId);
+    for (auto i = inherited; i < totalCount; ++i)
+    {
+        auto name = Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::Typesystem::Parameters::GetName(typeId, i));
+        // Ignore hidden parameters generated from propertyMappings since they are harmless
+        if (std::find(name.begin(), name.end(), '@') == name.end())
+        {
+            auto type = Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::Typesystem::Parameters::GetTypeName(typeId, i));
+            parameters.emplace_back(name, type);
+        }
+    }
+    return parameters;
+}
+
 class CheckConfigurationDotsKernel
 {
 public:
@@ -260,8 +298,6 @@ private:
         std::vector<DotsC_TypeId> douTypes(numberOfTypes);
         int dummySize;
         DotsC_GetAllTypeIds(&douTypes[0], numberOfTypes, dummySize);
-        std::sort(std::begin(douTypes), std::end(douTypes));
-        assert(dummySize == numberOfTypes);
 
         // filter out all classes (exclude properties, enums, exception), since only classes are registered in ObjectFactory
         std::vector<DotsC_TypeId> douClasses;
@@ -272,38 +308,84 @@ private:
                 douClasses.push_back(t);
             }
         }
+        std::sort(std::begin(douClasses), std::end(douClasses));
 
-        auto generatedTypes = Safir::Dob::Typesystem::ObjectFactory::Instance().GetRegisteredTypes();
-        std::sort(std::begin(generatedTypes), std::end(generatedTypes));
+        auto generatedTypeInfo = Safir::Dob::Typesystem::ObjectFactory::Instance().GetRegisteredTypes();
+
+        std::sort(generatedTypeInfo.begin(), generatedTypeInfo.end(), [](const auto& a, const auto& b)
+        {
+            return a.first < b.first;
+        });
 
         std::vector<DotsC_TypeId> notInGenerated, notInDou;
+        std::vector<std::pair<DotsC_TypeId, int64_t>> checksumMissmatch;
+        std::vector<DotsC_TypeId> generatedTypes;
+        generatedTypes.reserve(generatedTypeInfo.size());
+        for (const auto& gi : generatedTypeInfo)
+        {
+            generatedTypes.push_back(gi.first);
+            DotsC_Int64 checksum;
+            if (DotsC_GetClassChecksum(gi.first, checksum))
+            {
+                if (gi.second != checksum)
+                {
+                    checksumMissmatch.push_back(gi);
+                }
+            }
+        }
+        std::sort(std::begin(douClasses), std::end(douClasses));
+
         boost::range::set_difference(douClasses, generatedTypes, std::back_inserter(notInGenerated));
         boost::range::set_difference(generatedTypes, douClasses, std::back_inserter(notInDou));
 
         if (!notInGenerated.empty())
         {
-            std::cout << "Types missing in the generated libraries:" << std::endl;
+            std::cout << "These types are missing in the generated libraries:" << std::endl;
             for (auto t : notInGenerated)
             {
-                if (DotsC_IsClass(t)) // Only classes are registered in ObjectFactory
-                {
-                    std::string typeName=DotsC_GetTypeName(t);
-                    std::string file = DotsC_GetDouFilePath(t);
-                    std::cout << "    " << typeName << " (" << file << ")" << std::endl;
-                }
+                std::string typeName=DotsC_GetTypeName(t);
+                std::string file = DotsC_GetDouFilePath(t);
+                std::cout << "    " << typeName << " (" << file << ")" << std::endl;
             }
         }
 
         if (!notInDou.empty())
         {
-            std::cout << "Types found in generated libraries but not in the dou/dom files. Can only show typeId since name is not known." << std::endl;
+            std::cout << "These types were found in generated libraries but not in the dou/dom files. Can only show typeId since name is not known." << std::endl;
             for (auto t : notInDou)
             {
                 std::cout << "    " << t << std::endl;
             }
         }
 
-        if (notInDou.empty() && notInGenerated.empty())
+        if (!checksumMissmatch.empty())
+        {
+            std::cout << "These types have a missmatch in parameters or members when comparing dou-file towards the generated code. I.e the generated code used another version of dou-files!" << std::endl;
+
+            DouDiffHelper diffHelper; // DiffHelper using all dou-rootDirs found in typesystem.ini
+            for (auto t : checksumMissmatch)
+            {
+                std::string typeName=DotsC_GetTypeName(t.first);
+                std::string file = DotsC_GetDouFilePath(t.first);
+                std::cout << "  --- " << typeName << " (" << file << ")" << std::endl;
+                if (diffHelper.LoadType(typeName, t.second))
+                {
+                    // Get member and parameter info from the currently used dou-file and compare towards the one used in code generation.
+                    auto members = GetMembers(t.first);
+                    auto parameters = GetParameters(t.first);
+                    auto diff = diffHelper.DiffLoadedType(members, parameters);
+                    std::cout << diff << std::endl;
+                }
+                else
+                {
+                    std::cout << "      Could not find the dou-file that has been used by DobMake. Compare the dou-file with the generated code manually to find the diff." << std::endl;
+                }
+            }
+
+        }
+
+
+        if (notInDou.empty() && notInGenerated.empty() && checksumMissmatch.empty())
         {
             std::cout<<"Generated libraries and dou/dom-files match"<<std::endl;
             std::cout<<"Success!"<<std::endl;

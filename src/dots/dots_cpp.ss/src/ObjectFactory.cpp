@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013,2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -122,7 +122,12 @@ namespace Typesystem
     class ObjectFactory::Impl
     {
     public:
-        typedef std::unordered_map<TypeId,CreateObjectCallback> CallbackMap;
+        struct ClassInfo
+        {
+            Int64 checksum;
+            CreateObjectCallback createFunc;
+        };
+        typedef std::unordered_map<TypeId, ClassInfo> CallbackMap;
         CallbackMap m_CallbackMap;
     };
 
@@ -145,8 +150,7 @@ namespace Typesystem
     }
 
 
-    ObjectPtr
-    ObjectFactory::CreateObject(char const * const blob) const
+    ObjectPtr ObjectFactory::CreateObject(char const * const blob) const
     {
         if (blob == NULL)
         {
@@ -171,13 +175,12 @@ namespace Typesystem
 
         //invoke the function
         Int64 handle=DotsC_CreateBlobReader(blob);
-        ObjectPtr obj=it->second(handle);
+        ObjectPtr obj=it->second.createFunc(handle);
         DotsC_DeleteBlobReader(handle);
         return obj;
     }
 
-    ObjectPtr
-    ObjectFactory::CreateObject(const TypeId typeId) const
+    ObjectPtr ObjectFactory::CreateObject(const TypeId typeId) const
     {
         Impl::CallbackMap::const_iterator it = m_impl->m_CallbackMap.find(typeId);
         if (it == m_impl->m_CallbackMap.end())
@@ -196,23 +199,23 @@ namespace Typesystem
         }
 
         //invoke the function
-        return it->second(0);
+        return it->second.createFunc(0);
     }
 
-    bool
-    ObjectFactory::RegisterClass(const TypeId typeId, CreateObjectCallback createFunction)
+    bool ObjectFactory::RegisterClass(const TypeId typeId, const Int64 checksum, CreateObjectCallback createFunction)
     {
-        return m_impl->m_CallbackMap.insert(Impl::CallbackMap::value_type(typeId,createFunction)).second;
+        ObjectFactory::Impl::ClassInfo classInfo{checksum, createFunction};
+        return m_impl->m_CallbackMap.insert(Impl::CallbackMap::value_type(typeId, classInfo)).second;
     }
 
-    std::vector<TypeId> ObjectFactory::GetRegisteredTypes() const
+    std::vector<std::pair<TypeId, Int64>> ObjectFactory::GetRegisteredTypes() const
     {
-        std::vector<TypeId> typeIds;
+        std::vector<std::pair<TypeId, Int64>> result;
         for (const auto& kv : m_impl->m_CallbackMap)
         {
-            typeIds.push_back(kv.first);
+            result.push_back(std::make_pair(kv.first, kv.second.checksum));
         }
-        return typeIds;
+        return result;
     }
 }
 }

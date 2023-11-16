@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2023 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -87,9 +87,10 @@ namespace Typesystem
          * Register a class with the object factory.
          *
          * @param typeId [in] - The TypeId of the object that should be created using createFunction.
+         * @param checksum [in] - Checksum of all members and parameters in the class.
          * @param createFunction [in] - The function to call to create the object.
          */
-        bool RegisterClass(const TypeId typeId, CreateObjectCallback createFunction);
+        bool RegisterClass(const TypeId typeId, const Int64 checksum, CreateObjectCallback createFunction);
 
         /** @} */
 
@@ -120,9 +121,9 @@ namespace Typesystem
 
         /**
          * @brief GetRegisteredTypes - Get types wich have been registered in the ObjectFactory. Intended for debug and diagnostics.
-         * @return A vector of all registered type ids.
+         * @return A vector of all registered type ids and corresponding checksum.
          */
-        std::vector<TypeId> GetRegisteredTypes() const;
+        std::vector<std::pair<TypeId, Int64>> GetRegisteredTypes() const;
 
     private:
         ObjectFactory();

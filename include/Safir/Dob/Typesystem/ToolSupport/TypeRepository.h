@@ -361,7 +361,7 @@ namespace ToolSupport
          * @brief Get checksum of this enum type.
          * @return Checksum.
          */
-        virtual DotsC_TypeId GetCheckSum() const=0;
+        virtual DotsC_TypeId GetChecksum() const=0;
 
         /**
          * @brief Get number of enumeration values.
@@ -722,6 +722,12 @@ namespace ToolSupport
          * @return
          */
         virtual const CreateRoutineDescription* GetCreateRoutine(int index) const=0;
+
+        /**
+         * @brief Get checksum of this class.
+         * @return Checksum.
+         */
+        virtual DotsC_TypeId GetChecksum() const=0;
     };
 
     /**

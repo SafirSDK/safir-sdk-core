@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB AB, 2005-2015 (http://safirsdkcore.com)
+* Copyright Saab AB AB, 2023 (http://safirsdkcore.com)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -158,16 +158,36 @@ extern "C"
     // Comments:    Get integer value associated with the enumeration value for the specified enumeration type.
     DOTS_KERNEL_API DotsC_EnumerationValue DotsC_EnumerationValueFromName(DotsC_TypeId enumId, const char* enumValueName);
 
+    // Function:    DotsC_GetEnumerationChecksum
+    // Parameters:  typeId      -   id of enum type
+    //              checksum    -   checksum of the enum values, out param.
+    // Returns:     -
+    // Comments:    Get a checksum of all the enum values.
     DOTS_KERNEL_API void DotsC_GetEnumerationChecksum(const DotsC_TypeId typeId,
                                                       DotsC_TypeId & checksum);
 
     //  Functions for retrieving member info about object types
     //-----------------------------------------------------------
+
+    // Function:    DotsC_GetClassChecksum
+    // Parameters:  typeId - typeId of the class
+    //              checksum - the checksum, out param.
+    // Returns:     True if the class was found, else false.
+    // Comments:    Get a checksum calculated from an ordered list of members and parameters
+    //              including the types.
+    DOTS_KERNEL_API bool DotsC_GetClassChecksum(DotsC_TypeId typeId, DotsC_Int64& checksum);
+
     // Function:    DotsC_GetNumberOfMembers
     // Parameters:  typeId - id of class or property
-    // Returns:     number of members of the type, -1 if type does not exist
-    // Comments:    Get the number of members for a class or property. Parameters are not included.
+    // Returns:     Total number of members of the type including inherited members, -1 if type does not exist
+    // Comments:    Get the total number of members for a class or property. Parameters are not included.
     DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfMembers(DotsC_TypeId typeId);
+
+    // Function:    DotsC_GetNumberOfInheritedMembers
+    // Parameters:  typeId - id of class or property
+    // Returns:     Number of inherited members, -1 if type does not exist
+    // Comments:    Get the number of members for a class or property. Parameters are not included.
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfInheritedMembers(DotsC_TypeId typeId);
 
     // Function:    DotsC_GetMemberId
     // Parameters:  typeId      -   id of class or property
@@ -227,9 +247,15 @@ extern "C"
     //-----------------------------------------------------------
     // Function:    DotsC_GetNumberOfParameters
     // Parameters:  typeId  -   id of class
-    // Returns:     the number of parameters, -1 if type does not exist
-    // Comments:    Gets the number of parameters defined in a class.
+    // Returns:     The total number of parameters including inherited parameter, -1 if type does not exist
+    // Comments:    Gets the total number of parameters defined in a class.
     DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfParameters(DotsC_TypeId typeId);
+
+    // Function:    DotsC_GetNumberOfInheritedParameters
+    // Parameters:  typeId  -   id of class
+    // Returns:     The number of inerited parameters, -1 if type does not exist
+    // Comments:    Gets the number of inherited parameters.
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfInheritedParameters(DotsC_TypeId typeId);
 
     // Function:    DotsC_GetParameterId
     // Parameters:  typeId          -   id of class

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <!-- checksum: StrMem:String,StrPar:String = 7353289459398808221 -->
+    <name>Test.MyEntityInherited</name>
+    <baseClass>Test.MyEntity</baseClass>
+    <parameters>
+        <parameter>
+            <type>String</type>
+            <name>StrPar</name>
+            <value>hello</value>
+        </parameter>
+    </parameters>
+    
+    <members>
+        <member>
+            <name>StrMem</name>
+            <type>String</type>
+        </member>
+    </members>
+</class>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <!-- checksum: a:Int32,b:Test.MyEntity,c:String,d:Int64,E:EntityId,F:InstanceId = 2221939569538129493 -->
+    <name>Test.MyEntity</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <parameters>
+        <parameter>
+            <type>Test.MyEntity</type>
+            <name>b</name>
+            <Test.MyEntity/>
+        </parameter>
+        <parameter>
+            <type>Int32</type>
+            <name>a</name>
+            <value>654</value>
+        </parameter>
+        <parameter>
+            <type>InstanceId</type>
+            <name>F</name>
+            <value>SomeInstance</value>
+        </parameter>
+    </parameters>
+    
+    <members>
+        <member>
+            <name>E</name>
+            <type>EntityId</type>
+        </member>
+        <member>
+            <name>c</name>
+            <type>String</type>
+        </member>
+        <member>
+            <name>d</name>
+            <type>Int64</type>
+        </member>
+    </members>
+</class>

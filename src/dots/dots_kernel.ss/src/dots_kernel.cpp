@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -89,48 +89,6 @@ namespace
             GetCompleteTypeInternal(cd->GetDescendant(i), buf, bufSize, noResults);
         }
     }
-
-    /* This is work in progress for dictionary properties
-    bool GetPropertyParameterInternal(const DotsC_TypeId typeId,
-                                      const DotsC_TypeId propertyId,
-                                      const DotsC_MemberIndex member,
-                                      const DotsC_Int32 index, //memberIndex
-                                      const ParameterDescriptionShm*& parameter,
-                                      int& parameterIndex)
-    {
-        bool isInherited;
-        const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->
-            GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
-
-        if (pmd==NULL)
-        {
-            return false;
-        }
-
-        const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(member);
-
-        if (mm==NULL || mm->GetMappingKind()!=MappedToParameter)
-        {
-            return false;
-        }
-
-        std::pair<const ParameterDescriptionShm*, int> param=mm->GetParameter();
-        parameter=param.first;
-
-        if (pmd->GetProperty()->GetMember(member)->GetCollectionType()!=SingleValueCollectionType)
-        {
-            //if the member is an array we use the specified index.
-            parameterIndex=index;
-        }
-        else
-        {
-            //If not array we have to use what's been declared in dou-file in case the parameter is an array.
-            parameterIndex=param.second;
-        }
-
-        return true;
-    }
-    */
 
     typedef ts::BlobReader<RepositoryShm> Reader;
     typedef ts::BlobWriter<RepositoryShm> Writer;
@@ -319,14 +277,27 @@ void DotsC_GetEnumerationChecksum(const DotsC_TypeId typeId,
     }
     else
     {
-        checksum=ed->GetCheckSum();
+        checksum=ed->GetChecksum();
     }
 }
 
 //***********************************************************
 //* Functions for retrieving member info about object types
 //***********************************************************
-//Functions for retrieving member info about object types
+
+bool DotsC_GetClassChecksum(DotsC_TypeId typeId, DotsC_Int64& checksum)
+{
+    Init();
+    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
+    if (cd!=NULL)
+    {
+        checksum = cd->GetChecksum();
+        return true;
+    }
+
+    return false;
+}
+
 DotsC_Int32 DotsC_GetNumberOfMembers(const DotsC_TypeId typeId)
 {
     Init();
@@ -346,6 +317,28 @@ DotsC_Int32 DotsC_GetNumberOfMembers(const DotsC_TypeId typeId)
         }
     }
     return -1;
+}
+
+DotsC_Int32 DotsC_GetNumberOfInheritedMembers(DotsC_TypeId typeId)
+{
+    Init();
+    {
+        const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
+        if (cd!=NULL)
+        {
+            return cd->GetNumberOfInheritedMembers();
+        }
+    }
+
+    {
+        const PropertyDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetProperty(typeId);
+        if (pd!=NULL)
+        {
+            return 0; // Properties doesn't have inheritance.
+        }
+    }
+    return -1;
+
 }
 
 DotsC_MemberIndex DotsC_GetMemberId(const DotsC_TypeId typeId, const char* const memberName)
@@ -550,6 +543,21 @@ DotsC_Int32 DotsC_GetNumberOfParameters(const DotsC_TypeId typeId)
     {
         return -1;
     }
+}
+
+DotsC_Int32 DotsC_GetNumberOfInheritedParameters(DotsC_TypeId typeId)
+{
+    Init();
+    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
+    if (cd!=NULL)
+    {
+        return cd->GetNumberOfInheritedParameters();
+    }
+    else
+    {
+        return -1;
+    }
+
 }
 
 DotsC_ParameterIndex DotsC_GetParameterId(const DotsC_TypeId typeId, const char* parameterName)

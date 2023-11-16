@@ -320,7 +320,7 @@ namespace ToolSupport
         const char* Summary() const override {return summary.c_str();}
         DotsC_TypeId GetTypeId() const override {return typeId;}
         const char* GetName() const override {return name.c_str();}
-        DotsC_TypeId GetCheckSum() const override {return checksum;}
+        DotsC_TypeId GetChecksum() const override {return checksum;}
         int GetNumberOfValues() const override {return static_cast<int>(enumerationValues.size());}
         const char* GetValueName(DotsC_EnumerationValue val) const override {return enumerationValues[val].c_str();}
         int GetIndexOfValue(const std::string& valueName) const override;
@@ -444,6 +444,8 @@ namespace ToolSupport
         int GetNumberOfCreateRoutines() const override {return static_cast<int>(createRoutines.size());}
         const CreateRoutineDescription* GetCreateRoutine(int index) const override {return createRoutines[index].get();}
 
+        DotsC_TypeId GetChecksum() const override {return checksum;}
+
         //Fields
         DotsC_TypeId typeId;
         std::string summary;
@@ -457,6 +459,8 @@ namespace ToolSupport
         std::vector<CreateRoutineDescriptionLocalPtr> createRoutines;
         std::vector<PropertyMappingDescriptionLocalPtr> properties;
         std::vector<ParameterDescriptionLocalPtr> ownParameters;
+
+        DotsC_Int64 checksum;
     };
 
 

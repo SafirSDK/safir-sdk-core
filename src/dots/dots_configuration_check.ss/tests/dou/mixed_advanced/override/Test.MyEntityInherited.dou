@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <!-- checksum: IntMem1:Int32,IntMem2:Int32,IntMem3:Int32,StrMem:String = 899543895257396981 -->
+    <name>Test.MyEntityInherited</name>
+    <baseClass>Test.MyEntity</baseClass>
+    <!-- Remove parameters -->
+    
+    <members>
+        <!-- Add IntMem1, IntMem2, IntMem3 -->
+        <member>
+            <name>StrMem</name>
+            <type>String</type>
+        </member>
+        <member>
+            <name>IntMem1</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>IntMem2</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <name>IntMem3</name>
+            <type>Int32</type>
+        </member>
+    </members>
+</class>

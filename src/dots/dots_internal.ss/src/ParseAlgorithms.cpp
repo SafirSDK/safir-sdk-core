@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -1012,6 +1012,8 @@ namespace ToolSupport
         std::for_each(classesWithCreateRoutines.begin(),
                       classesWithCreateRoutines.end(),
                       [this, &state](ClassDescriptionLocal* cd){HandleCreateRoutines(state,cd);});
+
+        CalculateClassChecksums(state);
     }
 
     void DouCompletionAlgorithm::DeserializeObjects(const ParseState& state)
@@ -1470,6 +1472,36 @@ namespace ToolSupport
             }
             ed->checksum=LlufId_Generate64(ss.str().c_str());
         }
+    }
+
+    void DouCompletionAlgorithm::CalculateClassChecksums(const ParseState& state)
+    {
+        std::vector<std::string> values;
+        for (auto& cls : state.repository->m_classes)
+        {
+            values.clear();
+            ClassDescriptionLocalPtr& cd = cls.second;
+            for (const auto& md : cd->members)
+            {
+                values.push_back(md->name + ":" + md->typeName);
+            }
+            for (const auto& pd : cd->ownParameters)
+            {
+                values.push_back(pd->name + ":" + pd->typeName);
+            }
+
+            if (values.empty())
+            {
+                cd->checksum = 0;
+            }
+            else
+            {
+                std::sort(values.begin(), values.end());
+                std::string checksumStr = boost::algorithm::join(values, ",");
+                cd->checksum=LlufId_Generate64(checksumStr.c_str());
+            }
+        }
+
     }
 
     void DouCompletionAlgorithm::VerifyParameterKeys(const ParseState& state)

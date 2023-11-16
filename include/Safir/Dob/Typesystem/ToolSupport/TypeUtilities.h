@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -74,14 +74,14 @@ namespace TypeUtilities
     }
 
     /**
-     * Finds corresponding type name to a member description.
+     * Finds corresponding type name to a member or parameter description.
      *
      * @param repository [in] - Type repository containing all type information
-     * @param member [in] - Member description.
+     * @param member [in] - Member description or Parameter description.
      * @return The type name of the type.
      */
-    template <class RepositoryT, class MemberDescriptionT>
-    const char* GetTypeName(const RepositoryT* repository, const MemberDescriptionT* member)
+    template <class RepositoryT, class DescriptionT>
+    const char* GetTypeName(const RepositoryT* repository, const DescriptionT* member)
     {
         DotsC_MemberType mt=member->GetMemberType();
         if (mt==EnumerationMemberType || mt==ObjectMemberType)

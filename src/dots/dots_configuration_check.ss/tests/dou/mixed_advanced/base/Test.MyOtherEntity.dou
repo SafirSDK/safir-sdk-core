@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <!-- checksum: Bar:Int64,Foo:String = -8074543905675095924 -->
+    <name>Test.MyOtherEntity</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+        <member>
+            <name>Foo</name>
+            <type>String</type>
+        </member>
+        <member>
+            <name>Bar</name>
+            <type>Int64</type>
+        </member>
+    </members>
+</class>

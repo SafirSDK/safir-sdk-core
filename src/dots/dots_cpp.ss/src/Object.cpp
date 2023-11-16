@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2023 (http://safirsdkcore.com)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -58,7 +58,7 @@ namespace Typesystem
 
         //This ensures that Object is registered in the object factory 
         const Unused registered =
-            ObjectFactory::Instance().RegisterClass(Safir::Dob::Typesystem::Object::ClassTypeId,CreateObject);
+            ObjectFactory::Instance().RegisterClass(Safir::Dob::Typesystem::Object::ClassTypeId, 0, CreateObject);
         
     }
 

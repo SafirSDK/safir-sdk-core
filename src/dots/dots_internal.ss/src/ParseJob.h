@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2023 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -45,7 +45,7 @@ namespace ToolSupport
     class ParseJob : public boost::noncopyable
     {
     public:        
-        ParseJob(const std::vector<boost::filesystem::path>& roots);
+        ParseJob(const std::vector<boost::filesystem::path>& douFiles, const std::vector<boost::filesystem::path>& domFiles);
         std::shared_ptr<TypeRepository> GetResult() {return m_result;}
 
     private:

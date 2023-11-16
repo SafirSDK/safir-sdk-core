@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <!-- checksum: IntPar:Int32,ObjPar:Test.MyEntity = 2224062794534087353 -->
+    <name>Test.Params</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <type>Test.MyEntity</type>
+            <name>ObjPar</name>
+            <Test.MyEntity/>
+        </parameter>
+        <parameter>
+            <type>Int32</type>
+            <name>IntPar</name>
+            <value>123</value>
+        </parameter>
+    </parameters>
+</class>

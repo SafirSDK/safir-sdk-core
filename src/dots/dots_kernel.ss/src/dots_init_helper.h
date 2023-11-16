@@ -80,7 +80,7 @@ namespace Internal
             }
 
             //get all dou directory strings
-            std::vector<std::pair<std::string,std::string> > dirs = Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
+            std::vector<std::pair<std::string, std::string>> dirs = Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
 
             for (std::vector<std::pair<std::string,std::string> >::const_iterator it = dirs.begin();
                  it != dirs.end(); ++it)

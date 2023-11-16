@@ -1425,7 +1425,7 @@ namespace @_NAMESPACE_@
         /// Checksum of all the values of the @_CLASS_@ enumeration type.
         /// <see cref="CheckForMismatch(System.Int64)"/>
         /// </summary>
-        public const System.Int64 Checksum = @_CHECKSUM_@;
+        public const System.Int64 Checksum = @_ENUMCHECKSUM_@;
 
         /// <summary>
         /// Check that there is no enumeration mismatch that would require a recompilation of your application.

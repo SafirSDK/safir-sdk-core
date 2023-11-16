@@ -665,7 +665,7 @@ namespace @_NAMESPACEV_@
         static Enumeration ToValue(const std::wstring & valueString);
 
         static const Safir::Dob::Typesystem::TypeId EnumerationTypeId = @_TYPEID_@LL;
-        static const Safir::Dob::Typesystem::TypeId Checksum = @_CHECKSUM_@LL;
+        static const Safir::Dob::Typesystem::TypeId Checksum = @_ENUMCHECKSUM_@LL;
 
         //Check that there is no enumeration mismatch
         //throws an exception if there is - ConfigurationErrorException

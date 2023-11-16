@@ -1,8 +1,7 @@
-FILE(GLOB sources *.cpp)
-
-ADD_EXECUTABLE(dots_configuration_check ${sources})
+ADD_EXECUTABLE(dots_configuration_check dots_configuration_check.cpp dou_diff_helper.h)
 
 TARGET_LINK_LIBRARIES(dots_configuration_check PRIVATE
+  lluf_internal
   dots_kernel
   dots_internal
   dots_cpp
