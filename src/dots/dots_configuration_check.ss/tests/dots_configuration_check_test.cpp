@@ -197,7 +197,6 @@ int main(int argc, char* argv[])
             douDir / fs::path("mixed_advanced") / fs::path("override")
         };
 
-        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
         DouDiffHelper dh(roots);
 
         // Safir.Dob.Entity
@@ -205,6 +204,7 @@ int main(int argc, char* argv[])
         if (dh.LoadType("Safir.Dob.Entity", 0))
         {
             auto typeId = LlufId_Generate64("Safir.Dob.Entity");
+            auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
             auto members = GetMembers(typeId, repo);
             auto parameters = GetParameters(typeId, repo);
             const auto& diff = dh.DiffLoadedType(members, parameters);

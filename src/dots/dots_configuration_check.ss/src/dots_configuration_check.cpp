@@ -318,7 +318,7 @@ private:
         });
 
         std::vector<DotsC_TypeId> notInGenerated, notInDou;
-        std::vector<std::pair<DotsC_TypeId, int64_t>> checksumMissmatch;
+        std::vector<std::pair<DotsC_TypeId, int64_t>> checksumMismatch;
         std::vector<DotsC_TypeId> generatedTypes;
         generatedTypes.reserve(generatedTypeInfo.size());
         for (const auto& gi : generatedTypeInfo)
@@ -329,7 +329,7 @@ private:
             {
                 if (gi.second != checksum)
                 {
-                    checksumMissmatch.push_back(gi);
+                    checksumMismatch.push_back(gi);
                 }
             }
         }
@@ -358,12 +358,12 @@ private:
             }
         }
 
-        if (!checksumMissmatch.empty())
+        if (!checksumMismatch.empty())
         {
-            std::cout << "These types have a missmatch in parameters or members when comparing dou-file towards the generated code. I.e the generated code used another version of dou-files!" << std::endl;
+            std::cout << "These types have a mismatch in parameters or members when comparing dou-file towards the generated code. I.e the generated code used another version of dou-files!" << std::endl;
 
             DouDiffHelper diffHelper; // DiffHelper using all dou-rootDirs found in typesystem.ini
-            for (auto t : checksumMissmatch)
+            for (auto t : checksumMismatch)
             {
                 std::string typeName=DotsC_GetTypeName(t.first);
                 std::string file = DotsC_GetDouFilePath(t.first);
@@ -385,7 +385,7 @@ private:
         }
 
 
-        if (notInDou.empty() && notInGenerated.empty() && checksumMissmatch.empty())
+        if (notInDou.empty() && notInGenerated.empty() && checksumMismatch.empty())
         {
             std::cout<<"Generated libraries and dou/dom-files match"<<std::endl;
             std::cout<<"Success!"<<std::endl;

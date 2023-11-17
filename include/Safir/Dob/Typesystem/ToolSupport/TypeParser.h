@@ -71,7 +71,7 @@ namespace ToolSupport
                 if (thisRootFiles.find(fp.filename()) != thisRootFiles.end())
                 {
                     std::ostringstream os;
-                    os<<"The directory '"<<root.string()<<"' constains duplicated version of file '"<<fp.filename().string()<<"'"<<std::endl;
+                    os<<"The directory '"<<root.string()<<"' contains duplicated version of file '"<<fp.filename().string()<<"'"<<std::endl;
                     throw ParseError("Duplicated dou/dom file", os.str(), fp.string(), 2);
                 }
                 thisRootFiles.insert(fp.filename());
