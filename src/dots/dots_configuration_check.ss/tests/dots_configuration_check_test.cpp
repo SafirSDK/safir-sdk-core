@@ -84,10 +84,11 @@ int main(int argc, char* argv[])
         };
 
         DouDiffHelper dh(roots);
+        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
+
         if (dh.LoadType("Test.MyEntity", baseMyEntityChecksum))
         {
             auto typeId = LlufId_Generate64("Test.MyEntity");
-            auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
             auto members = GetMembers(typeId, repo);
             auto parameters = GetParameters(typeId, repo);
 
@@ -141,10 +142,11 @@ int main(int argc, char* argv[])
         };
 
         DouDiffHelper dh(roots);
+        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
+
         if (dh.LoadType("Test.MyEntity", baseMyEntityChecksum))
         {
             auto typeId = LlufId_Generate64("Test.MyEntity");
-            auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
             auto members = GetMembers(typeId, repo);
             auto parameters = GetParameters(typeId, repo);
 
@@ -198,13 +200,13 @@ int main(int argc, char* argv[])
         };
 
         DouDiffHelper dh(roots);
+        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
 
         // Safir.Dob.Entity
         std::cout << "--- Type: Safir.Dob.Entity ---" << std::endl;
         if (dh.LoadType("Safir.Dob.Entity", 0))
         {
             auto typeId = LlufId_Generate64("Safir.Dob.Entity");
-            auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
             auto members = GetMembers(typeId, repo);
             auto parameters = GetParameters(typeId, repo);
             const auto& diff = dh.DiffLoadedType(members, parameters);
@@ -226,7 +228,6 @@ int main(int argc, char* argv[])
         if (dh.LoadType("Test.MyEntity", baseMyEntityChecksum))
         {
             auto typeId = LlufId_Generate64("Test.MyEntity");
-            auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
             auto members = GetMembers(typeId, repo);
             auto parameters = GetParameters(typeId, repo);
 
@@ -270,7 +271,6 @@ int main(int argc, char* argv[])
         if (dh.LoadType("Test.MyEntityInherited", 7353289459398808221))
         {
             auto typeId = LlufId_Generate64("Test.MyEntityInherited");
-            auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
             auto members = GetMembers(typeId, repo);
             auto parameters = GetParameters(typeId, repo);
 
@@ -314,7 +314,6 @@ int main(int argc, char* argv[])
         if (dh.LoadType("Test.MyOtherEntity", -8074543905675095924))
         {
             auto typeId = LlufId_Generate64("Test.MyOtherEntity");
-            auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
             auto members = GetMembers(typeId, repo);
             auto parameters = GetParameters(typeId, repo);
 
@@ -356,7 +355,6 @@ int main(int argc, char* argv[])
         if (dh.LoadType("Test.Params", 2224062794534087353))
         {
             auto typeId = LlufId_Generate64("Test.Params");
-            auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
             auto members = GetMembers(typeId, repo);
             auto parameters = GetParameters(typeId, repo);
 

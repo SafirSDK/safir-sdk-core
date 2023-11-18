@@ -24,6 +24,7 @@
 #pragma once
 
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include <codecvt>
 #include <memory>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/TypeParserImpl.h>
@@ -68,22 +69,20 @@ namespace ToolSupport
             {
                 const boost::filesystem::path& fp=fileIt->path();
 
-                if (thisRootFiles.find(fp.filename()) != thisRootFiles.end())
+                // Only handle dou- and dom- files
+                auto fileVec = boost::iequals(fp.extension().string(), ".dou") ? &douFiles : (boost::iequals(fp.extension().string(), ".dom") ? &domFiles : nullptr);
+                if (fileVec != nullptr && boost::filesystem::is_regular_file(fp))
                 {
-                    std::ostringstream os;
-                    os<<"The directory '"<<root.string()<<"' contains duplicated version of file '"<<fp.filename().string()<<"'"<<std::endl;
-                    throw ParseError("Duplicated dou/dom file", os.str(), fp.string(), 2);
+                    if (thisRootFiles.find(fp.filename()) != thisRootFiles.end())
+                    {
+                        std::ostringstream os;
+                        os<<"The directory '"<<root.string()<<"' contains duplicated version of file '"<<fp.filename().string()<<"'"<<std::endl;
+                        throw ParseError("Duplicated dou/dom file", os.str(), fp.string(), 2);
+                    }
+                    thisRootFiles.insert(fp.filename());
+                    fileVec->push_back(fp);
                 }
-                thisRootFiles.insert(fp.filename());
 
-                if (fp.extension()==".dou")
-                {
-                    douFiles.push_back(fp);
-                }
-                else if (fp.extension()==".dom")
-                {
-                    domFiles.push_back(fp);
-                }
                 ++fileIt;
             }
         }
