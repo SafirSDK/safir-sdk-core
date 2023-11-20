@@ -20,5 +20,7 @@ if ((DEFINED ENV{SAFIR_SKIP_SLOW_TESTS}) AND ($ENV{SAFIR_SKIP_SLOW_TESTS}))
     websocket_stress_test
     Incarnation_And_Control_Tests
     system_picture_component_test
+    light_nodes_smart_sync
+    low_memory
     )
 endif()
