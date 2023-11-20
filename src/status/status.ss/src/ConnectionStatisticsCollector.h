@@ -61,4 +61,4 @@ namespace ConnectionStatisticsCollector
     };
 
     void GetStatistics(const Safir::Dob::Internal::ConnectionPtr& connection, Stat& stat);
-};
+}
