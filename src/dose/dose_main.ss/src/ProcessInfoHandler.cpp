@@ -25,6 +25,7 @@
 #include "ProcessInfoHandler.h"
 
 #include <Safir/Dob/AccessDeniedException.h>
+#include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/ErrorListResponse.h>
 #include <Safir/Dob/ResponseErrorInfo.h>
@@ -242,7 +243,13 @@ namespace Internal
             {
                 SEND_SYSTEM_LOG(Error,
                                 << "Unable to remove ProcessInfo entity " << eid
-                                << "Has someone overregistered Safir::Dob::ProcessInfo?");
+                                << ". Has someone overregistered Safir::Dob::ProcessInfo?");
+            }
+            catch (const Safir::Dob::NotFoundException &)
+            {
+                SEND_SYSTEM_LOG(Error,
+                                << "Unable to remove ProcessInfo entity " << eid
+                                << ". Maybe it was never created, due to low shared memory?");
             }
             catch (const Safir::Dob::LowMemoryException &)
             {
