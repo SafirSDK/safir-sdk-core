@@ -322,6 +322,8 @@ namespace Internal
             case Pd::PoolSyncInfo_PdMsgType::PoolSyncInfo_PdMsgType_PdRequest:
                 {
                     lllog(5)<<"PoolHandler: got PdRequest from "<<fromNodeId<<std::endl;
+
+                    // convert protobuf PoolSyncInfo to SmartSyncState
                     auto syncState = std::make_shared<SmartSyncState>();
                     for (const auto& c : pdInfo->connections())
                     {
@@ -329,7 +331,8 @@ namespace Internal
                         auto& smCon = syncState->connections.back();
                         for (const auto& r : c.registrations())
                         {
-                            smCon.registrations.push_back(SmartSyncState::Registration{r.type_id(), r.handler_id(), r.registration_time(), {}, &smCon});
+
+                            smCon.registrations.push_back(SmartSyncState::Registration{r.type_id(), ToHandlerId(r.handler_id()), r.registration_time(), {}, &smCon});
                             auto& smReg = smCon.registrations.back();
 
                             for (const auto& e : r.entities())
@@ -605,6 +608,20 @@ namespace Internal
                 }
             }
             break;
+        }
+    }
+
+    //convert a string to HandlerId by first trying to cast the string as int64_t
+    Safir::Dob::Typesystem::HandlerId PoolHandler::ToHandlerId(const std::string& idStr) const
+    {
+        try
+        {
+            auto id = boost::lexical_cast<int64_t>(idStr);
+            return Safir::Dob::Typesystem::HandlerId(id);
+        }
+        catch (const boost::bad_lexical_cast&)
+        {
+            return Safir::Dob::Typesystem::HandlerId(Safir::Dob::Typesystem::Utilities::ToWstring(idStr));
         }
     }
 }

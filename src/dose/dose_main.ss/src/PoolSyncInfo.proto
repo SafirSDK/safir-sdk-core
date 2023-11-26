@@ -35,7 +35,7 @@ message PoolSyncInfo {
     }
 
     message Registration {
-        optional sfixed64 handler_id = 1;
+        optional string handler_id = 1;
         optional sfixed64 type_id = 2;
         optional uint32 registration_time = 3;
         repeated Entity  entities = 4;

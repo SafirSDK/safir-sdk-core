@@ -111,6 +111,9 @@ namespace Internal
 
         //received entity state from other node
         void OnEntityState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);
+
+        //convert a string to HandlerId by first trying to cast the string as int64_t
+        Safir::Dob::Typesystem::HandlerId ToHandlerId(const std::string& idStr) const;
     };
 }
 }

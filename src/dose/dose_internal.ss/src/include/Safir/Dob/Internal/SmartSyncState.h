@@ -27,8 +27,8 @@
 #include <iostream>
 #include <list>
 #include <algorithm>
-#include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Operations.h>
+#include <Safir/Dob/Typesystem/HandlerId.h>
 
 namespace Safir
 {
@@ -59,7 +59,7 @@ namespace Internal
 
         struct Registration{
             int64_t typeId;
-            int64_t handlerId;
+            Safir::Dob::Typesystem::HandlerId handlerId;
             uint32_t registrationTime;
             std::list<SmartSyncState::Entity> entities;
             SmartSyncState::Connection* connection;
@@ -108,7 +108,7 @@ namespace Internal
                 {
                     for (const auto& reg : con.registrations)
                     {
-                        if (reg.typeId == typeId && reg.handlerId == handlerId)
+                        if (reg.typeId == typeId && reg.handlerId.GetRawValue() == handlerId)
                         {
                             return &reg;
                         }

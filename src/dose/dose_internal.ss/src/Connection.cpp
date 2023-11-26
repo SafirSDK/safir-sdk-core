@@ -140,8 +140,7 @@ namespace Internal
         for (const auto& reg : m_registrations)
         {
             auto typeId = reg.first.first;
-            auto handlerId = reg.first.second.GetRawValue();
-            smCon.registrations.push_back(SmartSyncState::Registration{typeId, handlerId, reg.second.regTime, {}, &smCon});
+            smCon.registrations.push_back(SmartSyncState::Registration{typeId, reg.first.second.GetHandlerId(), reg.second.regTime, {}, &smCon});
             if (Dob::Typesystem::Operations::IsOfType(typeId, Dob::Entity::ClassTypeId))
             {
                 EntityTypes::Instance().PrepareSmartSync(smCon.registrations.back());

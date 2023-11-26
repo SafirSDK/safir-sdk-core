@@ -175,6 +175,7 @@ namespace Internal
                         lllog(5) << L"Send PD request with smartSyncState: " << std::endl << os.str() << std::endl;
                     }
 
+                    // Convert smartSyncState to protobuf poolSyncInfo
                     Pd::PoolSyncInfo poolSyncInfo;
                     poolSyncInfo.set_messagetype(Pd::PoolSyncInfo_PdMsgType::PoolSyncInfo_PdMsgType_PdRequest);
                     for (const auto& connection : syncState.connections)
@@ -187,8 +188,15 @@ namespace Internal
                         {
                             auto r = c->mutable_registrations()->Add();
                             r->set_type_id(registration.typeId);
-                            r->set_handler_id(registration.handlerId);
                             r->set_registration_time(registration.registrationTime);
+                            if (registration.handlerId.GetRawString().empty())
+                            {
+                                r->set_handler_id(std::to_string(registration.handlerId.GetRawValue()));
+                            }
+                            else
+                            {
+                                r->set_handler_id(registration.handlerId.Utf8String());
+                            }
 
                             for (const auto& entity : registration.entities)
                             {

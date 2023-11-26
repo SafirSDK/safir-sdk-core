@@ -322,7 +322,6 @@ namespace Internal
 
         // We have an accepted registration state
 
-
         ConnectionPtr currentRegisterer;
         const Dob::Typesystem::HandlerId handlerId = remoteRegistrationState.GetHandlerId();
 

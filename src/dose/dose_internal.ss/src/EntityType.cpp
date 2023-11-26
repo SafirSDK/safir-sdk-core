@@ -157,7 +157,7 @@ namespace Internal
         m_entityStates[reg.connection->context].ForEachState([&reg](auto, const StateSharedPtr& ptr, bool&)
         {
             auto d = ptr->GetRealState();
-            if (d.GetType() == DistributionData::EntityState && !d.IsNoState() && d.GetHandlerId().GetRawValue() == reg.handlerId)
+            if (d.GetType() == DistributionData::EntityState && !d.IsNoState() && d.GetHandlerId() == reg.handlerId)
             {
                 SmartSyncState::Entity sst;
                 sst.instanceId = d.GetInstanceId().GetRawValue();

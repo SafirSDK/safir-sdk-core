@@ -175,7 +175,7 @@ namespace Internal
                             for (const auto& reg : con.registrations)
                             {
                                 bool exists = std::any_of(std::begin(registrations), std::end(registrations), [&reg](auto r) {
-                                    return r.typeId == reg.typeId && r.handlerId.GetRawValue() == reg.handlerId && r.regTime == reg.registrationTime;
+                                    return r.typeId == reg.typeId && r.handlerId == reg.handlerId && r.regTime == reg.registrationTime;
                                     });
 
                                 if (!exists)
@@ -183,7 +183,7 @@ namespace Internal
                                     // registration state doesn't exist any more, add a unregister state to the send queue
                                     self->m_prioritizedStates.push(
                                         DistributionData(registration_state_tag,
-                                            connId,
+                                            ConnectionId(connId.m_node, connId.m_contextId, -1),
                                             reg.typeId,
                                             Typesystem::HandlerId(reg.handlerId),
                                             InstanceIdPolicy::HandlerDecidesInstanceId, // Dummy for an unreg state
@@ -293,9 +293,11 @@ namespace Internal
             while (!m_prioritizedStates.empty())
             {
                 const DistributionData& d=m_prioritizedStates.front();
+                auto dataTypeId = d.GetType() == DistributionData::RegistrationState ? RegistrationStateDataTypeId : ConnectionMessageDataTypeId;
+
                 Safir::Utilities::Internal::SharedConstCharArray p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
 
-                if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, p, d.Size(), ConnectionMessageDataTypeId, true))
+                if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, p, d.Size(), dataTypeId, true))
                 {
                     m_prioritizedStates.pop();
                 }
@@ -697,14 +699,16 @@ namespace Internal
 
                 if (!state.IsNoState())
                 {
-                    const auto normalNode = !m_distribution.IsLightNode();
                     const auto ownerOnThisNode = state.GetSenderId().m_node==m_distribution.GetCommunication().Id();
-                    const auto isUnregistration =!state.IsRegistered();
+                    const auto isRegistration = state.IsRegistered();
 
-                    //States owned by someone on this node are to be sent to other nodes.
-                    //Unregistration states are always sent, since ghosts may be in WaitingStates
-                    //waiting for the unreg (only applies between two normal nodes).
-                    if (ownerOnThisNode || (normalNode && !m_receiverIsLightNode && isUnregistration))
+                    // RegistrationStates owned by someone on this node are to be sent to other nodes.
+                    // Unregistration states are always sent, since ghosts may be in WaitingStates
+                    // waiting for the unreg (only applies between two normal nodes).
+                    // However UnregStates are never sent to lightNodes here, since they have alreayd been sent
+                    // in SendConnectionsAndUnregistrations()
+                    //if (ownerOnThisNode || (normalNode && !m_receiverIsLightNode && !isRegistration))
+                    if ((isRegistration && ownerOnThisNode) || (!isRegistration && !m_receiverIsLightNode))
                     {
                         const auto conPtr = Connections::Instance().GetConnection(state.GetSenderId(), std::nothrow);
                         auto counter = conPtr != nullptr ? conPtr->Counter() : -1;
@@ -715,7 +719,7 @@ namespace Internal
                                     c.counter == counter &&
                                     std::any_of(std::begin(c.registrations), std::end(c.registrations), [&state](const auto& r)
                                     {
-                                        return r.typeId == state.GetTypeId() && r.handlerId == state.GetHandlerId().GetRawValue() && r.registrationTime >= state.GetRegistrationTime().GetRawValue();
+                                        return r.typeId == state.GetTypeId() && r.handlerId == state.GetHandlerId() && r.registrationTime >= state.GetRegistrationTime().GetRawValue();
                                     });
                         });
 
