@@ -3564,11 +3564,11 @@ fact that memory is running low. Warnings are logged to the syslog. Default thre
 
 _Low_::
 In the Low memory level, the system restricts operations that allocate new object
-instances. Default threshold is 10%.
+instances. Default threshold is 15%.
 
 _VeryLow_::
 In the VeryLow memory level, the system restricts operations that modify existing object
-instances or potentially lock instances in memory. Default threshold is 5%.
+instances or potentially lock instances in memory. Default threshold is 8%.
 
 _ExtremelyLow_::
 This is the most severe memory level, indicating an extremely constrained environment. At
@@ -3585,34 +3585,35 @@ that become forbidden at each of the memory levels:
 
 [[forbidden_operations]]
 .Operations that _become_ forbidden at each memory level
-[width="95%", cols="20%,15%,25%,25%,15%",options="header",frame="topbot"]
+[width="95%", cols="20%,15%,28%,25%,12%",options="header",frame="topbot"]
 |=========================================================================
 | Memory Level    | Connections   | Entities | Services | Messages
 
 | Normal, Warning | -             | -        | -        | -
 | Low
-| Open
-|Register +
-Register Pending +
-Create new instance +
-Inject +
-Subscribe
-|Register +
-Register Pending
+| -
+|*Create new instance* +
+Inject
+| -
 | -
 
 | VeryLow
-| -
-| Subscribe Registration +
+| Open
+| Register +
+Register Pending +
+Subscribe +
+Subscribe Registration +
 Unregister +
 Read +
-Update existing instance +
-Delete existing instance +
+*Update existing instance* +
+*Delete existing instance* +
 Create iterator +
 GetNumberOfInstances +
 Inject Deletion
-| Subscribe Registration +
-Unregister
+| Register +
+Register Pending +
+Subscribe Registration +
+Unregister +
 | -
 
 | ExtremelyLow
@@ -3629,6 +3630,9 @@ Unsubscribe Registration
 | Subscribe +
 Send
 |=========================================================================
+
+The three operations highlighted in bold can be moved to ExtremelyLow for a specific
+entity type by defining a property +LowMemoryOperationsAllowed+ on that type.
 
 By implementing these memory levels and the graceful degradation strategy, Safir SDK
 Core's distribution mechanism attempts to ensure stability and reliability even in
