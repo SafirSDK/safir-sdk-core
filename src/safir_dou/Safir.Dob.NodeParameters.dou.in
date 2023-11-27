@@ -29,11 +29,11 @@
         </entry>
         <entry>
           <key>Low</key>
-          <value>10</value>
+          <value>15</value>
         </entry>
         <entry>
           <key>VeryLow</key>
-          <value>5</value>
+          <value>8</value>
         </entry>
         <entry>
           <key>ExtremelyLow</key>

@@ -198,7 +198,7 @@ namespace Internal
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow)
         {
             std::wostringstream ostr;
             ostr << "Opening connections is not allowed due to lack of shared memory ("
@@ -465,7 +465,7 @@ namespace Internal
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow)
         {
             std::wostringstream ostr;
             ostr << "Register is not allowed due to lack of shared memory (typeId = "
@@ -558,7 +558,7 @@ namespace Internal
             throw Safir::Dob::Typesystem::ConfigurationErrorException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow)
         {
             std::wostringstream ostr;
             ostr << "Register is not allowed due to lack of shared memory (typeId = "
@@ -800,7 +800,7 @@ namespace Internal
             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow)
         {
             std::wostringstream ostr;
             ostr << "Subscribe is not allowed due to lack of shared memory (typeId = "
@@ -893,7 +893,7 @@ namespace Internal
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::Low)
+        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow)
         {
             std::wostringstream ostr;
             ostr << "SubscribeRegistration is not allowed due to lack of shared memory (typeId = "

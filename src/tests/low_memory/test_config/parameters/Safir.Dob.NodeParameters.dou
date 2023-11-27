@@ -14,7 +14,7 @@
       <summary>Specifies the amount of shared memory to allocate for the Dob distribution (in megabytes)</summary>
       <name>SharedMemorySize</name>
       <type>Int32</type>
-      <value>10</value>
+      <value>30</value>
     </parameter>
     <parameter>
       <summary>Percentages of the SharedMemorySize to enter the different degradation levels. The names have to be exactly these.</summary>
@@ -27,11 +27,11 @@
         </entry>
         <entry>
           <key>Low</key>
-          <value>10</value>
+          <value>15</value>
         </entry>
         <entry>
           <key>VeryLow</key>
-          <value>5</value>
+          <value>8</value>
         </entry>
         <entry>
           <key>ExtremelyLow</key>

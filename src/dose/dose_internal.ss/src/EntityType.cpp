@@ -865,7 +865,8 @@ namespace Internal
                 ostr << "SetEntity to create new instance is not allowed due to lack of shared memory (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
-                     << ", handlerId = " << handlerId << ")";
+                     << ", handlerId = " << handlerId
+                     << ", memoryLevel = " << Safir::Dob::MemoryLevel::ToString(GetMemoryLevel()) << ")";
                 SEND_SYSTEM_LOG(Error, << ostr.str());
                 throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
             }
@@ -877,7 +878,8 @@ namespace Internal
                 ostr << "SetEntity to update an existing instance is not allowed due to lack of shared memory (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
-                     << ", handlerId = " << handlerId << ")";
+                     << ", handlerId = " << handlerId
+                     << ", memoryLevel = " << Safir::Dob::MemoryLevel::ToString(GetMemoryLevel()) << ")";
                 SEND_SYSTEM_LOG(Error, << ostr.str());
                 throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
             }
@@ -958,7 +960,8 @@ namespace Internal
                 ostr << "DeleteEntity is not allowed due to lack of shared memory (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
-                     << ", handlerId = " << handlerId << ")";
+                     << ", handlerId = " << handlerId
+                     << ", memoryLevel = " << Safir::Dob::MemoryLevel::ToString(GetMemoryLevel()) << ")";
                 SEND_SYSTEM_LOG(Error, << ostr.str());
                 throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
             }
@@ -1014,7 +1017,8 @@ namespace Internal
             ostr << "InitialSet is not allowed due to lack of shared memory (typeId = "
                  << Typesystem::Operations::GetName(m_typeId)
                  << ", instanceId = " << instanceId
-                 << ", handlerId = " << handlerId << ")";
+                 << ", handlerId = " << handlerId
+                 << ", memoryLevel = " << Safir::Dob::MemoryLevel::ToString(GetMemoryLevel()) << ")";
             SEND_SYSTEM_LOG(Error, << ostr.str());
             throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
         }
@@ -1058,7 +1062,8 @@ namespace Internal
             ostr << "InjectChanges is not allowed due to lack of shared memory (typeId = "
                  << Typesystem::Operations::GetName(m_typeId)
                  << ", instanceId = " << instanceId
-                 << ", handlerId = " << handlerId << ")";
+                 << ", handlerId = " << handlerId
+                 << ", memoryLevel = " << Safir::Dob::MemoryLevel::ToString(GetMemoryLevel()) << ")";
             SEND_SYSTEM_LOG(Error, << ostr.str());
             throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
         }
@@ -1165,7 +1170,8 @@ namespace Internal
             ostr << "InjectDelete is not allowed due to lack of shared memory (typeId = "
                  << Typesystem::Operations::GetName(m_typeId)
                  << ", instanceId = " << instanceId
-                 << ", handlerId = " << handlerId << ")";
+                 << ", handlerId = " << handlerId
+                 << ", memoryLevel = " << Safir::Dob::MemoryLevel::ToString(GetMemoryLevel()) << ")";
             SEND_SYSTEM_LOG(Error, << ostr.str());
             throw Safir::Dob::LowMemoryException(ostr.str(),__WFILE__,__LINE__);
         }

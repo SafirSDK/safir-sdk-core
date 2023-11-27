@@ -158,7 +158,7 @@ public:
         }
     }
 
-    void TryRegister()
+    void Register(bool expectFailure)
     {
         try
         {
@@ -166,10 +166,18 @@ public:
                                                Safir::Dob::Typesystem::HandlerId(L"Blahonga"),
                                                Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
                                                this);
-            throw std::logic_error("Expected failure");
+            if (expectFailure)
+            {
+                throw std::logic_error("Expected failure");
+            }
         }
         catch (const Safir::Dob::LowMemoryException&)
         {
+            std::wcout << "Caught LowMemoryException " << std::boolalpha << expectFailure << std::endl;
+            if (!expectFailure)
+            {
+                throw;
+            }
             return;
         }
     }
@@ -287,8 +295,9 @@ public:
         AllocateUntilLevel(Safir::Dob::MemoryLevel::Low);
         m_entityOwner->Read(false);
         m_entityOwner->DeleteLast(false);
-        m_entityOwner->TryRegister();
+        m_entityOwner->Register(false);
         AllocateUntilLevel(Safir::Dob::MemoryLevel::VeryLow);
+        m_entityOwner->Register(true);
         m_entityOwner->Read(true);
         m_shmem.clear();
         CheckLevel(Safir::Dob::MemoryLevel::Normal);
