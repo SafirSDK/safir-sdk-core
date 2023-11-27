@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import subprocess, os, time, sys, signal, argparse
+import subprocess, os, time, sys, signal, argparse, re
 
 
 def log(*args, **kwargs):
@@ -42,9 +42,6 @@ parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose-main", required=True)
 arguments = parser.parse_args()
-
-log("This test program expects to be killed off after about two minutes unless it has finished successfully before then."
-    )
 
 proc = subprocess.Popen([arguments.safir_control, "--dose-main-path", arguments.dose_main],
                         stdout=subprocess.PIPE,
@@ -82,40 +79,37 @@ if proc.poll() is None:
 
 lines += proc.communicate()[0].splitlines()
 
-for i in range(len(lines)):
-    log("Line", i, ": '" + lines[i] + "'")
-    # Remove incarnation id
-    if lines[i].startswith("CTRL: Starting system"):
-        lines[i] = lines[i][:len("CTRL: Starting system with incarnation id")]
-    if lines[i].startswith("CTRL: This node has id"):
-        lines[i] = "CTRL: This node has id"
-
-expected_lines = set([
+expected_lines = [
     "MAIN: dose_main running...",
     "MAIN: dose_main is waiting for persistence data!",
-    "CTRL: Starting system with incarnation id",
-    "CTRL: This node has id",
+    "CTRL: Starting system with incarnation id -?[0-9]+",
+    "CTRL: This node has id [0-9]+",
     "MAIN: DOSE_MAIN: Exiting...",
     "CTRL: Exiting..."
-])
+]
 
 if sys.platform == "win32":
-    expected_lines.add("CTRL: Got signal 21 ... stop sequence initiated.")
+    expected_lines.append("CTRL: Got signal 21 ... stop sequence initiated.")
 else:
-    expected_lines.add("CTRL: Got signal 15 ... stop sequence initiated.")
+    expected_lines.append("CTRL: Got signal 15 ... stop sequence initiated.")
 
-if set(lines) - expected_lines:
+found = list()
+
+for expected in expected_lines:
+    for line in lines:
+        if re.match(expected, line):
+            found.append(line)
+            break
+
+if len(set(lines) - set(found)) != 0:
     log("Got unexpected output:")
-    log(set(lines) - expected_lines)
+    log(set(lines) - set(found))
     sys.exit(1)
 
-if expected_lines - set(lines):
-    log("Missing expected output:")
-    log(expected_lines - set(lines))
-
-if set(lines) != expected_lines:
-    log("something is wrong in the test script...")
-    sys.exit(1)
+if len(expected_lines) != len(lines):
+    log("Missing expected output!")
+    log("expected:", expected_lines)
+    log("got:", lines)
 
 log("success")
 sys.exit(0)

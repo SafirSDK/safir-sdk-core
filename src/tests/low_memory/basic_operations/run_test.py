@@ -26,10 +26,10 @@
 import time
 import sys
 import argparse
-from testenv import TestEnv, TestEnvStopper
+from testenv import TestEnv, TestEnvStopper, log
 
 parser = argparse.ArgumentParser("test script")
-parser.add_argument("--memory_eater", required=True)
+parser.add_argument("--basic-operations", required=True)
 parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose_main", required=True)
 parser.add_argument("--dope_main", required=True)
@@ -46,12 +46,16 @@ env = TestEnv(safir_control=arguments.safir_control,
 with TestEnvStopper(env):
     #env.launchProcess("dobexplorer", arguments.dobexplorer)
     #time.sleep(10)
-    eater = env.launchProcess("memory_eater", arguments.memory_eater)
-    env.WaitForOutput("memory_eater", "Done")
+    eater = env.launchProcess("basic_operations", arguments.basic_operations)
+    env.WaitForOutput("basic_operations", "Done")
+    env.WaitForProcess("basic_operations")
+    log("Waiting for a bit to let dose_main clean up")
+    time.sleep(3)
+    log("Shutting down")
 
 
 if not env.ReturnCodesOk():
-    print("Some process exited with an unexpected value")
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 sys.exit(0)
