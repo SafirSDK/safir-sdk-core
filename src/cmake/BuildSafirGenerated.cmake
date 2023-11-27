@@ -60,6 +60,11 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     include(PrecompiledHeader)
   endif()
 
+  #Disable a warning we get with gcc12
+  if (UNIX)
+    add_compile_options(-Wno-array-bounds)
+  endif()
+
   #
   # Dependency resolution
   #
