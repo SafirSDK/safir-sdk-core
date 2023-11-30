@@ -25,6 +25,7 @@
 
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
+#include <Safir/Dob/Internal/LowMemoryOperationsTable.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
@@ -43,6 +44,7 @@ void InitializeDoseInternalFromDoseMain(const int64_t nodeId)
     lllog(1) << "Initializing dose_internal from dose_main" << std::endl;
     Connections::Initialize(true,nodeId);
     ContextSharedTable::Initialize();
+    LowMemoryOperationsTable::Initialize();
     MessageTypes::Initialize(true);
     ServiceTypes::Initialize(true,nodeId);
     InjectionKindTable::Initialize();
@@ -79,6 +81,7 @@ void InitializeDoseInternalFromApp()
     lllog(1) << "Connecting to dose_internal from app" << std::endl;
     Connections::Initialize(false,0);
     ContextSharedTable::Initialize();
+    LowMemoryOperationsTable::Initialize();
     MessageTypes::Initialize(false);
     ServiceTypes::Initialize(false,0);
     InjectionKindTable::Initialize();

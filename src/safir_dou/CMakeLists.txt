@@ -56,6 +56,8 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.InstanceIdPolicy.dou
   data/Safir.Dob.Item.dou
   data/Safir.Dob.LowMemoryException.dou
+  data/Safir.Dob.LowMemoryOperationsAllowedProperty.dou
+  data/Safir.Dob.LowMemoryOperationsAllowedOverrideProperty.dou
   data/Safir.Dob.MemoryLevel.dou
   data/Safir.Dob.Message.dou
   data/Safir.Dob.NodeInfo.dou
@@ -104,6 +106,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Control.Status-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Control.GetConnectionStatistics-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.NodeInfo-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Dob.NodeInfo-Safir.Dob.LowMemoryOperationsAllowedProperty.dom
   data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.ProcessInfo-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Utilities.ForEach.DeleteAllRequest-Safir.Dob.DistributionScopeProperty.dom

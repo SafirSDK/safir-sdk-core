@@ -37,6 +37,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
+#include <Safir/Dob/Internal/LowMemoryOperationsTable.h>
 
 using namespace std::placeholders;
 
@@ -1288,7 +1289,7 @@ namespace Internal
             case CreatesDisallowedMemoryFull:
             case UpdatesAndDeletesDisallowedMemoryFull:
                 // New injections should have been stopped when memory is running low. So we
-                // accept any that made it through before passing the 10% limit.
+                // accept any that made it through before passing that limit.
                 break;
         }
 
@@ -2055,17 +2056,17 @@ namespace Internal
         }
 
         const auto memoryLevel = GetMemoryLevel();
-        if (memoryLevel >= MemoryLevel::Low &&
-            std::string(connection->NameWithoutCounter()).find(";NodeInfoHandler") == std::string::npos)
+
+        const auto createAllowedLevel = LowMemoryOperationsTable::Instance().GetDisallowedLevel(m_typeId,
+                                                                                                MemoryLevel::Low);
+        const auto updateAllowedLevel = std::max(createAllowedLevel, MemoryLevel::VeryLow);
+        if (!hasOwner && memoryLevel >= createAllowedLevel)
         {
-            if (!hasOwner && memoryLevel >= MemoryLevel::Low)
-            {
-                return CreatesDisallowedMemoryFull;
-            }
-            else if (memoryLevel >= MemoryLevel::VeryLow)
-            {
-                return UpdatesAndDeletesDisallowedMemoryFull;
-            }
+            return CreatesDisallowedMemoryFull;
+        }
+        else if (memoryLevel >= updateAllowedLevel)
+        {
+            return UpdatesAndDeletesDisallowedMemoryFull;
         }
 
         return AccessOk;

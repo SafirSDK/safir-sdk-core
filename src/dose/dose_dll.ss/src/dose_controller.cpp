@@ -63,6 +63,7 @@
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
+#include <Safir/Dob/Internal/LowMemoryOperationsTable.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/LowMemoryException.h>
 
@@ -1189,8 +1190,9 @@ namespace Internal
             throw Safir::Dob::NotOpenException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        if (SharedMemoryObject::GetMemoryLevel() >= MemoryLevel::VeryLow &&
-            std::string(m_connection->NameWithoutCounter()).find(";NodeInfoHandler") == std::string::npos)
+        const auto allowedLevel = LowMemoryOperationsTable::Instance().GetDisallowedLevel(entityId.GetTypeId(),
+                                                                                          MemoryLevel::VeryLow);
+        if (SharedMemoryObject::GetMemoryLevel() >= allowedLevel)
         {
             std::wostringstream ostr;
             ostr << "SetChanges/ReadEntity is not allowed due to lack of shared memory (entityId = "

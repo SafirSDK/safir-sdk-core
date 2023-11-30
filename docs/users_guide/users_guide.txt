@@ -3575,6 +3575,15 @@ This is the most severe memory level, indicating an extremely constrained enviro
 this point, the system attempts to forbid all operations, even those that just cause
 temporary shared memory allocation. Default threshold is 3%.
 
+If your system is designed in a way that makes it likely that it will reach these memory
+levels it is recommended to have a component that monitors the memory levels and issues
+UI alerts to the operators when the warning level and beyond are reached.
+
+By implementing these memory levels and the graceful degradation strategy, Safir SDK
+Core's distribution mechanism attempts to ensure stability and reliability even in
+resource-constrained scenarios, giving operators a chance to reduce memory usage before
+actual fatal memory allocation failures occur.
+
 ==== Forbidden operations at severe memory levels
 
 At the Warning, Low, and VeryLow memory levels, Safir SDK Core imposes restrictions on
@@ -3604,7 +3613,7 @@ Register Pending +
 Subscribe +
 Subscribe Registration +
 Unregister +
-Read +
+*Read* +
 *Update existing instance* +
 *Delete existing instance* +
 Create iterator +
@@ -3631,17 +3640,15 @@ Unsubscribe Registration
 Send
 |=========================================================================
 
-The three operations highlighted in bold can be moved to ExtremelyLow for a specific
-entity type by defining a property +LowMemoryOperationsAllowed+ on that type.
-
-By implementing these memory levels and the graceful degradation strategy, Safir SDK
-Core's distribution mechanism attempts to ensure stability and reliability even in
-resource-constrained scenarios, giving operators a chance to reduce memory usage before
-actual fatal memory allocation failures occur,
-
-If your system is designed in a way that makes it likely that it will reach these memory
-levels it is recommended to have a component that monitors the memory levels and issues
-UI alerts to the operators when the warning level and beyond are reached,
+The four operations highlighted in bold can be moved to VeryLow or ExtremelyLow for a
+specific entity type by defining +LowMemoryOperationsAllowedProperty+ (which can be
+overridden using +LowMemoryOperationsAllowedOverrideProperty+) on that type. That
+property has a member +DisallowAtLevel+, which if it is set to VeryLow will move the
+_Create new instance_ operation down to the VeryLow level, and if set to ExtremelyLow
+will move all four operations down to the ExtremelyLow level. Any other values for
+DisallowAtLevel are illegal. Great care should be taken to only use this facility for
+types that are set rarely and are small, since this introduces a risk of increasing
+memory usage even higher when it is already high.
 
 ===== Some notes on why things are where they are in the table above
 

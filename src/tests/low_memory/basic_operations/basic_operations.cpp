@@ -26,6 +26,7 @@
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/LowMemoryException.h>
+#include <Safir/Dob/NodeInfo.h>
 #include <DoseTest/GlobalEntity.h>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
@@ -260,6 +261,21 @@ public:
                        << std::endl;
             throw std::logic_error("Unexpected memory level");
         }
+
+        //Read the level from the ProcessInfo entity until it is right
+        for(int i = 0;i < 12; ++i) // wait for max 12 seconds. The NodeInfo entity gets updated every 10 seconds
+        {
+            const auto nodeInfo = m_connection.Read(Safir::Dob::Typesystem::EntityId(Safir::Dob::NodeInfo::ClassTypeId,
+                                                                                     Safir::Dob::Typesystem::InstanceId(m_misc.GetNodeId())));
+            const auto level = std::dynamic_pointer_cast<Safir::Dob::NodeInfo>(nodeInfo.GetEntity())->MemoryLevel().GetVal();
+            if (level == expectedLevel)
+            {
+                return;
+            }
+            boost::this_thread::sleep_for(boost::chrono::seconds(1));
+        }
+
+        throw std::logic_error("Did not get updated memory level in NodeInfo object");
     }
 
     void WaitForLevel(const Safir::Dob::MemoryLevel::Enumeration expectedLevel)
@@ -313,6 +329,8 @@ public:
         AllocateUntilLevel(Safir::Dob::MemoryLevel::VeryLow);
         m_entityOwner->Register(true);
         m_entityOwner->Read(true);
+        AllocateUntilLevel(Safir::Dob::MemoryLevel::ExtremelyLow);
+        CheckLevel(Safir::Dob::MemoryLevel::ExtremelyLow);
         m_shmem.clear();
         CheckLevel(Safir::Dob::MemoryLevel::Normal);
 

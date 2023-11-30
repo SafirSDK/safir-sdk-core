@@ -32,7 +32,8 @@
         </member>
         <member>
             <summary>
-              Current shared memory usage level of the node.
+              Current shared memory usage level of the node. This value will never be
+              set to Full, since it is impossible to actually update entities then.
             </summary>
             <name>MemoryLevel</name>
             <type>Safir.Dob.MemoryLevel</type>

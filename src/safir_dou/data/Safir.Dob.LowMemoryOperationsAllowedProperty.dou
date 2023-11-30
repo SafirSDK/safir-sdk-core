@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Used to determine if operations in low memory situations should be allowed on an entity type. This value is inherited by child classes.</summary>
+    <name>Safir.Dob.LowMemoryOperationsAllowedProperty</name>
+    <members>
+        <member>
+            <summary>The level at which operations on this entity type should become disallowed. Should NEVER be set to Full for anything except Safir.Dob.NodeInfo.</summary>
+            <name>DisallowAtLevel</name>
+            <type>Safir.Dob.MemoryLevel</type>
+        </member>
+    </members>
+</property>
+
+

@@ -8,5 +8,6 @@
     <value>Low</value>
     <value>VeryLow</value>
     <value>ExtremelyLow</value>
+    <value>Full</value>
   </values>
 </enumeration>
