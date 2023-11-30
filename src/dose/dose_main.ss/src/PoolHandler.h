@@ -68,7 +68,6 @@ namespace Internal
         typedef StateDistributor<Distribution> StateDistributorType;
 
         boost::asio::io_service::strand& m_strand;
-        boost::asio::steady_timer m_endStatesTimer;
         Distribution& m_distribution;
         std::function<void(const std::string& str)> m_log;
         PoolDistributionHandlerType m_poolDistributor;
@@ -89,7 +88,6 @@ namespace Internal
         Safir::Dob::NodeState::Enumeration m_nodeState;
         bool m_running;
 
-        void RunEndStatesTimer();
         void RunWaitingStatesSanityCheckTimer();
 
         //when a new registration arrives a list of waiting states need to be checked

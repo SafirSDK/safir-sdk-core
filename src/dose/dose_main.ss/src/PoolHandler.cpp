@@ -30,7 +30,6 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
-#include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 #include "PoolHandler.h"
@@ -46,7 +45,6 @@ namespace Internal
                              const std::function<void(int64_t)>& checkPendingReg,
                              const std::function<void(const std::string& str)>& logStatus)
         :m_strand(strand)
-        ,m_endStatesTimer(m_strand.context())
         ,m_distribution(distribution)
         ,m_log(logStatus)
         ,m_poolDistributor(m_strand.context(), m_distribution)
@@ -165,7 +163,6 @@ namespace Internal
                 m_persistHandler->Start();
             }
 
-            RunEndStatesTimer();
             RunWaitingStatesSanityCheckTimer();
 
             //request pool distributions
@@ -195,7 +192,6 @@ namespace Internal
             m_nodeInfoHandler->Stop();
         }
 
-        m_endStatesTimer.cancel();
         m_waitingStatesSanityTimer.cancel();
 
         if (m_persistHandler != nullptr)
@@ -230,10 +226,6 @@ namespace Internal
             }
 
             m_nodeState = detach ? Safir::Dob::NodeState::Detached : Safir::Dob::NodeState::Attaching;
-
-            // When a lightNode attach to a System it can not keep EndStates since they
-            // will prevent pooldistribution of Entities that previously existed on this node.
-            EndStates::Instance().ClearAllEndstates();
 
             // If the node is detached from the start, nodeInfoHandler is not created here.
             if (m_nodeInfoHandler)
@@ -435,21 +427,6 @@ namespace Internal
                    << " from node " << fromNodeId << ", system configuration is bad!");
 
             HandleEntityState(state, fromNodeType);
-        });
-    }
-
-    void PoolHandler::RunEndStatesTimer()
-    {
-        Safir::Dob::Internal::EndStates::Instance().HandleTimeout();
-
-        m_endStatesTimer.expires_from_now(boost::chrono::seconds(60));
-
-        m_endStatesTimer.async_wait([this](const boost::system::error_code& error)
-        {
-            if (!error && m_running)
-            {
-                RunEndStatesTimer();
-            }
         });
     }
 

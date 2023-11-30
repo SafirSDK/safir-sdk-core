@@ -25,7 +25,6 @@
 #include <Safir/Dob/Internal/HandlerRegistrations.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/State.h>
-#include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
@@ -288,13 +287,6 @@ namespace Internal
                 // Set the state to released which will cause a drop of the reference from
                 // the state container to this state.
                 statePtr->SetReleased(true);
-
-                // The released end state must be saved "a while" if it is not a LimitedType
-                if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
-                {
-                    EndStates::Instance().Add(statePtr);
-                }
-
             }
             break;
 
@@ -370,12 +362,6 @@ namespace Internal
                     // Set the state to released which will cause a drop of the reference from
                     // the state container to this state.
                     statePtr->SetReleased(true);
-
-                    // The released end state must be saved "a while" if it is not a LimitedType
-                    if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
-                    {
-                        EndStates::Instance().Add(statePtr);
-                    }
                 }
                 break;
 
@@ -755,14 +741,7 @@ namespace Internal
         // Release pointer to request in queue. We must not have any shared pointers to request queues
         // when the connection (and therefore the queue container) is destructed.
         statePtr->ResetOwnerRequestInQueue();
-
         statePtr->SetRealState(newRealState);
-
-        // The released end state must be saved "a while" if it is not a LimitedType
-        if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
-        {
-            EndStates::Instance().Add(statePtr);
-        }
     }
 
     void HandlerRegistrations::UpdateGhost(const StateSharedPtr&                statePtr,

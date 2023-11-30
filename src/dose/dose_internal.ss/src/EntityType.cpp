@@ -32,7 +32,6 @@
 #include <Safir/Dob/Internal/LamportClocks.h>
 #include <Safir/Dob/Internal/MonotonicClock.h>
 #include <Safir/Dob/Internal/TimestampOperations.h>
-#include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -1345,12 +1344,6 @@ namespace Internal
 
                 statePtr->SetConnection(ConnectionPtr());  // No connection since its a delete state
                 statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
-
-                // The released end state must be saved "a while" if it is not a LimitedType
-                if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
-                {
-                    EndStates::Instance().Add(statePtr);
-                }
             }
         }
     }
@@ -1648,12 +1641,6 @@ namespace Internal
         statePtr->SetConnection(ConnectionPtr());  // No connection since its a delete state
         statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
         statePtr->SetRealState(remoteEntity);
-
-        // The released end state must be saved "a while" if it is not a LimitedType
-        if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
-        {
-            EndStates::Instance().Add(statePtr);
-        }
     }
 
     void EntityType::RemoteSetRealEntityStateInternal(const ConnectionPtr&           connection,
@@ -1977,17 +1964,7 @@ namespace Internal
 
         }
 
-        if (statePtr->GetInjectionState().IsNoState())
-        {
-            // There is no unhandled injection state.
-
-            // The released end state must be saved "a while" if it is not a LimitedType
-            if (!DistributionScopeReader::Instance().IsLimited(m_typeId))
-            {
-                EndStates::Instance().Add(statePtr);
-            }
-        }
-        else
+        if (!statePtr->GetInjectionState().IsNoState())
         {
             // There is an unhandled injection state.
             statePtr->SetReleased(false);

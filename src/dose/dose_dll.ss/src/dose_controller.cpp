@@ -34,7 +34,6 @@
 #include <Safir/Dob/Internal/MessageTypes.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
-#include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Internal/State.h>
 #include <Safir/Dob/Internal/SubscriptionId.h>
