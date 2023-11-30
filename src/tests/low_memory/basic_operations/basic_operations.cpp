@@ -251,15 +251,17 @@ public:
 
     void CheckLevel(const Safir::Dob::MemoryLevel::Enumeration expectedLevel)
     {
-        const auto level = m_misc.GetSharedMemoryLevel();
-        if (level != expectedLevel)
         {
-            std::wcout << "Expected memory level "
-                       << Safir::Dob::MemoryLevel::ToString(expectedLevel)
-                       << " but got "
-                       << Safir::Dob::MemoryLevel::ToString(level)
-                       << std::endl;
-            throw std::logic_error("Unexpected memory level");
+            const auto level = m_misc.GetSharedMemoryLevel();
+            if (level != expectedLevel)
+            {
+                std::wcout << "Expected memory level "
+                    << Safir::Dob::MemoryLevel::ToString(expectedLevel)
+                    << " but got "
+                    << Safir::Dob::MemoryLevel::ToString(level)
+                    << std::endl;
+                throw std::logic_error("Unexpected memory level");
+            }
         }
 
         //Read the level from the ProcessInfo entity until it is right

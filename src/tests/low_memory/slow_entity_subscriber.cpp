@@ -111,14 +111,15 @@ int main()
     try
     {
         App app;
-        return app.Run();
+        const auto result = app.Run();
+        std::wcout << "Done" << std::endl;
+        return result;
     }
     catch (...)
     {
         std::wcout << "Caught exception: " << boost::current_exception_diagnostic_information().c_str() << std::endl;
         return 1;
     }
-    std::wcout << "Done" << std::endl;
 }
 
 
