@@ -45,12 +45,16 @@
 #pragma warning (pop)
 #endif
 
-#define NO_COLUMNS 5
-#define NAME_COLUMN 0
-#define IP_COLUMN 1
-#define TYPE_COLUMN 2
-#define NODE_ID_COLUMN 3
-#define NODE_STATE 4
+enum TableColumn
+{
+    NAME_COLUMN = 0,
+    IP_COLUMN,
+    TYPE_COLUMN,
+    NODE_ID_COLUMN,
+    NODE_STATE_COLUMN,
+    MEMORY_LEVEL_COLUMN,
+    NO_COLUMNS,
+};
 
 class NodeTableModel : public QAbstractTableModel,
                       public Safir::Dob::EntitySubscriber

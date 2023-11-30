@@ -81,7 +81,7 @@ QVariant NodeTableModel::headerData(int section,
         return QString("Name");
         break;
     case IP_COLUMN:
-        return QString("IP-Address");
+        return QString("IP address");
         break;
     case TYPE_COLUMN:
         return QString("Node type");
@@ -89,8 +89,11 @@ QVariant NodeTableModel::headerData(int section,
     case NODE_ID_COLUMN:
         return QString("Node id");
         break;
-    case NODE_STATE:
+    case NODE_STATE_COLUMN:
         return QString("State");
+        break;
+    case MEMORY_LEVEL_COLUMN:
+        return QString("Memory level");
         break;
     default:
         break;
@@ -148,8 +151,10 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
         case NODE_ID_COLUMN:
             return (qint64) m_nodeInfos.at(index.row()).GetInstanceId().GetRawValue();
             break;
-        case NODE_STATE:
+        case NODE_STATE_COLUMN:
             return QString::fromStdWString(Safir::Dob::NodeState::ToString(nodeInfo->State().GetVal()));
+        case MEMORY_LEVEL_COLUMN:
+            return QString::fromStdWString(Safir::Dob::MemoryLevel::ToString(nodeInfo->MemoryLevel().GetVal()));
         default:
             break;
         }

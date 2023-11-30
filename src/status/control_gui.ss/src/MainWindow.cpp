@@ -85,6 +85,8 @@ MainWindow::~MainWindow()
         std::quick_exit(0);
     }
 
+    m_dobConnection.Close();
+
     delete ui;
 }
 
@@ -168,9 +170,7 @@ void MainWindow::OnDoDispatch()
 
 void MainWindow::OnStopOrder()
 {
-    m_dobConnection.Close();
     this->close();
-
 }
 
 void MainWindow::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
