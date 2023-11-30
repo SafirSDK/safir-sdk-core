@@ -299,7 +299,7 @@ void ConnectionStatsAggregated::OnResponse(const Safir::Dob::ResponseProxy respo
         int numRows = 0;
         for (const auto& n : resp->NodeConnectionStatistics())
         {
-            numRows += n->ConnectionStatistics().size();
+            numRows += static_cast<int>(n->ConnectionStatistics().size());
         }
 
         ui->tableWidget->setSortingEnabled(false);
