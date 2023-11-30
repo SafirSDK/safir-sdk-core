@@ -177,7 +177,7 @@ public:
     }
 
 private:
-    std::vector<boost::filesystem::path> m_douFiles; // all dou-files includeing overridden files
+    std::vector<boost::filesystem::path> m_douFiles; // all dou-files including overridden files
 
     // Currently loaded type info
     NameTypeVector m_members;  // pair <name, type>

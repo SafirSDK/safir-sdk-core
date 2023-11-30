@@ -10,7 +10,7 @@
             <type>String</type>
         </member>
         <member>
-            <summary>Number of sent requests. Successfully pushed onto the send request queue, i.e not includeing overflows.</summary>
+            <summary>Number of sent requests. Successfully pushed onto the send request queue, i.e not including overflows.</summary>
             <name>NumberOfSentRequests</name>
             <type>Int32</type>
         </member>

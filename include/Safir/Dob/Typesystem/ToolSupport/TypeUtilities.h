@@ -166,7 +166,7 @@ namespace TypeUtilities
     }
 
     /**
-     * Get parameter by name when the classDesription is already retrieved. To get parameter from a
+     * Get parameter by name when the classDescription is already retrieved. To get parameter from a
      * fully qualified name, use GetParameterByFullName below.
      *
      * @param cd [in] - The class description that contains the parameter.
@@ -216,7 +216,7 @@ namespace TypeUtilities
         /**
          * Get ParameterDescription from a fully qualified name.
          * @param rep [in] - TypeRepository containing all type information needed.
-         * @param parameterName [in] - Fully qualified name includeing namespace and class name, Ex: MyNamespace.MyClass.MyParameter
+         * @param parameterName [in] - Fully qualified name including namespace and class name, Ex: MyNamespace.MyClass.MyParameter
          * @return ParameterDescription or NULL if not found.
          */
         const ParameterDescriptionType* operator()(const RepositoryType* rep, const std::string& parameterName) const

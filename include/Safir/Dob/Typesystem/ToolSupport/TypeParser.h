@@ -91,7 +91,7 @@ namespace ToolSupport
     /**
      * Will validate and parse a complete set of dou- and dom-files. If no error occurs, the
      * result is returned.
-     * This version takes a vector of paths and each path is traversed recursively includeing subfolders. If the same
+     * This version takes a vector of paths and each path is traversed recursively including subfolders. If the same
      * dou-/dom- file exists at many paths the latest found will override the previous ones. I.e files found at paths
      * closer to the end of the vector will override files closer to the beginning of the vector.
      *
