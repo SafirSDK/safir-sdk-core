@@ -112,7 +112,7 @@ class SafirSdkCoreConan(ConanFile):
                self.settings.compiler.version == 15:
                 self.requires("qt/5.15.11")
             else:
-                self.requires("qt/6.6.1")
+                self.requires("qt/6.5.2")
 
         #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support).
         #0.5.3 appears to be the last one that doesn't need that. Even 0.5.4 wants it.
