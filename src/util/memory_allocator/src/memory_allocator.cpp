@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <boost/exception/diagnostic_information.hpp>
+#include <boost/interprocess/sync/named_mutex.hpp>
 #include <iostream>
 
 //disable warnings in boost
@@ -146,6 +147,13 @@ class Allocator
     : public Safir::Dob::Internal::SharedMemoryObject
 {
 public:
+    Allocator()
+        : m_mutex(boost::interprocess::open_or_create, "SAFIR_MEMORY_ALLOCATOR_LOCK")
+        , m_lock(m_mutex)
+    {
+
+    }
+
     void AllocateUntilLevel(const Safir::Dob::MemoryLevel::Enumeration expectedLevel)
     {
         auto instance = GetSharedMemory().
@@ -169,6 +177,9 @@ public:
                    << Safir::Dob::MemoryLevel::ToString(level)
                    << "'" << std::endl;
     }
+private:
+    boost::interprocess::named_mutex m_mutex;
+    boost::interprocess::scoped_lock<boost::interprocess::named_mutex> m_lock;
 };
 
 
