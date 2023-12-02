@@ -41,7 +41,7 @@ if (MSVC)
       UxTheme
       Setupapi
       Dcomp
-      D3d9)
+      D3d12)
   else()
     find_package(Qt5 COMPONENTS Core Widgets QUIET)
     if (Qt5_FOUND)
