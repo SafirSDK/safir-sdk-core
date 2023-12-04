@@ -185,7 +185,9 @@ namespace Internal
 
     DoseMainApp::~DoseMainApp()
     {
+        lllog(9) << "DoseMainApp: In destructor" << std::endl;
         Stop();
+        lllog(9) << "DoseMainApp: Destructor finished" << std::endl;
     }
 
     void DoseMainApp::Start(const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
@@ -210,45 +212,57 @@ namespace Internal
     void DoseMainApp::Stop()
     {
         const bool wasStopped = m_stopped.exchange(true);
+        lllog(9) << "DoseMainApp::Stop: wasStopped = "<< wasStopped << std::endl;
         if (!wasStopped)
         {
+            lllog(9) << "DoseMainApp::Stop: Sending stop orders" << std::endl;
             m_connectionKiller.SendStopOrders();
 
+            lllog(9) << "DoseMainApp::Stop: Stopping cmdReceiver" << std::endl;
             m_cmdReceiver->Stop();
 
+            lllog(9) << "DoseMainApp::Stop: Stopping lockMonitor" << std::endl;
             if (m_lockMonitor != nullptr)
             {
                 m_lockMonitor->Stop();
             }
 
+            lllog(9) << "DoseMainApp::Stop: Stopping distribution" << std::endl;
             if (m_distribution != nullptr)
             {
                 m_distribution->Stop();
             }
 
+            lllog(9) << "DoseMainApp::Stop: Stopping connection handler" << std::endl;
             if (m_connectionHandler != nullptr)
             {
                 m_connectionHandler->Stop();
             }
 
+            lllog(9) << "DoseMainApp::Stop: Stopping request handler" << std::endl;
             if (m_requestHandler != nullptr)
             {
                 m_requestHandler->Stop();
             }
 
+            lllog(9) << "DoseMainApp::Stop: Stopping pending registration handler" << std::endl;
             if (m_pendingRegistrationHandler != nullptr)
             {
                 m_pendingRegistrationHandler->Stop();
             }
 
+            lllog(9) << "DoseMainApp::Stop: Stop listening to signals" << std::endl;
             m_signalSet.cancel();
 
+            lllog(9) << "DoseMainApp::Stop: Stopping memory monitor" << std::endl;
             if (m_memoryMonitor != nullptr)
             {
                 m_memoryMonitor->Stop();
             }
 
+            lllog(9) << "DoseMainApp::Stop: Resetting work" << std::endl;
             m_work.reset();
+
             lllog(1) << "DoseMainApp::Stop finished" << std::endl;
         }
     }

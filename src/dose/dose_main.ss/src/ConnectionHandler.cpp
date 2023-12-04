@@ -162,8 +162,10 @@ namespace
 
     void ConnectionHandler::Stop()
     {
+        lllog(5) << "ConnectionHandler: Entering Stop" << std::endl;
         if (!m_running.exchange(false))
         {
+            lllog(5) << "ConnectionHandler: Already stopped" << std::endl;
             return; // was already stopped
         }
 
@@ -177,6 +179,7 @@ namespace
 
     void ConnectionHandler::StopConnectionThread()
     {
+        lllog(5) << "ConnectionHandler: Entering StopConnectionThread" << std::endl;
         boost::asio::dispatch(m_strand, [this]
         {
             m_connectionThreadRunning = false;
