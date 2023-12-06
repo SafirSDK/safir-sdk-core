@@ -3549,9 +3549,11 @@ _Low_, _VeryLow_, and _ExtremelyLow_. These memory levels are parameterized in t
 +Safir.Dob.NodeParameters.SharedMemoryLevels+ parameter.
 
 The memory levels in the Safir SDK Core's distribution mechanism are designed to enable
-graceful degradation in resource-constrained environments. When memory consumption
-gets to the Low level and beyond, the system will take precautionary measures to
-prevent critical failures by adapting its behavior and prioritizing essential operations.
+graceful degradation in resource-constrained environments. When memory consumption gets
+to the Low level and beyond, the system is able take precautionary measures to prevent
+critical failures by adapting its behavior and prioritizing essential operations and
+giving operators a chance to reduce memory usage before actual fatal memory allocation
+failures occur.
 
 The five memory levels and their descriptions are as follows:
 
@@ -3578,11 +3580,6 @@ temporary shared memory allocation. Default threshold is 3%.
 If your system is designed in a way that makes it likely that it will reach these memory
 levels it is recommended to have a component that monitors the memory levels and issues
 UI alerts to the operators when the warning level and beyond are reached.
-
-By implementing these memory levels and the graceful degradation strategy, Safir SDK
-Core's distribution mechanism attempts to ensure stability and reliability even in
-resource-constrained scenarios, giving operators a chance to reduce memory usage before
-actual fatal memory allocation failures occur.
 
 ==== Forbidden operations at severe memory levels
 
@@ -3661,6 +3658,9 @@ These operations hold references to things in shared memory until the caller rel
 Unregister at VeryLow?::
 An unregistration can cause a whole bunch of entity instances to be deleted, which may cause the
 creation of a lot of ghost entities, which means shared memory allocations.
+
+Read affected by LowMemoryOperationsAllowedProperty?::
+SetChanges uses Read internally, so the implementation became a lot simpler by moving that too.
 
 ==== API for getting current memory level
 +Safir.Dob.ConnectionAspectMisc+ contains functions that are useful for monitoring the
