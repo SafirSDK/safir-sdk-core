@@ -1,4 +1,33 @@
 -----------------------------------------------------------------------------------------------------------------------
+2023-12-07 version 7.3.0
+-----------------------------------------------------------------------------------------------------------------------
+This release fixes the following issue (see http://safirsdkcore.com for details):
+
+#486 Low memory tests fail due to dose_main not stopping in time
+#485 Add tool for writing connection statistics to csv file.
+#480 Generated c++ code does not compile when there are circular dependencies between dou classes
+#460 Memory allocation test tool gets "stuck" if buttons are pressed too quickly in Tool Launcher
+#478 Entities are added to EndStates at shutdown and causes huge memory consumption
+#459 Add memory level to safir_control_gui
+#483 Add ability to let specific entity types have more lax memory level rules
+#482 Reorganize memory levels
+#481 Pool distribution uses wrong dataTypeId for Unregistrations
+#479 dose_main crash if ProcessInfoHandler fails to create instance
+#475 Fix of #473 has made restart_nodes test fail
+#477 Tool for collecting connection statistics from all system nodes
+#476 Use built-in cmake support for csharp when applicable
+#469 Better statistics in Dobexplorer
+#472 Throw of raw strings in some places in dots
+#457 Better exception descriptions for exceptions in callbacks
+#461 Add handling of LowMemoryException in pool distribution
+#473 safir_control should use an error exit code when dose_main exits with an error
+#467 Add close tab button in tool_launcher
+#470 Improve use of CMake CMP0091
+#465 Support Qt6 and drop support for Ubuntu 20.04 #465
+#466 Replace custom ODBC library detection with built-in detection
+#468 Add support for Debian 12 Bookworm
+
+-----------------------------------------------------------------------------------------------------------------------
 2023-10-01 version 7.2.2
 -----------------------------------------------------------------------------------------------------------------------
 This release fixes the following issue (see http://safirsdkcore.com for details):
@@ -100,7 +129,7 @@ This release also fixes the following issue (see http://safirsdkcore.com for det
 #390 Dictionary parameters crash
 #395 Sate large objects
 #391 dots_v fails to create code for dictionary parameters with enum keys
-#392 Dobexplorer filter/search behaves unexpectedly when searching for things two levels down bug
+#392 Dobexplorer filter/search behaves unexpectedly when searching for things two levels down
 
 Also the versions of third party libraries included in the builds have been updated.
 
@@ -153,7 +182,7 @@ Here is a complete list of issues fixed by this release (see http://safirsdkcore
 #381 Mark DynamicLibraryLoader as deprecated
 #380 Remove StartupSynchronizer from our public interfaces
 #373 Create Ubuntu 22.04 builds
-#360 Communication does not like being single threaded, like in safir_control bug
+#360 Communication does not like being single threaded, like in safir_control
 
 -----------------------------------------------------------------------------------------------------------------------
 2022-05-19 version 6.4.0
