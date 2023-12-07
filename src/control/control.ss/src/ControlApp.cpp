@@ -576,8 +576,8 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
 void ControlApp::StopDoseMain()
 {
     // Set up a timer that will kill dose_main the hard way if it doesn't stop within a reasonable time.
-    // The debug runtime on windows is sometimes unreasonably slow, so we give it a bunch of extra time.
-#if defined (_MSC_VER) && !defined (NDEBUG)
+    // In debug we give a longer timeout.
+#if !defined (NDEBUG)
     m_terminationTimer.expires_after(boost::chrono::minutes(10));
 #else
     m_terminationTimer.expires_after(boost::chrono::seconds(30));
