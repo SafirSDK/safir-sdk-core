@@ -1,5 +1,5 @@
 SAFIR_STATISTICS_DUMP(1)
-===========================
+========================
 :doctype: manpage
 
 
