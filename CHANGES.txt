@@ -3,9 +3,9 @@
 -----------------------------------------------------------------------------------------------------------------------
 This release fixes the following issue (see http://safirsdkcore.com for details):
 
+#464 dots_configuration_check should detect version differences
 #486 Low memory tests fail due to dose_main not stopping in time
 #485 Add tool for writing connection statistics to csv file.
-#480 Generated c++ code does not compile when there are circular dependencies between dou classes
 #460 Memory allocation test tool gets "stuck" if buttons are pressed too quickly in Tool Launcher
 #478 Entities are added to EndStates at shutdown and causes huge memory consumption
 #459 Add memory level to safir_control_gui
@@ -23,7 +23,7 @@ This release fixes the following issue (see http://safirsdkcore.com for details)
 #473 safir_control should use an error exit code when dose_main exits with an error
 #467 Add close tab button in tool_launcher
 #470 Improve use of CMake CMP0091
-#465 Support Qt6 and drop support for Ubuntu 20.04 #465
+#465 Support Qt6 and drop support for Ubuntu 20.04
 #466 Replace custom ODBC library detection with built-in detection
 #468 Add support for Debian 12 Bookworm
 
