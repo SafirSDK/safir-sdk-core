@@ -104,7 +104,7 @@ namespace
             {
                 strList << table->horizontalHeaderItem(col)->data(Qt::DisplayRole).toString();
             }
-            data << strList.join(",") << "\n";
+            data << strList.join(";") << "\n";
 
             // Write data rows
             for( int row= 0; row < table->rowCount(); ++row )
@@ -112,9 +112,16 @@ namespace
                 strList.clear();
                 for (int col = 0; col < table->columnCount(); ++col)
                 {
-                    strList << table->item(row, col)->text();
+                    if (col == 1)
+                    {
+                        strList << "\"" + table->item(row, col)->text() + "\"";
+                    }
+                    else
+                    {
+                        strList << table->item(row, col)->text();
+                    }
                 }
-                data << strList.join( "," ) + "\n";
+                data << strList.join( ";" ) + "\n";
             }
             f.close();
         }
