@@ -20,21 +20,21 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   DOU_FILES
 
   "${CMAKE_CURRENT_SOURCE_DIR}/config/Safir.Dob.PersistenceParameters.dou"
+  config/Safir.Control.Parameters.dou
   config/Safir.Dob.NodeParameters.dou
   config/Safir.Dob.QueueParameters.dou
   config/Safir.Dob.ThisNodeParameters.dou
-  config/Safir.Control.Parameters.dou
   config/Safir.Time.LibraryParameters.dou
   config/Safir.Websocket.Parameters.dou
   data/Safir.Application.BackdoorCommand.dou
   data/Safir.Control.Command.dou
-  data/Safir.Control.Operation.dou
-  data/Safir.Control.Status.dou
   data/Safir.Control.ConnectionStatisticsAllNodesResponse.dou
   data/Safir.Control.ConnectionStatisticsItem.dou
   data/Safir.Control.ConnectionStatisticsResponse.dou
   data/Safir.Control.GetConnectionStatistics.dou
   data/Safir.Control.GetConnectionStatisticsAllNodes.dou
+  data/Safir.Control.Operation.dou
+  data/Safir.Control.Status.dou
   data/Safir.Dob.AccessDeniedException.dou
   data/Safir.Dob.CallbackId.dou
   data/Safir.Dob.ConnectionInfo.dou
@@ -43,8 +43,8 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.ContextSharedProperty.dou
   data/Safir.Dob.CreateRoutineParameters.dou
   data/Safir.Dob.DistributionScope.dou
-  data/Safir.Dob.DistributionScopeProperty.dou
   data/Safir.Dob.DistributionScopeOverrideProperty.dou
+  data/Safir.Dob.DistributionScopeProperty.dou
   data/Safir.Dob.Entity.dou
   data/Safir.Dob.EntityIdResponse.dou
   data/Safir.Dob.ErrorListResponse.dou
@@ -56,8 +56,8 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.InstanceIdPolicy.dou
   data/Safir.Dob.Item.dou
   data/Safir.Dob.LowMemoryException.dou
-  data/Safir.Dob.LowMemoryOperationsAllowedProperty.dou
   data/Safir.Dob.LowMemoryOperationsAllowedOverrideProperty.dou
+  data/Safir.Dob.LowMemoryOperationsAllowedProperty.dou
   data/Safir.Dob.MemoryLevel.dou
   data/Safir.Dob.Message.dou
   data/Safir.Dob.NodeInfo.dou
@@ -89,8 +89,8 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Utilities.ForEach.FullResponse.dou
   data/Safir.Utilities.ForEach.ResponseType.dou
   data/Safir.Utilities.ForEach.UpdateRequest.dou
-  data/Safir.Websocket.Typesystem.EnumType.dou
   data/Safir.Websocket.Typesystem.ClassType.dou
+  data/Safir.Websocket.Typesystem.EnumType.dou
   data/Safir.Websocket.Typesystem.Member.dou
   data/Safir.Websocket.Typesystem.TypeHierarchy.dou
 
@@ -103,8 +103,8 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   config/Safir.Utilities.ForEach.UpdateRequest-Safir.Dob.RequestTimeoutProperty.dom
   data/Safir.Application.BackdoorCommand-Safir.Dob.ContextSharedProperty.dom
   data/Safir.Control.Command-Safir.Dob.DistributionScopeProperty.dom
-  data/Safir.Control.Status-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Control.GetConnectionStatistics-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Control.Status-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.NodeInfo-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.NodeInfo-Safir.Dob.LowMemoryOperationsAllowedProperty.dom
   data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionScopeProperty.dom
