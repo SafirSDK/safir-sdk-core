@@ -71,14 +71,6 @@ namespace dose_test_dotnet
         }
 
 
-        static bool NeedBinaryCheck(Safir.Dob.Typesystem.Object obj)
-        {
-            return
-                obj.GetTypeId() == DoseTest.ComplexGlobalMessage.ClassTypeId ||
-                obj.GetTypeId() == DoseTest.ComplexGlobalEntity.ClassTypeId ||
-                obj.GetTypeId() == DoseTest.ComplexGlobalService.ClassTypeId;
-        }
-
         //sets container to null after verification
         static void CheckBinaryMemberInternal(Safir.Dob.Typesystem.BinaryContainer cont)
         {
@@ -130,6 +122,29 @@ namespace dose_test_dotnet
             return Safir.Dob.Typesystem.Serialization.ToXml(obj);
         }
 
+        static String ToXml(Safir.Dob.Typesystem.Object obj,
+                            System.IntPtr blob)
+        {
+            if(obj.GetTypeId() == DoseTest.ComplexGlobalMessage.ClassTypeId ||
+               obj.GetTypeId() == DoseTest.ComplexGlobalEntity.ClassTypeId ||
+               obj.GetTypeId() == DoseTest.ComplexGlobalService.ClassTypeId)
+            {
+                //We don't want to print out the contents of binaries, since that is toooo much text
+                return CheckBinaryMember(obj);
+            }
+            else if (obj.GetTypeId() == Safir.Dob.NodeInfo.ClassTypeId ||
+                     obj.GetTypeId() == Safir.Dob.MirroredNodeInfo.ClassTypeId)
+            {
+                //Ip addresses differ from test system to test system, so we have to not print that.
+                var ni = obj as Safir.Dob.NodeInfo;
+                ni.IpAddress.SetNull();
+                return Safir.Dob.Typesystem.Serialization.ToXml(ni);
+            }
+            else
+            {
+                return Safir.Dob.Typesystem.Serialization.ToXml(blob);
+            }
+        }
 
         String CallbackId()
         {
@@ -689,25 +704,13 @@ namespace dose_test_dotnet
             m_connection.ExitDispatch();
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnMessage);
 
-            DoseTest.RootMessage msg = messageProxy.Message as DoseTest.RootMessage;
-            String xml;
-
-            if (NeedBinaryCheck(msg))
-            {
-                xml = CheckBinaryMember(msg);
-            }
-            else
-            {
-                xml = Safir.Dob.Typesystem.Serialization.ToXml(messageProxy.Blob);
-            }
-
             Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
                        + CallbackId() + ":\n"
                        + "  Type       = " + Safir.Dob.Typesystem.Operations.GetName(messageProxy.TypeId) + "\n"
                        + "  ChannelId  = " + messageProxy.ChannelId + "\n"
                        + "  Sender     = " + ConnInfoToXml(messageProxy.SenderConnectionInfo) + "\n"
                        + "  ChannelId  = " + messageProxy.ChannelIdWithStringRepresentation + "\n"
-                       + "  Message    = " + xml + "\n\n");
+                       + "  Message    = " + ToXml(messageProxy.Message, messageProxy.Blob) + "\n\n");
         }
 
         #endregion
@@ -719,18 +722,7 @@ namespace dose_test_dotnet
             m_connection.ExitDispatch();
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnNewEntity);
 
-            DoseTest.RootEntity entity = entityProxy.EntityWithChangeInfo as DoseTest.RootEntity;
-            String xml;
-
-            if (NeedBinaryCheck(entity))
-            {
-                xml = CheckBinaryMember(entity);
-            }
-            else
-            {
-                xml = Safir.Dob.Typesystem.Serialization.ToXml(entityProxy.Blob);
-            }
-
+            var entity = entityProxy.EntityWithChangeInfo;
 
             Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
                     + CallbackId() + ":\n"
@@ -738,7 +730,7 @@ namespace dose_test_dotnet
                     + "  Owner     = " + entityProxy.Owner + "\n"
                     + "  OwnerConn = " + ConnInfoToXml(entityProxy.OwnerConnectionInfo) + "\n"
                     + "  OwnerStr  = " + entityProxy.OwnerWithStringRepresentation + "\n"
-                    + "  Entity    = " + xml + "\n"
+                    + "  Entity    = " + ToXml(entity, entityProxy.Blob) + "\n"
                     + "  Changed top-level members: ");
 
             for (int i = 0;
@@ -758,29 +750,7 @@ namespace dose_test_dotnet
             m_connection.ExitDispatch();
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnUpdatedEntity);
 
-            DoseTest.RootEntity entity = entityProxy.EntityWithChangeInfo as DoseTest.RootEntity;
-            String xml;
-
-            if (NeedBinaryCheck(entity))
-            {
-                xml = CheckBinaryMember(entity);
-            }
-            else
-            {
-                xml = Safir.Dob.Typesystem.Serialization.ToXml(entityProxy.Blob);
-            }
-
-            DoseTest.RootEntity prevEntity = entityProxy.Previous.Entity as DoseTest.RootEntity;
-            String prevXml;
-
-            if (NeedBinaryCheck(prevEntity))
-            {
-                prevXml = CheckBinaryMember(prevEntity);
-            }
-            else
-            {
-                prevXml = Safir.Dob.Typesystem.Serialization.ToXml(entityProxy.Previous.Blob);
-            }
+            var entity = entityProxy.EntityWithChangeInfo;
 
             Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
                 + CallbackId() + ":\n"
@@ -788,8 +758,8 @@ namespace dose_test_dotnet
                 + "  Owner     = " + entityProxy.Owner + "\n"
                 + "  OwnerConn = " + ConnInfoToXml(entityProxy.OwnerConnectionInfo) + "\n"
                 + "  OwnerStr  = " + entityProxy.OwnerWithStringRepresentation + "\n"
-                + "  Entity    = " + xml + "\n"
-                + "  Previous  = " + prevXml + "\n"
+                + "  Entity    = " + ToXml(entity,entityProxy.Blob) + "\n"
+                + "  Previous  = " + ToXml(entityProxy.Previous.Entity, entityProxy.Previous.Blob) + "\n"
                 + "  Changed top-level members: ");
 
             for (int i = 0;
@@ -810,25 +780,13 @@ namespace dose_test_dotnet
             m_connection.ExitDispatch();
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnDeletedEntity);
 
-            DoseTest.RootEntity prevEntity = entityProxy.Previous.Entity as DoseTest.RootEntity;
-            String prevXml;
-
-            if (NeedBinaryCheck(prevEntity))
-            {
-                prevXml = CheckBinaryMember(prevEntity);
-            }
-            else
-            {
-                prevXml = Safir.Dob.Typesystem.Serialization.ToXml(entityProxy.Previous.Blob);
-            }
-
             Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
                             + CallbackId() + ":\n"
                             + "  EntityId       = " + entityProxy.EntityId + "\n"
                             + "  deletedByOwner = " + deletedByOwner.ToString().ToLower() + "\n"
                             + "  Owner          = " + entityProxy.Owner + "\n"
                             + "  OwnerStr  = " + entityProxy.OwnerWithStringRepresentation + "\n"
-                            + "  Previous  = " + prevXml);
+                            + "  Previous  = " + ToXml(entityProxy.Previous.Entity, entityProxy.Previous.Blob));
 
             Logger.Instance.WriteLine();
         }
@@ -905,26 +863,13 @@ namespace dose_test_dotnet
             m_responseSender = responseSender;
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnServiceRequest);
 
-            DoseTest.RootService svc = serviceRequestProxy.Request as DoseTest.RootService;
-            String xml;
-
-            if (NeedBinaryCheck(svc))
-            {
-                xml = CheckBinaryMember(svc);
-            }
-            else
-            {
-                xml = Safir.Dob.Typesystem.Serialization.ToXml(serviceRequestProxy.Blob);
-            }
-
-
             Logger.Instance.WriteLine(PREFIX + m_consumerNumber + ": "
                  + CallbackId() + ": \n"
                  + "  Type       = " + Safir.Dob.Typesystem.Operations.GetName(serviceRequestProxy.TypeId) + "\n"
                  + "  Sender     = " + ConnInfoToXml(serviceRequestProxy.SenderConnectionInfo) + "\n"
                  + "  Handler    = " + serviceRequestProxy.ReceivingHandlerId + "\n"
                  + "  HandlerStr = " + serviceRequestProxy.ReceiverWithStringRepresentation + "\n"
-                 + "  Request    = " + xml);
+                 + "  Request    = " + ToXml(serviceRequestProxy.Request,serviceRequestProxy.Blob));
             Logger.Instance.WriteLine();
 
             if (!responseSender.IsDone())
@@ -965,16 +910,6 @@ namespace dose_test_dotnet
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnCreateRequest);
 
             DoseTest.RootEntity req = entityRequestProxy.Request as DoseTest.RootEntity;
-            String xml;
-
-            if (NeedBinaryCheck(req))
-            {
-                xml = CheckBinaryMember(req);
-            }
-            else
-            {
-                xml = Safir.Dob.Typesystem.Serialization.ToXml(entityRequestProxy.Blob);
-            }
 
             Pair value;
             KeyValuePair<System.Int64, Safir.Dob.Typesystem.HandlerId> key =
@@ -995,7 +930,7 @@ namespace dose_test_dotnet
                      + "  Sender     = " + ConnInfoToXml(entityRequestProxy.SenderConnectionInfo) + "\n"
                      + "  Handler    = " + entityRequestProxy.ReceivingHandlerId + "\n"
                      + "  HandlerStr = " + entityRequestProxy.ReceiverWithStringRepresentation + "\n"
-                     + "  Request    = " + xml);
+                     + "  Request    = " + ToXml(req, entityRequestProxy.Blob));
                 Logger.Instance.WriteLine();
 
                 if (!m_responseSenderDiscarded)
@@ -1024,7 +959,7 @@ namespace dose_test_dotnet
                      + "  Sender     = " + ConnInfoToXml(entityRequestProxy.SenderConnectionInfo) + "\n"
                      + "  Handler    = " + entityRequestProxy.ReceivingHandlerId + "\n"
                      + "  HandlerStr = " + entityRequestProxy.ReceiverWithStringRepresentation + "\n"
-                     + "  Request    = " + xml);
+                     + "  Request    = " + ToXml(req, entityRequestProxy.Blob));
                 Logger.Instance.WriteLine();
 
                 if (!m_responseSenderDiscarded)
@@ -1082,16 +1017,6 @@ namespace dose_test_dotnet
             ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration.OnUpdateRequest);
 
             DoseTest.RootEntity req = entityRequestProxy.Request as DoseTest.RootEntity;
-            String xml;
-
-            if (NeedBinaryCheck(req))
-            {
-                xml = CheckBinaryMember(req);
-            }
-            else
-            {
-                xml = Safir.Dob.Typesystem.Serialization.ToXml(entityRequestProxy.Blob);
-            }
 
             Logger.Instance.WriteLine
                 (PREFIX + m_consumerNumber + ": "
@@ -1100,7 +1025,7 @@ namespace dose_test_dotnet
                  + "  Sender     = " + ConnInfoToXml(entityRequestProxy.SenderConnectionInfo) + "\n"
                  + "  Handler    = " + entityRequestProxy.ReceivingHandlerId + "\n"
                  + "  HandlerStr = " + entityRequestProxy.ReceiverWithStringRepresentation + "\n"
-                 + "  Request    = " + xml);
+                 + "  Request    = " + ToXml(req, entityRequestProxy.Blob));
             Logger.Instance.WriteLine();
 
             if (!m_responseSenderDiscarded)
@@ -1227,16 +1152,7 @@ namespace dose_test_dotnet
                  + "  Request    = ");
             try
             {
-                Safir.Dob.Typesystem.Object req = responseProxy.Request;
-
-                if (NeedBinaryCheck(req))
-                {
-                    Logger.Instance.WriteLine(CheckBinaryMember(req));
-                }
-                else
-                {
-                    Logger.Instance.WriteLine(Safir.Dob.Typesystem.Serialization.ToXml(responseProxy.RequestBlob));
-                }
+                Logger.Instance.WriteLine(ToXml(responseProxy.Request,responseProxy.RequestBlob));
             }
             catch (Safir.Dob.Typesystem.SoftwareViolationException)
             {
@@ -1272,7 +1188,16 @@ namespace dose_test_dotnet
         private string ConnInfoToXml(Safir.Dob.ConnectionInfo connInfo)
         {
             connInfo.ConnectionId.SetNull();
-            if (!connInfo.ConnectionName.IsNull())
+
+            //when we look at stuff that comes from safir_status it is not known which node will have the redundant
+            //registration, so we need to anonymize things...
+            if (!connInfo.ConnectionName.IsNull() &&
+                connInfo.ConnectionName.Val.Contains("safir_control_status"))
+            {
+                connInfo.NodeId.SetNull();
+                connInfo.ConnectionName.SetNull();
+            }
+            else if (!connInfo.ConnectionName.IsNull())
             {
                 int index = connInfo.ConnectionName.Val.LastIndexOf("#");
                 connInfo.ConnectionName.Val = connInfo.ConnectionName.Val.Substring(0, index);

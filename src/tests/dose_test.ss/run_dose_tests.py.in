@@ -245,6 +245,7 @@ class Parameters:
 
         self.dope_main_cmd = ("dope_main", )
         self.foreach_cmd = ("foreach", )
+        self.safir_status_cmd = ("safir_status", )
 
         self.dose_test_cpp_cmd = ("dose_test_cpp", )
         self.dose_test_dotnet_cmd = ("dose_test_dotnet", )
@@ -467,6 +468,7 @@ class Runner:
         if parameters.slave is None or parameters.slave == "server-1":
             self.__launchProcess("dope_main.0", parameters.dope_main_cmd)
         self.__launchProcess("foreach.0", parameters.foreach_cmd)
+        self.__launchProcess("safir_status.0", parameters.safir_status_cmd)
 
         for i in partners:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i), ))
@@ -485,6 +487,7 @@ class Runner:
 
             self.__launchProcess("dope_main.1", parameters.dope_main_cmd)
             self.__launchProcess("foreach.1", parameters.foreach_cmd)
+            self.__launchProcess("safir_status.1", parameters.safir_status_cmd)
 
             self.__launchProcess("dose_test_cpp.2", parameters.dose_test_cpp_cmd + ("2", ))
             if not parameters.no_dotnet:
@@ -499,6 +502,7 @@ class Runner:
                                                                                         NODE_IDS["client-0"]))
 
             self.__launchProcess("foreach.2", parameters.foreach_cmd)
+            self.__launchProcess("safir_status.2", parameters.safir_status_cmd)
 
             self.__launchProcess("dose_test_cpp.3", parameters.dose_test_cpp_cmd + ("3", ))
             if not parameters.no_dotnet:
@@ -512,6 +516,7 @@ class Runner:
                                                         parameters.safir_control_cmd + ("--force-id",
                                                                                         NODE_IDS["client-1"]))
             self.__launchProcess("foreach.3", parameters.foreach_cmd)
+            self.__launchProcess("safir_status.3", parameters.safir_status_cmd)
 
             self.__launchProcess("dose_test_cpp.4", parameters.dose_test_cpp_cmd + ("4", ))
             if not parameters.no_dotnet:

@@ -62,15 +62,6 @@ class Consumer implements
         m_connection.attach(connectionName,instance);
     }
 
-
-    static boolean needBinaryCheck(com.saabgroup.safir.dob.typesystem.Object obj)
-    {
-        return
-            obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalMessage.ClassTypeId ||
-            obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalEntity.ClassTypeId ||
-            obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalService.ClassTypeId;
-    }
-
     //sets container to null after verification
     static void checkBinaryMemberInternal(com.saabgroup.safir.dob.typesystem.BinaryContainer cont)
     {
@@ -123,6 +114,31 @@ class Consumer implements
 
     }
 
+    static String toXml(com.saabgroup.safir.dob.typesystem.Object obj,
+                        java.nio.ByteBuffer blob)
+    {
+        if (obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalMessage.ClassTypeId ||
+            obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalEntity.ClassTypeId ||
+            obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalService.ClassTypeId)
+        {
+            //We don't want to print out the contents of binaries, since that is toooo much text
+            return checkBinaryMember(obj);
+        }
+        else if (obj.getTypeId() == com.saabgroup.safir.dob.NodeInfo.ClassTypeId ||
+                 obj.getTypeId() == com.saabgroup.safir.dob.MirroredNodeInfo.ClassTypeId)
+        {
+            //Ip addresses differ from test system to test system, so we have to not print that.
+            var ni = (com.saabgroup.safir.dob.NodeInfo)obj;
+            ni.ipAddress().setNull();
+            return com.saabgroup.safir.dob.typesystem.Serialization.toXml(ni);
+        }
+        else
+        {
+            return com.saabgroup.safir.dob.typesystem.Serialization.toXml(blob);
+        }
+    }
+
+    
     String CallbackId()
     {
         com.saabgroup.safir.dob.CallbackId cb = new com.saabgroup.safir.dob.ConnectionAspectMisc(m_connection).getCurrentCallbackId();
@@ -701,18 +717,6 @@ class Consumer implements
         m_connection.exitDispatch();
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_MESSAGE);
 
-        com.saabgroup.dosetest.RootMessage msg = (com.saabgroup.dosetest.RootMessage)messageProxy.getMessage();
-        String xml;
-
-        if (needBinaryCheck(msg))
-        {
-            xml = checkBinaryMember(msg);
-        }
-        else
-        {
-            xml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(messageProxy.getBlob());
-        }
-
         Logger.instance().println
             (PREFIX + m_consumerNumber + ": "
              + CallbackId() + ":\n"
@@ -720,7 +724,7 @@ class Consumer implements
              + "  ChannelId  = " + messageProxy.getChannelId() + "\n"
              + "  Sender     = " + connInfoToXml(messageProxy.getSenderConnectionInfo()) + "\n"
              + "  ChannelId  = " + messageProxy.getChannelIdWithStringRepresentation() + "\n"
-             + "  Message    = " + xml + "\n\n");
+             + "  Message    = " + toXml(messageProxy.getMessage(), messageProxy.getBlob()) + "\n\n");
     }
 
 
@@ -735,17 +739,6 @@ class Consumer implements
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_NEW_ENTITY);
 
         com.saabgroup.safir.dob.Entity entity = entityProxy.getEntityWithChangeInfo();
-        String xml;
-
-        if (needBinaryCheck(entity))
-        {
-            xml = checkBinaryMember(entity);
-        }
-        else
-        {
-            xml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(entityProxy.getBlob());
-        }
-
 
         Logger.instance().println
             (PREFIX + m_consumerNumber + ": "
@@ -754,7 +747,7 @@ class Consumer implements
              + "  Owner     = " + entityProxy.getOwner() + "\n"
              + "  OwnerConn = " + connInfoToXml(entityProxy.getOwnerConnectionInfo()) + "\n"
              + "  OwnerStr  = " + entityProxy.getOwnerWithStringRepresentation() + "\n"
-             + "  Entity    = " + xml + "\n"
+             + "  Entity    = " + toXml(entity, entityProxy.getBlob()) + "\n"
              + "  Changed top-level members: ");
 
         for (int i = 0;
@@ -776,28 +769,6 @@ class Consumer implements
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_UPDATED_ENTITY);
 
         com.saabgroup.safir.dob.Entity entity = entityProxy.getEntityWithChangeInfo();
-        String xml;
-
-        if (needBinaryCheck(entity))
-        {
-            xml = checkBinaryMember(entity);
-        }
-        else
-        {
-            xml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(entityProxy.getBlob());
-        }
-
-        com.saabgroup.safir.dob.Entity prevEntity = entityProxy.getPrevious().getEntity();
-        String prevXml;
-
-        if (needBinaryCheck(prevEntity))
-        {
-            prevXml = checkBinaryMember(prevEntity);
-        }
-        else
-        {
-            prevXml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(entityProxy.getPrevious().getBlob());
-        }
 
         Logger.instance().println
             (PREFIX + m_consumerNumber + ": "
@@ -806,8 +777,8 @@ class Consumer implements
              + "  Owner     = " + entityProxy.getOwner() + "\n"
              + "  OwnerConn = " + connInfoToXml(entityProxy.getOwnerConnectionInfo()) + "\n"
              + "  OwnerStr  = " + entityProxy.getOwnerWithStringRepresentation() + "\n"
-             + "  Entity    = " + xml + "\n"
-             + "  Previous  = " + prevXml + "\n"
+             + "  Entity    = " + toXml(entity, entityProxy.getBlob()) + "\n"
+             + "  Previous  = " + toXml(entityProxy.getPrevious().getEntity(), entityProxy.getPrevious().getBlob()) + "\n"
              + "  Changed top-level members: ");
 
         for (int i = 0;
@@ -921,18 +892,6 @@ class Consumer implements
         m_responseSender = responseSender;
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_SERVICE_REQUEST);
 
-        com.saabgroup.dosetest.RootService svc = (com.saabgroup.dosetest.RootService)serviceRequestProxy.getRequest();
-        String xml;
-
-        if (needBinaryCheck(svc))
-        {
-            xml = checkBinaryMember(svc);
-        }
-        else
-        {
-            xml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(serviceRequestProxy.getBlob());
-        }
-
         Logger.instance().println
             (PREFIX + m_consumerNumber + ": "
              + CallbackId() + ": \n"
@@ -940,7 +899,7 @@ class Consumer implements
              + "  Sender     = " + connInfoToXml(serviceRequestProxy.getSenderConnectionInfo()) + "\n"
              + "  Handler    = " + serviceRequestProxy.getReceivingHandlerId() + "\n"
              + "  HandlerStr = " + serviceRequestProxy.getReceiverWithStringRepresentation() + "\n"
-             + "  Request    = " + xml);
+             + "  Request    = " + toXml(serviceRequestProxy.getRequest(), serviceRequestProxy.getBlob()));
         Logger.instance().println();
 
         if (!responseSender.isDone())
@@ -984,16 +943,6 @@ class Consumer implements
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_CREATE_REQUEST);
 
         com.saabgroup.dosetest.RootEntity req = (com.saabgroup.dosetest.RootEntity)entityRequestProxy.getRequest();
-        String xml;
-
-        if (needBinaryCheck(req))
-        {
-            xml = checkBinaryMember(req);
-        }
-        else
-        {
-            xml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(entityRequestProxy.getBlob());
-        }
 
         Key key = new Key(entityRequestProxy.getTypeId(), entityRequestProxy.getReceivingHandlerId());
         Pair value = m_instanceIdPolicyMap.get(key);
@@ -1010,7 +959,7 @@ class Consumer implements
                                       + "  Sender     = " + connInfoToXml(entityRequestProxy.getSenderConnectionInfo()) + "\n"
                                       + "  Handler    = " + entityRequestProxy.getReceivingHandlerId() + "\n"
                                       + "  HandlerStr = " + entityRequestProxy.getReceiverWithStringRepresentation() + "\n"
-                                      + "  Request    = " + xml);
+                                      + "  Request    = " + toXml(req, entityRequestProxy.getBlob()));
             Logger.instance().println();
 
             if (!m_responseSenderDiscarded)
@@ -1038,7 +987,7 @@ class Consumer implements
                                       + "  Sender     = " + connInfoToXml(entityRequestProxy.getSenderConnectionInfo()) + "\n"
                                       + "  Handler    = " + entityRequestProxy.getReceivingHandlerId() + "\n"
                                       + "  HandlerStr = " + entityRequestProxy.getReceiverWithStringRepresentation() + "\n"
-                                      + "  Request    = " + xml);
+                                      + "  Request    = " + toXml(req, entityRequestProxy.getBlob()));
             Logger.instance().println();
 
 
@@ -1095,16 +1044,6 @@ class Consumer implements
         executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_UPDATE_REQUEST);
 
         com.saabgroup.dosetest.RootEntity req = (com.saabgroup.dosetest.RootEntity)entityRequestProxy.getRequest();
-        String xml;
-
-        if (needBinaryCheck(req))
-        {
-            xml = checkBinaryMember(req);
-        }
-        else
-        {
-            xml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(entityRequestProxy.getBlob());
-        }
 
         Logger.instance().println(PREFIX + m_consumerNumber + ": "
                                   + CallbackId() + ": \n"
@@ -1112,7 +1051,7 @@ class Consumer implements
                                   + "  Sender     = " + connInfoToXml(entityRequestProxy.getSenderConnectionInfo()) + "\n"
                                   + "  Handler    = " + entityRequestProxy.getReceivingHandlerId() + "\n"
                                   + "  HandlerStr = " + entityRequestProxy.getReceiverWithStringRepresentation() + "\n"
-                                  + "  Request    = " + xml);
+                                  + "  Request    = " + toXml(req, entityRequestProxy.getBlob()));
         Logger.instance().println();
 
         if (!m_responseSenderDiscarded)
@@ -1244,16 +1183,7 @@ class Consumer implements
              + "  Request    = ");
         try
         {
-            com.saabgroup.safir.dob.typesystem.Object req = responseProxy.getRequest();
-            if (needBinaryCheck(req))
-            {
-                Logger.instance().println(checkBinaryMember(req));
-            }
-            else
-            {
-                Logger.instance().println(com.saabgroup.safir.dob.typesystem.Serialization.toXml(responseProxy.getRequestBlob()));
-            }
-
+            Logger.instance().println(toXml(responseProxy.getRequest(), responseProxy.getRequestBlob()));
         }
         catch (com.saabgroup.safir.dob.typesystem.SoftwareViolationException exc)
         {
@@ -1288,7 +1218,16 @@ class Consumer implements
     private String connInfoToXml(com.saabgroup.safir.dob.ConnectionInfo connInfo)
     {
         connInfo.connectionId().setNull();
-        if (!connInfo.connectionName().isNull())
+
+        //when we look at stuff that comes from safir_status it is not known which node will have the redundant
+        //registration, so we need to anonymize things...
+        if (!connInfo.connectionName().isNull() &&
+            connInfo.connectionName().getVal().contains("safir_control_status"))
+        {
+            connInfo.nodeId().setNull();
+            connInfo.connectionName().setNull();
+        }
+        else if (!connInfo.connectionName().isNull())
         {
             int index = connInfo.connectionName().getVal().lastIndexOf('#');
             connInfo.connectionName().setVal(connInfo.connectionName().getVal().substring(0, index));

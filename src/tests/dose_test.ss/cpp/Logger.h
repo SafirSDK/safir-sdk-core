@@ -48,7 +48,16 @@ public:
     inline Logger& operator << (const Safir::Dob::ConnectionInfoPtr& connInfo)
     {
         connInfo->ConnectionId().SetNull();
-        if (!connInfo->ConnectionName().IsNull())
+
+        //when we look at stuff that comes from safir_status it is not known which node will have the redundant
+        //registration, so we need to anonymize things...
+        if (!connInfo->ConnectionName().IsNull() &&
+            connInfo->ConnectionName().GetVal().find(L"safir_control_status") != std::string::npos)
+        {
+            connInfo->NodeId().SetNull();
+            connInfo->ConnectionName().SetNull();
+        }
+        else if (!connInfo->ConnectionName().IsNull())
         {
             const size_t index = connInfo->ConnectionName().GetVal().find_last_of(L"#");
             connInfo->ConnectionName() = connInfo->ConnectionName().GetVal().substr(0,index);

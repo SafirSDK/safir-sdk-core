@@ -2188,6 +2188,12 @@ Consumer 0: OnDeleteRequest:
   HandlerStr = -5453762115588730630
 
 ==========================================================================
+TESTCASE 1020
+Description: Testing that safir_status produces proper node_info.
+Expectation: Subscribers get correct number of node entities
+--------- Setup -----------
+--------- Test  -----------
+==========================================================================
 TESTCASE 1100
 Description: Test of the backdoor keeper.
 Expectation: Partner 0 shall report: 1.Backdoor is not started. 2.Backdoor is started. 3.Received command "test-command 2 olle" 4.Backdoor is not started. 5.Backdoor is started. 6.Received command "test-command 4 bertil bertilsson".

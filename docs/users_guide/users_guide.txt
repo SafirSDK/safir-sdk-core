@@ -3119,7 +3119,11 @@ reach all full nodes.
 
 A side effect of this is that light nodes may not be aware of each other at all. For
 example, looking at the +Safir.Dob.NodeInfo+ entity on one light node will not show
-instances for all nodes, but only for the light node itself and all the full nodes.
+instances for all nodes, but only for the light node itself and all the full nodes. (For
+this specific information +safir_status+ actually provides an entity
++Safir.Dob.MirroredNodeInfo+, which lets light nodes see the node status of other light
+nodes, since that information may be important for an operator to understand system
+status.)
 
 ===== Light node detach/attach behaviour
 
@@ -3817,7 +3821,11 @@ There is also a simple command line tool that can be used to execute different s
 === Node Control GUI
 To start the Node Control GUI run +safir_control_gui+.
 
-In order to get system information, the GUI needs another program, +safir_status+. This program act as a gateway to the lower parts and exposes a Dob interface that is used by the GUI to control the nodes.
+In order to get system information, the GUI needs another program, +safir_status+. This
+program act as a gateway to the lower parts and exposes a Dob interface that is used by
+the GUI to control the nodes. This program also provides an entity
++Safir.Dob.MirroredNodeInfo+, which lets light nodes see the node status of other light
+nodes.
 
 +safir_control_gui+ communicates with the local +safir_status+ program which means that both programs must execute on the same node. However, it is perfectly ok to start these programs on all (or a subset) of the nodes that constitue the system. The Node Control GUI on any node can be used to view the status of the complete system as well as to stop a specific node or all nodes.
 

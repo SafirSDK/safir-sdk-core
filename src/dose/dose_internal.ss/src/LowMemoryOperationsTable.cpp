@@ -25,6 +25,7 @@
 #include <Safir/Dob/LowMemoryOperationsAllowedProperty.h>
 #include <Safir/Dob/LowMemoryOperationsAllowedOverrideProperty.h>
 #include <Safir/Dob/NodeInfo.h>
+#include <Safir/Dob/MirroredNodeInfo.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Properties.h>
@@ -54,7 +55,7 @@ namespace Internal
                                   const Typesystem::TypeId typeId,
                                   const std::string& propertyName)
     {
-        if (typeId == Safir::Dob::NodeInfo::ClassTypeId)
+        if (typeId == Safir::Dob::NodeInfo::ClassTypeId || typeId == Safir::Dob::MirroredNodeInfo::ClassTypeId)
         {
             return;
         }

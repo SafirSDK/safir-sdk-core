@@ -39,6 +39,8 @@
 #include <DoseTest/SuccessfulUpdate.h>
 #include <DoseTest/SuccessfulService.h>
 #include <DoseTest/LastInjectionTimestamp.h>
+#include <Safir/Dob/NodeInfo.h>
+#include <Safir/Dob/MirroredNodeInfo.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include "Consumer.h"
@@ -61,8 +63,92 @@
 #if defined _MSC_VER
 #  pragma warning (pop)
 #endif
+namespace
+{
+    const std::wstring PREFIX = L"Consumer ";
 
-const std::wstring PREFIX = L"Consumer ";
+
+    //sets the container to null after checking it.
+    void CheckBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
+    {
+        if (!cont.IsNull() && cont.GetVal().size() > 10000) //only check for large sizes
+        {
+            if (cont.GetVal().size() != 10 *1024 *1024)
+            {
+                lout << "Binary is wrong size!" << std::endl;
+            }
+            else
+            {
+                char val = 0;
+                for (Safir::Dob::Typesystem::Binary::const_iterator it = cont.GetVal().begin();
+                     it != cont.GetVal().end(); ++it)
+                {
+                    if (*it != val)
+                    {
+                        lout << "Bad value in binary!" << std::endl;
+                        break;
+                    }
+                    ++val;
+                }
+            }
+            //we do NOT want to print all this out to stdout, so we set it to null once we've checked it.
+            cont.SetNull();
+        }
+    }
+
+    const std::wstring CheckBinaryMember(const Safir::Dob::Typesystem::ObjectPtr & object)
+    {
+        if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
+        {
+            CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->
+                                      BinaryMember().GetContainer());
+        }
+        else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
+        {
+            CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->
+                                      BinaryMember().GetContainer());
+
+            //in the entity we use the binary array as well
+            for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
+            {
+                CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->
+                                          BinaryArrayMember()[i]);
+            }
+        }
+        else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
+        {
+            CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->
+                                      BinaryMember().GetContainer());
+        }
+
+        return Safir::Dob::Typesystem::Serialization::ToXml(object);
+    }
+
+
+    std::wstring ToXml(const Safir::Dob::Typesystem::ObjectPtr& object,
+                       const char* const blob)
+    {
+        if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId ||
+            object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId ||
+            object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
+        {
+            //We don't want to print out the contents of binaries, since that is toooo much text
+            return CheckBinaryMember(object);
+        }
+        else if (object->GetTypeId() == Safir::Dob::NodeInfo::ClassTypeId ||
+                 object->GetTypeId() == Safir::Dob::MirroredNodeInfo::ClassTypeId)
+        {
+            //Ip addresses differ from test system to test system, so we have to not print that.
+            auto ni = std::dynamic_pointer_cast<Safir::Dob::NodeInfo>(object);
+            ni->IpAddress().SetNull();
+            return Safir::Dob::Typesystem::Serialization::ToXml(ni);
+        }
+        else
+        {
+            return Safir::Dob::Typesystem::Serialization::ToXml(blob);
+        }
+    }
+}
 
 Consumer::Consumer(int consumerNumber,
                    const std::wstring & connectionName,
@@ -98,70 +184,6 @@ void Consumer::ExecuteCallbackActions(const Safir::Dob::CallbackId::Enumeration 
     }
 }
 
-bool NeedBinaryCheck(const Safir::Dob::Typesystem::ObjectPtr & object)
-{
-    return
-        object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId ||
-        object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId ||
-        object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId;
-}
-
-//sets the container to null after checking it.
-void CheckBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
-{
-    if (!cont.IsNull() && cont.GetVal().size() > 10000) //only check for large sizes
-    {
-        if (cont.GetVal().size() != 10 *1024 *1024)
-        {
-            lout << "Binary is wrong size!" << std::endl;
-        }
-        else
-        {
-            char val = 0;
-            for (Safir::Dob::Typesystem::Binary::const_iterator it = cont.GetVal().begin();
-                 it != cont.GetVal().end(); ++it)
-            {
-                if (*it != val)
-                {
-                    lout << "Bad value in binary!" << std::endl;
-                    break;
-                }
-                ++val;
-            }
-        }
-        //we do NOT want to print all this out to stdout, so we set it to null once we've checked it.
-        cont.SetNull();
-    }
-}
-
-const std::wstring CheckBinaryMember(const Safir::Dob::Typesystem::ObjectPtr & object)
-{
-    if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
-    {
-        CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->
-                                    BinaryMember().GetContainer());
-    }
-    else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
-    {
-        CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->
-                                    BinaryMember().GetContainer());
-
-        //in the entity we use the binary array as well
-        for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
-        {
-            CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->
-                                        BinaryArrayMember()[i]);
-        }
-    }
-    else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
-    {
-        CheckBinaryMemberInternal(std::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->
-                                    BinaryMember().GetContainer());
-    }
-
-    return Safir::Dob::Typesystem::Serialization::ToXml(object);
-}
-
 const std::wstring
 Consumer::CallbackId() const
 {
@@ -174,25 +196,13 @@ void Consumer::OnMessage(const Safir::Dob::MessageProxy messageProxy)
     m_connection.ExitDispatch();
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnMessage);
 
-    DoseTest::RootMessagePtr msg = std::dynamic_pointer_cast<DoseTest::RootMessage>(messageProxy.GetMessage());
-
-    std::wstring xml;
-    if (NeedBinaryCheck(msg))
-    {
-        xml = CheckBinaryMember(msg);
-    }
-    else
-    {
-        xml = Safir::Dob::Typesystem::Serialization::ToXml(messageProxy.GetBlob());
-    }
-
     lout << PREFIX << m_consumerNumber << ": "
          << CallbackId() << ":" << std::endl
          << "  Type       = " << Safir::Dob::Typesystem::Operations::GetName(messageProxy.GetTypeId()) << std::endl
          << "  ChannelId  = " << messageProxy.GetChannelId() << std::endl
          << "  Sender     = " << messageProxy.GetSenderConnectionInfo() << std::endl
          << "  ChannelId  = " << messageProxy.GetChannelIdWithStringRepresentation() << std::endl
-         << "  Message    = " << xml << std::endl
+         << "  Message    = " << ToXml(messageProxy.GetMessage(), messageProxy.GetBlob()) << std::endl
          << std::endl;
     lout << std::endl;
 }
@@ -204,23 +214,13 @@ void Consumer::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 
     Safir::Dob::EntityPtr entity = entityProxy.GetEntityWithChangeInfo();
 
-    std::wstring xml;
-    if (NeedBinaryCheck(entity))
-    {
-        xml = CheckBinaryMember(entity);
-    }
-    else
-    {
-        xml = Safir::Dob::Typesystem::Serialization::ToXml(entityProxy.GetBlob());
-    }
-
     lout << PREFIX << m_consumerNumber << ": "
          << CallbackId() << ":" << std::endl
          << "  EntityId  = " << entityProxy.GetEntityId() << std::endl
          << "  Owner     = " << entityProxy.GetOwner() << std::endl
          << "  OwnerConn = " << entityProxy.GetOwnerConnectionInfo() << std::endl
          << "  OwnerStr  = " << entityProxy.GetOwnerWithStringRepresentation() << std::endl
-         << "  Entity    = " << xml << std::endl
+         << "  Entity    = " << ToXml(entity, entityProxy.GetBlob()) << std::endl
          << "  Changed top-level members: " << std::endl;
 
     for (int i = 0;
@@ -244,27 +244,6 @@ Consumer::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnUpdatedEntity);
 
     Safir::Dob::EntityPtr entity = entityProxy.GetEntityWithChangeInfo();
-    std::wstring xml;
-    if (NeedBinaryCheck(entity))
-    {
-        xml = CheckBinaryMember(entity);
-    }
-    else
-    {
-        xml = Safir::Dob::Typesystem::Serialization::ToXml(entityProxy.GetBlob());
-    }
-
-    Safir::Dob::EntityPtr prevEntity = entityProxy.GetPrevious().GetEntityWithChangeInfo();
-    std::wstring prevXml;
-    if (NeedBinaryCheck(prevEntity))
-    {
-        prevXml = CheckBinaryMember(prevEntity);
-    }
-    else
-    {
-        prevXml = Safir::Dob::Typesystem::Serialization::ToXml(entityProxy.GetPrevious().GetBlob());
-    }
-
 
     lout << PREFIX << m_consumerNumber << ": "
          << CallbackId() << ":" << std::endl
@@ -272,8 +251,9 @@ Consumer::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
          << "  Owner     = " << entityProxy.GetOwner() << std::endl
          << "  OwnerConn = " << entityProxy.GetOwnerConnectionInfo() << std::endl
          << "  OwnerStr  = " << entityProxy.GetOwnerWithStringRepresentation() << std::endl
-         << "  Entity    = " << xml << std::endl
-         << "  Previous  = " << prevXml << std::endl
+         << "  Entity    = " << ToXml(entity, entityProxy.GetBlob()) << std::endl
+         << "  Previous  = " << ToXml(entityProxy.GetPrevious().GetEntity(),
+                                      entityProxy.GetPrevious().GetBlob()) << std::endl
          << "  Changed top-level members: " << std::endl;
 
     for (int i = 0;
@@ -296,24 +276,14 @@ Consumer::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool 
     m_connection.ExitDispatch();
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnDeletedEntity);
 
-    Safir::Dob::EntityPtr prevEntity = entityProxy.GetPrevious().GetEntity();
-    std::wstring prevXml;
-    if (NeedBinaryCheck(prevEntity))
-    {
-        prevXml = CheckBinaryMember(prevEntity);
-    }
-    else
-    {
-        prevXml = Safir::Dob::Typesystem::Serialization::ToXml(entityProxy.GetPrevious().GetBlob());
-    }
-
     lout << PREFIX << m_consumerNumber << ": "
          << CallbackId() << ":" << std::endl
          << "  EntityId       = " << entityProxy.GetEntityId() << std::endl
          << "  deletedByOwner = " << std::boolalpha << deletedByOwner << std::endl
          << "  Owner          = " << entityProxy.GetOwner() << std::endl
          << "  OwnerStr  = " << entityProxy.GetOwnerWithStringRepresentation() << std::endl
-         << "  Previous  = " << prevXml << std::endl;
+         << "  Previous  = " << ToXml(entityProxy.GetPrevious().GetEntity(),
+                                      entityProxy.GetPrevious().GetBlob()) << std::endl;
     lout << std::endl;
 }
 
@@ -471,26 +441,13 @@ void Consumer::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceReq
     m_responseSender = responseSender;
     ExecuteCallbackActions(Safir::Dob::CallbackId::OnServiceRequest);
 
-    DoseTest::RootServicePtr svc = std::dynamic_pointer_cast<DoseTest::RootService>(serviceRequestProxy.GetRequest());
-
-    std::wstring xml;
-    if (NeedBinaryCheck(svc))
-    {
-        xml = CheckBinaryMember(svc);
-    }
-    else
-    {
-        xml = Safir::Dob::Typesystem::Serialization::ToXml(serviceRequestProxy.GetBlob());
-    }
-
-
     lout << PREFIX << m_consumerNumber << ": "
          << CallbackId() << ": " << std::endl
          << "  Type       = " << Safir::Dob::Typesystem::Operations::GetName(serviceRequestProxy.GetTypeId()) << std::endl
          << "  Sender     = " << serviceRequestProxy.GetSenderConnectionInfo() << std::endl
          << "  Handler    = " << serviceRequestProxy.GetReceivingHandlerId() << std::endl
          << "  HandlerStr = " << serviceRequestProxy.GetReceiverWithStringRepresentation() << std::endl
-         << "  Request    = " << xml << std::endl;
+         << "  Request    = " << ToXml(serviceRequestProxy.GetRequest(), serviceRequestProxy.GetBlob()) << std::endl;
     lout << std::endl;
 
     if (!responseSender->IsDone())
@@ -513,17 +470,6 @@ Consumer::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
 
     DoseTest::RootEntityPtr req = std::dynamic_pointer_cast<DoseTest::RootEntity>(entityProxy.GetRequest());
 
-    std::wstring xml;
-    if (NeedBinaryCheck(req))
-    {
-        xml = CheckBinaryMember(req);
-    }
-    else
-    {
-        xml = Safir::Dob::Typesystem::Serialization::ToXml(entityProxy.GetBlob());
-    }
-
-
     InstanceIdPolicyMap::iterator it =
         m_instanceIdPolicyMap.find(boost::make_tuple(entityProxy.GetTypeId(), entityProxy.GetReceivingHandlerId()));
 
@@ -537,7 +483,7 @@ Consumer::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
              << "  Sender     = " << entityProxy.GetSenderConnectionInfo() << std::endl
              << "  Handler    = " << entityProxy.GetReceivingHandlerId() << std::endl
              << "  HandlerStr = " << entityProxy.GetReceiverWithStringRepresentation() << std::endl
-             << "  Request    = " << xml << std::endl;
+             << "  Request    = " << ToXml(req, entityProxy.GetBlob()) << std::endl;
         lout << std::endl;
 
         if (!m_responseSenderDiscarded)
@@ -565,7 +511,7 @@ Consumer::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
              << "  Sender     = " << entityProxy.GetSenderConnectionInfo() << std::endl
              << "  Handler    = " << entityProxy.GetReceivingHandlerId() << std::endl
              << "  HandlerStr = " << entityProxy.GetReceiverWithStringRepresentation() << std::endl
-             << "  Request    = " << xml << std::endl;
+             << "  Request    = " << ToXml(req, entityProxy.GetBlob()) << std::endl;
         lout << std::endl;
 
         if (!m_responseSenderDiscarded)
@@ -595,23 +541,13 @@ Consumer::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityProxy,
 
     DoseTest::RootEntityPtr req = std::dynamic_pointer_cast<DoseTest::RootEntity>(entityProxy.GetRequest());
 
-    std::wstring xml;
-    if (NeedBinaryCheck(req))
-    {
-        xml = CheckBinaryMember(req);
-    }
-    else
-    {
-        xml = Safir::Dob::Typesystem::Serialization::ToXml(entityProxy.GetBlob());
-    }
-
     lout << PREFIX << m_consumerNumber << ": "
          << CallbackId() << ": " << std::endl
          << "  Entity     = " << entityProxy.GetEntityId() << std::endl
          << "  Sender     = " << entityProxy.GetSenderConnectionInfo() << std::endl
          << "  Handler    = " << entityProxy.GetReceivingHandlerId() << std::endl
          << "  HandlerStr = " << entityProxy.GetReceiverWithStringRepresentation() << std::endl
-         << "  Request    = " << xml << std::endl;
+         << "  Request    = " << ToXml(req, entityProxy.GetBlob()) << std::endl;
     lout << std::endl;
 
     if (!m_responseSenderDiscarded)
@@ -674,16 +610,7 @@ void Consumer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
          << "  Request    = ";
     try
     {
-        Safir::Dob::Typesystem::ObjectPtr req = responseProxy.GetRequest();
-
-        if (NeedBinaryCheck(req))
-        {
-            lout <<  CheckBinaryMember(req) << std::endl;
-        }
-        else
-        {
-            lout << Safir::Dob::Typesystem::Serialization::ToXml(responseProxy.GetRequestBlob()) << std::endl;
-        }
+        lout << ToXml(responseProxy.GetRequest(), responseProxy.GetRequestBlob()) << std::endl;
     }
     catch (const Safir::Dob::Typesystem::SoftwareViolationException&)
     {

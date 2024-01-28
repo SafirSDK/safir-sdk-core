@@ -104,7 +104,6 @@ namespace Control
                                           L"Failed to send response due to low shared memory. Skipping.");
             responseSender->Discard();
         }
-
     }
 
     void CommandRequestHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/,

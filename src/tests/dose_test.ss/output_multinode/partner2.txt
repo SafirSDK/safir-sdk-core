@@ -2316,6 +2316,116 @@ Consumer 0: OnDeleteRequest:
   HandlerStr = -6040750362377884435
 
 ==========================================================================
+TESTCASE 1020
+Description: Testing that safir_status produces proper node_info.
+Expectation: Subscribers get correct number of node entities
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.NodeInfo, 66666)
+  Owner     = 66666
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>66666</NodeId><ConnectionName xml:space="preserve">Client_1.66666;0;DoseMain;NodeInfoHandler</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = 66666
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.NodeInfo><NodeName xml:space="preserve">Client_1</NodeName><NodeType xml:space="preserve">Client</NodeType><State>Attached</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.NodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.NodeInfo, 77777)
+  Owner     = 77777
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>77777</NodeId><ConnectionName xml:space="preserve">Client_0.77777;0;DoseMain;NodeInfoHandler</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = 77777
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.NodeInfo><NodeName xml:space="preserve">Client_0</NodeName><NodeType xml:space="preserve">Client</NodeType><State>Attached</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.NodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.NodeInfo, 888888)
+  Owner     = 888888
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>888888</NodeId><ConnectionName xml:space="preserve">Server_1.888888;0;DoseMain;NodeInfoHandler</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = 888888
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.NodeInfo><NodeName xml:space="preserve">Server_1</NodeName><NodeType xml:space="preserve">Server</NodeType><State>Normal</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.NodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.NodeInfo, 999999)
+  Owner     = 999999
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">Server_0.999999;0;DoseMain;NodeInfoHandler</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = 999999
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.NodeInfo><NodeName xml:space="preserve">Server_0</NodeName><NodeType xml:space="preserve">Server</NodeType><State>Normal</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.NodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.MirroredNodeInfo, 66666)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.MirroredNodeInfo><NodeName xml:space="preserve">Client_1</NodeName><NodeType xml:space="preserve">Client</NodeType><State>Attached</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.MirroredNodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.MirroredNodeInfo, 77777)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.MirroredNodeInfo><NodeName xml:space="preserve">Client_0</NodeName><NodeType xml:space="preserve">Client</NodeType><State>Attached</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.MirroredNodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.MirroredNodeInfo, 888888)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.MirroredNodeInfo><NodeName xml:space="preserve">Server_1</NodeName><NodeType xml:space="preserve">Server</NodeType><State>Normal</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.MirroredNodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.MirroredNodeInfo, 999999)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.MirroredNodeInfo><NodeName xml:space="preserve">Server_0</NodeName><NodeType xml:space="preserve">Server</NodeType><State>Normal</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.MirroredNodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+==========================================================================
 TESTCASE 1100
 Description: Test of the backdoor keeper.
 Expectation: Partner 0 shall report: 1.Backdoor is not started. 2.Backdoor is started. 3.Received command "test-command 2 olle" 4.Backdoor is not started. 5.Backdoor is started. 6.Received command "test-command 4 bertil bertilsson".

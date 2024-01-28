@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoseTest.Items.TestCase>
+  <Description xml:space="preserve">Testing that safir_status produces proper node_info.</Description>
+  <Expectation xml:space="preserve">Subscribers get correct number of node entities</Expectation>
+  <TestCaseSetupActions>
+  </TestCaseSetupActions>
+  <TestActions>
+    <DoseTest.Action>
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>0</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>Safir.Dob.NodeInfo</TypeId>
+      <IncludeUpdates>false</IncludeUpdates>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>Safir.Dob.NodeInfo</TypeId>
+      <IncludeUpdates>false</IncludeUpdates>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>3</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>Safir.Dob.NodeInfo</TypeId>
+      <IncludeUpdates>false</IncludeUpdates>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>SubscribeEntity</ActionKind>
+      <Partner>4</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>Safir.Dob.NodeInfo</TypeId>
+      <IncludeUpdates>false</IncludeUpdates>
+      <IncludeSubclasses>true</IncludeSubclasses>
+      <RestartSubscription>false</RestartSubscription>
+    </DoseTest.Action>
+  </TestActions>
+</DoseTest.Items.TestCase>

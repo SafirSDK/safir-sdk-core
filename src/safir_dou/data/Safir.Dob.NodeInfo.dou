@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <summary>Node information for all nodes currently in the system. The instance corresponds to the node id.</summary>
+  <summary>
+    Node information for all nodes currently in the system. The instance corresponds to
+    the node id. Note that light nodes will not be able to see other light node's instances
+    of this class. See User's Guide for more information.
+  </summary>
     <name>Safir.Dob.NodeInfo</name>
     <baseClass>Safir.Dob.Entity</baseClass>
     <members>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>
+    Node information for all nodes currently in the system. The instance corresponds to
+    the node id. Requires safir_status to be runing. See User's Guide for more information.
+  </summary>
+  <name>Safir.Dob.MirroredNodeInfo</name>
+  <baseClass>Safir.Dob.NodeInfo</baseClass>
+</class>

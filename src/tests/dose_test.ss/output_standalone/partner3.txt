@@ -1366,6 +1366,38 @@ Expectation: Partner 1 and 2 should get a delete request and partner 0 should ge
 --------- Setup -----------
 --------- Test  -----------
 ==========================================================================
+TESTCASE 1020
+Description: Testing that safir_status produces proper node_info.
+Expectation: Subscribers get correct number of node entities
+--------- Setup -----------
+--------- Test  -----------
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.NodeInfo, 999999)
+  Owner     = 999999
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;DoseMain;NodeInfoHandler</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerStr  = 999999
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.NodeInfo><NodeName xml:space="preserve">StandAlone</NodeName><NodeType xml:space="preserve">Server</NodeType><State>Normal</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.NodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+Consumer 0: OnNewEntity:
+  EntityId  = (Safir.Dob.MirroredNodeInfo, 999999)
+  Owner     = DEFAULT_HANDLER
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo></Safir.Dob.ConnectionInfo>
+  OwnerStr  = DEFAULT_HANDLER
+  Entity    = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.MirroredNodeInfo><NodeName xml:space="preserve">StandAlone</NodeName><NodeType xml:space="preserve">Server</NodeType><State>Normal</State><MemoryLevel>Normal</MemoryLevel></Safir.Dob.MirroredNodeInfo>
+  Changed top-level members: 
+    NodeName
+    IpAddress
+    NodeType
+    State
+    MemoryLevel
+
+==========================================================================
 TESTCASE 1100
 Description: Test of the backdoor keeper.
 Expectation: Partner 0 shall report: 1.Backdoor is not started. 2.Backdoor is started. 3.Received command "test-command 2 olle" 4.Backdoor is not started. 5.Backdoor is started. 6.Received command "test-command 4 bertil bertilsson".

@@ -32,6 +32,7 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/NodeInfo.h>
+#include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
@@ -246,7 +247,16 @@ void ConnectionStatisticsServiceHandler::HandleNodeStatisticRequest(const Safir:
         item->NumberOfSendMessageOverflows() = s.second.msgOutQStat.noOverflows;
     }
 
-    responseSender->Send(response);
+    try
+    {
+        responseSender->Send(response);
+    }
+    catch (const Safir::Dob::LowMemoryException&)
+    {
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"Failed to send response due to low shared memory. Skipping.");
+        responseSender->Discard();
+    }
 }
 
 void ConnectionStatisticsServiceHandler::HandleAllNodesStatisticRequest(const Safir::Dob::ResponseSenderPtr& responseSender)

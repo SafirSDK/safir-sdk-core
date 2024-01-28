@@ -60,6 +60,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.LowMemoryOperationsAllowedProperty.dou
   data/Safir.Dob.MemoryLevel.dou
   data/Safir.Dob.Message.dou
+  data/Safir.Dob.MirroredNodeInfo.dou
   data/Safir.Dob.NodeInfo.dou
   data/Safir.Dob.NodeState.dou
   data/Safir.Dob.NodeType.dou
@@ -105,6 +106,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Control.Command-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Control.GetConnectionStatistics-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Control.Status-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Dob.MirroredNodeInfo-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.NodeInfo-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.NodeInfo-Safir.Dob.LowMemoryOperationsAllowedProperty.dom
   data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionScopeProperty.dom

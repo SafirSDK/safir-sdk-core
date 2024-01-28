@@ -28,6 +28,7 @@
 #include "StatusEntityHandler.h"
 #include "CommandRequestHandler.h"
 #include "ConnectionStatisticsServiceHandler.h"
+#include "NodeInfoMirrorer.h"
 
 #include <boost/asio.hpp>
 
@@ -58,7 +59,7 @@ private:
     StatusEntityHandler m_statusEntityHandler;
     CommandRequestHandler m_commandRequestHandler;
     ConnectionStatisticsServiceHandler m_connectionStatsHandler;
-
+    NodeInfoMirrorer m_nodeInfoMirrorer;
 };
 }
 }
