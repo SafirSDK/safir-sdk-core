@@ -136,7 +136,11 @@ function (SAFIR_INSTALL)
         if (ASSEMBLY_KIND STREQUAL "winexe")
           set(winforms_workaround "--verify-all")
         endif()
-        FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${target} "#!/bin/sh\nexec /usr/bin/mono ${winforms_workaround} $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_CSHARP}/${assembly_file} $@")
+        find_program(MONO_EXECUTABLE NAMES mono)
+        if (NOT MONO_EXECUTABLE)
+          message(FATAL_ERROR "Mono executable not found!")
+        endif()
+        FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${target} "#!/bin/sh\nexec ${MONO_EXECUTABLE} ${winforms_workaround} $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_CSHARP}/${assembly_file} $@")
         #and install it to bin directory
         install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${target}
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
