@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 12), cmake (>= 3.16), python3 (>= 3.8.0), default-j
 
 Package: safir-sdk-core
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, python3 (>= 3.8.0), lsb-base (>=3.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, python3 (>= 3.8.0)
 Suggests: openjdk-jre, openjdk-jre-headless, mono-runtime
 Description: Distributed real-time system framework
  Safir SDK Core is a middleware and platform for creation of
