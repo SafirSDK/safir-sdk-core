@@ -69,6 +69,23 @@ private:
 
     void ConnectToDob();
     void SendStatisticsRequest();
+
+    struct RowContent
+    {
+        QString node;
+        QString connection;
+        int sentReq;
+        int sentReqOverflow;
+        int sentReqTimeout;
+        int recvReq;
+        int recvReqOverflow;
+        int sentMsg;
+        int sentMsgOverflow;
+        int recvMsg;
+        int recvMsgOverflow;
+    };
+
+    void UpdateTableInternal(std::vector<RowContent>& data);
 };
 
 #endif // CONNECTIONSTATSAGGREGATED_H

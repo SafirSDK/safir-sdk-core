@@ -45,14 +45,15 @@
 namespace
 {
     // Create read-only table item
-    QTableWidgetItem* TableItem(const QString& text, bool alignCenter = false)
+    QTableWidgetItem* TableItem(const QVariant& data, bool alignCenter = false)
     {
-        auto item = new QTableWidgetItem(text);
+        auto item = new QTableWidgetItem();
         item->setFlags(item->flags() &  ~Qt::ItemIsEditable);
         if (alignCenter)
         {
             item->setTextAlignment(Qt::AlignCenter);
         }
+        item->setData(Qt::DisplayRole, data);
         return item;
     }
 
@@ -210,41 +211,24 @@ void ConnectionStatsAggregated::SendStatisticsRequest()
 //---------------------------------------------------------
 void ConnectionStatsAggregated::UpdateGuiLocal()
 {
-    std::vector<ConnectionStatisticsCollector::Stat> connectionStatistics;
+    std::vector<RowContent> rowData;
+    ConnectionStatisticsCollector::Stat s;
 
-    Safir::Dob::Internal::Connections::Instance().ForEachConnectionPtr([&connectionStatistics](const Safir::Dob::Internal::ConnectionPtr& con)
+    Safir::Dob::Internal::Connections::Instance().ForEachConnectionPtr([&s, &rowData](const Safir::Dob::Internal::ConnectionPtr& con)
     {
         if (con->IsLocal())
         {
-            connectionStatistics.emplace_back();
-            auto& stat = connectionStatistics.back();
-            ConnectionStatisticsCollector::GetStatistics(con, stat);
+            ConnectionStatisticsCollector::GetStatistics(con, s);
+            auto reqInQ = GetReqInQAccumulated(s.reqInQStat);
+            auto msgInQ = GetMsgInQAccumulated(s.msgInQStat);
+            rowData.emplace_back(RowContent{QString::fromStdWString(Safir::Dob::ThisNodeParameters::Name()), ShortConnectionName(s.connectionName),
+                                 s.reqOutQStat.noPushedRequests, s.reqOutQStat.noOverflows, s.reqOutQStat.noTimeouts, reqInQ.first, reqInQ.second,
+                                 s.msgOutQStat.noPushedMsg, s.msgOutQStat.noOverflows, msgInQ.first, msgInQ.second});
+
         }
     });
 
-    ui->tableWidget->setSortingEnabled(false);
-    ui->tableWidget->setRowCount(static_cast<int>(connectionStatistics.size()));
-    int row = 0;
-    for (const auto& s : connectionStatistics)
-    {
-        auto reqInQ = GetReqInQAccumulated(s.reqInQStat);
-        auto msgInQ = GetMsgInQAccumulated(s.msgInQStat);
-
-        ui->tableWidget->setItem(row, 0, TableItem(QString::fromStdWString(Safir::Dob::ThisNodeParameters::Name())));
-        ui->tableWidget->setItem(row, 1, TableItem(ShortConnectionName(s.connectionName)));
-        ui->tableWidget->setItem(row, 2, TableItem(QString::number(s.reqOutQStat.noPushedRequests), true));
-        ui->tableWidget->setItem(row, 3, TableItem(QString::number(s.reqOutQStat.noOverflows), true));
-        ui->tableWidget->setItem(row, 4, TableItem(QString::number(s.reqOutQStat.noTimeouts), true));
-        ui->tableWidget->setItem(row, 5, TableItem(QString::number(reqInQ.first), true));
-        ui->tableWidget->setItem(row, 6, TableItem(QString::number(reqInQ.second), true));
-        ui->tableWidget->setItem(row, 7, TableItem(QString::number(s.msgOutQStat.noPushedMsg), true));
-        ui->tableWidget->setItem(row, 8, TableItem(QString::number(s.msgOutQStat.noOverflows), true));
-        ui->tableWidget->setItem(row, 9, TableItem(QString::number(msgInQ.first), true));
-        ui->tableWidget->setItem(row, 10, TableItem(QString::number(msgInQ.second), true));
-
-        ++row;
-    }
-    ui->tableWidget->setSortingEnabled(true);
+    UpdateTableInternal(rowData);
 }
 
 void ConnectionStatsAggregated::Dispatch()
@@ -303,36 +287,21 @@ void ConnectionStatsAggregated::OnResponse(const Safir::Dob::ResponseProxy respo
             return;
         }
 
-        int numRows = 0;
-        for (const auto& n : resp->NodeConnectionStatistics())
-        {
-            numRows += static_cast<int>(n->ConnectionStatistics().size());
-        }
-
-        ui->tableWidget->setSortingEnabled(false);
-        ui->tableWidget->setRowCount(numRows);
-        int row = 0;
+        std::vector<RowContent> rowData;
         for (const auto& n : resp->NodeConnectionStatistics())
         {
             for (const auto& s : n->ConnectionStatistics())
             {
-                // Fill table with statistics
-                ui->tableWidget->setItem(row, 0, TableItem(QString::fromStdWString(n->NodeName())));
-                ui->tableWidget->setItem(row, 1, TableItem(ShortConnectionName(s->ConnectionName().GetVal())));
-                ui->tableWidget->setItem(row, 2, TableItem(QString::number(s->NumberOfSentRequests()), true));
-                ui->tableWidget->setItem(row, 3, TableItem(QString::number(s->NumberOfSendRequestOverflows()), true));
-                ui->tableWidget->setItem(row, 4, TableItem(QString::number(s->NumberOfSendRequestTimeouts()), true));
-                ui->tableWidget->setItem(row, 5, TableItem(QString::number(s->NumberOfReceivedRequests()), true));
-                ui->tableWidget->setItem(row, 6, TableItem(QString::number(s->NumberOfReceiveRequestOverflows()), true));
-                ui->tableWidget->setItem(row, 7, TableItem(QString::number(s->NumberOfSentMessages()), true));
-                ui->tableWidget->setItem(row, 8, TableItem(QString::number(s->NumberOfSendMessageOverflows()), true));
-                ui->tableWidget->setItem(row, 9, TableItem(QString::number(s->NumberOfReceivedMessages()), true));
-                ui->tableWidget->setItem(row, 10, TableItem(QString::number(s->NumberOfReceiveMessageOverflows()), true));
-                ++row;
+                rowData.emplace_back(RowContent{QString::fromStdWString(Safir::Dob::ThisNodeParameters::Name()), ShortConnectionName(s->ConnectionName().GetVal()),
+                                     s->NumberOfSentRequests().GetVal(), s->NumberOfSendRequestOverflows().GetVal(), s->NumberOfSendRequestTimeouts().GetVal(),
+                                     s->NumberOfReceivedRequests().GetVal(), s->NumberOfReceiveRequestOverflows().GetVal(),
+                                     s->NumberOfSentMessages().GetVal(), s->NumberOfSendMessageOverflows().GetVal(),
+                                     s->NumberOfReceivedMessages().GetVal(), s->NumberOfReceiveMessageOverflows().GetVal()});
             }
         }
+
+        UpdateTableInternal(rowData);
         ui->tableWidget->resizeColumnsToContents();
-        ui->tableWidget->setSortingEnabled(true);
 
         QTimer::singleShot(6000, [this]{ SendStatisticsRequest(); });
     }
@@ -370,4 +339,57 @@ void ConnectionStatsAggregated::OnDoDispatch()
 void ConnectionStatsAggregated::OnStopOrder()
 {
     QTimer::singleShot(0, [this]{ ui->remoteNodesCheckbox->setChecked(false); });
+}
+
+void ConnectionStatsAggregated::UpdateTableInternal(std::vector<RowContent>& data)
+{
+    ui->tableWidget->setSortingEnabled(false);
+
+    // Update existing rows and remove rows that are no longer present
+    for (int row = ui->tableWidget->rowCount() - 1; row >= 0; --row)
+    {
+        const QString& node = ui->tableWidget->item(row, 0)->text();
+        const QString& conn = ui->tableWidget->item(row, 1)->text();
+        auto it = std::find_if(data.begin(), data.end(), [&node, &conn](const RowContent& r) {return r.node == node && r.connection == conn;});
+        if (it != data.end())
+        {
+            // Update
+            ui->tableWidget->item(row, 2)->setData(Qt::DisplayRole, it->sentReq);
+            ui->tableWidget->item(row, 3)->setData(Qt::DisplayRole, it->sentReqOverflow);
+            ui->tableWidget->item(row, 4)->setData(Qt::DisplayRole, it->sentReqTimeout);
+            ui->tableWidget->item(row, 5)->setData(Qt::DisplayRole, it->recvReq);
+            ui->tableWidget->item(row, 6)->setData(Qt::DisplayRole, it->recvReqOverflow);
+            ui->tableWidget->item(row, 7)->setData(Qt::DisplayRole, it->sentMsg);
+            ui->tableWidget->item(row, 8)->setData(Qt::DisplayRole, it->sentMsgOverflow);
+            ui->tableWidget->item(row, 9)->setData(Qt::DisplayRole, it->recvMsg);
+            ui->tableWidget->item(row, 10)->setData(Qt::DisplayRole, it->recvMsgOverflow);
+        }
+        else
+        {
+            // Remove
+            ui->tableWidget->removeRow(row);
+        }
+
+        data.erase(it);
+    }
+
+    for (const auto& r : data)
+    {
+        const int row = ui->tableWidget->rowCount();
+        ui->tableWidget->insertRow(row);
+
+        ui->tableWidget->setItem(row, 0, TableItem(r.node));
+        ui->tableWidget->setItem(row, 1, TableItem(r.connection));
+        ui->tableWidget->setItem(row, 2, TableItem(r.sentReq, true));
+        ui->tableWidget->setItem(row, 3, TableItem(r.sentReqOverflow, true));
+        ui->tableWidget->setItem(row, 4, TableItem(r.sentReqTimeout, true));
+        ui->tableWidget->setItem(row, 5, TableItem(r.recvReq, true));
+        ui->tableWidget->setItem(row, 6, TableItem(r.recvReqOverflow, true));
+        ui->tableWidget->setItem(row, 7, TableItem(r.sentMsg, true));
+        ui->tableWidget->setItem(row, 8, TableItem(r.sentMsgOverflow, true));
+        ui->tableWidget->setItem(row, 9, TableItem(r.recvMsg, true));
+        ui->tableWidget->setItem(row, 10, TableItem(r.recvMsgOverflow, true));
+    }
+
+    ui->tableWidget->setSortingEnabled(true);
 }
