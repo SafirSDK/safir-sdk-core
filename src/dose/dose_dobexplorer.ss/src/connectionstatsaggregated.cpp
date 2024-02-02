@@ -363,14 +363,13 @@ void ConnectionStatsAggregated::UpdateTableInternal(std::vector<RowContent>& dat
             ui->tableWidget->item(row, 8)->setData(Qt::DisplayRole, it->sentMsgOverflow);
             ui->tableWidget->item(row, 9)->setData(Qt::DisplayRole, it->recvMsg);
             ui->tableWidget->item(row, 10)->setData(Qt::DisplayRole, it->recvMsgOverflow);
+            data.erase(it);
         }
         else
         {
             // Remove
             ui->tableWidget->removeRow(row);
         }
-
-        data.erase(it);
     }
 
     for (const auto& r : data)
