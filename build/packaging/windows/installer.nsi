@@ -627,6 +627,31 @@ FunctionEnd
 
 Section "Uninstall"
 
+  ;Kill a bunch of processes that may prevent proper uninstallation
+  DetailPrint "Stopping any left over Safir SDK Core processes..."
+  nsExec::Exec '"taskkill" "/f" "/im" "crash_dump_monitor.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "dobexplorer.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "dobmake.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "dope_bin2xml.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "dope_main.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "dose_main.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "dose_memory_stats.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "dots_configuration_check.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "foreach.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_control.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_control_cli.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_control_gui.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_entity_viewer.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_memory_allocator.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_resolver.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_show_config.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_statistics_dump.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_status.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_tool_launcher.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_websocket.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "sate.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "system_picture_listener.exe"'
+
   ;remove from PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/REMOVE" "$INSTDIR\bin"'
 
