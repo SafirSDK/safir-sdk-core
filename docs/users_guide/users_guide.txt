@@ -5,7 +5,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2023-12-07
+2024-01-29
 :source-highlighter: rouge
 :doctype: book
 :toc:
