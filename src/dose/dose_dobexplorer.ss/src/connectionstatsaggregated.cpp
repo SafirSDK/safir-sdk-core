@@ -341,7 +341,7 @@ void ConnectionStatsAggregated::OnStopOrder()
     QTimer::singleShot(0, [this]{ ui->remoteNodesCheckbox->setChecked(false); });
 }
 
-void ConnectionStatsAggregated::UpdateTableInternal(std::vector<RowContent>& data)
+void ConnectionStatsAggregated::UpdateTableInternal(std::vector<RowContent>& rowData)
 {
     ui->tableWidget->setSortingEnabled(false);
 
@@ -350,8 +350,8 @@ void ConnectionStatsAggregated::UpdateTableInternal(std::vector<RowContent>& dat
     {
         const QString& node = ui->tableWidget->item(row, 0)->text();
         const QString& conn = ui->tableWidget->item(row, 1)->text();
-        auto it = std::find_if(data.begin(), data.end(), [&node, &conn](const RowContent& r) {return r.node == node && r.connection == conn;});
-        if (it != data.end())
+        auto it = std::find_if(rowData.begin(), rowData.end(), [&node, &conn](const RowContent& r) {return r.node == node && r.connection == conn;});
+        if (it != rowData.end())
         {
             // Update
             ui->tableWidget->item(row, 2)->setData(Qt::DisplayRole, it->sentReq);
@@ -363,7 +363,7 @@ void ConnectionStatsAggregated::UpdateTableInternal(std::vector<RowContent>& dat
             ui->tableWidget->item(row, 8)->setData(Qt::DisplayRole, it->sentMsgOverflow);
             ui->tableWidget->item(row, 9)->setData(Qt::DisplayRole, it->recvMsg);
             ui->tableWidget->item(row, 10)->setData(Qt::DisplayRole, it->recvMsgOverflow);
-            data.erase(it);
+            rowData.erase(it);
         }
         else
         {
@@ -372,7 +372,7 @@ void ConnectionStatsAggregated::UpdateTableInternal(std::vector<RowContent>& dat
         }
     }
 
-    for (const auto& r : data)
+    for (const auto& r : rowData)
     {
         const int row = ui->tableWidget->rowCount();
         ui->tableWidget->insertRow(row);
