@@ -113,7 +113,7 @@ Contact Saab AB for more information (contact information at http://www.saabgrou
 === Prerequisites / Dependencies
 Safir SDK Core uses the _Boost_ library to provide low level functionality and operating system independence wrappers. See http://www.boost.org/[] for more information.
 
-Safir SDK Core also uses some other open source libraries, such as Qt for C++ widgets and CMake for building. See the build instructions for more information.
+Safir SDK Core also uses some other open source libraries, such as Qt for {cpp} widgets and CMake for building. See the build instructions for more information.
 
 === Supported Platforms
 Safir SDK Core supports both the Windows and Linux platforms on the x86 and x86_64 platforms. It also successufully builds and runs on ARM Linux, but we have not tested this extensively.
@@ -122,7 +122,7 @@ Obviously it is possible to combine all these platforms into one system and use 
 
 An application should, written correctly using Boost and Safir SDK Core, be portable to all the supported platforms with no or very little effort.
 
-The compilers that we use for building and testing for the C++ code are GNU gcc (version
+The compilers that we use for building and testing for the {cpp} code are GNU gcc (version
 9 or later), Microsoft Visual Studio (2015, 2017, 2019 and 2022). For C# code we use Visual
 Studio (2015, 2017, 2019 and 2022) or Mono (version 6.8 or later). Any Java 11 compiler should be
 able to compile the Java code (we've used Temurin for Windows and plain OpenJDK for Linux). We strive to make all
@@ -135,7 +135,7 @@ https://github.com/SafirSDK/safir-sdk-core/wiki/Platform-Support[Safir SDK Core 
 This chapter describes what the Dob does and a little bit about why it does it the way it does.
 
 === What does the Dob do?
-The Dob provides several distribution mechanisms needed to create distributed real-time systems. It is possible to interface with the Dob from several languages. Currently we provide C++, C#, and Java interfaces.
+The Dob provides several distribution mechanisms needed to create distributed real-time systems. It is possible to interface with the Dob from several languages. Currently we provide {cpp}, C#, and Java interfaces.
 
 The main ``selling points'' include:
 
@@ -154,7 +154,7 @@ the language independent types and manages the definitions of the objects to dis
 and the distribution mechanism (Dose), which does the actual data disfstart an d sttribution and
 synchronisation.
 
-To use the Dob an application includes the language specific interface part of the Dob interface into the application. This language specific interface in turn uses language independent libraries (written in C++) to manage the objects and to communicate with other parts of the Dob.
+To use the Dob an application includes the language specific interface part of the Dob interface into the application. This language specific interface in turn uses language independent libraries (written in {cpp}) to manage the objects and to communicate with other parts of the Dob.
 
 To run the Dob there is an executable, "safir_control", that must be running. This
 executable is responsible launching and monitoring the process that manages the
@@ -645,7 +645,7 @@ routine, and those to be fetched from parameter definitions are defined. For exa
 
 Will result in generated code like:
 
-.Generated C++ create routine
+.Generated {cpp} create routine
 [source,c++]
 -----------------------------------------------------
 /**
@@ -966,12 +966,12 @@ that you can do with this function than what has been described here.
 |=========================================================================
 |Description              |Linux file name     | Windows file names
 
-|C++ shared library
+|{cpp} shared library
 |libsafir_generated-<name>-cpp.so
 |safir_generated-<name>-cpp.dll +
 safir_generated-<name>-cppd.dll
 
-|C++ link library
+|{cpp} link library
 |N/A
 |safir_generated-<name>-cpp.lib +
 safir_generated-<name>-cppd.lib
@@ -989,7 +989,7 @@ safir_generated-<name>-cppd.lib
 If you are using cmake for your own project, you can incorporate your dou-file
 cmake files into your ``build tree''. If you are using another build system, or
 are not using a build tree in cmake you will need to install the produced binaries
-and C++ header files somewhere where your code can find them.
+and {cpp} header files somewhere where your code can find them.
 
 [[cmake-install]]
 .CMakeLists.txt commands for installing safir_generated files
@@ -1052,7 +1052,7 @@ specify a CMAKE_INSTALL_PREFIX, using the _Prefix_ field.
 
 .Note
 ************************************
-Dobmake will build binaries for C++, C# and Java if it can find compilers for each of
+Dobmake will build binaries for {cpp}, C# and Java if it can find compilers for each of
 these languages.
 
 It is possible to explicitly disable Java builds by setting an environment variable
@@ -1093,14 +1093,14 @@ has one obvious side effect, i.e. the interfaces are _not identical_.
 
 The syntax for operating on top-level members in the different languages is shown in
 <<cpp-top-level>>, <<cs-top-level>> and <<java-top-level>>. The code is identical, except
-in the C++ example, where some alternative ways of accomplishing the same thing is shown.
+in the {cpp} example, where some alternative ways of accomplishing the same thing is shown.
 
-(The attentive reader will notice the pointer stuff in the C++ examples. This is because
+(The attentive reader will notice the pointer stuff in the {cpp} examples. This is because
 the SDK uses smart pointers to manage memory in languages without a garbage
 collector. See <<smart-pointers>> for some info on smart pointers).
 
 [[cpp-top-level]]
-.Operating on top-level members in C++
+.Operating on top-level members in {cpp}
 [source,c++]
 ----------------------------
 // Get MyFloat out of myA
@@ -1169,14 +1169,14 @@ if (myA.myFloat().isChanged())
 myA.myFloat().setNull();
 ----------------------------
 
-The "extra level" to get to the actual values, e.g. the +GetVal()+ bit in C\++ and +Val+ bit in C# is needed due to the fact that the value is contained, together with the change and null flags, in a _container_. That there are two different ways of doing the operations in C\++ is because of a clever C++ construction, _proxy objects_, combined with operator overloading. More on containers and proxies later.
+The "extra level" to get to the actual values, e.g. the +GetVal()+ bit in {cpp} and +Val+ bit in C# is needed due to the fact that the value is contained, together with the change and null flags, in a _container_. That there are two different ways of doing the operations in {cpp} is because of a clever {cpp} construction, _proxy objects_, combined with operator overloading. More on containers and proxies later.
 
 C# and Java has only one way of doing the operations, and the C# interface uses properties for accessing the values - not as in Dob properties, but as in the language construct. (Look it up in your favourite C# reference if you don't know what they are.)
 
 Things get a bit more interesting when accessing nested members, see <<cpp-nested>>, <<cs-nested>> and <<java-nested>>, that show operations on nested members in the different languages.
 
 [[cpp-nested]]
-.Operating on nested members in C++
+.Operating on nested members in {cpp}
 [source,c++]
 ----------------------------
 // Get MyInt
@@ -1266,7 +1266,7 @@ There are containers for all of the types in the Dob, e.g. Int32Container, Float
 
 The members of the class A would be of type BContainer and Float32Container, and B's would be of type Int64Container.
 
-The containers introduce an extra level of indirection, which shows itself in the "GetVal()", "SetVal()" and "Val" parts of the expressions above. This unfortunately has the effect of cluttering up the code a bit, so to reduce this cluttering (in C++, which is the only supported language where it is possible) _container proxies_ with _operator overloading_ were introduced. They are really just an intermediate object that allows safe use of operator overloading, and they are what allows "myA.MyB()\->MyInt().SetVal(3)" to be replaced with "myA.MyB()\->MyInt() = 3" (as shown in the examples above). The proxies are meant to be transparent, but they do not have all operations overloaded, so for example if you're manipulating a string, you will probably have to do GetVal() to be able to get to most of the string operations.
+The containers introduce an extra level of indirection, which shows itself in the "GetVal()", "SetVal()" and "Val" parts of the expressions above. This unfortunately has the effect of cluttering up the code a bit, so to reduce this cluttering (in {cpp}, which is the only supported language where it is possible) _container proxies_ with _operator overloading_ were introduced. They are really just an intermediate object that allows safe use of operator overloading, and they are what allows "myA.MyB()\->MyInt().SetVal(3)" to be replaced with "myA.MyB()\->MyInt() = 3" (as shown in the examples above). The proxies are meant to be transparent, but they do not have all operations overloaded, so for example if you're manipulating a string, you will probably have to do GetVal() to be able to get to most of the string operations.
 
 Note that these proxies (container proxies) should not be confused with the proxies that the Dob passes to the applications in the distribution callbacks. The Container Proxies are only meant to simplify use of the typesystems containers, whereas the proxies in the distribution callbacks are used to encapsulate a collection of data and metadata into a single object for the callback (basically allowing the callback to take just a few arguments, instead of a whole bunch, where most applications only use a few).
 
@@ -1274,29 +1274,29 @@ Note that these proxies (container proxies) should not be confused with the prox
 ==== Smart pointers
 The generated classes are allocated on the heap and then handled via pointers. Using pointers to objects is necessary for polymorphism to work properly in the Dob interfaces.
 
-For C++, which is not a garbage collected language, we use the smart pointer concept. Smart pointers are _pointer wrapper objects_ that store pointers to dynamically allocated objects. They keep track of how many references there are to a certain object, and automatically deletes the referenced object when there are no more references to it.
+For {cpp}, which is not a garbage collected language, we use the smart pointer concept. Smart pointers are _pointer wrapper objects_ that store pointers to dynamically allocated objects. They keep track of how many references there are to a certain object, and automatically deletes the referenced object when there are no more references to it.
 
 In C# and Java there is no need for smart pointers, since both these languages have garbage collection.
 
-===== Smart pointers in C++
+===== Smart pointers in {cpp}
 
-In C++ to guarantee that all dynamically allocated memory is deallocated, the Dob uses
-the +std::shared_ptr+ implementation of smart pointers. Since C++ is not garbage
+In {cpp} to guarantee that all dynamically allocated memory is deallocated, the Dob uses
+the +std::shared_ptr+ implementation of smart pointers. Since {cpp} is not garbage
 collected we do not want to use raw pointers. +std::shared_ptr+ is a smart pointer that
 automatically deletes the object pointed to when there are no references to it.
 
-Read more about them in your favourite C\+\+ Reference
+Read more about them in your favourite {cpp} Reference
 
 Prior to version 7.0 Safir SDK Core used the Boost version of shared_ptr, +boost::shared_ptr+.
 
-See <<cpp_type_casting>> for more information on how to cast smart pointers in C++.
+See <<cpp_type_casting>> for more information on how to cast smart pointers in {cpp}.
 
 ===== Hints for Debugging
 It is possible to look at the contents of a Dob object in the debugger. Since the containers are all part of a class hierarchy the objects may seem a little difficult to understand at first. But just remember these things:
 
 - Value containers have three values: m_Value, m_bIsNull and m_bIsChanged (which is the member value and the null and change flag respectively).
 - Object containers have two values: m_pObject (which can be null) and m_bIsChanged.
-- C++ smart pointers have two pointers in them, the reference count (pn) and the pointer to the object they point to (px). It is px that you are interested in.
+- {cpp} smart pointers have two pointers in them, the reference count (pn) and the pointer to the object they point to (px). It is px that you are interested in.
 
 The naming of the container members is also slightly different in the different languages.
 
@@ -1316,15 +1316,15 @@ image::images/object_hierarchy.png["Example object hierarchy", link="images/obje
 endif::backend-docbook5[]
 
 [[cpp_type_casting]]
-===== C++ type casting
-The Dob C++ interface uses +std::shared_ptr+ (as described above) for passing around
+===== {cpp} type casting
+The Dob {cpp} interface uses +std::shared_ptr+ (as described above) for passing around
 objects over the interfaces. For example this means that you get a
 +std::shared_ptr<Safir.Dob.Entity>+ (typedefed to +Safir.Dob.EntityPtr+ in the generated
 code) out of the +EntityProxy+ in +OnNewEntity+. If you're subscribing to +EntityParent+
 you would want to somehow cast this +EntityPtr+ to an +EntityParentPtr+.
 
 If it was an ordinary pointer you would either use a +static_cast+ or a +dynamic_cast+
-operation (if you're unfamiliar with them you should look them up in your C++ reference
+operation (if you're unfamiliar with them you should look them up in your {cpp} reference
 now), but since these are shared_ptrs you have to use +std::static_pointer_cast+ or
 +std::dynamic_pointer_cast+ to accomplish the same thing.
 
@@ -1703,7 +1703,7 @@ ifndef::backend-docbook5[]
 image::images/dispatching_sequence_diagram.png["Dispatching Sequence Diagram", link="images/dispatching_sequence_diagram.png"]
 endif::backend-docbook5[]
 
-If you're using C++ and Boost.Asio or ACE the SDK provides Dispatcher classes that do the thread switch and calls Dispatch, see <<dispatcher_classes>>.
+If you're using {cpp} and Boost.Asio or ACE the SDK provides Dispatcher classes that do the thread switch and calls Dispatch, see <<dispatcher_classes>>.
 
 ===== Breaking out of Dispatch "early"
 As mentioned above, the +Dispatch+ call will call _all_ pending callbacks before returning. If there is a lot happening in a system this can potientially take a long time, and for example for applications that have requirements to do other tasks periodically this can cause trouble (e.g. missed deadlines).
@@ -1718,7 +1718,7 @@ Whereas a primary connection is a real connection to the Dob, a secondary connec
 
 Each application needs one primary connection (at least, see <<multithreading>>). This connection is the one that the Dob knows about and through which data is dispatched. A secondary connection is used by other parts of the application to "attach" to the primary connection.
 
-The reason for providing this functionality is so that for example a C\++ library used by a C# application can use the main programs connection. This would otherwise be impossible, since passing the connecton object over the C# to C++ interface is not possible. Instead modules can attach to the main program's connection using a secondary connection.
+The reason for providing this functionality is so that for example a {cpp} library used by a C# application can use the main programs connection. This would otherwise be impossible, since passing the connecton object over the C# to {cpp} interface is not possible. Instead modules can attach to the main program's connection using a secondary connection.
 
 When creating a secondary connection you can either specify a connection name and instance to get a specific connection instance, or not specify anything at all, in which case you will be given the first connection that was created in the current thread.
 
@@ -1749,7 +1749,7 @@ Internally the proxies contain direct references into the Dob shared memory, whi
 
 Proxies are (with a couple of exceptions) received as parameters to callbacks. After returning from the callback the shared memory that the proxy refers to is released, and the proxy therefore becomes invalid. If you try to use a proxy obtained through a callback after returning from that callback an exception will be thrown!
 
-Of course it is possible to pass proxies to other methods, as long as the proxy is not copied. Passing it as a const-reference (+const EntityProxy& proxy+) works very well in C++.
+Of course it is possible to pass proxies to other methods, as long as the proxy is not copied. Passing it as a const-reference (+const EntityProxy& proxy+) works very well in {cpp}.
 
 ==== Messages
 <<messages_sequence_diagram>> shows a sequence diagram of how Dob Messages are handled.
@@ -2387,9 +2387,9 @@ The Dob also provides a way of iterating over all instances of a certain entity 
 
 Before looking at how this is done, a *word of warning*: Iterating over lots of instances can be quite time-consuming (e.g. imagine a system that can have 10000 vehicles, and every time an update occurs to one of them, a badly written application iterates over all of them), so in cases where an application wants to do it frequently it is preferable to maintain some kind of lookup table instead, using entity subscriptions. Or maybe using a better algorithm for choosing instance numbers, so that the iteration can be avoided.
 
-Iterating over all Vehicles (including subclasses) in C++:
+Iterating over all Vehicles (including subclasses) in {cpp}:
 
-.Iterating over entities in C++
+.Iterating over entities in {cpp}
 [source,c++]
 ----------------------------
 for (Safir::Dob::EntityIterator it = m_connection.GetEntityIterator
@@ -2529,7 +2529,7 @@ When starting a system with persistence the Dob does not allow connections to be
 ===== Using persistence
 If you just want entities to survive a system restart it is very easy to do. This section describes how to do this in the easiest possible way, but if you want more control and understanding over what is going on you probably want to read <<advanced_persistence>>.
 
-Instead of inheriting from +Safir::Dob::EntityHandler+ you must inherit from +Safir::Dob::EntityHandlerInjection+. This will give you an additional four callbacks, which _you can leave empty_. If you're using C++ you don't even have to create empty callback bodies, since the base class has empty default implementations.
+Instead of inheriting from +Safir::Dob::EntityHandler+ you must inherit from +Safir::Dob::EntityHandlerInjection+. This will give you an additional four callbacks, which _you can leave empty_. If you're using {cpp} you don't even have to create empty callback bodies, since the base class has empty default implementations.
 
 You need to configure the Dob to persist your entity, and that is done by creating a dom-file for your class that specifies that permanent persistence is to be used:
 
@@ -2562,7 +2562,7 @@ If you want to understand what is going on, please read the next section, <<adva
 ===== Understanding persistence ^adv^
 To use persistence (of the volatile or permanent kind) there is a different consumer interface to implement, +Safir.Dob.EntityHandlerInjection+. This consumer has four additional callbacks, +OnInjectedNewEntity+, +OnInjectedUpdatedEntity+, +OnInjectedDeletedEntity+ and +OnInitialInjectionsDone+. The middle two of these are only used for asynchronous injections (i.e. the kind that uses deltas over a radio, as described above), so the only ones you might have to do anything in are +OnInjectedNewEntity+ and +OnInitialInjectionsDone+.
 
-In C\++ all the four _Injection callbacks_ have an empty default implementation. This is not possible in C# or Java since their interfaces cannot have default implementations of any kind. This means that in C\++ you don't have to override these callbacks if you don't want to do anything inside of them. For this example we assume that there is something that we need to do in these callbacks (but since this is a C++ example we only need to override the two callbacks that are actually used for persistent entities).
+In {cpp} all the four _Injection callbacks_ have an empty default implementation. This is not possible in C# or Java since their interfaces cannot have default implementations of any kind. This means that in {cpp} you don't have to override these callbacks if you don't want to do anything inside of them. For this example we assume that there is something that we need to do in these callbacks (but since this is a {cpp} example we only need to override the two callbacks that are actually used for persistent entities).
 
 .Injection entity handler class declaration
 [source,c++]
@@ -2993,7 +2993,7 @@ Optional. Specifies the directory to load dou files from. If this is not specifi
 +dou_search_path+ in the general section will be used to find the dou files.
 
 cpp_library_location::
-Optional. Location of the cpp binaries generated by dobmake. If this is not specified the
+Optional. Location of the {cpp} binaries generated by dobmake. If this is not specified the
 library loader configuration in the operating system will be used instead.
 
 java_jar_location::
@@ -3700,7 +3700,7 @@ Safir Log provides an easy-to-use interface that allows an application to create
 
 It is also possible to configure Safir Log so that the logs are sent to a native, platform specific, logging mechanism. In practice, this could be of use on the Windows platform to send logs to the Windows Event Log and on Linux to send the logs directly to the +syslog(...)+ interface instead of using UDP messages.
 
-.Example, sending a log message using C++
+.Example, sending a log message using {cpp}
 [source,c++]
 ----------------------------
 #include <Safir/Logging/Log.h>
@@ -4055,7 +4055,7 @@ The foreach service is provided by the "foreach" executable, which needs to be r
 
 [[dispatcher_classes]]
 === Asio and Ace Dispatchers
-For applications written in C++ and using Boost.Asio or ACE the classes +Safir.Utilities.AsioDispatcher+ and +Safir.Utilities.AceDispatcher+ provide +Dispatcher+ classes that performs the thread switch and call to +Dispatch+ as described in <<dispatching>>.
+For applications written in {cpp} and using Boost.Asio or ACE the classes +Safir.Utilities.AsioDispatcher+ and +Safir.Utilities.AceDispatcher+ provide +Dispatcher+ classes that performs the thread switch and call to +Dispatch+ as described in <<dispatching>>.
 
 Just instantiate the +AsioDispatcher+ or +AceDispatcher+ passing it your io_service or ACE_Reactor, and pass a pointer to the instance to your connection when calling +Open+, and you're done. The dispatcher will now perform the thread switch through the io_service/reactor main loop using +post+/+notify+.
 
@@ -4075,9 +4075,9 @@ Safir SDK Core includes a crash reporting library, google-breakpad (http://code.
 ==== Enabling the Crash Reporter
 To use the crash reporter you need to initiate it in your application. The initiation should occur as early in your program as possible.
 
-For example, in C++ you would do something like this:
+For example, in {cpp} you would do something like this:
 
-.Initializing crash reporting in C++ using RAII object
+.Initializing crash reporting in {cpp} using RAII object
 [source,c++]
 ----------------------------
 int main(int argc, char* argv[])
@@ -4089,7 +4089,7 @@ int main(int argc, char* argv[])
 
 The +CrashReporterStarter+ class is an RAII class, which means that it is equivalent to doing the following:
 
-.Initializing and stopping crash reporter in C++ manually
+.Initializing and stopping crash reporter in {cpp} manually
 [source,c++]
 ----------------------------
 int main(int argc, char* argv[])
@@ -4661,7 +4661,7 @@ By typing "+dots_configuration_check --help+" all available options are displaye
 Apart from this document there are other sources for help.
 
 === Doxygen help
-All the language interfaces have comments that can be used to generate documentation (doxygen for C++, javadoc for Java, etc).
+All the language interfaces have comments that can be used to generate documentation (doxygen for {cpp}, javadoc for Java, etc).
 
 The generated doxygen documentation is included in the installation packages, and is located
 under /usr/share/doc/safir-sdk-core on Linux and under the Start Menu in Windows.
@@ -4744,7 +4744,7 @@ checking that you get output on all listeners for every run of the sender. If yo
 getting output on all listeners for a certain sender you've got some routing problem.
 
 How can I be sure that I'm not using deprecated features?::
-In C++ you can define a preprocessor symbol +SAFIR_NO_DEPRECATED+. When this symbol is
+In {cpp} you can define a preprocessor symbol +SAFIR_NO_DEPRECATED+. When this symbol is
 defined any references to deprecated features will fail to compile.
 +
 For Java we have tagged deprecated features with the +@Deprecated+ attribute, which should

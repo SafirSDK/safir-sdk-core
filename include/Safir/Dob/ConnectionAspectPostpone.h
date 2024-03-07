@@ -95,8 +95,8 @@ namespace Dob
          * be affected by the postpone.
          *
          * If you are postponing a request (OnCreateRequest, OnUpdateRequest, OnDeleteRequest or OnServiceRequest),
-         * special care must be taken to the handling of the ResponseSender object. If redispatchCurrent is to True
-         * the current ResponseSender must be discarded (you will get a new ResponseSender). If redispatchCurrent
+         * special care must be taken to the handling of the ResponseSender object. If redispatchCurrent is set to
+         * True the current ResponseSender must be discarded (you will get a new ResponseSender). If redispatchCurrent
          * is set to False a response for the current request must be sent.
          *
          * @param [in] redispatchCurrent True indicates that the currently dispatched object shall be dispatched again

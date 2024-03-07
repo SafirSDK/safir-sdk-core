@@ -68,7 +68,7 @@ image::images/vehicle_deployment.png["Vehicle system deployment", link="images/v
 endif::backend-docbook5[]
 
 === VehicleApp - Business Application
-This application exists in the languages C++ and C#.
+This application exists in the languages {cpp} and C#.
 
 VehicleApp is the business application in the system. It is the owner of all vehicle entity instances and is therefore the only application with right to create, update and delete vehicle instances. Other applications may send vehicle object requests but it is VehicleApps responsibility to check the requests and perform the changes.
 
@@ -113,7 +113,7 @@ Mapping of the speed property onto the speed member of the vehicle class.
 Definition of vehicle parameters. 
 
 ==== Internal Design
-<<vehicleapp-class-diagram>> shows the classes of the C++ version of VehicleApp and the most important Dob classes and consumer interfaces that they use.
+<<vehicleapp-class-diagram>> shows the classes of the {cpp} version of VehicleApp and the most important Dob classes and consumer interfaces that they use.
 
 [[vehicleapp-class-diagram]]
 .VehicleApp class diagram
@@ -137,7 +137,7 @@ MessageSender::
 Sends message when number of vehicle objects has reached the limit specified through a parameter.
 
 === VehicleMmi - Presentation Application
-This application exists in two variants, one in C++ with the Qt widget set and one in C# using WinForms.
+This application exists in two variants, one in {cpp} with the Qt widget set and one in C# using WinForms.
 
 VehicleMmi is the presentation application in the system. It subscribes to, and presents all vehicle data in a table in the GUI. It also presens information for a selected vehicle object in a detailed window. In this window, it is possible to enter new data for a vehicle and send a request to change it. It is also possible to create a new vehicle object.
 

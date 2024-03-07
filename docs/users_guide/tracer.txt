@@ -14,7 +14,7 @@ The main goal of the Tracer class is for it to be as easy to use as possible, an
 
 1. Instantiate the Tracer class in each of the classes/packages where you want to use trace logging. Each instantiation requires a "prefix" which is used to enable and disable the logging from each tracer instantiation (described below). Several Tracer instances can use the same prefix, and will then all be enabled/disabled by the same command.
 2. Log to the tracer-instance (in this example the instance is called "debug"):
- - *C++*
+ - *{cpp}*
 +
 [source,c++]
 ----------------------------
@@ -47,7 +47,7 @@ debug.println("Testing logging " + myFloat + ", " + myInt);
 
 The checking of whether a prefix is enabled happens in slightly different ways in the different languages, which means that depending on how you use the logger you may pay for string expansion or you may not.
 
-- In C++ the check is made once for every "<<", but since the check is inlined it can be considered cheap. Floats and suchlike are not expanded into strings until after the check has "been successful", so it is ok to log most stuff using lines like 
+- In {cpp} the check is made once for every "<<", but since the check is inlined it can be considered cheap. Floats and suchlike are not expanded into strings until after the check has "been successful", so it is ok to log most stuff using lines like 
 +
 [source,c++]
 ----------------------------
@@ -88,7 +88,7 @@ if (debug.IsEnabled())
 }
 ----------------------------
 
-This applies to all languages, even if this example was in C++.
+This applies to all languages, even if this example was in {cpp}.
 
 [[force_log]]
 ==== The FORCE_LOG environment variable
@@ -107,7 +107,7 @@ The Tracer class itself does not use the Dob in any way, it is only the TracerBa
 ==== Tracer FAQ
 
 How does flushing work?::
-  The Tracer logs to both standard output and to Safir Logging. Flushing is handled differently in these two mechanisms, which means that they will behave slightly differently. Standard output is flushed as it is normally done in each language, e.g. on ++std::flush++ and ++std::endl++ in C++, and Safir Logging is flushed on each newline.
+  The Tracer logs to both standard output and to Safir Logging. Flushing is handled differently in these two mechanisms, which means that they will behave slightly differently. Standard output is flushed as it is normally done in each language, e.g. on ++std::flush++ and ++std::endl++ in {cpp}, and Safir Logging is flushed on each newline.
 
 How does the Tracer use Windows Native Logging?::
   When Native logging is enabled on Windows systems (see <<windows_native_logging>>) the Tracer will _only_ log to standard output, and not to Safir Logging. This is by design, since the Windows Event Log is not suited for tracer-style logs.
