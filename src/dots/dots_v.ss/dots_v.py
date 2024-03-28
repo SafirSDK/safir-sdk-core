@@ -669,7 +669,7 @@ def underscore_formatter(name, style):
         #    - number preceeded by capital or small letter
         #    - small letter preceeded by a number
         #    - last capital letter in a sequence of capital letters, if followed by small letter or number
-        s1 = re.sub("([^\._:\u00A4])([A-Z][a-z]+)", r'\1_\2', name)
+        s1 = re.sub(r"([^\._:\u00A4])([A-Z][a-z]+)", r'\1_\2', name)
         s2 = re.sub('([a-z])([A-Z])', r'\1_\2', s1)
         s3 = re.sub('([0-9])([A-Za-z])', r'\1_\2', s2)
         s4 = re.sub('([A-Za-z])([0-9])', r'\1_\2', s3)
@@ -1241,7 +1241,7 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
                 # there are any in the expression
                 rc1 = command[command.find("(") + 1:-1]
                 # first replace all escaped slashes with something else (¤)
-                rc1 = rc1.replace("\/", "\u00A4")
+                rc1 = rc1.replace(r"\/", "\u00A4")
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/", 1)
                 # now put the slashes back, unescaped
@@ -1254,7 +1254,7 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
                 # there are any in the expression
                 rc1 = command[command.find("(") + 1:-1]
                 # first replace all escaped slashes with something else
-                rc1 = rc1.replace("\/", "\u00A4")
+                rc1 = rc1.replace(r"\/", "\u00A4")
                 # Then split on the non-espaced slash
                 ptn, repl = rc1.split("/", 1)
                 # now put the slashes back, unescaped
