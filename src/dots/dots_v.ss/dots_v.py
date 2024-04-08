@@ -1389,8 +1389,8 @@ def if_string_subst(line):
     line = line.replace('=property', '= "property"')
 
     # C#
-    line = line.replace('=System.Single', '= "System.Single"')
-    line = line.replace('=System.Double', '= "System.Double"')
+    line = line.replace('=global::System.Single', '= "global::System.Single"')
+    line = line.replace('=global::System.Double', '= "global::System.Double"')
 
     # java
     line = line.replace('=com.saabgroup.safir.dob.typesystem.Object', '= "com.saabgroup.safir.dob.typesystem.Object"')
@@ -1414,6 +1414,7 @@ def evaluate_if_condition(gSession, line, dou, table_line, parent_table_line):
     # line may start with @@IF@@ or @@ELSIF@@
     start = line.find("IF@@")
     expression = line[start + 4:]
+
     # then let python do the work!
     return eval(expression)
 

@@ -1,8 +1,25 @@
 @@-------------------------------------------------------------------------------
 @@--
-@@--  Copyright Saab AB, 2005-2013,2015 (http://safirsdkcore.com)
+@@-- Copyright Saab AB, 2005-2013,2015,2022-2024 (http://safirsdkcore.com)
 @@--
-@@--  Created by: Henrik Sundberg / sthesu
+@@-- Created by: Henrik Sundberg / sthesu
+@@--
+@@--
+@@-------------------------------------------------------------------------------
+@@--
+@@-- This file is part of Safir SDK Core.
+@@--
+@@-- Safir SDK Core is free software: you can redistribute it and/or modify
+@@-- it under the terms of version 3 of the GNU General Public License as
+@@-- published by the Free Software Foundation.
+@@--
+@@-- Safir SDK Core is distributed in the hope that it will be useful,
+@@-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+@@-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@@-- GNU General Public License for more details.
+@@--
+@@-- You should have received a copy of the GNU General Public License
+@@-- along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 @@--
 @@-------------------------------------------------------------------------------
 @@IF@@ @_SECTION_@ = "Parameters"
@@ -62,57 +79,57 @@ Exception:Safir.Dob.Typesystem.SoftwareViolation:"Safir.Dob.Typesystem.SoftwareV
 @@-- And "Safir::Dots::String" to be used where the actual type is needed in the code.
 @@-- And that "dots/dots_defs" (with file extension added below) is to be included due to this.
 @@--
-Type:Int32:Int32:"System.Int32":""
-Type:Int64:Int64:"System.Int64":""
-Type:Float32:Float32:"System.Single":""
-Type:Float64:Float64:"System.Double":""
+Type:Int32:Int32:"global::System.Int32":""
+Type:Int64:Int64:"global::System.Int64":""
+Type:Float32:Float32:"global::System.Single":""
+Type:Float64:Float64:"global::System.Double":""
 Type:Boolean:Boolean:"bool":""
 Type:String:String:"string":""
 Type:EntityId:EntityId:"Safir.Dob.Typesystem.EntityId":""
-Type:TypeId:TypeId:"System.Int64":""
+Type:TypeId:TypeId:"global::System.Int64":""
 Type:InstanceId:InstanceId:"Safir.Dob.Typesystem.InstanceId":""
 Type:ChannelId:ChannelId:"Safir.Dob.Typesystem.ChannelId":""
 Type:HandlerId:HandlerId:"Safir.Dob.Typesystem.HandlerId":""
 Type:Binary:Binary:"byte[]":""
 Type:Object:Object:"Safir.Dob.Typesystem.Object":""
-Type:Ampere32:Si32.Ampere:"System.Single":""
-Type:CubicMeter32:Si32.CubicMeter:"System.Single":""
-Type:Hertz32:Si32.Hertz:"System.Single":""
-Type:Joule32:Si32.Joule:"System.Single":""
-Type:Kelvin32:Si32.Kelvin:"System.Single":""
-Type:Kilogram32:Si32.Kilogram:"System.Single":""
-Type:Meter32:Si32.Meter:"System.Single":""
-Type:MeterPerSecond32:Si32.MeterPerSecond:"System.Single":""
-Type:MeterPerSecondSquared32:Si32.MeterPerSecondSquared:"System.Single":""
-Type:Newton32:Si32.Newton:"System.Single":""
-Type:Pascal32:Si32.Pascal:"System.Single":""
-Type:Radian32:Si32.Radian:"System.Single":""
-Type:RadianPerSecond32:Si32.RadianPerSecond:"System.Single":""
-Type:RadianPerSecondSquared32:Si32.RadianPerSecondSquared:"System.Single":""
-Type:Second32:Si32.Second:"System.Single":""
-Type:SquareMeter32:Si32.SquareMeter:"System.Single":""
-Type:Steradian32:Si32.Steradian:"System.Single":""
-Type:Volt32:Si32.Volt:"System.Single":""
-Type:Watt32:Si32.Watt:"System.Single":""
-Type:Ampere64:Si64.Ampere:"System.Double":""
-Type:CubicMeter64:Si64.CubicMeter:"System.Double":""
-Type:Hertz64:Si64.Hertz:"System.Double":""
-Type:Joule64:Si64.Joule:"System.Double":""
-Type:Kelvin64:Si64.Kelvin:"System.Double":""
-Type:Kilogram64:Si64.Kilogram:"System.Double":""
-Type:Meter64:Si64.Meter:"System.Double":""
-Type:MeterPerSecond64:Si64.MeterPerSecond:"System.Double":""
-Type:MeterPerSecondSquared64:Si64.MeterPerSecondSquared:"System.Double":""
-Type:Newton64:Si64.Newton:"System.Double":""
-Type:Pascal64:Si64.Pascal:"System.Double":""
-Type:Radian64:Si64.Radian:"System.Double":""
-Type:RadianPerSecond64:Si64.RadianPerSecond:"System.Double":""
-Type:RadianPerSecondSquared64:Si64.RadianPerSecondSquared:"System.Double":""
-Type:Second64:Si64.Second:"System.Double":""
-Type:SquareMeter64:Si64.SquareMeter:"System.Double":""
-Type:Steradian64:Si64.Steradian:"System.Double":""
-Type:Volt64:Si64.Volt:"System.Double":""
-Type:Watt64:Si64.Watt:"System.Double":""
+Type:Ampere32:Si32.Ampere:"global::System.Single":""
+Type:CubicMeter32:Si32.CubicMeter:"global::System.Single":""
+Type:Hertz32:Si32.Hertz:"global::System.Single":""
+Type:Joule32:Si32.Joule:"global::System.Single":""
+Type:Kelvin32:Si32.Kelvin:"global::System.Single":""
+Type:Kilogram32:Si32.Kilogram:"global::System.Single":""
+Type:Meter32:Si32.Meter:"global::System.Single":""
+Type:MeterPerSecond32:Si32.MeterPerSecond:"global::System.Single":""
+Type:MeterPerSecondSquared32:Si32.MeterPerSecondSquared:"global::System.Single":""
+Type:Newton32:Si32.Newton:"global::System.Single":""
+Type:Pascal32:Si32.Pascal:"global::System.Single":""
+Type:Radian32:Si32.Radian:"global::System.Single":""
+Type:RadianPerSecond32:Si32.RadianPerSecond:"global::System.Single":""
+Type:RadianPerSecondSquared32:Si32.RadianPerSecondSquared:"global::System.Single":""
+Type:Second32:Si32.Second:"global::System.Single":""
+Type:SquareMeter32:Si32.SquareMeter:"global::System.Single":""
+Type:Steradian32:Si32.Steradian:"global::System.Single":""
+Type:Volt32:Si32.Volt:"global::System.Single":""
+Type:Watt32:Si32.Watt:"global::System.Single":""
+Type:Ampere64:Si64.Ampere:"global::System.Double":""
+Type:CubicMeter64:Si64.CubicMeter:"global::System.Double":""
+Type:Hertz64:Si64.Hertz:"global::System.Double":""
+Type:Joule64:Si64.Joule:"global::System.Double":""
+Type:Kelvin64:Si64.Kelvin:"global::System.Double":""
+Type:Kilogram64:Si64.Kilogram:"global::System.Double":""
+Type:Meter64:Si64.Meter:"global::System.Double":""
+Type:MeterPerSecond64:Si64.MeterPerSecond:"global::System.Double":""
+Type:MeterPerSecondSquared64:Si64.MeterPerSecondSquared:"global::System.Double":""
+Type:Newton64:Si64.Newton:"global::System.Double":""
+Type:Pascal64:Si64.Pascal:"global::System.Double":""
+Type:Radian64:Si64.Radian:"global::System.Double":""
+Type:RadianPerSecond64:Si64.RadianPerSecond:"global::System.Double":""
+Type:RadianPerSecondSquared64:Si64.RadianPerSecondSquared:"global::System.Double":""
+Type:Second64:Si64.Second:"global::System.Double":""
+Type:SquareMeter64:Si64.SquareMeter:"global::System.Double":""
+Type:Steradian64:Si64.Steradian:"global::System.Double":""
+Type:Volt64:Si64.Volt:"global::System.Double":""
+Type:Watt64:Si64.Watt:"global::System.Double":""
 @@--
 @@--
 @@--
@@ -123,7 +140,6 @@ Type:Watt64:Si64.Watt:"System.Double":""
 @@--
 @@-- HEADER
 @@--
-using System;
 
 namespace @_NAMESPACE_@
 {
@@ -157,7 +173,7 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Get the array size of the @_MEMBER_@ member.
         /// </summary>
-        public static System.Int32 @_MEMBER_@ArraySize(Safir.Dob.Typesystem.Object obj)
+        public static global::System.Int32 @_MEMBER_@ArraySize(Safir.Dob.Typesystem.Object obj)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.GetArraySize(obj.GetTypeId(), ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex);
@@ -171,10 +187,10 @@ namespace @_NAMESPACE_@
 @@END_IF@@
         /// </summary>
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, @_MEMBERTYPE_@.Enumeration val)
+        public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index, @_MEMBERTYPE_@.Enumeration val)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, m_@_LOWER:MEMBER_@MemberIndex, index);
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (global::System.Int32) val, m_@_LOWER:MEMBER_@MemberIndex, index);
         }
 
         /// <summary>
@@ -184,13 +200,13 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, System.Int32 ordinal)
+        public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index, global::System.Int32 ordinal)
         {
             Init();
             Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, ordinal, m_@_LOWER:MEMBER_@MemberIndex, index);
         }
 @@ELSE@@
-        public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, @_MEMBERTYPE_@ val)
+        public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index, @_MEMBERTYPE_@ val)
         {
             Init();
             Safir.Dob.Typesystem.Properties.Set(obj, ClassTypeId, val, m_@_LOWER:MEMBER_@MemberIndex, index);
@@ -204,7 +220,7 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index)
         {
             Init();
             Safir.Dob.Typesystem.Properties.SetNull(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, index);
@@ -217,7 +233,7 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static bool IsNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        public static bool IsNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.IsNull(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, index);
@@ -230,7 +246,7 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static bool IsChanged@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        public static bool IsChanged@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.IsChanged(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, index);
@@ -243,7 +259,7 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static bool IsReadOnly@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        public static bool IsReadOnly@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.IsReadOnly(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, index);
@@ -256,7 +272,7 @@ namespace @_NAMESPACE_@
 @@END_IF@@
         /// </summary>
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index)
         {
             Safir.Dob.Typesystem.Object val;
             Init();
@@ -268,9 +284,9 @@ namespace @_NAMESPACE_@
 @@END_IF@@
         }
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        public static @_MEMBERTYPE_@.Enumeration Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        public static @_MEMBERTYPE_@.Enumeration Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index)
         {
-            System.Int32 val;
+            global::System.Int32 val;
             Init();
             Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, index);
             return (@_MEMBERTYPE_@.Enumeration) val;
@@ -282,15 +298,15 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static System.Int32 GetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        public static global::System.Int32 GetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index)
         {
-            System.Int32 val;
+            global::System.Int32 val;
             Init();
             Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, index);
             return val;
         }
 @@ELSE@@
-        public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
+        public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 index)
         {
             @_MEMBERTYPE_@ val;
             Init();
@@ -312,7 +328,7 @@ namespace @_NAMESPACE_@
         public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, @_MEMBERTYPE_@.Enumeration val)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, m_@_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (global::System.Int32) val, m_@_LOWER:MEMBER_@MemberIndex, 0);
         }
 
         /// <summary>
@@ -322,7 +338,7 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 ordinal)
+        public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, global::System.Int32 ordinal)
         {
             Init();
             Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, ordinal, m_@_LOWER:MEMBER_@MemberIndex, 0);
@@ -409,7 +425,7 @@ namespace @_NAMESPACE_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         public static @_MEMBERTYPE_@.Enumeration Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
-            System.Int32 val;
+            global::System.Int32 val;
             Init();
             Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, 0);
             return (@_MEMBERTYPE_@.Enumeration) val;
@@ -422,9 +438,9 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static System.Int32 GetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
+        public static global::System.Int32 GetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
-            System.Int32 val;
+            global::System.Int32 val;
             Init();
             Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, 0);
             return val;
@@ -447,7 +463,7 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Type id for @_CLASS_@
         /// </summary>
-        public static System.Int64 ClassTypeId = @_TYPEID_@;
+        public static global::System.Int64 ClassTypeId = @_TYPEID_@;
 
         #region Indices
 
@@ -469,7 +485,7 @@ namespace @_NAMESPACE_@
 
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
-        private static System.Int32 m_@_LOWER:MEMBER_@MemberIndex = -1;
+        private static global::System.Int32 m_@_LOWER:MEMBER_@MemberIndex = -1;
 @@END_IF@@
 @@END_TABLE@@
         #endregion
@@ -575,7 +591,7 @@ namespace @_NAMESPACE_@
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
 
             // Inline set of object member @_CREATEVALUE_@ value
-            System.Int32 tmp@_CREATEVALUE_@Index =
+            global::System.Int32 tmp@_CREATEVALUE_@Index =
                 Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
             val.@_CREATEVALUE_@.Obj = (@_CREATEVALUEMEMBERTYPE_@)Safir.Dob.Typesystem.Parameters.GetObject(ClassTypeId, tmp@_CREATEVALUE_@Index, 0);
 @@ELSE@@
@@ -585,7 +601,7 @@ namespace @_NAMESPACE_@
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
 
             // Inline set of member @_CREATEVALUE_@ value
-            System.Int32 tmp@_CREATEVALUE_@Index =
+            global::System.Int32 tmp@_CREATEVALUE_@Index =
                 Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
             val.@_CREATEVALUE_@.Val = Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_CREATEVALUETYPE_@(ClassTypeId, tmp@_CREATEVALUE_@Index, 0);
 @@ELSE@@
@@ -610,7 +626,7 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Get the array size of the @_PARAMETER_@ member.
         /// </summary>
-        public static System.Int32 @_PARAMETER_@ArraySize
+        public static global::System.Int32 @_PARAMETER_@ArraySize
         {
             get
             {
@@ -627,31 +643,31 @@ namespace @_NAMESPACE_@
 @@END_IF@@
         /// </summary>
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
-        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (global::System.Int32 index)
         {
             Init();
             return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
 @@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
-        public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ (System.Int32 index)
+        public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ (global::System.Int32 index)
         {
             Init();
             return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Single
-        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Single
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (global::System.Int32 index)
         {
             Init();
             return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Double
-        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Double
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (global::System.Int32 index)
         {
             Init();
             return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
 @@ELSE@@
-        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (global::System.Int32 index)
         {
             Init();
             return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
@@ -671,10 +687,10 @@ namespace @_NAMESPACE_@
         public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
         {
             Init();
-            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (global::System.Int32)key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
@@ -682,32 +698,32 @@ namespace @_NAMESPACE_@
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
         {
             Init();
-            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (global::System.Int32)key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Single
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Single
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
         {
             Init();
-            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (global::System.Int32)key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Double
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Double
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
         {
             Init();
-            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (global::System.Int32)key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
@@ -715,10 +731,10 @@ namespace @_NAMESPACE_@
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
         {
             Init();
-            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (global::System.Int32)key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
@@ -731,7 +747,7 @@ namespace @_NAMESPACE_@
             var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
@@ -742,29 +758,29 @@ namespace @_NAMESPACE_@
             var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Single
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Single
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
         {
             Init();
             var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Double
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Double
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
         {
             Init();
             var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
@@ -775,7 +791,7 @@ namespace @_NAMESPACE_@
             var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
             if (index<0)
             {
-                throw new System.Collections.Generic.KeyNotFoundException ();
+                throw new global::System.Collections.Generic.KeyNotFoundException ();
             }
             return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
@@ -808,7 +824,7 @@ namespace @_NAMESPACE_@
                 return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, 0);
             }
         }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Single
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Single
         public static @_PARAMETERTYPE_@ @_PARAMETER_@
         {
             get
@@ -817,7 +833,7 @@ namespace @_NAMESPACE_@
                 return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, 0);
             }
         }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Double
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Double
         public static @_PARAMETERTYPE_@ @_PARAMETER_@
         {
             get
@@ -850,7 +866,7 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static System.Int32 @_MEMBER_@MemberIndex
+        public static global::System.Int32 @_MEMBER_@MemberIndex
         {
             get
             {
@@ -867,7 +883,7 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static System.Int32 @_MEMBER_@MaxStringLength
+        public static global::System.Int32 @_MEMBER_@MaxStringLength
         {
             get
             {
@@ -885,7 +901,7 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>
-        public static System.Int32 @_MEMBER_@ArraySize
+        public static global::System.Int32 @_MEMBER_@ArraySize
         {
             get
             {
@@ -967,12 +983,12 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Type id for the class @_CLASS_@
         /// </summary>
-        public new const System.Int64 ClassTypeId = @_TYPEID_@;
+        public new const global::System.Int64 ClassTypeId = @_TYPEID_@;
 
         /// <summary>
         /// Get the type id of this object.
         /// </summary>
-        public override System.Int64 GetTypeId()
+        public override global::System.Int64 GetTypeId()
         {
             return ClassTypeId;
         }
@@ -1021,7 +1037,7 @@ namespace @_NAMESPACE_@
         /// Create a(n) @_CLASS_@ from a blob reader handle.
         /// </summary>
         /// <param name="handle">Handle to blob reader.</param>
-        public @_CLASS_@(System.Int64 handle)
+        public @_CLASS_@(global::System.Int64 handle)
             : base(handle)
         {
             Init();
@@ -1038,7 +1054,7 @@ namespace @_NAMESPACE_@
 @@ELSE@@
             m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(@_MEMBER_@ArraySize);
 @@END_IF@@
-            for (System.Int32 i = 0; i < @_MEMBER_@ArraySize; ++i)
+            for (global::System.Int32 i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
                 Safir.Dob.Typesystem.Internal.BlobOperations.Get(m_@_MEMBER_@Member[i], handle, m_@_LOWER:MEMBER_@MemberIndex, i);
             }
@@ -1050,7 +1066,7 @@ namespace @_NAMESPACE_@
                 {
                     bool isNull, isChanged;
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
-                    Int32 ordinal;
+                    global::System.Int32 ordinal;
                     Safir.Dob.Typesystem.Internal.BlobOperations.Get(out ordinal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
                     m_@_MEMBER_@Member.Add((@_MEMBERTYPE_@.Enumeration)ordinal);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
@@ -1078,7 +1094,7 @@ namespace @_NAMESPACE_@
                     bool dummy1, dummy2;
 @@--                  -- KEY ---
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-                    Int32 ordinal;
+                    global::System.Int32 ordinal;
                     Safir.Dob.Typesystem.Internal.BlobOperations.Get(out ordinal, out dummy1, out dummy2, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.KeyMode);
                     @_MEMBERDICTIONARYTYPE_@.Enumeration key = (@_MEMBERDICTIONARYTYPE_@.Enumeration)ordinal;
 @@ELSE@@
@@ -1115,9 +1131,9 @@ namespace @_NAMESPACE_@
         }
 
         /// <summary>
-        /// <see cref="Safir.Dob.Typesystem.Object.WriteToBlob(System.Int64)"/>
+        /// <see cref="Safir.Dob.Typesystem.Object.WriteToBlob(global::System.Int64)"/>
         /// </summary>
-        override public void WriteToBlob(System.Int64 handle)
+        override public void WriteToBlob(global::System.Int64 handle)
         {
             Init();
             base.WriteToBlob(handle);
@@ -1152,7 +1168,7 @@ namespace @_NAMESPACE_@
             for (int i=0; i<m_@_MEMBER_@Member.Count; ++i)
             {
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
-                Safir.Dob.Typesystem.Internal.BlobOperations.Set((Int32)m_@_MEMBER_@Member[i], false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, i, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set((global::System.Int32)m_@_MEMBER_@Member[i], false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, i, Safir.Dob.Typesystem.KeyValMode.ValueMode);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
                 Safir.Dob.Typesystem.Internal.BlobOperations.Set((Safir.Dob.Typesystem.Object)m_@_MEMBER_@Member[i], false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, i, Safir.Dob.Typesystem.KeyValMode.ValueMode);
 @@ELSE@@
@@ -1170,7 +1186,7 @@ namespace @_NAMESPACE_@
             foreach (var kv in m_@_MEMBER_@Member)
             {
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-                Int32 ordinal = (Int32)kv.Key;
+                global::System.Int32 ordinal = (global::System.Int32)kv.Key;
                 Safir.Dob.Typesystem.Internal.BlobOperations.Set(ordinal, false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, 0, Safir.Dob.Typesystem.KeyValMode.KeyMode);
 @@ELSE@@
                 Safir.Dob.Typesystem.Internal.BlobOperations.Set(kv.Key, false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, 0, Safir.Dob.Typesystem.KeyValMode.KeyMode);
@@ -1198,10 +1214,10 @@ namespace @_NAMESPACE_@
         #region Reflection part
 
         /// <summary>
-        /// <see cref="Safir.Dob.Typesystem.Object.GetMember(System.Int32, System.Int32)"/>
+        /// <see cref="Safir.Dob.Typesystem.Object.GetMember(global::System.Int32, global::System.Int32)"/>
         /// </summary>
-        public override Safir.Dob.Typesystem.ContainerBase GetMember(System.Int32 member,
-                                                                     System.Int32 index)
+        public override Safir.Dob.Typesystem.ContainerBase GetMember(global::System.Int32 member,
+                                                                     global::System.Int32 index)
         {
             Init();
 
@@ -1335,17 +1351,17 @@ namespace @_NAMESPACE_@
 
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
-        private static System.Int32 m_@_LOWER:PARAMETER_@ParameterIndex = -1;
+        private static global::System.Int32 m_@_LOWER:PARAMETER_@ParameterIndex = -1;
 @@END_IF@@
 @@END_TABLE@@
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
-        private static System.Int32 m_@_LOWER:MEMBER_@MemberIndex = -1;
+        private static global::System.Int32 m_@_LOWER:MEMBER_@MemberIndex = -1;
 @@IF@@ @_EXIST:MEMBERISARRAY_@
-        private static System.Int32 m_@_LOWER:MEMBER_@Size = -1;
+        private static global::System.Int32 m_@_LOWER:MEMBER_@Size = -1;
 @@END_IF@@
 @@IF@@ @_EXIST:MEMBERISSTRING_@
-        private static System.Int32 m_@_LOWER:MEMBER_@Length = -1;
+        private static global::System.Int32 m_@_LOWER:MEMBER_@Length = -1;
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@
@@ -1366,7 +1382,7 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Constructor.
         /// </summary>
-        public @_CLASS_@ContainerArray(System.Int32 size) : base(size) { }
+        public @_CLASS_@ContainerArray(global::System.Int32 size) : base(size) { }
     }
 
     /// <summary>
@@ -1419,13 +1435,13 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Enumeration id (or type id) of the @_CLASS_@ enumeration type.
         /// </summary>
-        public static System.Int64 EnumerationId = @_TYPEID_@;
+        public static global::System.Int64 EnumerationId = @_TYPEID_@;
 
         /// <summary>
         /// Checksum of all the values of the @_CLASS_@ enumeration type.
-        /// <see cref="CheckForMismatch(System.Int64)"/>
+        /// <see cref="CheckForMismatch(global::System.Int64)"/>
         /// </summary>
-        public const System.Int64 Checksum = @_ENUMCHECKSUM_@;
+        public const global::System.Int64 Checksum = @_ENUMCHECKSUM_@;
 
         /// <summary>
         /// Check that there is no enumeration mismatch that would require a recompilation of your application.
@@ -1442,7 +1458,7 @@ namespace @_NAMESPACE_@
         /// in safir_generated, which will mean that an exception is thrown.
         /// </summary>
         /// <exception cref="Safir.Dob.Typesystem.ConfigurationErrorException">If there is an enumeration checksum mismatch</exception>
-        static public void CheckForMismatch(System.Int64 checksum)
+        static public void CheckForMismatch(global::System.Int64 checksum)
         {
             if (checksum != Checksum)
             {
@@ -1470,7 +1486,7 @@ namespace @_NAMESPACE_@
                 }
                 set
                 {
-                    if (!System.Enum.IsDefined(typeof(Enumeration), value))
+                    if (!global::System.Enum.IsDefined(typeof(Enumeration), value))
                     {
                         throw new Safir.Dob.Typesystem.IllegalValueException("Value is not in the enumeration range");
                     }
@@ -1538,7 +1554,7 @@ namespace @_NAMESPACE_@
             /// <summary>
             /// Constructor for array container.
             /// </summary>
-            public EnumerationContainerArray(System.Int32 size) : base(size) { }
+            public EnumerationContainerArray(global::System.Int32 size) : base(size) { }
 
         }
 
@@ -1571,12 +1587,12 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Type id for @_CLASS_@
         /// </summary>
-        public new const System.Int64 ExceptionTypeId = @_TYPEID_@;
+        public new const global::System.Int64 ExceptionTypeId = @_TYPEID_@;
 
         /// <summary>
         /// Get the type id of this exception object.
         /// </summary>
-        public override System.Int64 GetTypeId()
+        public override global::System.Int64 GetTypeId()
         {
             return ExceptionTypeId;
         }
