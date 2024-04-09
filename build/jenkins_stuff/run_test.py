@@ -333,9 +333,10 @@ class JenkinsInterface:
 
         cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
         self.tempdir = tempfile.TemporaryDirectory()
-        #log "will download jenkins-cli.jar using url", cliurl
+        log(f"Downloading jenkins-cli.jar using url {cliurl}")
         self.clijar = os.path.join(self.tempdir.name, "jenkins-cli.jar")
         urllib.request.urlretrieve(cliurl, self.clijar)
+        log(f"Successfully downloaded to{self.clijar}")
 
     def __run_command(self, cmd, inp=None, name=None):
         args = list()
