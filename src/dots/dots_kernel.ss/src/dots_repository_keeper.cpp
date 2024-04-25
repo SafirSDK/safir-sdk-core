@@ -61,9 +61,8 @@ namespace Internal
             instance->m_sharedMemorySize=sharedMemorySize;
             instance->m_paths.insert(instance->m_paths.begin(), paths.begin(), paths.end());
             instance->m_startupSynchronizer.Start(instance);
-            if (instance->m_repository!=NULL)
+            if (instance->m_repository!=nullptr)
             {
-                //instance->m_blobLayout.reset(new Safir::Dob::Typesystem::ToolSupport::BlobLayout<RepositoryShm>(instance->m_repository));
                 return; //loaded ok
             }
         }
@@ -81,6 +80,18 @@ namespace Internal
     bool RepositoryKeeper::RepositoryCreatedByThisProcess()
     {
         return Instance().m_repositoryCreatedByThisProcess;
+    }
+
+    void RepositoryKeeper::MemoryInfo(DotsC_Int32& capacity, DotsC_Int32& used)
+    {
+        if (Instance().m_sharedMemory == nullptr)
+        {
+            capacity = -1;
+            used = -1;
+            return;
+        }
+        capacity = Instance().m_sharedMemory->get_size();
+        used = capacity - Instance().m_sharedMemory->get_free_memory();
     }
 
     const RepositoryShm* RepositoryKeeper::GetRepository()
@@ -110,7 +121,7 @@ namespace Internal
         }
         catch (...)
         {
-            m_repository=NULL;
+            m_repository=nullptr;
             return;
         }
 
@@ -136,14 +147,18 @@ namespace Internal
         }
         catch(const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
         {
-            std::cout<<"********** Parse Error **********************************************"<<std::endl;
-            std::cout<<"* Label: "<<err.Label()<<std::endl;
-            std::cout<<"* Descr: "<<err.Description()<<std::endl;
-            std::cout<<"* File:  "<<err.File()<<std::endl;
-            std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
-            std::cout<<"*********************************************************************"<<std::endl;
+            std::ostringstream ostr;
+            ostr <<"********** Parse Error **********************************************\n"
+                 <<"* Label: "<<err.Label() << "\n"
+                 <<"* Descr: "<<err.Description() << "\n"
+                 <<"* File:  "<<err.File() << "\n"
+                 <<"* ErrId: "<<err.ErrorId() << "\n"
+                 <<"*********************************************************************";
+            std::cerr << ostr.str() << std::endl;
+            SEND_SYSTEM_LOG(Error,
+                            << ostr.str().c_str());
             localRepository.reset();
-            m_repository=NULL;
+            m_repository=nullptr;
             return;
         }
 
@@ -165,27 +180,55 @@ namespace Internal
         }
         catch (const boost::interprocess::interprocess_exception& e)
         {
+            std::ostringstream ostr;
+            ostr << "Encountered an error when setting up the typesystem shared memory (in RepositoryKeeper). "
+                 << "This could be a sign of permissions problems in the directory used by boost interprocess. "
+                 << "Exception information: " << e.what();
+            std::cerr << ostr.str()<< std::endl;
             SEND_SYSTEM_LOG(Error,
-                            << "Encountered an error when loading types and parameters (in RepositoryKeeper)."
-                            << "This could be a sign that you should increase the shared memory "
-                            << "size specified in typesystem.ini. If that does not help, here is "
-                            << "some exception information: " << e.what());
+                            << ostr.str().c_str());
             localRepository.reset();
-            m_repository=NULL;
+            boost::interprocess::shared_memory_object::remove(DOTS_SHM_NAME);
+            m_sharedMemory.reset();
+            m_repository=nullptr;
             return;
         }
         catch (const std::exception& ex)
         {
-            SEND_SYSTEM_LOG(Error, << "Failure while creating dots shared memory: "<< ex.what());
+            std::ostringstream ostr;
+            ostr << "Failure while creating dots shared memory: "<< ex.what();
+            std::cerr << ostr.str() << std::endl;
+            SEND_SYSTEM_LOG(Error,
+                            << ostr.str().c_str());
             localRepository.reset();
-            m_repository=NULL;
+            boost::interprocess::shared_memory_object::remove(DOTS_SHM_NAME);
+            m_sharedMemory.reset();
+            m_repository=nullptr;
             return;
         }
 
         //-------------------------------------------------
         //Copy localRepository into shared memory
         //-------------------------------------------------
-        RepositoryShm::CreateShmCopyOfRepository(*localRepository, DOTS_REPOSITORY_NAME, *m_sharedMemory);
+        try
+        {
+            RepositoryShm::CreateShmCopyOfRepository(*localRepository, DOTS_REPOSITORY_NAME, *m_sharedMemory);
+        }
+        catch (const boost::interprocess::bad_alloc& ex)
+        {
+            std::ostringstream ostr;
+            ostr << "Encountered an error when copying typesystem information to shared memory. "
+                 << "This is probably a sign that you should increase the shared memory size specified "
+                 << "in typesystem.ini. ";
+            std::cerr << ostr.str() << "Exception information: " << ex.what() << std::endl;
+            SEND_SYSTEM_LOG(Error,
+                            << ostr.str().c_str());
+            localRepository.reset();
+            boost::interprocess::shared_memory_object::remove(DOTS_SHM_NAME);
+            m_sharedMemory.reset();
+            m_repository=nullptr;
+            return;
+        }
     }
 }
 }

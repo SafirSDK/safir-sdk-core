@@ -878,7 +878,6 @@ extern "C"
 
     // Function:    DotsC_GetDouFilePathForType
     // Parameters:  typeId      -   Type to find path for
-
     // Returns:     Pointer to a string containing full path to the dou-file.
     // Comments:    Get the full path to the dou file that the type id represents.
     DOTS_KERNEL_API const char* DotsC_GetDouFilePath(const DotsC_TypeId typeId);
@@ -888,7 +887,13 @@ extern "C"
     // Comments:    Check if this process created and the shared memory and loaded type repository
     //              or if it just opened it (i.e someone else already created it for us).
     DOTS_KERNEL_API bool DotsC_TypeRepositoryLoadedByThisProcess();
-    
+
+    // Function:    DotsC_TypeRepositoryMemoryInfo
+    // Parameters:  capacity - will contain type system shared memory capacity in bytes.
+    //              used  - will contain bytes used of type system shared memory
+    // Comments:    Get typesystem shared memory usage.
+    DOTS_KERNEL_API void DotsC_TypeRepositoryMemoryInfo(DotsC_Int32& capacity, DotsC_Int32& used);
+
     // Function:    DotsC_GetTypeDescription
     // Parameters:  typeId      -   Type to describe. If 0 all types will be completely described. Very much text.
     //              buf         -   Buffer where file text description will be put, will be null terminated.

@@ -1587,6 +1587,12 @@ bool DotsC_TypeRepositoryLoadedByThisProcess()
     return RepositoryKeeper::RepositoryCreatedByThisProcess();
 }
 
+void DotsC_TypeRepositoryMemoryInfo(DotsC_Int32& capacity, DotsC_Int32& used)
+{
+    Init();
+    RepositoryKeeper::MemoryInfo(capacity, used);
+}
+
 void DotsC_GetTypeDescription(const DotsC_TypeId typeId,
                               char * const buf,
                               const DotsC_Int32 bufSize,

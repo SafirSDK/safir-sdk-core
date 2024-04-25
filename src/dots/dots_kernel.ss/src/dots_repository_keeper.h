@@ -48,7 +48,7 @@ namespace Internal
         static void Initialize(size_t sharedMemorySize, const std::vector<boost::filesystem::path>& paths);
         static const RepositoryShm* GetRepository();
         static bool RepositoryCreatedByThisProcess();
-
+        static void MemoryInfo(DotsC_Int32& capacity, DotsC_Int32& used); //in bytes
     private:
         Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
         size_t m_sharedMemorySize;

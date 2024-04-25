@@ -70,8 +70,8 @@ namespace Internal
             sharedMemorySize=0;
             try
             {
-                sharedMemorySize=reader.Typesystem().get<size_t>("dots_shared_memory_size");
-                sharedMemorySize*=(1024*1024); //megabytes to bytes
+                //megabytes to bytes
+                sharedMemorySize=reader.Typesystem().get<size_t>("dots_shared_memory_size") * (1024*1024); 
             }
             catch(...)
             {

@@ -245,11 +245,16 @@ private:
         {
             std::cout<<"Type system loaded, was already created."<<std::endl;
         }
+        DotsC_Int32 shmCapacity, shmUsage;
+        DotsC_TypeRepositoryMemoryInfo(shmCapacity, shmUsage);
+        const auto usagePercent = (100.0 * shmUsage)/shmCapacity;
+        
         std::cout<<"Number of classes:     "<<DotsC_NumberOfClasses()<<std::endl;
         std::cout<<"Number of enums:       "<<DotsC_NumberOfEnumerations()<<std::endl;
         std::cout<<"Number of properties:  "<<DotsC_NumberOfProperties()<<std::endl;
         std::cout<<"Number of exceptions:  "<<DotsC_NumberOfExceptions()<<std::endl;
         std::cout<<"Total number of types: "<<DotsC_NumberOfTypeIds()<<std::endl;
+        std::cout<<"Shared memory use:     "<<std::setprecision(0) << usagePercent << "% (" << shmUsage << " of " << shmCapacity << " bytes)" <<std::endl;
     }
 
     static void ShowType(DotsC_TypeId tid)
