@@ -10076,6 +10076,24 @@ void ContainerTest()
         Check(md->Int32ItemMember()[0]->IsChanged());
     }
 
+    //Copying dictionaries with objects
+    {
+        DotsTest::MemberDictionariesPtr md=DotsTest::MemberDictionaries::Create();
+        md->Int32ItemMember().Insert(0,DotsTest::MemberDictionaries::Create());
+        md->Int32ItemMember()[0]->Int32ItemMember().Insert(10,DotsTest::MemberDictionaries::Create());
+        md->Int32ItemMember()[0]->Int32ItemMember()[10]->Int32StringMember().Insert(20,L"Foobar");
+        auto item = DotsTest::TestItem::Create();
+        item->MyString().SetVal(L"plopp");
+        md->StringObjectMember().Insert(L"plupp",item);
+
+        DotsTest::MemberDictionariesPtr md2=DotsTest::MemberDictionaries::Create();
+        Safir::Dob::Typesystem::Utilities::MergeChanges(md2,md);
+        Check(md2->Int32ItemMember()[0]->Int32ItemMember()[10]->Int32StringMember()[20].GetVal() == L"Foobar");
+
+        Safir::Dob::Typesystem::DictionaryContainer<Safir::Dob::Typesystem::Int32, DotsTest::MemberDictionariesContainer> cont;
+        cont.Copy(md->Int32ItemMember());
+    }
+
     //sequence container Object specialization
     {
         using namespace Safir::Dob::Typesystem;
