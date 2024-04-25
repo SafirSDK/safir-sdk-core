@@ -71,7 +71,7 @@ namespace Typesystem
          * @throws IllegalValueException There is no such type or parameter defined.
          */
         DOTS_CPP_API Dob::Typesystem::ParameterIndex GetIndex(const Dob::Typesystem::TypeId typeId,
-                                                          const std::wstring & parameterName);
+                                                              const std::wstring & parameterName);
 
         /**
          * Get the name of the specified parameter as it was defined in the xml description.
@@ -107,7 +107,7 @@ namespace Typesystem
          * @return The type of the parameter.
          */
         DOTS_CPP_API MemberType GetType(const Dob::Typesystem::TypeId typeId,
-                                    const Dob::Typesystem::ParameterIndex parameter);
+                                        const Dob::Typesystem::ParameterIndex parameter);
 
         /**
          * Get the array size of a parameter.
@@ -120,7 +120,7 @@ namespace Typesystem
          * @return The array size of the parameter, or 1 if it is not an array.
          */
         DOTS_CPP_API Dob::Typesystem::Int32 GetArraySize(const Dob::Typesystem::TypeId typeId,
-                                                     const Dob::Typesystem::ParameterIndex parameter);
+                                                         const Dob::Typesystem::ParameterIndex parameter);
 
         /** @} */
 
@@ -139,8 +139,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API bool GetBoolean(const Dob::Typesystem::TypeId typeId,
-                                 const Dob::Typesystem::ParameterIndex parameter,
-                                 const Dob::Typesystem::ArrayIndex index);
+                                     const Dob::Typesystem::ParameterIndex parameter,
+                                     const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get an enumeration parameter value.
@@ -151,8 +151,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API Dob::Typesystem::Int32 GetEnumeration(const Dob::Typesystem::TypeId typeId,
-                                                       const Dob::Typesystem::ParameterIndex parameter,
-                                                       const Dob::Typesystem::ArrayIndex index);
+                                                           const Dob::Typesystem::ParameterIndex parameter,
+                                                           const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get an Int32 parameter value.
@@ -163,8 +163,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API Dob::Typesystem::Int32 GetInt32(const Dob::Typesystem::TypeId typeId,
-                                                 const Dob::Typesystem::ParameterIndex parameter,
-                                                 const Dob::Typesystem::ArrayIndex index);
+                                                     const Dob::Typesystem::ParameterIndex parameter,
+                                                     const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get an Int64 parameter value.
@@ -175,8 +175,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API Dob::Typesystem::Int64 GetInt64(const Dob::Typesystem::TypeId typeId,
-                                                 const Dob::Typesystem::ParameterIndex parameter,
-                                                 const Dob::Typesystem::ArrayIndex index);
+                                                     const Dob::Typesystem::ParameterIndex parameter,
+                                                     const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get a Float32 parameter value.
@@ -187,8 +187,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API Dob::Typesystem::Float32 GetFloat32(const Dob::Typesystem::TypeId typeId,
-                                                     const Dob::Typesystem::ParameterIndex parameter,
-                                                     const Dob::Typesystem::ArrayIndex index);
+                                                         const Dob::Typesystem::ParameterIndex parameter,
+                                                         const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get a Float64 parameter value.
@@ -199,8 +199,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API Dob::Typesystem::Float64 GetFloat64(const Dob::Typesystem::TypeId typeId,
-                                                     const Dob::Typesystem::ParameterIndex parameter,
-                                                     const Dob::Typesystem::ArrayIndex index);
+                                                         const Dob::Typesystem::ParameterIndex parameter,
+                                                         const Dob::Typesystem::ArrayIndex index);
         /**
          * Get a string parameter value.
          *
@@ -210,8 +210,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API const std::wstring GetString(const Dob::Typesystem::TypeId typeId,
-                                              const Dob::Typesystem::ParameterIndex parameter,
-                                              const Dob::Typesystem::ArrayIndex index);
+                                                  const Dob::Typesystem::ParameterIndex parameter,
+                                                  const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get a TypeId parameter value.
@@ -222,8 +222,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API Dob::Typesystem::TypeId GetTypeId(const Dob::Typesystem::TypeId typeId,
-                                                   const Dob::Typesystem::ParameterIndex parameter,
-                                                   const Dob::Typesystem::ArrayIndex index);
+                                                       const Dob::Typesystem::ParameterIndex parameter,
+                                                       const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get a InstanceId parameter value.
@@ -234,8 +234,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API const Dob::Typesystem::InstanceId GetInstanceId(const Dob::Typesystem::TypeId typeId,
-                                                                 const Dob::Typesystem::ParameterIndex parameter,
-                                                                 const Dob::Typesystem::ArrayIndex index);
+                                                                     const Dob::Typesystem::ParameterIndex parameter,
+                                                                     const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get an EntityId parameter value.
@@ -246,8 +246,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API const Dob::Typesystem::EntityId GetEntityId(const Dob::Typesystem::TypeId typeId,
-                                                             const Dob::Typesystem::ParameterIndex parameter,
-                                                             const Dob::Typesystem::ArrayIndex index);
+                                                                 const Dob::Typesystem::ParameterIndex parameter,
+                                                                 const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get a ChannelId parameter value.
@@ -258,8 +258,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API const Dob::Typesystem::ChannelId GetChannelId(const Dob::Typesystem::TypeId typeId,
-                                                               const Dob::Typesystem::ParameterIndex parameter,
-                                                               const Dob::Typesystem::ArrayIndex index);
+                                                                   const Dob::Typesystem::ParameterIndex parameter,
+                                                                   const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get a HandlerId parameter value.
@@ -270,8 +270,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API const Dob::Typesystem::HandlerId GetHandlerId(const Dob::Typesystem::TypeId typeId,
-                                                               const Dob::Typesystem::ParameterIndex parameter,
-                                                               const Dob::Typesystem::ArrayIndex index);
+                                                                   const Dob::Typesystem::ParameterIndex parameter,
+                                                                   const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get an Object parameter value.
@@ -284,8 +284,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API const Dob::Typesystem::ObjectPtr GetObject(const Dob::Typesystem::TypeId typeId,
-                                                            const Dob::Typesystem::ParameterIndex parameter,
-                                                            const Dob::Typesystem::ArrayIndex index);
+                                                                const Dob::Typesystem::ParameterIndex parameter,
+                                                                const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get a Binary parameter value.
@@ -298,8 +298,8 @@ namespace Typesystem
          * @return Parameter value.
          */
         DOTS_CPP_API const Dob::Typesystem::Binary GetBinary(const Dob::Typesystem::TypeId typeId,
-                                                         const Dob::Typesystem::ParameterIndex parameter,
-                                                         const Dob::Typesystem::ArrayIndex index);
+                                                             const Dob::Typesystem::ParameterIndex parameter,
+                                                             const Dob::Typesystem::ArrayIndex index);
 
         /**
          * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
@@ -311,8 +311,8 @@ namespace Typesystem
          * @return Index or -1 if key does not exist.
          */
         DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                                      const ParameterIndex parameter,
-                                                       const Int32 key);
+                                                const ParameterIndex parameter,
+                                                const Int32 key);
 
         /**
          * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
@@ -324,8 +324,8 @@ namespace Typesystem
          * @return Index or -1 if key does not exist.
          */
         DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                                      const ParameterIndex parameter,
-                                                      const Int64 key);
+                                                const ParameterIndex parameter,
+                                                const Int64 key);
 
         /**
          * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
@@ -337,8 +337,8 @@ namespace Typesystem
          * @return Index or -1 if key does not exist.
          */
         DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                                      const ParameterIndex parameter,
-                                                      const std::wstring& key);
+                                                const ParameterIndex parameter,
+                                                const std::wstring& key);
 
         /**
          * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
@@ -350,8 +350,8 @@ namespace Typesystem
          * @return Index or -1 if key does not exist.
          */
         DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                                      const ParameterIndex parameter,
-                                                      const EntityId& key);
+                                                const ParameterIndex parameter,
+                                                const EntityId& key);
 
         /**
          * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
@@ -363,8 +363,8 @@ namespace Typesystem
          * @return Index or -1 if key does not exist.
          */
         DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                                      const ParameterIndex parameter,
-                                                      const InstanceId& key);
+                                                const ParameterIndex parameter,
+                                                const InstanceId& key);
 
         /**
          * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
@@ -376,8 +376,8 @@ namespace Typesystem
          * @return Index or -1 if key does not exist.
          */
         DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                                      const ParameterIndex parameter,
-                                                      const HandlerId& key);
+                                                const ParameterIndex parameter,
+                                                const HandlerId& key);
 
         /**
          * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
@@ -389,8 +389,8 @@ namespace Typesystem
          * @return Index or -1 if key does not exist.
          */
         DOTS_CPP_API Int32 DictionaryKeyToIndex(const TypeId typeId,
-                                                      const ParameterIndex parameter,
-                                                      const ChannelId& key);
+                                                const ParameterIndex parameter,
+                                                const ChannelId& key);
 
 
         /** @} */
