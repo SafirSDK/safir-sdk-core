@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB AB, 2023 (http://safirsdkcore.com)
-* 
+*
 * Created by: Joel Ottosson / stjoot
 *
 *******************************************************************************
@@ -273,9 +273,11 @@ extern "C"
     //              to obtain a parameter that is guaranteed to exist.
     DOTS_KERNEL_API void DotsC_GetParameterInfo(DotsC_TypeId typeId,
                                                 DotsC_ParameterIndex parameter,
-                                                DotsC_MemberType& memberType,
+                                                DotsC_MemberType& parameterType,
+                                                DotsC_MemberType& keyType,
                                                 const char*& parameterName,
                                                 DotsC_TypeId& complexTypeId,
+                                                DotsC_TypeId& keyTypeId,
                                                 DotsC_CollectionType& collectionType,
                                                 DotsC_Int32& numberOfValues);
 
@@ -386,7 +388,7 @@ extern "C"
                                           const char * const blobSource,
                                           const DotsC_Int32 bufSize,
                                           DotsC_Int32 & resultSize);
-    
+
     // Function:    DotsC_JsonToBlob
     // Parameters:  blobDest    -   blob that is the result of the serialization, out parameter
     //              xmlSource   -   json string to serialize
@@ -395,7 +397,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_JsonToBlob(char * & blobDest,
                                           DotsC_BytePointerDeleter & deleter,
                                           const char * const jsonSource);
-    
+
     // Function:    DotsC_BinaryToBase64
     // Parameters:  binarySourceSize    -   number of bytes to be converted to Base64.
     // Returns:     number of characters in the Base64 converted representation. This is the
@@ -930,7 +932,7 @@ extern "C"
     };
 #pragma pack(pop)
 
-    typedef void (*DotsC_GeneratedLibraryListDeleter)(DotsC_GeneratedLibrary* list, 
+    typedef void (*DotsC_GeneratedLibraryListDeleter)(DotsC_GeneratedLibrary* list,
                                                       const DotsC_Int32 size);
 
     DOTS_KERNEL_API void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,

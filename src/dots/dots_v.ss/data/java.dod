@@ -732,6 +732,41 @@ public class @_CLASS_@
     }
 @@END_IF@@
 
+    /** Get number of key/value pairs in dictionary parameter @_PARAMETER_@
+     * @returns Number of key value pairs in the dictionary. */
+    public static int get@_PARAMETER_@DictionarySize()
+    {
+        init();
+        return com.saabgroup.safir.dob.typesystem.Parameters.getCollectionSize(ClassTypeId,
+                                                                               m_@_PARAMETER_@Parameter);
+    }
+
+    /** Get key from dictionary parameter @_PARAMETER_@ using a dictionary index.
+     * @param Index of key to fetch. Number between 0 and get@_PARAMETER_@DictionarySize().*/
+    public static @_PARAMETERDICTIONARYTYPE_@ get@_PARAMETER_@KeyFromIndex(int index)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        return @_PARAMETERDICTIONARYTYPE_@.values()[com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERDICTIONARYTYPE_@DictionaryKey(ClassTypeId, m_@_PARAMETER_@Parameter, index)];
+@@ELSE@@
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERDICTIONARYTYPE_@DictionaryKey(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+@@END_IF@@
+    }
+
+    /** Get value from dictionary parameter @_PARAMETER_@ using a dictionary index.
+     * @param Index of value to fetch. Number between 0 and get@_PARAMETER_@DictionarySize().*/
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@ValueFromIndex(int index)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        return @_PARAMETERTYPE_@.values()[com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index)];
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Object
+        return (@_PARAMETERTYPE_@)com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+@@ELSE@@
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+@@END_IF@@
+    }
+
 @-------- single parameter -----------
 @@ELSE@@
     /**

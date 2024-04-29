@@ -76,6 +76,20 @@
             </dictionary>
         </parameter>
         <parameter>
+            <name>Int32Ampere64Parameter</name>
+            <type>Float64</type>
+            <dictionary keyType="Int32">
+                <entry>
+                    <key>10</key>
+                    <value>64.64</value>
+                </entry>
+                <entry>
+                    <key>20</key>
+                    <value>-64.64</value>
+                </entry>
+            </dictionary>
+        </parameter>
+        <parameter>
             <name>Int32TypeIdParameter</name>
             <type>TypeId</type>
             <dictionary keyType="Int32">
@@ -465,7 +479,7 @@
                 </entry>
             </dictionary>
         </parameter>
-        
+
         <!-- Dictionaries keyType=DotsTest.TestEnum -->
         <parameter>
             <name>EnumInt32Parameter</name>
@@ -696,7 +710,7 @@
                 </entry>
             </dictionary>
         </parameter>
-        
+
         <!-- Dictionaries keyType=HandlerId -->
         <parameter>
             <name>HandlerIdInt32Parameter</name>
@@ -927,7 +941,7 @@
                 </entry>
             </dictionary>
         </parameter>
-        
+
         <!-- Dictionaries keyType=EntityId -->
         <parameter>
             <name>EntityIdInt32Parameter</name>
@@ -1158,6 +1172,6 @@
                 </entry>
             </dictionary>
         </parameter>
-        
+
   </parameters>
 </class>

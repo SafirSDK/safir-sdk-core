@@ -9276,7 +9276,6 @@ namespace Misc
             }
         }
 
-
         public void Test_Containers()
         {
             //sequences
@@ -9639,6 +9638,8 @@ namespace Misc
             Test_EnumerationSequenceReflection();
             Test_ObjectSequenceReflection();
             Test_DictionaryReflection();
+            Test_ParameterGetInfo();
+            Test_ParameterDictionaryReflection();
         }
 
         public void Test_EnumerationSequenceReflection()
@@ -9783,6 +9784,119 @@ namespace Misc
                 Check(container.IsNull() == true);
             }
 
+        }
+
+        private void Test_ParameterGetInfo()
+        {
+            MemberType parameterType;
+            MemberType keyType;
+            String parameterName;
+            System.Int64 parameterTypeId;
+            System.Int64 keyTypeId;
+            CollectionType collectionType;
+            Int32 numberOfValues;
+
+            Safir.Dob.Typesystem.Parameters.GetInfo(DotsTest.ParameterDictionaries.ClassTypeId,
+                                                        Safir.Dob.Typesystem.Parameters.GetIndex(DotsTest.ParameterDictionaries.ClassTypeId,
+                                                                                                     "Int32StringParameter"),
+                                                    out parameterType,
+                                                    out keyType,
+                                                    out parameterName,
+                                                    out parameterTypeId,
+                                                    out keyTypeId,
+                                                    out collectionType,
+                                                    out numberOfValues);
+            Check(parameterType == MemberType.StringMemberType);
+            Check(keyType == MemberType.Int32MemberType);
+            Check(parameterName == "Int32StringParameter");
+            Check(collectionType == CollectionType.DictionaryCollectionType);
+            Check(numberOfValues == 2);
+
+            Safir.Dob.Typesystem.Parameters.GetInfo(DotsTest.ParameterDictionaries.ClassTypeId,
+                                                        Safir.Dob.Typesystem.Parameters.GetIndex(DotsTest.ParameterDictionaries.ClassTypeId,
+                                                                                                     "StringEnumParameter"),
+                                                    out parameterType,
+                                                    out keyType,
+                                                    out parameterName,
+                                                    out parameterTypeId,
+                                                    out keyTypeId,
+                                                    out collectionType,
+                                                    out numberOfValues);
+            Check(parameterType == MemberType.EnumerationMemberType);
+            Check(keyType == MemberType.StringMemberType);
+            Check(parameterName == "StringEnumParameter");
+            Check(collectionType == CollectionType.DictionaryCollectionType);
+            Check(parameterTypeId == DotsTest.TestEnum.EnumerationId);
+            Check(numberOfValues == 2);
+
+            Safir.Dob.Typesystem.Parameters.GetInfo(DotsTest.ParameterDictionaries.ClassTypeId,
+                                                        Safir.Dob.Typesystem.Parameters.GetIndex(DotsTest.ParameterDictionaries.ClassTypeId,
+                                                                                                     "EnumObjectParameter"),
+                                                    out parameterType,
+                                                    out keyType,
+                                                    out parameterName,
+                                                    out parameterTypeId,
+                                                    out keyTypeId,
+                                                    out collectionType,
+                                                    out numberOfValues);
+            Check(parameterType == MemberType.ObjectMemberType);
+            Check(keyType == MemberType.EnumerationMemberType);
+            Check(parameterName == "EnumObjectParameter");
+            Check(collectionType == CollectionType.DictionaryCollectionType);
+            Check(parameterTypeId == Safir.Dob.Typesystem.Object.ClassTypeId);
+            Check(keyTypeId == DotsTest.TestEnum.EnumerationId);
+            Check(numberOfValues == 2);
+
+
+            Safir.Dob.Typesystem.Parameters.GetInfo(DotsTest.ParameterTypes.ClassTypeId,
+                                                        Safir.Dob.Typesystem.Parameters.GetIndex(DotsTest.ParameterTypes.ClassTypeId,
+                                                                                                     "EnumerationParameter"),
+                                                    out parameterType,
+                                                    out keyType,
+                                                    out parameterName,
+                                                    out parameterTypeId,
+                                                    out keyTypeId,
+                                                    out collectionType,
+                                                    out numberOfValues);
+            Check(parameterType == MemberType.EnumerationMemberType);
+            Check(parameterName == "EnumerationParameter");
+            Check(collectionType == CollectionType.SingleValueCollectionType);
+            Check(parameterTypeId == DotsTest.TestEnum.EnumerationId);
+            Check(numberOfValues == 1);
+        }
+
+        private void Test_ParameterDictionaryReflection()
+        {
+            Check(2 == DotsTest.ParameterDictionaries.Int32StringParameterDictionarySize());
+            Check(10 == DotsTest.ParameterDictionaries.Int32StringParameterKeyFromIndex(0));
+            Check("Safir" == DotsTest.ParameterDictionaries.Int32StringParameterValueFromIndex(0));
+            Check(20 == DotsTest.ParameterDictionaries.Int32StringParameterKeyFromIndex(1));
+            Check("rifaS" == DotsTest.ParameterDictionaries.Int32StringParameterValueFromIndex(1));
+
+            Check(2 == DotsTest.ParameterDictionaries.Int32Float64ParameterDictionarySize());
+            Check(10 == DotsTest.ParameterDictionaries.Int32Float64ParameterKeyFromIndex(0));
+            Check(64.64 == DotsTest.ParameterDictionaries.Int32Float64ParameterValueFromIndex(0));
+            Check(20 == DotsTest.ParameterDictionaries.Int32Float64ParameterKeyFromIndex(1));
+            Check(-64.64 == DotsTest.ParameterDictionaries.Int32Float64ParameterValueFromIndex(1));
+
+            Check(2 == DotsTest.ParameterDictionaries.Int32Ampere64ParameterDictionarySize());
+            Check(10 == DotsTest.ParameterDictionaries.Int32Ampere64ParameterKeyFromIndex(0));
+            Check(64.64 == DotsTest.ParameterDictionaries.Int32Ampere64ParameterValueFromIndex(0));
+            Check(20 == DotsTest.ParameterDictionaries.Int32Ampere64ParameterKeyFromIndex(1));
+            Check(-64.64 == DotsTest.ParameterDictionaries.Int32Ampere64ParameterValueFromIndex(1));
+
+            Check(2 == DotsTest.ParameterDictionaries.StringEnumParameterDictionarySize());
+            Check("Billy" == DotsTest.ParameterDictionaries.StringEnumParameterKeyFromIndex(0));
+            Check(TestEnum.Enumeration.MyFirst == DotsTest.ParameterDictionaries.StringEnumParameterValueFromIndex(0));
+            Check("Svarre" == DotsTest.ParameterDictionaries.StringEnumParameterKeyFromIndex(1));
+            Check(TestEnum.Enumeration.MySecond == DotsTest.ParameterDictionaries.StringEnumParameterValueFromIndex(1));
+
+            Check(2 == DotsTest.ParameterDictionaries.EnumObjectParameterDictionarySize());
+            Check(TestEnum.Enumeration.MyFirst == DotsTest.ParameterDictionaries.EnumObjectParameterKeyFromIndex(0));
+            Check(null != DotsTest.ParameterDictionaries.EnumObjectParameterValueFromIndex(0));
+            Check(Safir.Dob.Typesystem.Object.ClassTypeId == DotsTest.ParameterDictionaries.EnumObjectParameterValueFromIndex(0).GetTypeId());
+            Check(TestEnum.Enumeration.MySecond == DotsTest.ParameterDictionaries.EnumObjectParameterKeyFromIndex(1));
+            Check(null != (DotsTest.MemberDictionaries)DotsTest.ParameterDictionaries.EnumObjectParameterValueFromIndex(1));
         }
     }
 

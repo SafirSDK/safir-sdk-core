@@ -35,13 +35,13 @@ namespace Dob
 {
 namespace Typesystem
 {
-    /**
-     * Functions for getting member information from types.
-     *
-     * With these operations you can get information on types regarding
-     * their members. You can get member names and indexes. You can
-     * get TypeIds of members etc.
-     */
+/**
+ * Functions for getting member information from types.
+ *
+ * With these operations you can get information on types regarding
+ * their members. You can get member names and indexes. You can
+ * get TypeIds of members etc.
+ */
 namespace Members
 {
     /**
@@ -65,7 +65,7 @@ namespace Members
      *                               in the type.
      */
     DOTS_CPP_API Dob::Typesystem::MemberIndex GetIndex(const Dob::Typesystem::TypeId typeId,
-                                                   const std::wstring & memberName);
+                                                       const std::wstring & memberName);
 
     /**
      * Get the name of the specified member as it was defined in the xml description.
@@ -77,7 +77,7 @@ namespace Members
      *                               in the type.
      */
     DOTS_CPP_API std::wstring GetName(const Dob::Typesystem::TypeId typeId,
-                                  const Dob::Typesystem::MemberIndex member);
+                                      const Dob::Typesystem::MemberIndex member);
 
     /**
      * Get the type name of the specified member as it was defined in the xml description.
@@ -104,7 +104,7 @@ namespace Members
      *                               in the type or the member is not an enum or object.
      */
     DOTS_CPP_API Dob::Typesystem::TypeId GetTypeId(const Dob::Typesystem::TypeId typeId,
-                                               const Dob::Typesystem::MemberIndex member);
+                                                   const Dob::Typesystem::MemberIndex member);
 
     /**
      * Get information about a specific class member.
@@ -148,7 +148,7 @@ namespace Members
      *                               in the type.
      */
     DOTS_CPP_API Dob::Typesystem::Int32 GetArraySize(const Dob::Typesystem::TypeId typeId,
-                                                 const Dob::Typesystem::MemberIndex member);
+                                                     const Dob::Typesystem::MemberIndex member);
 
     /**
      * Get the maximum string length of a member.
@@ -160,7 +160,7 @@ namespace Members
      *                               in the type or the member is not a string.
      */
     DOTS_CPP_API Dob::Typesystem::Int32 GetMaxStringLength(const Dob::Typesystem::TypeId typeId,
-                                                       const Dob::Typesystem::MemberIndex member);
+                                                           const Dob::Typesystem::MemberIndex member);
 }
 }
 }

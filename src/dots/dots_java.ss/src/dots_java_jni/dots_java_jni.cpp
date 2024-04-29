@@ -514,19 +514,23 @@ jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterId
  * Signature: (JI[I[Ljava/lang/String;[J[I[I)V
  */
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterInfo
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jintArray _memberType, jobjectArray _parameterName, jlongArray _complexType, jintArray _collectionType, jintArray _numberOfValues)
+(JNIEnv * env, jclass, jlong _typeId, jint _parameter, jintArray _parameterType, jintArray _keyType, jobjectArray _parameterName, jlongArray _complexTypeId, jlongArray _keyTypeId, jintArray _collectionType, jintArray _numberOfValues)
 {
-    DotsC_MemberType memberType;
+    DotsC_MemberType parameterType;
+    DotsC_MemberType keyType;
     const char* parameterName;
     DotsC_TypeId complexTypeId;
+    DotsC_TypeId keyTypeId;
     DotsC_CollectionType collectionType;
     DotsC_Int32 numberOfValues;
 
-    DotsC_GetParameterInfo(_typeId, _parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
+    DotsC_GetParameterInfo(_typeId, _parameter, parameterType, keyType, parameterName, complexTypeId, keyTypeId, collectionType, numberOfValues);
 
-    SetJArray(env,_memberType, memberType);
+    SetJArray(env,_parameterType, parameterType);
+    SetJArray(env,_keyType, keyType);
     SetJArray(env,_parameterName, env->NewStringUTF(parameterName));
-    SetJArray(env,_complexType, complexTypeId);
+    SetJArray(env,_complexTypeId, complexTypeId);
+    SetJArray(env,_keyTypeId, keyTypeId);
     SetJArray(env,_collectionType, collectionType);
     SetJArray(env,_numberOfValues, numberOfValues);
 }

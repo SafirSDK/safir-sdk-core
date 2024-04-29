@@ -1019,7 +1019,7 @@ namespace @_NAMESPACEV_@
         return Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
     }
 @@END_IF@@
-@@ELSE@@    
+@@ELSE@@
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
     @_PARAMETERTYPE_@::Enumeration @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key)
     {
@@ -1056,7 +1056,49 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_IF@@
 
+    Safir::Dob::Typesystem::Int32 @_PARAMETERCLASS_@::@_PARAMETER_@DictionarySize()
+    {
+        if (!isInitialised) Init();
+        return Safir::Dob::Typesystem::Parameters::GetCollectionSize(ClassTypeId,
+                                                                     g_@_LOWER:PARAMETER_@ParameterIndex);
+    }
 
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+    @_PARAMETERDICTIONARYTYPE_@::Enumeration @_PARAMETERCLASS_@::@_PARAMETER_@KeyFromIndex(const Safir::Dob::Typesystem::Int32 index)
+    {
+        if (!isInitialised) Init();
+        return static_cast<@_PARAMETERDICTIONARYTYPE_@::Enumeration>
+            (Safir::Dob::Typesystem::Parameters::GetEnumerationDictionaryKey(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
+    }
+@@ELSE@@
+    @_PARAMETERDICTIONARYTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@KeyFromIndex(const Safir::Dob::Typesystem::Int32 index)
+    {
+        if (!isInitialised) Init();
+        return Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERDICTIONARYTYPE_@DictionaryKey
+            (ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
+    }
+@@END_IF@@
+
+
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+    @_PARAMETERTYPE_@::Enumeration @_PARAMETERCLASS_@::@_PARAMETER_@ValueFromIndex(const Safir::Dob::Typesystem::Int32 index)
+    {
+        if (!isInitialised) Init();
+        return static_cast<@_PARAMETERTYPE_@::Enumeration>(Safir::Dob::Typesystem::Parameters::GetEnumeration(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
+    }
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+    @_PARAMETERTYPE_@Ptr @_PARAMETERCLASS_@::@_PARAMETER_@ValueFromIndex(const Safir::Dob::Typesystem::Int32 index)
+    {
+        if (!isInitialised) Init();
+        return std::static_pointer_cast<@_PARAMETERTYPE_@>(Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
+    }
+@@ELSE@@
+    @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@ValueFromIndex(const Safir::Dob::Typesystem::Int32 index)
+    {
+        if (!isInitialised) Init();
+        return Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
+    }
+@@END_IF@@
 
 @@--  SINGLE PARAMETERS
 @@ELSE@@

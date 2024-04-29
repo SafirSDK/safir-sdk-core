@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2009-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2009-2013, 2024 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -9526,6 +9526,8 @@ public class Test {
             Test_EnumerationSequenceReflection();
             Test_ObjectSequenceReflection();
             Test_DictionaryReflection();
+            Test_ParameterGetInfo();
+            Test_ParameterDictionaryReflection();
         }
 
         private void Test_EnumerationSequenceReflection()
@@ -9680,6 +9682,92 @@ public class Test {
                 check(container.isNull() == true);
             }
 
+        }
+
+
+        private void Test_ParameterGetInfo()
+        {
+            {
+                int index = com.saabgroup.safir.dob.typesystem.Parameters.getIndex(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,
+                                                                                    "Int32StringParameter");
+
+                check(com.saabgroup.safir.dob.typesystem.MemberType.STRING_MEMBER_TYPE == com.saabgroup.safir.dob.typesystem.Parameters.getType(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.MemberType.INT32_MEMBER_TYPE == com.saabgroup.safir.dob.typesystem.Parameters.getDictionaryKeyType(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.Parameters.getName(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index).equals("Int32StringParameter"));
+                check(com.saabgroup.safir.dob.typesystem.CollectionType.DICTIONARY == com.saabgroup.safir.dob.typesystem.Parameters.getCollectionType(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(2 == com.saabgroup.safir.dob.typesystem.Parameters.getCollectionSize(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+            }
+
+
+            {
+                int index = com.saabgroup.safir.dob.typesystem.Parameters.getIndex(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,
+                                                                                    "StringEnumParameter");
+
+                check(com.saabgroup.safir.dob.typesystem.MemberType.ENUMERATION_MEMBER_TYPE == com.saabgroup.safir.dob.typesystem.Parameters.getType(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.MemberType.STRING_MEMBER_TYPE == com.saabgroup.safir.dob.typesystem.Parameters.getDictionaryKeyType(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.Parameters.getName(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index).equals("StringEnumParameter"));
+                check(com.saabgroup.dotstest.TestEnum.EnumerationId == com.saabgroup.safir.dob.typesystem.Parameters.getParameterTypeId(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.CollectionType.DICTIONARY == com.saabgroup.safir.dob.typesystem.Parameters.getCollectionType(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(2 == com.saabgroup.safir.dob.typesystem.Parameters.getCollectionSize(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+            }
+
+            {
+                int index = com.saabgroup.safir.dob.typesystem.Parameters.getIndex(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,
+                                                                                    "EnumObjectParameter");
+
+                check(com.saabgroup.safir.dob.typesystem.MemberType.OBJECT_MEMBER_TYPE == com.saabgroup.safir.dob.typesystem.Parameters.getType(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.MemberType.ENUMERATION_MEMBER_TYPE == com.saabgroup.safir.dob.typesystem.Parameters.getDictionaryKeyType(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.Parameters.getName(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index).equals("EnumObjectParameter"));
+                check(com.saabgroup.safir.dob.typesystem.Object.ClassTypeId == com.saabgroup.safir.dob.typesystem.Parameters.getParameterTypeId(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(com.saabgroup.dotstest.TestEnum.EnumerationId == com.saabgroup.safir.dob.typesystem.Parameters.getDictionaryKeyTypeId(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.CollectionType.DICTIONARY == com.saabgroup.safir.dob.typesystem.Parameters.getCollectionType(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+                check(2 == com.saabgroup.safir.dob.typesystem.Parameters.getCollectionSize(com.saabgroup.dotstest.ParameterDictionaries.ClassTypeId,index));
+            }
+
+            {
+                int index = com.saabgroup.safir.dob.typesystem.Parameters.getIndex(com.saabgroup.dotstest.ParameterTypes.ClassTypeId,
+                                                                                    "EnumerationParameter");
+
+                check(com.saabgroup.safir.dob.typesystem.MemberType.ENUMERATION_MEMBER_TYPE == com.saabgroup.safir.dob.typesystem.Parameters.getType(com.saabgroup.dotstest.ParameterTypes.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.Parameters.getName(com.saabgroup.dotstest.ParameterTypes.ClassTypeId,index).equals("EnumerationParameter"));
+                check(com.saabgroup.dotstest.TestEnum.EnumerationId == com.saabgroup.safir.dob.typesystem.Parameters.getParameterTypeId(com.saabgroup.dotstest.ParameterTypes.ClassTypeId,index));
+                check(com.saabgroup.safir.dob.typesystem.CollectionType.SINGLE_VALUE == com.saabgroup.safir.dob.typesystem.Parameters.getCollectionType(com.saabgroup.dotstest.ParameterTypes.ClassTypeId,index));
+                check(1 == com.saabgroup.safir.dob.typesystem.Parameters.getCollectionSize(com.saabgroup.dotstest.ParameterTypes.ClassTypeId,index));
+            }
+        }
+
+        private void Test_ParameterDictionaryReflection()
+        {
+            check(2 == com.saabgroup.dotstest.ParameterDictionaries.getInt32StringParameterDictionarySize());
+            check(10 == com.saabgroup.dotstest.ParameterDictionaries.getInt32StringParameterKeyFromIndex(0));
+            check(com.saabgroup.dotstest.ParameterDictionaries.getInt32StringParameterValueFromIndex(0).equals("Safir"));
+            check(20 == com.saabgroup.dotstest.ParameterDictionaries.getInt32StringParameterKeyFromIndex(1));
+            check(com.saabgroup.dotstest.ParameterDictionaries.getInt32StringParameterValueFromIndex(1).equals("rifaS"));
+
+            check(2 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Float64ParameterDictionarySize());
+            check(10 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Float64ParameterKeyFromIndex(0));
+            check(64.64 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Float64ParameterValueFromIndex(0));
+            check(20 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Float64ParameterKeyFromIndex(1));
+            check(-64.64 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Float64ParameterValueFromIndex(1));
+
+            check(2 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Ampere64ParameterDictionarySize());
+            check(10 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Ampere64ParameterKeyFromIndex(0));
+            check(64.64 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Ampere64ParameterValueFromIndex(0));
+            check(20 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Ampere64ParameterKeyFromIndex(1));
+            check(-64.64 == com.saabgroup.dotstest.ParameterDictionaries.getInt32Ampere64ParameterValueFromIndex(1));
+
+            check(2 == com.saabgroup.dotstest.ParameterDictionaries.getStringEnumParameterDictionarySize());
+            check(com.saabgroup.dotstest.ParameterDictionaries.getStringEnumParameterKeyFromIndex(0).equals("Billy"));
+            check(com.saabgroup.dotstest.TestEnum.MY_FIRST == com.saabgroup.dotstest.ParameterDictionaries.getStringEnumParameterValueFromIndex(0));
+            check(com.saabgroup.dotstest.ParameterDictionaries.getStringEnumParameterKeyFromIndex(1).equals("Svarre"));
+            check(com.saabgroup.dotstest.TestEnum.MY_SECOND == com.saabgroup.dotstest.ParameterDictionaries.getStringEnumParameterValueFromIndex(1));
+
+            check(2 == com.saabgroup.dotstest.ParameterDictionaries.getEnumObjectParameterDictionarySize());
+            check(com.saabgroup.dotstest.TestEnum.MY_FIRST == com.saabgroup.dotstest.ParameterDictionaries.getEnumObjectParameterKeyFromIndex(0));
+            check(null != com.saabgroup.dotstest.ParameterDictionaries.getEnumObjectParameterValueFromIndex(0));
+            check(com.saabgroup.safir.dob.typesystem.Object.ClassTypeId == com.saabgroup.dotstest.ParameterDictionaries.getEnumObjectParameterValueFromIndex(0).getTypeId());
+            check(com.saabgroup.dotstest.TestEnum.MY_SECOND == com.saabgroup.dotstest.ParameterDictionaries.getEnumObjectParameterKeyFromIndex(1));
+            check(null != (com.saabgroup.dotstest.MemberDictionaries)com.saabgroup.dotstest.ParameterDictionaries.getEnumObjectParameterValueFromIndex(1));
         }
     }
 

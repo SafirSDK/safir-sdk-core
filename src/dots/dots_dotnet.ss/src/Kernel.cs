@@ -190,9 +190,11 @@ namespace Safir.Dob.Typesystem.Internal
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern void DotsC_GetParameterInfo(System.Int64 typeId,
                                                            System.Int32 parameter,
-                                                           out MemberType memberType,
+                                                           out MemberType parameterType,
+                                                           out MemberType keyType,
                                                            out System.IntPtr parameterName,
-                                                           out System.Int64 complexType,
+                                                           out System.Int64 complexTypeId,
+                                                           out System.Int64 keyTypeId,
                                                            out CollectionType collectionType,
                                                            out System.Int32 numberOfValues);
 

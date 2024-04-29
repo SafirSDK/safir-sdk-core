@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -86,32 +86,36 @@ namespace Parameters
     GetName(const TypeId typeId,
             const ParameterIndex parameter)
     {
-        DotsC_MemberType memberType;
+        DotsC_MemberType parameterType;
+        DotsC_MemberType keyType;
         const char* parameterName;
         DotsC_TypeId complexTypeId;
+        DotsC_TypeId keyTypeId;
         DotsC_CollectionType collectionType;
         DotsC_Int32 numberOfValues;
-        DotsC_GetParameterInfo(typeId, parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
+        DotsC_GetParameterInfo(typeId, parameter, parameterType, keyType, parameterName, complexTypeId, keyTypeId, collectionType, numberOfValues);
 
         return Utilities::ToWstring(parameterName);
     }
 
     std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId, const Dob::Typesystem::ParameterIndex parameter)
     {
-        DotsC_MemberType memberType;
+        DotsC_MemberType parameterType;
+        DotsC_MemberType keyType;
         const char* parameterName;
         DotsC_TypeId complexTypeId;
+        DotsC_TypeId keyTypeId;
         DotsC_CollectionType collectionType;
         DotsC_Int32 numberOfValues;
-        DotsC_GetParameterInfo(typeId, parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
+        DotsC_GetParameterInfo(typeId, parameter, parameterType, keyType, parameterName, complexTypeId, keyTypeId, collectionType, numberOfValues);
 
-        if (memberType==ObjectMemberType || memberType==EnumerationMemberType)
+        if (parameterType==ObjectMemberType || parameterType==EnumerationMemberType)
         {
             return Safir::Dob::Typesystem::Utilities::ToWstring(DotsC_GetTypeName(complexTypeId));
         }
         else
         {
-            return Safir::Dob::Typesystem::Utilities::ToWstring(DotsC_MemberTypeName(memberType));
+            return Safir::Dob::Typesystem::Utilities::ToWstring(DotsC_MemberTypeName(parameterType));
         }
     }
 
@@ -119,26 +123,37 @@ namespace Parameters
     GetType(const TypeId typeId,
             const ParameterIndex parameter)
     {
-        DotsC_MemberType memberType;
+        DotsC_MemberType parameterType;
+        DotsC_MemberType keyType;
         const char* parameterName;
         DotsC_TypeId complexTypeId;
+        DotsC_TypeId keyTypeId;
         DotsC_CollectionType collectionType;
         DotsC_Int32 numberOfValues;
-        DotsC_GetParameterInfo(typeId, parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
+        DotsC_GetParameterInfo(typeId, parameter, parameterType, keyType, parameterName, complexTypeId, keyTypeId, collectionType, numberOfValues);
 
-        return memberType;
+        return parameterType;
     }
 
     Int32
     GetArraySize(const TypeId typeId,
                  const ParameterIndex parameter)
     {
-        DotsC_MemberType memberType;
+        return GetCollectionSize(typeId, parameter);
+    }
+
+    Int32
+    GetCollectionSize(const TypeId typeId,
+                      const ParameterIndex parameter)
+    {
+        DotsC_MemberType parameterType;
+        DotsC_MemberType keyType;
         const char* parameterName;
         DotsC_TypeId complexTypeId;
+        DotsC_TypeId keyTypeId;
         DotsC_CollectionType collectionType;
         DotsC_Int32 numberOfValues;
-        DotsC_GetParameterInfo(typeId, parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
+        DotsC_GetParameterInfo(typeId, parameter, parameterType, keyType, parameterName, complexTypeId, keyTypeId, collectionType, numberOfValues);
 
         return numberOfValues;
     }
@@ -374,6 +389,160 @@ namespace Parameters
                                const ChannelId& key)
     {
         return DotsC_DictionaryInt64KeyToIndex(typeId, parameter, key.GetRawValue());
+    }
+
+
+    void GetInfo(const Dob::Typesystem::TypeId typeId,
+                 const Dob::Typesystem::ParameterIndex parameter,
+                 Dob::Typesystem::MemberType& parameterType,
+                 Dob::Typesystem::MemberType& keyType,
+                 std::wstring& parameterName,
+                 Dob::Typesystem::TypeId& parameterTypeId,
+                 Dob::Typesystem::TypeId& keyTypeId,
+                 Dob::Typesystem::CollectionType & collectionType,
+                 Dob::Typesystem::Int32& numberOfValues)
+    {
+        const char* parameterNameUtf8 = nullptr;
+
+        DotsC_GetParameterInfo(typeId,
+                               parameter,
+                               parameterType,
+                               keyType,
+                               parameterNameUtf8,
+                               parameterTypeId,
+                               keyTypeId,
+                               collectionType,
+                               numberOfValues);
+
+        if (parameterNameUtf8 != nullptr)
+        {
+            parameterName = Utilities::ToWstring(parameterNameUtf8);
+        }
+    }
+
+    Int32
+    GetEnumerationDictionaryKey(const TypeId typeId,
+                                const ParameterIndex parameter,
+                                const Dob::Typesystem::ArrayIndex index)
+    {
+        Int32 i;
+        DotsC_GetEnumerationParameter(typeId, parameter, index, DotsC_KeyMode, i);
+        return i;
+    }
+
+    Int32
+    GetInt32DictionaryKey(const TypeId typeId,
+                          const ParameterIndex parameter,
+                          const Dob::Typesystem::ArrayIndex index)
+    {
+        Int32 i;
+        DotsC_GetInt32Parameter(typeId, parameter, index, DotsC_KeyMode, i);
+        return i;
+    }
+
+    Int64
+    GetInt64DictionaryKey(const TypeId typeId,
+                          const ParameterIndex parameter,
+                          const Dob::Typesystem::ArrayIndex index)
+    {
+        Int64 i;
+        DotsC_GetInt64Parameter(typeId, parameter, index, DotsC_KeyMode, i);
+        return i;
+    }
+
+
+    TypeId
+    GetTypeIdDictionaryKey(const TypeId typeId,
+                           const ParameterIndex parameter,
+                           const Dob::Typesystem::ArrayIndex index)
+    {
+        TypeId t;
+        DotsC_GetTypeIdParameter(typeId, parameter, index, DotsC_KeyMode, t);
+        return t;
+    }
+
+    const InstanceId
+    GetInstanceIdDictionaryKey(const TypeId typeId,
+                               const ParameterIndex parameter,
+                               const Dob::Typesystem::ArrayIndex index)
+    {
+        Int64 hashVal;
+        const char * strVal;
+        DotsC_GetHashedIdParameter(typeId, parameter, index, DotsC_KeyMode, hashVal, strVal);
+        if (strVal == NULL)
+        {
+            return InstanceId(hashVal);
+        }
+        else
+        {
+            return InstanceId(hashVal, Utilities::ToWstring(strVal));
+        }
+    }
+
+    const EntityId
+    GetEntityIdDictionaryKey(const TypeId typeId,
+                             const ParameterIndex parameter,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        DotsC_EntityId eid;
+        const char * instanceIdStr;
+        DotsC_GetEntityIdParameter(typeId, parameter, index, DotsC_KeyMode, eid, instanceIdStr);
+        if(instanceIdStr==NULL)
+        {
+            return EntityId(eid.typeId,InstanceId(eid.instanceId));
+        }
+        else
+        {
+            return EntityId(eid.typeId,InstanceId(eid.instanceId,Utilities::ToWstring(instanceIdStr)));
+        }
+    }
+
+
+    const ChannelId
+    GetChannelIdDictionaryKey(const TypeId typeId,
+                              const ParameterIndex parameter,
+                              const Dob::Typesystem::ArrayIndex index)
+    {
+        Int64 hashVal;
+        const char * strVal;
+        DotsC_GetHashedIdParameter(typeId, parameter, index, DotsC_KeyMode, hashVal, strVal);
+        if (strVal == NULL)
+        {
+            return ChannelId(hashVal);
+        }
+        else
+        {
+            return ChannelId(hashVal,Utilities::ToWstring(strVal));
+        }
+    }
+
+
+    const HandlerId
+    GetHandlerIdDictionaryKey(const TypeId typeId,
+                              const ParameterIndex parameter,
+                              const Dob::Typesystem::ArrayIndex index)
+    {
+        Int64 hashVal;
+        const char * strVal;
+        DotsC_GetHashedIdParameter(typeId, parameter, index, DotsC_KeyMode, hashVal, strVal);
+        if (strVal == NULL)
+        {
+            return HandlerId(hashVal);
+        }
+        else
+        {
+            return HandlerId(hashVal,Utilities::ToWstring(strVal));
+        }
+    }
+
+    const std::wstring
+    GetStringDictionaryKey(const TypeId typeId,
+                           const ParameterIndex parameter,
+                           const Dob::Typesystem::ArrayIndex index)
+    {
+        const char* tmp;
+        DotsC_GetStringParameter(typeId, parameter, index, DotsC_KeyMode, tmp);
+        return Utilities::ToWstring(tmp);
     }
 }
 }

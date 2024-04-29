@@ -797,6 +797,76 @@ namespace @_NAMESPACE_@
         }
 @@END_IF@@
 @@END_IF@@
+
+        /// <summary>
+        /// Get number of key/value pairs in dictionary parameter @_PARAMETER_@
+        /// </summary>
+        /// <returns>Number of key value pairs in the dictionary.</returns>
+        public static global::System.Int32 @_PARAMETER_@DictionarySize()
+        {
+            Init();
+            return Safir.Dob.Typesystem.Parameters.GetCollectionSize(ClassTypeId,
+                                                                     m_@_LOWER:PARAMETER_@ParameterIndex);
+        }
+
+        /// <summary>
+        ///Get key from dictionary parameter @_PARAMETER_@ using a dictionary index.
+        /// </summary>
+        /// <param name="index">Index of key to fetch. Number between 0 and @_PARAMETER_@DictionarySize().</param>
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        public static @_PARAMETERDICTIONARYTYPE_@.Enumeration @_PARAMETER_@KeyFromIndex(global::System.Int32 index)
+        {
+            Init();
+            return (@_PARAMETERDICTIONARYTYPE_@.Enumeration)
+                Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERDICTIONARYTYPE_@DictionaryKey(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSE@@
+        public static @_PARAMETERDICTIONARYTYPE_@ @_PARAMETER_@KeyFromIndex(global::System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERDICTIONARYTYPE_@DictionaryKey(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@END_IF@@
+
+        /// <summary>
+        ///Get value from dictionary parameter @_PARAMETER_@ using a dictionary index.
+        /// </summary>
+        /// <param name="index">Index of value to fetch. Number between 0 and @_PARAMETER_@DictionarySize().</param>
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ValueFromIndex(global::System.Int32 index)
+        {
+            Init();
+            return (@_PARAMETERTYPE_@.Enumeration)
+                Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+
+        }
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ValueFromIndex(global::System.Int32 index)
+        {
+            Init();
+            return (@_PARAMETERTYPE_@)
+                Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Single
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ValueFromIndex(global::System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=global::System.Double
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ValueFromIndex(global::System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSE@@
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ValueFromIndex(global::System.Int32 index)
+        {
+            Init();
+            return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@END_IF@@
+
 @-------- single parameter -----------
 @@ELSE@@
         /// <summary>

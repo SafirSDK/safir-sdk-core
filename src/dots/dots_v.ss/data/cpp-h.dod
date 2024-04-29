@@ -1,6 +1,6 @@
 @@-------------------------------------------------------------------------------
 @@--
-@@-- Copyright Saab AB, 2005-2013,2015,2022-2023 (http://safirsdkcore.com)
+@@-- Copyright Saab AB, 2005-2013,2015,2022-2024 (http://safirsdkcore.com)
 @@--
 @@-- Created by: Henrik Sundberg / sthesu
 @@--
@@ -423,7 +423,27 @@ namespace @_NAMESPACEV_@
         static @_PARAMETERTYPE_@Ptr @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key);
 @@ELSE@@
         static @_PARAMETERTYPE_@ @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key);
+
 @@END_IF@@
+@@END_IF@@
+
+        //Get number of key/value pairs in dictionary parameter @_PARAMETER_@
+        static Safir::Dob::Typesystem::Int32 @_PARAMETER_@DictionarySize();
+
+        //Get key from dictionary parameter @_PARAMETER_@ using a dictionary index.
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        static @_PARAMETERDICTIONARYTYPE_@::Enumeration @_PARAMETER_@KeyFromIndex(const Safir::Dob::Typesystem::Int32 index);
+@@ELSE@@
+        static @_PARAMETERDICTIONARYTYPE_@ @_PARAMETER_@KeyFromIndex(const Safir::Dob::Typesystem::Int32 index);
+@@END_IF@@
+
+        //Get value from dictionary parameter @_PARAMETER_@ using a dictionary index.
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        static @_PARAMETERTYPE_@::Enumeration @_PARAMETER_@ValueFromIndex(const Safir::Dob::Typesystem::Int32 index);
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+        static @_PARAMETERTYPE_@Ptr @_PARAMETER_@ValueFromIndex(const Safir::Dob::Typesystem::Int32 index);
+@@ELSE@@
+        static @_PARAMETERTYPE_@ @_PARAMETER_@ValueFromIndex(const Safir::Dob::Typesystem::Int32 index);
 @@END_IF@@
 @@ --- Single parameter ---
 @@ELSE@@

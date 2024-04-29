@@ -99,12 +99,14 @@ public final class Kernel {
     public static native int GetParameterId(long id, String parameterName);
 
     public static native void GetParameterInfo(long typeId,
-            int parameter,
-            int[] memberType,
-            String[] parameterName,
-            long[] complexType,
-            int[] collectionType,
-            int[] numberOfValues);
+                                               int parameter,
+                                               int[] parameterType,
+                                               int[] keyType,
+                                               String[] parameterName,
+                                               long[] complexTypeId,
+                                               long[] keyTypeId,
+                                               int[] collectionType,
+                                               int[] numberOfValues);
 
     //************************************************************************************
     //* Type compatibility

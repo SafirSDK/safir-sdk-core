@@ -11876,3 +11876,117 @@ BOOST_AUTO_TEST_CASE(ParserExceptions)
     BOOST_CHECK_THROW(ts::Serialization::ToObjectFromJson(L""),
                       ts::IllegalValueException);
 }
+
+
+BOOST_AUTO_TEST_CASE(ParameterGetInfo)
+{
+    Dob::Typesystem::MemberType parameterType;
+    Dob::Typesystem::MemberType keyType;
+    std::wstring parameterName;
+    Dob::Typesystem::TypeId parameterTypeId;
+    Dob::Typesystem::TypeId keyTypeId;
+    Dob::Typesystem::CollectionType collectionType;
+    Dob::Typesystem::Int32 numberOfValues;
+
+    Safir::Dob::Typesystem::Parameters::GetInfo(DotsTest::ParameterDictionaries::ClassTypeId,
+                                                Safir::Dob::Typesystem::Parameters::GetIndex(DotsTest::ParameterDictionaries::ClassTypeId,
+                                                                                             L"Int32StringParameter"),
+                                                parameterType,
+                                                keyType,
+                                                parameterName,
+                                                parameterTypeId,
+                                                keyTypeId,
+                                                collectionType,
+                                                numberOfValues);
+    BOOST_CHECK_EQUAL(parameterType, StringMemberType);
+    BOOST_CHECK_EQUAL(keyType, Int32MemberType);
+    BOOST_CHECK_EQUAL(parameterName, L"Int32StringParameter");
+    BOOST_CHECK_EQUAL(collectionType, DictionaryCollectionType);
+    BOOST_CHECK_EQUAL(numberOfValues, 2);
+
+    Safir::Dob::Typesystem::Parameters::GetInfo(DotsTest::ParameterDictionaries::ClassTypeId,
+                                                Safir::Dob::Typesystem::Parameters::GetIndex(DotsTest::ParameterDictionaries::ClassTypeId,
+                                                                                             L"StringEnumParameter"),
+                                                parameterType,
+                                                keyType,
+                                                parameterName,
+                                                parameterTypeId,
+                                                keyTypeId,
+                                                collectionType,
+                                                numberOfValues);
+    BOOST_CHECK_EQUAL(parameterType, EnumerationMemberType);
+    BOOST_CHECK_EQUAL(keyType, StringMemberType);
+    BOOST_CHECK_EQUAL(parameterName, L"StringEnumParameter");
+    BOOST_CHECK_EQUAL(collectionType, DictionaryCollectionType);
+    BOOST_CHECK_EQUAL(parameterTypeId, DotsTest::TestEnum::EnumerationTypeId);
+    BOOST_CHECK_EQUAL(numberOfValues, 2);
+
+    Safir::Dob::Typesystem::Parameters::GetInfo(DotsTest::ParameterDictionaries::ClassTypeId,
+                                                Safir::Dob::Typesystem::Parameters::GetIndex(DotsTest::ParameterDictionaries::ClassTypeId,
+                                                                                             L"EnumObjectParameter"),
+                                                parameterType,
+                                                keyType,
+                                                parameterName,
+                                                parameterTypeId,
+                                                keyTypeId,
+                                                collectionType,
+                                                numberOfValues);
+    BOOST_CHECK_EQUAL(parameterType, ObjectMemberType);
+    BOOST_CHECK_EQUAL(keyType, EnumerationMemberType);
+    BOOST_CHECK_EQUAL(parameterName, L"EnumObjectParameter");
+    BOOST_CHECK_EQUAL(collectionType, DictionaryCollectionType);
+    BOOST_CHECK_EQUAL(parameterTypeId, Safir::Dob::Typesystem::Object::ClassTypeId);
+    BOOST_CHECK_EQUAL(keyTypeId, DotsTest::TestEnum::EnumerationTypeId);
+    BOOST_CHECK_EQUAL(numberOfValues, 2);
+
+
+    Safir::Dob::Typesystem::Parameters::GetInfo(DotsTest::ParameterTypes::ClassTypeId,
+                                                Safir::Dob::Typesystem::Parameters::GetIndex(DotsTest::ParameterTypes::ClassTypeId,
+                                                                                             L"EnumerationParameter"),
+                                                parameterType,
+                                                keyType,
+                                                parameterName,
+                                                parameterTypeId,
+                                                keyTypeId,
+                                                collectionType,
+                                                numberOfValues);
+    BOOST_CHECK_EQUAL(parameterType, EnumerationMemberType);
+    BOOST_CHECK_EQUAL(parameterName, L"EnumerationParameter");
+    BOOST_CHECK_EQUAL(collectionType, SingleValueCollectionType);
+    BOOST_CHECK_EQUAL(parameterTypeId, DotsTest::TestEnum::EnumerationTypeId);
+    BOOST_CHECK_EQUAL(numberOfValues, 1);
+}
+
+BOOST_AUTO_TEST_CASE(ParameterDictionaryReflection)
+{
+    BOOST_CHECK_EQUAL(2, DotsTest::ParameterDictionaries::Int32StringParameterDictionarySize());
+    BOOST_CHECK_EQUAL(10, DotsTest::ParameterDictionaries::Int32StringParameterKeyFromIndex(0));
+    BOOST_CHECK_EQUAL(L"Safir", DotsTest::ParameterDictionaries::Int32StringParameterValueFromIndex(0));
+    BOOST_CHECK_EQUAL(20, DotsTest::ParameterDictionaries::Int32StringParameterKeyFromIndex(1));
+    BOOST_CHECK_EQUAL(L"rifaS", DotsTest::ParameterDictionaries::Int32StringParameterValueFromIndex(1));
+
+    BOOST_CHECK_EQUAL(2, DotsTest::ParameterDictionaries::Int32Float64ParameterDictionarySize());
+    BOOST_CHECK_EQUAL(10, DotsTest::ParameterDictionaries::Int32Float64ParameterKeyFromIndex(0));
+    BOOST_CHECK_EQUAL(64.64, DotsTest::ParameterDictionaries::Int32Float64ParameterValueFromIndex(0));
+    BOOST_CHECK_EQUAL(20, DotsTest::ParameterDictionaries::Int32Float64ParameterKeyFromIndex(1));
+    BOOST_CHECK_EQUAL(-64.64, DotsTest::ParameterDictionaries::Int32Float64ParameterValueFromIndex(1));
+
+    BOOST_CHECK_EQUAL(2, DotsTest::ParameterDictionaries::Int32Ampere64ParameterDictionarySize());
+    BOOST_CHECK_EQUAL(10, DotsTest::ParameterDictionaries::Int32Ampere64ParameterKeyFromIndex(0));
+    BOOST_CHECK_EQUAL(64.64, DotsTest::ParameterDictionaries::Int32Ampere64ParameterValueFromIndex(0));
+    BOOST_CHECK_EQUAL(20, DotsTest::ParameterDictionaries::Int32Ampere64ParameterKeyFromIndex(1));
+    BOOST_CHECK_EQUAL(-64.64, DotsTest::ParameterDictionaries::Int32Ampere64ParameterValueFromIndex(1));
+
+    BOOST_CHECK_EQUAL(2, DotsTest::ParameterDictionaries::StringEnumParameterDictionarySize());
+    BOOST_CHECK_EQUAL(L"Billy", DotsTest::ParameterDictionaries::StringEnumParameterKeyFromIndex(0));
+    BOOST_CHECK_EQUAL(DotsTest::TestEnum::MyFirst, DotsTest::ParameterDictionaries::StringEnumParameterValueFromIndex(0));
+    BOOST_CHECK_EQUAL(L"Svarre", DotsTest::ParameterDictionaries::StringEnumParameterKeyFromIndex(1));
+    BOOST_CHECK_EQUAL(DotsTest::TestEnum::MySecond, DotsTest::ParameterDictionaries::StringEnumParameterValueFromIndex(1));
+
+    BOOST_CHECK_EQUAL(2, DotsTest::ParameterDictionaries::EnumObjectParameterDictionarySize());
+    BOOST_CHECK_EQUAL(DotsTest::TestEnum::MyFirst, DotsTest::ParameterDictionaries::EnumObjectParameterKeyFromIndex(0));
+    BOOST_CHECK_NE(nullptr, DotsTest::ParameterDictionaries::EnumObjectParameterValueFromIndex(0));
+    BOOST_CHECK_EQUAL(Safir::Dob::Typesystem::Object::ClassTypeId, DotsTest::ParameterDictionaries::EnumObjectParameterValueFromIndex(0)->GetTypeId());
+    BOOST_CHECK_EQUAL(DotsTest::TestEnum::MySecond, DotsTest::ParameterDictionaries::EnumObjectParameterKeyFromIndex(1));
+    BOOST_CHECK_NE(nullptr, std::dynamic_pointer_cast<DotsTest::MemberDictionaries>(DotsTest::ParameterDictionaries::EnumObjectParameterValueFromIndex(1)));
+}

@@ -583,20 +583,24 @@ DotsC_ParameterIndex DotsC_GetParameterId(const DotsC_TypeId typeId, const char*
 
 void DotsC_GetParameterInfo(DotsC_TypeId typeId,
                             DotsC_ParameterIndex parameter,
-                            DotsC_MemberType& memberType,
+                            DotsC_MemberType& parameterType,
+                            DotsC_MemberType& keyType,
                             const char*& parameterName,
                             DotsC_TypeId& complexTypeId,
+                            DotsC_TypeId& keyTypeId,
                             DotsC_CollectionType& collectionType,
                             DotsC_Int32& numberOfValues)
 {
     Init();
     const ParameterDescriptionShm* par=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    memberType=par->GetMemberType();
+    parameterType=par->GetMemberType();
     complexTypeId=par->GetTypeId();
+    keyTypeId=par->GetKeyTypeId();
     parameterName=par->GetName();
     collectionType=par->GetCollectionType();
+    keyType=par->GetKeyType();
     numberOfValues=par->GetNumberOfValues();
-    memberType=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter)->GetMemberType();
+    parameterType=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter)->GetMemberType();
 }
 
 //************************************************************************************
