@@ -132,13 +132,13 @@
         <arrayElement>
           <Safir.Dob.NodeType type="Safir.Dob.NodeType">
             <Name>Server</Name>
-            <HeartbeatInterval>1.0</HeartbeatInterval>
-            <MaxLostHeartbeats>5</MaxLostHeartbeats>
+            <HeartbeatInterval>0.5</HeartbeatInterval>
+            <MaxLostHeartbeats>6</MaxLostHeartbeats>
             <SlidingWindowsSize>20</SlidingWindowsSize>
             <AckRequestThreshold>10</AckRequestThreshold>
             <RetryTimeout>
-                <Second64>1.0</Second64>
-                <Second64>2.0</Second64>
+                <Second64>0.1</Second64>
+                <Second64>0.3</Second64>
             </RetryTimeout>
             <RequiredForStart>True</RequiredForStart>
           </Safir.Dob.NodeType>
