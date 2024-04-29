@@ -24,7 +24,7 @@
 #
 ###############################################################################
 import os, time, sys, argparse, re
-from testenv import TestEnv, TestEnvStopper
+from testenv import TestEnv, TestEnvStopper, log
 
 
 def makeaddr(port):
@@ -32,7 +32,7 @@ def makeaddr(port):
 
 
 def launch_node(args, instance):
-    print("Launching node", instance)
+    log("Launching node", instance)
     os.environ["SAFIR_INSTANCE"] = str(instance)
     os.environ["SAFIR_NODE_NAME"] = "Node_" + str(instance)
     os.environ["SAFIR_CONTROL_ADDRESS"] = makeaddr(30000 + instance)
@@ -50,19 +50,36 @@ def launch_node(args, instance):
                   wait_for_persistence=instance == 0)
 
     if instance == 0:
-        env.launchProcess("WaitingStatesOwner", args.owner)
+        #env.launchProcess("Dobexplorer", args.dobexplorer)
+        pass
+
+    for handler in range(args.handlers):
+        if instance == 0:
+            cmd = (args.owner, "--handler", str(handler))
+            if args.entity_updates:
+                cmd += ( "--update", "--update-period", str(args.update_period))
+            env.launchProcess(f"WaitingStatesOwner_{handler}", cmd)
+        elif args.entity_requests:
+            env.launchProcess(f"RequestSender_{handler}", (args.sender, "--handler",  str(handler)))
     return env
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser("test script")
     parser.add_argument("--owner", required=True)
+    parser.add_argument("--sender", required=True)
     parser.add_argument("--safir-control", required=True)
     parser.add_argument("--dobexplorer", required=True)
     parser.add_argument("--dose_main", required=True)
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
     parser.add_argument("--clients", type=int, default=10)
+    parser.add_argument("--handlers", type=int, default=1, help="number of handlers used. Means more owners and more requestors are started")
+    parser.add_argument("--update-period", type=int, default=10, help="Number of ms between updates of all entities")
+    parser.add_argument('--entity-updates', action="store_true", default=False,
+                        help="Produce lots of entity updates on node 0")
+    parser.add_argument('--entity-requests', action="store_true", default=False,
+                        help="Produce lots of entity requests on all nodes except 0. Owner always deny requests, so this only tests request mechanism.")
     arguments = parser.parse_args()
 
     return arguments
@@ -73,7 +90,7 @@ def main():
     server = launch_node(args, 0)
     output = server.Output("safir_control")
     incarnation = int(re.search(r"Starting system with incarnation id (.*)", output).group(1))
-    print("This system has incarnation", incarnation)
+    log("This system has incarnation", incarnation)
 
     with TestEnvStopper(server):
         env = dict()
@@ -87,35 +104,41 @@ def main():
                     output = env[i].Output("safir_control")
                     res = re.search(r"Joined system with incarnation id (.*)", output)
                     if res is None:
-                        print("Failed to find join statement in:")
-                        print(output)
-                        print("Sleeping a while, to see if that will let us join")
+                        log("Failed to find join statement in:")
+                        log(output)
+                        log("Sleeping a while, to see if that will let us join")
                         time.sleep(10)
-                        print(env[i].Output("safir_control"))
+                        log(env[i].Output("safir_control"))
                         return 1
                     inc = int(res.group(1))
                     if inc != incarnation:
-                        print("Joined invalid incarnation!!!!")
+                        log("Joined invalid incarnation!!!!")
                         return 1
 
+                if args.entity_requests:
+                    for num in range(args.handlers):
+                        for i in range(1, args.clients + 1):
+                            log(f"Waiting for instance {i} to have completed sending requests")
+                            env[i].WaitForOutput(f"RequestSender_{num}", "Have sent 1000 requests and gotten responses to them")
+
                 for i in range(1, args.clients + 1):
-                    print(f"Terminating instance {i}")
+                    log(f"Terminating instance {i}")
                     env[i].killprocs()
                     syslog_output = env[i].Syslog()
                     if len(syslog_output) != 0:
-                        print("Unexpected syslog output:\n" + syslog_output)
+                        log("Unexpected syslog output:\n" + syslog_output)
                         return 1
                     if not env[i].ReturnCodesOk():
-                        print("Some process failed")
+                        log("Some process failed")
                         return 1
-            print("exiting normally")
+            log("exiting normally")
         finally:
-            print ("cleaning up")
+            log ("cleaning up")
             for i, e in env.items():
                 e.killprocs()
 
     if not server.ReturnCodesOk():
-        print("Some process exited with an unexpected value")
+        log("Some process exited with an unexpected value")
         return 1
 
     return 0

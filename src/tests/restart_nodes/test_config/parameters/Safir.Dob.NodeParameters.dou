@@ -137,8 +137,8 @@
             <SlidingWindowsSize>20</SlidingWindowsSize>
             <AckRequestThreshold>10</AckRequestThreshold>
             <RetryTimeout>
-                <Second64>0.2</Second64>
-                <Second64>0.5</Second64>
+                <Second64>1.0</Second64>
+                <Second64>2.0</Second64>
             </RetryTimeout>
             <RequiredForStart>True</RequiredForStart>
           </Safir.Dob.NodeType>

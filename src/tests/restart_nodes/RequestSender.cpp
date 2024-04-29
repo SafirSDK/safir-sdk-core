@@ -23,11 +23,11 @@
 ******************************************************************************/
 #include <iostream>
 #include <Safir/Dob/Connection.h>
+#include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <DoseTest/SynchronousPermanentEntity.h>
 #include <boost/lexical_cast.hpp>
-#include <cstdlib>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -36,12 +36,11 @@
 #endif
 
 #include <boost/program_options.hpp>
-#include <boost/thread.hpp>
-#include <boost/chrono.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)
 #endif
+
 
 std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
 {
@@ -60,14 +59,9 @@ public:
         options_description options("Options");
         options.add_options()
             ("help,h", "show help message")
-            ("update-period",
-                 value<int>(&period)->default_value(10, ""),
-                 "Entity update period, in ms")
             ("handler",
                  value<std::int64_t>(&handler)->default_value(0, ""),
-                 "Handler to register")
-            ("update",
-             "Update entities");
+             "Handler to send requests to");
 
         variables_map vm;
 
@@ -90,13 +84,9 @@ public:
             return;
         }
 
-        update = vm.count("update") != 0;
-
         parseOk = true;
     }
     bool parseOk;
-    int period;
-    bool update;
     std::int64_t handler;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
@@ -108,7 +98,6 @@ private:
     }
 
 };
-
 
 class StopHandler :
     public Safir::Dob::StopHandler
@@ -122,102 +111,75 @@ private:
 
 };
 
-
-
-class EntityOwner
-    : public Safir::Dob::EntityHandlerInjection
+class RequestSender
+    : public Safir::Dob::Requestor
 {
 public:
-    EntityOwner(boost::asio::io_service& ioService, const bool update, const int period, const std::int64_t handler)
-        : m_timer(ioService)
-        , m_handler(handler)
-        , m_update(update)
-        , m_period(period)
+    explicit RequestSender(const std::int64_t handler)
+        : m_handler(handler)
     {
         using namespace Safir::Dob;
         m_connection.Attach();
 
-        m_connection.RegisterEntityHandlerInjection(DoseTest::SynchronousPermanentEntity::ClassTypeId,
-                                                    m_handler,
-                                                    InstanceIdPolicy::HandlerDecidesInstanceId,
-                                                    this);
-
-        if (m_update)
-        {
-            for (int i = 0; i < 20; ++i)
-            {
-                auto ent = DoseTest::SynchronousPermanentEntity::Create();
-                ent->Info() = L"test" + boost::lexical_cast<std::wstring>(Typesystem::InstanceId::GenerateRandom().GetRawValue());
-                m_instances.push_back(Typesystem::InstanceId::GenerateRandom());
-                m_connection.SetChanges(ent,
-                                        m_instances.back(),
-                                        m_handler);
-            }
-
-            m_timer.expires_from_now(boost::posix_time::seconds(1));
-            m_timer.async_wait([this](const boost::system::error_code&){Update();});
-        }
+        SendRequests();
     }
 
 private:
-    void Update()
+    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override
     {
-        for (auto inst = m_instances.begin(); inst != m_instances.end(); ++inst)
+        auto response = std::dynamic_pointer_cast<Safir::Dob::ErrorResponse>(responseProxy.GetResponse());
+        if (response == nullptr)
         {
-            auto ent = DoseTest::SynchronousPermanentEntity::Create();
-            ent->Info() = L"test" + boost::lexical_cast<std::wstring>
-                (Safir::Dob::Typesystem::InstanceId::GenerateRandom().GetRawValue());
-            m_connection.SetChanges(ent,
-                                    *inst,
-                                    m_handler);
+            throw Safir::Dob::Typesystem::SoftwareViolationException(L"Got unexpected response!",__WFILE__,__LINE__);
         }
 
-        m_timer.expires_from_now(boost::posix_time::milliseconds(m_period));
-        m_timer.async_wait([this](const boost::system::error_code&){Update();});
+        if (response->Code() == L"SafirNotRegistered" && m_numResponses == 0)
+        {
+            return;
+        }
+
+        if (response->Code() == L"SafirTimeout")
+        {
+            return;
+        }
+
+        if (response->Code() != L"Blahonga")
+        {
+            throw Safir::Dob::Typesystem::SoftwareViolationException(L"Got unexpected response code!",__WFILE__,__LINE__);
+        }
+
+        ++m_numResponses;
+        if (m_numResponses % 500 == 0)
+        {
+            std::wcout << "Have sent " << m_numResponses << " requests and gotten responses to them" << std::endl;
+        }
     }
 
-    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
-        const Safir::Dob::Typesystem::HandlerId&) override {}
-
-    void OnCreateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-                         Safir::Dob::ResponseSenderPtr        responseSender) override
+    void OnNotRequestOverflow() override
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(std::rand() % 10));
-        responseSender->Send(m_errorResponse);
+        SendRequests();
     }
 
-    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-        Safir::Dob::ResponseSenderPtr        responseSender) override
+    void SendRequests()
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(std::rand() % 10));
-        responseSender->Send(m_errorResponse);
-    }
-
-    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
-        Safir::Dob::ResponseSenderPtr        responseSender) override
-    {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(std::rand() % 10));
-        responseSender->Send(m_errorResponse);
-    }
-
-    void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy /*injectedEntityProxy*/) override
-    {
-    }
-
-    void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId,
-                                 const Safir::Dob::Typesystem::HandlerId&) override
-    {
-
+        for(;;)
+        {
+            try
+            {
+                m_connection.CreateRequest(m_request, m_handler, this);
+            }
+            catch (const Safir::Dob::OverflowException&)
+            {
+                return;
+            }
+        }
     }
 
     Safir::Dob::SecondaryConnection m_connection;
-    boost::asio::deadline_timer m_timer;
-    std::vector<Safir::Dob::Typesystem::InstanceId> m_instances;
-
     const Safir::Dob::Typesystem::HandlerId m_handler;
-    const bool m_update;
-    const int m_period;
-    Safir::Dob::ErrorResponsePtr m_errorResponse = Safir::Dob::ErrorResponse::CreateErrorResponse(L"Blahonga",L"");
+
+    DoseTest::SynchronousPermanentEntityPtr m_request = DoseTest::SynchronousPermanentEntity::Create();
+    int m_numResponses = 0;
 };
 
 int main(int argc, char * argv[])
@@ -230,7 +192,7 @@ int main(int argc, char * argv[])
 
     try
     {
-        const std::wstring nameCommonPart = L"Owner";
+        const std::wstring nameCommonPart = L"RequestSender";
         const std::wstring nameInstancePart = Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString();
 
         boost::asio::io_service ioService;
@@ -246,13 +208,13 @@ int main(int argc, char * argv[])
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-        EntityOwner owner(ioService, options.update, options.period, options.handler);
+        RequestSender sender(options.handler);
         boost::asio::io_service::work keepRunning(ioService);
         ioService.run();
 
         connection.Close();
     }
-    catch(const std::exception & e)
+    catch(std::exception & e)
     {
         std::wcout << "Caught std::exception! Contents of exception is:" << std::endl
             << e.what()<<std::endl;
