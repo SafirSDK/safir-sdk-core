@@ -84,14 +84,29 @@ namespace Internal
 
     void RepositoryKeeper::MemoryInfo(DotsC_Int32& capacity, DotsC_Int32& used)
     {
+        capacity = -1;
+        used = -1;
+
         if (Instance().m_sharedMemory == nullptr)
         {
-            capacity = -1;
-            used = -1;
             return;
         }
-        capacity = Instance().m_sharedMemory->get_size();
-        used = capacity - Instance().m_sharedMemory->get_free_memory();
+
+        const auto tmpCapacity = Instance().m_sharedMemory->get_size();
+        const auto tmpUsed = tmpCapacity - Instance().m_sharedMemory->get_free_memory();
+        if (tmpCapacity > std::numeric_limits<DotsC_Int32>::max() ||
+            tmpUsed > std::numeric_limits<DotsC_Int32>::max())
+        {
+            std::ostringstream ostr;
+            ostr <<"Numeric overflow in MemoryInfo.";
+            std::cerr << ostr.str() << std::endl;
+            SEND_SYSTEM_LOG(Error, << ostr.str().c_str());
+
+            return;
+        }
+
+        capacity = static_cast<DotsC_Int32>(tmpCapacity);
+        used = static_cast<DotsC_Int32>(tmpUsed);
     }
 
     const RepositoryShm* RepositoryKeeper::GetRepository()
