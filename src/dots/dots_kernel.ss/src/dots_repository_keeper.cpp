@@ -92,10 +92,10 @@ namespace Internal
             return;
         }
 
-        const auto tmpCapacity = Instance().m_sharedMemory->get_size();
-        const auto tmpUsed = tmpCapacity - Instance().m_sharedMemory->get_free_memory();
-        if (tmpCapacity > std::numeric_limits<DotsC_Int32>::max() ||
-            tmpUsed > std::numeric_limits<DotsC_Int32>::max())
+        const size_t tmpCapacity = Instance().m_sharedMemory->get_size();
+        const size_t tmpUsed = tmpCapacity - Instance().m_sharedMemory->get_free_memory();
+        const size_t maxInt = static_cast<size_t>(std::numeric_limits<DotsC_Int32>::max());
+        if (tmpCapacity > maxInt || tmpUsed > maxInt)
         {
             std::ostringstream ostr;
             ostr <<"Numeric overflow in MemoryInfo.";
