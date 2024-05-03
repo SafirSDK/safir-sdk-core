@@ -101,7 +101,7 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("rapidjson/cci.20230929")
         self.requires("protobuf/3.21.12")
         if self.settings.os == "Windows":
-            self.requires("ninja/1.12-0")
+            self.requires("ninja/1.12.0")
             self.requires("boost/1.83.0")
 
             #Visual Studio 2015 and 2017 does not have support for c++17, which is required
