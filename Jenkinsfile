@@ -20,8 +20,30 @@ def runCommand(Map map) {
 }
 
 def runPython(Map map) {
-    map.command = "python " + map.command
-    runCommand(map)
+    def command = map.command
+    if (betterIsUnix()) {
+        if (map.linux_arguments != null)
+            command = command + " " + map.linux_arguments
+        sh label: "Running (through sh) " + command,
+           script: """
+                   python -m venv --system-site-packages .venv
+                   . .venv/bin/activate
+                   python -m pip install --upgrade pip
+                   python -m pip install -r build/requirements.txt
+                   python """ + command
+    }
+    else {
+        command = command.replaceAll("/","\\\\")
+        if (map.windows_arguments != null)
+            command = command + " " + map.windows_arguments
+        bat label: "Running (through bat) " + command,
+           script: """
+                   python -m venv --system-site-packages .venv
+                   call .venv\\Scripts\\activate
+                   python -m pip install --upgrade pip
+                   python -m pip install -r build\\requirements.txt
+                   python """ + command
+    }
 }
 
 

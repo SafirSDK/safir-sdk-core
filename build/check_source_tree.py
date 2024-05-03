@@ -28,7 +28,7 @@ import os
 import fnmatch
 
 #exact matches
-ignore_directories = (".git", ".svn", ".hg", "boost", "rapidjson",
+ignore_directories = (".git", ".svn", ".hg", ".venv", "boost", "rapidjson",
                       "websocketpp", "RelWithDebInfo", "Release", "Debug", "bin")
 
 #glob patterns for files to not check for tabs
