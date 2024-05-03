@@ -5,7 +5,7 @@ add_executable(safir_websocket_testclient
                 ${sources} ${headers})
 
 target_link_libraries(safir_websocket_testclient  PRIVATE
-    RapidJSON::RapidJSON
+    rapidjson
     websocketpp::websocketpp
     Boost::program_options
     Boost::thread

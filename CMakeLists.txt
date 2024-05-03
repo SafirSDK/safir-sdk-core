@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.16.0)
+cmake_minimum_required(VERSION 3.24.0)
 
 #Don't add /W3 to MSVC compilation flags. We set warning levels ourselves
 cmake_policy(SET CMP0092 NEW)
 
+set (CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/src/cmake/conan_provider.cmake)
 PROJECT(safir-sdk-core CXX C)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -17,42 +18,11 @@ endforeach()
 
 file(MAKE_DIRECTORY ${CMAKE_CSHARP_OUTPUT_DIRECTORY})
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
-list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
-
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
   message(STATUS "Found ccache, using it to speed up compilation.")
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
 endif(CCACHE_FOUND)
-
-set(expected_conan_cmake_hash 5cdb3042632da3efff558924eecefd580a0e786863a857ca097c3d1d43df5dcd)
-if(EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-  file(SHA256 "${CMAKE_BINARY_DIR}/conan.cmake" conan_cmake_hash)
-  if (NOT conan_cmake_hash STREQUAL expected_conan_cmake_hash)
-    message(WARNING "Invalid version of conan.cmake found. Will attempt to download a proper one")
-    file (REMOVE "${CMAKE_BINARY_DIR}/conan.cmake")
-  endif()
-endif()
-
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-  message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
-                "${CMAKE_BINARY_DIR}/conan.cmake"
-                EXPECTED_HASH SHA256=${expected_conan_cmake_hash}
-                TLS_VERIFY ON)
-endif()
-
-include(${CMAKE_BINARY_DIR}/conan.cmake)
-
-if (MSVC)
-    set (CONAN_SETTINGS_WINDOWS SETTINGS compiler.toolset=v${MSVC_TOOLSET_VERSION})
-endif()
-
-conan_cmake_run(CONANFILE conanfile.py
-                BASIC_SETUP CMAKE_TARGETS
-                ${CONAN_SETTINGS_WINDOWS}
-                BUILD missing)
 
 # Define RUN_CLANG_TIDY on the command line if you want to run clangs static analysis tool.
 # With these settings there are only a few warnings given. Other settings yield more...

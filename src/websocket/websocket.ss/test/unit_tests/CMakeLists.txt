@@ -17,7 +17,7 @@ target_link_libraries(safir_websocket_unittests PRIVATE
     dose_cpp
     safir_generated-Core-cpp
     dots_internal
-    RapidJSON::RapidJSON
+    rapidjson
     websocketpp::websocketpp)
 
 add_test(NAME WebsocketUnitTests COMMAND safir_websocket_unittests)

@@ -39,6 +39,7 @@
 #include <functional>
 #include <unordered_map>
 #include <set>
+#include <map>
 #include <memory>
 #include <boost/asio.hpp>
 

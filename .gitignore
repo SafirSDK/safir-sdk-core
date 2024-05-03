@@ -131,6 +131,8 @@ tmp
 CMakeDoxyfile.in
 CMakeDoxygenDefaults.cmake
 
+conan/
+conan_host_profile
 conan.*
 conanfile.txt
 conaninfo.txt
