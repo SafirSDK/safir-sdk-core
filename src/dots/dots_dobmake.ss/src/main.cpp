@@ -40,7 +40,12 @@
 #if defined (SAFIR_LINK_QT_STATICALLY) && defined (_MSC_VER)
 #include <QtPlugin>
 Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
+
+#  if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+Q_IMPORT_PLUGIN (QModernWindowsStylePlugin);
+#  else
 Q_IMPORT_PLUGIN (QWindowsVistaStylePlugin);
+#  endif
 #endif
 
 int main(int argc, char *argv[])

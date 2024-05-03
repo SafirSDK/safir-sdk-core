@@ -32,16 +32,25 @@ if (MSVC)
   # On Windows we build qt in Conan and link statically
   #we also look for qt5 if qt6 was not available.
   if (Qt6_FOUND)
+    if (TARGET Qt6::QModernWindowsStylePlugin)
+      set (windows_plugin Qt6::QModernWindowsStylePlugin)
+    elseif (TARGET Qt6::QWindowsVistaStylePlugin)
+      set (windows_plugin Qt6::QWindowsVistaStylePlugin)
+    else ()
+      message(FATAL_ERROR "Could not find the appropriate windows style plugin for Qt, please investigate!")
+    endif()
+
     target_link_libraries(Qt6::Widgets
       INTERFACE
       Qt6::QWindowsIntegrationPlugin
-      Qt6::QWindowsVistaStylePlugin
+      ${windows_plugin}
       #These are windows libraries that qt needs to link against.
       shcore
       UxTheme
       Setupapi
       Dcomp
       D3d12)
+    unset(windows_plugin)
   else()
     find_package(Qt5 COMPONENTS Core Widgets QUIET)
     if (Qt5_FOUND)
