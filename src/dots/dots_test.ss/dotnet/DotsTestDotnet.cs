@@ -9344,6 +9344,8 @@ namespace Misc
                 md.Int32ItemMember.SetChanged(true);
                 Check(md.Int32ItemMember.IsChanged());
                 Check(md.Int32ItemMember[0].IsChanged());
+
+                Test_DictionaryReflection_AddNull();
             }
 
             //sequence container Object specialization
@@ -9782,6 +9784,198 @@ namespace Misc
                 container = (StringContainer)(b.GetValueContainerAt(2));
                 Check(container != null);
                 Check(container.IsNull() == true);
+            }
+
+        }
+
+        public void Test_DictionaryReflection_AddNull()
+        {
+            MemberDictionaries dict = new MemberDictionaries();
+
+            // Int64 key
+            {
+                var b = dict.Int64ItemMember;
+
+                var objCont = b.AddNull((long)3) as ObjectContainerBase;
+                b.AddNull((long)4);
+                Check(b.Count == 2);
+
+                var testItem = new TestItem();
+                testItem.MyInt.Val = 30;
+                testItem.MyString.Val = "Three";                
+                objCont.InternalObj = testItem;
+
+                var container = new ObjectDictionaryContainer<global::System.Int64, DotsTest.TestItemContainer, DotsTest.TestItem>();
+                container.Copy(b);
+                Check(container.Count == 2);
+
+                var itemCont3 = container[3];
+                Check(!itemCont3.IsNull());
+                Check(itemCont3.Obj.MyInt.Val == 30);
+                Check(itemCont3.Obj.MyString.Val == "Three");
+            }
+
+            // Enum key
+            {
+                var b = dict.EnumItemMember;
+                var objCont = b.AddNull(TestEnum.Enumeration.MySecond) as ObjectContainerBase;
+                Check(b.Count == 1);
+
+                var testItem = new TestItem();
+                testItem.MyInt.Val = 30;
+                testItem.MyString.Val = "Three";
+                objCont.InternalObj = testItem;
+
+                var container = new ObjectDictionaryContainer<DotsTest.TestEnum.Enumeration, DotsTest.TestItemContainer, DotsTest.TestItem>();
+                
+                container.Copy(b);
+                Check(container.Count == 1);
+
+                var itemCont3 = container[TestEnum.Enumeration.MySecond];
+                Check(!itemCont3.IsNull());
+                Check(itemCont3.Obj.MyInt.Val == 30);
+                Check(itemCont3.Obj.MyString.Val == "Three");
+            }
+
+            // String key
+            {
+                var b = dict.StringItemMember;
+                var objCont = b.AddNull("MyKey") as ObjectContainerBase;
+                Check(b.Count == 1);
+
+                var testItem = new TestItem();
+                testItem.MyInt.Val = 30;
+                testItem.MyString.Val = "Three";
+                
+                var md = new MemberDictionaries();
+                md.Int64ItemMember.Add(1, testItem);
+                objCont.InternalObj = md;
+                
+                var container = new Safir.Dob.Typesystem.ObjectDictionaryContainer<string, DotsTest.MemberDictionariesContainer, DotsTest.MemberDictionaries>();
+
+                container.Copy(b);
+                Check(container.Count == 1);
+
+                var itemCont = container["MyKey"];
+                Check(!itemCont.IsNull());
+                Check(itemCont.Obj.Int64ItemMember[1].Obj.MyInt.Val == 30);
+                Check(itemCont.Obj.Int64ItemMember[1].Obj.MyString.Val == "Three");
+            }
+
+            // InstanceId key
+            {
+                var b = dict.InstanceIdItemMember;
+                var objCont = b.AddNull(new InstanceId("someInstance")) as ObjectContainerBase;
+                Check(b.Count == 1);
+
+                var testItem = new TestItem();
+                testItem.MyInt.Val = 30;
+                testItem.MyString.Val = "Three";
+
+                var md = new MemberDictionaries();
+                md.Int64ItemMember.Add(1, testItem);
+                objCont.InternalObj = md;
+                
+                var container = new Safir.Dob.Typesystem.ObjectDictionaryContainer<Safir.Dob.Typesystem.InstanceId, DotsTest.MemberDictionariesContainer, DotsTest.MemberDictionaries>();
+
+                container.Copy(b);
+                Check(container.Count == 1);
+
+                var itemCont = container[new InstanceId("someInstance")];
+                Check(!itemCont.IsNull());
+                Check(itemCont.Obj.Int64ItemMember[1].Obj.MyInt.Val == 30);
+                Check(itemCont.Obj.Int64ItemMember[1].Obj.MyString.Val == "Three");
+            }
+
+            // EntityId key
+            {
+                var b = dict.EntityIdItemMember;
+                var key = new EntityId(Safir.Dob.Entity.ClassTypeId, new InstanceId(3));
+                var objCont = b.AddNull(key) as ObjectContainerBase;
+                Check(b.Count == 1);
+
+                var testItem = new TestItem();
+                testItem.MyInt.Val = 30;
+                testItem.MyString.Val = "Three";
+
+                var md = new MemberDictionaries();
+                md.Int64ItemMember.Add(1, testItem);
+                objCont.InternalObj = md;
+                
+                var container = new Safir.Dob.Typesystem.ObjectDictionaryContainer<Safir.Dob.Typesystem.EntityId, DotsTest.MemberDictionariesContainer, DotsTest.MemberDictionaries>();
+
+                container.Copy(b);
+                Check(container.Count == 1);
+
+                var itemCont = container[key];
+                Check(!itemCont.IsNull());
+                Check(itemCont.Obj.Int64ItemMember[1].Obj.MyInt.Val == 30);
+                Check(itemCont.Obj.Int64ItemMember[1].Obj.MyString.Val == "Three");
+            }
+
+            // Int32Object dictionary
+            {
+                var b = dict.Int32ObjectMember;
+
+                var objCont1 = b.AddNull(1) as ObjectContainerBase;
+                var objCont2 = b.AddNull(2) as ObjectContainerBase;
+                b.AddNull(3);
+                Check(b.Count == 3);
+
+                var testItem1 = new TestItem();
+                testItem1.MyInt.Val = 30;
+                testItem1.MyString.Val = "Three";
+                objCont1.InternalObj = testItem1;
+
+                var testItem2 = new TestItem();
+                testItem2.MyInt.Val = 40;
+                testItem2.MyString.Val = "Four";
+                var md = new MemberDictionaries();
+                md.Int64ItemMember.Add(1, testItem2);
+                objCont2.InternalObj = md;
+
+                var container = new Safir.Dob.Typesystem.ObjectDictionaryContainer<global::System.Int32, Safir.Dob.Typesystem.ObjectContainer, Safir.Dob.Typesystem.Object>();
+                container.Copy(b);
+                Check(container.Count == 3);
+
+                var itemCont1 = container[1];
+                Check(!itemCont1.IsNull());
+                var obj1 = itemCont1.Obj as TestItem;
+                Check(obj1.MyInt.Val == 30);
+                Check(obj1.MyString.Val == "Three");
+
+                var itemCont2 = container[2];
+                Check(!itemCont2.IsNull());
+                var obj2 = itemCont2.Obj as MemberDictionaries;
+                Check(obj2.Int64ItemMember[1].Obj.MyInt.Val == 40);
+                Check(obj2.Int64ItemMember[1].Obj.MyString.Val == "Four");
+
+                var itemCont3 = container[3];
+                Check(itemCont3.IsNull());
+            }
+
+            // Wrong key type throws SoftwareViolationException
+            {
+                try
+                {
+                    dict.Int64ItemMember.AddNull((int)3);
+                    Check(false);
+                }
+                catch (Safir.Dob.Typesystem.SoftwareViolationException){}
+
+                try
+                {
+                    dict.EntityIdItemMember.AddNull("Hello");
+                    Check(false);
+                }
+                catch (Safir.Dob.Typesystem.SoftwareViolationException){}
+
+                try
+                {
+                    dict.StringItemMember.AddNull(new InstanceId("someInstance"));
+                    Check(false);
+                }
+                catch (Safir.Dob.Typesystem.SoftwareViolationException){}
             }
 
         }

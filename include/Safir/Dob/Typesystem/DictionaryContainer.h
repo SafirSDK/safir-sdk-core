@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2015, 2022, 2024 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -32,6 +32,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <vector>
+#include <iostream> // TODO: remove
 
 namespace Safir
 {
@@ -100,6 +101,20 @@ namespace Typesystem
         /** @{ */
 
         /**
+         * Adds a new key to the dictionary and return the value container.
+         *
+         * If the key already exists, the value will be overwritten.
+         *
+         * @param key the key to be added.
+         * @return the value container that belongs to the key.
+         */
+        template<class KeyT>
+        ContainerBase& InsertNull(const KeyT& key)
+        {
+            return InsertNullInternal(static_cast<const void*>(&key), typeid (key));
+        }
+
+        /**
          * Get the key at a particular position in the dictionary.
          *
          * Note that the order of keys in the dictionary is not guaranteed.
@@ -139,6 +154,7 @@ namespace Typesystem
         /** @} */
 
     protected:
+        virtual ContainerBase& InsertNullInternal(const void* key, const std::type_info& typeInfo) = 0;
         virtual const void* GetKeyAtInternal(const size_t index) const = 0;
 
     private:
@@ -353,7 +369,36 @@ namespace Typesystem
         }
         /** @} */
 
-        
+    protected:
+
+        ContainerBase& InsertNullInternal(const void* key, const std::type_info& typeInfo) override
+        {
+            if (typeInfo == typeid(KeyType))
+            {
+                m_bIsChanged=true;
+                ValueContainerType container;
+                auto result = m_values.insert(value_type(*static_cast<const KeyType*>(key), container));
+                return result.first->second;
+            }
+
+            std::wostringstream os;
+            os << L"DictionaryContainer::InsertNull: The supplied key has wrong type! "
+               << L"Expected type: " << typeid(KeyType).name() << L", got type: "
+               << typeInfo.name() << std::endl;
+            throw SoftwareViolationException(os.str(), __WFILE__, __LINE__);
+        }
+
+
+        const void* GetKeyAtInternal(const size_t index) const override
+        {
+            if (index >= size())
+            {
+                throw SoftwareViolationException
+                    (L"DictionaryContainer::GetKeyAt: Index outside range!", __WFILE__, __LINE__);
+            }
+            return &(std::next(m_values.begin(),index)->first);
+        }
+
     private:
 
         void Merge(const DictionaryContainerBase& that) override
@@ -414,17 +459,6 @@ namespace Typesystem
                 }
             }
         }
-
-        const void* GetKeyAtInternal(const size_t index) const override
-        {
-            if (index >= size())
-            {
-                throw SoftwareViolationException
-                    (L"DictionaryContainer::GetKeyAt: Index outside range!", __WFILE__, __LINE__);
-            }
-            return &(std::next(m_values.begin(),index)->first);
-        }
-
 
         std::map<KeyT, ValT> m_values;
 

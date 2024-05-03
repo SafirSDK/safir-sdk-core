@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2015-2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015-2016, 2024 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -46,4 +46,15 @@ public class BinaryDictionaryContainer<K>
 
         return m_values.put(key, container);
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public BinaryContainer putNull(java.lang.Object key) {
+        m_isChanged=true;
+        BinaryContainer container = new BinaryContainer();
+        container.setChanged(true);
+        m_values.put((K)key, container);
+        return container;
+    }
+
 }

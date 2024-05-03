@@ -11857,6 +11857,195 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection)
         BOOST_CHECK_NE(container, nullptr);
         BOOST_CHECK_EQUAL(container->IsNull(), true);
     }
+}
+
+BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
+{
+    MemberDictionariesPtr dict = MemberDictionaries::Create();
+
+    // Int64 key
+    {
+        DictionaryContainerBase& base = dict->Int64ItemMember();
+
+        auto& valCont = base.InsertNull(Int64(3));
+        base.InsertNull(Int64(4));
+
+        BOOST_CHECK_EQUAL(base.size(), 2);
+        auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
+        auto testItem = TestItem::Create();
+        testItem->MyInt() = 30;
+        testItem->MyString() = L"Three";
+        ObjectPtr obj = testItem;
+        objCont->SetPtr(obj);
+
+        Safir::Dob::Typesystem::DictionaryContainer<Safir::Dob::Typesystem::Int64, DotsTest::TestItemContainer> container;
+        container.Copy(base);
+        BOOST_CHECK_EQUAL(container.size(), 2);
+
+        auto itemCont3 = container.at(Int64(3));
+        BOOST_CHECK_EQUAL(itemCont3.IsNull(), false);
+        BOOST_CHECK_EQUAL(itemCont3.GetPtr()->MyInt().GetVal(), 30);
+        BOOST_CHECK_EQUAL(itemCont3.GetPtr()->MyString().GetVal(), L"Three");
+
+        auto itemCont4 = container.at(Int64(4));
+        BOOST_CHECK_EQUAL(itemCont4.IsNull(), true);
+    }
+
+
+    // Enum key
+    {
+        DictionaryContainerBase& base = dict->EnumItemMember();
+        auto& valCont = base.InsertNull(DotsTest::TestEnum::MySecond);
+        BOOST_CHECK_EQUAL(base.size(), 1);
+        auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
+        auto testItem = TestItem::Create();
+        testItem->MyInt() = 30;
+        testItem->MyString() = L"Three";
+        ObjectPtr obj = testItem;
+        objCont->SetPtr(obj);
+
+        Safir::Dob::Typesystem::DictionaryContainer<DotsTest::TestEnum::Enumeration, DotsTest::TestItemContainer> container;
+        container.Copy(base);
+        BOOST_CHECK_EQUAL(container.size(), 1);
+
+        auto itemCont = container.at(DotsTest::TestEnum::MySecond);
+        BOOST_CHECK_EQUAL(itemCont.IsNull(), false);
+        BOOST_CHECK_EQUAL(itemCont.GetPtr()->MyInt().GetVal(), 30);
+        BOOST_CHECK_EQUAL(itemCont.GetPtr()->MyString().GetVal(), L"Three");
+    }
+
+    // String key
+    {
+        DictionaryContainerBase& base = dict->StringItemMember();
+        std::wstring key = L"MyKey";
+        auto& valCont = base.InsertNull(key);
+        BOOST_CHECK_EQUAL(base.size(), 1);
+        auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
+
+        auto testItem = TestItem::Create();
+        testItem->MyInt() = 30;
+        testItem->MyString() = L"Three";
+        ObjectPtr obj = testItem;
+        auto val = MemberDictionaries::Create();
+        val->Int64ItemMember()[1].SetPtr(obj);
+        objCont->SetPtr(val);
+
+        Safir::Dob::Typesystem::DictionaryContainer<std::wstring, DotsTest::MemberDictionariesContainer> container;
+        container.Copy(base);
+        BOOST_CHECK_EQUAL(container.size(), 1);
+
+        auto itemCont = container.at(key);
+        BOOST_CHECK_EQUAL(itemCont.IsNull(), false);
+        BOOST_CHECK_EQUAL(itemCont.GetPtr()->Int64ItemMember()[1]->MyInt().GetVal(), 30);
+        BOOST_CHECK_EQUAL(itemCont.GetPtr()->Int64ItemMember()[1]->MyString().GetVal(), L"Three");
+    }
+
+    // InstanceId key
+    {
+        DictionaryContainerBase& base = dict->InstanceIdItemMember();
+        InstanceId key(L"someInstance");
+
+        auto& valCont = base.InsertNull(key);
+        BOOST_CHECK_EQUAL(base.size(), 1);
+        auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
+
+        auto testItem = TestItem::Create();
+        testItem->MyInt() = 30;
+        testItem->MyString() = L"Three";
+        ObjectPtr obj = testItem;
+        auto val = MemberDictionaries::Create();
+        val->Int64ItemMember()[1].SetPtr(obj);
+        objCont->SetPtr(val);
+
+        Safir::Dob::Typesystem::DictionaryContainer<InstanceId, DotsTest::MemberDictionariesContainer> container;
+        container.Copy(base);
+        BOOST_CHECK_EQUAL(container.size(), 1);
+
+        auto itemCont = container.at(key);
+        BOOST_CHECK_EQUAL(itemCont.IsNull(), false);
+        BOOST_CHECK_EQUAL(itemCont.GetPtr()->Int64ItemMember()[1]->MyInt().GetVal(), 30);
+        BOOST_CHECK_EQUAL(itemCont.GetPtr()->Int64ItemMember()[1]->MyString().GetVal(), L"Three");
+    }
+
+    // EntityId key
+    {
+        DictionaryContainerBase& base = dict->EntityIdItemMember();
+        Safir::Dob::Typesystem::EntityId key(Safir::Dob::Entity::ClassTypeId, InstanceId(3));
+
+        auto& valCont = base.InsertNull(key);
+        BOOST_CHECK_EQUAL(base.size(), 1);
+        auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
+
+        auto testItem = TestItem::Create();
+        testItem->MyInt() = 30;
+        testItem->MyString() = L"Three";
+        ObjectPtr obj = testItem;
+        auto val = MemberDictionaries::Create();
+        val->Int64ItemMember()[1].SetPtr(obj);
+        objCont->SetPtr(val);
+
+        Safir::Dob::Typesystem::DictionaryContainer<EntityId, DotsTest::MemberDictionariesContainer> container;
+        container.Copy(base);
+        BOOST_CHECK_EQUAL(container.size(), 1);
+
+        auto itemCont = container.at(key);
+        BOOST_CHECK_EQUAL(itemCont.IsNull(), false);
+        BOOST_CHECK_EQUAL(itemCont.GetPtr()->Int64ItemMember()[1]->MyInt().GetVal(), 30);
+        BOOST_CHECK_EQUAL(itemCont.GetPtr()->Int64ItemMember()[1]->MyString().GetVal(), L"Three");
+    }
+    
+    // Int32Object dictionary
+    {
+        DictionaryContainerBase& base = dict->Int32ObjectMember();
+
+        auto& valCont1 = base.InsertNull(1);
+        auto& valCont2 = base.InsertNull(2);
+        base.InsertNull(3);
+        BOOST_CHECK_EQUAL(base.size(), 3);
+
+        auto objCont1 = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont1);
+        auto obj1 = TestItem::Create();
+        obj1->MyInt() = 30;
+        obj1->MyString() = L"Three";
+        objCont1->SetPtr(obj1);
+
+        auto objCont2 = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont2);
+        auto obj2 = TestItem::Create();
+        obj2->MyInt() = 40;
+        obj2->MyString() = L"Four";
+        auto val = MemberDictionaries::Create();
+        val->Int64ItemMember()[1].SetPtr(obj2);
+        objCont2->SetPtr(val);
+
+        Safir::Dob::Typesystem::DictionaryContainer<Safir::Dob::Typesystem::Int32, Safir::Dob::Typesystem::ObjectContainer> container;
+        container.Copy(base);
+        BOOST_CHECK_EQUAL(container.size(), 3);
+
+        auto itemCont1 = container.at(1);
+        BOOST_CHECK_EQUAL(itemCont1.IsNull(), false);
+        auto testItem = std::dynamic_pointer_cast<TestItem>(itemCont1.GetPtr());
+        BOOST_CHECK(testItem.get());
+        BOOST_CHECK_EQUAL(testItem->MyInt().GetVal(), 30);
+        BOOST_CHECK_EQUAL(testItem->MyString().GetVal(), L"Three");
+
+        auto itemCont2 = container.at(2);
+        BOOST_CHECK_EQUAL(itemCont2.IsNull(), false);
+        auto memDict = std::dynamic_pointer_cast<MemberDictionaries>(itemCont2.GetPtr());
+        BOOST_CHECK(memDict.get());
+
+        BOOST_CHECK_EQUAL(memDict->Int64ItemMember()[1].GetPtr()->MyInt().GetVal(), 40);
+        BOOST_CHECK_EQUAL(memDict->Int64ItemMember()[1].GetPtr()->MyString().GetVal(), L"Four");
+
+        auto itemCont4 = container.at(3);
+        BOOST_CHECK_EQUAL(itemCont4.IsNull(), true);
+    }
+
+    // Wrong key type throws SoftwareViolationException
+    {
+        BOOST_CHECK_THROW(dict->Int64ItemMember().InsertNull(3), Safir::Dob::Typesystem::SoftwareViolationException);
+        BOOST_CHECK_THROW(dict->EntityIdItemMember().InsertNull(L"Hello"), Safir::Dob::Typesystem::SoftwareViolationException);
+        BOOST_CHECK_THROW(dict->StringItemMember().InsertNull(L"hej"), Safir::Dob::Typesystem::SoftwareViolationException); // expects w_char* is not a wstring
+    }
 
 }
 

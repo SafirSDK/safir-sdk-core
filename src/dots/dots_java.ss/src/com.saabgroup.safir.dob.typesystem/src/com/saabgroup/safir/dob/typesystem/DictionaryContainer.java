@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2015-2016, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015-2016, 2022, 2024 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-public class DictionaryContainer<K, V extends ContainerBase>
+public abstract class DictionaryContainer<K, V extends ContainerBase>
 extends DictionaryContainerBase
 implements java.util.Map<K, V> {
 

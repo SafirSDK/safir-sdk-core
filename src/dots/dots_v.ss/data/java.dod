@@ -1684,6 +1684,17 @@ public enum @_CLASS_@
 
             return m_values.put(key, container);
         }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Container putNull(java.lang.Object key) {
+            m_isChanged=true;
+            Container container = new Container();
+            container.setChanged(true);
+            m_values.put((K)key, container);
+            return container;
+        }
+
     }
 
 }

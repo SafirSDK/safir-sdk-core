@@ -62,6 +62,17 @@ namespace Safir.Dob.Typesystem
         public abstract int Count { get; }
 
         /// <summary>
+        /// Adds a new key to the dictionary and return the value container.
+        /// <para/>
+        /// If the type of the key doesn't match the dictionaries key type an
+        /// SoftwareViolation is thrown.
+        /// <para/>
+        /// </summary>
+        /// <param name="key">The key to add.</param>
+        /// <returns>The value container</returns>
+        public abstract ContainerBase AddNull(object key);
+
+        /// <summary>
         /// Get the key at a particular position in the dictionary.
         /// <para/>
         /// Note that the order of keys in the dictionary is not guaranteed.
@@ -135,6 +146,7 @@ namespace Safir.Dob.Typesystem
         /// <summary>
         /// Add the specified key.
         /// </summary>
+        /// <returns>The value container.</returns>
         /// <param name="key">Key.</param>
         public ValT Add(KeyT key)
         {
@@ -385,6 +397,25 @@ namespace Safir.Dob.Typesystem
 
 
         #endregion
+
+        /// <summary>
+        /// Adds a new key to the dictionary and return the value container.
+        /// <para/>
+        /// If the type of the key doesn't match the dictionaries key type an
+        /// SoftwareViolation is thrown.
+        /// <para/>
+        /// </summary>
+        /// <param name="key">The key to add.</param>
+        /// <returns>The value container</returns>
+        public override ContainerBase AddNull(object key)
+        {
+            if (key is KeyT)
+            {
+                return Add((KeyT)key);
+            }
+
+            throw new SoftwareViolationException($"DictionaryContainer.AddNull: The supplied key has wrong type! Expected {typeof(KeyT)}, got type {key.GetType()}");
+        }
 
         /// <summary>
         /// Get the key at a particular position in the dictionary.

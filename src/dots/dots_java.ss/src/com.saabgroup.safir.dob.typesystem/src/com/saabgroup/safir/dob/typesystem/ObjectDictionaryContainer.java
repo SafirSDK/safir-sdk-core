@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2015-2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015-2016, 2024 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -59,6 +59,28 @@ public class ObjectDictionaryContainer<K, C extends ObjectContainerImpl<O>, O ex
     public O getObj(K key) {
         return m_values.get(key).getObj();
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public C putNull(java.lang.Object key) {
+        m_isChanged=true;
+        C container;
+        try {
+            container = m_containerClass.getDeclaredConstructor().newInstance();
+        }
+        catch (InstantiationException |
+               IllegalAccessException |
+               java.lang.NoSuchMethodException |
+               java.lang.reflect.InvocationTargetException e) {
+            throw new SoftwareViolationException("Internal error in ObjectDictionaryContainer: " +
+                                                 "Failed to instantiate container.");
+        }
+        container.setChanged(true);
+
+        m_values.put((K)key, container);
+        return container;
+    }
+
 
     private final Class<C> m_containerClass;
 }

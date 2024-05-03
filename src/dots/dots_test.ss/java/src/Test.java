@@ -9526,6 +9526,7 @@ public class Test {
             Test_EnumerationSequenceReflection();
             Test_ObjectSequenceReflection();
             Test_DictionaryReflection();
+            Test_DictionaryReflection_putNull();
             Test_ParameterGetInfo();
             Test_ParameterDictionaryReflection();
         }
@@ -9684,6 +9685,146 @@ public class Test {
 
         }
 
+        @SuppressWarnings("unchecked")
+        void Test_DictionaryReflection_putNull()
+        {
+            MemberDictionaries dict = new MemberDictionaries();
+
+            // Int64 key
+            {
+                DictionaryContainerBase base = dict.int64ItemMember();
+
+                var valCont = base.putNull(3);
+                base.putNull(4);
+
+                check(base.size()== 2);
+                check(valCont.isNull());
+                check(valCont.isChanged());
+                var objCont = (ObjectContainerImpl)valCont;
+                var testItem = new TestItem();
+                testItem.myInt().setVal(30);
+                testItem.myString().setVal("Three");
+                objCont.setObj(testItem);
+
+                check(dict.int64ItemMember().size() == 2);
+                check(dict.int64ItemMember().get(3).isNull() == false);
+                check(dict.int64ItemMember().get(4).isNull() == true);
+                check(dict.int64ItemMember().get(3).getObj().myInt().getVal() == 30);
+                check(dict.int64ItemMember().get(3).getObj().myString().getVal() == "Three");
+            }
+
+
+
+
+            // Enum key
+            {
+                DictionaryContainerBase base = dict.enumItemMember();
+                var valCont = base.putNull(com.saabgroup.dotstest.TestEnum.MY_SECOND);
+                check(base.size() == 1);
+                check(valCont.isNull());
+                check(valCont.isChanged());
+                var objCont = (ObjectContainerBase)valCont;
+                var testItem = new TestItem();
+                testItem.myInt().setVal(39);
+                testItem.myString().setVal("Four");
+                objCont.setObjInternal(testItem);
+
+                check(dict.enumItemMember().size() == 1);
+                check(dict.enumItemMember().get(com.saabgroup.dotstest.TestEnum.MY_SECOND).isNull() == false);
+                check(dict.enumItemMember().get(com.saabgroup.dotstest.TestEnum.MY_SECOND).getObj().myInt().getVal() == 39);
+                check(dict.enumItemMember().get(com.saabgroup.dotstest.TestEnum.MY_SECOND).getObj().myString().getVal() == "Four");
+            }
+
+            // String key
+            {
+                DictionaryContainerBase base = dict.stringEnumMember();
+                var valCont = base.putNull("MyKey");
+                check(base.size() == 1);
+                check(valCont.isNull());
+                check(valCont.isChanged());
+                var castedCont = (EnumerationContainerBase)valCont;
+                castedCont.setOrdinal(1);
+
+                check(dict.stringEnumMember().size() == 1);
+                check(dict.stringEnumMember().get("MyKey").isNull() == false);
+                check(dict.stringEnumMember().get("MyKey").getVal() == com.saabgroup.dotstest.TestEnum.MY_SECOND);
+            }
+
+            // InstanceId key
+            {
+                DictionaryContainerBase base = dict.instanceIdStringMember();
+
+                var valCont = base.putNull("someInstance");
+                check(base.size() == 1);
+                var castedCont = (StringContainer)valCont;
+                castedCont.setVal("Flupp");
+
+                check(dict.instanceIdStringMember().size() == 1);
+                check(dict.instanceIdStringMember().get("someInstance").isNull() == false);
+                check(dict.instanceIdStringMember().get("someInstance").getVal() == "Flupp");
+            }
+
+            // Int32Object dictionary
+            {
+                DictionaryContainerBase base = dict.int32ObjectMember();
+
+                var valCont1 = base.putNull(1);
+                var valCont2 = base.putNull(2);
+                base.putNull(3);
+                check(base.size() == 3);
+
+                var objCont1 = (ObjectContainerImpl)valCont1;
+                var obj1 = new TestItem();
+                obj1.myInt().setVal(30);
+                obj1.myString().setVal("Three");
+                objCont1.setObj(obj1);
+
+                var objCont2 = (ObjectContainerBase)valCont2;
+                var obj2 = new TestItem();
+                obj2.myInt().setVal(40);
+                obj2.myString().setVal("Four");
+                var val = new MemberDictionaries();
+                val.int64ItemMember().putObj(10L,obj2);
+                objCont2.setObjInternal(val);
+
+                check(dict.int32ObjectMember().size() == 3);
+                check(dict.int32ObjectMember().get(1).isNull() == false);
+                check(dict.int32ObjectMember().get(1).isChanged());
+                check(((TestItem)dict.int32ObjectMember().get(1).getObj()).myInt().getVal() == 30);
+                check(((TestItem)dict.int32ObjectMember().get(1).getObj()).myString().getVal() == "Three");
+
+                check(dict.int32ObjectMember().get(2).isNull() == false);
+                check(dict.int32ObjectMember().get(2).isChanged());
+                check(((MemberDictionaries)dict.int32ObjectMember().get(2).getObj()).int64ItemMember().get(10L).getObj().myInt().getVal() == 40);
+                check(((MemberDictionaries)dict.int32ObjectMember().get(2).getObj()).int64ItemMember().get(10L).getObj().myString().getVal() == "Four");
+
+                check(dict.int32ObjectMember().get(3).isNull());
+                check(dict.int32ObjectMember().get(3).isChanged());
+            }
+
+            // Wrong key type throws SoftwareViolationException
+            {
+                //DictionaryContainerBase base = dict.Int64ItemMember();
+                try
+                {
+                    dict.int64ItemMember().putNull("string");
+                    check(false);
+                }
+                catch(java.lang.ClassCastException e)
+                {
+                }
+
+                try
+                {
+                    dict.enumItemMember().putNull(10);
+                    check(false);
+                }
+                catch(java.lang.ClassCastException e)
+                {
+                }
+            }
+
+        }
 
         private void Test_ParameterGetInfo()
         {

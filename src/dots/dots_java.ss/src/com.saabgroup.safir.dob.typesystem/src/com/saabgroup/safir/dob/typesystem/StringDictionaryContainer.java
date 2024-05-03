@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2015-2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015-2016, 2024 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -32,11 +32,28 @@ import java.util.Set;
 public class StringDictionaryContainer<K>
     extends DictionaryContainer<K,StringContainer>
 {
+    /**
+     * Set the value for a particular key.
+     *
+     * @param key The key to assign a value for
+     * @param value The value to assign.
+     * @return The container that was modified/created.
+     */
     public StringContainer putVal(K key, String value) {
         m_isChanged=true;
         StringContainer container = new StringContainer();
         container.setVal(value);
 
         return m_values.put(key, container);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public StringContainer putNull(java.lang.Object key) {
+        m_isChanged=true;
+        StringContainer container = new StringContainer();
+        container.setChanged(true);
+        m_values.put((K)key, container);
+        return container;
     }
 }

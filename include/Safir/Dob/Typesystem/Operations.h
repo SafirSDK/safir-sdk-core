@@ -219,7 +219,7 @@ namespace Operations
     /**
      * Returns a list of all type id's that is of the given type by inheritance.
      * The type 'rootClass' will also be inserted in the list. If for example type A
-     * is the base class for type B and type C, GetCompleteType(A::ClassTypeId) will
+     * is the base class for type B and type C, GetClassTree(A::ClassTypeId) will
      * return a list with A, B and C.
      *
      * @param rootClass [in] - The base type.

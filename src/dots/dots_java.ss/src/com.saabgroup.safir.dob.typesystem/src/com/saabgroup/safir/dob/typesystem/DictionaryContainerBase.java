@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2022, 2024 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -71,4 +71,23 @@ public abstract class DictionaryContainerBase
      * @return The container at a position in the dictionary.
      */
     public abstract ContainerBase getValueContainerAt(int index);
+
+    /**
+     * Set the value for a particular key to null.
+     *
+     * This is really meant to be part of the reflection functionality, to allow setting
+     * values in a dictionary without having instantiated the types directly.
+     * After you have called this you will have an empty container that you
+     * know inherits from ContainerBase, and that can be cast to the correct type
+     * for further use.
+     *
+     * Warning: There are very few checks implemented in this function, please take care!
+     * It is for example likely that you will be able successfully to call this with an
+     * incorrect key type, but something will blow up on you later.  It is probably as
+     * bad as calling it with an long instead of an int will blow things up.
+     *
+     * @param key The key to assign to null.
+     * @return The newly created empty container.
+     */
+    public abstract ContainerBase putNull(java.lang.Object key);
 }
