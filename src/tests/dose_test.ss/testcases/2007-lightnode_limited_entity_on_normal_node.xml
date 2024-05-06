@@ -106,5 +106,12 @@
         <instanceId>0</instanceId>
       </EntityId>
     </DoseTest.Action>
+    <DoseTest.Action>
+      <ActionKind>UnregisterHandler</ActionKind>
+      <Partner>2</Partner>
+      <Consumer>0</Consumer>
+      <TypeId>DoseTest.LimitedEntity</TypeId>
+      <Handler>DEFAULT_HANDLER</Handler>
+    </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>
