@@ -11870,7 +11870,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
         auto& valCont = base.InsertNull(Int64(3));
         base.InsertNull(Int64(4));
 
-        BOOST_CHECK_EQUAL(base.size(), 2);
+        BOOST_CHECK_EQUAL(base.size(), 2U);
         auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
         auto testItem = TestItem::Create();
         testItem->MyInt() = 30;
@@ -11880,7 +11880,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
 
         Safir::Dob::Typesystem::DictionaryContainer<Safir::Dob::Typesystem::Int64, DotsTest::TestItemContainer> container;
         container.Copy(base);
-        BOOST_CHECK_EQUAL(container.size(), 2);
+        BOOST_CHECK_EQUAL(container.size(), 2U);
 
         auto itemCont3 = container.at(Int64(3));
         BOOST_CHECK_EQUAL(itemCont3.IsNull(), false);
@@ -11896,7 +11896,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
     {
         DictionaryContainerBase& base = dict->EnumItemMember();
         auto& valCont = base.InsertNull(DotsTest::TestEnum::MySecond);
-        BOOST_CHECK_EQUAL(base.size(), 1);
+        BOOST_CHECK_EQUAL(base.size(), 1U);
         auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
         auto testItem = TestItem::Create();
         testItem->MyInt() = 30;
@@ -11906,7 +11906,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
 
         Safir::Dob::Typesystem::DictionaryContainer<DotsTest::TestEnum::Enumeration, DotsTest::TestItemContainer> container;
         container.Copy(base);
-        BOOST_CHECK_EQUAL(container.size(), 1);
+        BOOST_CHECK_EQUAL(container.size(), 1U);
 
         auto itemCont = container.at(DotsTest::TestEnum::MySecond);
         BOOST_CHECK_EQUAL(itemCont.IsNull(), false);
@@ -11919,7 +11919,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
         DictionaryContainerBase& base = dict->StringItemMember();
         std::wstring key = L"MyKey";
         auto& valCont = base.InsertNull(key);
-        BOOST_CHECK_EQUAL(base.size(), 1);
+        BOOST_CHECK_EQUAL(base.size(), 1U);
         auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
 
         auto testItem = TestItem::Create();
@@ -11932,7 +11932,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
 
         Safir::Dob::Typesystem::DictionaryContainer<std::wstring, DotsTest::MemberDictionariesContainer> container;
         container.Copy(base);
-        BOOST_CHECK_EQUAL(container.size(), 1);
+        BOOST_CHECK_EQUAL(container.size(), 1U);
 
         auto itemCont = container.at(key);
         BOOST_CHECK_EQUAL(itemCont.IsNull(), false);
@@ -11946,7 +11946,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
         InstanceId key(L"someInstance");
 
         auto& valCont = base.InsertNull(key);
-        BOOST_CHECK_EQUAL(base.size(), 1);
+        BOOST_CHECK_EQUAL(base.size(), 1U);
         auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
 
         auto testItem = TestItem::Create();
@@ -11959,7 +11959,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
 
         Safir::Dob::Typesystem::DictionaryContainer<InstanceId, DotsTest::MemberDictionariesContainer> container;
         container.Copy(base);
-        BOOST_CHECK_EQUAL(container.size(), 1);
+        BOOST_CHECK_EQUAL(container.size(), 1U);
 
         auto itemCont = container.at(key);
         BOOST_CHECK_EQUAL(itemCont.IsNull(), false);
@@ -11973,7 +11973,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
         Safir::Dob::Typesystem::EntityId key(Safir::Dob::Entity::ClassTypeId, InstanceId(3));
 
         auto& valCont = base.InsertNull(key);
-        BOOST_CHECK_EQUAL(base.size(), 1);
+        BOOST_CHECK_EQUAL(base.size(), 1U);
         auto objCont = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont);
 
         auto testItem = TestItem::Create();
@@ -11986,14 +11986,14 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
 
         Safir::Dob::Typesystem::DictionaryContainer<EntityId, DotsTest::MemberDictionariesContainer> container;
         container.Copy(base);
-        BOOST_CHECK_EQUAL(container.size(), 1);
+        BOOST_CHECK_EQUAL(container.size(), 1U);
 
         auto itemCont = container.at(key);
         BOOST_CHECK_EQUAL(itemCont.IsNull(), false);
         BOOST_CHECK_EQUAL(itemCont.GetPtr()->Int64ItemMember()[1]->MyInt().GetVal(), 30);
         BOOST_CHECK_EQUAL(itemCont.GetPtr()->Int64ItemMember()[1]->MyString().GetVal(), L"Three");
     }
-    
+
     // Int32Object dictionary
     {
         DictionaryContainerBase& base = dict->Int32ObjectMember();
@@ -12001,7 +12001,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
         auto& valCont1 = base.InsertNull(1);
         auto& valCont2 = base.InsertNull(2);
         base.InsertNull(3);
-        BOOST_CHECK_EQUAL(base.size(), 3);
+        BOOST_CHECK_EQUAL(base.size(), 3U);
 
         auto objCont1 = static_cast<Safir::Dob::Typesystem::ObjectContainerBase*>(&valCont1);
         auto obj1 = TestItem::Create();
@@ -12019,7 +12019,7 @@ BOOST_AUTO_TEST_CASE(DictionaryReflection_InsertNull)
 
         Safir::Dob::Typesystem::DictionaryContainer<Safir::Dob::Typesystem::Int32, Safir::Dob::Typesystem::ObjectContainer> container;
         container.Copy(base);
-        BOOST_CHECK_EQUAL(container.size(), 3);
+        BOOST_CHECK_EQUAL(container.size(), 3U);
 
         auto itemCont1 = container.at(1);
         BOOST_CHECK_EQUAL(itemCont1.IsNull(), false);
