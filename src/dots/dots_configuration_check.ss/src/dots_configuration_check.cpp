@@ -175,12 +175,8 @@ DouDiffHelper::NameTypeVector GetParameters(DotsC_TypeId typeId)
     for (auto i = inherited; i < totalCount; ++i)
     {
         auto name = Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::Typesystem::Parameters::GetName(typeId, i));
-        // Ignore hidden parameters generated from propertyMappings since they are harmless
-        if (std::find(name.begin(), name.end(), '@') == name.end())
-        {
-            auto type = Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::Typesystem::Parameters::GetTypeName(typeId, i));
-            parameters.emplace_back(name, type);
-        }
+        auto type = Safir::Dob::Typesystem::Utilities::ToUtf8(Safir::Dob::Typesystem::Parameters::GetTypeName(typeId, i));
+        parameters.emplace_back(name, type);
     }
     return parameters;
 }
@@ -373,6 +369,9 @@ private:
                 std::string typeName=DotsC_GetTypeName(t.first);
                 std::string file = DotsC_GetDouFilePath(t.first);
                 std::cout << "  --- " << typeName << " (" << file << ")" << std::endl;
+                DotsC_Int64 checksum;
+                DotsC_GetClassChecksum(t.first, checksum);
+                std::cout << "The dou file has checksum: " << checksum << " but the generated code has checksum " << t.second << std::endl;
                 if (diffHelper.LoadType(typeName, t.second))
                 {
                     // Get member and parameter info from the currently used dou-file and compare towards the one used in code generation.

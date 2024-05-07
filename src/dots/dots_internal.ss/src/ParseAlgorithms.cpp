@@ -1486,8 +1486,15 @@ namespace ToolSupport
                 values.push_back(md->name + ":" + md->typeName);
             }
             for (const auto& pd : cd->ownParameters)
-            {
-                values.push_back(pd->name + ":" + pd->typeName);
+            {                
+                if (pd->hidden)
+                {
+                    values.push_back(pd->name);
+                }
+                else
+                {
+                    values.push_back(pd->name + ":" + pd->typeName);
+                }
             }
 
             if (values.empty())

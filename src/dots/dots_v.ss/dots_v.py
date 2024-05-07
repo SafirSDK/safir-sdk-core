@@ -967,6 +967,10 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
             member_list.append(mv.name + ":" + mv.type)
         for pv in dou.parameters:
             member_list.append(pv.name + ":" + pv.type)
+        for cr in dou.createRoutines:
+            for cv in cr.values:
+                if cv.inline:
+                    member_list.append(cv.parameter)
         member_list.sort();
         return str(md5_first64(",".join(member_list)))
     elif var == "ENUMCHECKSUM":

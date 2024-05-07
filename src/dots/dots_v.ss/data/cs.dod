@@ -587,6 +587,7 @@ namespace @_NAMESPACE_@
 @@END_IF@@
 @@END_IF@@
 @@ELSE@@
+@@-- Not array
 @@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
 
@@ -597,7 +598,41 @@ namespace @_NAMESPACE_@
 @@ELSE@@
             val.@_CREATEVALUE_@.Obj = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@;
 @@END_IF@@
+@-- createValues of all Enumeration
+@@ELSIF@@ @_UNIFORM_CREATEVALUETYPE_@=Enumeration
+@@IF@@ @_EXIST:CREATEVALUEISINLINE_@
+
+            // Inline set of member @_CREATEVALUE_@ value
+            global::System.Int32 tmp@_CREATEVALUE_@Index =
+                Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
+            val.@_CREATEVALUE_@.Val = (@_CREATEVALUETYPE_@.Enumeration)Safir.Dob.Typesystem.Parameters.GetEnumeration(ClassTypeId, tmp@_CREATEVALUE_@Index, 0);
 @@ELSE@@
+            val.@_CREATEVALUE_@.Val = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@;
+@@END_IF@@
+@-- createValues of all Float32 types including Si32
+@@ELSIF@@ @_CREATEVALUETYPE_@=global::System.Single
+@@IF@@ @_EXIST:CREATEVALUEISINLINE_@
+
+            // Inline set of member @_CREATEVALUE_@ value
+            global::System.Int32 tmp@_CREATEVALUE_@Index =
+                Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
+            val.@_CREATEVALUE_@.Val = Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, tmp@_CREATEVALUE_@Index, 0);
+@@ELSE@@
+            val.@_CREATEVALUE_@.Val = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@;
+@@END_IF@@
+@-- createValues of all Float64 types including Si64
+@@ELSIF@@ @_CREATEVALUETYPE_@=global::System.Double
+@@IF@@ @_EXIST:CREATEVALUEISINLINE_@
+
+            // Inline set of member @_CREATEVALUE_@ value
+            global::System.Int32 tmp@_CREATEVALUE_@Index =
+                Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
+            val.@_CREATEVALUE_@.Val = Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, tmp@_CREATEVALUE_@Index, 0);
+@@ELSE@@
+            val.@_CREATEVALUE_@.Val = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@;
+@@END_IF@@
+@@ELSE@@
+@@-- CreateRoutine value that is not object
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
 
             // Inline set of member @_CREATEVALUE_@ value

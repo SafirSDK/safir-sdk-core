@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!--
+    Checksum = 990581854026369521
+    A:String,B:String,C:String,C@Test.MyEntity.Cr1#A,D:String,D@Test.MyEntity.Cr2#A#B,E:String,E@Test.MyEntity.Cr1#A,F:String,X:String,Y:String
+    -->
+    <name>Test.MyEntity</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <members>
+        <member>
+            <name>A</name>
+            <type>String</type>
+        </member>
+        <member>
+            <name>B</name>
+            <type>String</type>
+        </member>
+        <member>
+            <name>C</name>
+            <type>String</type>
+        </member>
+        <member>
+            <name>D</name>
+            <type>String</type>
+        </member>
+        <member>
+            <name>E</name>
+            <type>String</type>
+        </member>
+        <member>
+            <name>F</name>
+            <type>String</type>
+        </member>
+    </members>
+
+    <parameters>
+        <parameter>
+            <type>String</type>
+            <name>X</name>
+            <value>paramX</value>
+        </parameter>
+        <parameter>
+            <type>String</type>
+            <name>Y</name>
+            <value>paramY</value>
+        </parameter>
+    </parameters>
+
+    <createRoutines>
+        <createRoutine>
+            <name>Cr1</name>
+            <parameters>
+                <member>A</member>
+            </parameters>
+            <values>
+                <value>
+                    <member>B</member>
+                    <parameter>
+                        <name>Test.MyEntity.X</name>
+                    </parameter>
+                </value>
+                <value>
+                    <member>C</member>
+                    <value>InlineC</value>
+                </value>
+                <value>
+                    <member>E</member>
+                    <value>InlineE</value>
+                </value>
+            </values>
+        </createRoutine>
+
+        <createRoutine>
+            <name>Cr2</name>
+            <parameters>
+                <member>A</member>
+                <member>B</member>
+            </parameters>
+            <values>
+                <value>
+                    <member>C</member>
+                    <parameter>
+                        <name>Test.MyEntity.Y</name>
+                    </parameter>
+                </value>
+                <value>
+                    <member>D</member>
+                    <value>InlineD</value>
+                </value>                
+            </values>
+        </createRoutine>
+
+    </createRoutines>
+</class>

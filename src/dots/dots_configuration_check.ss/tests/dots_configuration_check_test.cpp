@@ -27,6 +27,7 @@
 
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 
 namespace fs = boost::filesystem;
 
@@ -388,6 +389,55 @@ int main(int argc, char* argv[])
         else
         {
             std::cout << "mixed_advanced failed - couldn't find dou-file for Test.Params" << std::endl;
+            failed = true;
+        }
+
+        returnCode = failed ? -1 : returnCode;
+        std::cout<< "Test " << (failed ? "failed!" : "passed!") << std::endl;
+    }
+
+    // ---------------------------------------
+    // createRoutines
+    // ---------------------------------------
+    {
+        std::cout << "\n=== Start: createRoutines ===" << std::endl;
+        auto failed = false;
+        std::vector<fs::path> roots = {
+            douDir / fs::path("createRoutines") / fs::path("base"),
+            douDir / fs::path("createRoutines") / fs::path("override")
+        };
+
+        DouDiffHelper dh(roots);
+        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
+
+        std::ostringstream os;
+        //Safir::Dob::Typesystem::ToolSupport::RepositoryToString(repo.get(), true, os);
+        std::cout << os.str() << std::endl;
+
+        if (dh.LoadType("Test.MyEntity", -3544093291246692643))
+        {
+            auto typeId = LlufId_Generate64("Test.MyEntity");
+            auto members = GetMembers(typeId, repo);
+            auto parameters = GetParameters(typeId, repo);
+
+            // Add some dummy hidden parameters, just to make sure they won't have effect on the result.
+            parameters.push_back({"Test.MyProperty.Dummy@Test.MyClass", "String"});
+            parameters.push_back({"Test.MyProperty.Dummy2@Test.MyClass", "Int32"});
+
+            const auto& diff = dh.DiffLoadedType(members, parameters);
+
+            auto expectedResult = diff.hasDiff && diff.addedMembers.empty() && diff.addedParameters.empty() &&
+                    diff.missingMembers.empty() && diff.missingParameters.empty();
+            if (!expectedResult || !Check(diff.missingCreateRoutineValues, {{"E@Test.MyEntity.Cr2#A#B", ""}, {"F@Test.MyEntity.Cr3", ""}}))
+            {
+                std::cout << "mixed_advanced failed - addedMembers not correct." << std::endl;
+                failed = true;
+            }
+            std::cout << "Diff: " << diff << std::endl;
+        }
+        else
+        {
+            std::cout << "createRoutines failed - couldn't find dou-file." << std::endl;
             failed = true;
         }
 

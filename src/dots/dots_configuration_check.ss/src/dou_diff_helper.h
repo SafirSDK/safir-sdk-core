@@ -48,6 +48,7 @@ public:
         NameTypeVector addedMembers;
         NameTypeVector missingParameters;
         NameTypeVector addedParameters;
+        NameTypeVector missingCreateRoutineValues;
 
         std::string ToString() const
         {
@@ -73,6 +74,18 @@ public:
             for (const auto& m : addedParameters)
             {
                 os << "  - Parameter '" << m.second << " " << m.first << "' has been added." << std::endl;
+            }
+            if (!missingCreateRoutineValues.empty())
+            {
+                os << "  - There are changes to CreateRoutines that may cause runtime errors." << std::endl
+                   << "    The compiled code will look for the following parameters that no longer exists" << std::endl
+                   << "    (generated DOB-parameters from default values in CreateRoutines):" << std::endl;
+
+                for (const auto& m : missingCreateRoutineValues)
+                {
+                    os << "      - " << m.first << std::endl;
+                    //os << "  - CreateRoutine for member '" << m.first << " is missing in createRoutine " << m.second << std::endl;
+                }
             }
 
             return os.str();
@@ -111,6 +124,7 @@ public:
         m_diff.addedMembers.clear();
         m_diff.missingParameters.clear();
         m_diff.addedParameters.clear();
+        m_diff.missingCreateRoutineValues.clear();
 
         m_members.clear();
         m_parameters.clear();
@@ -148,30 +162,92 @@ public:
             }
         }
 
+        auto createRoutines = pt.get_child_optional("class.createRoutines");
+        if (createRoutines)
+        {
+            for (const auto& cr : *createRoutines)
+            {
+                auto crName = cr.second.get<std::string>("name");
+                auto vals = cr.second.get_child_optional("values");
+
+                if (vals)
+                {
+                    for (const auto& v : *vals)
+                    {
+                        auto member = v.second.get<std::string>("member");
+
+                        // If referencing an existing parameter the element <parameter> is alway used. If the parameter is
+                        // inline there are several options like: <value>, <entityId>, <MyClass> etc.
+                        auto isInlineParameter = !v.second.get_optional<std::string>("parameter").has_value();
+                        if (isInlineParameter)
+                        {
+                            // We have found a createRoutine with a member value that is not valueRef, i.e an hidden parameter.
+                            // Example of an inline parameter name: memberName@MyNamespace.MyClass.MyCreateRoutine#inParam1#inParam2
+                            std::string crSignature = member + "@" + typeName + "." + crName;
+
+                            // If the createRoutine has in-parameters they must be appended to the signature as #param1#param2...#paramN
+                            auto params = cr.second.get_child_optional("parameters");
+                            if (params)
+                            {
+                                for (const auto& p : *params)
+                                {
+                                    if (p.first == "member")
+                                    {
+                                        crSignature += "#" + p.second.data();
+                                    }
+                                }
+                            }
+
+                            m_createRoutineValues.emplace_back(crSignature, "");
+                        }
+                    }
+                }
+            }
+        }
+
         auto calculatedChecksum = CalculateChecksum();
         std::cout << "File found: " << it->string() << std::endl;
-        std::cout << "Calculated: " << calculatedChecksum << ", SearchedForGenerated: " << checksum << std::endl;
+        //std::cout << "Calculated: " << calculatedChecksum << ", SearchedForGenerated: " << checksum << std::endl;
 
         return calculatedChecksum == checksum;
     }
 
-    // Frågar med override versionen. Denna metod jämför mot ursprungsversione som genererat klasserna
-    const DouDiffHelper::DiffResult& DiffLoadedType(const NameTypeVector& members, const NameTypeVector& parameters)
+    // The data passed to this function has been loaded by dots_kernel. This method compares the data against the original version
+    // that was used to generate the classes.
+    const DouDiffHelper::DiffResult& DiffLoadedType(const NameTypeVector& members, const NameTypeVector& allParameters)
     {
         // Clear
         m_diff.missingMembers.clear();
         m_diff.addedMembers.clear();
         m_diff.missingParameters.clear();
         m_diff.addedParameters.clear();
+        m_diff.missingCreateRoutineValues.clear();
+
+        // Separate normal parameters from hidden parameters
+        NameTypeVector parameters, hidden;
+        for (const auto& v : allParameters)
+        {
+            if (std::find(v.first.begin(), v.first.end(), '@') == v.first.end())
+            {
+                parameters.push_back(v);
+            }
+            else
+            {
+                hidden.push_back({v.first, ""});
+            }
+        }
+
 
         // Get diffs in the in-params to this function.
-        m_diff.missingMembers = GetMissingInSecontVector(m_members, members);
-        m_diff.addedMembers = GetMissingInSecontVector(members, m_members);
-        m_diff.missingParameters = GetMissingInSecontVector(m_parameters, parameters);
-        m_diff.addedParameters = GetMissingInSecontVector(parameters, m_parameters);
+        m_diff.missingMembers = GetMissingInSecondVector(m_members, members);
+        m_diff.addedMembers = GetMissingInSecondVector(members, m_members);
+        m_diff.missingParameters = GetMissingInSecondVector(m_parameters, parameters);
+        m_diff.addedParameters = GetMissingInSecondVector(parameters, m_parameters);
+        m_diff.missingCreateRoutineValues = GetMissingInSecondVector(m_createRoutineValues, hidden);
 
         m_diff.hasDiff = !(m_diff.missingMembers.empty() && m_diff.addedMembers.empty() &&
-                         m_diff.missingParameters.empty() && m_diff.addedParameters.empty());
+                           m_diff.missingParameters.empty() && m_diff.addedParameters.empty() &&
+                           m_diff.missingCreateRoutineValues.empty());
 
         return m_diff;
     }
@@ -182,6 +258,7 @@ private:
     // Currently loaded type info
     NameTypeVector m_members;  // pair <name, type>
     NameTypeVector m_parameters; // pair <name, type>
+    NameTypeVector m_createRoutineValues; // pair <memberName, full_createRoutineName>  ex <MyMember, MyNamespace.MyClass.MyCreateRoutine#inParam>
 
     // Diff result of currently loaded type
     DouDiffHelper::DiffResult m_diff;
@@ -197,6 +274,10 @@ private:
         {
             values.push_back(val.first + ":" + val.second);
         }
+        for (const auto& val : m_createRoutineValues)
+        {
+            values.push_back(val.first);
+        }
 
         if (values.empty())
         {
@@ -205,10 +286,12 @@ private:
 
         std::sort(values.begin(), values.end());
         std::string checksumStr = boost::algorithm::join(values, ",");
+        std::cout << "Checksum string: " << checksumStr << std::endl;
         return LlufId_Generate64(checksumStr.c_str());
     }
 
-    NameTypeVector GetMissingInSecontVector(const NameTypeVector& src, const NameTypeVector& other) const
+    // Get a list of all values that are present in the src but not in other
+    NameTypeVector GetMissingInSecondVector(const NameTypeVector& src, const NameTypeVector& other) const
     {
         NameTypeVector missing;
         for (const auto& val : src)

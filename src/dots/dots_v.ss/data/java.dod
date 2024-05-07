@@ -1052,12 +1052,20 @@ public class @_CLASS_@
 @@ELSE@@
         val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setObj(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@());
 @@END_IF@@
-@@ELSE@@
+@@ELSIF@@ @_UNIFORM_CREATEVALUETYPE_@=Enumeration
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-
         // Inline set of member @_CREATEVALUE_@ value
         int tmp@_LOWER:CREATEVALUE_@index = com.saabgroup.safir.dob.typesystem.Parameters.getIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
-        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setVal(com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_CREATEVALUETYPE_@(ClassTypeId, tmp@_LOWER:CREATEVALUE_@index, 0));
+        int enumVal = com.saabgroup.safir.dob.typesystem.Parameters.getEnumeration(ClassTypeId, tmp@_LOWER:CREATEVALUE_@index, 0);
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setVal(@_CREATEVALUETYPE_@.values()[enumVal]);
+@@ELSE@@
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setVal(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@());
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_EXIST:CREATEVALUEISINLINE_@
+        // Inline set of member @_CREATEVALUE_@ value
+        int tmp@_LOWER:CREATEVALUE_@index = com.saabgroup.safir.dob.typesystem.Parameters.getIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
+        val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setVal(com.saabgroup.safir.dob.typesystem.Parameters.get@_REPLACE(^si(..)\..*/Float\1):UNIFORM_CREATEVALUETYPE_@(ClassTypeId, tmp@_LOWER:CREATEVALUE_@index, 0));
 @@ELSE@@
         val.@_LOWER:SLICE(1..1):CREATEVALUE_@@_REPLACE(./):CREATEVALUE_@().setVal(@_CREATEVALUEPARAMETERCLASS_@.get@_CREATEVALUEPARAMETER_@());
 @@END_IF@@
