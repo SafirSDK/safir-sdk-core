@@ -88,6 +88,7 @@ def archive_and_analyze(platform, arch, buildType){
         tool: cmake(pattern:"**/buildlog.html",
                     id:"cmake_${buildIdentifier}",
                     name:"CMake ${buildIdentifier}"),
+        filters: [excludeFile('CTestCustom.cmake')],
         sourceCodeEncoding: 'UTF-8'
     )
     def java = scanForIssues (
