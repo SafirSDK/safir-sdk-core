@@ -79,6 +79,8 @@ namespace Dob
         * the desired type. This is only a virtual function call, instead of a dynamic_cast, ie
         * potentially much quicker.
         *
+        * As of 2024 this is ~100x faster than a dynamic_cast for an EntityHandlerPending.
+        *
         * @headerfile ConsumerBase.h <Safir/Dob/Consumer.h>
         */
         class DOSE_CPP_API ConsumerBase
