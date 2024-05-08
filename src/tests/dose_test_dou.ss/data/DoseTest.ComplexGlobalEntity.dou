@@ -1367,34 +1367,4 @@
         </member>
 
     </members>
-
-    <!-- CrateRoutines for smoke test of dots_configuration_check -->
-    <createRoutines>
-        <createRoutine>
-            <name>CreateRoutine1</name>
-            <parameters>
-                <member>CubicMeter32Member</member>
-                <member>Hertz32Member</member>
-                <member>Kelvin32Member</member>
-                <!-- StringMember is inherited -->
-                <member>StringMember</member> 
-            </parameters>
-            <values>
-                <value>
-                    <member>Newton32Member</member>
-                    <value>10</value>
-                </value>
-                <value>
-                    <member>Second32Member</member>
-                    <value>60</value>
-                </value>
-                <!-- Int32Member is inherited -->
-                <!-- <value>
-                    <member>Int32Member</member>
-                    <value>1000</value>
-                </value> -->
-            </values>
-        </createRoutine>
-    </createRoutines>
-
 </class>

@@ -433,7 +433,7 @@ def parse_dou(gSession, dou_xmlfile):
                                                         m_arraySize ) )
 
                         if not m_type is None:
-                            if not (m_type in dod_types):
+                            if not (m_type in gSession.dod_types):
                                 # This is a dou defined object
                                 uniform_type = dou_uniform_lookup(gSession, m_type)
                                 gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type,
@@ -456,9 +456,15 @@ def parse_dou(gSession, dou_xmlfile):
             if vs is not None:
                 for v in vs:
                     m_member = readTextPropery(v, "member")
-                    m_type = member_name_to_type_lookup[m_member]
+                    m_type = None
                     m_array = None
-                    if member_name_to_is_array_lookup[m_member]: m_array = True
+
+                    found_member = seek_member_in_base_class(gSession, m_member, parsed.name)
+                    if found_member is not None:
+                            m_type = found_member.type
+                            m_array = found_member.array
+                    else:
+                        print(">!< cannot find member reference", p.text, file=sys.stderr)
 
                     m_parameter = ""
                     m_p_index = None
@@ -883,8 +889,8 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
         return create_parameter_is_last(dou, table_line, parent_table_line)
     elif var == "UNIFORM_CREATEVALUETYPE":
         member = dou.createRoutines[parent_table_line - 1].values[index].member
-        m_type = dou.member_name_to_type_lookup[member]
-        return gSession.dod_types[m_type].uniform_type
+        m = seek_member_in_base_class(gSession, member, dou.name)
+        return gSession.dod_types[m.type].uniform_type
     elif var == "CREATEVALUEPARAMETER":
         p1 = dou.createRoutines[parent_table_line - 1].values[index].parameter
         return member_formatter(gSession, p1[p1.rfind(".") + 1:])
@@ -903,8 +909,8 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
         return member_formatter(gSession, dou.createRoutines[parent_table_line - 1].values[index].member)
     elif var == "CREATEVALUETYPE":
         member = dou.createRoutines[parent_table_line - 1].values[index].member
-        m_type = dou.member_name_to_type_lookup[member]
-        return gSession.dod_types[m_type].generated
+        m = seek_member_in_base_class(gSession, member, dou.name)
+        return gSession.dod_types[m.type].generated
     elif var == "CREATEVALUEISARRAY":
         return create_value_is_array(dou, table_line, parent_table_line)
     elif var == "MEMBER":
