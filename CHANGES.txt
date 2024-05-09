@@ -1,4 +1,25 @@
 -----------------------------------------------------------------------------------------------------------------------
+2024-05-09 version 7.3.1
+-----------------------------------------------------------------------------------------------------------------------
+This release fixes the following issue (see http://safirsdkcore.com for details):
+
+#471 Mirror NodeInfo in global entities
+#490 CreateRoutines doesn't handle default values for inherited members
+#492 dots_configuration_check falsely report mismatch
+#500 CreateRoutines default values of SI types and Enums does not compile
+#497 Entity with dictionary of entities causes SoftwareViolation
+#491 Better dictionary parameter reflection
+#496 Dobmake fails when a sub-namespace is called "System"
+#488 Dobexplorer column sorting error
+#494 dots_configuration_check reports success when out of shared memory
+#498 Resurrect or delete the non-merged tests in branch private/restart-nodes-6.4
+#489 Make Windows uninstaller kill Core processes
+#495 Make Add/Remove programs in Windows show installed variant
+#493 Warnings in dobmake/dots_v
+#499 Bump dependency versions for release
+#487 Use python venv on build machines, to avoid breaking system packages
+
+-----------------------------------------------------------------------------------------------------------------------
 2023-12-07 version 7.3.0
 -----------------------------------------------------------------------------------------------------------------------
 This release fixes the following issue (see http://safirsdkcore.com for details):
