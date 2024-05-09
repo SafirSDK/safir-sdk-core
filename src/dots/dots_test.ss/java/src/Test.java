@@ -243,7 +243,7 @@ public class Test {
         System.out.println("CreateValueTypes     : " + Serialization.toXml(MemberTypes.createValueTypes()));
         System.out.println("Create_ValueArrays   : " + Serialization.toXml(MemberTypes.createValueArrays()));
         System.out.println("CreateValues         : " + Serialization.toXml(TypesItem.createCreateRoutineValues()));
-        System.out.println("CreateInheritedValues: " + Serialization.toXml(TypesItemInherited.createCreateRoutineValues()));
+        System.out.println("CreateInheritedValues: " + Serialization.toXml(TypesItemInherited.createCreateRoutineValues2()));
 
         TypesItem createParameters = TypesItem.createCreateRoutineParameters(
         10,
@@ -302,7 +302,7 @@ public class Test {
         2.5,
         2.5);
 
-        TypesItemInherited createParametersInherited = TypesItemInherited.createCreateRoutineParameters(
+        TypesItemInherited createParametersInherited = TypesItemInherited.createCreateRoutineParameters2(
         "Local Member",
         10,
         20,

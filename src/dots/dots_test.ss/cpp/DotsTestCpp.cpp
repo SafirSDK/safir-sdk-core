@@ -355,7 +355,7 @@ void Test_Create_Routines()
     std::wcout<< "Create_ValueArrays   : " << Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::MemberTypes::CreateValueArrays())<<std::endl;
 
     std::wcout<< "CreateValues         : " << Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::TypesItem::CreateCreateRoutineValues())<<std::endl;
-    std::wcout<< "CreateInheritedValues: " << Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::TypesItemInherited::CreateCreateRoutineValues())<<std::endl;    
+    std::wcout<< "CreateInheritedValues: " << Safir::Dob::Typesystem::Serialization::ToXml(DotsTest::TypesItemInherited::CreateCreateRoutineValues2())<<std::endl;    
 
     auto createParameters = DotsTest::TypesItem::CreateCreateRoutineParameters(
             10,
@@ -414,7 +414,7 @@ void Test_Create_Routines()
             2.5,
             2.5);
 
-    auto createParametersInherited = DotsTest::TypesItemInherited::CreateCreateRoutineParameters(
+    auto createParametersInherited = DotsTest::TypesItemInherited::CreateCreateRoutineParameters2(
             L"Local Member",
             10,
             20,

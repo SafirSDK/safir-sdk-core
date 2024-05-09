@@ -11,7 +11,7 @@
 
     <createRoutines>
         <createRoutine>
-            <name>CreateRoutineParameters</name>
+            <name>CreateRoutineParameters2</name>
             <parameters>
                 <member>LocalStringMember</member>
                 <member>Int32Member</member>
@@ -73,7 +73,7 @@
         </createRoutine>
 
         <createRoutine>
-            <name>CreateRoutineValues</name>
+            <name>CreateRoutineValues2</name>
             <values>
                 <value>
                     <member>LocalStringMember</member>

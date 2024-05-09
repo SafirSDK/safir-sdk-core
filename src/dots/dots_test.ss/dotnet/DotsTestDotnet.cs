@@ -302,7 +302,7 @@ class DotsTestDotnet
         Console.WriteLine("CreateValueTypes     : " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberTypes.CreateValueTypes()));
         Console.WriteLine("Create_ValueArrays   : " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.MemberTypes.CreateValueArrays()));
         Console.WriteLine("CreateValues         : " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.TypesItem.CreateCreateRoutineValues()));
-        Console.WriteLine("CreateInheritedValues: " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.TypesItemInherited.CreateCreateRoutineValues()));
+        Console.WriteLine("CreateInheritedValues: " + Safir.Dob.Typesystem.Serialization.ToXml(DotsTest.TypesItemInherited.CreateCreateRoutineValues2()));
 
         var createParameters = DotsTest.TypesItem.CreateCreateRoutineParameters(
         10,
@@ -361,7 +361,7 @@ class DotsTestDotnet
         2.5,
         2.5);
 
-        var createParametersInherited = DotsTest.TypesItemInherited.CreateCreateRoutineParameters(
+        var createParametersInherited = DotsTest.TypesItemInherited.CreateCreateRoutineParameters2(
         "Local Member",
         10,
         20,
