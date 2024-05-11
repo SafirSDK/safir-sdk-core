@@ -144,20 +144,13 @@ namespace Internal
 
         StateContainerPtr  m_entityContainerPtr;
 
-        // This aggregation of input paramters exist because the current boost bind implementation
-        // can handle a maximum of 9 parameters.
-        struct RegisterInternalInput
-        {
-            ConnectionConsumerPair          registerer;
-            Dob::Typesystem::HandlerId      handlerId;
-            InstanceIdPolicy::Enumeration   instanceIdPolicy;
-            bool                            isInjectionHandler;
-            RegisterTime                    regTime;
-            bool                            overrideRegistration;
-        };
-
         void RegisterInternal(const StateSharedPtr&         statePtr,
-                              const RegisterInternalInput&  inputPar,
+                              ConnectionConsumerPair        registerer,
+                              Dob::Typesystem::HandlerId    handlerId,
+                              InstanceIdPolicy::Enumeration instanceIdPolicy,
+                              bool                          isInjectionHandler,
+                              RegisterTime                  regTime,
+                              bool                          overrideRegistration,
                               bool&                         registrationDone);
 
         void UnregisterInternal(const ConnectionPtr&                connection,

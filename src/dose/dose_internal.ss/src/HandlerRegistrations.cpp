@@ -84,22 +84,25 @@ namespace Internal
 
         ConnectionConsumerPair registerer(connection, consumer);
 
-        //TODO: remove this crap
-        // The input parameters are put in a struct because the current boost bind implementation can
-        // handle only 9 parameters.
-        RegisterInternalInput input;
-        input.registerer = registerer;
-        input.handlerId = handlerId;
-        input.instanceIdPolicy = instanceIdPolicy;
-        input.isInjectionHandler = isInjectionHandler;
-        input.regTime = regTime;
-        input.overrideRegistration = overrideRegistration;
-
         // Add a state if not already present
         m_registrations.ForSpecificStateAdd
             (handlerId.GetRawValue(),
-             [this,&inp = std::as_const(input),&regDone](const auto /*key*/, const auto& stateSharedPtr)
-               {RegisterInternal(stateSharedPtr,inp,regDone);});
+             [this,
+              &registerer,
+              &handlerId,
+              instanceIdPolicy,
+              isInjectionHandler,
+              regTime,
+              overrideRegistration,
+              &regDone](const auto /*key*/, const auto& stateSharedPtr)
+             {RegisterInternal(stateSharedPtr,
+                               registerer,
+                               handlerId,
+                               instanceIdPolicy,
+                               isInjectionHandler,
+                               regTime,
+                               overrideRegistration,
+                               regDone);});
 
         return regDone;
     }
@@ -119,17 +122,14 @@ namespace Internal
     }
 
     void HandlerRegistrations::RegisterInternal(const StateSharedPtr&         statePtr,
-                                                const RegisterInternalInput&  inputPar,
+                                                ConnectionConsumerPair        registerer,
+                                                Dob::Typesystem::HandlerId    handlerId,
+                                                InstanceIdPolicy::Enumeration instanceIdPolicy,
+                                                bool                          isInjectionHandler,
+                                                RegisterTime                  regTime,
+                                                bool                          overrideRegistration,
                                                 bool&                         registrationDone)
     {
-        // Set up alias so the rest of the code is as easy to read as before.
-        const ConnectionConsumerPair&           registerer = inputPar.registerer;
-        const Dob::Typesystem::HandlerId&       handlerId = inputPar.handlerId;
-        const InstanceIdPolicy::Enumeration&    instanceIdPolicy = inputPar.instanceIdPolicy;
-        const bool                              isInjectionHandler = inputPar.isInjectionHandler;
-        const RegisterTime&                     regTime = inputPar.regTime;
-        const bool                              overrideRegistration = inputPar.overrideRegistration;
-
         registrationDone = false;
 
         // If this registration is on the revoked list we must act as if the application
