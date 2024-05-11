@@ -32,7 +32,6 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <vector>
-#include <iostream> // TODO: remove
 
 namespace Safir
 {
