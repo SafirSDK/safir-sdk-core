@@ -46,11 +46,18 @@ namespace Typesystem
 {
 namespace Internal
 {
+    std::once_flag RepositoryKeeper::SingletonHelper::m_onceFlag;
 
-    RepositoryKeeper& RepositoryKeeper::Instance()
+    RepositoryKeeper & RepositoryKeeper::SingletonHelper::Instance()
     {
         static RepositoryKeeper instance;
         return instance;
+    }
+
+    RepositoryKeeper& RepositoryKeeper::Instance()
+    {
+        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
+        return SingletonHelper::Instance();
     }
 
     void RepositoryKeeper::Initialize(size_t sharedMemorySize, const std::vector<boost::filesystem::path>& paths)
@@ -115,10 +122,10 @@ namespace Internal
     }
 
     RepositoryKeeper::RepositoryKeeper()
-        :m_startupSynchronizer("SAFIR_DOTS_INITIALIZATION")
-        ,m_sharedMemorySize(0)
+        :m_sharedMemorySize(0)
         ,m_paths()
         ,m_repositoryCreatedByThisProcess(false)
+        ,m_startupSynchronizer("SAFIR_DOTS_INITIALIZATION")
     {
     }
 
@@ -126,30 +133,11 @@ namespace Internal
     {
     }
 
-    void RepositoryKeeper::Use()
-    {
-        try
-        {
-            m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
-                                 (boost::interprocess::open_read_only,
-                                  DOTS_SHM_NAME));
-        }
-        catch (...)
-        {
-            m_repository=nullptr;
-            return;
-        }
-
-        m_repository=m_sharedMemory->find<RepositoryShm>(DOTS_REPOSITORY_NAME).first;
-    }
-
-    void RepositoryKeeper::Destroy()
-    {
-        boost::interprocess::shared_memory_object::remove(DOTS_SHM_NAME);
-    }
-
     void RepositoryKeeper::Create()
     {
+        //Mandatory cleanup of old shared memories before we start!
+        Destroy();
+
         m_repositoryCreatedByThisProcess=true;
 
         //-------------------------------------------------
@@ -172,8 +160,7 @@ namespace Internal
             std::cerr << ostr.str() << std::endl;
             SEND_SYSTEM_LOG(Error,
                             << ostr.str().c_str());
-            localRepository.reset();
-            m_repository=nullptr;
+            Destroy(); //cleanup
             return;
         }
 
@@ -202,10 +189,7 @@ namespace Internal
             std::cerr << ostr.str()<< std::endl;
             SEND_SYSTEM_LOG(Error,
                             << ostr.str().c_str());
-            localRepository.reset();
-            boost::interprocess::shared_memory_object::remove(DOTS_SHM_NAME);
-            m_sharedMemory.reset();
-            m_repository=nullptr;
+            Destroy();
             return;
         }
         catch (const std::exception& ex)
@@ -215,10 +199,7 @@ namespace Internal
             std::cerr << ostr.str() << std::endl;
             SEND_SYSTEM_LOG(Error,
                             << ostr.str().c_str());
-            localRepository.reset();
-            boost::interprocess::shared_memory_object::remove(DOTS_SHM_NAME);
-            m_sharedMemory.reset();
-            m_repository=nullptr;
+            Destroy(); //cleanup
             return;
         }
 
@@ -238,12 +219,34 @@ namespace Internal
             std::cerr << ostr.str() << "Exception information: " << ex.what() << std::endl;
             SEND_SYSTEM_LOG(Error,
                             << ostr.str().c_str());
-            localRepository.reset();
-            boost::interprocess::shared_memory_object::remove(DOTS_SHM_NAME);
-            m_sharedMemory.reset();
-            m_repository=nullptr;
+            Destroy(); //cleanup
             return;
         }
+    }
+
+    void RepositoryKeeper::Use()
+    {
+        try
+        {
+            m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
+                                 (boost::interprocess::open_read_only,
+                                  DOTS_SHM_NAME));
+        }
+        catch (...)
+        {
+            m_repository=nullptr;
+            m_sharedMemory.reset();;
+            return;
+        }
+
+        m_repository=m_sharedMemory->find<RepositoryShm>(DOTS_REPOSITORY_NAME).first;
+    }
+
+    void RepositoryKeeper::Destroy()
+    {
+        m_repository=nullptr;
+        m_sharedMemory.reset();
+        boost::interprocess::shared_memory_object::remove(DOTS_SHM_NAME);
     }
 }
 }

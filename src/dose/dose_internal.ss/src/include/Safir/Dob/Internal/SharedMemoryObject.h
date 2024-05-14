@@ -97,7 +97,7 @@ namespace Internal
             void Use() override;
             void Destroy() override;
 
-            std::shared_ptr<boost::interprocess::managed_shared_memory> m_shmem;
+            std::unique_ptr<boost::interprocess::managed_shared_memory> m_shmem;
 
             /**
              * This class is here to ensure that only the Instance method can get at the
@@ -114,12 +114,13 @@ namespace Internal
                 static std::once_flag m_onceFlag;
             };
 
-            Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
-
             const double m_warningPercentage;
             const double m_lowPercentage;
             const double m_veryLowPercentage;
             const double m_extremelyLowPercentage;
+
+            //must be last for Destroy to work!
+            Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
         };
 
     public:

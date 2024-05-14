@@ -62,11 +62,11 @@ namespace Internal
     }
 
     SharedMemoryObject::SharedMemoryHolder::SharedMemoryHolder()
-        : m_startupSynchronizer("SAFIR_DOSE_INITIALIZATION")
-        , m_warningPercentage(Safir::Dob::NodeParameters::SharedMemoryLevels(L"Warning"))
+        : m_warningPercentage(Safir::Dob::NodeParameters::SharedMemoryLevels(L"Warning"))
         , m_lowPercentage(Safir::Dob::NodeParameters::SharedMemoryLevels(L"Low"))
         , m_veryLowPercentage(Safir::Dob::NodeParameters::SharedMemoryLevels(L"VeryLow"))
         , m_extremelyLowPercentage(Safir::Dob::NodeParameters::SharedMemoryLevels(L"ExtremelyLow"))
+        , m_startupSynchronizer("SAFIR_DOSE_INITIALIZATION")
     {
         m_startupSynchronizer.Start(this);
     }
@@ -98,6 +98,7 @@ namespace Internal
 
     void SharedMemoryObject::SharedMemoryHolder::Destroy()
     {
+        m_shmem.reset();
         boost::interprocess::shared_memory_object::remove(SHARED_MEMORY_NAME);
     }
 

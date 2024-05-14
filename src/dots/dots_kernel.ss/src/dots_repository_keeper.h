@@ -24,7 +24,6 @@
 #ifndef __DOTS_KERNEL_REPOSITORY_KEEPER_H__
 #define __DOTS_KERNEL_REPOSITORY_KEEPER_H__
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include "dots_shm_repository.h"
@@ -50,14 +49,6 @@ namespace Internal
         static bool RepositoryCreatedByThisProcess();
         static void MemoryInfo(DotsC_Int32& capacity, DotsC_Int32& used); //in bytes
     private:
-        Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
-        size_t m_sharedMemorySize;
-        std::vector<boost::filesystem::path> m_paths;
-        boost::scoped_ptr<boost::interprocess::managed_shared_memory> m_sharedMemory;
-        RepositoryShm* m_repository;
-        bool m_repositoryCreatedByThisProcess;
-        //boost::scoped_ptr< Safir::Dob::Typesystem::ToolSupport::BlobLayout<RepositoryShm> > m_blobLayout;
-
         static RepositoryKeeper& Instance();
         RepositoryKeeper();
         ~RepositoryKeeper();
@@ -66,6 +57,30 @@ namespace Internal
         void Create() override;
         void Use() override;
         void Destroy() override;
+
+        size_t m_sharedMemorySize;
+        std::vector<boost::filesystem::path> m_paths;
+        std::unique_ptr<boost::interprocess::managed_shared_memory> m_sharedMemory;
+        RepositoryShm* m_repository;
+        bool m_repositoryCreatedByThisProcess;
+
+        //must be last member for Destroy to work!
+        Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
+
+        /**
+         * This class is here to ensure that only the Instance method can get at the
+         * instance, so as to be sure that std call_once is used correctly.
+         * Also makes it easier to grep for singletons in the code, if all
+         * singletons use the same construction and helper-name.
+         */
+        struct SingletonHelper
+        {
+        private:
+            friend RepositoryKeeper& RepositoryKeeper::Instance();
+
+            static RepositoryKeeper& Instance();
+            static std::once_flag m_onceFlag;
+        };
     };
 }
 }

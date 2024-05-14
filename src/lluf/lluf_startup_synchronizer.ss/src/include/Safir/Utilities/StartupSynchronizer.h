@@ -100,6 +100,9 @@ namespace Utilities
      *
      * Note that multiple threads within a process may call these functions simultaneously
      * on *different* instances with different arguments to no ill effect.
+     *
+     * WARNING: Ensure that the instance if this class is destroyed *after* the variables
+     * you use in Synchronized::Destroy(), or otherwise you will be using destroyed variables.
      */
     class LLUF_STARTUP_SYNCHRONIZER_API StartupSynchronizer
     {
