@@ -1,9 +1,9 @@
-safir-sdk-core (7.3.2~alpha1-1) UNRELEASED; urgency=medium
+safir-sdk-core (7.3.2-1) UNRELEASED; urgency=medium
 
   [ Lars Hagström ]
   * Update of source package.
 
- -- Lars Hagström <lars@foldspace.nu>  Mon, 13 May 2024 15:12:00 +0100
+ -- Lars Hagström <lars@foldspace.nu>  Mon, 15 May 2024 07:55:00 +0100
 
 safir-sdk-core (7.3.1-1) UNRELEASED; urgency=medium
 

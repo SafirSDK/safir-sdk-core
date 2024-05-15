@@ -1,7 +1,14 @@
 -----------------------------------------------------------------------------------------------------------------------
-2024-05-09 version 7.3.1
+2024-05-15 version 7.3.2
 -----------------------------------------------------------------------------------------------------------------------
 This release fixes the following issue (see http://safirsdkcore.com for details):
+
+#501  Dou parse errors do not always lead to safir_control exiting with an error
+
+-----------------------------------------------------------------------------------------------------------------------
+2024-05-09 version 7.3.1
+-----------------------------------------------------------------------------------------------------------------------
+This release fixes the following issues (see http://safirsdkcore.com for details):
 
 #471 Mirror NodeInfo in global entities
 #490 CreateRoutines doesn't handle default values for inherited members
