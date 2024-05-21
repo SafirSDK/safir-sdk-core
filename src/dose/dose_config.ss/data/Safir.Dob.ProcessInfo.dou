@@ -25,7 +25,7 @@
     <member>
       <summary>The names of all Dob connections opened by the process.</summary>
       <name>ConnectionNames</name>
-      <arraySize>20</arraySize>
+      <arraySize>40</arraySize>
       <type>String</type>
       <maxLength>255</maxLength>
     </member>
