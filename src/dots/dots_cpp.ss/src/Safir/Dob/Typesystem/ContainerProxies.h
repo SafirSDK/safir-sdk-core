@@ -157,24 +157,24 @@ namespace Typesystem
 */
 
     static inline bool operator==(const ContainerProxy<ChannelIdContainer>& first, const ChannelId& second)
-    {return second == first;}
+    {return second == first.GetVal();}
     static inline bool operator!=(const ContainerProxy<ChannelIdContainer>& first, const ChannelId& second)
-    {return second != first;}
-    
+    {return second != first.GetVal();}
+
     static inline bool operator==(const ContainerProxy<HandlerIdContainer>& first, const HandlerId& second)
-    {return second == first;}
+    {return second == first.GetVal();}
     static inline bool operator!=(const ContainerProxy<HandlerIdContainer>& first, const HandlerId& second)
-    {return second != first;}
+    {return second != first.GetVal();}
 
     static inline bool operator==(const ContainerProxy<InstanceIdContainer>& first, const InstanceId& second)
-    {return second == first;}
+    {return second == first.GetVal();}
     static inline bool operator!=(const ContainerProxy<InstanceIdContainer>& first, const InstanceId& second)
-    {return second != first;}
+    {return second != first.GetVal();}
 
     static inline bool operator==(const ContainerProxy<EntityIdContainer>& first, const EntityId& second)
-    {return second == first;}
+    {return second == first.GetVal();}
     static inline bool operator!=(const ContainerProxy<EntityIdContainer>& first, const EntityId& second)
-    {return second != first;}
+    {return second != first.GetVal();}
 
 /*
     template <>

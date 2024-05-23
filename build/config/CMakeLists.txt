@@ -1,6 +1,5 @@
+cmake_minimum_required(VERSION 3.27)
 project(build_files)
-
-cmake_minimum_required(VERSION 2.4)
 
 FILE(TO_CMAKE_PATH $ENV{SAFIR_SDK} SAFIR_SDK)
 FILE(TO_CMAKE_PATH $ENV{SAFIR_RUNTIME} SAFIR_RUNTIME)

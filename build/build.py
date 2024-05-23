@@ -59,8 +59,8 @@ def copy_dob_files(source_dir, target_dir):
     if not os.path.isdir(dots_generated_dir):
         mkdir(dots_generated_dir)
 
-    pattern = re.compile("[a-zA-Z0-9\.\-]*\.do[um]$")
-    pattern2 = re.compile("[a-zA-Z0-9\.]*-java\.namespace\.txt$")
+    pattern = re.compile(r"[a-zA-Z0-9\.\-]*\.do[um]$")
+    pattern2 = re.compile(r"[a-zA-Z0-9\.]*-java\.namespace\.txt$")
     for filename in os.listdir(source_dir):
         if pattern.match(filename) or pattern2.match(filename):
             
@@ -95,7 +95,7 @@ def remove(path):
         try:
             os.remove(path)
             return
-        except Exception, e:
+        except Exception as e:
             die ("Failed to remove file " + path + ". Got exception " + e)
             
     for name in os.listdir(path):
@@ -104,12 +104,12 @@ def remove(path):
         else:
             try:
                 os.remove(os.path.join(path,name))
-            except Exception, e:
+            except Exception as e:
                 die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + e)
 
     try:
         os.rmdir(path)
-    except Exception, e:
+    except Exception as e:
         die ("Failed to remove directory " + path + ". Got exception " + e)
 
 
@@ -117,7 +117,7 @@ def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
     # Linux, Unix and MacOS:
     if hasattr(os, "sysconf"):
-        if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+        if "SC_NPROCESSORS_ONLN" in os.sysconf_names:
             # Linux & Unix:
             ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
             if isinstance(ncpus, int) and ncpus > 0:
@@ -125,7 +125,7 @@ def num_cpus():
         else: # OSX:
             return int(os.popen2("sysctl -n hw.ncpu")[1].read())
     # Windows:
-    if os.environ.has_key("NUMBER_OF_PROCESSORS"):
+    if "NUMBER_OF_PROCESSORS" in os.environ:
             ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
             if ncpus > 0:
                 return ncpus
@@ -134,7 +134,7 @@ def num_cpus():
 
 def log(message,ignore_verbose = False):
     if verbose or ignore_verbose:
-        print message
+        print(message)
         sys.stdout.flush()
 
 
@@ -204,33 +204,21 @@ def find_sln():
             
 class VisualStudioBuilder(object):
     def __init__(self):
-        VS80 = os.environ.get("VS80COMNTOOLS")
-        VS90 = os.environ.get("VS90COMNTOOLS")
-        VS100 = os.environ.get("VS100COMNTOOLS")
+        VS170 = os.environ.get("VS170COMNTOOLS")
 
         VSCount = 0;
 
-        if VS80 is not None:
-            VSCount = VSCount + 1;
-        if VS90 is not None:
-            VSCount = VSCount + 1;
-        if VS100 is not None:
+        if VS170 is not None:
             VSCount = VSCount + 1;
 
         self.studio = None
         self.generator = None
         
         if VSCount > 1:
-            log("I found both several Visual Studio installations, will need command line arg!")
-        elif VS80 is not None:
-            self.studio = VS80
-            self.generator = "Visual Studio 8 2005"
-        elif VS90 is not None:
-            self.studio = VS90
-            self.generator = "Visual Studio 9 2008"
-        elif VS100 is not None:
-            self.studio = VS100
-            self.generator = "Visual Studio 10"
+            log("I found several Visual Studio installations, will need command line arg!")
+        elif VS170 is not None:
+            self.studio = VS170
+            self.generator = "Visual Studio 17 2022"
         else:
             die("Could not find a supported compiler to use!")
 
@@ -244,29 +232,22 @@ class VisualStudioBuilder(object):
 
     @staticmethod
     def can_use():
-        VS80 = os.environ.get("VS80COMNTOOLS")
-        VS90 = os.environ.get("VS90COMNTOOLS")
-        VS100 = os.environ.get("VS100COMNTOOLS")
-        return VS80 is not None or VS90 is not None or VS100 is not None
+        import sys
+        return sys.platform == "win32"
 
-    def setup_command_line_options(self,parser):
+    @staticmethod
+    def setup_command_line_options(parser):
         parser.add_option("--use-studio",action="store",type="string",dest="use_studio",
                           help="The visual studio to use for building, can be '2005', '2008' or '2010'")
 
     def handle_command_line_options(self,options):
         if self.studio is None and options.use_studio is None:
             die("Please specify which visual studio you want to use for building.\n" +
-                "Use the --use-studio command line switch, can be '2005', '2008' or '2010'")
+                "Use the --use-studio command line switch, can be '2022'")
         elif options.use_studio is not None:
-            if options.use_studio == "2005":
-                self.studio = os.environ.get("VS80COMNTOOLS")
-                self.generator = "Visual Studio 8 2005"
-            elif options.use_studio == "2008":
-                self.studio = os.environ.get("VS90COMNTOOLS")
-                self.generator = "Visual Studio 9 2008"
-            elif options.use_studio == "2010":
-                self.studio = os.environ.get("VS100COMNTOOLS")
-                self.generator = "Visual Studio 10"
+            if options.use_studio == "2022":
+                self.studio = os.environ.get("VS170COMNTOOLS")
+                self.generator = "Visual Studio 17 2022"
             else:
                 die ("Unknown visual studio " + options.use_studio)
         
@@ -280,15 +261,10 @@ class VisualStudioBuilder(object):
             
     def dobmake(self):
         """run the dobmake command"""
-        batpath = os.path.join(self.tmpdir,"build2.bat")
-        bat = open(batpath,"w")
-        bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio,"vsvars32.bat") + "\"\n" +
-                  "\"" + os.path.join(SAFIR_RUNTIME,"bin","dobmake.py") + "\" -b --html-output --rebuild\n") #batch mode (no gui)
-        bat.close()
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(("python.exe", os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--no-java", "--no-ada", "--rebuild"),
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         result = process.communicate()
-        buildlog.write(result[0].replace("\r\n","\n"))
+        buildlog.write(str(result[0],'UTF-8','ignore').replace("\r\n","\n"))
         if process.returncode != 0:
             die("Failed to run dobmake")
 
@@ -328,23 +304,18 @@ class VisualStudioBuilder(object):
         os.chdir(self.generator)
     
         self.__run_command(("cmake -D SAFIR_BUILD_SYSTEM_VERSION:string=2 " +
-                            "-G \"" + self.generator + "\" " +
+                            "-G \"" + self.generator + "\" -A Win32 " +
                             ".."),
                            "Configure", directory)
 
         solution = find_sln()
         
         if clean:
-            for config in configs:
-                self.__run_command("devenv.com " + solution + " /clean " + config,
-                                   "Clean " + config, directory)
+            die("Clean is not possible any longer, wipe your directories instead")
 
 
         for config in configs:
-            self.__run_command("devenv.com " + solution + " /build  " + config,
-                               "Build " + config, directory)
-
-            self.__run_command("devenv.com " + solution + " /build " +config +" /Project INSTALL",
+            self.__run_command("msbuild " + "INSTALL.vcxproj" + " -p:Configuration=" +config,
                                "Install " + config, directory)
         
         os.chdir(olddir)
@@ -366,17 +337,11 @@ class VisualStudioBuilder(object):
 
     def __run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""
-        batpath = os.path.join(self.tmpdir,"build.bat")
-        bat = open(batpath,"w")
-        bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio,"vsvars32.bat") + "\"\n" +
-                  cmd)
-        bat.close()
         buildlog.write("<h4>" + description + " '" + what + "'</h4><pre style=\"color: green\">" + cmd + "</pre>\n")
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         result = process.communicate()
         buildlog.write("<pre>")
-        buildlog.write(result[0].replace("\r\n","\n"))
+        buildlog.write(str(result[0],'UTF-8','ignore').replace("\r\n","\n"))
         buildlog.write("</pre>")
         if process.returncode != 0:
             if not allow_fail:
@@ -426,11 +391,11 @@ class UnixGccBuilder(object):
 
     def dobmake(self):
         """run the dobmake command"""
-        process = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--rebuild"), #batch mode (no gui)
+        process = subprocess.Popen((os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--no-java", "--rebuild"), #batch mode (no gui)
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
         result = process.communicate()
-        buildlog.write(result[0])
+        buildlog.write(str(result[0],'UTF-8','ignore'))
         if process.returncode != 0:
             die("Failed to run dobmake")
 
@@ -440,7 +405,7 @@ class UnixGccBuilder(object):
         process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         result = process.communicate()
         buildlog.write("<pre>")
-        buildlog.write(result[0])
+        buildlog.write(str(result[0],'UTF-8','ignore'))
         buildlog.write("</pre>")
         if process.returncode != 0:
             if not allow_fail:
@@ -563,12 +528,12 @@ try:
     os.remove(logpath)
 except OSError:
     pass
-buildlog = open(logpath,'w', 0)
+buildlog = open(logpath,'w', 1)
 buildlog.write("<html><title>Build Log</title><body>")
 
 try:
     main()
-except FatalError, e:
+except FatalError as e:
     log("Build script failed: " + str(e),True)
     sys.exit(1)
 

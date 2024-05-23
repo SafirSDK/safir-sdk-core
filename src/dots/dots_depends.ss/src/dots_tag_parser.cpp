@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/convenience.hpp>
 
 #include <iostream>
 #include <vector>
@@ -47,12 +46,13 @@ namespace DotsDepends
 
     int DotsTagParser::ResolveDependencies()
     {
-        for (boost::filesystem::directory_iterator path = boost::filesystem::directory_iterator(m_fileDirectory);
-            path != boost::filesystem::directory_iterator(); ++path)
+        for (boost::filesystem::directory_iterator it = boost::filesystem::directory_iterator(m_fileDirectory);
+            it != boost::filesystem::directory_iterator(); ++it)
         {
-            const std::string extension = boost::filesystem::extension(*path);
+			const auto path = it->path();
+            const std::string extension = path.extension().string();
 
-            if ( boost::filesystem::is_directory(*path) )
+            if ( boost::filesystem::is_directory(path) )
             {
                 continue;
             }
@@ -61,12 +61,12 @@ namespace DotsDepends
             {
                 if (m_verbose)
                 {
-                    std::wcout << "Skipped file: " << (*path).string().c_str() << std::endl;
+                    std::wcout << "Skipped file: " << path.string().c_str() << std::endl;
                 }
                 continue;
             }            
 
-            CheckFile(*path);
+            CheckFile(path);
 
         }
 
@@ -141,7 +141,7 @@ namespace DotsDepends
     }
 
 
-    void DotsTagParser::CheckFile(boost::filesystem::path filename)
+    void DotsTagParser::CheckFile(const boost::filesystem::path filename)
     {
         FILE* stream = fopen(filename.string().c_str(), "r");
         if (stream == NULL)
@@ -195,7 +195,7 @@ namespace DotsDepends
         bool found = false;
         const char fileDelimiter[] = "-";
         char baseName[256];
-        strcpy(baseName, boost::filesystem::basename(filename).c_str());
+        strcpy(baseName, filename.stem().string().c_str());
         const char* const fileToken = strtok(baseName, fileDelimiter);;
 
         while( fgets( line, buff_size, stream ) != NULL)

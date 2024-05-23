@@ -30,7 +30,7 @@ def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
     # Linux, Unix and MacOS:
     if hasattr(os, "sysconf"):
-        if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+        if "SC_NPROCESSORS_ONLN" in os.sysconf_names:
             # Linux & Unix:
             ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
             if isinstance(ncpus, int) and ncpus > 0:
@@ -38,7 +38,7 @@ def num_cpus():
         else: # OSX:
             return int(os.popen2("sysctl -n hw.ncpu")[1].read())
     # Windows:
-    if os.environ.has_key("NUMBER_OF_PROCESSORS"):
+    if "NUMBER_OF_PROCESSORS" in os.environ:
             ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
             if ncpus > 0:
                 return ncpus
@@ -87,7 +87,7 @@ def remove(path):
             chmod(path)
             os.remove(path)
             return
-        except Exception, e:
+        except Exception as e:
             die ("Failed to remove file " + path + ". Got exception " + str(e))
             
     for name in os.listdir(path):
@@ -97,14 +97,14 @@ def remove(path):
         else:
             try:
                 os.remove(os.path.join(path,name))
-            except Exception, e:
+            except Exception as e:
                 die ("Failed to remove file " + os.path.join(path,name) + ". Got exception " + str(e))
 
     try:
         chmod(path)
         os.rmdir(path)
 
-    except Exception, e:
+    except Exception as e:
         die ("Failed to remove directory " + path + ". Got exception " + str(e))
 
 def save_installed_files_manifest():
@@ -225,8 +225,8 @@ class Logger(object):
                 data = self.process.stdout.readline()
                 if len(data) == 0: # and self.process.returncode is not None:
                     return
-                data = data.replace("\r\n","\n")
-                self.logger.write(data,"pre")
+                out = str(data,'UTF-8','ignore').replace("\r\n","\n")
+                self.logger.write(out,"pre")
 
 
     def logOutput(self, process):
@@ -245,12 +245,12 @@ class Logger(object):
         return data
 
     def close(self):
-        print "logger.close"
+        print("logger.close")
 
 
 buildType = "build"
 default_config="Release"
-build_java = True
+build_java = False
 build_ada = True
 build_cpp_release = True
 build_cpp_debug = True
@@ -279,10 +279,10 @@ def parse_command_line():
     (options,args) = parser.parse_args()
 
     if options.clean and options.rebuild:
-        print "Specifying both --clean and --rebuild is redundant, ignoring --clean"
+        print("Specifying both --clean and --rebuild is redundant, ignoring --clean")
 
     if options.uninstall and options.rebuild:
-        print "Specifying both --uninstall and --rebuild is redundant, ignoring --uninstall"         
+        print("Specifying both --uninstall and --rebuild is redundant, ignoring --uninstall")         
 
     global buildType
 
@@ -329,14 +329,14 @@ def run_dots_depends():
 
 class VisualStudioBuilder(object):
     def __init__(self):
-        from ConfigParser import ConfigParser
+        from configparser import ConfigParser
         cfg = ConfigParser()
         
         cfgpath = get_config_file()
 
         add_section = False
         if not os.path.exists(cfgpath):
-            print "Could not find " + cfgpath + ", trying to create one"
+            print("Could not find " + cfgpath + ", trying to create one")
             add_section = True
         else:
             cfg.read(cfgpath)
@@ -350,38 +350,21 @@ class VisualStudioBuilder(object):
             if DIR is None:
                 die("Could not work out which studio you are using, make sure you run dobmake.py in a Visual Studio command prompt.")
             cfg.add_section("main")
-            cfg.set("main","VSPATH",os.path.join(DIR,"Common7","Tools"))
-            configfile = open(cfgpath,"wb")
-            try:
+            cfg.set("main","VSPATH",os.path.join(DIR,"VC", "Auxiliary","Build"))
+            with open(cfgpath, 'w') as configfile:
                 cfg.write(configfile)
-            finally:
-                configfile.close()             
         
         self.studio = os.path.normcase(os.path.normpath(cfg.get("main","VSPATH")))
 
-        if not os.path.isdir(self.studio) or not os.path.isfile(os.path.join(self.studio,"vsvars32.bat")):
+        if not os.path.isdir(self.studio) or not os.path.isfile(os.path.join(self.studio,"vcvarsall.bat")):
             die("Something seems to have happened to your dobmake.ini or Visual Studio installations!"+
                 "\nVSPATH (in dots_generated/dobmake.ini) does not seem to point to a valid path." +
                 "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
-        def getenv_and_normalize(variable):
-            env = os.environ.get(variable)
-            if env is not None:
-                return os.path.normcase(os.path.normpath(env))
-            return None
-        
-        VS80 = getenv_and_normalize("VS80COMNTOOLS")
-        VS90 = getenv_and_normalize("VS90COMNTOOLS")
-        VS100 = getenv_and_normalize("VS100COMNTOOLS")
-        
-        if self.studio == VS80:
-            self.generator = "Visual Studio 8 2005"
-        elif self.studio == VS90:
-            self.generator = "Visual Studio 9 2008"
-        elif self.studio == VS100:
-            self.generator = "Visual Studio 10"
+                
+        if "2022" in self.studio:
+            self.generator = "Visual Studio 17 2022"
         else:
             die("VSPATH (in dots_generated/dobmake.ini) is set to something I dont recognize\n" +
-                "It should be either the value of %VS80COMNTOOLS%, %VS90COMNTOOLS% or %VS100COMNTOOLS%" +
                 "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
 
         #work out where to put temp files
@@ -392,24 +375,11 @@ class VisualStudioBuilder(object):
                 die("Failed to find a temp directory!")
         if not os.path.isdir(self.tmpdir):
             die("I can't seem to use the temp directory " + self.tmpdir)
-
-        #work out whether to use devenv.com or vcexpress.exe to build
-        basepath = os.path.join(self.studio,"..","IDE")
-        vcexpresspath = os.path.join(basepath,"vcexpress.exe")
-        devenvpath = os.path.join(basepath,"devenv.com")
-        if os.path.exists(vcexpresspath):
-            self.build_cmd = vcexpresspath
-        elif  os.path.exists(devenvpath):
-            self.build_cmd = devenvpath
-        else:
-            die("I couldn't find either vcexpress.exe or devenv.com, so I dont know how to build stuff!")
             
     @staticmethod
     def can_use():
-        VS80 = os.environ.get("VS80COMNTOOLS")
-        VS90 = os.environ.get("VS90COMNTOOLS")
-        VS100 = os.environ.get("VS100COMNTOOLS")
-        return VS80 is not None or VS90 is not None or VS100 is not None
+        import sys
+        return sys.platform == "win32"
 
     def run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""
@@ -465,7 +435,7 @@ class VisualStudioBuilder(object):
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            self.run_command2("cmake -G \""+ self.generator + "\" "+
+            self.run_command2("cmake -G \""+ self.generator + "\" -A Win32 "+
                               "-D NO_JAVA:string=TRUE " + 
                               "-D NO_DOTNET:string=TRUE " + 
                               "-D NO_ADA:string=TRUE " + 
@@ -481,7 +451,8 @@ class VisualStudioBuilder(object):
             if build_cpp_release:
                 cppconfig += ["Release"]
             for config in cppconfig:
-                self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + config +" /Project INSTALL",
+            
+                self.run_command("msbuild INSTALL.vcxproj -p:Configuration=" +config,
                                  "Build and Install CPP " + config,what)
                 save_installed_files_manifest()
             
@@ -498,7 +469,7 @@ class VisualStudioBuilder(object):
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            self.run_command(("cmake -G \""+ self.generator + "\" "+
+            self.run_command(("cmake -G \""+ self.generator + "\" -A Win32 "+
                               "-D NO_CXX:string=TRUE " +
                               "-D NO_DOTNET:string=FALSE " +
                               "-D NO_ADA:string=" + str(not build_ada) + " " + 
@@ -508,7 +479,7 @@ class VisualStudioBuilder(object):
                              "Configure", what)
             solution = self.find_sln()
             
-            self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + default_config  +" /Project INSTALL",
+            self.run_command("msbuild INSTALL.vcxproj -p:Configuration=" +default_config,
                              "Build and Install " + default_config, what)
             save_installed_files_manifest()
         finally:
@@ -532,13 +503,14 @@ class VisualStudioBuilder(object):
                 self.run_command("nmake install",
                                  "Build and Install " + default_config, what)
             else:
-                self.run_command(("cmake -G \""+ self.generator + "\" "+
+                self.run_command(("cmake -G \""+ self.generator + "\"  -A Win32 "+
                                   "-D REBUILD=" + Rebuild + " " +
                                   "."),
                                  "Configure", what)
                 solution = self.find_sln()
                 
-                self.run_command("\"" + self.build_cmd + "\" " + solution + " /build " + default_config  +" /Project INSTALL",
+                
+                self.run_command("msbuild INSTALL.vcxproj -p:Configuration=" +default_config,
                                  "Build and Install " + default_config, what)
             
 
@@ -691,28 +663,28 @@ def check_config_dots_generated():
     run_dots_configuration_check()
         
 def load_gui():
-    import Tkinter, tkMessageBox, tkFont, time
-    from ConfigParser import RawConfigParser
+    import tkinter, tkinter.messagebox, tkinter.font, time
+    from configparser_3_1 import RawConfigParser
     global MainDialog
     
-    class MainDialog(Tkinter.Frame):
+    class MainDialog(tkinter.Frame):
         def __init__(self,parent, builder):
-            Tkinter.Frame.__init__(self,parent)
+            tkinter.Frame.__init__(self,parent)
             self.cfgpath = None
             self.cfg = None
             self.parent = parent
             self.builder = builder
-            self.grid(row=0,column=0,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
+            self.grid(row=0,column=0,sticky=tkinter.W + tkinter.E + tkinter.N + tkinter.S)
 
             self.parent.grid_rowconfigure(0, weight=1)
             self.parent.grid_columnconfigure(0, weight=1)
 
-            self.buildType=Tkinter.StringVar()
+            self.buildType=tkinter.StringVar()
             self.buildType.set(buildType)
-            self.buildAda = Tkinter.IntVar()
-            self.buildJava = Tkinter.IntVar()
-            self.buildReleaseCpp = Tkinter.IntVar()
-            self.buildDebugCpp = Tkinter.IntVar()
+            self.buildAda = tkinter.IntVar()
+            self.buildJava = tkinter.IntVar()
+            self.buildReleaseCpp = tkinter.IntVar()
+            self.buildDebugCpp = tkinter.IntVar()
             self.getGuiConfiguration()
             self.createWidgets()
             self.cppDebugBoxChanged()
@@ -760,104 +732,104 @@ def load_gui():
             self.grid_rowconfigure(5, weight=1)
             self.grid_columnconfigure(4, weight=1)
 
-            Tkinter.Label(self, 
-                          text='Build directory:').grid(row=0,column=0,sticky=Tkinter.W + Tkinter.N)
+            tkinter.Label(self, 
+                          text='Build directory:').grid(row=0,column=0,sticky=tkinter.W + tkinter.N)
 
-            Tkinter.Label(self, 
+            tkinter.Label(self, 
                           text=os.path.join(SAFIR_SDK,"dots","dots_generated"), 
-                          relief=Tkinter.SUNKEN).grid(row=0,column=1,columnspan=5,sticky=Tkinter.W + Tkinter.N)
+                          relief=tkinter.SUNKEN).grid(row=0,column=1,columnspan=5,sticky=tkinter.W + tkinter.N)
 
 
-            Tkinter.Label(self, 
-                          text='Task:').grid(row=1,column=0,sticky=Tkinter.W + Tkinter.N)
+            tkinter.Label(self, 
+                          text='Task:').grid(row=1,column=0,sticky=tkinter.W + tkinter.N)
 
-            Tkinter.Radiobutton(self,
+            tkinter.Radiobutton(self,
                                 text="Build",
                                 variable=self.buildType,
                                 value="build",
-                                command=self.buildTypeChanged).grid(row=1,column=1, sticky=Tkinter.W + Tkinter.N)
+                                command=self.buildTypeChanged).grid(row=1,column=1, sticky=tkinter.W + tkinter.N)
 
-            Tkinter.Radiobutton(self,
+            tkinter.Radiobutton(self,
                                 text="Rebuild",
                                 variable=self.buildType,
                                 value="rebuild",
-                                command=self.buildTypeChanged).grid(row=1,column=2, sticky=Tkinter.W + Tkinter.N)
+                                command=self.buildTypeChanged).grid(row=1,column=2, sticky=tkinter.W + tkinter.N)
 
-            Tkinter.Radiobutton(self,
+            tkinter.Radiobutton(self,
                                 text="Clean",
                                 variable=self.buildType,
                                 value="clean",
-                                command=self.buildTypeChanged).grid(row=1,column=3, sticky=Tkinter.W + Tkinter.N)
-            Tkinter.Label(self, 
-                          text='Languages:').grid(row=2,column=0,sticky=Tkinter.W + Tkinter.N)
+                                command=self.buildTypeChanged).grid(row=1,column=3, sticky=tkinter.W + tkinter.N)
+            tkinter.Label(self, 
+                          text='Languages:').grid(row=2,column=0,sticky=tkinter.W + tkinter.N)
             
-            cppBox = Tkinter.Checkbutton(self,
+            cppBox = tkinter.Checkbutton(self,
                                          text="C++",
                                          state="disabled")
-            cppBox.grid(row=2,column=1,sticky=Tkinter.W + Tkinter.N)
+            cppBox.grid(row=2,column=1,sticky=tkinter.W + tkinter.N)
             cppBox.select()
             
-            csBox = Tkinter.Checkbutton(self,
+            csBox = tkinter.Checkbutton(self,
                                         text="C#",
                                         state="disabled")
-            csBox.grid(row=2,column=2,sticky=Tkinter.W + Tkinter.N)
+            csBox.grid(row=2,column=2,sticky=tkinter.W + tkinter.N)
             csBox.select()
             
             
-            self.adaBox = Tkinter.Checkbutton(self,
+            self.adaBox = tkinter.Checkbutton(self,
                                               text="Ada",
                                               variable = self.buildAda,
                                               command=self.adaBoxChanged)
-            self.adaBox.grid(row=2,column=3,sticky=Tkinter.W + Tkinter.N)
+            self.adaBox.grid(row=2,column=3,sticky=tkinter.W + tkinter.N)
             
-            self.javaBox = Tkinter.Checkbutton(self,
+            self.javaBox = tkinter.Checkbutton(self,
                                                text="Java",
                                                variable = self.buildJava,
                                                command=self.javaBoxChanged)
-            self.javaBox.grid(row=2,column=4,sticky=Tkinter.W + Tkinter.N)
+            self.javaBox.grid(row=2,column=4,sticky=tkinter.W + tkinter.N)
             
-            Tkinter.Label(self,
-                          text='C++ build type:').grid(row=3,column=0,sticky=Tkinter.W + Tkinter.N)
+            tkinter.Label(self,
+                          text='C++ build type:').grid(row=3,column=0,sticky=tkinter.W + tkinter.N)
 
-            cppReleaseBuildBox = Tkinter.Checkbutton(self,
+            cppReleaseBuildBox = tkinter.Checkbutton(self,
                                                      text="Release",
                                                      state="disabled")
-            cppReleaseBuildBox.grid(row=3,column=1,sticky=Tkinter.W + Tkinter.N)
+            cppReleaseBuildBox.grid(row=3,column=1,sticky=tkinter.W + tkinter.N)
             cppReleaseBuildBox.select()
             
 
-            self.cppDebugBuildBox = Tkinter.Checkbutton(self,
+            self.cppDebugBuildBox = tkinter.Checkbutton(self,
                                                         text="Debug",
                                                         variable = self.buildDebugCpp,
                                                         command=self.cppDebugBoxChanged)
-            self.cppDebugBuildBox.grid(row=3,column=2,sticky=Tkinter.W + Tkinter.N)             
+            self.cppDebugBuildBox.grid(row=3,column=2,sticky=tkinter.W + tkinter.N)             
             
-            Tkinter.Label(self, text='Build output').grid(row=4,column=0,sticky=Tkinter.W + Tkinter.N)
+            tkinter.Label(self, text='Build output').grid(row=4,column=0,sticky=tkinter.W + tkinter.N)
           
-            scrollbar = Tkinter.Scrollbar(self)            
-            self.output = Tkinter.Text(self, yscrollcommand=scrollbar.set)
+            scrollbar = tkinter.Scrollbar(self)            
+            self.output = tkinter.Text(self, yscrollcommand=scrollbar.set)
             
-            scrollbar.grid(row=5,column=10,columnspan=1,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
+            scrollbar.grid(row=5,column=10,columnspan=1,sticky=tkinter.W + tkinter.E + tkinter.N + tkinter.S)
 
             scrollbar.config(command=self.output.yview)
             self.output.config(yscrollcommand=scrollbar.set)
 
-            self.output.grid(row=5,column=0,columnspan=10,sticky=Tkinter.W + Tkinter.E + Tkinter.N + Tkinter.S)
+            self.output.grid(row=5,column=0,columnspan=10,sticky=tkinter.W + tkinter.E + tkinter.N + tkinter.S)
             self.output.tag_config("pre",foreground="black")
-            self.output.tag_config("title",font = tkFont.Font(family="Times",size=-24,weight="bold"))
+            self.output.tag_config("title",font = tkinter.font.Font(family="Times",size=-24,weight="bold"))
             self.output.tag_config("command",foreground="blue", underline=True)
             self.output.tag_config("error",foreground="red")
-            self.output.tag_config("header",font = tkFont.Font(family="Times",size=-18))
+            self.output.tag_config("header",font = tkinter.font.Font(family="Times",size=-18))
             
-            self.runButton = Tkinter.Button(self, text="Run", command=self.run)
-            self.runButton.grid(row=6,column=4,sticky=Tkinter.E )
-            Tkinter.Button(self, text="Clear",command=self.clear).grid(row=6,column=5,pady=10,padx=10,sticky=Tkinter.E)
-            self.cancelButton = Tkinter.Button(self, text="Quit",command=self.quit)
-            self.cancelButton.grid(row=6,column=6,sticky=Tkinter.E)
+            self.runButton = tkinter.Button(self, text="Run", command=self.run)
+            self.runButton.grid(row=6,column=4,sticky=tkinter.E )
+            tkinter.Button(self, text="Clear",command=self.clear).grid(row=6,column=5,pady=10,padx=10,sticky=tkinter.E)
+            self.cancelButton = tkinter.Button(self, text="Quit",command=self.quit)
+            self.cancelButton.grid(row=6,column=6,sticky=tkinter.E)
 
 
         def clear(self):
-            self.output.delete(1.0,Tkinter.END)
+            self.output.delete(1.0,tkinter.END)
 
         def adaBoxChanged(self):
             global build_ada
@@ -896,8 +868,8 @@ def load_gui():
             self.after(100,self.updateLog)
             delta = buildlog.getDelta()
             for chunk in delta:
-                self.output.insert(Tkinter.END,chunk[0],chunk[1])
-                self.output.see(Tkinter.END)
+                self.output.insert(tkinter.END,chunk[0],chunk[1])
+                self.output.see(tkinter.END)
 
         def run(self):
             self.runButton.config(state="disabled")
@@ -924,7 +896,7 @@ def load_gui():
 
                 if self.commandThread.result != None:
                     if self.commandThread.traceback is not None:
-                        print self.commandThread.traceback
+                        print(self.commandThread.traceback)
                     self.runButton.config(state="normal")
                     self.cancelButton.config(state="normal")
                     self.commandList = list()
@@ -951,7 +923,7 @@ def load_gui():
             def run(self):
                 try:
                     self.result = self.command()
-                except Exception, e:
+                except Exception as e:
                     self.result = e
                     import traceback
                     self.traceback = traceback.format_exc()
@@ -962,7 +934,7 @@ def main():
     SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
     SAFIR_SDK = os.environ.get("SAFIR_SDK")
     if SAFIR_RUNTIME == None or SAFIR_SDK == None:
-        print "You need to have both SAFIR_RUNTIME and SAFIR_SDK set"
+        print("You need to have both SAFIR_RUNTIME and SAFIR_SDK set")
         sys.exit(1)
     
     import time
@@ -978,7 +950,7 @@ def main():
     elif UnixGccBuilder.can_use():
         builder = UnixGccBuilder()
     else:
-        print "Failed to work out what builder to use!"
+        print("Failed to work out what builder to use!")
         return 1
 
     olddir = os.getcwd();
@@ -986,7 +958,7 @@ def main():
     os.chdir(dir)
 
     if no_gui:
-        print "Running in batch mode"
+        print("Running in batch mode")
         
         if buildType == "clean" or buildType == "clean_and_uninstall" or buildType == "rebuild":
             builder.clean()
@@ -999,12 +971,12 @@ def main():
             builder.build()
             check_config()
         
-        print "Success! (dobmake took " + str(time.time() - start_time) + " seconds)"
+        print("Success! (dobmake took " + str(time.time() - start_time) + " seconds)")
 
     else:
-        import Tkinter, tkMessageBox, tkFont
+        import tkinter, tkinter.messagebox, tkinter.font
         load_gui()
-        application = Tkinter.Tk()
+        application = tkinter.Tk()
         dlg = MainDialog(application,builder)
         application.title("Dobmake")
         application.mainloop()

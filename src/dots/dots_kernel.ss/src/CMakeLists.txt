@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.27)
 
 PROJECT (dots_kernel)
 
@@ -15,7 +15,8 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_kernel SHARED ${sources} ${headers})
 
-find_library(EXPAT_LIBRARY NAMES expat libexpat)
+find_library(EXPAT_LIBRARY NAMES expat libexpat
+             PATHS ${SAFIR_SDK}/lib)
 if (NOT EXPAT_LIBRARY)
     message(FATAL_ERROR "Couldn't find expat.lib or libexpat.lib")
 endif()
@@ -24,7 +25,7 @@ endif()
 #we also check where it ends up if you use the expat install package.
 if (WIN32)
     find_path(EXPAT_HEADER NAMES expat.h
-              PATHS ENV PATH
+              PATHS ${SAFIR_SDK}/include
               PATH_SUFFIXES ../Source/lib)
     if (NOT EXPAT_HEADER)
         message(FATAL_ERROR "Couldn't find expat.h")
@@ -41,6 +42,7 @@ IF (NOT MSVC)
 ENDIF()
 
 ADD_DEFINITIONS(-DDOTSKERNEL_EXPORTS)
+ADD_DEFINITIONS(-D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

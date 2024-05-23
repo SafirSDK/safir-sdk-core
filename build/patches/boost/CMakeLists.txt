@@ -1,6 +1,6 @@
 project(ubuntu_patches)
 
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 3.27)
 
 #Add some more boost library versions that we want to be able to use,
 # just to try to be "future safe"

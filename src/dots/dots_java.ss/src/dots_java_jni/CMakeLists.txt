@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.27)
 
 project(dots_java_jni Java)
 find_package(Java REQUIRED)

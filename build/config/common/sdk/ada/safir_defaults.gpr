@@ -1,16 +1,6 @@
 --  ===========================================================================
 --  ==              Copyright (C) SAAB 2009
 --  ===========================================================================
---
---
---
---
---
---
---
---
---
--- ============================================================================
 project Safir_Defaults is
 
    --
@@ -23,6 +13,25 @@ project Safir_Defaults is
    type Build_Type is ("Release", "Debug");
 
    type Boolean is ("False", "True");
+   
+   type Architecture_Type is ("i386",
+                              
+                              "pentium",
+                              "pentium2",
+                              "pentium3",
+                              "pentium4",
+                              "prescott",
+                              "nocona",
+                              "core2",
+
+                              "athlon",
+                              "athlon-mp",
+                              "athlon-fx",
+                              "opteron",
+                              "opteron-sse3",
+                              "barcelona");
+
+   Architecture     : Architecture_Type := External ("ARCHITECTURE", "pentium4"); 
 
    OS               : OS_Type           := External ("OS", "Linux");
 
@@ -42,11 +51,12 @@ project Safir_Defaults is
         ("-C", -- Cache source mappings
          "-k", -- Keep going after compilation errors
          "-s", -- Recompile if compiler switches have changed
-         "-g", -- Enable Debug information
+--         "-g", -- Enable Debug information
          "-j" &  External ("NUMBER_OF_PROCESSORS", "1"));
       case Build is
          when "Debug" =>
-            for Global_Configuration_Pragmas use "configuration_pragmas.gnat";
+            --for Global_Configuration_Pragmas use "configuration_pragmas.gnat";
+            null;
          when "Release" =>
             null;
       end case;
@@ -61,25 +71,26 @@ project Safir_Defaults is
          "-gnatq",                 -- Don't quit, try semantics, even if parse errors
          "-gnatQ",                 -- Don't quit, write ali/tree file even if compile errors
          "-gnat05",                -- Full Ada05
-         --"-gnato",                 -- Overflow checking enabled.
-         --"-fcallgraph-info=su",    -- Output callgraph information
-         --"-fstack-usage",          -- Output stack usage information
-         --"-march=" & Architecture, -- Target processor
-         --"-fstack-check",          -- Since we are running multiple threads.
-         --"-gnateDOS=" & OS,        -- For Conditional Compilation
-         "-gnatwa",                 -- Turn on all optional warnings (except d,h,l)
-         "-gnatwbdhl");              -- Warn for every thing.
+--       "-gnato",                 -- Overflow checking enabled.
+--       "-fcallgraph-info=su",    -- Output callgraph information
+--       "-fstack-usage",          -- Output stack usage information
+         "-march=" & Architecture, -- Target processor
+         "-fstack-check",          -- Since we are running multiple threads.
+         "-gnateDOS=" & OS,        -- For Conditional Compilation
+         "-gnatwa"                 -- Turn on all optional warnings (except d,h,l)
+--       "-gnatwbdhl               -- Warn for every thing.
+         );
 
       -- Style checks
       for Default_Switches ("Ada") use
               Compiler'Default_Switches ("Ada") &
             ("-gnaty" &
-             "3" & --  check indentation
+             --"3" & --  check indentation
              "a"  & --  check attribute casing
              "A"  & --  check array attribute indexes
-             "b"  & --  check no blanks at end of lines
+             --"b"  & --  check no blanks at end of lines
              --"c"  & --  check comment format
-             -- "d"  & --  check no DOS line terminators
+             --"d"  & --  check no DOS line terminators
              "e"  & --  check end/exit labels present
              "f"  & --  check no form feeds/vertical tabs in source
              "h"  & --  check no horizontal tabs in source
@@ -94,7 +105,7 @@ project Safir_Defaults is
              "p"  & --  check pragma casing
              "r"  & --  check casing for identifier references
              --"s"  & --  check separate subprogram specs present
-             "t"  & --  check token separation rules
+             --"t"  & --  check token separation rules
              -- "u"  & --  check no unnecessary blank lines
              "x"  & -- check extra parens around conditionals
              "");
@@ -103,17 +114,25 @@ project Safir_Defaults is
          when "Release" =>
             for Default_Switches ("Ada") use
               Compiler'Default_Switches ("Ada") &
-            ("-O2",     -- Full optimisation.
-             "-gnatn"); -- Inlining of subprograms.
+            (
+--             "-O0",
+--             "-g"
+             "-O2"      -- Full optimisation.
+--           "-gnatn",  -- Inlining of subprograms.
+--           "-gnato",  -- Enable overflow checking (off by default)
+--           "-gnata"   -- Enable assertions.
+	     );
 
          when "Debug" =>
             for Default_Switches ("Ada") use
               Compiler'Default_Switches ("Ada") &
-            ("-g",
-             "-gnatVa", -- Turn on all validity checking options
+            (
+            "-g",
              "-O0",     -- Optimisation level 0 (-Wuninitialized inefective)
+             "-gnatVa", -- Turn on all validity checking options
              "-gnato",  -- Enable overflow checking (off by default)
-             "-gnata"); -- Enable assertions.
+             "-gnata"   -- Enable assertions.
+            );
       end case;
 
    end Compiler;
@@ -124,10 +143,9 @@ project Safir_Defaults is
    package Linker is
       case Build is
          when "Debug" =>
-            for Default_Switches ("Ada") use
-              Linker'Default_Switches ("Ada") &
-            ("-g");
+            for Default_Switches ("Ada") use Linker'Default_Switches ("Ada") & ("-g");
          when others =>
+          --for Default_Switches ("Ada") use Linker'Default_Switches ("Ada") & ("-g");
             null;
       end case;
    end Linker;

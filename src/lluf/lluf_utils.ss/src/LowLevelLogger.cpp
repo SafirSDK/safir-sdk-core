@@ -67,7 +67,7 @@ namespace Internal
         {
             return "";
         }
-        boost::filesystem::path filename(env,boost::filesystem::native);
+        boost::filesystem::path filename(env);
 
         filename /= "log";
         filename /= "Dob-LowLevelLog";

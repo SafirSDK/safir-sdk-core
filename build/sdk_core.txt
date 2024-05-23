@@ -7,37 +7,35 @@
 build_dir         build/config                              Release
 
 #LLUF
-build_dir        src/lluf/lluf_utils.ss/src                 Release   Debug
-build_dir        src/lluf/lluf_logger_control.ss/src        Release
-#TODO: lluf ada stuff
+#build_dir        src/lluf/lluf_utils.ss/src                 Release   Debug
+#build_dir        src/lluf/lluf_logger_control.ss/src        Release
 
 #DOTS
-build_dir        src/dots/dots_id.ss/src                   Release
-build_dir        src/dots/dots_kernel.ss/src               Release
-build_dir        src/dots/dots_configuration_check.ss/src  Release
-build_dir        src/dots/dots_schema_validator.ss         Release
-build_dir        src/dots/dots_cpp.ss/src                  Release   Debug
-build_dir        src/dots/dots_dotnet.ss/src               Release
-build_dir        src/dots/dots_ada.ss                      Release
-build_dir        src/dots/dots_java.ss/src                 Release
+#build_dir        src/dots/dots_id.ss/src                   Release
+#build_dir        src/dots/dots_kernel.ss/src               Release
+#build_dir        src/dots/dots_configuration_check.ss/src  Release
+#build_dir        src/dots/dots_schema_validator.ss         Release
+#build_dir        src/dots/dots_cpp.ss/src                  Release   Debug
+#build_dir        src/dots/dots_dotnet.ss/src               Release
+#build_dir        src/dots/dots_ada.ss                      Release
 build_dir        src/dots/dots_v.ss                        Release
-build_dir        src/dots/dots_depends.ss                  Release
+#build_dir        src/dots/dots_depends.ss                  Release
 
 #COPY DOB FILES
-copy_dob_files   src/dose/dose_config.ss/data              definitions/safir_core
-copy_dob_files   src/dose/dose_config.ss/config            definitions/safir_core/config
+#copy_dob_files   src/dose/dose_config.ss/data              definitions/safir_core
+#copy_dob_files   src/dose/dose_config.ss/config            definitions/safir_core/config
 
-copy_dob_files   src/swre/swre_library.ss/data             definitions/safir_core
+#copy_dob_files   src/swre/swre_library.ss/data             definitions/safir_core
 
-copy_dob_files   src/douf/douf_multi_foreach.ss/data       definitions/safir_core
-copy_dob_files   src/douf/douf_multi_foreach.ss/config     definitions/safir_core/config
+#copy_dob_files   src/douf/douf_multi_foreach.ss/data       definitions/safir_core
+#copy_dob_files   src/douf/douf_multi_foreach.ss/config     definitions/safir_core/config
 
-copy_dob_files   src/douf/douf_time_library.ss/config      definitions/safir_core/config
+#copy_dob_files   src/douf/douf_time_library.ss/config      definitions/safir_core/config
 
-copy_dob_files   src/olib/olib_code.ss/data                definitions/safir_core
+#copy_dob_files   src/olib/olib_code.ss/data                definitions/safir_core
 
-copy_dob_files   src/dope/dope_main.ss/data                definitions/safir_core
-copy_dob_files   src/dope/dope_main.ss/config              definitions/safir_core/config
+#copy_dob_files   src/dope/dope_main.ss/data                definitions/safir_core
+#copy_dob_files   src/dope/dope_main.ss/config              definitions/safir_core/config
 
 #run dobmake to build dots_generated dlls/libs
 dobmake
@@ -48,7 +46,6 @@ build_dir        src/dose/dose_cpp.ss/src                  Release   Debug
 build_dir        src/dose/dose_communication.ss/src        Release   Debug
 build_dir        src/dose/dose_main.ss/src                 Release
 build_dir        src/dose/dose_dotnet.ss/src               Release
-build_dir        src/dose/dose_java.ss/src                 Release
 build_dir        src/dose/dose_ada.ss                      Release
 #TODO cmake file will move to src dir.
 
@@ -71,7 +68,6 @@ build_dir        src/douf/douf_utilities_mix.ss/src        Release
 build_dir        src/swre/swre_library.ss/src              Release
 build_dir        src/swre/swre_interface.ss/cpp/swre_interface_cpp         Release   Debug
 build_dir        src/swre/swre_interface.ss/dotnet/swre_interface_dotnet   Release
-build_dir        src/swre/swre_interface.ss/java           Release
 build_dir        src/swre/swre_interface.ss/ada            Release
 build_dir        src/swre/swre_logger.ss/src               Release
 build_dir        src/swre/swre_backdoor.ss/src             Release

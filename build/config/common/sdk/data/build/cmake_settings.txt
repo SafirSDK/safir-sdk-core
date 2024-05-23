@@ -28,6 +28,8 @@ if (SAFIR_USER)
    INCLUDE_DIRECTORIES(${SAFIR_USER}/sdk/include)
 endif()
 
+set (CMAKE_CXX_STANDARD 20)
+
 #if we're using gcc we need to set up some things
 if (CMAKE_COMPILER_IS_GNUCXX)
    #link directory for libraries (will this work with gcc under windows?)
@@ -68,9 +70,9 @@ if (MSVC)
    ENDIF(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
 endif ()
 
-#Add some more boost library versions that we want to be able to use,
-# just to try to be "future safe"
-set (Boost_ADDITIONAL_VERSIONS "1.34.1" "1.37" "1.37.0" "1.38" "1.38.0" "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0")
+#Add some more boost library versions that we want to be able to use.
+set (Boost_ADDITIONAL_VERSIONS "1.85.0")
+set (Boost_NO_WARN_NEW_VERSIONS ON)
 
 set(Boost_USE_MULTITHREADED ON)
 
@@ -93,13 +95,6 @@ endif()
 
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
-#Boost 1.39 and vc80 don't play nicely together. 
-#we get multiply defined symbols. As a workaround we allow this.
-if (MSVC80 AND Boost_LIB_VERSION STREQUAL "1_39")
-	SET(CMAKE_EXE_LINKER_FLAGS /FORCE:MULTIPLE)
-	SET(CMAKE_SHARED_LINKER_FLAGS /FORCE:MULTIPLE)
-endif()
-
 #Work out what ACE lib is called
 if (UNIX)
   set (ACE_LIBRARY "ACE")
@@ -121,39 +116,43 @@ endif()
 
 MACRO(INSTALL_DEBUG_INFO target)
   if(MSVC)
+    # TODO: need to fix this!
 
-    GET_TARGET_PROPERTY(location ${target} LOCATION)
-    # fix for vs2010
-    if (MSVC_VERSION EQUAL 1600)
-       STRING(REPLACE "$(Configuration)" Debug location ${location})
-    else()
-       STRING(REPLACE "$(OutDir)" Debug location ${location})
-    endif()
+    # if (NOT TARGET ${target})
+	  # message(FATAL_ERROR "No such target: ${target}")
+	# endif()
+    # GET_TARGET_PROPERTY(location ${target} LOCATION)
+    # # fix for vs2010
+    # if (MSVC_VERSION EQUAL 1600)
+       # STRING(REPLACE "$(Configuration)" Debug location ${location})
+    # else()
+       # STRING(REPLACE "$(OutDir)" Debug location ${location})
+    # endif()
 
-    STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
-    STRING(REPLACE .exe .pdb location ${location})
+    # STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
+    # STRING(REPLACE .exe .pdb location ${location})
     
-    if (SAFIR_USER)
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS Debug)
-    else()
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
-    endif()
+    # if (SAFIR_USER)
+      # INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS Debug)
+    # else()
+      # INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
+    # endif()
 
-    GET_TARGET_PROPERTY(location ${target} LOCATION)
-    # fix for vs2010
-    if (MSVC_VERSION EQUAL 1600)
-       STRING(REPLACE "$(Configuration)" RelWithDebInfo location ${location})
-    else()
-       STRING(REPLACE "$(OutDir)" RelWithDebInfo location ${location})
-    endif()
+    # GET_TARGET_PROPERTY(location ${target} LOCATION)
+    # # fix for vs2010
+    # if (MSVC_VERSION EQUAL 1600)
+       # STRING(REPLACE "$(Configuration)" RelWithDebInfo location ${location})
+    # else()
+       # STRING(REPLACE "$(OutDir)" RelWithDebInfo location ${location})
+    # endif()
 
-    STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
+    # STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
 
-    if (SAFIR_USER)
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS RelWithDebInfo)
-    else()
-      INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
-    endif()
+    # if (SAFIR_USER)
+      # INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS RelWithDebInfo)
+    # else()
+      # INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
+    # endif()
 
   endif()
 ENDMACRO()

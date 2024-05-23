@@ -117,7 +117,7 @@ namespace Internal
             int m_lineNumber;
         };
 
-        class NameEquals: public std::binary_function<Element,std::string,bool>
+        class NameEquals
         {
         public:
             bool operator() (const Element & el, const std::string & name) const {return el.m_Name == name;}

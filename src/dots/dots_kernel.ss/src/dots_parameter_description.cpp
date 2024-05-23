@@ -50,14 +50,14 @@ namespace Internal
     ParameterDescription::~ParameterDescription()
     {
     }
-
+	
     const ParameterDescription::BinaryParameterValue
     ParameterDescription::BinaryValue(const ArrayIndex index) const
     {
         //        std::wcout << "ABAQ Reading binary parameter (index = " << index << ") from address " << (const void *)((m_offset + index * sizeof(ParameterOffset)).get()) << std::endl;
-        const ParameterOffsetConst paramPtrLocation = m_offset + index * sizeof(ParameterOffset);
+        const auto paramPtrLocation = m_offset + index * sizeof(ParameterOffset);
         //        std::wcout << "ABAQ   paramPtrLocation = " << (const void *)paramPtrLocation.get() << std::endl;
-        const ParameterOffsetConst paramLocation = *ParameterOffsetCast<const ParameterOffsetConst>(paramPtrLocation);
+        const ParameterOffsetConst paramLocation = *ParameterOffsetCast<ParameterOffsetConst>(paramPtrLocation);
         //        std::wcout << "ABAQ   paramLocation = " << (const void *)paramLocation.get() << std::endl;
         const Size size = *ParameterOffsetCast<const Size>(paramLocation);
         //        std::wcout << "ABAQ   size = " << size << std::endl;
@@ -74,7 +74,6 @@ namespace Internal
     }
 
 
-
     template <>
     const boost::interprocess::offset_ptr<const char>
     ParameterDescription::Value<char>(const ArrayIndex index) const
@@ -83,7 +82,7 @@ namespace Internal
         {
         case ObjectMemberType:
         case StringMemberType:
-            return *ParameterOffsetCast<const ParameterOffsetConst>(m_offset + index * sizeof(ParameterOffset));
+            return *ParameterOffsetCast<ParameterOffsetConst>(m_offset + index * sizeof(ParameterOffset));
 
         default:
             ENSURE(false, << "Someone tried to call the char specialization of ParameterDescription::Value on parameter of type " << m_memberType);

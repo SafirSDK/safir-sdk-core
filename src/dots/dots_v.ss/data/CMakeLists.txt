@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.27)
 
 PROJECT (dots_generated)
 
@@ -24,6 +24,8 @@ add_custom_target(ensure_rebuild ALL
 #            C++                #
 #################################
 if (NOT NO_CXX)
+
+find_package(Boost COMPONENTS filesystem)
 
 # Instructs the MSVC toolset to use the precompiled header PRECOMPILED_HEADER
 # for each source file given in the collection named by SOURCE_VARIABLE_NAME.
@@ -107,7 +109,7 @@ endfunction(enable_precompiled_headers)
 ##
   ADD_LIBRARY(dots_generated-cpp SHARED dll_imports.cpp dll_imports.h)  
   ADD_DEFINITIONS(-DDOTS_GENERATED_CPP_EXPORTS)
-  TARGET_LINK_LIBRARIES(dots_generated-cpp ${ACE_LIBRARY})
+  TARGET_LINK_LIBRARIES(dots_generated-cpp ${ACE_LIBRARY} ${Boost_LIBRARIES})
 
   if (NOT MSVC)
        TARGET_LINK_LIBRARIES(dots_generated-cpp dots_cpp)

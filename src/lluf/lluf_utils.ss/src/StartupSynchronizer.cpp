@@ -23,7 +23,7 @@
 ******************************************************************************/
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem/file_status.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/interprocess/sync/named_semaphore.hpp>
 #include <ace/Guard_T.h>
@@ -77,7 +77,7 @@ namespace Utilities
         {
             throw StartupSynchronizerException("Environment variable SAFIR_RUNTIME does not appear to be set");
         }
-        path dir(env,native);
+        path dir(env);
 
         dir /= "data/text/lluf/";
         if (!exists(dir))
@@ -109,7 +109,7 @@ namespace Utilities
 
         if (exists(filename))
         {
-            if (!is_regular(filename))
+            if (!is_regular_file(filename))
             {
                 std::ostringstream ostr;
                 ostr << "The lockfile does not appear to be a reglar file. filename = '" << filename.string() << "'" << std::endl;

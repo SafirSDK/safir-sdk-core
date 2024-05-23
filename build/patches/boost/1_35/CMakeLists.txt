@@ -1,6 +1,6 @@
 project(boost_patches)
 
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 3.27)
 
 INSTALL(FILES file_lock.hpp
         DESTINATION ${Boost_INCLUDE_DIRS}/boost/interprocess/sync/)

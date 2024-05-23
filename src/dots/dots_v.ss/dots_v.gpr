@@ -1,4 +1,4 @@
-with "templates_parser";
+with "aws";
 with "xmlada";
 with "dots_id";
 with "safir_defaults.gpr";

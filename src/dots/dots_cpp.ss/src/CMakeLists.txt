@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.27)
 
 PROJECT (dots_cpp)
 
@@ -9,8 +9,9 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
+FIND_PACKAGE(Boost COMPONENTS filesystem)
 ADD_LIBRARY(dots_cpp SHARED ${sources} ${headers})
-TARGET_LINK_LIBRARIES(dots_cpp ${ACE_LIBRARY})
+TARGET_LINK_LIBRARIES(dots_cpp ${ACE_LIBRARY} ${Boost_LIBRARIES})
 
 ADD_DEFINITIONS(-DDOTS_EXPORTS)
 

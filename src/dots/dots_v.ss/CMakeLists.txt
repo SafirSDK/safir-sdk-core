@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.27)
 
 PROJECT (dots_v)
 
@@ -7,7 +7,7 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 # XML ada version can be 3.2.1 or 4.2
 
 if ("$ENV{XML_ADA_VER}" STREQUAL "")
-    SET(XML_ADA_VER "3.2.1")
+    SET(XML_ADA_VER "4.2")
 else()
     SET(XML_ADA_VER $ENV{XML_ADA_VER})
 endif()
