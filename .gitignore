@@ -14,5 +14,7 @@ CMakeCache.txt
 *.resources
 *.ilk
 *.pdb
+*.exp
+*.lib
 Visual Studio 17 2022/
 buildlog.html

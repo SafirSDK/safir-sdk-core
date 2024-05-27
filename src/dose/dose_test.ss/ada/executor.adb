@@ -36,16 +36,16 @@ with Safir.Dob.Instance_Id_Policy;
 with Safir.Dob.Typesystem.Si_64;
 with Safir.Dob.Error_Response;
 with Safir.Dob.Typesystem.Object_Factory;
-with Unchecked_Conversion;
+with Ada.Unchecked_Conversion;
 with Interfaces.C;
 with Ada.Strings.Wide_Fixed;
 with Ada.Strings.Wide_Unbounded;
 with Ada.Exceptions; use Ada.Exceptions;
 with GNAT.Sockets; use GNAT.Sockets;
 with GNAT.Command_Line;
-with Text_IO; use Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Strings.Wide_Unbounded.Wide_Text_IO; use Ada.Strings.Wide_Unbounded.Wide_Text_IO;
-with Ada.Text_IO;
+with Ada.Streams;
 
 pragma Warnings ("D"); -- turn off warnings for implicit dereference
 pragma Warnings ("L"); -- turn off warnings for missing elaboration pragma
@@ -95,7 +95,7 @@ package body Executor is
       type Stream_Element_Ptr is access all Ada.Streams.Stream_Element;
       Buf_Ptr : constant Stream_Element_Ptr := Item (1)'Access;
 
-      function To_Char_Star is new Unchecked_Conversion (Stream_Element_Ptr, Safir.Dob.Typesystem.Char_Star);
+      function To_Char_Star is new Ada.Unchecked_Conversion (Stream_Element_Ptr, Safir.Dob.Typesystem.Char_Star);
 
       Action : Dose_Test.Action.Smart_Pointer;
 
@@ -360,7 +360,8 @@ package body Executor is
    begin
 
       if not Action.Ref.Partner.Is_Null and then
-        Action.Ref.Partner.Get_Val /= Safir.Dob.Typesystem.Channel_Id.Create_Channel_Id (Self.Instance) then
+        Action.Ref.Partner.Get_Val /= Safir.Dob.Typesystem.Channel_Id.Create_Channel_Id (Self.Instance)
+      then
          return;
       end  if;
 

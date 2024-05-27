@@ -4,7 +4,7 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 ADD_SUBDIRECTORY(cpp)
 ADD_SUBDIRECTORY(dotnet)
-#ADD_SUBDIRECTORY(ada)
+ADD_SUBDIRECTORY(ada)
 #ADD_SUBDIRECTORY(java)
 
 INSTALL(FILES output.txt

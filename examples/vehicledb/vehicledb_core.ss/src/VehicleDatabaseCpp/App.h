@@ -25,10 +25,6 @@
 #ifndef __APP_H
 #define __APP_H
 
-#ifndef ACE_HAS_WINSOCK2
-#define ACE_HAS_WINSOCK2 0
-#endif
-
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AceDispatcher.h>
 
