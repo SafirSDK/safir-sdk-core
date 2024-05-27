@@ -9,7 +9,9 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
+find_package(Boost COMPONENTS filesystem)
 ADD_LIBRARY(dose_cpp SHARED ${sources} ${headers})
+TARGET_LINK_LIBRARIES(dose_cpp ${Boost_LIBRARIES})
 
 ADD_DEFINITIONS(-DDOSE_CPP_EXPORTS)
 

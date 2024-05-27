@@ -332,7 +332,7 @@ package body Safir.Dob.Typesystem.Object is
    end Array_Containers;
 
    Dummy : aliased Int_32_Container.Container;
-   function Get_Member (Self   : in Object_Type;
+   function Get_Member (Self   : in out Object_Type;
                         Member : in Safir.Dob.Typesystem.Member_Index;
                         Idx    : in Safir.Dob.Typesystem.Array_Index)
                         return Safir.Dob.Typesystem.Container_Base.Container_Base_Access is

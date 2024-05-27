@@ -94,6 +94,7 @@ else()
 endif()
 
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
+ADD_DEFINITIONS(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 #Work out what ACE lib is called
 if (UNIX)

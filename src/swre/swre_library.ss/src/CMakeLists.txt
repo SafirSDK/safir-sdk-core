@@ -13,8 +13,10 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
+find_package(Boost COMPONENTS filesystem)
+
 ADD_LIBRARY(swre_library SHARED ${sources} ${headers})
-TARGET_LINK_LIBRARIES(swre_library ${ACE_LIBRARY})
+TARGET_LINK_LIBRARIES(swre_library ${ACE_LIBRARY} ${Boost_LIBRARIES})
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(swre_library dose_cpp dots_generated-cpp douf_time_cpp)

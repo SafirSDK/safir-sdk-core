@@ -36,6 +36,7 @@
 #include <boost/noncopyable.hpp>
 
 #include <vector>
+#include <map>
 #include <stack>
 
 #include "dose_dll_defs.h"

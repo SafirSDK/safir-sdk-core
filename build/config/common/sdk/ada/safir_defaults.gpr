@@ -71,6 +71,7 @@ project Safir_Defaults is
          "-gnatq",                 -- Don't quit, try semantics, even if parse errors
          "-gnatQ",                 -- Don't quit, write ali/tree file even if compile errors
          "-gnat05",                -- Full Ada05
+		 "-gnat2012",
 --       "-gnato",                 -- Overflow checking enabled.
 --       "-fcallgraph-info=su",    -- Output callgraph information
 --       "-fstack-usage",          -- Output stack usage information

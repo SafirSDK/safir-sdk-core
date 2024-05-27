@@ -386,7 +386,7 @@ class VisualStudioBuilder(object):
         batpath = os.path.join(self.tmpdir,"build.bat")
         bat = open(batpath,"w")
         bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio,"vsvars32.bat") + "\"\n" +
+                  "call \"" + os.path.join(self.studio,"vcvarsall.bat") + "\" x86\n" +
                   cmd)
         bat.close()
         buildlog.writeHeader(description + " '" + what + "'\n")

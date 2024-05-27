@@ -84,12 +84,12 @@ namespace Swre
     {
         try
         {
-            m_logFilePath = fs::path(logFile, fs::native);
+            m_logFilePath = fs::path(logFile);
 
             std::string oldFileName = "old_";
-            oldFileName.append(m_logFilePath.leaf());
+            oldFileName.append(m_logFilePath.filename().string());
 
-            m_oldLogFilePath = m_logFilePath.branch_path() / oldFileName;
+            m_oldLogFilePath = m_logFilePath.parent_path() / oldFileName;
 
         }
         catch (boost::filesystem::filesystem_error& e)
@@ -126,9 +126,9 @@ namespace Swre
             if (m_outDest == File)
             {
                 // Create log directory if it doesn't exist
-                if (m_logFilePath.has_branch_path() && !fs::exists(m_logFilePath.branch_path()))
+                if (m_logFilePath.has_parent_path() && !fs::exists(m_logFilePath.parent_path()))
                 {
-                    fs::create_directory(m_logFilePath.branch_path());
+                    fs::create_directory(m_logFilePath.parent_path());
                 }
 
                 CheckLogFile(); // Will rename log file if it is over max limit
@@ -137,7 +137,7 @@ namespace Swre
 
                 if (!m_logFile)
                 {
-                    std::cerr << "Fatal error: Can't open " <<  m_logFilePath.native_file_string() << std::endl;
+                    std::cerr << "Fatal error: Can't open " <<  m_logFilePath.string() << std::endl;
                     return false;
                 }
 
@@ -284,13 +284,13 @@ namespace Swre
     {
         if (!CheckLogFile())
         {
-            std::cerr << "Opening new " << m_logFilePath.native_file_string() << " ..." << std::endl;
+            std::cerr << "Opening new " << m_logFilePath.string() << " ..." << std::endl;
 
             m_logFile.open(m_logFilePath, std::ios_base::app);
 
             if (!m_logFile)
             {
-                std::cerr << "Fatal error: Can't open " <<  m_logFilePath.native_file_string() << std::endl;
+                std::cerr << "Fatal error: Can't open " <<  m_logFilePath.string() << std::endl;
             }
         }
         return 0; //means success
@@ -306,7 +306,7 @@ namespace Swre
         {
             if (fs::file_size(m_logFilePath) >= m_maxFileSize)
             {
-                std::cerr << "Size of " << m_logFilePath.native_file_string() << " >= "
+                std::cerr << "Size of " << m_logFilePath.string() << " >= "
                           << m_maxFileSize << " bytes. Closing the file ..." << std::endl;
 
                 if (m_logFile.is_open())
@@ -316,12 +316,12 @@ namespace Swre
 
                 if (fs::exists(m_oldLogFilePath))
                 {
-                    std::cerr << "Deleting " << m_oldLogFilePath.native_file_string() << " ..." << std::endl;
+                    std::cerr << "Deleting " << m_oldLogFilePath.string() << " ..." << std::endl;
                     fs::remove(m_oldLogFilePath);
                 }
 
-                std::cerr << "Renaming " << m_logFilePath.native_file_string() << " to "
-                          << m_oldLogFilePath.native_file_string() << " ..." << std::endl;
+                std::cerr << "Renaming " << m_logFilePath.string() << " to "
+                          << m_oldLogFilePath.string() << " ..." << std::endl;
 
                 fs::rename(m_logFilePath, m_oldLogFilePath);
 

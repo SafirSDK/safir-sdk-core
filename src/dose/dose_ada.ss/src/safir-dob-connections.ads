@@ -120,7 +120,7 @@ private
 
    use type Safir.Dob.Defs.Controller_Id;
 
-   type Connection is new Safir.Dob.Connection_Bases.Connection_Base with record
+   type Connection is limited new Safir.Dob.Connection_Bases.Connection_Base with record
       --Do_Dispatch   : Do_Dispatch_Cb_T;
       Controller_Id : Safir.Dob.Defs.Controller_Id := -1;
    end record;

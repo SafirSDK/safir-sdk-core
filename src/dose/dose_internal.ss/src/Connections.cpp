@@ -29,6 +29,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/interprocess/sync/upgradable_lock.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
+#include <boost/interprocess/detail/move.hpp>
 #include "Signals.h"
 #include "ExitHandler.h"
 #include <ace/OS_NS_unistd.h>
@@ -199,7 +200,7 @@ namespace Internal
             const pid_t pid = ACE_OS::getpid();
 
             //upgrade the mutex
-            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(move(rlock));
+            boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
             connection = ConnectionPtr(GetSharedMemory().construct<Connection>
                 (boost::interprocess::anonymous_instance)
                 (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), contextId, pid));

@@ -71,11 +71,10 @@ namespace Internal
     typedef boost::shared_ptr<const TimerInfoBase> TimerInfoConstPtr;
 
 
-    class TimerInfoPtrLess:
-        public std::binary_function<const TimerInfoConstPtr &,const TimerInfoConstPtr &,bool>
+    class TimerInfoPtrLess
     {
     public:
-        result_type operator() (first_argument_type first, second_argument_type second) const
+        bool operator() (const TimerInfoConstPtr & first, const TimerInfoConstPtr & second) const
         {
             return *first < *second;
         }

@@ -830,7 +830,7 @@ package @_NAMESPACE_@.@_CLASS_@ is
                             Beginning_Of_Unused : in out Safir.Dob.Typesystem.Blob_T);
 
    overriding
-   function Get_Member (Self   : in @_CLASS_@_Type;
+   function Get_Member (Self   : in out @_CLASS_@_Type;
                         Member : in Safir.Dob.Typesystem.Member_Index;
                         Idx    : in Safir.Dob.Typesystem.Array_Index)
                        return Safir.Dob.Typesystem.Container_Base.Container_Base_Access;

@@ -261,7 +261,7 @@ class VisualStudioBuilder(object):
             
     def dobmake(self):
         """run the dobmake command"""
-        process = subprocess.Popen(("python.exe", os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--no-java", "--no-ada", "--rebuild"),
+        process = subprocess.Popen(("python.exe", os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--html-output", "--no-java", "--rebuild"),
                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         result = process.communicate()
         buildlog.write(str(result[0],'UTF-8','ignore').replace("\r\n","\n"))

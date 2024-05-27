@@ -25,6 +25,9 @@
 #ifndef __DOSE_DISTRIBUTION_DATA_H__
 #define __DOSE_DISTRIBUTION_DATA_H__
 
+void intrusive_ptr_add_ref(const char * p);
+void intrusive_ptr_release(const char * p);
+
 #include <Safir/Dob/InstanceIdPolicy.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
@@ -37,8 +40,6 @@
 #include <Safir/Dob/Typesystem/ChannelId.h>
 #include <Safir/Dob/Internal/VersionNumber.h>
 
-void intrusive_ptr_add_ref(const char * p);
-void intrusive_ptr_release(const char * p);
 
 //#define REGISTER_TIMES
 

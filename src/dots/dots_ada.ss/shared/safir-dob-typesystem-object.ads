@@ -327,7 +327,7 @@ package Safir.Dob.Typesystem.Object is
    -- Returns: A pointer to a member container.
    -- Exceptions: Illegal_Value_Exception - The index is not in the range of the array.
    --
-   function Get_Member (Self   : in Object_Type;
+   function Get_Member (Self   : in out Object_Type;
                         Member : in Safir.Dob.Typesystem.Member_Index;
                         Idx    : in Safir.Dob.Typesystem.Array_Index)
                         return Safir.Dob.Typesystem.Container_Base.Container_Base_Access;

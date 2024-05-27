@@ -819,7 +819,6 @@ package body Safir.Dob.Connection_Bases is
       Requestor      : access Safir.Dob.Consumers.Requestor'Class) return
      Safir.Dob.Defs.Request_Id is
 
-      use type Safir.Dob.Entity.Entity_Class_Access;
       use Safir.Dob.Typesystem.Instance_Id;
 
       Success : C.char;

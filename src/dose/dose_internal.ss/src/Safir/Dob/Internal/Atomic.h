@@ -36,11 +36,11 @@ namespace Internal
 {
     namespace Atomics 
     {
-        using boost::interprocess::detail::atomic_inc32;
-        using boost::interprocess::detail::atomic_dec32;
-        using boost::interprocess::detail::atomic_read32;
-        using boost::interprocess::detail::atomic_write32;
-        using boost::interprocess::detail::atomic_cas32;
+        using boost::interprocess::ipcdetail::atomic_inc32;
+        using boost::interprocess::ipcdetail::atomic_dec32;
+        using boost::interprocess::ipcdetail::atomic_read32;
+        using boost::interprocess::ipcdetail::atomic_write32;
+        using boost::interprocess::ipcdetail::atomic_cas32;
     }
 
     class AtomicUint32:

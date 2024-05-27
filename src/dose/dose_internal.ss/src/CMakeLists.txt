@@ -11,7 +11,7 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_internal SHARED ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS regex)
+FIND_PACKAGE(Boost COMPONENTS regex filesystem)
 TARGET_LINK_LIBRARIES(dose_internal ${ACE_LIBRARY} ${Boost_LIBRARIES})
 
 ADD_DEFINITIONS(-DDOSE_INT_EXPORTS)

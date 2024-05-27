@@ -103,7 +103,7 @@ private
 
    use type Safir.Dob.Defs.Controller_Id;
 
-   type Secondary_Connection is new Safir.Dob.Connection_Bases.Connection_Base with record
+   type Secondary_Connection is limited new Safir.Dob.Connection_Bases.Connection_Base with record
       Controller_Id : Safir.Dob.Defs.Controller_Id := -1;
    end record;
 

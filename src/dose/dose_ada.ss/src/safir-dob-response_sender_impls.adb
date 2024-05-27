@@ -22,7 +22,7 @@
 --
 -------------------------------------------------------------------------------
 with GNAT.OS_Lib;
-with Text_IO; use Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Exceptions;
 with Interfaces.C;
 with Safir.Dob.Typesystem;

@@ -17,7 +17,7 @@ build_dir         build/config                              Release
 #build_dir        src/dots/dots_schema_validator.ss         Release
 #build_dir        src/dots/dots_cpp.ss/src                  Release   Debug
 #build_dir        src/dots/dots_dotnet.ss/src               Release
-#build_dir        src/dots/dots_ada.ss                      Release
+build_dir        src/dots/dots_ada.ss                      Release
 build_dir        src/dots/dots_v.ss                        Release
 #build_dir        src/dots/dots_depends.ss                  Release
 
@@ -47,10 +47,9 @@ build_dir        src/dose/dose_communication.ss/src        Release   Debug
 build_dir        src/dose/dose_main.ss/src                 Release
 build_dir        src/dose/dose_dotnet.ss/src               Release
 build_dir        src/dose/dose_ada.ss                      Release
-#TODO cmake file will move to src dir.
 
 build_dir        src/dose/dose_sate.ss/src                 Release
-build_dir        src/dose/dose_dobexplorer.ss/src          Release
+#build_dir        src/dose/dose_dobexplorer.ss/src          Release
 
 #DOUF
 build_dir        src/douf/douf_time_library.ss/src/douf_time_library    Release
@@ -75,4 +74,4 @@ build_dir        src/douf/douf_multi_foreach.ss/src/cpp    Release
 build_dir        src/olib/olib_code.ss/olib                Release   Debug
 build_dir        src/dope/dope_main.ss/src                 Release
 
-build_dir        docs/doxygen                              Release
+#build_dir        docs/doxygen                              Release

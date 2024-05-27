@@ -12,9 +12,10 @@ endif()
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
+FIND_PACKAGE(Boost COMPONENTS regex filesystem)
 ADD_EXECUTABLE(dope_main ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(dope_main ${ACE_LIBRARY})
+TARGET_LINK_LIBRARIES(dope_main ${ACE_LIBRARY} ${Boost_LIBRARIES})
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(dope_main dose_cpp swre_interface_cpp olib)

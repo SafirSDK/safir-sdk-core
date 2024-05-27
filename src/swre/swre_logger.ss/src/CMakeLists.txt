@@ -7,9 +7,11 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
+find_package(Boost COMPONENTS filesystem)
 ADD_EXECUTABLE(swre_logger ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(swre_logger ${ACE_LIBRARY})
+
+TARGET_LINK_LIBRARIES(swre_logger ${ACE_LIBRARY} ${Boost_LIBRARIES})
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(swre_logger dose_cpp douf_time_cpp)

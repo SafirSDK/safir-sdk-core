@@ -41,6 +41,9 @@
 #pragma warning (disable:4189)
 #endif
 
+void intrusive_ptr_add_ref(const char * p);
+void intrusive_ptr_release(const char * p);
+
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/containers/set.hpp>
 #include <boost/interprocess/containers/string.hpp>

@@ -78,41 +78,41 @@ endif()
 ###################################################
 #    Installation rules for dou and dom files     #
 ###################################################
-	INSTALL(CODE "FILE(REMOVE_RECURSE \"${SAFIR_RUNTIME}/data/text/dots/classes/\")")
+    INSTALL(CODE "FILE(REMOVE_RECURSE \"${SAFIR_RUNTIME}/data/text/dots/classes/\")")
 
-	INSTALL(DIRECTORY ../ DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes
-			PATTERN "ada" EXCLUDE
-			PATTERN "gen" EXCLUDE
-			PATTERN "others" EXCLUDE
-			PATTERN "cpp" EXCLUDE
-			PATTERN "dotnet" EXCLUDE
-			PATTERN "java" EXCLUDE
-			PATTERN "*.txt" EXCLUDE
-			PATTERN "*.ini" EXCLUDE
-			PATTERN "*.cs" EXCLUDE
-			PATTERN "*.snk" EXCLUDE
-			PATTERN "*.h" EXCLUDE
-			PATTERN "*.cpp" EXCLUDE
-			PATTERN "*.*_template" EXCLUDE
-			PATTERN "*.gpr" EXCLUDE
-			PATTERN "tags" EXCLUDE
-			PATTERN "build_1" EXCLUDE
-			PATTERN "build_2" EXCLUDE
-                        PATTERN "Visual Studio*"EXCLUDE)
+    INSTALL(DIRECTORY ../ DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes
+            PATTERN "ada" EXCLUDE
+            PATTERN "gen" EXCLUDE
+            PATTERN "others" EXCLUDE
+            PATTERN "cpp" EXCLUDE
+            PATTERN "dotnet" EXCLUDE
+            PATTERN "java" EXCLUDE
+            PATTERN "*.txt" EXCLUDE
+            PATTERN "*.ini" EXCLUDE
+            PATTERN "*.cs" EXCLUDE
+            PATTERN "*.snk" EXCLUDE
+            PATTERN "*.h" EXCLUDE
+            PATTERN "*.cpp" EXCLUDE
+            PATTERN "*.*_template" EXCLUDE
+            PATTERN "*.gpr" EXCLUDE
+            PATTERN "tags" EXCLUDE
+            PATTERN "build_1" EXCLUDE
+            PATTERN "build_2" EXCLUDE
+            PATTERN "Visual Studio*" EXCLUDE)
 
 
-	INSTALL(DIRECTORY ../ DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes
-			FILES_MATCHING PATTERN "*.namespace.txt"
-			PATTERN "ada" EXCLUDE
-			PATTERN "gen" EXCLUDE
-			PATTERN "others" EXCLUDE
-			PATTERN "cpp" EXCLUDE
-			PATTERN "dotnet" EXCLUDE
-			PATTERN "java" EXCLUDE
-			PATTERN "tags" EXCLUDE
-			PATTERN "build_1" EXCLUDE
-			PATTERN "build_2" EXCLUDE
-                        PATTERN "Visual Studio*"EXCLUDE)
+    INSTALL(DIRECTORY ../ DESTINATION ${SAFIR_RUNTIME}/data/text/dots/classes
+            FILES_MATCHING PATTERN "*.namespace.txt"
+            PATTERN "ada" EXCLUDE
+            PATTERN "gen" EXCLUDE
+            PATTERN "others" EXCLUDE
+            PATTERN "cpp" EXCLUDE
+            PATTERN "dotnet" EXCLUDE
+            PATTERN "java" EXCLUDE
+            PATTERN "tags" EXCLUDE
+            PATTERN "build_1" EXCLUDE
+            PATTERN "build_2" EXCLUDE
+            PATTERN "Visual Studio*"EXCLUDE)
         
 
 

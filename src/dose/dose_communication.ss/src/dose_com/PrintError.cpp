@@ -163,7 +163,7 @@ static char *Get_Err_Text(int err_code, char *pBuff, int maxSize)
 
 #ifdef _WIN32
     int     result;
-    char    *pTxt = NULL;
+    const char    *pTxt = NULL;
     int len = strlen(pBuff);
 
     result = FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, NULL, err_code,

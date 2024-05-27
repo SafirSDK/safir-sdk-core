@@ -29,6 +29,8 @@
 #include <Safir/Dob/Internal/InternalDefs.h>
 #include <Safir/Dob/Internal/ConsumerId.h>
 
+#include <map>
+
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>

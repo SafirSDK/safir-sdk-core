@@ -1,0 +1,18 @@
+lib-obj/
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+ali/
+obj/
+interface/
+CMakeCache.txt
+
+*.exe
+*.dll
+*.rsp
+*.csexe
+*.resources
+*.ilk
+*.pdb
+Visual Studio 17 2022/
+buildlog.html
