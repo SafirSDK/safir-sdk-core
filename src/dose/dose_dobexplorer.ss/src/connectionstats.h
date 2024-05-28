@@ -27,6 +27,7 @@
 #include "ui_connectionstats.h"
 
 #include <Safir/Dob/Internal/Connection.h>
+#include <QTimer>
 
 struct Stat;
 

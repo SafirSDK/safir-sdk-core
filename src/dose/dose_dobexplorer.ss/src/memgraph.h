@@ -28,6 +28,7 @@
 #include "ui_memgraph.h"
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <boost/noncopyable.hpp>
+#include <QTimer>
 
 class MemGraph :
   public QWidget,

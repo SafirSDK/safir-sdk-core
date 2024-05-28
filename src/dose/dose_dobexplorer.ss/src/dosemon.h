@@ -27,6 +27,8 @@
 #include "ui_dosemon.h"
 #include <set>
 #include <Safir/Dob/Internal/InternalFwd.h>
+#include <Safir/Dob/Internal/StateDeleter.h>
+#include <QTimer>
 
 class DoseMon : public QWidget, private Ui::DoseMonDlg
 {

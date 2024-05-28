@@ -25,6 +25,8 @@
 #define NODESTATUS_H
 #include "common_header.h"
 #include "ui_nodestatus.h"
+#include <QTimer>
+#include <QBrush>
 
 class NodeStatus :
   public QWidget,

@@ -27,7 +27,9 @@
 #include "ui_entitystats.h"
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Internal/InternalFwd.h>
+#include <Safir/Dob/Internal/StateDeleter.h>
 #include <set>
+#include <QTimer>
 
 struct Arguments;
 

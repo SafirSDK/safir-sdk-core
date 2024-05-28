@@ -21,16 +21,29 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#ifndef __DOBEXPLORER_COMMON_HEADER_H__
+#define __DOBEXPLORER_COMMON_HEADER_H__
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4127)
-#pragma warning (disable: 4512)
+#pragma warning (disable: 4244)
 #endif
 
-#include <QtGui>
+#include <QObject>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 
 #pragma warning (disable: 4355)
+#endif
+
+//Define a dummy class to avoid "moc" warning about this file not containing any QObjects. 
+//The cmake setup currently runs moc on all .h files.
+class Dummy 
+    : public QObject
+{
+    Q_OBJECT
+};
+
 #endif

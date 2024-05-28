@@ -35,6 +35,7 @@
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <set>
+#include <QPushButton>
 
 const int EntityWidgetType = 10;
 const int ConnectionWidgetType = 11;

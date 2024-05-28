@@ -25,6 +25,9 @@
 #define GRAPHWIDGET_H
 #include "common_header.h"
 #include <map>
+#include <QFrame>
+class QPaintEvent;
+class QDateTime;
 
 class GraphWidget : public QFrame
 {

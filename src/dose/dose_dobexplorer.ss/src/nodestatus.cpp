@@ -31,6 +31,7 @@
 #include <boost/lexical_cast.hpp>
 #include "dosecom_stuff.h"
 
+#include <QLabel>
 
 
 
@@ -174,11 +175,13 @@ void NodeStatus::UpdateTable()
         std::string newValue;
         if(isMe)
         {
-            newValue = boost::lexical_cast<std::string>(pShm->Statistics.TotTxCount).c_str();
+			auto copy = pShm->Statistics.TotTxCount; //lexical cast cannot handle volatiles
+            newValue = boost::lexical_cast<std::string>(copy).c_str();
         }
         else
         {
-            newValue = boost::lexical_cast<std::string>(pShm->NodeStatusTable[jx].RxCount).c_str();
+			auto copy = pShm->NodeStatusTable[jx].RxCount; //lexical cast cannot handle volatiles
+            newValue = boost::lexical_cast<std::string>(copy).c_str();
         }
 
         if (nodeTable->item(jx,5)->text() != newValue.c_str())
