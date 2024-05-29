@@ -405,10 +405,15 @@ class VisualStudioBuilder(object):
     def run_command2(self, cmd, description, what, allow_fail = False):
         """Run a command"""
         import subprocess
-        
+        batpath = os.path.join(self.tmpdir,"build.bat")
+        bat = open(batpath,"w")
+        bat.write("@echo off\n" +
+                  "call \"" + os.path.join(self.studio,"vcvarsall.bat") + "\" x86\n" +
+                  cmd)
+        bat.close()
         buildlog.writeHeader(description + " '" + what + "'\n")
         buildlog.writeCommand(cmd + "\n")
-        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         buildlog.logOutput(process)
 
@@ -888,7 +893,7 @@ def load_gui():
             self.runCommandList()
 
         def pollCommandCompletion(self):
-            if self.commandThread.isAlive():
+            if self.commandThread.is_alive():
                 self.after(10,self.pollCommandCompletion)
             else:
                 self.commandThread.join()
