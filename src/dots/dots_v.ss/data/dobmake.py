@@ -25,6 +25,8 @@
 ###############################################################################
 
 import os, glob, subprocess, threading, sys, stat, shutil
+from configparser import ConfigParser
+from configparser import RawConfigParser
 
 def num_cpus():
     """Detects the number of CPUs on a system. Cribbed from pp."""
@@ -329,7 +331,6 @@ def run_dots_depends():
 
 class VisualStudioBuilder(object):
     def __init__(self):
-        from configparser import ConfigParser
         cfg = ConfigParser()
         
         cfgpath = get_config_file()
@@ -664,7 +665,6 @@ def check_config_dots_generated():
         
 def load_gui():
     import tkinter, tkinter.messagebox, tkinter.font, time
-    from configparser_3_1 import RawConfigParser
     global MainDialog
     
     class MainDialog(tkinter.Frame):
@@ -696,7 +696,7 @@ def load_gui():
 
 
         def writeGuiConfiguration(self):
-            configfile = open(self.cfgpath,"wb")
+            configfile = open(self.cfgpath,"w")
             try:
                 self.cfg.write(configfile)
             finally:
