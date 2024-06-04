@@ -112,7 +112,7 @@ endif()
             PATTERN "tags" EXCLUDE
             PATTERN "build_1" EXCLUDE
             PATTERN "build_2" EXCLUDE
-            PATTERN "Visual Studio*"EXCLUDE)
+            PATTERN "Visual Studio*" EXCLUDE)
         
 
 
