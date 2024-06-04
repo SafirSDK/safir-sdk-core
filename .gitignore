@@ -18,3 +18,4 @@ CMakeCache.txt
 *.lib
 Visual Studio 17 2022/
 buildlog.html
+run0-*/
