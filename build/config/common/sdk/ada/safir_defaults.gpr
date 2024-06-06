@@ -13,25 +13,6 @@ project Safir_Defaults is
    type Build_Type is ("Release", "Debug");
 
    type Boolean is ("False", "True");
-   
-   type Architecture_Type is ("i386",
-                              
-                              "pentium",
-                              "pentium2",
-                              "pentium3",
-                              "pentium4",
-                              "prescott",
-                              "nocona",
-                              "core2",
-
-                              "athlon",
-                              "athlon-mp",
-                              "athlon-fx",
-                              "opteron",
-                              "opteron-sse3",
-                              "barcelona");
-
-   Architecture     : Architecture_Type := External ("ARCHITECTURE", "pentium4"); 
 
    OS               : OS_Type           := External ("OS", "Linux");
 
@@ -70,12 +51,12 @@ project Safir_Defaults is
         ("-gnatf",                 -- Full source path in brief error messages
          "-gnatq",                 -- Don't quit, try semantics, even if parse errors
          "-gnatQ",                 -- Don't quit, write ali/tree file even if compile errors
-         "-gnat05",                -- Full Ada05
+--         "-gnat05",                -- Full Ada05
 		 "-gnat2012",
 --       "-gnato",                 -- Overflow checking enabled.
 --       "-fcallgraph-info=su",    -- Output callgraph information
 --       "-fstack-usage",          -- Output stack usage information
-         "-march=" & Architecture, -- Target processor
+--         "-march=" & Architecture, -- Target processor
          "-fstack-check",          -- Since we are running multiple threads.
          "-gnateDOS=" & OS,        -- For Conditional Compilation
          "-gnatwa"                 -- Turn on all optional warnings (except d,h,l)

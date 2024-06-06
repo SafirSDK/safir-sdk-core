@@ -19,3 +19,11 @@ CMakeCache.txt
 Visual Studio 17 2022/
 buildlog.html
 run0-*/
+
+
+.ninja_deps
+.ninja_log
+build.ninja
+
+ui_*
+moc_*

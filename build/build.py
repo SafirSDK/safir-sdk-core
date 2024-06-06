@@ -254,10 +254,18 @@ class VisualStudioBuilder(object):
 
     def build(self, directory, configs):
         log(" - in config(s): " + str(list(configs)),True)
-        if self.__can_use_studio_build(directory):
-            self.__studio_build(directory,configs)
-        else:
-            self.__nmake_build(directory,configs)
+        for config in configs:                
+            self.__run_command("cmake -D CMAKE_BUILD_TYPE:string=" + config + " " +
+                               "-D SAFIR_BUILD_SYSTEM_VERSION:string=2 " +
+                               "-G Ninja .",
+                               "Configure " + config, directory)
+            if clean:
+                self.__run_command("ninja clean",
+                                   "Clean " + config, directory, allow_fail=True)
+            self.__run_command("ninja",
+                               "Build " + config, directory)
+            self.__run_command("ninja install",
+                               "Install " + config, directory)
             
     def dobmake(self):
         """run the dobmake command"""
@@ -268,72 +276,6 @@ class VisualStudioBuilder(object):
         if process.returncode != 0:
             die("Failed to run dobmake")
 
-    def __can_use_studio_build(self,directory):
-        cmakelists = open("CMakeLists.txt","r")
-        contents = cmakelists.read().lower()
-        cmakelists.close()
-        bad_keywords = ("add_subdirectory",
-                        "add_custom_target",
-                        "add_custom_command",
-                        "add_cs_library",
-                        "dotnet",
-                        "java",
-                        "gprmake")
-        log(" - Checking if I can use Visual Studio to speed the build up.")
-        for bad in bad_keywords:
-            if contents.find(bad) != -1:
-                log("  - No, CMakeLists.txt contains " + bad)
-                return False
-
-        good_keywords = ("add_executable",
-                         "add_library")
-
-        for good in good_keywords:
-            if contents.find(good) != -1:
-                log("  - Yes, CMakeLists.txt contains " + good)
-                return True
-        log("  - No, failed to find either good or bad keywords!")
-        return False
-
-    def __studio_build(self,directory,configs):
-        if clean:
-            remove(self.generator)
-            
-        mkdir(self.generator)
-        olddir = os.getcwd();
-        os.chdir(self.generator)
-    
-        self.__run_command(("cmake -D SAFIR_BUILD_SYSTEM_VERSION:string=2 " +
-                            "-G \"" + self.generator + "\" -A Win32 " +
-                            ".."),
-                           "Configure", directory)
-
-        solution = find_sln()
-        
-        if clean:
-            die("Clean is not possible any longer, wipe your directories instead")
-
-
-        for config in configs:
-            self.__run_command("msbuild " + "INSTALL.vcxproj" + " -p:Configuration=" +config,
-                               "Install " + config, directory)
-        
-        os.chdir(olddir)
-
-    def __nmake_build(self,directory,configs):
-        """build a directory using nmake"""
-        for config in configs:                
-            self.__run_command("cmake -D CMAKE_BUILD_TYPE:string=" + config + " " +
-                               "-D SAFIR_BUILD_SYSTEM_VERSION:string=2 " +
-                               "-G \"NMake Makefiles\" .",
-                               "Configure " + config, directory)
-            if clean:
-                self.__run_command("nmake /NOLOGO clean",
-                                   "Clean " + config, directory, allow_fail=True)
-            self.__run_command("nmake /NOLOGO",
-                               "Build " + config, directory)
-            self.__run_command("nmake /NOLOGO install",
-                               "Install " + config, directory)
 
     def __run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""

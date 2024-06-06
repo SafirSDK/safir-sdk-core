@@ -384,15 +384,7 @@ class VisualStudioBuilder(object):
 
     def run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""
-        batpath = os.path.join(self.tmpdir,"build.bat")
-        bat = open(batpath,"w")
-        bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio,"vcvarsall.bat") + "\" x86\n" +
-                  cmd)
-        bat.close()
-        buildlog.writeHeader(description + " '" + what + "'\n")
-        buildlog.writeCommand(cmd + "\n")
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         
         buildlog.logOutput(process)
 
@@ -402,72 +394,43 @@ class VisualStudioBuilder(object):
             else:
                 buildlog.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")
 
-    def run_command2(self, cmd, description, what, allow_fail = False):
-        """Run a command"""
-        import subprocess
-        batpath = os.path.join(self.tmpdir,"build.bat")
-        bat = open(batpath,"w")
-        bat.write("@echo off\n" +
-                  "call \"" + os.path.join(self.studio,"vcvarsall.bat") + "\" x86\n" +
-                  cmd)
-        bat.close()
-        buildlog.writeHeader(description + " '" + what + "'\n")
-        buildlog.writeCommand(cmd + "\n")
-        process = subprocess.Popen(batpath,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-        buildlog.logOutput(process)
-
-        if process.returncode != 0:
-            if not allow_fail:
-                die("Failed to run '" + cmd + "' for " + what)
-            else:
-                buildlog.write("This command failed, but failure of this particular command is non-fatal to the build process, so I'm continuing\n")    
-
-
-    def find_sln(self):
-        sln_files = glob.glob("*.sln")
-        if (len(sln_files) != 1):
-            die("There is not exactly one sln file in " + os.getcwd() +
-                ", either cmake failed to generate one or there is another one coming from somewhere else!")
-        return sln_files[0]
-
     def build_cpp(self):
         what = "CPP - dots_generated"
-        buildlog.writeHeader("Building C++ using "+self.generator + "\n")
-        mkdir(self.generator)
-        olddir = os.getcwd();
-        os.chdir(self.generator)
+        buildlog.writeHeader("Building C++ using Ninja\n")
         Rebuild = "FALSE"
         if buildType == "rebuild":
             Rebuild = "TRUE"
-        try:
-            self.run_command2("cmake -G \""+ self.generator + "\" -A Win32 "+
-                              "-D NO_JAVA:string=TRUE " + 
-                              "-D NO_DOTNET:string=TRUE " + 
-                              "-D NO_ADA:string=TRUE " + 
-                              "-D REBUILD=" + Rebuild + " " +
-                              "..",
-                              "Configure", what)
-
-            solution = self.find_sln()
-
-            cppconfig = []
-            if build_cpp_debug:
-                cppconfig += ["Debug"]
-            if build_cpp_release:
-                cppconfig += ["Release"]
-            for config in cppconfig:
             
-                self.run_command("msbuild INSTALL.vcxproj -p:Configuration=" +config,
-                                 "Build and Install CPP " + config,what)
+        cppconfig = []
+        if build_cpp_debug:
+            cppconfig += ["Debug"]
+        if build_cpp_release:
+            cppconfig += ["Release"]
+        for config in cppconfig:      
+            try:
+                mkdir(config)
+                olddir = os.getcwd();
+                os.chdir(config)            
+                self.run_command("cmake -D CMAKE_BUILD_TYPE:string=" + config + " " +
+                                   "-D NO_JAVA:string=TRUE " + 
+                                   "-D NO_DOTNET:string=TRUE " + 
+                                   "-D NO_ADA:string=TRUE " + 
+                                   "-D REBUILD=" + Rebuild + " " +
+                                   "-G Ninja "
+                                   "..",
+                                   "Configure", what)
+                self.run_command("ninja",
+                                   "Build " + config, what)
+                self.run_command("ninja install",
+                                   "Install " + config, what)
                 save_installed_files_manifest()
             
-        finally:
-            os.chdir(olddir)
+            finally:
+                os.chdir(olddir)
             
     def build_others(self):
         what = "DOTNET JAVA ADA - dots_generated"
-        buildlog.writeHeader("Building others using "+self.generator+"\n")
+        buildlog.writeHeader("Building others using NMake\n")
         olddir = os.getcwd();
         mkdir("others")
         os.chdir("others")
@@ -475,7 +438,7 @@ class VisualStudioBuilder(object):
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            self.run_command(("cmake -G \""+ self.generator + "\" -A Win32 "+
+            self.run_command(("cmake -G \"NMake Makefiles\" "+
                               "-D NO_CXX:string=TRUE " +
                               "-D NO_DOTNET:string=FALSE " +
                               "-D NO_ADA:string=" + str(not build_ada) + " " + 
@@ -483,42 +446,29 @@ class VisualStudioBuilder(object):
                               "-D REBUILD=" + Rebuild + " " +
                               ".."),
                              "Configure", what)
-            solution = self.find_sln()
             
-            self.run_command("msbuild INSTALL.vcxproj -p:Configuration=" +default_config,
-                             "Build and Install " + default_config, what)
+            self.run_command("nmake /NOLOGO install",
+                             "Build and Install", what)
             save_installed_files_manifest()
         finally:
             os.chdir(olddir)
         
     def build_dots(self):
         what = "Process DOU files - dots_generated"
-        buildlog.writeHeader("Building dots using "+self.generator+"\n")
+        buildlog.writeHeader("Building dots using Ninja\n")
         olddir = os.getcwd();
         os.chdir("gen")
         Rebuild = "FALSE"
         if buildType == "rebuild":
             Rebuild = "TRUE"
         try:
-            # workaround for bug in CMake with VS2010
-            if self.generator == "Visual Studio 10": 
-                self.run_command(("cmake -G \""+ "NMake Makefiles" + "\" "+
-                                  "-D REBUILD=" + Rebuild + " " +
-                                  "."),
-                                 "Configure", what)
-                self.run_command("nmake install",
-                                 "Build and Install " + default_config, what)
-            else:
-                self.run_command(("cmake -G \""+ self.generator + "\"  -A Win32 "+
-                                  "-D REBUILD=" + Rebuild + " " +
-                                  "."),
-                                 "Configure", what)
-                solution = self.find_sln()
-                
-                
-                self.run_command("msbuild INSTALL.vcxproj -p:Configuration=" +default_config,
-                                 "Build and Install " + default_config, what)
+            self.run_command(("cmake -G Ninja "+
+                              "-D REBUILD=" + Rebuild + " " +
+                              "."),
+                             "Configure", what)
             
+            self.run_command("ninja install",
+                             "Build and Install", what)
 
             save_installed_files_manifest()
                         
@@ -529,7 +479,8 @@ class VisualStudioBuilder(object):
         buildlog.writeHeader("Cleaning...\n")
         
         remove("others")
-        remove(self.generator)
+        remove("Debug")
+        remove("Release")
         remove("cpp")
         remove("java")
         remove("ada")

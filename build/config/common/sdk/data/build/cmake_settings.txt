@@ -120,8 +120,8 @@ MACRO(INSTALL_DEBUG_INFO target)
     # TODO: need to fix this!
 
     # if (NOT TARGET ${target})
-	  # message(FATAL_ERROR "No such target: ${target}")
-	# endif()
+      # message(FATAL_ERROR "No such target: ${target}")
+    # endif()
     # GET_TARGET_PROPERTY(location ${target} LOCATION)
     # # fix for vs2010
     # if (MSVC_VERSION EQUAL 1600)
@@ -160,17 +160,21 @@ ENDMACRO()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SAFIR_SDK}/data/build/)
 
+
+SET(COMMON_CS_FLAGS "-warn:4")
 if (MSVC)
-    SET(COMMON_CS_FLAGS "-warn:4" "-platform:x86")
-else()
-    SET(COMMON_CS_FLAGS "-warn:4")
+    if ("$ENV{PLATFORM}" STREQUAL "x64")
+        LIST(APPEND COMMON_CS_FLAGS "-platform:x64")
+    else()
+        LIST(APPEND COMMON_CS_FLAGS "-platform:x86")
+    endif()
 endif(MSVC)
 
 
 #work out if we've got a configuration on the command line or if 
 #we're running in an IDE.
 if (CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
-	#MESSAGE("Both CMAKE_CONFIGURATION_TYPES and CMAKE_BUILD_TYPE are set! Using CMAKE_BUILD_TYPE as the CUSTOM_BUILD_TYPE")
+    #MESSAGE("Both CMAKE_CONFIGURATION_TYPES and CMAKE_BUILD_TYPE are set! Using CMAKE_BUILD_TYPE as the CUSTOM_BUILD_TYPE")
     SET(CUSTOM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 elseif(CMAKE_CONFIGURATION_TYPES)
     # fix for vs2010
@@ -179,7 +183,7 @@ elseif(CMAKE_CONFIGURATION_TYPES)
     else()
        SET(CUSTOM_BUILD_TYPE "$(OutDir)")
     endif()
-	
+    
 elseif(CMAKE_BUILD_TYPE)
     SET(CUSTOM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 else()
