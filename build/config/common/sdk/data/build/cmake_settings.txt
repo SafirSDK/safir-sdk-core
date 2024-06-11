@@ -117,44 +117,19 @@ endif()
 
 MACRO(INSTALL_DEBUG_INFO target)
   if(MSVC)
-    # TODO: need to fix this!
+    if (NOT TARGET ${target})
+      message(FATAL_ERROR "No such target: ${target}")
+    endif()
 
-    # if (NOT TARGET ${target})
-      # message(FATAL_ERROR "No such target: ${target}")
-    # endif()
-    # GET_TARGET_PROPERTY(location ${target} LOCATION)
-    # # fix for vs2010
-    # if (MSVC_VERSION EQUAL 1600)
-       # STRING(REPLACE "$(Configuration)" Debug location ${location})
-    # else()
-       # STRING(REPLACE "$(OutDir)" Debug location ${location})
-    # endif()
-
-    # STRING(REPLACE .dll ${CMAKE_DEBUG_POSTFIX}.pdb location ${location})
-    # STRING(REPLACE .exe .pdb location ${location})
-    
-    # if (SAFIR_USER)
-      # INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS Debug)
-    # else()
-      # INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
-    # endif()
-
-    # GET_TARGET_PROPERTY(location ${target} LOCATION)
-    # # fix for vs2010
-    # if (MSVC_VERSION EQUAL 1600)
-       # STRING(REPLACE "$(Configuration)" RelWithDebInfo location ${location})
-    # else()
-       # STRING(REPLACE "$(OutDir)" RelWithDebInfo location ${location})
-    # endif()
-
-    # STRING(REPLACE .dll ${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb location ${location})
-
-    # if (SAFIR_USER)
-      # INSTALL(FILES ${location} DESTINATION ${SAFIR_USER}/runtime/bin CONFIGURATIONS RelWithDebInfo)
-    # else()
-      # INSTALL(FILES ${location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
-    # endif()
-
+    if (SAFIR_USER)
+	  INSTALL(FILES $<TARGET_PDB_FILE:${target}>
+		DESTINATION ${SAFIR_USER}/runtime/bin
+		CONFIGURATIONS Debug RelWithDebInfo)
+    else()
+	  INSTALL(FILES $<TARGET_PDB_FILE:${target}>
+		DESTINATION ${SAFIR_RUNTIME}/bin
+		CONFIGURATIONS Debug RelWithDebInfo)
+    endif()
   endif()
 ENDMACRO()
 
