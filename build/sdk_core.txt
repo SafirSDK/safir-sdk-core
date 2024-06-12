@@ -74,4 +74,5 @@ build_dir        src/douf/douf_multi_foreach.ss/src/cpp    Release
 build_dir        src/olib/olib_code.ss/olib                Release   Debug
 build_dir        src/dope/dope_main.ss/src                 Release
 
+#Temporarily removed since customer does not need it for the time being.
 #build_dir        docs/doxygen                              Release

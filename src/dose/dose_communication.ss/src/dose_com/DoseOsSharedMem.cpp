@@ -75,7 +75,7 @@ static HANDLE create_shm( const wchar_t *pName, int Size,
     *ppRetShm = NULL; //default if error
 
     //-------------------------------------------------------------
-    // When handle parameter == 0xFFFFFFFF tells Windows NT that
+    // When handle parameter == INVALID_HANDLE_VALUE tells Windows NT that
     // you are not mapping on disk.
     //------------------------------------------------------------
 
@@ -107,7 +107,7 @@ static HANDLE create_shm( const wchar_t *pName, int Size,
     // error information, call GetLastError.
     //--------------------------------------------------------------------
 
-    hHandle = CreateFileMapping((HANDLE) 0xFFFFFFFF, // from above
+    hHandle = CreateFileMapping(INVALID_HANDLE_VALUE, // from above
                                 &sa,                //&security_attrib
                                 PAGE_READWRITE,
                                 0, shared_mem_size, //high/low 32 bits of fsize
@@ -157,7 +157,7 @@ void *DoseOs::Shared_Memory_Create(int Size)
     if(*pDbg) PrintDbg("DoseOs::Shared_Memory_Create()\n");
 
     //------------------------------------------------------------
-    // When handle parameter == 0xFFFFFFFF tells Windows NT that
+    // When handle parameter == INVALID_HANDLE_VALUE tells Windows NT that
     // you are not mapping on disk.
     //------------------------------------------------------------
 
