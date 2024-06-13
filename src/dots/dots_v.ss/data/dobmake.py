@@ -25,7 +25,6 @@
 ###############################################################################
 
 import os, glob, subprocess, threading, sys, stat, shutil
-from configparser import ConfigParser
 from configparser import RawConfigParser
 
 def num_cpus():
@@ -331,43 +330,6 @@ def run_dots_depends():
 
 class VisualStudioBuilder(object):
     def __init__(self):
-        cfg = ConfigParser()
-        
-        cfgpath = get_config_file()
-
-        add_section = False
-        if not os.path.exists(cfgpath):
-            print("Could not find " + cfgpath + ", trying to create one")
-            add_section = True
-        else:
-            cfg.read(cfgpath)
-            try:
-                cfg.get("main","VSPATH")
-            except:
-                 add_section = True
-        
-        if add_section:
-            DIR = os.environ.get("VSINSTALLDIR")
-            if DIR is None:
-                die("Could not work out which studio you are using, make sure you run dobmake.py in a Visual Studio command prompt.")
-            cfg.add_section("main")
-            cfg.set("main","VSPATH",os.path.join(DIR,"VC", "Auxiliary","Build"))
-            with open(cfgpath, 'w') as configfile:
-                cfg.write(configfile)
-        
-        self.studio = os.path.normcase(os.path.normpath(cfg.get("main","VSPATH")))
-
-        if not os.path.isdir(self.studio) or not os.path.isfile(os.path.join(self.studio,"vcvarsall.bat")):
-            die("Something seems to have happened to your dobmake.ini or Visual Studio installations!"+
-                "\nVSPATH (in dots_generated/dobmake.ini) does not seem to point to a valid path." +
-                "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
-                
-        if "2022" in self.studio:
-            self.generator = "Visual Studio 17 2022"
-        else:
-            die("VSPATH (in dots_generated/dobmake.ini) is set to something I dont recognize\n" +
-                "\nTry to delete dots_generated/dobmake.ini and run dobmake.py in a Visual Studio command prompt.")
-
         #work out where to put temp files
         self.tmpdir = os.environ.get("TEMP")
         if self.tmpdir is None:
