@@ -171,7 +171,8 @@ def copy_docs_dir(dir, targetname, exclude_regex=None):
 
 def main():
     #Copy Boost 
-    boost_dll_dir = find_dll(("boost_filesystem-vc143-mt-x32-1_85.dll",))
+    boost_dll_dir = find_dll(("boost_filesystem-vc143-mt-x32-1_85.dll",
+                              "boost_filesystem-vc143-mt-x64-1_85.dll"))
     boost_dir = os.path.join(boost_dll_dir,"..")
         
     copy_libs_from_dir(boost_dll_dir)
@@ -201,15 +202,10 @@ def main():
     expat_header_dir = os.path.join(find_dll(("libexpat.dll",)),"..","include")
     copy_headers(expat_header_dir,("expat.h","expat_external.h"))
 
-    #Copy the GNAT runtime, xmlada and templates_parser.
-    copy_dll("libgcc_s_dw2-1.dll")
-    copy_dll("libgnat-24.1.dll")
-    copy_dll("libgnarl-24.1.dll")
-    copy_dll("libxmlada_unicode.dll")
-    copy_dll("libxmlada_input_sources.dll")
-    copy_dll("libxmlada_sax.dll")
-    copy_dll("libaws.dll")
-    #copy_dll("mingwm10.dll")
+    #Copy the GNAT runtime.
+    copy_dll("libgcc_s_dw2-1.dll", alternatives=("libgcc_s_seh-1.dll",))
+    copy_dll("libgnat-24.1.dll", alternatives=("libgnat-2021.dll",))
+    copy_dll("libgnarl-24.1.dll", alternatives=("libgnarl-2021.dll",))
 
     #copy example apps to good spot
     copy_docs_dir("examples/vehicleapp/vehicleapp_core.ss", "examples/vehicleapp", r".*\.svn.*")
