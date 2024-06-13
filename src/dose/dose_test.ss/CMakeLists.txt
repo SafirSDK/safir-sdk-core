@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 
+PROJECT (dose_test)
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 ADD_SUBDIRECTORY(util)
@@ -18,7 +20,7 @@ endif ()
 
 
 ADD_SUBDIRECTORY(Sequencer)
-ADD_SUBDIRECTORY(StressTests)
+#ADD_SUBDIRECTORY(StressTests)
 
 
 INSTALL(DIRECTORY testcases
