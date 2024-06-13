@@ -462,7 +462,7 @@ void DoseCom_GetOwnIpAddr( dcom_ulong32 & IpAddr_nw)
 * 'd' - get Debug level  (used by DoseMonitor)
 * 'D' - set Debug level  (used by DoseMonitor)
 *************************************************************************/
-
+#if 0
 void DoseCom_Test(dcom_ulong32 TestCode, dcom_ulong32 Param)
 {
     //PrintDbg("DoseCom_Test() pDbg=%X\n", pDbg);
@@ -473,4 +473,5 @@ void DoseCom_Test(dcom_ulong32 TestCode, dcom_ulong32 Param)
     else
         PrintDbg("DoseCom_Test(): Invalid TestCode = %X\n", TestCode);
 }
+#endif
 /*-------------- end DoseComMain.cpp ---------------------*/

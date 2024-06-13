@@ -25,3 +25,10 @@ INSTALL(DIRECTORY ${sdk_dirs}
         DESTINATION ${SAFIR_SDK}/..
         PATTERN ".svn" EXCLUDE
         ${additional_exclude})
+
+
+set(ignore_me
+  "Some of our build methods pass along extra variables to cmake, which causes warnings."
+  "Add them below to get rid of the warning."
+  ${SAFIR_BUILD_SYSTEM_VERSION}
+)

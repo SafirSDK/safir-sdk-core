@@ -26,6 +26,10 @@
 #include <Safir/Databases/Odbc/ReconnectException.h>
 #include <Safir/SwReports/SwReport.h>
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4312)
+#endif
+
 namespace Safir
 {
 

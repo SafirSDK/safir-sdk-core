@@ -122,8 +122,7 @@ package body Safir.Dob.Typesystem.Parameters is
      (Type_Id   : in Safir.Dob.Typesystem.Type_Id;
       Parameter : Safir.Dob.Typesystem.Parameter_Index) return Safir.Dob.Typesystem.Int_32 is
    begin
-      return Safir.Dob.Typesystem.Int_32
-        (Safir.Dob.Typesystem.Kernel.Get_Parameter_Array_Size (Type_Id, Parameter));
+      return Safir.Dob.Typesystem.Kernel.Get_Parameter_Array_Size (Type_Id, Parameter);
    end Get_Array_Size;
 
    -----------------

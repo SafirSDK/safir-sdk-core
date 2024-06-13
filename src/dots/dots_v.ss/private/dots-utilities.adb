@@ -829,8 +829,6 @@ package body Dots.Utilities is
 
       Conf : Dots.State.Output_Config renames
         Dots.State.Outputs (Dots.State.Current_Output);
-      use type Templates_Parser.Translate_Set;
-      use type Templates_Parser.Vector_Tag;
       use type Templates_Parser.Association;
 
    begin

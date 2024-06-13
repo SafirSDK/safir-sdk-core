@@ -412,7 +412,6 @@ package body Dots.Parser is
 
          when stFullClassName =>
             declare
-               use type Templates_Parser.Vector_Tag;
                use type Templates_Parser.Association;
                Current : constant Integer :=
                            Integer'Max (Dots.State.Current_Output, 1);
@@ -465,7 +464,6 @@ package body Dots.Parser is
 
          when stType =>
             declare
-               use type Templates_Parser.Vector_Tag;
                use type Templates_Parser.Association;
                Current : constant Integer :=
                            Integer'Max (Dots.State.Current_Output, 1);

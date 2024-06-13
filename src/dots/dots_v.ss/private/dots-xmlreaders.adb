@@ -38,8 +38,6 @@ with Dots.Xmlreaders.Unit;
 
 package body Dots.Xmlreaders is
 
-   use type Dots.Parser.Element_Type_T;
-
    Indent_Str : constant String :=
      ("                                                                 ");
    Indentation : Integer := 0;

@@ -213,8 +213,6 @@ package body Dots.Xmlreaders.Unit is
       Conf : Dots.State.Output_Config renames
         Dots.State.Outputs (Dots.State.Current_Output);
 
-      use type Dots.State.Case_Style;
-
       function Local_Exception_Tag_Of
         (Xml_Exception : in String) return String;
 
