@@ -71,7 +71,7 @@
             <value>SafirTimeout</value>
         </parameter>
         <parameter>
-            <summary>No one is registerd to handle the request</summary>
+            <summary>No one is registered to handle the request</summary>
             <name>SafirNotRegistered</name>
             <type>String</type>
             <value>SafirNotRegistered</value>
