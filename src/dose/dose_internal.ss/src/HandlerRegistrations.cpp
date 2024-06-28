@@ -407,11 +407,24 @@ namespace Internal
     {
         m_registrations.ForEachState([this, &connection, detached](const auto, const StateSharedPtr& regState, bool&)
         {
+#if 0
+            if (regState->GetConnection() == nullptr)
+            {
+                lllog(8) << "SetDetachFlagAll lambda1: regState connection is null" << std::endl;
+                lllog(8) << " Released: " << regState->IsReleased() << std::endl;
+                lllog(8) << " Detached: " << regState->IsDetached() << std::endl;
+                lllog(8) << " RealState: " << regState->GetRealState().Image() << std::endl;
+            }
+            if (regState->GetConnection() != nullptr && regState->GetConnection()->Id() == connection->Id())
+            {
+                regState->SetDetached(detached);
+            }
+#else
             if (regState->GetConnection()->Id() == connection->Id())
             {
                 regState->SetDetached(detached);
             }
-
+#endif
             if (m_entityContainerPtr != NULL)
             {
                 auto handlerId = regState->GetRealState().GetHandlerId();
