@@ -7,28 +7,28 @@
             <summary>A nice name for this node</summary>
             <name>Name</name>
             <type>String</type>
-            <value>LightFive</value>
+            <value>OtherNormal</value>
         </parameter>
 
         <parameter>
             <summary>Node type for this node</summary>
             <name>NodeType</name>
             <type>String</type>
-            <value>ClientKeepState</value>
+            <value>Server</value>
         </parameter>
 
         <parameter>
             <summary>Address and port of the control channel</summary>
             <name>ControlAddress</name>
             <type>String</type>
-            <value>127.0.0.1:30005</value>
+            <value>127.0.0.1:30009</value>
         </parameter>
 
         <parameter>
             <summary>Address and port of the data channel</summary>
             <name>DataAddress</name>
             <type>String</type>
-            <value>127.0.0.1:40005</value>
+            <value>127.0.0.1:40009</value>
         </parameter>
 
         <parameter>
@@ -36,11 +36,6 @@
             <name>Seeds</name>
             <type>String</type>
             <array>
-                <value>127.0.0.1:30001</value>
-                <value>127.0.0.1:30002</value>
-
-                <!--Also seed to other system, if running -->
-                <value>127.0.0.1:30009</value>
             </array>
         </parameter>
 

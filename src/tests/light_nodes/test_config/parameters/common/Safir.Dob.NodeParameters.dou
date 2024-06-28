@@ -125,8 +125,6 @@
       <array>
         <Safir.Dob.NodeType>
           <Name>Server</Name>
-          <MulticastAddressControl>224.11.11.11:23000</MulticastAddressControl>
-          <MulticastAddressData>224.11.11.11:24000</MulticastAddressData>
           <HeartbeatInterval>1.0</HeartbeatInterval>
           <MaxLostHeartbeats>5</MaxLostHeartbeats>
           <SlidingWindowsSize>20</SlidingWindowsSize>
@@ -140,8 +138,6 @@
 
         <Safir.Dob.NodeType>
           <Name>ClientClearState</Name>
-          <MulticastAddressControl>224.11.11.11:23001</MulticastAddressControl>
-          <MulticastAddressData>224.11.11.11:24001</MulticastAddressData>
           <HeartbeatInterval>1.0</HeartbeatInterval>
           <MaxLostHeartbeats>5</MaxLostHeartbeats>
           <SlidingWindowsSize>20</SlidingWindowsSize>
@@ -156,8 +152,6 @@
 
         <Safir.Dob.NodeType>
           <Name>ClientKeepState</Name>
-          <MulticastAddressControl>224.11.11.11:23002</MulticastAddressControl>
-          <MulticastAddressData>224.11.11.11:24003</MulticastAddressData>
           <HeartbeatInterval>1.0</HeartbeatInterval>
           <MaxLostHeartbeats>5</MaxLostHeartbeats>
           <SlidingWindowsSize>20</SlidingWindowsSize>
