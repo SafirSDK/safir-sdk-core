@@ -277,21 +277,21 @@ namespace Internal
                 m_connectionHandler->Start();
                 LogStatus("dose_main running...");
             }
-                break;
+            break;
 
             case Control::NodeState::AttachedNewSystem:
             {
                 ENSURE (m_distribution->IsLightNode(), << "DoseMain: AttachedNewSystem called for non-lightNode! NodeId=" << m_nodeId);
                 m_distribution->SetAttached(false); // Will notify subscribers that we are no longer in detached mode.
             }
-                break;
+            break;
 
             case Control::NodeState::AttachedSameSystem:
             {
                 ENSURE (m_distribution->IsLightNode(), << "DoseMain: AttachedSameSystem called for non-lightNode! NodeId=" << m_nodeId);
                 m_distribution->SetAttached(true); // Will notify subscribers that we are no longer in detached mode.
             }
-                break;
+            break;
 
             case Control::NodeState::DetachedFromSystem:
             {
@@ -299,7 +299,7 @@ namespace Internal
                 m_distribution->SetDetached(); // Will exclude all nodes and notify subscribers.
                 LogStatus("dose_main is now running in detached mode!");
             }
-                break;
+            break;
         }
     }
 
