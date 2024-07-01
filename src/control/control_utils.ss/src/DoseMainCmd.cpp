@@ -25,6 +25,7 @@
 #include <Safir/Utilities/Internal/IpcPublisher.h>
 #include <Safir/Utilities/Internal/IpcSubscriber.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <set>
 
 #ifdef _MSC_VER
@@ -203,6 +204,7 @@ namespace Control
              const std::function<void()>    doseMainConnectedCb)
             : m_ipcPublisher(io, doseMainCmdChannel, doseMainConnectedCb, NULL)
         {
+            ENSURE(!m_ipcPublisher.IsNameAlreadyInUse(), << "DoseMainCmdReceiver: Failed to set up IPC communication to dose_main. This can happen if starting duplicated safir_control with the same SAFIR_INSTANCE.");
         }
 
         Impl(const Impl&) = delete;

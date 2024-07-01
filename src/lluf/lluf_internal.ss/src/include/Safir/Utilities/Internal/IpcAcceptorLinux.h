@@ -31,6 +31,7 @@
 #include <functional>
 
 #include <boost/asio.hpp>
+#include <boost/filesystem.hpp>
 
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/IpcName.h>
@@ -88,8 +89,14 @@ namespace Internal
         }
 
         bool IsStarted() const
-        {
+        {            
             return m_acceptor.is_open();
+        }
+
+        // Check if the ipcPath is already in use by someone else.
+        bool IsNameAlreadyInUse() const
+        {
+            return boost::filesystem::exists(m_ipcPath);
         }
 
     private:

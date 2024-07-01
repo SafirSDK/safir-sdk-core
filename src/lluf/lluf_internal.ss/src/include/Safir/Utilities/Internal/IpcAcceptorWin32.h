@@ -90,6 +90,12 @@ namespace Internal
             return m_currentConnectHandle && m_currentConnectHandle->is_open();
         }
 
+        // Check if the ipcPath is already in use by someone else.
+        bool IsNameAlreadyInUse() const
+        {
+            return false;
+        }
+
 
     private:
 

@@ -162,6 +162,28 @@ void ControlApp::LogStatus(const std::string& str)
 //must be called from within strand
 void ControlApp::Start()
 {
+    m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
+                              (m_io,
+                               // This is what we do when dose_main is ready to receive commands
+                               [this]()
+    {
+        m_doseMainRunning = true;
+
+        m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
+                                           m_nodeId,
+                                           m_conf.thisNodeParam.nodeTypeId,
+                                           m_conf.thisNodeParam.dataAddress);
+
+        auto this_ = this;
+        m_sp->StartStateSubscription
+                ([this_](const SP::SystemState& newState)
+        {
+            this_->m_stateHandler->SetNewState(newState);
+        });
+
+        m_communication->Start();
+    }));
+
     const auto addresses = ResolveAddresses();
 
     //if addresses can not be resolved we can't go on. ResolveAddresses is responsible
@@ -344,28 +366,6 @@ void ControlApp::Start()
         m_incarnationId = incarnationId;
         boost::asio::post(m_strand, [this]{ SendControlInfo(); });
         return true;
-    }));
-
-    m_doseMainCmdSender.reset(new Control::DoseMainCmdSender
-                              (m_io,
-                               // This is what we do when dose_main is ready to receive commands
-                               [this]()
-    {
-        m_doseMainRunning = true;
-
-        m_doseMainCmdSender->StartDoseMain(m_conf.thisNodeParam.name,
-                                           m_nodeId,
-                                           m_conf.thisNodeParam.nodeTypeId,
-                                           m_conf.thisNodeParam.dataAddress);
-
-        auto this_ = this;
-        m_sp->StartStateSubscription
-                ([this_](const SP::SystemState& newState)
-        {
-            this_->m_stateHandler->SetNewState(newState);
-        });
-
-        m_communication->Start();
     }));
 
     m_stopHandler.reset(new Control::StopHandler(m_io,

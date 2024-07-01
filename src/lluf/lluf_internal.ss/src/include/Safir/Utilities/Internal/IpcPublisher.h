@@ -136,6 +136,11 @@ namespace Internal
                          });
         }
 
+        bool IsNameAlreadyInUse() const
+        {
+            return m_acceptor->IsNameAlreadyInUse();
+        }
+
         void Send(std::unique_ptr<char[]> msg, uint32_t msgSize)
         {
             if (!m_running)
@@ -262,6 +267,14 @@ namespace Internal
         void Stop()
         {
             m_pimpl->Stop();
+        }
+
+        /**
+         * Check if the ipc name is already in use.
+         */
+        bool IsNameAlreadyInUse() const
+        {
+            return m_pimpl->IsNameAlreadyInUse();
         }
 
         /**
