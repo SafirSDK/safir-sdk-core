@@ -122,11 +122,12 @@ Obviously it is possible to combine all these platforms into one system and use 
 
 An application should, written correctly using Boost and Safir SDK Core, be portable to all the supported platforms with no or very little effort.
 
-The compilers that we use for building and testing for the {cpp} code are GNU gcc (version
-9 or later), Microsoft Visual Studio (2015, 2017, 2019 and 2022). For C# code we use Visual
-Studio (2015, 2017, 2019 and 2022) or Mono (version 6.8 or later). Any Java 11 compiler should be
-able to compile the Java code (we've used Temurin for Windows and plain OpenJDK for Linux). We strive to make all
-our code standards compliant, so other versions and compilers _should_ work.
+The compilers that we use for building and testing for the {cpp} code are GNU gcc
+(version 9 or later), Microsoft Visual Studio (2015, 2017, 2019 and 2022). For C# code we
+use Visual Studio (2015, 2017, 2019 and 2022) or Mono (version 6.8 or later). Any Java 17
+(or later) compiler should be able to compile the Java code (we've used Temurin for
+Windows and plain OpenJDK for Linux). We strive to make all our code standards compliant,
+so other versions and compilers _should_ work.
 
 There is more information about platform support on the
 https://github.com/SafirSDK/safir-sdk-core/wiki/Platform-Support[Safir SDK Core wiki].

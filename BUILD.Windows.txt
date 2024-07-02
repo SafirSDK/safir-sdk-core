@@ -30,9 +30,9 @@ Items marked with an asterisk (*) are optional.
 The easiest way to install these prerequisites is using chocolatey (www.chocolatey.org):
 
    choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-   choco install Temurin11 graphviz nsis doxygen.install ninja python3 dejavufonts asciidoctorj dia gzip
+   choco install Temurin17 graphviz nsis doxygen.install ninja python3 dejavufonts asciidoctorj dia gzip
 
-Temurin11 is a packaged version OpenJDK 11.
+Temurin17 is a packaged version OpenJDK 17.
 
 Conan and websockets
 --------------------
