@@ -131,7 +131,7 @@ tmp
 CMakeDoxyfile.in
 CMakeDoxygenDefaults.cmake
 
-conan.*
+conan.lock
 conanfile.txt
 conaninfo.txt
 conanbuildinfo.txt
