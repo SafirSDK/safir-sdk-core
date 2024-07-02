@@ -43,6 +43,8 @@ if (MSVC)
      add_compile_options(/wd4800) #forcing value to bool 'true' or 'false' (performance warning)
    endif()
 
+   add_compile_options(/EHsc)
+
    # increase warning level
    # Use the highest warning level for visual studio.
    # This ought to work both for cases where CMP0092 is set or not.
