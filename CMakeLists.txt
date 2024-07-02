@@ -26,7 +26,7 @@ if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
 endif(CCACHE_FOUND)
 
-include(${CMAKE_BINARY_DIR}/conan.cmake)
+include(${CMAKE_SOURCE_DIR}/conan.cmake)
 
 if (MSVC)
     set (CONAN_SETTINGS_WINDOWS SETTINGS compiler.toolset=v${MSVC_TOOLSET_VERSION})
