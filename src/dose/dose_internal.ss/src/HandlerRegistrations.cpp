@@ -294,8 +294,10 @@ namespace Internal
             case InjectionKind::SynchronousPermanent:
             case InjectionKind::Injectable:
             {
-                //Unregistration states for types that potentially have ghosts must be kept
-                statePtr->SetReleased(false);
+                //Unregistration states for types that potentially have ghosts must be kept,
+                //but if it is a detached state (i.e. on a lightnode), then we want to release it,
+                //since we may be attaching to a completely different system.
+                statePtr->SetReleased(statePtr->IsDetached());
             }
             break;
         }
