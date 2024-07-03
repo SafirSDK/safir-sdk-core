@@ -26,7 +26,6 @@
 #include <Safir/Utilities/Internal/Expansion.h>
 #include <thread>
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <iostream>
 #include <mutex>

@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <Safir/Utilities/Internal/LowLevelLoggerControl.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
-#include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <iostream>
