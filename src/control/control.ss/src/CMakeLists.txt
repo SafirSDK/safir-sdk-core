@@ -8,6 +8,7 @@ TARGET_LINK_LIBRARIES(safir_control PRIVATE
   control_utils
   lluf_internal
   lluf_crash_reporter
+  lluf_startup_synchronizer
   Boost::filesystem
   Boost::program_options)
 

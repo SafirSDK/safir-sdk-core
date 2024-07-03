@@ -28,6 +28,9 @@
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Utilities/Internal/Expansion.h>
+#include <Safir/Utilities/StartupSynchronizer.h>
+
 #include <iostream>
 #include <atomic>
 
@@ -184,6 +187,27 @@ private:
 
 };
 
+// Helper class that makes sure only one safir_control can be started with the same SAFIR_INSTANCE
+class StartCondition : public Safir::Utilities::Synchronized
+{
+public:
+    StartCondition() : m_synchronizer(("SAFIR_CONTROL" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()).c_str())
+    {
+    }
+
+    bool IsAllowedToStart()
+    {
+        m_synchronizer.Start(this);
+        return m_startAllowed;
+    }
+
+private:
+    Safir::Utilities::StartupSynchronizer m_synchronizer;
+    bool m_startAllowed = false;
+    void Create() override { m_startAllowed = true; }
+    void Use() override {}
+    void Destroy() override {}
+};
 
 int main(int argc, char * argv[])
 {
@@ -192,10 +216,15 @@ int main(int argc, char * argv[])
     std::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
+    StartCondition startCondition;
     std::atomic<bool> success(true);
 
     try
     {
+        ENSURE(startCondition.IsAllowedToStart(),
+               << "CTRL: Failed to start. Another instance of safir_control is already started with SAFIR_INSTANCE="
+               << Safir::Utilities::Internal::Expansion::GetSafirInstance());
+
         lllog(1) << "CTRL: Started" << std::endl;
 
         const ProgramOptions options(argc, argv);

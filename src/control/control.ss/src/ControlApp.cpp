@@ -32,7 +32,6 @@
 #include <Safir/Utilities/Internal/AsioStrandWrap.h>
 #include <Safir/Utilities/CrashReporter.h>
 #include <Safir/Utilities/Internal/Id.h>
-#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <iostream>
 #include <map>
 #include <atomic>

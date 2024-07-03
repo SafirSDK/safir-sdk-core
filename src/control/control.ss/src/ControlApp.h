@@ -32,6 +32,7 @@
 #include <Safir/Dob/Internal/ControlInfo.h>
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
+#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <atomic>
 #include <boost/aligned_storage.hpp>
 
