@@ -63,8 +63,8 @@ class SafirSdkCoreConan(ConanFile):
                        "qt/*:qtcharts": False,
                        "qt/*:qtconnectivity": False,
                        "qt/*:qtdatavis3d": False,
-                       "qt/*:qtdeclarative": False,
-                       "qt/*:qtdoc": False,
+                       #"qt/*:qtdeclarative": False,
+                       #"qt/*:qtdoc": False,
                        "qt/*:qtimageformats": False,
                        "qt/*:qtlottie": False,
                        "qt/*:qtmultimedia": False,
@@ -77,8 +77,8 @@ class SafirSdkCoreConan(ConanFile):
                        "qt/*:qtserialbus": False,
                        "qt/*:qtserialport": False,
                        "qt/*:qtsvg": False,
-                       "qt/*:qttools": False,
-                       "qt/*:qttranslations": False,
+                       #"qt/*:qttools": False,
+                       #"qt/*:qttranslations": False,
                        "qt/*:qtvirtualkeyboard": False,
                        "qt/*:qtwebchannel": False,
                        "qt/*:qtwebengine": False,
@@ -107,16 +107,15 @@ class SafirSdkCoreConan(ConanFile):
             #Visual Studio 2015 and 2017 does not have support for c++17, which is required
             #by qt6. So we go for qt5 instead there.
             #The conan recipe for qt6 does not work for x86 currently, so we fall back to qt5
-            if self.settings.arch == "x86" or \
-               self.settings.compiler.version == 14 or \
-               self.settings.compiler.version == 15:
+            if self.settings.compiler.version == 190 or \
+               self.settings.compiler.version == 191:
                 self.requires("qt/5.15.13")
             else:
                 self.requires("qt/6.7.1")
 
         #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support).
         #0.5.3 appears to be the last one that doesn't need that. Even 0.5.4 wants it.
-        if self.settings.os == "Windows" and self.settings.compiler.version == 14:
+        if self.settings.os == "Windows" and self.settings.compiler.version == 190:
             self.requires("sentry-breakpad/0.5.3")
         else:
             self.requires("sentry-breakpad/0.6.5")

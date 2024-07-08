@@ -50,7 +50,7 @@ namespace Utilities
     public:
         explicit ProcessMonitorImpl(boost::asio::io_context& io,
                                     const std::function<void(const pid_t pid)>& callback,
-                                    const boost::chrono::steady_clock::duration& pollPeriod);
+                                    const std::chrono::steady_clock::duration& pollPeriod);
 
         void Stop();
 
@@ -82,7 +82,7 @@ namespace Utilities
 
         // In some cases async supervision is not possible due to application access level. In that
         // case the fallback solution is polling.
-        const boost::chrono::steady_clock::duration m_pollPeriod;
+        const std::chrono::steady_clock::duration m_pollPeriod;
         void Poll(std::shared_ptr<Process> proc, const boost::system::error_code& error);
 
         HANDLE GetProcessHandle(const pid_t pid) const;
