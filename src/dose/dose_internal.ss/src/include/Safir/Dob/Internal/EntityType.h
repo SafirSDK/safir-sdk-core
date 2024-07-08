@@ -233,7 +233,7 @@ namespace Internal
         {return m_entityStates[context].IncrementIterator(iterator);}
 
         bool CanAcquireContainerWriterLock(const ContextId contextId,
-                                           const boost::chrono::steady_clock::duration& lockTimeout);
+                                           const std::chrono::steady_clock::duration& lockTimeout);
 
         void PrepareSmartSync(SmartSyncState::Registration& reg) const;
 

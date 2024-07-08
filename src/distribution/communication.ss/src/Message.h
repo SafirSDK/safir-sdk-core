@@ -224,7 +224,7 @@ namespace Com
         Safir::Utilities::Internal::SharedConstCharArray message; //This is to prevent  destruction of data before all fragments are sent
         const char* fragment; //This is what is sent in this UserData. If not fragmented these will be the same as payload and payloadSize
         Receivers receivers; //Set of receivers, can be filled with a receiver list, or if MultiReceiverSendMethod it will be filled when its sent
-        boost::chrono::steady_clock::time_point sendTime; //timestamp when this messages was last transmitted so we know when it's time to make retransmit
+        std::chrono::steady_clock::time_point sendTime; //timestamp when this messages was last transmitted so we know when it's time to make retransmit
         size_t transmitCount;
 
         UserData(const int64_t senderId,

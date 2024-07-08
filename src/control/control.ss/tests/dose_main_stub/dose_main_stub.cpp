@@ -118,17 +118,17 @@ int main(int /*argc*/, char * /*argv*/[])
                                                          nt->ackRequestThreshold,
                                                          nt->retryTimeout));
 
-        std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
+        std::vector<std::chrono::steady_clock::duration> retryTimeouts;
         for (auto rt = nt->retryTimeout.cbegin(); rt != nt->retryTimeout.cend(); ++rt)
         {
-            retryTimeouts.push_back(boost::chrono::milliseconds(*rt));
+            retryTimeouts.push_back(std::chrono::milliseconds(*rt));
         }
 
         spNodeTypes.insert(std::make_pair(nt->id,
                                           SP::NodeType(nt->id,
                                                        nt->name,
                                                        nt->isLightNode,
-                                                       boost::chrono::milliseconds(nt->heartbeatInterval),
+                                                       std::chrono::milliseconds(nt->heartbeatInterval),
                                                        nt->maxLostHeartbeats,
                                                        retryTimeouts)));
     }
@@ -166,7 +166,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                        12345,
                                        true);
                }
-               timer.expires_after(boost::chrono::milliseconds(2000));
+               timer.expires_after(std::chrono::milliseconds(2000));
                timer.async_wait(onTimeout);
             };
 
@@ -227,7 +227,7 @@ int main(int /*argc*/, char * /*argv*/[])
                              communication->Start();
 
                              // Start cyclic sending of messages
-                             timer.expires_after(boost::chrono::milliseconds(2000));
+                             timer.expires_after(std::chrono::milliseconds(2000));
                              timer.async_wait(onTimeout);
                          },
 

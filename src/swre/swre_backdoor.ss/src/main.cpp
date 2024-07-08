@@ -43,7 +43,7 @@
 #include <Safir/Application/BackdoorCommand.h>
 #include <iostream>
 
-const boost::chrono::steady_clock::duration EXIT_TIMER_DELAY(boost::chrono::milliseconds(100));
+const std::chrono::steady_clock::duration EXIT_TIMER_DELAY(std::chrono::milliseconds(100));
 
 class StopHandler
     : public Safir::Dob::StopHandler

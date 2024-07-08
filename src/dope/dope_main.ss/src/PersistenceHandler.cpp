@@ -50,7 +50,7 @@ PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService,
                                        const bool ignorePersistenceProperties)
     : m_ioService(ioService)
     , m_writeTimer(ioService)
-    , m_nextTimeout(boost::chrono::steady_clock::time_point::max())
+    , m_nextTimeout(std::chrono::steady_clock::time_point::max())
     , m_dispatcher(m_dobConnection, ioService)
     , m_debug(L"PersistenceHandler")
     , m_started(false)
@@ -61,7 +61,7 @@ PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService,
 
     for (auto type = types.cbegin(); type != types.cend(); ++type)
     {
-        const boost::chrono::milliseconds writePeriod = GetWritePeriod(*type);
+        const std::chrono::milliseconds writePeriod = GetWritePeriod(*type);
 
         if (ShouldPersist(*type))
         {
@@ -79,11 +79,11 @@ PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService,
                 os << L"  " << Safir::Dob::Typesystem::Operations::GetName(*type);
             }
 
-            if (writePeriod > boost::chrono::milliseconds(0))
+            if (writePeriod > std::chrono::milliseconds(0))
             {
                 if (m_debug.IsEnabled())
                 {
-                    os << L" (will be stored no more frequently than every " << writePeriod << ")";
+                    os << L" (will be stored no more frequently than every " << writePeriod.count() << " ms)";
                 }
 
                 m_writePeriod[*type] = writePeriod;
@@ -105,7 +105,7 @@ PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService,
         {
             // A non synchronous permanent type. Put out a warning if it happens to have
             // a PersistenceThrottlingProperty
-            if (writePeriod > boost::chrono::milliseconds(0))
+            if (writePeriod > std::chrono::milliseconds(0))
             {
                 std::wostringstream os;
                 os << "Ignoring PersistenceThrottlingProperty since "
@@ -244,7 +244,7 @@ PersistenceHandler::ShouldPersist(const Safir::Dob::Typesystem::TypeId typeId)
 }
 
 //-------------------------------------------------------
-boost::chrono::milliseconds
+std::chrono::milliseconds
 PersistenceHandler::GetWritePeriod(const Safir::Dob::Typesystem::TypeId typeId)
 {
     try
@@ -275,7 +275,7 @@ PersistenceHandler::GetWritePeriod(const Safir::Dob::Typesystem::TypeId typeId)
             result = Safir::Dob::PersistenceThrottlingProperty::GetWritePeriod(obj);
         }
 
-        return boost::chrono::milliseconds(static_cast<int>(result * 1000));
+        return std::chrono::milliseconds(static_cast<int>(result * 1000));
     }
     catch (const Safir::Dob::Typesystem::NullException &)
     {
@@ -364,12 +364,12 @@ PersistenceHandler::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
 void
 PersistenceHandler::HandleTimeout()
 {
-    const auto now = boost::chrono::steady_clock::now();
+    const auto now = std::chrono::steady_clock::now();
 
     // Don't iterate through all unless we are due for a write timeout.
     if (now > m_nextTimeout)
     {
-        m_nextTimeout = boost::chrono::steady_clock::time_point::max();
+        m_nextTimeout = std::chrono::steady_clock::time_point::max();
 
         for (auto entity = m_toBeWritten.begin(); entity != m_toBeWritten.end(); ++entity)
         {
@@ -406,7 +406,7 @@ PersistenceHandler::HandleTimeout()
         }
     }
 
-    m_writeTimer.expires_from_now(boost::chrono::seconds(1));
+    m_writeTimer.expires_from_now(std::chrono::seconds(1));
     m_writeTimer.async_wait([this](const boost::system::error_code& error)
     {
         if (!error)
@@ -427,7 +427,7 @@ PersistenceHandler::HandleEntity(const Safir::Dob::EntityProxy& entityProxy, con
     {
         // This entity type has a write period limit
 
-        const auto now = boost::chrono::steady_clock::now();
+        const auto now = std::chrono::steady_clock::now();
 
         const auto writePeriod = writePeriodIt->second;
 

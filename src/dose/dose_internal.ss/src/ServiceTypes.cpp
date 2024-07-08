@@ -251,7 +251,7 @@ namespace Internal
 
     bool ServiceTypes::CanAcquireContainerWriterLock(const Typesystem::TypeId             typeId,
                                                      const ContextId                      contextId,
-                                                     const boost::chrono::steady_clock::duration& lockTimeout)
+                                                     const std::chrono::steady_clock::duration& lockTimeout)
     {
         return GetType(typeId).CanAcquireContainerWriterLock(contextId, lockTimeout);
     }

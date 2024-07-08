@@ -31,6 +31,7 @@
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <thread>
 
 namespace Safir
 {
@@ -74,7 +75,7 @@ void InitializeDoseInternalFromApp()
 
         //sleep_for contains an interruption point, which makes it possible to interrupt the thread
         //if it is hanging in here. Useful in dobexplorer, for example.
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     sem->post();
 

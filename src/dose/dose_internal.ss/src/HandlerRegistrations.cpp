@@ -876,7 +876,7 @@ namespace Internal
         return false;
     }
 
-    bool HandlerRegistrations::CanAcquireContainerWriterLock(const boost::chrono::steady_clock::duration& lockTimeout) const
+    bool HandlerRegistrations::CanAcquireContainerWriterLock(const std::chrono::steady_clock::duration& lockTimeout) const
     {
         return m_registrations.CanAcquireContainerWriterLock(lockTimeout);
     }

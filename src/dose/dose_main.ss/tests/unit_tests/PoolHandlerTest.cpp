@@ -28,6 +28,7 @@
 #include "../../src/PoolDistributionHandler.h"
 #include "../../../dose_internal.ss/src/include/Safir/Dob/Internal/InternalDefs.h"
 #include "../../../dose_internal.ss/src/include/Safir/Dob/Internal/SmartSyncState.h"
+#include <thread>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -216,7 +217,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     auto WaitUntilReady=[&]
     {
         while(!hasRun)
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         hasRun=false;
     };
 

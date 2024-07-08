@@ -67,7 +67,7 @@ namespace Internal
         {
             // We use the parameter DoseMainThreadWatchdogTimeout divided
             //by 4 to determine how long to wait for a single lock.
-            const boost::chrono::milliseconds
+            const std::chrono::milliseconds
                 lockTimeout(static_cast<int>
                             (Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout() / 4.0 * 1000.0));
 
@@ -88,8 +88,8 @@ namespace Internal
                             if (m_loggingIsEnabled)
                             {
                                 SEND_SYSTEM_LOG(Alert,
-                                                << "Have tried for " << lockTimeout
-                                                << " to get an exclusive lock (type lock or registration container) "
+                                                << "Have tried for " << lockTimeout.count()
+                                                << " ms to get an exclusive lock (type lock or registration container) "
                                                 << "for type " << Typesystem::Operations::GetName(*it)
                                                 << " in context " << context << ". Probably an application has "
                                                 << "terminated in an improper way leaving a locked lock behind!");
@@ -111,8 +111,8 @@ namespace Internal
                             if (m_loggingIsEnabled)
                             {
                                 SEND_SYSTEM_LOG(Alert,
-                                                << "Have tried for " << lockTimeout
-                                                << " to get an exclusive lock (type lock, registration container lock or entity container lock) "
+                                                << "Have tried for " << lockTimeout.count()
+                                                << " ms to get an exclusive lock (type lock, registration container lock or entity container lock) "
                                                 << "for type " << Typesystem::Operations::GetName(*it)
                                                 << " in context " << context << ". Probably an application has "
                                                 << "terminated in an improper way leaving a locked lock behind!");

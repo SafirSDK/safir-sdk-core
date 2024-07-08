@@ -45,7 +45,7 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_context& ioContext, 
            1450)
     ,m_running(true)
 {
-    m_timerInclude.expires_after(boost::chrono::milliseconds(1000));
+    m_timerInclude.expires_after(std::chrono::milliseconds(1000));
     m_timerInclude.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& /*error*/)
                                               {if (m_running) IncludeNode();}));
 
@@ -85,7 +85,7 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_context& ioContext, int
            1450)
     ,m_running(true)
 {
-    m_timerInclude.expires_after(boost::chrono::milliseconds(1000));
+    m_timerInclude.expires_after(std::chrono::milliseconds(1000));
     m_timerInclude.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){if (!error) IncludeNode();}));
 
     m_com.SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
@@ -160,7 +160,7 @@ void Receiver::IncludeNode()
         m_com.IncludeNode(nodeId);
     }
 
-    m_timerInclude.expires_after(boost::chrono::milliseconds(4000));
+    m_timerInclude.expires_after(std::chrono::milliseconds(4000));
     m_timerInclude.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
     {
         if (!error)

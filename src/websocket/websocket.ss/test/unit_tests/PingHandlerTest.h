@@ -37,7 +37,7 @@ public:
         ,m_pingHandler(new PingHandler(m_strand, interval, [this]{OnPing();}))
     {
         m_ioService.dispatch([this]{m_pingHandler->Start();});
-        m_pingTime=boost::chrono::steady_clock::now();
+        m_pingTime=std::chrono::steady_clock::now();
         m_ioService.run();
     }
 
@@ -46,16 +46,16 @@ private:
     boost::asio::io_service m_ioService;
     std::shared_ptr<boost::asio::io_service::work> m_work;
     boost::asio::io_service::strand m_strand;
-    boost::chrono::steady_clock::time_point m_pingTime;
+    std::chrono::steady_clock::time_point m_pingTime;
     std::shared_ptr<PingHandler> m_pingHandler;
 
     void OnPing()
     {
         static int count=0;
 
-        boost::chrono::duration<double> elapsed=boost::chrono::steady_clock::now()-m_pingTime;
+        std::chrono::duration<double> elapsed=std::chrono::steady_clock::now()-m_pingTime;
         //std::cout<<"ping "<<elapsed.count()<<std::endl;
-        if (elapsed>boost::chrono::seconds(interval+1))
+        if (elapsed>std::chrono::seconds(interval+1))
         {
             std::cout<<"took to long between pings"<<std::endl;
             exit(1);
@@ -69,7 +69,7 @@ private:
 
         }
 
-        m_pingTime=boost::chrono::steady_clock::now();
+        m_pingTime=std::chrono::steady_clock::now();
     }
 
 };

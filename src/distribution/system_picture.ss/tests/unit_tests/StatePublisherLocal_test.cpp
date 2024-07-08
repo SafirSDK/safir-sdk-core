@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( send_ten )
 {
     Handler h;
 
-    StatePublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoService,h,"foo",boost::chrono::milliseconds(10));
+    StatePublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoService,h,"foo",std::chrono::milliseconds(10));
 
     h.stopCall = [&]{publisher.Stop();};
     gIoService.run();

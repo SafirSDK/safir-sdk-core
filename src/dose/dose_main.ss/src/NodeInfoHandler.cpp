@@ -126,7 +126,7 @@ namespace Internal
             }
         }
 
-        m_timer.expires_from_now(boost::chrono::seconds(10));
+        m_timer.expires_from_now(std::chrono::seconds(10));
         m_timer.async_wait(boost::asio::bind_executor(m_dispatcher.Strand(),
                                                       [this](const boost::system::error_code& error)
         {

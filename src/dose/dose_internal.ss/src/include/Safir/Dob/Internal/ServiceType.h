@@ -102,7 +102,7 @@ namespace Internal
         /** @} */
 
         bool CanAcquireContainerWriterLock(const ContextId contextId,
-                                           const boost::chrono::steady_clock::duration& lockTimeout);
+                                           const std::chrono::steady_clock::duration& lockTimeout);
 
     private:
         Typesystem::TypeId m_typeId;

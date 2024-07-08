@@ -140,7 +140,7 @@ namespace Com
                     {
                         //if multicast nodeType we have to assure some acked traffic to prevent nodes from missunderstanding received heartbeats
                         //from nodes that have excluded us. By sending low traffic acked pings, we detect nodes that does not respond to us.
-                        m_lastSendTime=boost::chrono::steady_clock::now();
+                        m_lastSendTime=std::chrono::steady_clock::now();
                         Ping();
                     }
                 }
@@ -416,7 +416,7 @@ namespace Com
         uint64_t m_lastAckRequestMultiReceiver; //the last seq we have requested ack
         boost::asio::steady_timer m_resendTimer;
         boost::asio::steady_timer m_pingTimer;
-        boost::chrono::steady_clock::time_point m_lastSendTime; //timestamp of last time something was sent
+        std::chrono::steady_clock::time_point m_lastSendTime; //timestamp of last time something was sent
         RetransmitTo m_retransmitNotification;
         std::vector<QueueNotFull> m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
@@ -541,7 +541,7 @@ namespace Com
 
                 if (m_deliveryGuarantee==Acked)
                 {
-                    ud->sendTime=boost::chrono::steady_clock::now();
+                    ud->sendTime=std::chrono::steady_clock::now();
                     m_lastSendTime=ud->sendTime;
                     m_sendQueue.step_unhandled();
                 }
@@ -554,12 +554,12 @@ namespace Com
             }
         }
 
-        boost::chrono::milliseconds GetRetryTimeout(size_t transmitCount) const
+        std::chrono::milliseconds GetRetryTimeout(size_t transmitCount) const
         {
             size_t index = transmitCount>0 ? transmitCount-1 : 0;
             return m_retryTimeout.size()>index ?
-                        boost::chrono::milliseconds(m_retryTimeout[index]) :
-                        boost::chrono::milliseconds(m_retryTimeout.back());
+                        std::chrono::milliseconds(m_retryTimeout[index]) :
+                        std::chrono::milliseconds(m_retryTimeout.back());
         }
 
         void RetransmitUnackedMessages()
@@ -570,13 +570,13 @@ namespace Com
             }
 
             //Always called from writeStrand
-            static const boost::chrono::milliseconds timerInterval(*std::min_element(m_retryTimeout.begin(), m_retryTimeout.end()) / 2);
+            static const std::chrono::milliseconds timerInterval(*std::min_element(m_retryTimeout.begin(), m_retryTimeout.end()) / 2);
 
             //Check if there is any unacked messages that are old enough to be retransmitted
             for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
             {
                 UserDataPtr& ud=m_sendQueue[i];
-                auto durationSinceSend=boost::chrono::steady_clock::now()-ud->sendTime;
+                auto durationSinceSend=std::chrono::steady_clock::now()-ud->sendTime;
                 auto retransmitLimit = GetRetryTimeout(ud->transmitCount);
                 if (durationSinceSend>retransmitLimit)
                 {
@@ -692,7 +692,7 @@ namespace Com
                 }
             }
 
-            ud->sendTime=boost::chrono::steady_clock::now(); //update sendTime so that we will wait for an new WaitForAckTime period before retransmit again
+            ud->sendTime=std::chrono::steady_clock::now(); //update sendTime so that we will wait for an new WaitForAckTime period before retransmit again
             m_lastSendTime=ud->sendTime;
         }
 
@@ -706,8 +706,8 @@ namespace Com
             //Always called from writeStrand
             if (m_sendQueue.empty() && m_nodes.size()>0)
             {
-                static const boost::chrono::milliseconds PingSendThreshold = boost::chrono::milliseconds(Parameters::SendPingThreshold);
-                auto durationSinceSend=boost::chrono::steady_clock::now()-m_lastSendTime;
+                static const std::chrono::milliseconds PingSendThreshold = std::chrono::milliseconds(Parameters::SendPingThreshold);
+                auto durationSinceSend=std::chrono::steady_clock::now()-m_lastSendTime;
                 if (durationSinceSend>PingSendThreshold)
                 {
                     //add ping to the normal sendQueue
@@ -718,7 +718,7 @@ namespace Com
             }
 
             //Restart timer
-            m_pingTimer.expires_after(boost::chrono::milliseconds(Parameters::SendPingThreshold));
+            m_pingTimer.expires_after(std::chrono::milliseconds(Parameters::SendPingThreshold));
             m_pingTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& /*error*/){Ping();}));
         }
 

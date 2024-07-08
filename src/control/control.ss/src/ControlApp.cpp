@@ -100,7 +100,7 @@ ControlApp::ControlApp(boost::asio::io_context&         io,
     : m_io(io)
     , m_work(boost::asio::make_work_guard(io))
     , m_stopped(false)
-    , m_resolutionStartTime(boost::chrono::steady_clock::now())
+    , m_resolutionStartTime(std::chrono::steady_clock::now())
     , m_strand(io)
     , m_wcoutStrand(io)
     , m_requiredForStart(GetRequiredForStart(m_conf))
@@ -200,17 +200,17 @@ void ControlApp::Start()
                                                         nt.retryTimeout));
 
         // system picture stuff
-        std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
+        std::vector<std::chrono::steady_clock::duration> retryTimeouts;
         for (auto rt : nt.retryTimeout)
         {
-            retryTimeouts.push_back(boost::chrono::milliseconds(rt));
+            retryTimeouts.push_back(std::chrono::milliseconds(rt));
         }
 
         spNodeTypes.insert(std::make_pair(nt.id,
                                           SP::NodeType(nt.id,
                                                        nt.name,
                                                        nt.isLightNode,
-                                                       boost::chrono::milliseconds(nt.heartbeatInterval),
+                                                       std::chrono::milliseconds(nt.heartbeatInterval),
                                                        nt.maxLostHeartbeats,
                                                        retryTimeouts)));
     }
@@ -507,7 +507,7 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
     if (!(controlAddress.Ok() && dataAddress.Ok()))
     {
         //well, unless we've been trying to start for long enough
-        if (m_resolutionStartTime + m_conf.localInterfaceTimeout < boost::chrono::steady_clock::now())
+        if (m_resolutionStartTime + m_conf.localInterfaceTimeout < std::chrono::steady_clock::now())
         {
             std::ostringstream os;
             os << "CTRL: Failed to resolve local address/interface ";
@@ -558,7 +558,7 @@ std::pair<Com::ResolvedAddress,Com::ResolvedAddress> ControlApp::ResolveAddresse
             }
 
             //ok, set up the retry timer
-            m_startTimer.expires_after(boost::chrono::seconds(1));
+            m_startTimer.expires_after(std::chrono::seconds(1));
             m_startTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
             {
                 if (!error && !m_stopped)
@@ -577,9 +577,9 @@ void ControlApp::StopDoseMain()
     // Set up a timer that will kill dose_main the hard way if it doesn't stop within a reasonable time.
     // In debug we give a longer timeout.
 #if !defined (NDEBUG)
-    m_terminationTimer.expires_after(boost::chrono::minutes(10));
+    m_terminationTimer.expires_after(std::chrono::minutes(10));
 #else
-    m_terminationTimer.expires_after(boost::chrono::seconds(30));
+    m_terminationTimer.expires_after(std::chrono::seconds(30));
 #endif
 
     m_terminationTimer.async_wait([this]

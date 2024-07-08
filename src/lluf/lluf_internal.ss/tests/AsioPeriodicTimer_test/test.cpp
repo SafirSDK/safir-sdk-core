@@ -40,7 +40,7 @@ int main()
         std::function<void()> stopCb;
 
         Safir::Utilities::Internal::AsioPeriodicTimer timer(io,
-                                                            boost::chrono::milliseconds(10),
+                                                            std::chrono::milliseconds(10),
                                                             [&](const boost::system::error_code& error)
                                                             {
                                                                 std::wcout << "Got callback" << std::endl;

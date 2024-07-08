@@ -40,7 +40,7 @@ class App
 public:
     App()
          : m_dispatcher(m_connection, m_ioService)
-         , m_timer(m_ioService, boost::chrono::milliseconds(10))
+         , m_timer(m_ioService, std::chrono::milliseconds(10))
          , m_razor(L"Razor")
          , m_rb(L"Rymd-B\u00f6rje") //ö
     {}
@@ -73,7 +73,7 @@ public:
     void Timeout()
     {
         static int i = 0;
-        m_timer.expires_from_now(boost::chrono::milliseconds(10));
+        m_timer.expires_from_now(std::chrono::milliseconds(10));
         m_timer.async_wait([this](const auto& /*error*/){Timeout();});
         m_razor << "foo" << "bar" << 1234 << std::endl;
         m_rb << "blahonga, " << "blahonga, " << "blahonga" << std::endl;

@@ -151,7 +151,7 @@ namespace Internal
                            std::unique_ptr<boost::asio::steady_timer>,
                            boost::hash<std::pair<int64_t, InternalRequestId>>> m_outReqTimers;
 
-        boost::chrono::milliseconds GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const;
+        std::chrono::milliseconds GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const;
         typedef std::unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
         mutable TimeoutTable m_timeoutTable;
 

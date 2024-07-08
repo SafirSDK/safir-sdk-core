@@ -47,7 +47,7 @@ namespace SP
                                 const std::map<int64_t, NodeType>& nodeTypes,
                                 const char* const senderId,
                                 RawHandlerT& rawHandler,
-                                const boost::chrono::steady_clock::duration& period)
+                                const std::chrono::steady_clock::duration& period)
             : m_logPrefix(logPrefix)
             , m_strand(ioService)
             , m_timer(ioService)
@@ -100,7 +100,7 @@ namespace SP
 
 
         //must be called in strand
-        void SchedulePublishTimer(const boost::chrono::steady_clock::duration& delay,
+        void SchedulePublishTimer(const std::chrono::steady_clock::duration& delay,
                                   const std::set<int64_t>& toNodeTypes)
         {
             if (m_stopped)
@@ -155,7 +155,7 @@ namespace SP
 
                 if (!overflowNodes.empty())
                 {
-                    SchedulePublishTimer(boost::chrono::milliseconds(100), overflowNodes);
+                    SchedulePublishTimer(std::chrono::milliseconds(100), overflowNodes);
                 }
             });
         }
@@ -169,7 +169,7 @@ namespace SP
         const std::map<int64_t, NodeType> m_nodeTypes;
         RawHandlerT& m_rawHandler;
         const std::set<int64_t> m_allNodeTypes;
-        const boost::chrono::steady_clock::duration m_period;
+        const std::chrono::steady_clock::duration m_period;
     };
 
     typedef RawPublisherRemoteBasic<RawHandler, Com::Communication> RawPublisherRemote;

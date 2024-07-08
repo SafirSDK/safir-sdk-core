@@ -35,6 +35,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <chrono>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 
@@ -70,7 +71,7 @@ namespace SP
                              const int64_t id,
                              const int64_t nodeTypeId,
                              const std::map<int64_t, NodeType>& nodeTypes,
-                             const boost::chrono::steady_clock::duration& aloneTimeout,
+                             const std::chrono::steady_clock::duration& aloneTimeout,
                              const char* const receiverId,
                              const std::function<void(const int64_t nodeId,
                                                       const int64_t electionId)>& electionCompleteCallback,
@@ -106,9 +107,8 @@ namespace SP
                                           m_receiverId,
                                           [](size_t size){return new char[size];},
                                           [](const char* data){delete[] data;});
-
-            lllog(3) << m_logPrefix << "AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_aloneTimeout) << std::endl;
-            lllog(3) << m_logPrefix << "ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
+            lllog(3) << m_logPrefix << "AloneTimeout will be " << std::chrono::duration_cast<std::chrono::milliseconds>(m_aloneTimeout).count() << " ms" << std::endl;
+            lllog(3) << m_logPrefix << "ElectionTimeout will be " << std::chrono::duration_cast<std::chrono::milliseconds>(m_electionTimeout).count() << " ms" << std::endl;
             m_electionInProgress = true;
             m_electionTimer.expires_from_now(m_aloneTimeout);
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
@@ -218,17 +218,17 @@ namespace SP
 
         /** Calculate the time to wait for other nodes to come up before assuming that
          * we're alone and proclaiming victory. */
-        static boost::chrono::steady_clock::duration
+        static std::chrono::steady_clock::duration
         CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes,
-                              const boost::chrono::steady_clock::duration& aloneTimeout)
+                              const std::chrono::steady_clock::duration& aloneTimeout)
         {
-            if (aloneTimeout > boost::chrono::seconds(0))
+            if (aloneTimeout > std::chrono::seconds(0))
             {
                 return aloneTimeout;
             }
 
             //use max of non-light node types heartbeatInterval * maxLostHeartbeats * 2
-            boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
+            std::chrono::steady_clock::duration max = std::chrono::milliseconds(100);
 
             for (auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
             {
@@ -241,11 +241,11 @@ namespace SP
         }
 
         /** Calculate the time to wait for other nodes to respond to our INQUIRY. */
-        static boost::chrono::steady_clock::duration
+        static std::chrono::steady_clock::duration
         CalculateElectionTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
             //use max of non-light node types retryTimeout[0] * maxLostHeartbeats
-            boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
+            std::chrono::steady_clock::duration max = std::chrono::milliseconds(100);
 
             for (auto nt = nodeTypes.cbegin(); nt != nodeTypes.cend(); ++nt)
             {
@@ -632,7 +632,7 @@ namespace SP
             //Handle retry
             if (!m_pendingAlives.empty() || !m_pendingVictories.empty() || !m_pendingInquiries.empty())
             {
-                m_sendMessageTimer.expires_from_now(boost::chrono::milliseconds(10));
+                m_sendMessageTimer.expires_from_now(std::chrono::milliseconds(10));
                 m_sendMessageTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                             {
                                                                 if (!error && !m_stopped)
@@ -665,8 +665,8 @@ namespace SP
         const std::set<int64_t> m_allNodeTypeIds;
         const std::set<int64_t> m_nonLightNodeTypeIds;
 
-        const boost::chrono::steady_clock::duration m_aloneTimeout;
-        const boost::chrono::steady_clock::duration m_electionTimeout;
+        const std::chrono::steady_clock::duration m_aloneTimeout;
+        const std::chrono::steady_clock::duration m_electionTimeout;
 
         RawStatistics m_lastStatistics;
 

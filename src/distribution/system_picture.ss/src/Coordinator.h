@@ -101,7 +101,7 @@ namespace SP
                          const std::string& controlAddress,
                          const std::string& dataAddress,
                          const std::map<int64_t, NodeType>& nodeTypes,
-                         const boost::chrono::steady_clock::duration& aloneTimeout,
+                         const std::chrono::steady_clock::duration& aloneTimeout,
                          const char* const receiverId,
                          RawHandlerT& rawHandler)
             : m_logPrefix(logPrefix)

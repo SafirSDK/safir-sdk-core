@@ -113,7 +113,7 @@ namespace SP
              const int64_t id,
              const int64_t nodeTypeId,
              const std::map<int64_t, NodeType>& nodeTypes,
-             const boost::chrono::steady_clock::duration& aloneTimeout,
+             const std::chrono::steady_clock::duration& aloneTimeout,
              const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
              const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
             : m_logPrefix(MasterLogPrefix(id))
@@ -153,7 +153,7 @@ namespace SP
                                                                         ioService,
                                                                         *m_rawHandler,
                                                                         MASTER_LOCAL_RAW_NAME,
-                                                                        boost::chrono::seconds(1),
+                                                                        std::chrono::seconds(1),
                                                                         true))
             , m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                       RawStatisticsSubscriber,
@@ -164,7 +164,7 @@ namespace SP
                                                                           nodeTypes,
                                                                           MASTER_REMOTE_RAW_NAME,
                                                                           *m_rawHandler,
-                                                                          boost::chrono::seconds(30)))
+                                                                          std::chrono::seconds(30)))
             , m_rawSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication, RawHandler>>
                                     (communication,
                                      MASTER_REMOTE_RAW_NAME,
@@ -185,7 +185,7 @@ namespace SP
                                                                             ioService,
                                                                             *m_coordinator,
                                                                             MASTER_LOCAL_STATE_NAME,
-                                                                            boost::chrono::seconds(1)))
+                                                                            std::chrono::seconds(1)))
             , m_stateSubscriberLocal(Safir::make_unique<StateSubscriberMaster>(ioService,
                                                                                *m_coordinator))
             , m_statePublisherRemote(Safir::make_unique<StatePublisherRemote>(ioService,
@@ -193,7 +193,7 @@ namespace SP
                                                                               nodeTypes,
                                                                               MASTER_REMOTE_STATE_NAME,
                                                                               *m_coordinator,
-                                                                              boost::chrono::seconds(1)))
+                                                                              std::chrono::seconds(1)))
             , m_stateSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication,Coordinator>>
                                       (communication,
                                        MASTER_REMOTE_STATE_NAME,
@@ -242,7 +242,7 @@ namespace SP
                                                                         ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,
-                                                                        boost::chrono::seconds(1),
+                                                                        std::chrono::seconds(1),
                                                                         false))
             , m_stopped(false)
         {
@@ -433,7 +433,7 @@ namespace SP
                                  const int64_t id,
                                  const int64_t nodeTypeId,
                                  const std::map<int64_t, NodeType>& nodeTypes,
-                                 const boost::chrono::steady_clock::duration& aloneTimeout,
+                                 const std::chrono::steady_clock::duration& aloneTimeout,
                                  const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
                                  const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
         : m_impl(Safir::make_unique<Impl>(master_tag,

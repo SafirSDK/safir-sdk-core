@@ -87,7 +87,7 @@ namespace SP
                       const int64_t id,
                       const int64_t nodeTypeId,
                       const std::map<int64_t, NodeType>& nodeTypes,
-                      const boost::chrono::steady_clock::duration& aloneTimeout,
+                      const std::chrono::steady_clock::duration& aloneTimeout,
                       const std::function<bool (const int64_t incarnationId)>& validateJoinSystemCallback,
                       const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback);
 

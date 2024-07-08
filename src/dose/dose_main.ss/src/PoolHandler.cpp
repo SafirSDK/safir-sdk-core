@@ -435,7 +435,7 @@ namespace Internal
         m_waitingStates.SanityCheck();
 
         /* We run this timer fairly infrequently, to reduce false warnings */
-        m_waitingStatesSanityTimer.expires_from_now(boost::chrono::minutes(6));
+        m_waitingStatesSanityTimer.expires_from_now(std::chrono::minutes(6));
         m_waitingStatesSanityTimer.async_wait([this](const boost::system::error_code& error)
         {
             if (!error && m_running)

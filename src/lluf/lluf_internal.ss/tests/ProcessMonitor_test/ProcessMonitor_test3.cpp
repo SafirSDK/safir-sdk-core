@@ -25,6 +25,7 @@
 #include <boost/lexical_cast.hpp>
 #include <vector>
 #include <set>
+#include <thread>
 
 #if defined _MSC_VER
 #  pragma warning (push)
@@ -64,7 +65,7 @@ struct Fixture
         , work(boost::asio::make_work_guard(io))
         , monitor(io,
                   [this](const pid_t pid){TerminatedCb(pid);},
-                  boost::chrono::milliseconds(20)) //high polling rate to speed up tests.
+                  std::chrono::milliseconds(20)) //high polling rate to speed up tests.
     {
         BOOST_TEST_MESSAGE("setup fixture");
     }
@@ -239,7 +240,7 @@ BOOST_AUTO_TEST_CASE(stop_unknown)
     RunIoContext();
     monitor.StopMonitorPid(100);
     work.reset();
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     Stop();
     BOOST_CHECK(TerminatedPids().empty());
 }
@@ -250,7 +251,7 @@ BOOST_AUTO_TEST_CASE(monitor_0)
     monitor.StartMonitorPid(0);
     while(TerminatedPids().empty())
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     monitor.Stop();
     std::vector<pid_t> terminated = TerminatedPids();
@@ -265,7 +266,7 @@ BOOST_AUTO_TEST_CASE(monitor_0_twice)
     monitor.StartMonitorPid(0);
     while(TerminatedPids().empty())
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     monitor.Stop();
 
@@ -312,7 +313,7 @@ BOOST_AUTO_TEST_CASE(monitor_self_and_0)
     monitor.StartMonitorPid(0);
     while(TerminatedPids().empty())
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     Stop();
 
@@ -330,7 +331,7 @@ BOOST_AUTO_TEST_CASE(monitor_sleeper)
     WaitSleeper(pid);
     while(TerminatedPids().empty())
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     Stop();
@@ -348,7 +349,7 @@ BOOST_AUTO_TEST_CASE(stop_monitor)
     monitor.StopMonitorPid(pid);
 
     WaitSleeper(pid);
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     Stop();
 
@@ -378,7 +379,7 @@ BOOST_AUTO_TEST_CASE(many_sleepers)
     BOOST_TEST_MESSAGE("Waiting for term");
     while(TerminatedPids().size() != 30)
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     BOOST_TEST_MESSAGE("Stopping");

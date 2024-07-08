@@ -682,7 +682,7 @@ namespace Internal
         }
     }
 
-    bool StateContainer::CanAcquireContainerWriterLock(const boost::chrono::steady_clock::duration& lockTimeout)
+    bool StateContainer::CanAcquireContainerWriterLock(const std::chrono::steady_clock::duration& lockTimeout)
     {
         // Get writer lock
         ScopedStateContainerRwLock wlock(m_stateReaderWriterlock,

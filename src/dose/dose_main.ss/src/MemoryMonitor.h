@@ -45,7 +45,7 @@ namespace Internal
         {
 
             m_timer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
-                                                                            boost::chrono::seconds(30),
+                                                                            std::chrono::seconds(30),
                                                                             [this](const boost::system::error_code& error)
                                                                             {
                                                                                 if (!error)

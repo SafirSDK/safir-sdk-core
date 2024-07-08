@@ -2259,7 +2259,7 @@ namespace Internal
     }
 
     bool EntityType::CanAcquireContainerWriterLock(const ContextId contextId,
-                                                   const boost::chrono::steady_clock::duration& lockTimeout)
+                                                   const std::chrono::steady_clock::duration& lockTimeout)
     {
         bool okToAcquireLock = true;
 

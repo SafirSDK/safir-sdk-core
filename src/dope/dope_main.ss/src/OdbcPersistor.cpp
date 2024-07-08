@@ -33,21 +33,10 @@
 #include <Safir/Dob/ConnectionAspectInjector.h>
 #include <boost/algorithm/hex.hpp>
 #include <boost/function_output_iterator.hpp>
+#include <thread>
+#include <chrono>
 
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning (disable: 4913)
-#pragma warning (disable: 4100)
-#endif
-
-#include <boost/thread.hpp>
-#include <boost/chrono.hpp>
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-
-//Disable incorrect VS2010 warning about unicode characters.
-#pragma warning (disable : 4428)
 
 //Disable warning about constant conditional expressions, caused
 //by USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS.
@@ -55,8 +44,8 @@
 
 #endif
 
-const boost::chrono::steady_clock::duration RECONNECT_EXCEPTION_DELAY = boost::chrono::milliseconds(100);
-const boost::chrono::steady_clock::duration RETRY_EXCEPTION_DELAY = boost::chrono::milliseconds(10);
+const std::chrono::steady_clock::duration RECONNECT_EXCEPTION_DELAY = std::chrono::milliseconds(100);
+const std::chrono::steady_clock::duration RETRY_EXCEPTION_DELAY = std::chrono::milliseconds(10);
 
 const int REPORT_AFTER_RECONNECTS = 100;
 
@@ -211,7 +200,7 @@ void OdbcPersistor::PerformStartupChecks()
                 {
                     const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
                     m_debug << "Caught a RetryException in PerformStartupChecks:\n" << err << std::endl;
-                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                    std::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
                 }
             }
 
@@ -277,7 +266,7 @@ void OdbcPersistor::PerformStartupChecks()
                 {
                     const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
                     m_debug << "Caught a RetryException in GetAll:\n" << err << std::endl;
-                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                    std::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
                 }
             }
 
@@ -363,7 +352,7 @@ void OdbcPersistor::PerformStartupChecks()
                 {
                     const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
                     m_debug << "Caught a RetryException in GetAll:\n" << err << std::endl;
-                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                    std::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
                 }
             }
 
@@ -388,7 +377,7 @@ void OdbcPersistor::PerformStartupChecks()
                 {
                     const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
                     m_debug << "Caught a RetryException in PerformStartupChecks:\n" << err << std::endl;
-                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                    std::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
                 }
             }
         }
@@ -412,7 +401,7 @@ void OdbcPersistor::PerformStartupChecks()
 
             writeUnicodeIsValid = false;
 
-            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
+            std::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
 
@@ -539,7 +528,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
 
             DisconnectOdbcConnection();
 
-            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
+            std::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
 }
@@ -605,7 +594,7 @@ void OdbcPersistor::Remove(const Safir::Dob::Typesystem::EntityId& entityId)
                 errorReported = true;
             }
             DisconnectOdbcConnection();
-            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
+            std::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
 }
@@ -659,7 +648,7 @@ void OdbcPersistor::RemoveAll()
             }
 
             DisconnectOdbcConnection();
-            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
+            std::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
 }
@@ -690,7 +679,7 @@ void OdbcPersistor::RestoreAll()
     boost::scoped_array<wchar_t>                xmlBufferW(new wchar_t[xmlSize / sizeof(wchar_t)]);
     SQLLEN                                      currentXmlSize = 0;
 
-    const boost::chrono::steady_clock::time_point startTime = boost::chrono::steady_clock::now();
+    const std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
 
     const SQLRETURN ret = ::SQLAllocHandle(SQL_HANDLE_DBC, m_environment, &getAllConnection);
     if (!SQL_SUCCEEDED(ret))
@@ -745,7 +734,7 @@ void OdbcPersistor::RestoreAll()
                 {
                     const std::wstring err = Safir::Dob::Typesystem::Utilities::ToWstring(e.what());
                     m_debug << "Caught a RetryException in GetAll:\n" << err << std::endl;
-                    boost::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
+                    std::this_thread::sleep_for(RETRY_EXCEPTION_DELAY);
                 }
             }
 
@@ -893,7 +882,7 @@ void OdbcPersistor::RestoreAll()
 
             getAllIsValid = false;
 
-            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
+            std::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
     }
 
@@ -924,7 +913,7 @@ void OdbcPersistor::RestoreAll()
     m_debug << "RestoreAll completed: "
             << restoredObjects.size()
             << " objects restored in time "
-            << boost::chrono::steady_clock::now() - startTime << std::endl;
+            << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime).count() << " ms" << std::endl;
 }
 
 //-------------------------------------------------------
@@ -1070,7 +1059,7 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId& entityId)
 
             DisconnectOdbcConnection();
 
-            boost::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
+            std::this_thread::sleep_for(RECONNECT_EXCEPTION_DELAY);
         }
 
     }

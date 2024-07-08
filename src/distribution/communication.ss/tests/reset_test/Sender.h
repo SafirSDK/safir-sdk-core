@@ -91,7 +91,7 @@ public:
         m_running = true;
         m_sendToNodeType = sendToNodeType;
         m_com.Start();
-        m_sendTimer.expires_after(boost::chrono::milliseconds(25));
+        m_sendTimer.expires_after(std::chrono::milliseconds(25));
         m_sendTimer.async_wait([this](const boost::system::error_code& ec){OnSendTimer(ec);});
     }
 
@@ -158,7 +158,7 @@ private:
             m_com.Send(0, m_sendToNodeType, data, size, 123, true);
         }
 
-        m_sendTimer.expires_after(boost::chrono::milliseconds(5));
+        m_sendTimer.expires_after(std::chrono::milliseconds(5));
         m_sendTimer.async_wait([this](const boost::system::error_code& ec){OnSendTimer(ec);});
     }
 

@@ -187,12 +187,12 @@ private:
 
 };
 
-std::vector<boost::chrono::steady_clock::duration> ToChronoDurations(const std::vector<int>& ms)
+std::vector<std::chrono::steady_clock::duration> ToChronoDurations(const std::vector<int>& ms)
 {
-    std::vector<boost::chrono::steady_clock::duration> ch;
+    std::vector<std::chrono::steady_clock::duration> ch;
     for(auto it = ms.cbegin(); it != ms.cend(); ++it)
     {
-        ch.push_back(boost::chrono::milliseconds(*it));
+        ch.push_back(std::chrono::milliseconds(*it));
     }
     return ch;
 }
@@ -230,7 +230,7 @@ public:
                                             (1,
                                              "NormalUnicast",
                                              false, //isLightNode
-                                             boost::chrono::milliseconds(500), //heartbeatInterval
+                                             std::chrono::milliseconds(500), //heartbeatInterval
                                              10, //maxLostHeartbeats
                                              ToChronoDurations(retryTimeout20)))); //retryTimeout
 
@@ -251,7 +251,7 @@ public:
                                             (2,
                                              "NormalMulticast",
                                              false,
-                                             boost::chrono::milliseconds(500),
+                                             std::chrono::milliseconds(500),
                                              10,
                                              ToChronoDurations(retryTimeout20))));
 
@@ -272,7 +272,7 @@ public:
                                             (11,
                                              "LightUnicast",
                                              true,
-                                             boost::chrono::milliseconds(500),
+                                             std::chrono::milliseconds(500),
                                              10,
                                              ToChronoDurations(retryTimeout20))));
 
@@ -293,7 +293,7 @@ public:
                                             (12,
                                              "LightMulticast",
                                              true,
-                                             boost::chrono::milliseconds(500),
+                                             std::chrono::milliseconds(500),
                                              8,
                                              ToChronoDurations(retryTimeout20))));
     }
@@ -406,7 +406,7 @@ public:
                                m_id,
                                options.nodeType,
                                m_spNodeTypes,
-                               boost::chrono::seconds(10), //don't use auto aloneTimeout
+                               std::chrono::seconds(10), //don't use auto aloneTimeout
                                [this](const int64_t id)
                                {return CheckJoinSystem(id);},
                                [this](const int64_t id)
@@ -522,7 +522,7 @@ public:
                                          [](const char * data){delete[] data;});
 
 
-        m_sendTimer.expires_from_now(boost::chrono::milliseconds(20));
+        m_sendTimer.expires_from_now(std::chrono::milliseconds(20));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
 
         m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
@@ -571,7 +571,7 @@ private:
         m_communication->Send(0, 2, DATA, DATA_SIZE, 1000100222, false);
         m_communication->Send(0, 11, DATA, DATA_SIZE, 1000100222, false);
         m_communication->Send(0, 12, DATA, DATA_SIZE, 1000100222, false);
-        m_sendTimer.expires_from_now(boost::chrono::milliseconds(20));
+        m_sendTimer.expires_from_now(std::chrono::milliseconds(20));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
     }
 

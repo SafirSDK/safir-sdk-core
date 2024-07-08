@@ -69,7 +69,7 @@ namespace Com
                          const std::function<bool(const char*, size_t, bool multicast)>& onRecv,
                          const std::function<bool(void)>& isReceiverIsReady)
             :m_strand(receiveStrand)
-            ,m_timer(m_strand.context(), boost::chrono::milliseconds(10))
+            ,m_timer(m_strand.context(), std::chrono::milliseconds(10))
             ,m_checkMcTimer(m_strand.context())
             ,m_onRecv(onRecv)
             ,m_isReceiverReady(isReceiverIsReady)
@@ -130,8 +130,8 @@ namespace Com
                         AsyncReceive(m_bufferMulticast, m_multicastSocket.get());
                     }
 
-                    m_lastMcRecv = boost::chrono::steady_clock::now();
-                    m_checkMcTimer.expires_after(boost::chrono::milliseconds(Parameters::SendPingThreshold * 2));
+                    m_lastMcRecv = std::chrono::steady_clock::now();
+                    m_checkMcTimer.expires_after(std::chrono::milliseconds(Parameters::SendPingThreshold * 2));
                     m_checkMcTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code&){CheckMulticast();}));
                 }
             });
@@ -177,7 +177,7 @@ namespace Com
         std::string m_logPrefix;
 
         unsigned int m_runCount = 0;
-        boost::chrono::time_point<boost::chrono::steady_clock> m_lastMcRecv;
+        std::chrono::time_point<std::chrono::steady_clock> m_lastMcRecv;
         char m_bufferUnicast[Parameters::ReceiveBufferSize];
         char m_bufferMulticast[Parameters::ReceiveBufferSize];
 
@@ -255,7 +255,7 @@ namespace Com
                 if (multicast)
                 {
                     lllog(9)<<m_logPrefix.c_str()<<L"received multicast"<<std::endl;
-                    m_lastMcRecv = boost::chrono::steady_clock::now();
+                    m_lastMcRecv = std::chrono::steady_clock::now();
                 }
                 else
                 {
@@ -294,7 +294,7 @@ namespace Com
 
         void SetWakeUpTimer(char* buf, boost::asio::ip::udp::socket* socket)
         {
-            m_timer.expires_after(boost::chrono::milliseconds(10));
+            m_timer.expires_after(std::chrono::milliseconds(10));
             m_timer.async_wait(boost::asio::bind_executor(m_strand, [this,buf,socket](const boost::system::error_code& error){WakeUpAfterSleep(error, buf, socket);}));
         }
 
@@ -324,8 +324,8 @@ namespace Com
                 return;
             }
 
-            static const boost::chrono::milliseconds McRecvThreshold = boost::chrono::milliseconds(Parameters::SendPingThreshold + 1000);
-            auto timeSinceLastMc = boost::chrono::steady_clock::now() - m_lastMcRecv;
+            static const std::chrono::milliseconds McRecvThreshold = std::chrono::milliseconds(Parameters::SendPingThreshold + 1000);
+            auto timeSinceLastMc = std::chrono::steady_clock::now() - m_lastMcRecv;
             if (timeSinceLastMc > McRecvThreshold)
             {
                 if (m_multicastSocket && m_multicastSocket->is_open())
@@ -348,7 +348,7 @@ namespace Com
                 }
             }
 
-            m_checkMcTimer.expires_after(boost::chrono::milliseconds(Parameters::SendPingThreshold));
+            m_checkMcTimer.expires_after(std::chrono::milliseconds(Parameters::SendPingThreshold));
             m_checkMcTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code&){CheckMulticast();}));
         }
     };

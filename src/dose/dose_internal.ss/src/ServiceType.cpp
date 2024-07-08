@@ -206,7 +206,7 @@ namespace Internal
     }
 
     bool ServiceType::CanAcquireContainerWriterLock(const ContextId contextId,
-                                                    const boost::chrono::steady_clock::duration& lockTimeout)
+                                                    const std::chrono::steady_clock::duration& lockTimeout)
     {
         ScopedTypeLock lck(m_typeLocks[contextId],
                            boost::interprocess::defer_lock);

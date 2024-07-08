@@ -25,6 +25,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <boost/chrono.hpp>
 #include <functional>
 #include <atomic>
 #include <set>
@@ -38,7 +39,7 @@ namespace Utilities
     public:
         ProcessMonitorImpl(boost::asio::io_context& io,
                            const std::function<void(const pid_t pid)>& callback,
-                           const boost::chrono::steady_clock::duration& pollPeriod);
+                           const std::chrono::steady_clock::duration& pollPeriod);
 
         void Stop();
 
@@ -65,7 +66,7 @@ namespace Utilities
         boost::asio::io_context::strand m_strand;
         std::atomic<bool> m_stopped;
 
-        const boost::chrono::steady_clock::duration m_pollPeriod;
+        const std::chrono::steady_clock::duration m_pollPeriod;
         boost::asio::steady_timer m_pollTimer;
 
         std::set<pid_t> m_monitoredPids;

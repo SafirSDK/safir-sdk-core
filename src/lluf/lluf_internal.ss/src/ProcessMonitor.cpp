@@ -35,7 +35,7 @@ namespace Utilities
 
     ProcessMonitor::ProcessMonitor(boost::asio::io_context& io,
                                    const std::function<void(const pid_t pid)>& callback,
-                                   const boost::chrono::steady_clock::duration& pollPeriod)
+                                   const std::chrono::steady_clock::duration& pollPeriod)
         : m_impl(new ProcessMonitorImpl(io,callback, pollPeriod))
     {
 

@@ -52,7 +52,7 @@ namespace SP
                                boost::asio::io_service& ioService,
                                RawHandlerT& rawHandler,
                                const char* const name,
-                               const boost::chrono::steady_clock::duration& period,
+                               const std::chrono::steady_clock::duration& period,
                                const bool all)
             : m_logPrefix(logPrefix)
             , m_rawHandler(rawHandler)

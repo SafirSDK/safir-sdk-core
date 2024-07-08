@@ -101,7 +101,7 @@ private:
     boost::asio::io_context&                    m_io;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     bool                                        m_stopped;
-    const boost::chrono::steady_clock::time_point m_resolutionStartTime;
+    const std::chrono::steady_clock::time_point m_resolutionStartTime;
     boost::asio::io_context::strand             m_strand;
     boost::asio::io_context::strand             m_wcoutStrand;
     std::unique_ptr<TerminateHandler>           m_terminateHandler;

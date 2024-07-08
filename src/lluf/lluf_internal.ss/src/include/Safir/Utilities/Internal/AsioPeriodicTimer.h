@@ -32,6 +32,7 @@
 #pragma warning (disable: 4267)
 #endif
 
+#include <boost/chrono.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 
@@ -57,7 +58,7 @@ namespace Internal
     {
     public:
         AsioPeriodicTimer(boost::asio::io_context& io,
-                          const boost::chrono::steady_clock::duration& period,
+                          const std::chrono::steady_clock::duration& period,
                           const std::function<void(const boost::system::error_code& error)>& handler)
             : m_strand(io)
             , m_timer(io)
@@ -138,7 +139,7 @@ namespace Internal
 
         boost::asio::io_context::strand m_strand;
         boost::asio::steady_timer m_timer;
-        const boost::chrono::steady_clock::duration m_period;
+        const std::chrono::steady_clock::duration m_period;
         const std::function<void(const boost::system::error_code& error)> m_handler;
         std::atomic<bool> m_started;
     };

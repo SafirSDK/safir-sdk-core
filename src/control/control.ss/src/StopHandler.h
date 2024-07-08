@@ -111,7 +111,7 @@ namespace Control
             for (unsigned int idx = 0; idx < m_config.nodeTypesParam.size(); ++idx)
             {
                 auto nodeTypeId = m_config.nodeTypesParam[idx].id;
-                auto maxStopDuration = (boost::chrono::milliseconds(m_config.nodeTypesParam[idx].heartbeatInterval) *
+                auto maxStopDuration = (std::chrono::milliseconds(m_config.nodeTypesParam[idx].heartbeatInterval) *
                                         m_config.nodeTypesParam[idx].maxLostHeartbeats) * 2;
 
                 m_nodeTypeTable.insert(std::make_pair(nodeTypeId, maxStopDuration));
@@ -279,7 +279,7 @@ namespace Control
 
         bool m_systemStop;
 
-        std::unordered_map<int64_t, boost::chrono::milliseconds> m_nodeTypeTable;
+        std::unordered_map<int64_t, std::chrono::milliseconds> m_nodeTypeTable;
 
         struct Node
         {
@@ -291,7 +291,7 @@ namespace Control
 
             const int64_t                       nodeTypeId;
 
-            boost::chrono::steady_clock::time_point maxStopTime;
+            std::chrono::steady_clock::time_point maxStopTime;
             Control::CommandAction                  cmdAction;
             int64_t                                 cmdNodeId;
             bool                                    stopInProgress;
@@ -314,7 +314,7 @@ namespace Control
 
             // Wait a short while and then send the notification again, just in case.
 
-            m_stopTimer.expires_after(boost::chrono::milliseconds(300));
+            m_stopTimer.expires_after(std::chrono::milliseconds(300));
 
             m_stopTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
             {
@@ -369,7 +369,7 @@ namespace Control
             m_stopSystemCb();  // Notify other parts that we got a system stop order
 
             // Initiate stop of all known nodes
-            auto now = boost::chrono::steady_clock::now();
+            auto now = std::chrono::steady_clock::now();
             for (auto nodeIt = m_nodeTable.begin(); nodeIt != m_nodeTable.end(); ++nodeIt)
             {
                 nodeIt->second.cmdAction = cmdAction;
@@ -378,7 +378,7 @@ namespace Control
                 nodeIt->second.maxStopTime = now + m_nodeTypeTable[nodeIt->second.nodeTypeId];
             }
 
-            m_sendTimer.expires_after(boost::chrono::seconds(0));
+            m_sendTimer.expires_after(std::chrono::seconds(0));
 
             m_sendTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
             {
@@ -409,10 +409,10 @@ namespace Control
             nodeIt->second.cmdAction = cmdAction;
             nodeIt->second.cmdNodeId = cmdNodeId;
             nodeIt->second.stopInProgress = true;
-            nodeIt->second.maxStopTime = boost::chrono::steady_clock::now() +
+            nodeIt->second.maxStopTime = std::chrono::steady_clock::now() +
                                          m_nodeTypeTable[nodeIt->second.nodeTypeId];
 
-            m_sendTimer.expires_after(boost::chrono::seconds(0));
+            m_sendTimer.expires_after(std::chrono::seconds(0));
             m_sendTimer.async_wait(Safir::Utilities::Internal::WrapInStrand(m_strand, [this](const boost::system::error_code& error)
                                                  {
                                                      if (error == boost::asio::error::operation_aborted)
@@ -427,7 +427,7 @@ namespace Control
         {
             bool externalNodeStopInProgress = false;
 
-            auto now = boost::chrono::steady_clock::now();
+            auto now = std::chrono::steady_clock::now();
 
             std::set<int64_t> pendingNodeTypeIds;
 
@@ -466,7 +466,7 @@ namespace Control
                         SEND_SYSTEM_LOG(Informational,
                                         << "Node " << nodeIt->first
                                         << " doesn't receive or doesn't act on a stop order. Have tried for"
-                                        << m_nodeTypeTable[nodeIt->second.nodeTypeId] << "ms");
+                                        << m_nodeTypeTable[nodeIt->second.nodeTypeId].count() << "ms");
 
                         nodeIt->second.stopInProgress = false;
                     }
@@ -489,7 +489,7 @@ namespace Control
                                          true); // delivery guarantee
                 }
 
-                m_sendTimer.expires_after(boost::chrono::seconds(1));
+                m_sendTimer.expires_after(std::chrono::seconds(1));
 
                 m_sendTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error)
                 {

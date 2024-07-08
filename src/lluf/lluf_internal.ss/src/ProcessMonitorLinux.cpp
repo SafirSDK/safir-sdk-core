@@ -26,6 +26,7 @@
 #include "ProcessMonitorLinux.h"
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/lexical_cast.hpp>
+#include <chrono>
 #include <boost/filesystem.hpp>
 
 namespace Safir
@@ -34,7 +35,7 @@ namespace Utilities
 {
     ProcessMonitorImpl::ProcessMonitorImpl(boost::asio::io_context& io,
                                            const std::function<void(const pid_t pid)>& callback,
-                                           const boost::chrono::steady_clock::duration& pollPeriod)
+                                           const std::chrono::steady_clock::duration& pollPeriod)
         : m_callback(callback)
         , m_io(io)
         , m_strand(io)

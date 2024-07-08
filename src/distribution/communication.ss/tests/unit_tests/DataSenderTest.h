@@ -565,10 +565,10 @@ public:
         TRACELINE
 
         // Test retranmit time calculations
-        CHECK(sender.GetRetryTimeout(0)==boost::chrono::milliseconds(1000));
-        CHECK(sender.GetRetryTimeout(1)==boost::chrono::milliseconds(1000));
-        CHECK(sender.GetRetryTimeout(2)==boost::chrono::milliseconds(3000));
-        CHECK(sender.GetRetryTimeout(3)==boost::chrono::milliseconds(3000));
+        CHECK(sender.GetRetryTimeout(0)==std::chrono::milliseconds(1000));
+        CHECK(sender.GetRetryTimeout(1)==std::chrono::milliseconds(1000));
+        CHECK(sender.GetRetryTimeout(2)==std::chrono::milliseconds(3000));
+        CHECK(sender.GetRetryTimeout(3)==std::chrono::milliseconds(3000));
 
         // Test request ack calculations
         {

@@ -28,7 +28,7 @@ Sender::Sender(Com::ControlModeTag tag, boost::asio::io_context& ioContext, int6
     ,m_timerSend(ioContext)
     ,m_msgCount(0)
 {
-    m_timerSend.expires_after(boost::chrono::milliseconds(10));
+    m_timerSend.expires_after(std::chrono::milliseconds(10));
     m_timerSend.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& /*error*/){if (m_running) Send();}));
 }
 
@@ -37,7 +37,7 @@ Sender::Sender(Com::DataModeTag tag, boost::asio::io_context& ioContext, int64_t
     ,m_timerSend(ioContext)
     ,m_msgCount(0)
 {
-    m_timerSend.expires_after(boost::chrono::milliseconds(3000));
+    m_timerSend.expires_after(std::chrono::milliseconds(3000));
     m_timerSend.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){if (!error) Send();}));
 }
 
@@ -78,6 +78,6 @@ void Sender::Send()
         }
     }
 
-    m_timerSend.expires_after(boost::chrono::milliseconds(10));
+    m_timerSend.expires_after(std::chrono::milliseconds(10));
     m_timerSend.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){if (!error) Send();}));
 }

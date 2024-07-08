@@ -985,9 +985,9 @@ public:
         Info state(10002, 2, io);
 
         // remove first two from exclude list and put back seeds
-        state.discover->m_excludedNodes[1] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), "127.0.0.1:1"};
-        state.discover->m_excludedNodes[2] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), "127.0.0.1:2"};
-        state.discover->m_excludedNodes[3] = {boost::chrono::steady_clock::now() + boost::chrono::seconds(2), "127.0.0.1:3"};
+        state.discover->m_excludedNodes[1] = {std::chrono::steady_clock::now() - std::chrono::seconds(2), "127.0.0.1:1"};
+        state.discover->m_excludedNodes[2] = {std::chrono::steady_clock::now() - std::chrono::seconds(2), "127.0.0.1:2"};
+        state.discover->m_excludedNodes[3] = {std::chrono::steady_clock::now() + std::chrono::seconds(2), "127.0.0.1:3"};
         state.discover->CheckTimeLimitedExclusions();
         CHECK(state.discover->m_excludedNodes.size() == 1);
         CHECK(state.discover->m_excludedNodes.find(3) != state.discover->m_excludedNodes.end());
@@ -1001,7 +1001,7 @@ public:
         // remove none from exclude list
         state.discover->m_excludedNodes[1] = {boost::none, ""};
         state.discover->m_excludedNodes[2] = {boost::none, ""};
-        state.discover->m_excludedNodes[3] = {boost::chrono::steady_clock::now() + boost::chrono::seconds(2), "127.0.0.1:3"};
+        state.discover->m_excludedNodes[3] = {std::chrono::steady_clock::now() + std::chrono::seconds(2), "127.0.0.1:3"};
         state.discover->CheckTimeLimitedExclusions();
         CHECK(state.discover->m_excludedNodes.size() == 3);
         CHECK(state.discover->m_seeds.size() == 0);
@@ -1010,9 +1010,9 @@ public:
         state.discover->m_seeds.clear();
 
         // remove last, no seed
-        state.discover->m_excludedNodes[1] = {boost::chrono::steady_clock::now() + boost::chrono::seconds(20), "127.0.0.1:1"};
+        state.discover->m_excludedNodes[1] = {std::chrono::steady_clock::now() + std::chrono::seconds(20), "127.0.0.1:1"};
         state.discover->m_excludedNodes[2] = {boost::none, ""};
-        state.discover->m_excludedNodes[3] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), "127.0.0.1:3"};
+        state.discover->m_excludedNodes[3] = {std::chrono::steady_clock::now() - std::chrono::seconds(2), "127.0.0.1:3"};
         state.discover->CheckTimeLimitedExclusions();
         CHECK(state.discover->m_excludedNodes.size() == 2);
         CHECK(state.discover->m_excludedNodes.find(1) != state.discover->m_excludedNodes.end());
@@ -1024,9 +1024,9 @@ public:
         state.discover->m_seeds.clear();
 
         // remove all - one seed
-        state.discover->m_excludedNodes[1] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), ""};
-        state.discover->m_excludedNodes[2] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), ""};
-        state.discover->m_excludedNodes[3] = {boost::chrono::steady_clock::now() - boost::chrono::seconds(2), "127.0.0.1:3"};
+        state.discover->m_excludedNodes[1] = {std::chrono::steady_clock::now() - std::chrono::seconds(2), ""};
+        state.discover->m_excludedNodes[2] = {std::chrono::steady_clock::now() - std::chrono::seconds(2), ""};
+        state.discover->m_excludedNodes[3] = {std::chrono::steady_clock::now() - std::chrono::seconds(2), "127.0.0.1:3"};
         state.discover->CheckTimeLimitedExclusions();
         CHECK(state.discover->m_excludedNodes.size() == 0);
         CHECK(state.discover->m_seeds.size() == 1);

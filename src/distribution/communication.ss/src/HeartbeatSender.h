@@ -82,7 +82,7 @@ namespace Com
             boost::asio::post(m_strand, [this]
             {
                 m_running=true;
-                m_heartbeatTimer.expires_after(boost::chrono::milliseconds(m_interval));
+                m_heartbeatTimer.expires_after(std::chrono::milliseconds(m_interval));
                 m_heartbeatTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code&){OnTimeout();}));
             });
         }
@@ -155,7 +155,7 @@ namespace Com
                     }
                 }
 
-                m_heartbeatTimer.expires_after(boost::chrono::milliseconds(m_interval));
+                m_heartbeatTimer.expires_after(std::chrono::milliseconds(m_interval));
                 m_heartbeatTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code&){OnTimeout();}));
             }
         }

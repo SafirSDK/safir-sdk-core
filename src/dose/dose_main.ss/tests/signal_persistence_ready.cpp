@@ -75,7 +75,7 @@ int main()
                               Safir::Dob::Typesystem::HandlerId(),
                               &r);
     //set a timer
-    boost::asio::steady_timer timer(ioService,boost::chrono::milliseconds(1000));
+    boost::asio::steady_timer timer(ioService,std::chrono::milliseconds(1000));
     timer.async_wait([](const boost::system::error_code&){});
 
     std::wcout <<"running" << std::endl;

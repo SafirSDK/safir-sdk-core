@@ -129,7 +129,7 @@ namespace Internal
         /** @} */
 
         // This method just  tries to acquire the container lock as a writer.
-        bool CanAcquireContainerWriterLock(const boost::chrono::steady_clock::duration& lockTimeout) const;
+        bool CanAcquireContainerWriterLock(const std::chrono::steady_clock::duration& lockTimeout) const;
 
     private:
 

@@ -44,7 +44,7 @@ public:
         ,m_strand(strand)
         ,m_sendPing(sendPing)
         ,m_pingInterval(interval)
-        ,m_lastSendTime(boost::chrono::steady_clock::now())
+        ,m_lastSendTime(std::chrono::steady_clock::now())
         ,m_timer(strand.context())
     {
     }
@@ -73,26 +73,26 @@ public:
     void Update()
     {
         //always called from strand
-        m_lastSendTime = boost::chrono::steady_clock::now();
+        m_lastSendTime = std::chrono::steady_clock::now();
     }
 
 private:
     bool m_running;
     boost::asio::io_context::strand& m_strand;
     boost::function<void()> m_sendPing;
-    boost::chrono::seconds m_pingInterval;
-    boost::chrono::steady_clock::time_point m_lastSendTime;
+    std::chrono::seconds m_pingInterval;
+    std::chrono::steady_clock::time_point m_lastSendTime;
     boost::asio::steady_timer m_timer;
 
     void OnTimeout()
     {
         if (m_running)
         {
-            auto durationSinceSend=boost::chrono::steady_clock::now()-m_lastSendTime;
+            auto durationSinceSend=std::chrono::steady_clock::now()-m_lastSendTime;
             if (durationSinceSend>m_pingInterval)
             {
                 m_sendPing();
-                m_lastSendTime=boost::chrono::steady_clock::now();
+                m_lastSendTime=std::chrono::steady_clock::now();
                 m_timer.expires_after(m_pingInterval);
 
 

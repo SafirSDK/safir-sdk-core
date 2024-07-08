@@ -141,7 +141,7 @@ void WebsocketServer::Terminate()
 
     //give a couple of seconds to send pending messages and nice shutdown messages
     std::shared_ptr<boost::asio::steady_timer> shutDownTimer=std::make_shared<boost::asio::steady_timer>(m_io);
-    shutDownTimer->expires_after(boost::chrono::seconds(3));
+    shutDownTimer->expires_after(std::chrono::seconds(3));
     shutDownTimer->async_wait([this, shutDownTimer](const boost::system::error_code&)
     {
         boost::asio::post(m_connectionsStrand, [this]{m_server.stop();});

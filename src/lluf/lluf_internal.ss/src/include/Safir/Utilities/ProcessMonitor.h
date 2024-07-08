@@ -27,6 +27,7 @@
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/asio.hpp>
+#include <boost/chrono.hpp>
 #include <functional>
 #include <memory>
 
@@ -49,7 +50,7 @@ namespace Utilities
          */
         ProcessMonitor(boost::asio::io_context& io,
                        const std::function<void(const pid_t pid)>& callback,
-                       const boost::chrono::steady_clock::duration& pollPeriod);
+                       const std::chrono::steady_clock::duration& pollPeriod);
 
         /**
          * Stop monitoring all processes and stop the process monitor.

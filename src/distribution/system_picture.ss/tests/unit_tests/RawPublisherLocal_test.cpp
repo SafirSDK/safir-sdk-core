@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE( send_ten_all )
 {
     Handler h;
 
-    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoService,h,"foo",boost::chrono::milliseconds(10),true);
+    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoService,h,"foo",std::chrono::milliseconds(10),true);
 
     h.stopCall = [&]{publisher.Stop();};
     gIoService.run();
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE( send_ten_my )
 {
     Handler h;
 
-    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoService,h,"foo",boost::chrono::milliseconds(10),false);
+    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoService,h,"foo",std::chrono::milliseconds(10),false);
 
     h.stopCall = [&]{publisher.Stop();};
     gIoService.reset();

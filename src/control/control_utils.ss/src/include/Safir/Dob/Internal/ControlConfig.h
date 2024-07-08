@@ -356,8 +356,8 @@ namespace Control
                 throw std::logic_error("Parameter error: Node " + thisNodeParam.name + " specifies a nodeType that does not exist, specified nodeType:  " + nodeType);
             }
 
-            localInterfaceTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::LocalInterfaceTimeout() * 1000));
-            aloneTimeout = boost::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::NewSystemFormationTimeout() * 1000));
+            localInterfaceTimeout = std::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::LocalInterfaceTimeout() * 1000));
+            aloneTimeout = std::chrono::milliseconds(static_cast<int64_t>(Safir::Dob::NodeParameters::NewSystemFormationTimeout() * 1000));
 
             fragmentSize = Safir::Dob::NodeParameters::FragmentSize();
 
@@ -378,8 +378,8 @@ namespace Control
         std::vector<NodeType> nodeTypesParam;
         ThisNode thisNodeParam;
         std::string incarnationBlacklistFileName;
-        boost::chrono::steady_clock::duration localInterfaceTimeout;
-        boost::chrono::steady_clock::duration aloneTimeout;
+        std::chrono::steady_clock::duration localInterfaceTimeout;
+        std::chrono::steady_clock::duration aloneTimeout;
         int fragmentSize;
     };
 }

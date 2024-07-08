@@ -46,7 +46,7 @@ namespace Internal
     {
     public:
         explicit AsioLatencyMonitor(const std::string& identifier,
-                                    const boost::chrono::steady_clock::duration& warningThreshold,
+                                    const std::chrono::steady_clock::duration& warningThreshold,
                                     boost::asio::io_service::strand& strand)
             : m_identifier(identifier)
             , m_tolerance(warningThreshold)
@@ -74,7 +74,7 @@ namespace Internal
                 return;
             }
 
-            m_timer.expires_from_now(boost::chrono::seconds(1));
+            m_timer.expires_from_now(std::chrono::seconds(1));
             m_timer.async_wait([this](const boost::system::error_code& error)
                                {
                                    if (error || m_stop)
@@ -82,14 +82,14 @@ namespace Internal
                                        return;
                                    }
 
-                                   const auto latency = boost::chrono::duration_cast<boost::chrono::milliseconds>
-                                       (boost::chrono::steady_clock::now() - m_timer.expires_at());
+                                   const auto latency = std::chrono::duration_cast<std::chrono::milliseconds>
+                                       (std::chrono::steady_clock::now() - m_timer.expires_at());
 
                                    if (latency > m_tolerance)
                                    {
                                        SEND_SYSTEM_LOG(Warning, << "Boost.Asio latency for '"
-                                                       << m_identifier.c_str() << "' is at " << latency
-                                                       << ". If this happens a lot your system is overloaded and may start misbehaving.");
+                                                       << m_identifier.c_str() << "' is at " << latency.count()
+                                                       << " ms. If this happens a lot your system is overloaded and may start misbehaving.");
                                    }
 
                                    //schedule next latency check
@@ -99,7 +99,7 @@ namespace Internal
         }
 
         const std::string m_identifier;
-        const boost::chrono::steady_clock::duration m_tolerance;
+        const std::chrono::steady_clock::duration m_tolerance;
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
 

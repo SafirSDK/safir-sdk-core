@@ -100,7 +100,7 @@ namespace Com
             boost::asio::post(m_strand, [this]
             {
                 m_running=true;
-                m_timer.expires_after(boost::chrono::milliseconds(m_random.Get()));
+                m_timer.expires_after(std::chrono::milliseconds(m_random.Get()));
                 m_timer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){OnTimeout(error);}));
             });
         }
@@ -262,7 +262,7 @@ namespace Com
                     if (m_thisNodeIsLightNode) // I am a lightNode
                     {
                         // Exclude other (always non-lightnodes) for a limited time.
-                        ExcludeUntil timeLimit = boost::chrono::steady_clock::now() + boost::chrono::seconds(m_lightNodesExcludeTimeLimit);
+                        ExcludeUntil timeLimit = std::chrono::steady_clock::now() + std::chrono::seconds(m_lightNodesExcludeTimeLimit);
                         m_excludedNodes.insert({nodeId, std::make_pair(timeLimit, it->second.isSeed ? it->second.controlAddress : "")});
                         lllog(DiscovererLogLevel) << m_logPrefix.c_str() << L"Exclude node for " << m_lightNodesExcludeTimeLimit << L" seconds, nodeId: " << nodeId <<std::endl;
                     }
@@ -323,7 +323,7 @@ namespace Com
         std::map<int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
 
         unsigned int m_lightNodesExcludeTimeLimit = 30; // seconds
-        typedef boost::optional<boost::chrono::steady_clock::time_point> ExcludeUntil;
+        typedef boost::optional<std::chrono::steady_clock::time_point> ExcludeUntil;
         std::map<int64_t, std::pair<ExcludeUntil /*timeLimitedUntil*/, std::string /*seedIp*/>> m_excludedNodes;
 
         boost::asio::io_context::strand m_strand;
@@ -613,7 +613,7 @@ namespace Com
         {
             for (auto it = std::cbegin(m_excludedNodes); it != std::cend(m_excludedNodes);)
             {
-                if (it->second.first.has_value() && it->second.first.value() < boost::chrono::steady_clock::now())
+                if (it->second.first.has_value() && it->second.first.value() < std::chrono::steady_clock::now())
                 {
                     // time limit has elapsed
                     if (!it->second.second.empty())
@@ -645,7 +645,7 @@ namespace Com
                 SendDiscover();
 
                 //restart timer
-                m_timer.expires_after(boost::chrono::milliseconds(m_random.Get()));
+                m_timer.expires_after(std::chrono::milliseconds(m_random.Get()));
                 m_timer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& error){OnTimeout(error);}));
             }
         }

@@ -104,8 +104,8 @@ int main(int argc, char* argv[])
         CHECK(conf.thisNodeParam.nodeType == "Server");
         CHECK(conf.thisNodeParam.nodeTypeId == LlufId_Generate64("Server"));
 
-        CHECK(conf.aloneTimeout == boost::chrono::seconds(123));
-        CHECK(conf.localInterfaceTimeout == boost::chrono::seconds(33));
+        CHECK(conf.aloneTimeout == std::chrono::seconds(123));
+        CHECK(conf.localInterfaceTimeout == std::chrono::seconds(33));
 
         CHECK(&conf.GetThisNodeType() == &conf.nodeTypesParam[0]);
     }

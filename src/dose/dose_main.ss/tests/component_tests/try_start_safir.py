@@ -43,6 +43,7 @@ parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose-main", required=True)
 arguments = parser.parse_args()
 
+log("Starting safir_control")
 proc = subprocess.Popen([arguments.safir_control, "--dose-main-path", arguments.dose_main],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT,
@@ -56,6 +57,8 @@ for i in range(2):
 
 #give it one second to output any spurious stuff...
 time.sleep(1)
+
+log ("Terminating safir_control")
 
 if sys.platform == "win32":
     #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately

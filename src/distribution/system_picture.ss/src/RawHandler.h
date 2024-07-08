@@ -86,16 +86,16 @@ namespace SP
         {
             explicit NodeInfo(RawStatisticsMessage_NodeInfo* const nodeInfo_, const bool mc)
                 : multicast(mc)
-                , lastUcReceiveTime(boost::chrono::steady_clock::now())
-                , lastMcReceiveTime(boost::chrono::steady_clock::now())
+                , lastUcReceiveTime(std::chrono::steady_clock::now())
+                , lastMcReceiveTime(std::chrono::steady_clock::now())
                 , nodeInfo(nodeInfo_)
                 , numBadElectionIds(0)
                 , lastBadElectionId(0)
             {}
 
             const bool multicast;
-            boost::chrono::steady_clock::time_point lastUcReceiveTime;
-            boost::chrono::steady_clock::time_point lastMcReceiveTime;
+            std::chrono::steady_clock::time_point lastUcReceiveTime;
+            std::chrono::steady_clock::time_point lastMcReceiveTime;
             RawStatisticsMessage_NodeInfo* nodeInfo;
             int numBadElectionIds;
             int64_t lastBadElectionId;
@@ -691,8 +691,8 @@ namespace SP
                                       }
                                   }
 
-                                  findIt->second.lastUcReceiveTime = boost::chrono::steady_clock::now();
-                                  findIt->second.lastMcReceiveTime = boost::chrono::steady_clock::now();
+                                  findIt->second.lastUcReceiveTime = std::chrono::steady_clock::now();
+                                  findIt->second.lastMcReceiveTime = std::chrono::steady_clock::now();
 
                                   PostRawChangedCallback(RawChanges::NODES_CHANGED, nullptr);
                               });
@@ -812,10 +812,10 @@ namespace SP
         }
 
     private:
-        static boost::chrono::steady_clock::duration
+        static std::chrono::steady_clock::duration
         CalculateDeadCheckPeriod(const std::map<int64_t,NodeType>& nodeTypes)
         {
-            boost::chrono::steady_clock::duration result = boost::chrono::seconds(1);
+            std::chrono::steady_clock::duration result = std::chrono::seconds(1);
 
             for (auto node = nodeTypes.cbegin(); node != nodeTypes.cend(); ++node)
             {
@@ -825,10 +825,10 @@ namespace SP
             return result + result / 10;
         }
 
-        static boost::chrono::steady_clock::duration
+        static std::chrono::steady_clock::duration
         CalculateLatencyWarningThreshold(const std::map<int64_t,NodeType>& nodeTypes)
         {
-            boost::chrono::steady_clock::duration result = boost::chrono::seconds(120);
+            std::chrono::steady_clock::duration result = std::chrono::seconds(120);
 
             for (auto node = nodeTypes.cbegin(); node != nodeTypes.cend(); ++node)
             {
@@ -841,7 +841,7 @@ namespace SP
         static int CalculateExcludeNodeTimeLimit(const std::wstring& logPrefix,
                                                  const std::map<int64_t,NodeType>& nodeTypes)
         {
-            boost::chrono::steady_clock::duration result = boost::chrono::seconds(1);
+            std::chrono::steady_clock::duration result = std::chrono::seconds(1);
 
             for (auto node = nodeTypes.cbegin(); node != nodeTypes.cend(); ++node)
             {
@@ -851,7 +851,7 @@ namespace SP
             // Multiplied by 2 because of increased tolerance toward new nodes, and another two to wait
             // twice the other nodes timeout.
             const int seconds = static_cast<int>
-                ((boost::chrono::duration_cast<boost::chrono::milliseconds>(result).count()*4)/1000);
+                ((std::chrono::duration_cast<std::chrono::milliseconds>(result).count()*4)/1000);
             lllog(1) << logPrefix << "CalculateExcludeNodeTimeLimit " << seconds << " seconds" << std::endl;
             return seconds;
         }
@@ -924,8 +924,8 @@ namespace SP
                 lllog(4) << m_logPrefix << "New node '" << name.c_str() << "' ("
                          << id << ") is resurrecting" << std::endl;
 
-                nodeIt->second.lastUcReceiveTime = boost::chrono::steady_clock::now();
-                nodeIt->second.lastMcReceiveTime = boost::chrono::steady_clock::now();
+                nodeIt->second.lastUcReceiveTime = std::chrono::steady_clock::now();
+                nodeIt->second.lastMcReceiveTime = std::chrono::steady_clock::now();
 
                 PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED), nullptr);
             }
@@ -1012,9 +1012,9 @@ namespace SP
         //Must be called in strand!
         void GotReceive(const int64_t id, const bool multicast, const bool duplicate)
         {
-            const auto now = boost::chrono::steady_clock::now();
+            const auto now = std::chrono::steady_clock::now();
             lllog(9) << m_logPrefix << "GotReceive (MC=" <<std::boolalpha << multicast
-                     << ") from node with id " << id <<", time = " << now << std::endl;
+                     << ") from node with id " << id << std::endl;
 
             const auto findIt = m_nodeTable.find(id);
 
@@ -1155,7 +1155,7 @@ namespace SP
 
         }
 
-        boost::chrono::steady_clock::duration
+        std::chrono::steady_clock::duration
         CalculateTimeout(const int64_t id, const NodeInfo& nodeInfo) const
         {
             auto tolerance = 1;
@@ -1190,9 +1190,9 @@ namespace SP
         //Must be called in strand!
         void CheckDeadNodes()
         {
-            const auto now = boost::chrono::steady_clock::now();
+            const auto now = std::chrono::steady_clock::now();
 
-            const auto clearThreshold = now - boost::chrono::minutes(5);
+            const auto clearThreshold = now - std::chrono::minutes(5);
 
             bool somethingChanged = false;
 

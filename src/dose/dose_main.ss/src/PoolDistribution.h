@@ -748,7 +748,7 @@ namespace Internal
                 return;
             }
 
-            m_timer.expires_from_now(boost::chrono::milliseconds(10));
+            m_timer.expires_from_now(std::chrono::milliseconds(10));
             m_timer.async_wait(m_strand.wrap([self = this->shared_from_this(), completionHandler](const boost::system::error_code&)
             {
                 if (self->HasBeenCancelled())

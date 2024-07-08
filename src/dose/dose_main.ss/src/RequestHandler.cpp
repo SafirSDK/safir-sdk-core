@@ -816,7 +816,7 @@ namespace
                 return;
             }
 
-            timerIt->second->expires_from_now(boost::chrono::milliseconds(500));
+            timerIt->second->expires_from_now(std::chrono::milliseconds(500));
 
             StartOutReqTimer(fromConnection, request, *timerIt->second);
         }
@@ -923,13 +923,13 @@ namespace
         }
     }
 
-    boost::chrono::milliseconds
+    std::chrono::milliseconds
     RequestHandler::GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const
     {
         TimeoutTable::iterator findIt = m_timeoutTable.find(typeId);
         if (findIt != m_timeoutTable.end())
         {
-            boost::chrono::milliseconds(static_cast<int>(findIt->second * 1000));
+            std::chrono::milliseconds(static_cast<int>(findIt->second * 1000));
         }
         //nope, it wasnt in the table, we need to get the value and insert it.
 
@@ -966,7 +966,7 @@ namespace
                           << Safir::Dob::Typesystem::Operations::GetName(typeId));
         }
         m_timeoutTable.insert(std::make_pair(typeId,timeout));
-        return boost::chrono::milliseconds(static_cast<int>(timeout * 1000));
+        return std::chrono::milliseconds(static_cast<int>(timeout * 1000));
     }
 
 }

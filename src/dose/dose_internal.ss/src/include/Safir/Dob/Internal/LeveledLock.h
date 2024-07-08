@@ -293,9 +293,9 @@ namespace Internal
 
 
     template <class lock_type>
-    bool steady_try_lock_for(lock_type& lock, const boost::chrono::steady_clock::duration& rel_time)
+    bool steady_try_lock_for(lock_type& lock, const std::chrono::steady_clock::duration& rel_time)
     {
-        const boost::chrono::steady_clock::time_point abs_time = boost::chrono::steady_clock::now() + rel_time;
+        const std::chrono::steady_clock::time_point abs_time = std::chrono::steady_clock::now() + rel_time;
         for(;;)
         {
             const bool locked = lock.try_lock();
@@ -304,7 +304,7 @@ namespace Internal
                 return true;
             }
 
-            if (boost::chrono::steady_clock::now() > abs_time)
+            if (std::chrono::steady_clock::now() > abs_time)
             {
                 return false;
             }

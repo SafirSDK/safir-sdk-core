@@ -49,7 +49,7 @@ namespace SP
                                  boost::asio::io_service& ioService,
                                  CoordinatorT& coordinator,
                                  const char* const name,
-                                 const boost::chrono::steady_clock::duration& period)
+                                 const std::chrono::steady_clock::duration& period)
             : m_logPrefix(logPrefix)
             , m_coordinator(coordinator)
             , m_publisher(ioService, name, NULL, NULL)

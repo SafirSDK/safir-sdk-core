@@ -635,7 +635,7 @@ public:
                         const int64_t id_,
                         const int64_t /*nodeTypeId_*/,
                         const std::map<int64_t, NodeType>& /*nodeTypes*/,
-                        const boost::chrono::steady_clock::duration& /*aloneTimeout*/,
+                        const std::chrono::steady_clock::duration& /*aloneTimeout*/,
                         const char* const /*receiverId*/,
                         const std::function<void(const int64_t nodeId,
                                                  const int64_t electionId)>& electionCompleteCallback_,
@@ -711,7 +711,7 @@ struct Fixture
                       "klopp",
                       "flupp",
                       GetNodeTypes(),
-                      boost::chrono::seconds(0),
+                      std::chrono::seconds(0),
                       "snoop",
                       rh)
     {
@@ -725,33 +725,33 @@ struct Fixture
 
     static std::map<int64_t, NodeType> GetNodeTypes()
     {
-        std::vector<boost::chrono::steady_clock::duration> retryTimeouts;
-        retryTimeouts.push_back(boost::chrono::milliseconds(1));
-        retryTimeouts.push_back(boost::chrono::milliseconds(2));
+        std::vector<std::chrono::steady_clock::duration> retryTimeouts;
+        retryTimeouts.push_back(std::chrono::milliseconds(1));
+        retryTimeouts.push_back(std::chrono::milliseconds(2));
 
         std::map<int64_t, NodeType> nodeTypes;
         nodeTypes.insert(std::make_pair(10, NodeType(10,
                                                      "mupp",
                                                      false,
-                                                     boost::chrono::milliseconds(1),
+                                                     std::chrono::milliseconds(1),
                                                      10,
                                                      retryTimeouts)));
 
         nodeTypes.insert(std::make_pair(15, NodeType(15,
                                                      "lupp",
                                                      true,
-                                                     boost::chrono::milliseconds(1),
+                                                     std::chrono::milliseconds(1),
                                                      15,
                                                      retryTimeouts)));
 
         retryTimeouts.clear();
-        retryTimeouts.push_back(boost::chrono::hours(1));
-        retryTimeouts.push_back(boost::chrono::hours(2));
+        retryTimeouts.push_back(std::chrono::hours(1));
+        retryTimeouts.push_back(std::chrono::hours(2));
 
         nodeTypes.insert(std::make_pair(20, NodeType(20,
                                                      "tupp",
                                                      true,
-                                                     boost::chrono::hours(1),
+                                                     std::chrono::hours(1),
                                                      22,
                                                      retryTimeouts)));
         return nodeTypes;

@@ -44,7 +44,7 @@
 void callback(const pid_t pid);
 
 boost::asio::io_context gIo;
-Safir::Utilities::ProcessMonitor monitor(gIo, callback, boost::chrono::milliseconds(50));
+Safir::Utilities::ProcessMonitor monitor(gIo, callback, std::chrono::milliseconds(50));
 
 boost::mutex pidsLock;
 std::set<pid_t> pids;

@@ -67,7 +67,7 @@ namespace Internal
                                                                                     }
                                                                                 });
                                                                        },
-                                                                       boost::chrono::seconds(1)));
+                                                                       std::chrono::seconds(1)));
 
         m_strand.dispatch([this]
         {

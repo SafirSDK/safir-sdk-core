@@ -26,6 +26,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <thread>
 
 #if defined _MSC_VER
 #  pragma warning (push)
@@ -63,7 +64,7 @@ int main(int argc, char** argv)
 
     boost::asio::io_context io;
 
-    Safir::Utilities::ProcessMonitor monitor(io, callback, boost::chrono::milliseconds(50));
+    Safir::Utilities::ProcessMonitor monitor(io, callback, std::chrono::milliseconds(50));
 
     for(std::set<pid_t>::iterator it = pids.begin(); it != pids.end(); ++it)
     {
@@ -72,14 +73,14 @@ int main(int argc, char** argv)
 
     boost::thread thread([&io]{io.run();});
 
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     for(std::set<pid_t>::iterator it = pids.begin(); it != pids.end(); ++it)
     {
         monitor.StopMonitorPid(*it);
     }
 
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     monitor.Stop();
     io.run();

@@ -71,7 +71,7 @@ namespace Internal
                     //dont generate any compiler errors...
                     for(int i = 0; i < 10; ++i)
                     {
-                        boost::this_thread::sleep_for(boost::chrono::seconds(1));
+                        std::this_thread::sleep_for(std::chrono::seconds(1));
                     }
                 }
                 return TRUE;

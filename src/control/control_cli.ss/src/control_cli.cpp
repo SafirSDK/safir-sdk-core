@@ -125,7 +125,7 @@ int main(int argc, char * argv[])
     auto work = boost::asio::make_work_guard(io);
 
     boost::asio::steady_timer timeOutTimer(io);
-    timeOutTimer.expires_after(boost::chrono::seconds(cmd.timeOut));
+    timeOutTimer.expires_after(std::chrono::seconds(cmd.timeOut));
 
     // We start the sender and a timeout timer. If the sender is connected to the subscriber we send our action and cancel
     // the timer. Thus the timer will always expire, so in the callback for the timer we stop our worker and thus lets

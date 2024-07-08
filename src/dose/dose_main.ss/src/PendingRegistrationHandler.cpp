@@ -280,7 +280,7 @@ namespace Internal
         ENSURE (findIt != m_pendingRegistrations.end(),
                 << "PendingRegistrationHandler::SendRequest: Request id not found!");
 
-        const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
+        const std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
 
         findIt->second->lastRequestTimestamp = m_pendingRegistrationClock.GetNewTimestamp();
         findIt->second->rejected = false;
@@ -327,13 +327,13 @@ namespace Internal
             // Set the first timeout to now + 1.0, the second to now + 1.5, and so on. This is to handle
             // any node that for some reason is permanently slow.
             findIt->second->timer.expires_at(now +
-                                             boost::chrono::milliseconds(1000 + findIt->second->nbrOfSentRequests * 500));
+                                             std::chrono::milliseconds(1000 + findIt->second->nbrOfSentRequests * 500));
 
             ++findIt->second->nbrOfSentRequests;
         }
         else
         {
-            findIt->second->timer.expires_at(now + boost::chrono::milliseconds(10));
+            findIt->second->timer.expires_at(now + std::chrono::milliseconds(10));
         }
 
         findIt->second->timer.async_wait(m_strand.wrap([this, requestId](const boost::system::error_code& error)

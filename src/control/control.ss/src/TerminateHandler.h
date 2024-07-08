@@ -26,6 +26,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/AsioStrandWrap.h>
+#include <thread>
 
 #if defined _MSC_VER
 #  pragma warning (push)
@@ -33,7 +34,6 @@
 #endif
 
 #include <boost/asio.hpp>
-#include <boost/thread.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)
@@ -135,7 +135,7 @@ private:
                 //dont generate any compiler errors...
                 for(int i = 0; i < 10; ++i)
                 {
-                    boost::this_thread::sleep_for(boost::chrono::seconds(1));
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
                 }
             }
             return TRUE;

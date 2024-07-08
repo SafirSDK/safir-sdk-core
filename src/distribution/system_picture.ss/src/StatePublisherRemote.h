@@ -48,7 +48,7 @@ namespace SP
                                   const std::map<int64_t, NodeType>& nodeTypes,
                                   const char* const senderId,
                                   CoordinatorT& coordinator,
-                                  const boost::chrono::steady_clock::duration& period)
+                                  const std::chrono::steady_clock::duration& period)
             : m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)

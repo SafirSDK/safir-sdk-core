@@ -31,7 +31,7 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <boost/exception/diagnostic_information.hpp>
-#include <boost/thread.hpp>
+#include <thread>
 
 class EntityOwner
     : public Safir::Dob::EntityHandler
@@ -274,7 +274,7 @@ public:
             {
                 return;
             }
-            boost::this_thread::sleep_for(boost::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
         throw std::logic_error("Did not get updated memory level in NodeInfo object");
@@ -284,7 +284,7 @@ public:
     {
         while(m_misc.GetSharedMemoryLevel() != expectedLevel)
         {
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
@@ -343,7 +343,7 @@ public:
         std::wcout << "Done" << std::endl;
 
         //Exit after 3 seconds, but let the ioservice run, just in case something is going on...
-        m_timer.expires_after(boost::chrono::seconds(3));
+        m_timer.expires_after(std::chrono::seconds(3));
         m_timer.async_wait([this](const boost::system::error_code&){m_work.reset();});
 
         m_ioService.run();
