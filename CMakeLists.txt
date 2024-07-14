@@ -196,13 +196,13 @@ INSTALL(FILES build/packaging/debian/copyright
   RENAME third_party_licenses.txt
   COMPONENT Runtime)
 
-INSTALL(DIRECTORY licenses/
+INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/conan/licenses/
   DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/more_third_party_licenses
   COMPONENT Runtime
   PATTERN .gitignore EXCLUDE)
 
 if (WIN32)
-  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/bin/ninja.exe
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/conan/bin/ninja.exe
     DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
     COMPONENT Development)
 endif()

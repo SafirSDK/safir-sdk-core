@@ -1,5 +1,7 @@
 """ Conan stuff for Safir SDK Core """
 from conan import ConanFile
+from conan.tools.files import copy
+import os
 
 class SafirSdkCoreConan(ConanFile):
     """ Conan stuff for Safir SDK Core """
@@ -91,17 +93,27 @@ class SafirSdkCoreConan(ConanFile):
                        "pcre2/*:with_bzip2": False
                        }
 
-    def imports(self):
-        self.copy("license*", dst="licenses", folder=True, ignore_case=True, keep_path=False)
-        if self.settings.os == "Windows":
-            self.copy("*.exe", src="bin", dst="bin", root_package="ninja")
+    def generate(self):
+        for dep in self.dependencies.values():
+            name = str(dep).split("/")[0]
+            print("Copying license files from", name, "to", os.path.join(self.build_folder, "licenses", name))
+            copy(self,
+                 pattern="license*",
+                 src=dep.package_folder,
+                 dst=os.path.join(self.build_folder, "licenses", name),
+                 ignore_case=True,
+                 keep_path=False)
+            if "ninja" == name and self.settings.os == "Windows":
+                print("Copying ninja executable from", name, "to", os.path.join(self.build_folder, "bin"))
+                copy(self, "ninja.exe", src=dep.cpp_info.bindirs[0], dst=os.path.join(self.build_folder, "bin"))
 
     def requirements(self):
         self.requires("websocketpp/0.8.2")
         self.requires("rapidjson/cci.20230929")
         self.requires("protobuf/3.21.12")
+        self.requires("ninja/1.12.1")
         if self.settings.os == "Windows":
-            self.requires("ninja/1.12.1")
+
             self.requires("boost/1.85.0")
 
             #Visual Studio 2015 and 2017 does not have support for c++17, which is required
