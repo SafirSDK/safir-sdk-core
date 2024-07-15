@@ -198,8 +198,8 @@ def build_examples(){
 pipeline {
     parameters {
         choice(name: 'PLATFORM_FILTER',
-               choices: ['all', 'ubuntu-jammy', 'debian-bullseye', 'debian-bookworm', 'vs2015', 'vs2017', 'vs2019', 'vs2022'],
-               description: "Run on specific platform. Note that multicomputer tests will only run if 'all' or 'debian-bullseye' is selected.")
+               choices: ['all', 'ubuntu-noble', 'debian-bookworm', 'vs2015', 'vs2017', 'vs2019', 'vs2022'],
+               description: "Run on specific platform. Note that multicomputer tests will only run if 'all' or 'debian-bookworm' is selected.")
 
         booleanParam(name: 'SKIP_SLOW_TESTS',
                      defaultValue: false,
@@ -231,7 +231,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-jammy', 'debian-bullseye', 'debian-bookworm', 'vs2015', 'vs2017', 'vs2019', 'vs2022'
+                        values 'ubuntu-noble', 'debian-bookworm', 'vs2015', 'vs2017', 'vs2019', 'vs2022'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -246,7 +246,7 @@ pipeline {
                     exclude {
                         axis { //ubuntu no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-jammy'
+                            values 'ubuntu-noble'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -275,9 +275,9 @@ pipeline {
         stage('Render documentation') {
             when {
                 beforeAgent true
-                expression { return nodesByLabel("debian-bullseye-amd64-build").size() > 0 }
+                expression { return nodesByLabel("debian-bookworm-amd64-build").size() > 0 }
             }
-            agent { label 'debian-bullseye-amd64-build' }
+            agent { label 'debian-bookworm-amd64-build' }
             steps { script {
                 render_documentation()
             }}
@@ -302,7 +302,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-jammy', 'debian-bullseye', 'debian-bookworm', 'vs2015', 'vs2017', 'vs2019', 'vs2022'
+                        values 'ubuntu-noble', 'debian-bookworm', 'vs2015', 'vs2017', 'vs2019', 'vs2022'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -323,7 +323,7 @@ pipeline {
                     exclude {
                         axis { //ubuntu no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-jammy'
+                            values 'ubuntu-noble'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -343,12 +343,12 @@ pipeline {
                     stage('Multicomputer Tests') {
                         when { allOf {
                             expression {LANGUAGES == "cpp-cpp-cpp-cpp-cpp"}
-                            expression { return nodesByLabel("debian-bullseye-x86-build").size() > 0 }
+                            expression { return nodesByLabel("debian-bookworm-amd64-build").size() > 0 }
                             anyOf {
-                                //The multicomputer test slave uses the debian-bullseye-x86 release build,
+                                //The multicomputer test slave uses the debian-bookworm-amd64 release build,
                                 //so we can't run unless they are part of the build
                                 expression {params.PLATFORM_FILTER == 'all'}
-                                expression {params.PLATFORM_FILTER == 'debian-bullseye'}
+                                expression {params.PLATFORM_FILTER == 'debian-bookworm'}
                             }
                         }}
                         steps {
@@ -391,7 +391,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-jammy', 'debian-bullseye', 'debian-bookworm', 'vs2015', 'vs2017', 'vs2019', 'vs2022'
+                        values 'ubuntu-noble', 'debian-bookworm', 'vs2015', 'vs2017', 'vs2019', 'vs2022'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -406,7 +406,7 @@ pipeline {
                     exclude {
                         axis { //ubuntu no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-jammy'
+                            values 'ubuntu-noble'
                         }
                         axis {
                             name 'BUILD_ARCH'
