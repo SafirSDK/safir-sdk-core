@@ -44,7 +44,7 @@ install_testsuite:
 
 override_dh_auto_test:
 	touch obj-$(DEB_BUILD_GNU_TYPE)/DartConfiguration.tcl
-	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/ctest --output-on-failure -T Test --no-compress-output
+	-cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/ctest --output-on-failure -T Test --no-compress-output
 
 
 #make debug symbols go in separate package
