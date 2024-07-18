@@ -7,8 +7,8 @@ pipeline {
         string(name: 'SOURCE_BUILD_NUMBER',
                description: 'Build number of SOURCE_PROJECT to copy installation files from')
         string(name: 'BUILD_IDENTIFIER',
-               defaultValue: "debian-bullseye-x86-RelWithDebInfo",
-               description: "Build identifier, for example 'debian-bullseye-x86-DebugOnly'")
+               defaultValue: "debian-bookworm-amd64-RelWithDebInfo",
+               description: "Build identifier, for example 'debian-bookworm-amd64-DebugOnly'")
         choice(name: 'SLAVE_ROLE',
                choices: ['server-1', 'client-0', 'client-1'],
                description: 'Which slave to run')

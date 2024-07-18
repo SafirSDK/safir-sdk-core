@@ -2,9 +2,9 @@ Linux Build Instructions
 ========================
 
 We provide pre-built packages for certain linux distributions:
-   Ubuntu 22.04 amd64
-   Debian 11 Bullseye x86
-   Debian 11 Bullseye amd64
+   Ubuntu 24.04 amd64
+   Debian 11 Bookworm x86
+   Debian 11 Bookworm amd64
 
 If you're using one of these platforms you should probably download the pre-built package
 from http://safirsdkcore.com.
