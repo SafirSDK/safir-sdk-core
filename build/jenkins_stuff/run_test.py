@@ -479,6 +479,7 @@ class JenkinsController:
         # from Jenkins environment variables
         parameters = {"SOURCE_PROJECT" : os.environ.get("JOB_NAME"),
                       "SOURCE_BUILD_NUMBER" : os.environ.get("BUILD_NUMBER"),
+                      "BUILD_IDENTIFIER" : "debian-bookworm-amd64-RelWithDebInfo",
                       "SLAVE_ROLE": self.slave_role}
         self.interface.build(self.job_name, parameters)
 

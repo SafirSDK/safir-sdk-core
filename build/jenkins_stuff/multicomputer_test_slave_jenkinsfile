@@ -3,8 +3,10 @@
 pipeline {
     parameters {
         string(name: 'SOURCE_PROJECT',
+               defaultValue: "build/develop",
                description: 'Jenkins project to copy installation files from')
         string(name: 'SOURCE_BUILD_NUMBER',
+               defaultValue: "lastCompleted",
                description: 'Build number of SOURCE_PROJECT to copy installation files from')
         string(name: 'BUILD_IDENTIFIER',
                defaultValue: "debian-bookworm-amd64-RelWithDebInfo",
