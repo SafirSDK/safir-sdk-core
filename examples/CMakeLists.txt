@@ -1,6 +1,10 @@
-cmake_minimum_required(VERSION 3.16.0)
+cmake_minimum_required(VERSION 3.24.0)
 
-PROJECT(safir_sdk_core_examples CXX)
+if (DEFINED ENV{JENKINS_HOME} OR SAFIR_EXAMPLES_USE_CONAN)
+  set (CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/../src/cmake/conan_provider.cmake)
+endif()
+
+PROJECT(safir_sdk_core_examples C CXX) #Conan stuff requires C, and it does not break anything else.
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -23,31 +27,22 @@ set(CMAKE_CXX_STANDARD 17)
 #
 
 if (DEFINED ENV{JENKINS_HOME} OR SAFIR_EXAMPLES_USE_CONAN)
-  if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-    message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.17.0/conan.cmake"
-                  "${CMAKE_BINARY_DIR}/conan.cmake"
-                  EXPECTED_HASH SHA256=3bef79da16c2e031dc429e1dac87a08b9226418b300ce004cc125a82687baeef
-                  TLS_VERIFY ON)
-  endif()
 
-  include(${CMAKE_BINARY_DIR}/conan.cmake)
+  write_file(${CMAKE_SOURCE_DIR}/conanfile.txt
+    "[requires]\n"
+    "boost/1.79.0\n"
+    "[options]\n"
+    "boost*:header_only=True\n"
+    "[generators]\n"
+    "CMakeDeps\n")
 
-  conan_cmake_configure(REQUIRES boost/1.70.0
-                        OPTIONS boost:header_only=True
-                        GENERATORS cmake_find_package)
+  SET(REQUIRED_BOOST_VERSION 1.79.0 REQUIRED)
 
-  conan_cmake_autodetect(settings)
-
-  conan_cmake_install(PATH_OR_REFERENCE .
-                      BUILD missing
-                      REMOTE conancenter
-                      SETTINGS ${settings})
 endif()
 
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
-find_package(Boost)
+find_package(Boost ${REQUIRED_BOOST_VERSION})
 
 find_package(SafirSDKCore REQUIRED)
 
