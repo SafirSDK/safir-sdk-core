@@ -1,2 +1,2 @@
-conan
+conan>=2.5
 websockets
