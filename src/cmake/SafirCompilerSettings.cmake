@@ -1,7 +1,11 @@
 #This file sets up some of the compiler flags we want for GCC and MSVC.
 cmake_minimum_required(VERSION 3.13)
 
-set(CMAKE_CXX_STANDARD 17)
+if (MSVC_VERSION EQUAL 1900)
+  set(CMAKE_CXX_STANDARD 14)
+else()
+  set(CMAKE_CXX_STANDARD 17)
+endif()
 
 if (UNIX)
 
