@@ -119,7 +119,8 @@ class SafirSdkCoreConan(ConanFile):
             #Visual Studio 2015 and 2017 does not have support for c++17, which is required
             #by qt6. So we go for qt5 instead there.
             #The conan recipe for qt6 does not work for x86 currently, so we fall back to qt5
-            if self.settings.compiler.version == 190 or \
+            if self.settings.arch == "x86" or \
+               self.settings.compiler.version == 190 or \
                self.settings.compiler.version == 191:
                 self.requires("qt/5.15.13")
             else:
