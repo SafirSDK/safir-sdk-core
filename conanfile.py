@@ -65,11 +65,9 @@ class SafirSdkCoreConan(ConanFile):
                        "qt/*:qtcharts": False,
                        "qt/*:qtconnectivity": False,
                        "qt/*:qtdatavis3d": False,
-                       #"qt/*:qtdeclarative": False,
-                       #"qt/*:qtdoc": False,
                        "qt/*:qtimageformats": False,
                        "qt/*:qtlottie": False,
-                       "qt/*:qtmultimedia": False,
+                       "qt/6*:qtmultimedia": False,
                        "qt/*:qtnetworkauth": False,
                        "qt/*:qtquick3d": False,
                        "qt/*:qtquicktimeline": False,
@@ -79,8 +77,6 @@ class SafirSdkCoreConan(ConanFile):
                        "qt/*:qtserialbus": False,
                        "qt/*:qtserialport": False,
                        "qt/*:qtsvg": False,
-                       #"qt/*:qttools": False,
-                       #"qt/*:qttranslations": False,
                        "qt/*:qtvirtualkeyboard": False,
                        "qt/*:qtwebchannel": False,
                        "qt/*:qtwebengine": False,
@@ -122,7 +118,7 @@ class SafirSdkCoreConan(ConanFile):
             if self.settings.arch == "x86" or \
                self.settings.compiler.version == 190 or \
                self.settings.compiler.version == 191:
-                self.requires("qt/5.15.13")
+                self.requires("qt/5.15.14")
             else:
                 self.requires("qt/6.7.1")
 
