@@ -871,7 +871,7 @@ class DebianPackager():
                         "HEAD"), "creating tar archive")
         os.chdir("tmp")
         if not self.noclean:
-            self.__run(("/bin/tar", "xvz",
+            self.__run(("/bin/tar", "xfz",
                         "safir-sdk-core_" + version_string + ".orig.tar.gz"),
                        "extracting archive")
         os.chdir("safir-sdk-core_" + version_string)
