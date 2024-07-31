@@ -871,7 +871,7 @@ class DebianPackager():
                         "HEAD"), "creating tar archive")
         os.chdir("tmp")
         if not self.noclean:
-            self.__run(("/bin/tar", "xvfz",
+            self.__run(("/bin/tar", "xvz",
                         "safir-sdk-core_" + version_string + ".orig.tar.gz"),
                        "extracting archive")
         os.chdir("safir-sdk-core_" + version_string)
@@ -890,7 +890,7 @@ class DebianPackager():
 
         #Pass along a few select environment variables to debuild, since by default no environment
         #is passed over to the build process by debuild.
-        for var in ("CONAN_LOG_RUN_TO_FILE", "CONAN_LOG_RUN_TO_OUTPUT", "SAFIR_SKIP_SLOW_TESTS"):
+        for var in ("SAFIR_SKIP_SLOW_TESTS"):
             val = os.environ.get(var)
             if val is not None:
                 command += ("--set-envvar", var + "=" + val)
@@ -967,8 +967,6 @@ def get_builder(arguments):
 
 def main():
     """Woo! Main function"""
-    os.environ["CONAN_LOG_RUN_TO_OUTPUT"] = "0"
-    os.environ["CONAN_LOG_RUN_TO_FILE"] = "1"
 
     arguments = parse_command_line()
     builder = get_builder(arguments)
