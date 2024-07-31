@@ -110,7 +110,10 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("ninja/1.12.1")
         if self.settings.os == "Windows":
 
-            self.requires("boost/1.85.0")
+            if self.settings.compiler.version == 190:
+               self.requires("boost/1.83.0")
+            else:
+                self.requires("boost/1.85.0")
 
             #Visual Studio 2015 and 2017 does not have support for c++17, which is required
             #by qt6. So we go for qt5 instead there.
