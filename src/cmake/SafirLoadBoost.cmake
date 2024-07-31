@@ -1,5 +1,10 @@
 set(Boost_USE_MULTITHREADED ON)
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0")
+  #Use new FindBoost behaviour
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 if (UNIX)
   #use dynamic linking with boost
   ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
