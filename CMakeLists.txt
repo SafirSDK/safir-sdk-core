@@ -3,6 +3,13 @@ cmake_minimum_required(VERSION 3.24.0)
 #Don't add /W3 to MSVC compilation flags. We set warning levels ourselves
 cmake_policy(SET CMP0092 NEW)
 
+#This allows the build script to specify which vs toolset to use. That is currently
+#the only thing this is used for.
+if (DEFINED ENV{CONAN_EXTRA_ARGUMENTS})
+  separate_arguments(CONAN_EXTRA_ARGUMENTS UNIX_COMMAND $ENV{CONAN_EXTRA_ARGUMENTS})
+  set(CONAN_INSTALL_ARGS --build=missing ${CONAN_EXTRA_ARGUMENTS} CACHE STRING "Command line arguments for conan install" FORCE)
+endif()
+
 set (CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/src/cmake/conan_provider.cmake)
 PROJECT(safir-sdk-core CXX C)
 

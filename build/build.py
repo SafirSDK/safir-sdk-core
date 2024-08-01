@@ -599,7 +599,7 @@ class VisualStudioBuilder(BuilderBase):
         return sys.platform == "win32"
 
     @staticmethod
-    def __msvc14_find_vc2015():
+    def __find_vcvarsall_vc2015():
         try:
             key = winreg.OpenKey(
                 winreg.HKEY_LOCAL_MACHINE,
@@ -628,7 +628,7 @@ class VisualStudioBuilder(BuilderBase):
         return best_dir
 
     @staticmethod
-    def __msvc14_find_vc2017():
+    def __find_vcvarsall_vc2017_or_later():
         root = environ.get("ProgramFiles(x86)") or environ.get("ProgramFiles")
         if not root:
             return None
@@ -655,13 +655,13 @@ class VisualStudioBuilder(BuilderBase):
 
     @staticmethod
     def __find_vcvarsall():
-        best_dir = VisualStudioBuilder.__msvc14_find_vc2017()
+        best_dir = VisualStudioBuilder.__find_vcvarsall_vc2017_or_later()
         version = "new"
-        LOGGER.log("__msvc14_find_vc2017() result: " + str(best_dir))
+        LOGGER.log("__find_vcvarsall_vc2017_or_later() result: " + str(best_dir))
         if not best_dir:
-            best_dir = VisualStudioBuilder.__msvc14_find_vc2015()
+            best_dir = VisualStudioBuilder.__find_vcvarsall_vc2015()
             version = "old"
-            LOGGER.log("__msvc14_find_vc2015() result: " + str(best_dir))
+            LOGGER.log("__find_vcvarsall_vc2015() result: " + str(best_dir))
 
         if not best_dir:
             return None, None
@@ -674,8 +674,6 @@ class VisualStudioBuilder(BuilderBase):
 
 
     def __run_vcvarsall(self, vcvarsall, version):
-
-
         if version == "old":
             if self.arguments.use_studio not in  ("any", "vs2015"):
                 die("Could only find vs2015")
@@ -704,7 +702,7 @@ class VisualStudioBuilder(BuilderBase):
         is inspired (but not copied, for licensing reasons) by the one in python's setuptools.
         """
 
-        vcvarsall, version = self.__find_vcvarsall()
+        vcvarsall, vcvarsall_kind = self.__find_vcvarsall()
 
         #use uppercase only in this variable!
         required_variables = set(["LIB", "LIBPATH", "PATH", "INCLUDE", "VSINSTALLDIR"])
@@ -714,7 +712,7 @@ class VisualStudioBuilder(BuilderBase):
         wanted_variables = required_variables | optional_variables  #union
 
         LOGGER.log("Loading Visual Studio Environment", "header")
-        output = self.__run_vcvarsall(vcvarsall, version)
+        output = self.__run_vcvarsall(vcvarsall, vcvarsall_kind)
 
         found_variables = set()
 
@@ -738,7 +736,7 @@ class VisualStudioBuilder(BuilderBase):
         if len(required_variables - found_variables) != 0:
             die("Failed to find all expected variables in vcvarsall.bat")
 
-        self.__conan_tweaks()
+        VisualStudioBuilder.__conan_tweaks(vcvarsall, vcvarsall_kind)
 
         #we also need to put the java 32 bit vm first in the path, if we're running an x86 build
         dont_build_java = os.getenv("SAFIR_DONT_BUILD_JAVA", 'False').lower() in ('true', '1', 't')
@@ -755,31 +753,36 @@ class VisualStudioBuilder(BuilderBase):
                             os.environ["PATH"] = path + ";" + os.environ["PATH"]
                             break
                     except subprocess.SubprocessError as e:
-                        LOGGER.log("Failed to check whether JDK os 32 or 64 bit, Java part of the build may not " +
+                        LOGGER.log("Failed to check whether JDK iss 32 or 64 bit, Java part of the build may not " +
                                    "work. Consider setting environment variable SAFIR_DONT_BUILD_JAVA to 1 to " +
                                    "avoid building java interfaces altogether.")
-    def __conan_tweaks(self):
-        """Conan on windows is troublesome, to say the least..."""
+
+    @staticmethod
+    def __conan_tweaks(vcvarsall, vcvarsall_kind):
+        """
+        Here are some tweaks to allow us to build with vc versions that are installed
+        under a newer Visual Studio version. For example VS2022 can have Visual C++ 16 compilers
+        installed (i.e. the compiler from VS2019).
+        This is a bit messy, and is currently only tested on our build setup. So if you get
+        messages from conan wanting compiler version configs this might need to be adjusted.
+        """
         if not os.path.exists("conanfile.py"):
             return
 
-        if self.arguments.use_studio == "vs2015":
-            compiler_version = 14
-        elif self.arguments.use_studio == "vs2017":
-            compiler_version = 15
-        elif self.arguments.use_studio == "vs2019":
-            compiler_version = 16
-        elif self.arguments.use_studio == "vs2022":
-            compiler_version = 17
+        if "Microsoft Visual Studio 14.0" in vcvarsall and vcvarsall_kind == "old":
+            ide_version = 14
+        elif "2017" in vcvarsall and vcvarsall_kind == "new":
+            ide_version = 15
+        elif "2019" in vcvarsall and vcvarsall_kind == "new":
+            ide_version = 16
+        elif "2022" in vcvarsall and vcvarsall_kind == "new":
+            ide_version = 17
         else:
             die("Unsupported Visual Studio version")
-
-        LOGGER.log("Setting environment variable 'VisualStudioVersion' to '{}', to encourage conan packages to build correctly."
-                   .format(compiler_version))
-        os.environ["VisualStudioVersion"] = str(compiler_version)
-
-        LOGGER.log("Setting environment variable 'CONAN_CMAKE_GENERATOR' to 'Ninja', to encourage conan packages to build correctly.")
-        os.environ["CONAN_CMAKE_GENERATOR"] = "Ninja"
+        arg = f"--conf:all tools.microsoft.msbuild:vs_version={ide_version}"
+        os.environ["CONAN_EXTRA_ARGUMENTS"] = arg
+        LOGGER.log(f"Setting environment variable CONAN_EXTRA_ARGUMENTS to '{arg}', " +
+                   "to encourage conan packages to build correctly.")
 
 
     def stage_package(self):
@@ -890,7 +893,7 @@ class DebianPackager():
 
         #Pass along a few select environment variables to debuild, since by default no environment
         #is passed over to the build process by debuild.
-        for var in ("SAFIR_SKIP_SLOW_TESTS"):
+        for var in ("SAFIR_SKIP_SLOW_TESTS",):
             val = os.environ.get(var)
             if val is not None:
                 command += ("--set-envvar", var + "=" + val)
