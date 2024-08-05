@@ -29,10 +29,10 @@ To install all build dependencies "in one go" run the following from the command
 The last three packages - devscripts, debhelper and fakeroot - are used for debian
 package creation, and dblatex is for generating pdf documentation.
 
-Then you need to install conan 1.x, which is a C++ package manager we use for some third party
+Then you need to install Conan 2, which is a C++ package manager we use for some third party
 dependencies, and python websockets, which we use for some tests.
 
-  pip3 install "conan<2.0.0" websockets
+  pip3 install "conan>=2.5.0" websockets
 
 If you're building for another Debian-based distribution you may have to adjust some
 package names.

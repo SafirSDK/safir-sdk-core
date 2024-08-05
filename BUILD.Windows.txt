@@ -18,7 +18,7 @@ Java Platform (JDK) *
 NSIS (>=3.0) *
 Doxygen *
 Graphviz *
-Conan (<2.0.0)
+Conan (>=2.5.0)
 Python Websockets
 DejaVu Fonts *
 Dia *
@@ -39,10 +39,10 @@ Conan and websockets
 Safir SDK Core uses conan for downloading some third party code.
 For details on what versions are downloaded, see conanfile.py.
 
-So you need to install conan 1.x, which is a C++ package manager we use for some third party
+So you need to install Conan 2,, which is a C++ package manager we use for some third party
 dependencies, and python websockets, which we use for some tests.
 
-  pip3 install "conan<2.0.0" websockets
+  pip3 install "conan>=2.5.0" websockets
 
 Conan and Visual Studio Build Tools
 -----------------------------------
