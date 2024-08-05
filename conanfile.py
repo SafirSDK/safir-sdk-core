@@ -110,6 +110,7 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("ninja/1.12.1")
         if self.settings.os == "Windows":
 
+            #VS2015 does not build boost 1.85 for some reason, so we use an older version for that.
             if self.settings.compiler.version == 190:
                self.requires("boost/1.83.0")
             else:
