@@ -6,7 +6,12 @@ endif()
 
 PROJECT(safir_sdk_core_examples C CXX) #Conan stuff requires C, and it does not break anything else.
 
-set(CMAKE_CXX_STANDARD 17)
+#You can use later standards as well, but this is how we have to set it up for vs2015 compatibility.
+if (MSVC_VERSION EQUAL 1900)
+  set(CMAKE_CXX_STANDARD 14)
+else()
+  set(CMAKE_CXX_STANDARD 17)
+endif()
 
 #
 # !! If you are trying to compile the examples, please read this !!
