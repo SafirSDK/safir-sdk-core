@@ -23,11 +23,11 @@ FIND_PROGRAM (CSHARP_COMPILER NAMES mcs csc cli-csc gmcs gmcs2)
 FIND_PROGRAM (CSHARP_LINKER NAMES cli-al al)
 FIND_PROGRAM (GACUTIL_EXECUTABLE gacutil)
 FIND_PROGRAM (RESGEN_EXECUTABLE NAMES cli-resgen resgen2 resgen PATH_SUFFIXES ..) #in vs2013 express x64 we need to look one step up!
-
+FIND_PROGRAM (SN_EXECUTABLE NAMES sn)
 
 SET (CSHARP_FOUND FALSE)
 
-IF (CSHARP_COMPILER AND GACUTIL_EXECUTABLE AND RESGEN_EXECUTABLE AND CSHARP_LINKER)
+IF (CSHARP_COMPILER AND GACUTIL_EXECUTABLE AND RESGEN_EXECUTABLE AND CSHARP_LINKER AND SN_EXECUTABLE)
     SET (CSHARP_FOUND TRUE)
 ENDIF ()
 
@@ -44,6 +44,7 @@ IF (NOT CSharp_FIND_QUIETLY)
   MESSAGE(STATUS "Found CSharp linker: ${CSHARP_LINKER}")
   MESSAGE(STATUS "Found gacutil: ${GACUTIL_EXECUTABLE}")
   MESSAGE(STATUS "Found resgen: ${RESGEN_EXECUTABLE}")
+  MESSAGE(STATUS "Found sn: ${SN_EXECUTABLE}")
 ENDIF ()
 
 IF (NOT CSHARP_FOUND)
@@ -53,8 +54,8 @@ IF (NOT CSHARP_FOUND)
 ENDIF ()
 
 
-# On Windows we want to ensure that we target version 4.8 of the .NET framework, falling back on 4.6.1 for 
-# vs2015 compatibility, so we point it out specifically. On Linux it doesnt matter so much, since we 
+# On Windows we want to ensure that we target version 4.8 of the .NET framework, falling back on 4.6.1 for
+# vs2015 compatibility, so we point it out specifically. On Linux it doesnt matter so much, since we
 # target whateveris in  the distro repos.
 if (WIN32)
   set (_DOTNET_FRAMEWORK_VERSIONS v4.8 v4.6.1)
@@ -72,7 +73,7 @@ if (WIN32)
   endforeach()
   unset(ver)
   unset(_DOTNET_FRAMEWORK_VERSIONS)
-  
+
   if (NOT DOTNET_FRAMEWORK_LIBPATH)
     message(FATAL_ERROR "Could not find the .NET assemblies")
   endif()

@@ -51,9 +51,9 @@ if (MSVC AND NOT SAFIR_CSHARP_IS_CMAKE_NATIVE)
 
   #make sure we set the arch of dotnet assemblies to be the same as the native code we build.
   if (PLATFORM STREQUAL "x64")
-    SET(CSHARP_COMPILER_FLAGS "${CSHARP_COMPILER_FLAGS} -platform:x64")
+    SET(CSHARP_PLATFORM_FLAG "-platform:x64")
   else()
-    SET(CSHARP_COMPILER_FLAGS "${CSHARP_COMPILER_FLAGS} -platform:x86")
+    SET(CSHARP_PLATFORM_FLAG "-platform:x86")
   endif()
 elseif(CSHARP_IS_MONO)
   SET(CSHARP_COMPILER_FLAGS "-warn:4")
