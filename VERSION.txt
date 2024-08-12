@@ -14,3 +14,6 @@ SUFFIX=~alpha1
 #wants it that way.
 
 #Note: Keep to 7-bit ascii in this file, or everything will blow up...
+
+
+#Note: When you change this you also have to change multiple files inside build/packaging/debian
