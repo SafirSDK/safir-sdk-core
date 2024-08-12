@@ -114,6 +114,7 @@ private:
             m_sendToSyslogServer = configReader.Logging().get<bool>("SystemLog.send_to_syslog_server");
             m_replaceNewlines = configReader.Logging().get<bool>("SystemLog.replace_newline_with_space");
             m_includeSafirInstance = configReader.Logging().get<bool>("SystemLog.show_safir_instance");
+            m_syslogLineLength = configReader.Logging().get<size_t>("SystemLog.truncate_syslog_to_bytes", 1024);
 
             if (m_nativeLogging)
             {
@@ -298,17 +299,16 @@ private:
 
         std::string logStr = log.str();
 
-        const size_t LOG_MAX_SIZE = 1024;
-
-        // RFC 3164 says that we must not send messages larger that 1024 bytes.
-        if (logStr.size() > LOG_MAX_SIZE)
+        // RFC 3164 says that we must not send messages larger that 1024 bytes,
+        // but we parameterize this, so that users can change this according to
+        // what their syslog server supports.
+        if (logStr.size() > m_syslogLineLength)
         {
             // truncate string ...
-            logStr.erase(LOG_MAX_SIZE - 3, std::string::npos);
+            logStr.erase(m_syslogLineLength - 3, std::string::npos);
 
             // ... and put in "..." to indicate this
             logStr += "...";
-
         }
 
         // The asio socket is not thread safe
@@ -362,6 +362,7 @@ private:
     bool                            m_sendToSyslogServer;
     bool                            m_replaceNewlines;
     bool                            m_includeSafirInstance;
+    size_t                          m_syslogLineLength;
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
     boost::asio::io_context         m_io;
     boost::asio::ip::udp::socket    m_sock;

@@ -18,6 +18,11 @@ syslog_server_port=514
 ;Logging replace newlines with a space.
 replace_newline_with_space=true
 
+;Truncate syslog messages after this many bytes. RFC3164 states that 1024 is the limit,
+;but many syslog servers allow for longer messages. Make sure to verify that changing
+;this works with your server. This only applies to syslog messages, not to native logging.
+truncate_syslog_to_bytes=1024
+
 ;Show the current SAFIR_INSTANCE in syslog reports. This is very useful when running
 ;multiple Safir instances on the same computer.
 show_safir_instance=false

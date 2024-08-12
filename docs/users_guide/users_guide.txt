@@ -2903,6 +2903,11 @@ UDP Port for the syslog server.
 replace_newline_with_space::
 Controls whether or not a newline in the log message is replaced with a space.
 
+truncate_syslog_to_bytes::
+Truncate syslog messages after this many bytes. RFC 3164 states that 1024 is the limit,
+but many syslog servers allow for longer messages. Make sure to verify that changing
+this works with your server. This only applies to syslog messages, not to native logging.
+
 show_safir_instance::
 Show the current SAFIR_INSTANCE in syslog reports. Useful when running multiple nodes on
 one computer (see <<multiple-nodes-on-one-computer>>)

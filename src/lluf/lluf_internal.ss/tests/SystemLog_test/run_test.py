@@ -57,7 +57,7 @@ inst_str = r""
 show_safir_instance = config.getboolean('SystemLog', 'show_safir_instance')
 if show_safir_instance:
     inst_str = r"\(" + os.getenv("SAFIR_INSTANCE", "0") + r"\) "
-
+truncate_syslog_to_bytes = config.getint('SystemLog', 'truncate_syslog_to_bytes', fallback=1024)
 syslog_server_address = config.get('SystemLog', 'syslog_server_address')
 syslog_server_port = config.get('SystemLog', 'syslog_server_port')
 
@@ -114,7 +114,12 @@ for test in range(12):
         text = r"This is another error log"
     elif test == 10:
         pri = r"<15>"
-        text = r"This is a suuuuuuuuuuper duuuuuuuper long log line .*"
+        text = r"This is a suuuuuuuuuuper duuuuuuuper long log line a*"
+        if truncate_syslog_to_bytes == 1024:
+            text+= r"\.\.\.$"
+        else:
+            text+= r"b*c$"
+
     elif test == 11:
         pri = r"<9>"
         text = r"This is a log from a singleton destructor"
