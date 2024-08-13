@@ -28,9 +28,7 @@ truncate_syslog_to_bytes=1024
 show_safir_instance=false
 
 [LowLevelLog]
-;Set the log level that will be used upon startup. This can be set when logging needs to
-;be turned on by default.  If you just want to change logging level in runtime you can
-;use logger_control or dobexplorer.
+;Set the log level of the internal logs that will be used upon startup.
 log_level=0
 
 ;Directory where the logs are put.

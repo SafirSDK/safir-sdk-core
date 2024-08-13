@@ -102,13 +102,6 @@ class LllProc:
         self.proc.kill()
         self.proc.wait()
 
-
-def call_logger_control(args):
-    cmd = (logger_control, ) + args
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-    return proc.communicate()[0]
-
-
 if sys.platform == "win32":
     temp = os.environ.get("TEMP")
     if temp is None:
