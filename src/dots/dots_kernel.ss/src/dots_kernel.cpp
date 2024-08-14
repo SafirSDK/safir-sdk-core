@@ -69,6 +69,7 @@ namespace
 
             delete [] list[i].dotnetAssemblyName;
             delete [] list[i].dotnetAssemblyLocation;
+            delete [] list[i].dotnetAssemblyVersion;
         }
         delete [] list;
     }
@@ -1687,6 +1688,17 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
                 else
                 {
                     generatedLibraries[i].dotnetAssemblyLocation = NULL;
+                }
+
+                const boost::optional<std::string> dotnet_assembly_version =
+                    it->second.get_optional<std::string>("dotnet_assembly_version");
+                if (dotnet_assembly_version)
+                {
+                    generatedLibraries[i].dotnetAssemblyVersion = CopyStringToNew(dotnet_assembly_version.get());
+                }
+                else
+                {
+                    generatedLibraries[i].dotnetAssemblyVersion = NULL;
                 }
 
                 const boost::optional<std::string> java_jar_location =

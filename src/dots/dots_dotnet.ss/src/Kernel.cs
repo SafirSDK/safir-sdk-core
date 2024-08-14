@@ -703,6 +703,9 @@ namespace Safir.Dob.Typesystem.Internal
 
             [MarshalAs(UnmanagedType.LPStr)]
             public string dotnetAssemblyLocation;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string dotnetAssemblyVersion;
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

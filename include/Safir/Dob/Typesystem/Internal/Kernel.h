@@ -929,6 +929,7 @@ extern "C"
 
         char* dotnetAssemblyName;
         char* dotnetAssemblyLocation;
+        char* dotnetAssemblyVersion;
     };
 #pragma pack(pop)
 
