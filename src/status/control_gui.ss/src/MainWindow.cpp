@@ -101,7 +101,8 @@ void MainWindow::OnConnected()
     ui->nodeTableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     ui->nodeTableView->setColumnHidden(NODE_ID_COLUMN, false);
-
+    ui->nodeTableView->setSortingEnabled(true);
+    ui->nodeTableView->sortByColumn(NAME_COLUMN, Qt::AscendingOrder);
     connect(ui->nodeTableView->selectionModel(),
             &QItemSelectionModel::selectionChanged,
             this,
@@ -248,11 +249,6 @@ void MainWindow::HandleStatusEntity(const Safir::Control::StatusPtr status)
 {
 
     m_statusRunning = status != nullptr;;
-
-    if (status != nullptr && !status->NodeId().IsNull())
-    {
-        m_nodeTableModel->setOwnNodeId(status->NodeId());
-    }
 
     if (status != nullptr && !status->SystemIncarnation().IsNull())
     {

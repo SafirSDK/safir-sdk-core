@@ -25,6 +25,7 @@
 
 
 #include <Safir/Dob/Connection.h>
+#include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/NodeInfo.h>
 #include <set>
 
@@ -57,7 +58,7 @@ enum TableColumn
 };
 
 class NodeTableModel : public QAbstractTableModel,
-                      public Safir::Dob::EntitySubscriber
+                       public Safir::Dob::EntitySubscriber
 {
 public:
     NodeTableModel(QObject *parent, Safir::Dob::Connection& connection);
@@ -73,17 +74,15 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
-    void setOwnNodeId(int64_t ownNodeId) { beginResetModel(); m_ownNodeId = ownNodeId;  endResetModel(); }
-
 signals:
 
 public slots:
 
 private:
-
     Safir::Dob::Connection& m_dobConnection;
-    std::vector<Safir::Dob::Typesystem::EntityId> m_nodeInfos;
-    int64_t m_ownNodeId;
+    Safir::Dob::ConnectionAspectMisc m_misc;
+    const int64_t m_ownNodeId;
     std::set<std::wstring> m_lightNodeTypeNames;
+    std::vector<Safir::Dob::Typesystem::EntityId> m_nodeInfos;
 };
 

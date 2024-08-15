@@ -26,14 +26,23 @@
 #include "Safir/Dob/NotFoundException.h"
 #include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/NodeParameters.h>
+#include <Safir/Dob/MirroredNodeInfo.h>
 
 NodeTableModel::NodeTableModel(QObject *parent, Safir::Dob::Connection& connection)
     : QAbstractTableModel(parent)
     , m_dobConnection(connection)
+    , m_misc(m_dobConnection)
+    , m_ownNodeId (m_misc.GetNodeId())
 {
     try
     {
-        m_dobConnection.SubscribeEntity(Safir::Dob::NodeInfo::ClassTypeId, this );
+        //If we're a light node we include MirroredNodeInfo so that we can see
+        //other light nodes.
+        m_dobConnection.SubscribeEntity(Safir::Dob::NodeInfo::ClassTypeId,
+                                        true, //includeUpdates
+                                        m_misc.IsLightNode(), //includeSubclasses
+                                        true, //restartSubscription
+                                        this );
     }
     catch (const Safir::Dob::LowMemoryException&)
     {
@@ -191,6 +200,15 @@ QVariant NodeTableModel::data(const QModelIndex &index, int role) const
 //DOB Stuff
 void NodeTableModel::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 {
+    //for own node we want to use NodeInfo information
+    //for normal nodes we want to use NodeInfo
+    if (entityProxy.GetTypeId() == Safir::Dob::MirroredNodeInfo::ClassTypeId &&
+        (entityProxy.GetInstanceId().GetRawValue() == m_ownNodeId ||
+         m_lightNodeTypeNames.find(std::static_pointer_cast<Safir::Dob::NodeInfo>(entityProxy.GetEntity())->NodeType().GetVal()) == m_lightNodeTypeNames.end()))
+    {
+        return;
+    }
+
     beginInsertRows(QModelIndex(), static_cast<int>(m_nodeInfos.size()), static_cast<int>(m_nodeInfos.size()));
     m_nodeInfos.push_back(entityProxy.GetEntityId());
     endInsertRows();
@@ -198,6 +216,15 @@ void NodeTableModel::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 
 void NodeTableModel::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
 {
+    //for own node we want to use NodeInfo information
+    //for normal nodes we want to use NodeInfo
+    if (entityProxy.GetTypeId() == Safir::Dob::MirroredNodeInfo::ClassTypeId &&
+        (entityProxy.GetInstanceId().GetRawValue() == m_ownNodeId ||
+         m_lightNodeTypeNames.find(std::static_pointer_cast<Safir::Dob::NodeInfo>(entityProxy.GetEntity())->NodeType().GetVal()) == m_lightNodeTypeNames.end()))
+    {
+        return;
+    }
+
     for (unsigned int x = 0; x < m_nodeInfos.size(); ++x)
     {
         if (m_nodeInfos.at(x) == entityProxy.GetEntityId())
