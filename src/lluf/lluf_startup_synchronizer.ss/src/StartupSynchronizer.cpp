@@ -37,7 +37,7 @@
 #  pragma warning(push)
 #  pragma warning (disable: 4189)
 #endif
- 
+
 #include <boost/interprocess/sync/named_semaphore.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -112,13 +112,21 @@ namespace
             }
         }
 
-        boost::filesystem::ofstream file(filename);
-        if (!file.good())
         {
-            std::ostringstream ostr;
-            ostr << "Failed to open the lockfile '" << filename.string() << "'." << std::endl;
-            throw std::logic_error(ostr.str());
+            boost::filesystem::ofstream file(filename);
+            if (!file.good())
+            {
+                std::ostringstream ostr;
+                ostr << "Failed to open the lockfile '" << filename.string() << "'." << std::endl;
+                throw std::logic_error(ostr.str());
+            }
         }
+
+        using boost::filesystem::perms;
+        boost::filesystem::permissions(filename,
+                                       owner_read | owner_write |
+                                       group_read | group_write |
+                                       others_read | others_write);
 
         return filename;
     }
