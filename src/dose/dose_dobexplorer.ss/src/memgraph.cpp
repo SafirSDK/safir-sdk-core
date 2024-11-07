@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safirsdkcore.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -25,6 +25,7 @@
 #include "common_header.h"
 #include "memgraph.h"
 #include <sstream>
+#include <iostream>
 #include <math.h>
 #include <QDateTime>
 
@@ -43,6 +44,8 @@ MemGraph::MemGraph(QWidget* /*parent*/):
     m_timer.setSingleShot(true);
     m_timer.start(static_cast<int>(updatePeriod->value()*1000));
     graph->SetHistoryLength(static_cast<int>(historyLength->value()*60));
+
+    total->setText(QString::number(m_capacity / 1024 / 1024));
 }
 
 
@@ -54,9 +57,18 @@ void MemGraph::HistoryChanged(double newValue)
 void MemGraph::Timeout()
 {
     m_timer.start(static_cast<int>(updatePeriod->value()*1000));
-    const size_t free = GetSharedMemory().get_free_memory();
+    const size_t allocated = m_capacity - GetSharedMemory().get_free_memory();
+    const double ratio = allocated/(double)m_capacity;
+    graph->AddData(QDateTime::currentDateTime(),ratio);
+    std::wcout <<"AddData: "<<ratio<<std::endl;
+    current->setText(QString::number(allocated / 1024 /1024));
+    currentPercent->setText(QString::number(static_cast<int>(ratio * 100)));
+    
+    std::ostringstream ostr;
+    ostr.precision(2);
+    ostr << static_cast<double>((allocated)/(double)m_capacity)*100 << " %" << " (" << (allocated)/1048576 << "/" << m_capacity/1048576 << "Mb)";
 
-    graph->AddData(QDateTime::currentDateTime(),static_cast<float>((m_capacity-free)/(double)m_capacity));
+    memLabel->setText(ostr.str().c_str());
 }
 
 void MemGraph::PeriodChanged(double newPeriod)
@@ -70,5 +82,5 @@ void MemGraph::ScaleChanged(int newValue)
     std::ostringstream ostr;
     ostr << newValue << " %";
     scalePercent->setText(ostr.str().c_str());
-    graph->SetVerticalScale(static_cast<float>(newValue/100.0));
+    graph->SetVerticalScale(newValue/100.0);
 }

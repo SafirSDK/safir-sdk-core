@@ -29,7 +29,7 @@ QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
 
 FIND_PACKAGE(Boost COMPONENTS filesystem system)
 
-ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_com_sources} ${headers})
+ADD_EXECUTABLE(dobexplorer ${sources} ${ui_headers} ${moc_sources} ${dose_com_sources} ${headers})
 
 target_link_libraries(dobexplorer  Qt5::Widgets Qt5::Network ${ACE_LIBRARY} ${Boost_LIBRARIES})
 
