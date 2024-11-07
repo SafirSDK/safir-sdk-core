@@ -204,8 +204,8 @@ def main():
 
     #Copy the GNAT runtime.
     copy_dll("libgcc_s_dw2-1.dll", alternatives=("libgcc_s_seh-1.dll",))
-    copy_dll("libgnat-24.1.dll", alternatives=("libgnat-2021.dll",))
-    copy_dll("libgnarl-24.1.dll", alternatives=("libgnarl-2021.dll",))
+    copy_dll("libgnat-24.1.dll", alternatives=("libgnat-2021.dll","libgnat-24.dll"))
+    copy_dll("libgnarl-24.1.dll", alternatives=("libgnarl-2021.dll","libgnarl-24.dll"))
 
     #copy example apps to good spot
     copy_docs_dir("examples/vehicleapp/vehicleapp_core.ss", "examples/vehicleapp", r".*\.svn.*")
