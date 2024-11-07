@@ -218,6 +218,9 @@ def main():
     if retcode != 0:
         print ("Failed to do 'dobmake.py -b --clean'")
 
+    #remove the installed_files.txt in dots_generated, since it can cause issues when moving towers
+    #around in unexpected ways.
+    os.remove(os.path.join(SAFIR_SDK,"dots","dots_generated", "installed_files.txt"))
 if __name__ == "__main__":
     import sys
     sys.exit(main())
