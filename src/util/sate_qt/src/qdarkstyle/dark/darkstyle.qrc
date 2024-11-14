@@ -212,5 +212,6 @@
     <qresource prefix="/qdarkstyle/dark">
         <file>darkstyle.qss</file>
         <file>style.qss</file>
+        <file>ads.qss</file>
     </qresource>
 </RCC>

@@ -1,3 +1,5 @@
+find_package(qt-advanced-docking-system CONFIG REQUIRED)
+
 set(ui
     satemainwindow.ui
     typesystemwidget.ui
@@ -74,6 +76,7 @@ TARGET_LINK_LIBRARIES(sate_qt PRIVATE
   dots_cpp
   dose_internal
   dose_cpp
+  qt-advanced-docking-system::qt-advanced-docking-system
   Qt::Widgets)
 
 SAFIR_INSTALL(TARGETS sate_qt COMPONENT Tools)

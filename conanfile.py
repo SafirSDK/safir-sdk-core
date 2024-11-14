@@ -88,6 +88,9 @@ class SafirSdkCoreConan(ConanFile):
                        "pcre2/*:with_zlib":False,
                        "pcre2/*:with_bzip2": False
                        }
+    def configure(self):
+        if self.settings.os == "Windows":
+            self.options["qt-advanced-docking-system"].qt_from_conan = True
 
     def generate(self):
         for dep in self.dependencies.values():
@@ -108,6 +111,7 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("rapidjson/cci.20230929")
         self.requires("protobuf/3.21.12")
         self.requires("ninja/1.12.1")
+        self.requires("qt-advanced-docking-system/4.3.1")
         if self.settings.os == "Windows":
 
             #VS2015 does not build boost 1.85 for some reason, so we use an older version for that.

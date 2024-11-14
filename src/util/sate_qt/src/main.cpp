@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
     SateMainWindow w;
     w.show();
 
-    //QFile f(":qdarkstyle/dark/darkstyle.qss");
-    QFile f(":qdarkstyle/dark/style.qss");
+    QFile f(":qdarkstyle/dark/darkstyle.qss");
+    //QFile f(":qdarkstyle/dark/style.qss");
     if (f.exists())   {
         f.open(QFile::ReadOnly | QFile::Text);
         QTextStream ts(&f);

@@ -31,6 +31,8 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QLabel>
 #include <QTabWidget>
+#include <QTableView>
+#include <QHeaderView>
 #include <QCloseEvent>
 #include <QMessageBox>
 
@@ -42,22 +44,48 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Make the left dock area stronger than top/bottom areas
-    setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
-    setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
-
-    // Create menu
-    auto m = createPopupMenu();
-    m->setTitle("Windows");
-    ui->menubar->addMenu(m);
-
-    //Hide entity view at start
-    ui->entityViewDockWidget->hide();
-
     m_dob = std::make_unique<DobHandler>();
 
-    // set default sizes of tree/tabView
-    ui->typeTree->Initialize(m_dob.get());
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasUndockButton, false);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasCloseButton, false);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::TabCloseButtonIsToolButton, true);
+    //ads::CDockManager::setAutoHideConfigFlags(ads::CDockManager::DefaultAutoHideConfig);
+
+    m_dockManager = new ads::CDockManager(this);
+    QFile f(":qdarkstyle/dark/ads.qss");
+    if (f.exists())   {
+        f.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts(&f);
+        m_dockManager->setStyleSheet(ts.readAll());
+    }
+
+    
+    //Set up the central area as always present
+    QLabel* label = new QLabel();
+    label->setText("Welcome to SateNy!");
+    label->setAlignment(Qt::AlignCenter);
+    auto* centralDockWidget = new ads::CDockWidget("CentralWidget");
+    centralDockWidget->setWidget(label);
+    centralDockWidget->setFeature(ads::CDockWidget::NoTab, true);// set the flag before adding the widget to dock manager
+    m_centralDockArea = m_dockManager->setCentralWidget(centralDockWidget);
+
+    m_typesystem = new TypesystemWidget();
+    m_typesystem->Initialize(m_dob.get());
+
+    auto* typesystemDock = new ads::CDockWidget("Typesystem");
+    typesystemDock->setWidget(m_typesystem);
+    m_dockManager->addDockWidget(ads::LeftDockWidgetArea, typesystemDock);
+    ui->menuView->addAction(typesystemDock->toggleViewAction());
+
+    // TypesystemWidget signal handling
+    connect(m_typesystem, &TypesystemWidget::OpenObjectEdit, this, [this](int64_t tid)
+    {
+        auto oe = new DobObjectEditWidget(m_dob.get(), tid, this);
+        auto* dock = new ads::CDockWidget(TypesystemRepository::Instance().GetClass(tid)->name);
+        dock->setWidget(oe);
+        m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
+    });
 
     ui->statusbar->addPermanentWidget(new QLabel(tr("SAFIR_INSTANCE: %1").arg(Safir::Utilities::Internal::Expansion::GetSafirInstance())));
     ui->statusbar->showMessage("Trying to connect to DOB...", std::numeric_limits<int>::max());
@@ -66,16 +94,12 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     connect(m_dob.get(), &DobInterface::ConnectedToDob, this, [this](const QString& n)
     {
         ui->statusbar->showMessage(QString("Connected as ") + n, std::numeric_limits<int>::max());
+        m_connected = true;
     });
 
+#if 0
     // TabWidget signal handling
     ui->tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    connect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, [this](int i){
-        QWidget * widget = this->ui->tabWidget->widget(i);
-        this->ui->tabWidget->removeTab(i);
-        delete widget;
-    });
 
     connect(ui->tabWidget->tabBar(), &QTabBar::customContextMenuRequested, [this](const QPoint& p){
         auto index = ui->tabWidget->tabBar()->tabAt(p);
@@ -90,22 +114,17 @@ SateMainWindow::SateMainWindow(QWidget *parent)
         }
     });
 
-    // TypesystemWidget signal handling
-    connect(ui->typeTree, &TypesystemWidget::OpenObjectEdit, this, [this](int64_t tid)
-    {
-        auto oe = new DobObjectEditWidget(m_dob.get(), tid, this);
-        auto tabIndex = ui->tabWidget->addTab(oe, TypesystemRepository::Instance().GetClass(tid)->name);
-        ui->tabWidget->setCurrentIndex(tabIndex);
-    });
+#endif
 
-    connect(ui->typeTree, &TypesystemWidget::OpenEntityViewer, this, [](int64_t tid)
+
+    connect(m_typesystem, &TypesystemWidget::OpenEntityViewer, this, [](int64_t tid)
     {
         QMessageBox mb;
         mb.setText("TODO: Open EntityViewer for " + QString::fromStdWString(sdt::Operations::GetName(tid)));
         mb.exec();
     });
 
-    connect(ui->typeTree, &TypesystemWidget::OpenDouFile, this, [](int64_t tid)
+    connect(m_typesystem, &TypesystemWidget::OpenDouFile, this, [](int64_t tid)
     {
         QMessageBox mb;
         mb.setText("TODO: Open Dou file for " + QString::fromStdWString(sdt::Operations::GetName(tid)));
@@ -113,29 +132,43 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     });
 
     // Received table
-    ui->receivedTableView->setModel(new ReceivedModel(m_dob.get(), ui->receivedTableView));
-    ui->receivedTableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    ui->receivedTableView->setColumnWidth(1, 250);
-    ui->receivedTableView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-    ui->receivedTableView->setColumnWidth(3, 250);
-    ui->receivedTableView->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    ui->receivedTableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
-    connect(ui->receivedTableView, &QTableView::doubleClicked, this, [this](const QModelIndex& ix)
+    m_received = new QTableView();
+    m_received->setModel(new ReceivedModel(m_dob.get(), m_received));
+    m_received->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    m_received->setColumnWidth(1, 250);
+    m_received->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    m_received->setColumnWidth(3, 250);
+    m_received->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    m_received->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+
+    connect(m_received, &QTableView::doubleClicked, this, [this](const QModelIndex& ix)
     {
         if (!ix.isValid())
         {
             return;
         }
 
-        auto recvObjItem = static_cast<ReceivedModel*>(ui->receivedTableView->model())->ReadItem(ix.row());
+        auto recvObjItem = static_cast<ReceivedModel*>(m_received->model())->ReadItem(ix.row());
         if (recvObjItem.object)
         {
-            auto oe = new DobObjectEditWidget(m_dob.get(), recvObjItem.typeId, recvObjItem.channelHandler, recvObjItem.instance,
-                                              recvObjItem.object, this);
-            auto tabIndex = ui->tabWidget->addTab(oe, TypesystemRepository::Instance().GetClass(recvObjItem.typeId)->name);
-            ui->tabWidget->setCurrentIndex(tabIndex);
+            auto oe = new DobObjectEditWidget(m_dob.get(),
+                                              recvObjItem.typeId,
+                                              recvObjItem.channelHandler,
+                                              recvObjItem.instance,
+                                              recvObjItem.object,
+                                              this);
+            auto* dock = new ads::CDockWidget(TypesystemRepository::Instance().GetClass(recvObjItem.typeId)->name);
+            dock->setWidget(oe);
+            m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
         }
     });
+
+
+    auto* receivedDock = new ads::CDockWidget("Received");
+    receivedDock->setWidget(m_received);
+    m_dockManager->addDockWidget(ads::BottomDockWidgetArea, receivedDock);
+    ui->menuView->addAction(receivedDock->toggleViewAction());
+
 
     m_dob->Open("SATE", 0);
 }
@@ -143,25 +176,10 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 SateMainWindow::~SateMainWindow()
 {
     delete ui;
-}
-
-void SateMainWindow::CloseTab(int index)
-{
-    QWidget * widget = this->ui->tabWidget->widget(index);
-    this->ui->tabWidget->removeTab(index);
-    delete widget;
-}
-
-void SateMainWindow::CloseOtherTabs(int indexToKeep)
-{
-    QWidget* keepWidget = indexToKeep > -1 ? ui->tabWidget->widget(indexToKeep) : nullptr;
-    for (int i = ui->tabWidget->count() - 1; i >= 0; --i)
+    if (!m_connected)
     {
-        auto w = ui->tabWidget->widget(i);
-        if (w != keepWidget)
-        {
-            this->ui->tabWidget->removeTab(i);
-            delete w;
-        }
+        //If the connect is still pending we need to kill the program very forcefully, since there is no way
+        //to interrupt the Open call.
+        std::quick_exit(0);
     }
 }

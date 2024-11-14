@@ -24,11 +24,14 @@
 #pragma once
 
 #include <QMainWindow>
+#include <qt6advanceddocking/DockManager.h>
+
 #include "dobinterface.h"
 
-QT_BEGIN_NAMESPACE
+class QTableView;
+class TypesystemWidget;
+
 namespace Ui { class SateMainWindow; }
-QT_END_NAMESPACE
 
 class SateMainWindow : public QMainWindow
 {
@@ -44,8 +47,14 @@ signals:
 
 private:
     Ui::SateMainWindow *ui;
-    std::unique_ptr<DobInterface> m_dob;
 
-    void CloseTab(int index);
-    void CloseOtherTabs(int indexToKeep);
+    ads::CDockManager* m_dockManager;
+    ads::CDockAreaWidget* m_centralDockArea;
+    
+    std::unique_ptr<DobInterface> m_dob;
+    bool m_connected = false;
+
+    TypesystemWidget* m_typesystem;
+    QTableView* m_received;
+
 };

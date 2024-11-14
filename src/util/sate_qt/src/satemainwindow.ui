@@ -18,21 +18,6 @@
     <normaloff>:/img/icons/sate.png</normaloff>:/img/icons/sate.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>-1</number>
-      </property>
-      <property name="tabsClosable">
-       <bool>true</bool>
-      </property>
-      <property name="movable">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -43,73 +28,15 @@
      <height>23</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+   </widget>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QDockWidget" name="typesystemDockWidget">
-   <property name="windowTitle">
-    <string>Typesystem</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <property name="leftMargin">
-      <number>1</number>
-     </property>
-     <property name="topMargin">
-      <number>1</number>
-     </property>
-     <property name="rightMargin">
-      <number>1</number>
-     </property>
-     <property name="bottomMargin">
-      <number>1</number>
-     </property>
-     <item>
-      <widget class="TypesystemWidget" name="typeTree" native="true"/>
-     </item>
-    </layout>
-   </widget>
   </widget>
-  <widget class="QDockWidget" name="entityViewDockWidget">
-   <property name="windowTitle">
-    <string>Entity view</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_3"/>
-  </widget>
-  <widget class="QDockWidget" name="receivedDockWidget">
-   <property name="layoutDirection">
-    <enum>Qt::LeftToRight</enum>
-   </property>
-   <property name="windowTitle">
-    <string>Received</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>8</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QVBoxLayout" name="verticalLayout_3">
-     <item>
-      <widget class="QTableView" name="receivedTableView">
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <attribute name="horizontalHeaderCascadingSectionResizes">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-  </widget>
- </widget>
  <customwidgets>
   <customwidget>
    <class>TypesystemWidget</class>
