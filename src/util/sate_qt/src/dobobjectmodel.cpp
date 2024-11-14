@@ -1,0 +1,368 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+*
+* Created by: Joel Ottosson
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+#include "dobobjectmodel.h"
+
+#include <QColor>
+#include <QFont>
+#include <QTreeView>
+#include <QTimer>
+
+namespace {
+static const int NumberOfColumns = 5;
+}
+
+DobObjectModel::DobObjectModel(int64_t typeId, QObject *parent)
+    : QAbstractItemModel(parent)
+    , m_invisibleRootItem(new MemberTreeItem(TypesystemRepository::Instance().GetClass(typeId)))
+    , m_typeId(typeId)
+{    
+}
+
+DobObjectModel::DobObjectModel(int64_t typeId, const Safir::Dob::Typesystem::ObjectPtr& obj, QObject *parent)
+    : QAbstractItemModel(parent)
+    , m_invisibleRootItem(new MemberTreeItem(TypesystemRepository::Instance().GetClass(typeId), obj))
+    , m_typeId(typeId)
+{
+}
+
+const MemberTreeItem* DobObjectModel::InvisibleRoot() const
+{
+    return m_invisibleRootItem.get();
+}
+
+QVariant DobObjectModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (section < NumberOfColumns && orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    {
+        switch (section)
+        {
+        case 0: return "Member";
+        case 1: return "Value";
+        case 2: return "Null";
+        case 3: return "Changed";
+        case 4: return "Type";
+        }
+    }
+    return {};
+}
+
+QModelIndex DobObjectModel::index(int row, int column, const QModelIndex &parent) const
+{
+    if (row < 0 || column < 0 || column >= NumberOfColumns)
+    {
+        return{}; // invalid index
+    }
+
+    if (!parent.isValid() || parent.internalPointer() == m_invisibleRootItem.get())
+    {
+        // Root item
+        if (row < m_invisibleRootItem->NumberOfChildMembers())
+        {
+            return createIndex(row, column, m_invisibleRootItem->GetChildMember(row));
+        }
+        return{}; // invalid index
+    }
+
+    // Not the root, i.e nested objects or a container member (array/seq/dict)
+    auto childItem = static_cast<MemberTreeItem*>(parent.internalPointer())->GetChildMember(row);
+    if (childItem != nullptr)
+    {
+        return createIndex(row, column, childItem);
+    }
+
+    return{};
+}
+
+QModelIndex DobObjectModel::parent(const QModelIndex &index) const
+{    
+    if (!index.isValid() || index.internalPointer() == m_invisibleRootItem.get())
+    {
+        return{};
+    }
+
+    auto childItem = static_cast<MemberTreeItem*>(index.internalPointer());
+    auto parentItem = childItem->GetParentMember();
+
+    if (parentItem != m_invisibleRootItem.get() && parentItem != nullptr)
+    {
+        return createIndex(parentItem->RowNumber(), 0, parentItem);
+
+    }
+
+    return {};
+}
+
+int DobObjectModel::rowCount(const QModelIndex &parent) const
+{
+    const MemberTreeItem* parentItem = parent.isValid()
+        ? static_cast<const MemberTreeItem*>(parent.internalPointer())
+        : m_invisibleRootItem.get();
+
+    return parentItem->NumberOfChildMembers();
+}
+
+int DobObjectModel::columnCount(const QModelIndex &/*parent*/) const
+{
+    return NumberOfColumns;
+}
+
+QVariant DobObjectModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+    {
+        return {};
+    }
+
+    switch (role)
+    {
+    case Qt::DisplayRole:
+    {
+        auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+        switch (index.column())
+        {
+        case 0: return item->GetName();
+        case 1:
+        {
+            return item->GetValue();
+        }
+        case 2: return item->IsNull() ? QString::fromStdWString(L"\u2713") : "";
+        case 3: return item->IsChanged() ? QString::fromStdWString(L"\u2713") : "";
+        case 4: return TypesystemRepository::Instance().GetTypeName(item->GetMemberInfo()->memberType, item->GetMemberInfo()->memberTypeId);
+        }
+    }
+    break;
+
+    case Qt::ForegroundRole:
+    {
+        if (index.column() == 1)
+        {
+            auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+            bool hasNonNullValues = false;
+            if (item->IsContainerRootItem() || item->IsObjectRootItem())
+            {
+                for (int i = 0; i < item->NumberOfChildMembers(); ++i)
+                {
+                    if (!item->GetConstChildMember(i)->IsNull())
+                    {
+                        hasNonNullValues = true;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                hasNonNullValues = !item->IsNull();
+            }
+
+            return hasNonNullValues ? QColor(250, 185, 0) : QColor(135, 134, 132);
+        }
+    }
+    break;
+
+    case Qt::TextAlignmentRole:
+    {
+        if (index.column() == 2 || index.column() == 3)
+        {
+            return Qt::AlignHCenter;
+        }
+    }
+    break;
+
+    case Qt::FontRole:
+    {
+        if (index.column() == 1)
+        {
+            auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+            if (item->IsContainerRootItem() || item->IsObjectRootItem())
+            {
+                QFont font;
+                font.setBold(true);
+                return font;
+            }
+        }
+    }
+    break;
+    }
+
+
+    return {};
+
+}
+
+bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid())
+    {
+        return false;
+    }
+    if (role != Qt::EditRole && role != MemberTreeItem::DeleteItemRole)
+    {
+        return false;
+    }
+
+    auto item = static_cast<MemberTreeItem*>(index.internalPointer());
+
+    // ---------------------
+    // Changed flag column
+    // ---------------------
+    if (index.column() == 3 && item->IsChanged() != value.toBool())
+    {
+        item->SetChanged(value.toBool());
+        emit dataChanged(index, index, { role });
+        return true;
+    }
+
+    // ---------------------
+    // Value column
+    // ---------------------
+    if (index.column() == 1)
+    {
+        auto childCount = item->NumberOfChildMembers();
+        
+        // --- Handle delete iems, clear container or delete single item in a container. ---
+        if (role == MemberTreeItem::DeleteItemRole)
+        {
+            // If the item is a container root, clear all children.
+            if (item->IsContainerRootItem())
+            {
+                // Rows will be deleted.
+                beginRemoveRows(index, 0, childCount - 1);
+                item->SetNull(true); // Will clear all children.
+                item->SetChanged(true);
+                endRemoveRows();
+            }
+            else
+            {
+                // If the item is a single value in a sequence or dictionary, remove that item from parent container.
+                auto parentContainer = item->GetParentMember();
+                if (parentContainer->IsContainerRootItem())
+                {
+                    // The delete must be deferred to after the editor has been closed.
+                    // TODO: Check if this can be done by calling removeRows immediately from the delegate instead.
+                    auto row = item->RowNumber();
+                    auto parentIndex = index.parent();
+                    QTimer::singleShot(0, [this, parentIndex, row]
+                    {
+                        auto pi = static_cast<MemberTreeItem*>(parentIndex.internalPointer());
+                        beginRemoveRows(parentIndex, row, row);
+                        pi->DeleteChild(row);
+                        endRemoveRows();
+                    });
+                }
+            }
+            return true;
+        }
+
+        // --- Handle setNull ---
+        if (value.isNull())
+        {
+            if (!item->IsNull())
+            {
+                // Set value to null
+                if (childCount > 0)
+                {
+                    // Rows will be deleted.
+                    beginRemoveRows(index, 0, childCount - 1);
+                    item->SetNull(true);
+                    item->SetChanged(true);
+                    endRemoveRows();
+                }
+                else
+                {
+                    item->SetNull(true);
+                    item->SetChanged(true);
+                }
+                emit dataChanged(createIndex(index.row(), 0, index.internalPointer()), createIndex(index.row(), 3, index.internalPointer()), { role });
+            }
+            return true;
+        }
+
+        // --- Handle insert row in a container ---
+        if (item->IsContainerRootItem())
+        {
+            auto parentIndex = createIndex(index.row(), 0, index.internalPointer());
+            beginInsertRows(parentIndex, childCount, childCount);
+            item->SetValue(value.toString());
+            item->SetChanged(true);
+            endInsertRows();
+            emit dataChanged(parentIndex, createIndex(index.row(), 3, index.internalPointer()));
+            return true;
+        }
+
+        // --- Handle init object value ---
+        if (item->IsObjectRootItem())
+        {
+            item->SetValue(value.toString());
+            auto newChildCount = item->NumberOfChildMembers();
+            beginInsertRows(index, childCount, newChildCount - 1);
+            item->SetChanged(true);
+            endInsertRows();
+            auto valIndex = DobObjectModel::index(childCount, 1, index);
+            emit dataChanged(createIndex(index.row(), 0, index.internalPointer()), createIndex(index.row(), 3, index.internalPointer()), { role });
+            emit OpenEditor(valIndex);
+            return true;
+        }
+
+        // --- Handle edit simple values, strings, numbers enums etc. ---
+        if (value.toString() != item->GetValue())
+        {
+            item->SetValue(value.toString());
+            item->SetChanged(true);
+            emit dataChanged(createIndex(index.row(), 0, index.internalPointer()), createIndex(index.row(), 3, index.internalPointer()), { role });
+            return true;
+        }
+    }
+
+    return false;
+}
+
+Qt::ItemFlags DobObjectModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+
+    if (index.column() == 1 || index.column() == 2 || index.column() == 3)
+    {
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    }
+
+    return QAbstractItemModel::flags(index);
+    
+}
+
+bool DobObjectModel::insertRows(int row, int count, const QModelIndex &parent)
+{
+    beginInsertRows(parent, row, row + count - 1);
+    // FIXME: Implement me!
+    endInsertRows();
+    return true;
+}
+
+bool DobObjectModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    beginRemoveRows(parent, row, row + count - 1);
+    // FIXME: Implement me!
+    endRemoveRows();
+    return true;
+}

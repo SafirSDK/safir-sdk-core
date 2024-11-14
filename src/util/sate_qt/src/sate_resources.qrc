@@ -1,0 +1,33 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>icons/folder.png</file>
+        <file>icons/folder_orange.png</file>
+        <file>icons/gear.png</file>
+        <file>icons/gear_orange.png</file>
+        <file>icons/message.png</file>
+        <file>icons/message_orange.png</file>
+        <file>icons/parameters.png</file>
+        <file>icons/parameters_orange.png</file>
+        <file>icons/response.png</file>
+        <file>icons/response_orange.png</file>
+        <file>icons/service.png</file>
+        <file>icons/service_orange.png</file>
+        <file>icons/entity.png</file>
+        <file>icons/entity_orange.png</file>
+        <file>icons/sate.ico</file>
+        <file>icons/struct.png</file>
+        <file>icons/struct_orange.png</file>
+        <file>icons/item.png</file>
+        <file>icons/item_orange.png</file>
+        <file>icons/sate.png</file>
+        <file>icons/entity_orange_r.png</file>
+        <file>icons/entity_orange_s.png</file>
+        <file>icons/entity_orange_sr.png</file>
+        <file>icons/gear_orange_r.png</file>
+        <file>icons/gear_orange_s.png</file>
+        <file>icons/gear_orange_sr.png</file>
+        <file>icons/message_orange_r.png</file>
+        <file>icons/message_orange_s.png</file>
+        <file>icons/message_orange_sr.png</file>
+    </qresource>
+</RCC>
