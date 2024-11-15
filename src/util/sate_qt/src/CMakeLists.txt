@@ -29,6 +29,9 @@ set(sources
     operationswidget.cpp
     dobobjectbuilder.cpp
     registerhandlerdialog.cpp
+    instanceswidget.cpp
+    entityinstancesmodel.cpp
+    columninfo.cpp
     qdarkstyle/dark/darkstyle.qss
     qdarkstyle/dark/style.qss
     qdarkstyle/dark/ads.qss
@@ -49,7 +52,10 @@ set(widget_headers
     valueinput.h
     operationswidget.h
     registerhandlerdialog.h
-)
+    instanceswidget.h
+    entityinstancesmodel.h
+    columninfo.h
+  )
 
 set(headers
     typesystemrepository.h
@@ -59,7 +65,7 @@ set(headers
 )
 
 if (NOT TARGET Qt::Widgets)
-  message(STATUS "Could not find Qt, will not build sate_qt")
+  message(STATUS "Could not find Qt, will not build Qt Sate")
   return()
 endif()
 
@@ -67,9 +73,10 @@ QT_WRAP_UI(ui_headers ${ui})
 QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
 QT_ADD_RESOURCES(rcc_sources sate_resources.qrc qdarkstyle/dark/darkstyle.qrc)
 
-ADD_EXECUTABLE(sate_qt WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} ${rcc_sources})
+ADD_EXECUTABLE(sate_next WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} ${rcc_sources})
 
-TARGET_LINK_LIBRARIES(sate_qt PRIVATE
+TARGET_LINK_LIBRARIES(sate_next PRIVATE
+  douf_time_cpp
   lluf_internal
   lluf_crash_reporter
   dots_internal
@@ -80,4 +87,4 @@ TARGET_LINK_LIBRARIES(sate_qt PRIVATE
   qt-advanced-docking-system::qt-advanced-docking-system
   Qt::Widgets)
 
-SAFIR_INSTALL(TARGETS sate_qt COMPONENT Tools)
+SAFIR_INSTALL(TARGETS sate_next COMPONENT Tools)

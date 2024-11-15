@@ -73,6 +73,7 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
         connect(menu.addAction("Register handler"), &QAction::triggered, this, [this, typeId]{ m_dob->RegisterEntityHandler(typeId, sdt::HandlerId(), Safir::Dob::InstanceIdPolicy::RequestorDecidesInstanceId, false, false); });
         connect(menu.addAction("Register handler..."), &QAction::triggered, this, [this, typeId]{ m_registerDlg->Show(typeId); });
         connect(menu.addAction("Unregister handler"), &QAction::triggered, this, [this, typeId]{ m_dob->Unregister(typeId); });
+#if 0
         connect(menu.addAction("Subscribe"), &QAction::triggered, this, [this, typeId]
         {
             m_dob->SubscribeRegistrations(typeId, sdt::HandlerId::ALL_HANDLERS, true);
@@ -85,7 +86,9 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
             m_dob->UnsubscribeEntity(typeId);
         });
         menu.addSeparator();
-        connect(menu.addAction("Open EntityView"), &QAction::triggered, this, [this, typeId]{ emit OpenEntityViewer(typeId); });
+#endif
+        connect(menu.addAction("Subscribe"), &QAction::triggered, this, [this, typeId]{ emit OpenInstanceViewer(typeId, false); });
+        connect(menu.addAction("Subscribe recursive"), &QAction::triggered, this, [this, typeId]{ emit OpenInstanceViewer(typeId, true); });
     }
         break;
     case TypesystemRepository::Message:

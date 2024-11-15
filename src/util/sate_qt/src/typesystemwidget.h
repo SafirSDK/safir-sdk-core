@@ -46,7 +46,7 @@ public:
 
 signals:
     void OpenObjectEdit(int64_t typeId);
-    void OpenEntityViewer(int64_t typeId);
+    void OpenInstanceViewer(int64_t typeId, bool includeSubclasses);
     void OpenDouFile(int64_t typeId);
 
 private:

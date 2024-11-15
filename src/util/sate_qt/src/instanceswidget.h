@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2014, 2022, 2024 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson
+* Created by: Patrik Fundberg / patrik.fundberg@saabgroup.com
 *
 *******************************************************************************
 *
@@ -23,26 +23,30 @@
 ******************************************************************************/
 #pragma once
 
-#include <QTreeView>
-#include "typesystemrepository.h"
 #include "dobinterface.h"
-#include "registerhandlerdialog.h"
+#include <QTableView>
 
-class TypesystemContextMenuHandler : public QObject
+class EntityInstancesModel;
+
+class InstancesWidget
+    : public QTableView
 {
     Q_OBJECT
+
 public:
-    TypesystemContextMenuHandler(DobInterface* dob, QTreeView* parent);
+    explicit InstancesWidget(DobInterface* dob, int64_t typeId, bool includeSubclasses, QWidget* parent);
+
+    ~InstancesWidget() override;
 
 signals:
-    void OpenObjectEdit(int64_t typeId);
-    void OpenInstanceViewer(int64_t typeId, bool includeSubclasses);
-    void OpenDouFile(int64_t typeId);
+    void OpenObjectEdit(int64_t typeId,
+                        QString channelHandler,
+                        int64_t instance,
+                        const Safir::Dob::Typesystem::ObjectPtr& object);
 
+private slots:
+    void OnDoubleClicked(const QModelIndex &index);
 private:
-    DobInterface* m_dob;
-    QTreeView* m_treeView;
-    RegisterHandlerDialog* m_registerDlg;
-
-    void CreateContextMenu(int64_t typeId, TypesystemRepository::DobBaseClass baseClass);
+    EntityInstancesModel* m_model = nullptr;
 };
+

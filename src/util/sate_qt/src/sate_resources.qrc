@@ -29,5 +29,7 @@
         <file>icons/message_orange_r.png</file>
         <file>icons/message_orange_s.png</file>
         <file>icons/message_orange_sr.png</file>
+        <file>icons/instance_viewer.png</file>
+        <file>icons/instance_viewer_recursive.png</file>
     </qresource>
 </RCC>

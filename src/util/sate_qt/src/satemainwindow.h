@@ -28,6 +28,7 @@
 
 #include "dobinterface.h"
 
+class QLabel;
 class QTableView;
 class TypesystemWidget;
 
@@ -44,13 +45,19 @@ public:
 signals:
     void ConnectedToDobSignal();
     void DispatchSignal();
-
+private slots:
+    void OnOpenInstanceViewer(const int64_t typeId, const bool includeSubclasses);
+    void OnConnectedToDob(const QString& connectionName);
+    void OnReceivedTableDoubleClicked(const QModelIndex& ix);
+    void OnOpenObjectEdit(const int64_t typeId);
+    void OnOpenDouFile(const int64_t typeId);
 private:
     Ui::SateMainWindow *ui;
+    QLabel* m_instanceLabel = nullptr;
 
     ads::CDockManager* m_dockManager;
     ads::CDockAreaWidget* m_centralDockArea;
-    
+
     std::unique_ptr<DobInterface> m_dob;
     bool m_connected = false;
 

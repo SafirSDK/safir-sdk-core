@@ -72,7 +72,7 @@ void TypesystemWidget::Initialize(DobInterface* dob)
             bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
             if (baseClassVal.isValid() && static_cast<TypesystemRepository::DobBaseClass>(baseClassVal.toInt()) == TypesystemRepository::Entity && !ctrlKey)
             {
-                emit OpenEntityViewer(typeIdVal.toLongLong());
+                emit OpenInstanceViewer(typeIdVal.toLongLong(), false);
             }
             else
             {
@@ -89,7 +89,7 @@ void TypesystemWidget::Initialize(DobInterface* dob)
     // TODO: remove std functions and use signals
     m_contextMenuHandler = new TypesystemContextMenuHandler(m_dob, ui->treeView);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenObjectEdit, this, &TypesystemWidget::OpenObjectEdit);
-    connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenEntityViewer, this, &TypesystemWidget::OpenEntityViewer);
+    connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenInstanceViewer, this, &TypesystemWidget::OpenInstanceViewer);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenDouFile, this, &TypesystemWidget::OpenDouFile);
 }
 
