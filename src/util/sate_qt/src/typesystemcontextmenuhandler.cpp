@@ -43,9 +43,21 @@ TypesystemContextMenuHandler::TypesystemContextMenuHandler(DobInterface* dob, QT
             auto tid = ix.data(TypesystemRepository::DobTypeIdRole);
             auto bc = ix.data(TypesystemRepository::DobBaseClassRole);
 
-            if (tid.isValid() && bc.isValid())
+            if (tid.isValid())
             {
-                CreateContextMenu(tid.toLongLong(), static_cast<TypesystemRepository::DobBaseClass>(bc.toInt()));
+                if (bc.isValid())
+                {
+                    // A class type
+                    CreateContextMenu(tid.toLongLong(), static_cast<TypesystemRepository::DobBaseClass>(bc.toInt()));
+                }
+                else
+                {
+                    // Valid typeId but no baseClass, must be an Enum
+                    QMenu menu;
+                    int64_t typeId = tid.toLongLong();
+                    connect(menu.addAction("Open dou-file"), &QAction::triggered, this, [this, typeId]{ emit OpenDouFile(typeId);});
+                    menu.exec(m_treeView->cursor().pos());
+                }
             }
         }
     });

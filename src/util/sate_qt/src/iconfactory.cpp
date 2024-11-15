@@ -53,6 +53,11 @@ QIcon IconFactory::GetNamespaceIcon()
     return QIcon(":/img/icons/folder_orange.png");
 }
 
+QIcon IconFactory::GetEnumIcon()
+{
+    return QIcon(":/img/icons/enum_orange.png");
+}
+
 QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass, bool subscriberMark, bool registationMark)
 {
     switch (baseClass)

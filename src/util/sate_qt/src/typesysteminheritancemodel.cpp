@@ -29,7 +29,9 @@
 
 TypesystemInheritanceModel::TypesystemInheritanceModel(QObject* parent)
     : QAbstractItemModel(parent)
+    , m_rootEnum(new TypesystemRepository::DobEnum())
 {
+    m_rootEnum->name = "Enums";
 }
 
 TypesystemInheritanceModel::~TypesystemInheritanceModel()
@@ -43,20 +45,40 @@ QVariant TypesystemInheritanceModel::headerData(int /*section*/, Qt::Orientation
 
 QModelIndex TypesystemInheritanceModel::index(int row, int column, const QModelIndex &parent) const
 {
+    if (column != 0)
+    {
+        return {}; // invalid index
+    }
+
     if (!parent.isValid())
     {
-        if (row == 0 && column == 0)
+        if (row == 0)
         {
             return createIndex(row, column, TypesystemRepository::Instance().GetRootObject());
+        }
+        else if (row == 1)
+        {
+            return createIndex(row, column, m_rootEnum.get());
         }
         return {}; // invalid index
     }
 
     size_t ix = static_cast<size_t>(row);
-    auto parentPtr = static_cast<TypesystemRepository::DobClass*>(parent.internalPointer());
-    if (parentPtr != nullptr && column == 0 && ix < parentPtr->children.size())
+    auto parentPtr = static_cast<const TypesystemRepository::DobUnit*>(parent.internalPointer());
+    if (parentPtr->category == TypesystemRepository::Class)
     {
-        return createIndex(row, column, parentPtr->children[ix]);
+        auto clsPtr = static_cast<const TypesystemRepository::DobClass*>(parent.internalPointer());
+        if (clsPtr != nullptr && ix < clsPtr->children.size())
+        {
+            return createIndex(row, column, clsPtr->children[ix]);
+        }
+    }
+    else if (parentPtr->category == TypesystemRepository::Enum)
+    {
+        if (ix < TypesystemRepository::Instance().EnumsSorted().size())
+        {
+            return createIndex(row, column, TypesystemRepository::Instance().EnumsSorted()[ix]);
+        }
     }
 
     return {}; // invalid index
@@ -69,22 +91,35 @@ QModelIndex TypesystemInheritanceModel::parent(const QModelIndex &index) const
         return {};
     }
 
-    // This is a bit complicated. We want to find the index of our parent. So we must go back to our grand parent to wind out
-    // which row our parent is in our grand parents children-vector.
-    auto me = static_cast<const TypesystemRepository::DobClass*>(index.internalPointer());
-    if (me != nullptr && me->parent != nullptr)
+    auto dobUnit = static_cast<const TypesystemRepository::DobUnit*>(index.internalPointer());
+
+    if (dobUnit->category == TypesystemRepository::Class)
     {
-        if (me->parent->parent != nullptr)
+        // This is a bit complicated. We want to find the index of our parent. So we must go back to our grand parent to find out
+        // which row our parent is in our grand parents children-vector.
+        auto me = static_cast<const TypesystemRepository::DobClass*>(index.internalPointer());
+        if (me != nullptr && me->parent != nullptr)
         {
-            // We have parent and grand parent. row number for our parent in grandparents children-vector
-            auto it = std::find(me->parent->parent->children.begin(), me->parent->parent->children.end(), me->parent);
-            size_t ix = std::distance(me->parent->parent->children.begin(), it);
-            return createIndex(static_cast<int>(ix), 0, me->parent);
+            if (me->parent->parent != nullptr)
+            {
+                // We have parent and grand parent. row number for our parent in grandparents children-vector
+                auto it = std::find(me->parent->parent->children.begin(), me->parent->parent->children.end(), me->parent);
+                size_t ix = std::distance(me->parent->parent->children.begin(), it);
+                return createIndex(static_cast<int>(ix), 0, me->parent);
+            }
+            else
+            {
+                // We have a parent but no grand parent. Then our parent must have row = 0
+                return createIndex(0, 0, me->parent);
+            }
         }
-        else
+    }
+    else if (dobUnit->category == TypesystemRepository::Enum)
+    {
+        auto me = static_cast<const TypesystemRepository::DobEnum*>(index.internalPointer());
+        if (me != m_rootEnum.get())
         {
-            // We have a parent but no grand parent. Then our parent must have row = 0
-            return createIndex(0, 0, me->parent);
+            return createIndex(1, 0, m_rootEnum.get());
         }
     }
 
@@ -96,11 +131,25 @@ int TypesystemInheritanceModel::rowCount(const QModelIndex &parent) const
 {
     if (!parent.isValid())
     {
-        return 1;
+        return 2;
     }
 
-    auto ptr = static_cast<TypesystemRepository::DobClass*>(parent.internalPointer());
-    return static_cast<int>(ptr->children.size());
+    auto dobUnit = static_cast<const TypesystemRepository::DobUnit*>(parent.internalPointer());
+    if (dobUnit->category == TypesystemRepository::Class)
+    {
+        auto cls = static_cast<TypesystemRepository::DobClass*>(parent.internalPointer());
+        return static_cast<int>(cls->children.size());
+    }
+    else if (dobUnit->category == TypesystemRepository::Enum)
+    {
+        auto en = static_cast<TypesystemRepository::DobEnum*>(parent.internalPointer());
+        if (en == m_rootEnum.get())
+        {
+            return static_cast<int>(TypesystemRepository::Instance().EnumsSorted().size());
+        }
+    }
+
+    return 0;
 }
 
 int TypesystemInheritanceModel::columnCount(const QModelIndex &/*parent*/) const
@@ -115,25 +164,48 @@ QVariant TypesystemInheritanceModel::data(const QModelIndex &index, int role) co
         return QVariant();
     }
 
-    auto ptr = static_cast<TypesystemRepository::DobClass*>(index.internalPointer());
-
-    switch (role)
+    auto dobUnit = static_cast<const TypesystemRepository::DobUnit*>(index.internalPointer());
+    if (dobUnit->category == TypesystemRepository::Class)
     {
-    case Qt::DisplayRole:
-        return ptr->name;
+        auto ptr = static_cast<TypesystemRepository::DobClass*>(index.internalPointer());
+        switch (role)
+        {
+        case Qt::DisplayRole:
+            return ptr->name;
 
-    case Qt::DecorationRole:
-        return IconFactory::GetIcon(ptr->dobBaseClass, false, false);
+        case Qt::DecorationRole:
+            return IconFactory::GetIcon(ptr->dobBaseClass, false, false);
 
-    case TypesystemRepository::DobBaseClassRole:
-        return ptr->dobBaseClass;
+        case TypesystemRepository::DobBaseClassRole:
+            return ptr->dobBaseClass;
 
-    case TypesystemRepository::DobTypeIdRole:
-        return QVariant::fromValue(ptr->typeId);
+        case TypesystemRepository::DobTypeIdRole:
+            return QVariant::fromValue(ptr->typeId);
 
-    default:
-        return{};
+        default:
+            return{};
+        }
     }
+    else if (dobUnit->category == TypesystemRepository::Enum)
+    {
+        auto ptr = static_cast<TypesystemRepository::DobEnum*>(index.internalPointer());
+        switch (role)
+        {
+        case Qt::DisplayRole:
+            return ptr->name;
+
+        case Qt::DecorationRole:
+            return ptr != m_rootEnum.get() ? IconFactory::GetEnumIcon() : QVariant();
+
+        case TypesystemRepository::DobTypeIdRole:
+            return ptr != m_rootEnum.get() ? QVariant::fromValue(ptr->typeId) : QVariant();
+
+        default:
+            return{};
+        }
+    }
+
+    return {};
 }
 
 // -----------------------------------------------------

@@ -117,6 +117,7 @@ TypesystemRepository::TypesystemRepository()
             {
                 it.first->second->values.push_back(QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetEnumerationValueName(t, ev)));
             }
+            m_enumsSorted.push_back(it.first->second.get());
         }
     }
 
@@ -135,6 +136,7 @@ TypesystemRepository::TypesystemRepository()
     // Sort result
     SortClasses(const_cast<DobClass*>(GetRootObject())->children);
     SortNamespaces(m_rootNamespaces);
+    std::sort(m_enumsSorted.begin(), m_enumsSorted.end(), [](const DobEnum* a, const DobEnum* b){ return a->name < b->name;});
 }
 
 const TypesystemRepository& TypesystemRepository::Instance()
@@ -165,12 +167,17 @@ const TypesystemRepository::DobEnum* TypesystemRepository::GetEnum(int64_t typeI
     return it != m_enums.end() ? it->second.get() : nullptr;
 }
 
+const std::vector<const TypesystemRepository::DobEnum*>& TypesystemRepository::EnumsSorted() const
+{
+    return m_enumsSorted;
+}
+
 const TypesystemRepository::DobEnum* TypesystemRepository::GetEnum(const QString& name) const
 {
     return GetEnum(Safir::Dob::Typesystem::Operations::GetTypeId(name.toStdWString()));
 }
 
-const std::vector<const TypesystemRepository::DobNamespace*> TypesystemRepository::GetRootNamespaces() const
+const std::vector<const TypesystemRepository::DobNamespace*>& TypesystemRepository::GetRootNamespaces() const
 {
     return m_rootNamespaces;
 }

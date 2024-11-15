@@ -69,14 +69,25 @@ void TypesystemWidget::Initialize(DobInterface* dob)
         auto baseClassVal = ix.data(TypesystemRepository::DobBaseClassRole);
         if (typeIdVal.isValid())
         {
-            bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
-            if (baseClassVal.isValid() && static_cast<TypesystemRepository::DobBaseClass>(baseClassVal.toInt()) == TypesystemRepository::Entity && !ctrlKey)
+            if (typeIdVal.isValid())
             {
-                emit OpenInstanceViewer(typeIdVal.toLongLong(), false);
-            }
-            else
-            {
-                emit OpenObjectEdit(typeIdVal.toLongLong());
+                if (baseClassVal.isValid())
+                {
+                    bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
+                    if (baseClassVal.isValid() && static_cast<TypesystemRepository::DobBaseClass>(baseClassVal.toInt()) == TypesystemRepository::Entity && !ctrlKey)
+                    {
+                        emit OpenInstanceViewer(typeIdVal.toLongLong(), false);
+                    }
+                    else
+                    {
+                        emit OpenObjectEdit(typeIdVal.toLongLong());
+                    }
+                }
+                else
+                {
+                    // TypeId but no baseClass, must be an Enum
+                    emit OpenDouFile(typeIdVal.toLongLong());
+                }
             }
         }
     });

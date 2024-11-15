@@ -40,7 +40,7 @@ QModelIndex TypesystemNamespaceModel::index(int row, int column, const QModelInd
     if (!parent.isValid())
     {
         const auto rowIndex = static_cast<size_t>(row);
-        auto rootNs = TypesystemRepository::Instance().GetRootNamespaces();
+        const auto& rootNs = TypesystemRepository::Instance().GetRootNamespaces();
         if (rowIndex < rootNs.size() && column == 0)
         {
             return createIndex(row, column, rootNs[rowIndex]);
@@ -98,7 +98,7 @@ QModelIndex TypesystemNamespaceModel::parent(const QModelIndex &index) const
         else
         {
             // We have a parent but no grand parent. Then our parent is a top namespace
-            auto rootNamespaces = TypesystemRepository::Instance().GetRootNamespaces();
+            const auto& rootNamespaces = TypesystemRepository::Instance().GetRootNamespaces();
             auto it = std::find(rootNamespaces.begin(), rootNamespaces.end(), parent);
             size_t ix = std::distance(rootNamespaces.begin(), it);
             return createIndex(static_cast<int>(ix), 0, parent);

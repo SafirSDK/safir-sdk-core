@@ -48,6 +48,9 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+private:
+    std::unique_ptr<TypesystemRepository::DobEnum> m_rootEnum;
 };
 
 class TypesystemFilterProxyModel : public QSortFilterProxyModel

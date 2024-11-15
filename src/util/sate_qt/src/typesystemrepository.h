@@ -136,8 +136,9 @@ public:
 
     const DobEnum* GetEnum(int64_t typeId) const;
     const DobEnum* GetEnum(const QString& name) const;
+    const std::vector<const DobEnum*>& EnumsSorted() const;
 
-    const std::vector<const DobNamespace*> GetRootNamespaces() const;
+    const std::vector<const DobNamespace*>& GetRootNamespaces() const;
     const DobNamespace* GetNamespace(const QString& fullname) const;
 
     QString GetTypeName(Safir::Dob::Typesystem::MemberType mt, int64_t typeId) const;
@@ -154,6 +155,7 @@ private:
     std::map<int64_t, std::unique_ptr<DobEnum>> m_enums;
     std::map<QString, std::unique_ptr<DobNamespace>> m_namespaces;
     std::vector<const DobNamespace*> m_rootNamespaces;
+    std::vector<const DobEnum*> m_enumsSorted;
 
     void CreateNamespace(DobClass* c);
     void SortClasses(std::vector<const DobClass*>& cls);

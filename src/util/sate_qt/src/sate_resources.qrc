@@ -31,5 +31,7 @@
         <file>icons/message_orange_sr.png</file>
         <file>icons/instance_viewer.png</file>
         <file>icons/instance_viewer_recursive.png</file>
+        <file>icons/enum.png</file>
+        <file>icons/enum_orange.png</file>
     </qresource>
 </RCC>
