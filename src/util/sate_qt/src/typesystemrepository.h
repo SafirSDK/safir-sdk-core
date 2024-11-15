@@ -45,8 +45,9 @@ public:
     {
     public:
         DobCategory category;
-
+        QString name;
         DobUnit(DobCategory c) : category(c) {}
+        DobUnit(DobCategory c, const QString& n) : category(c), name(n) {}
     };
 
     class DobNamespace; // Forward declare
@@ -56,10 +57,10 @@ public:
     {
     public:
         int64_t typeId = -1;
-        QString name;
         std::vector<QString> values;
+        const DobNamespace* namespaze = nullptr;
         DobEnum() : DobUnit(Enum) {}
-        DobEnum(int64_t t, const QString& n) : DobUnit(Enum), typeId(t), name(n) {}
+        DobEnum(int64_t t, const QString& n) : DobUnit(Enum, n), typeId(t) {}
         QString ToString() const
         {
             QString s = name + " {\n";
@@ -75,7 +76,6 @@ public:
     class DobMember : public DobUnit
     {
     public:
-        QString name;
         Safir::Dob::Typesystem::MemberType memberType = Int32MemberType;
         Safir::Dob::Typesystem::MemberType keyType = Int32MemberType;
         int64_t memberTypeId = -1;
@@ -93,7 +93,6 @@ public:
     public:
         DobBaseClass dobBaseClass = Object;
         int64_t typeId = -1;
-        QString name = "";
         std::vector<DobMember> members;
         int totalNumberOfMembers = 0;
 
@@ -112,20 +111,19 @@ public:
         const DobNamespace* namespaze = nullptr;
 
         DobClass() : DobUnit(Class) {}
-        DobClass(int64_t t, const QString& n) : DobUnit(Class), typeId(t), name(n) {}
+        DobClass(int64_t t, const QString& n) : DobUnit(Class, n), typeId(t) {}
     };
 
     class DobNamespace : public DobUnit
     {
     public:
         QString fullName;
-        QString name;
         const DobNamespace* parent = nullptr;
         std::vector<const DobNamespace*> children;
-        std::vector<const DobClass*> classes;
+        std::vector<const DobUnit*> units;
 
         DobNamespace() : DobUnit(Namespace) {}
-        DobNamespace(const QString& full) : DobUnit(Namespace), fullName(full), name(full.split(".").last()) {}
+        DobNamespace(const QString& full) : DobUnit(Namespace, full.split(".").last()), fullName(full) {}
     };
 
     static const TypesystemRepository& Instance();
@@ -157,7 +155,8 @@ private:
     std::vector<const DobNamespace*> m_rootNamespaces;
     std::vector<const DobEnum*> m_enumsSorted;
 
-    void CreateNamespace(DobClass* c);
     void SortClasses(std::vector<const DobClass*>& cls);
     void SortNamespaces(std::vector<const DobNamespace*>& ns);
+
+    DobNamespace* CreateNamespace(const QString& unitName);
 };

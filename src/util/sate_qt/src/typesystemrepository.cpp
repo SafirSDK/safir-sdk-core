@@ -83,7 +83,13 @@ TypesystemRepository::TypesystemRepository()
     for (auto t : typeIds)
     {
         auto it = m_classes.insert({t, std::make_unique<TypesystemRepository::DobClass>(t, QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(t)))});
-        CreateNamespace(it.first->second.get());
+        auto cls = it.first->second.get();
+        auto ns = CreateNamespace(cls->name);
+        if (ns != nullptr)
+        {
+            ns->units.push_back(cls);
+            cls->namespaze = ns;
+        }
     }
 
     // ...then set-up parent-child relationships
@@ -113,11 +119,19 @@ TypesystemRepository::TypesystemRepository()
         if (Safir::Dob::Typesystem::Operations::IsEnumeration(t))
         {
             auto it = m_enums.insert({ t, std::make_unique<TypesystemRepository::DobEnum>(t, QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(t))) });
+            auto enumPtr = it.first->second.get();
             for (auto ev = 0; ev < Safir::Dob::Typesystem::Operations::GetNumberOfEnumerationValues(t); ++ev)
             {
-                it.first->second->values.push_back(QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetEnumerationValueName(t, ev)));
+                enumPtr->values.push_back(QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetEnumerationValueName(t, ev)));
             }
-            m_enumsSorted.push_back(it.first->second.get());
+            auto ns = CreateNamespace(enumPtr->name);
+            if (ns != nullptr)
+            {
+                ns->units.push_back(enumPtr);
+                enumPtr->namespaze = ns;
+            }
+
+            m_enumsSorted.push_back(enumPtr);
         }
     }
 
@@ -188,14 +202,14 @@ const TypesystemRepository::DobNamespace* TypesystemRepository::GetNamespace(con
     return it != m_namespaces.end() ? it->second.get() : nullptr;
 }
 
-void TypesystemRepository::CreateNamespace(TypesystemRepository::DobClass* c)
+TypesystemRepository::DobNamespace* TypesystemRepository::CreateNamespace(const QString& unitName)
 {
     // The namespace we are looking for
     TypesystemRepository::DobNamespace* parentNamespace = nullptr;
 
     // Remove class name to a clean namespace string
-    auto i = c->name.lastIndexOf(".");
-    auto namespaceName = i > -1 ? c->name.mid(0, i) : QString("Safir.Dob.Typesystem");
+    auto i = unitName.lastIndexOf(".");
+    auto namespaceName = i > -1 ? unitName.mid(0, i) : QString("Safir.Dob.Typesystem");
 
     // Check if namespace already exists
     auto alreadyExistIt = m_namespaces.find(namespaceName);
@@ -234,12 +248,7 @@ void TypesystemRepository::CreateNamespace(TypesystemRepository::DobClass* c)
         }
     }
 
-    // All namespaces have been created, insert the class
-    if (parentNamespace != nullptr)
-    {
-        parentNamespace->classes.push_back(c);
-        c->namespaze = parentNamespace;
-    }
+    return parentNamespace;
 }
 
 QString TypesystemRepository::GetTypeName(Safir::Dob::Typesystem::MemberType mt, int64_t typeId) const
@@ -289,7 +298,7 @@ void TypesystemRepository::SortNamespaces(std::vector<const DobNamespace*>& ns)
     for (auto subNamespace : ns)
     {
         auto sn = const_cast<DobNamespace*>(subNamespace);
-        std::sort(sn->classes.begin(), sn->classes.end(), [](const DobClass* a, const DobClass* b){ return a->name < b->name;});
+        std::sort(sn->units.begin(), sn->units.end(), [](const DobUnit* a, const DobUnit* b){ return a->name < b->name;});
         SortNamespaces(sn->children);
     }
 }

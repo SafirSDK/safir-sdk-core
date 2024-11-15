@@ -63,7 +63,7 @@ QModelIndex TypesystemNamespaceModel::index(int row, int column, const QModelInd
             else
             {
                 // Class node
-                return createIndex(row, column, parentPtr->classes[static_cast<size_t>(ix.first)]);
+                return createIndex(row, column, parentPtr->units[static_cast<size_t>(ix.first)]);
             }
         }
     }
@@ -120,7 +120,7 @@ int TypesystemNamespaceModel::rowCount(const QModelIndex &parent) const
     if (du->category == TypesystemRepository::Namespace)
     {
         auto parentPtr = static_cast<const TypesystemRepository::DobNamespace*>(du);
-        return static_cast<int>(parentPtr->children.size() + parentPtr->classes.size());
+        return static_cast<int>(parentPtr->children.size() + parentPtr->units.size());
     }
     else
     {
@@ -147,50 +147,42 @@ QVariant TypesystemNamespaceModel::data(const QModelIndex &index, int role) cons
     {
     case Qt::DisplayRole:
     {
-        if (du->category == TypesystemRepository::Namespace)
-        {
-            return static_cast<const TypesystemRepository::DobNamespace*>(du)->name;
-        }
-        else
-        {
-            return static_cast<const TypesystemRepository::DobClass*>(du)->name;
-        }
+        return du->name;
     }
 
     case Qt::DecorationRole:
     {
-        if (du->category == TypesystemRepository::Namespace)
+        switch (du->category)
         {
-            return IconFactory::GetNamespaceIcon();
-        }
-        else
-        {
-            return IconFactory::GetIcon(static_cast<const TypesystemRepository::DobClass*>(du)->dobBaseClass, false, false);
+        case TypesystemRepository::Class: return IconFactory::GetIcon(static_cast<const TypesystemRepository::DobClass*>(du)->dobBaseClass, false, false);
+        case TypesystemRepository::Enum: return IconFactory::GetEnumIcon();
+        case TypesystemRepository::Namespace: return IconFactory::GetNamespaceIcon();
+        default: return {};
         }
     }
 
     case TypesystemRepository::DobBaseClassRole:
     {
-        if (du->category == TypesystemRepository::Namespace)
-        {
-            return {};
-        }
-        else
+        if (du->category == TypesystemRepository::Class)
         {
             return static_cast<const TypesystemRepository::DobClass*>(du)->dobBaseClass;
         }
+
+        return {};
     }
 
     case TypesystemRepository::DobTypeIdRole:
     {
-        if (du->category == TypesystemRepository::Namespace)
-        {
-            return {};
-        }
-        else
+        if (du->category == TypesystemRepository::Class)
         {
             return QVariant::fromValue(static_cast<const TypesystemRepository::DobClass*>(du)->typeId);
         }
+        else if (du->category == TypesystemRepository::Enum)
+        {
+            return QVariant::fromValue(static_cast<const TypesystemRepository::DobEnum*>(du)->typeId);
+        }
+
+        return {};
     }
 
     default:
@@ -208,7 +200,7 @@ std::pair<int, bool> TypesystemNamespaceModel::RowIndex(int row, const Typesyste
     }
 
     auto classIx = row - static_cast<int>(ns->children.size());
-    if (classIx < static_cast<int>(ns->classes.size()))
+    if (classIx < static_cast<int>(ns->units.size()))
     {
         return std::make_pair(classIx, false);
     }
