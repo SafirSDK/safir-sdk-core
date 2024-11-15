@@ -42,15 +42,13 @@ public:
     SateMainWindow(QWidget *parent = nullptr);
     ~SateMainWindow();
 
-signals:
-    void ConnectedToDobSignal();
-    void DispatchSignal();
 private slots:
     void OnOpenInstanceViewer(const int64_t typeId, const bool includeSubclasses);
     void OnConnectedToDob(const QString& connectionName);
     void OnReceivedTableDoubleClicked(const QModelIndex& ix);
     void OnOpenObjectEdit(const int64_t typeId);
     void OnOpenDouFile(const int64_t typeId);
+
 private:
     Ui::SateMainWindow *ui;
     QLabel* m_instanceLabel = nullptr;
@@ -64,4 +62,8 @@ private:
     TypesystemWidget* m_typesystem;
     QTableView* m_received;
 
+    void AddXmlPage(const QString& title, const QString& text);
+    void AddJsonPage(const QString& title, const QString& text);
+
+    void AddTab(const QString& title, QWidget* widget);
 };

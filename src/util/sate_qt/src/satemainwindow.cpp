@@ -37,6 +37,10 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
+#include <QTextBrowser>
+#include <QFile>
+#include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
+
 #include <Safir/Utilities/Internal/Expansion.h>
 
 SateMainWindow::SateMainWindow(QWidget *parent)
@@ -61,7 +65,6 @@ SateMainWindow::SateMainWindow(QWidget *parent)
         m_dockManager->setStyleSheet(ts.readAll());
     }
 
-
     //Set up the central area as always present
     QLabel* label = new QLabel();
     label->setText("Welcome to the next generation Sate. SateNext!");
@@ -79,15 +82,12 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     m_dockManager->addDockWidget(ads::LeftDockWidgetArea, typesystemDock);
     ui->menuView->addAction(typesystemDock->toggleViewAction());
 
-    // TypesystemWidget signal handling
-    connect(m_typesystem, &TypesystemWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEdit);
-
     m_instanceLabel = new QLabel(tr("SAFIR_INSTANCE: %1").arg(Safir::Utilities::Internal::Expansion::GetSafirInstance()));
     ui->statusbar->addPermanentWidget(m_instanceLabel);
     ui->statusbar->showMessage(tr("Trying to connect to DOB..."), std::numeric_limits<int>::max());
 
-    // DOB signal handling
-    connect(m_dob.get(), &DobInterface::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
+    // TypesystemWidget signal handling
+    connect(m_typesystem, &TypesystemWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEdit);
     connect(m_typesystem, &TypesystemWidget::OpenInstanceViewer, this, &SateMainWindow::OnOpenInstanceViewer);
     connect(m_typesystem, &TypesystemWidget::OpenDouFile, this, &SateMainWindow::OnOpenDouFile);
 
@@ -103,13 +103,13 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     connect(m_received, &QTableView::doubleClicked, this, &SateMainWindow::OnReceivedTableDoubleClicked);
 
-
     auto* receivedDock = new ads::CDockWidget("Received");
     receivedDock->setWidget(m_received);
     m_dockManager->addDockWidget(ads::BottomDockWidgetArea, receivedDock);
     ui->menuView->addAction(receivedDock->toggleViewAction());
 
-
+    // DOB signal handling
+    connect(m_dob.get(), &DobInterface::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
     m_dob->Open("SATE", 0);
 }
 
@@ -207,25 +207,72 @@ void SateMainWindow::OnReceivedTableDoubleClicked(const QModelIndex& ix)
                                           recvObjItem.instance,
                                           recvObjItem.object,
                                           this);
-        auto* dock = new ads::CDockWidget(TypesystemRepository::Instance().GetClass(recvObjItem.typeId)->name);
-        dock->setWidget(oe);
-        dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
-        m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
+        connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
+        connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
+        AddTab(TypesystemRepository::Instance().GetClass(recvObjItem.typeId)->name, oe);
     }
 }
 
 void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
 {
     auto oe = new DobObjectEditWidget(m_dob.get(), typeId, this);
-    auto* dock = new ads::CDockWidget(TypesystemRepository::Instance().GetClass(typeId)->name);
-    dock->setWidget(oe);
-    dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
-    m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
+    connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
+    connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe);
 }
 
 void SateMainWindow::OnOpenDouFile(const int64_t typeId)
 {
-    QMessageBox mb;
-    mb.setText("TODO: Open Dou file for " + QString::fromStdWString(sdt::Operations::GetName(typeId)));
-    mb.exec();
+    auto path = QString::fromStdWString(sdt::Internal::GetDouFilePath(typeId));
+    QFile f(path);
+    if (!f.open(QFile::ReadOnly | QFile::Text))
+    {
+        QMessageBox mb;
+        mb.setText("Could not open dou file: " + path);
+        mb.exec();
+        return;
+    }
+    QTextStream in(&f);
+    auto text = in.readAll();
+    AddXmlPage(path, text);
+}
+
+void SateMainWindow::AddXmlPage(const QString& title, const QString& text)
+{
+    QString xmlFormatted;
+    QXmlStreamReader reader(text);
+    reader.setNamespaceProcessing(false);
+
+    QXmlStreamWriter writer(&xmlFormatted);
+    writer.setAutoFormatting(true);
+
+    while (!reader.atEnd())
+    {
+        reader.readNext();
+        if (!reader.isWhitespace()) {
+            writer.writeCurrentToken(reader);
+        }
+    }
+
+    auto textBrowser = new  QTextBrowser();
+    textBrowser->setPlainText(xmlFormatted);
+    AddTab(title, textBrowser);
+}
+
+void SateMainWindow::AddJsonPage(const QString& title, const QString& text)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(text.toUtf8());
+    QString formattedJsonString = doc.toJson(QJsonDocument::Indented);
+    auto textBrowser = new  QTextBrowser();
+    textBrowser->setPlainText(formattedJsonString);
+    AddTab(title, textBrowser);
+}
+
+void SateMainWindow::AddTab(const QString& title, QWidget* widget)
+{
+    auto* dock = new ads::CDockWidget(title);
+    widget->setParent(dock);
+    dock->setWidget(widget);
+    dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
+    m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
 }

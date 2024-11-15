@@ -43,6 +43,10 @@ public:
                                  int64_t instance, const Safir::Dob::Typesystem::ObjectPtr& object,  QWidget *parent);
     ~DobObjectEditWidget();
 
+signals:
+    void XmlSerializedObject(const QString& title, const QString& text);
+    void JsonSerializedObject(const QString& title, const QString& text);
+
 private:
     Ui::DobObjectEditWidget *ui;
     DobInterface* m_dob;

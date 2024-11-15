@@ -29,6 +29,7 @@
 #include <QTreeView>
 #include <QKeyEvent>
 #include <QTimer>
+#include <Safir/Dob/Typesystem/Serialization.h>
 
 DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QWidget *parent)
     : QWidget(parent)
@@ -160,13 +161,17 @@ void DobObjectEditWidget::Init(DobObjectModel* model)
         auto req = std::dynamic_pointer_cast<Safir::Dob::Service>(obj);
         m_dob->SendServiceRequest(req, ui->operationsWidget->Handler());
     });
-    connect(ui->operationsWidget->toXmlBtn, &QPushButton::clicked, this, []
+    connect(ui->operationsWidget->toXmlBtn, &QPushButton::clicked, this, [this]
     {
-        qDebug() << "ToXml";
+        auto obj = BuildObject();
+        auto xml = QString::fromStdWString(Safir::Dob::Typesystem::Serialization::ToXml(obj));
+        emit XmlSerializedObject(QString::fromStdWString(sdt::Operations::GetName(m_typeId)), xml);
     });
-    connect(ui->operationsWidget->toJsonBtn, &QPushButton::clicked, this, []
+    connect(ui->operationsWidget->toJsonBtn, &QPushButton::clicked, this, [this]
     {
-        qDebug() << "ToJson";
+        auto obj = BuildObject();
+        auto json = QString::fromStdWString(Safir::Dob::Typesystem::Serialization::ToJson(obj));
+        emit JsonSerializedObject(QString::fromStdWString(sdt::Operations::GetName(m_typeId)), json);
     });
 }
 
