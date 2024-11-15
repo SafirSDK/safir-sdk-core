@@ -35,7 +35,7 @@ class OperationsWidget : public QWidget, public Ui::OperationsWidget
     Q_OBJECT
 
 public:
-    explicit OperationsWidget(QWidget *parent = nullptr);
+    explicit OperationsWidget(QWidget *parent);
     ~OperationsWidget();
 
     void SetConfiguration(TypesystemRepository::DobBaseClass bc);

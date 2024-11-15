@@ -35,7 +35,7 @@ class RegisterHandlerDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit RegisterHandlerDialog(QWidget *parent = nullptr);
+    explicit RegisterHandlerDialog(QWidget *parent);
     ~RegisterHandlerDialog();
 
     // For Entities use allFieldsVisible=true, for serviceReq false

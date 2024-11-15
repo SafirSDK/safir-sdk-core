@@ -32,8 +32,8 @@ class DobObjectModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit DobObjectModel(int64_t typeId, QObject *parent = nullptr);
-    explicit DobObjectModel(int64_t typeId, const Safir::Dob::Typesystem::ObjectPtr& obj, QObject *parent = nullptr);
+    explicit DobObjectModel(int64_t typeId, QObject *parent);
+    explicit DobObjectModel(int64_t typeId, const Safir::Dob::Typesystem::ObjectPtr& obj, QObject *parent);
 
     // Header:
     QVariant headerData(int section,

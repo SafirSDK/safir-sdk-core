@@ -50,7 +50,7 @@ public:
         ReceivedObjectInfo(ReceivedObjectInfo& r) = default;
     };
 
-    explicit ReceivedModel(DobInterface* dob, QObject *parent = nullptr);
+    explicit ReceivedModel(DobInterface* dob, QObject *parent);
 
     // Header:
     QVariant headerData(int section,

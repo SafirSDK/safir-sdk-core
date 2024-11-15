@@ -38,9 +38,9 @@ class DobObjectEditWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit DobObjectEditWidget(DobInterface* dob, int64_t typeId, QWidget *parent = nullptr);
+    explicit DobObjectEditWidget(DobInterface* dob, int64_t typeId, QWidget *parent);
     explicit DobObjectEditWidget(DobInterface* dob, int64_t typeId, QString channelHandler,
-                                 int64_t instance, const Safir::Dob::Typesystem::ObjectPtr& object,  QWidget *parent = nullptr);
+                                 int64_t instance, const Safir::Dob::Typesystem::ObjectPtr& object,  QWidget *parent);
     ~DobObjectEditWidget();
 
 private:

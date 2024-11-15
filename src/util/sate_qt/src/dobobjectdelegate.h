@@ -25,7 +25,6 @@
 
 #include <QObject>
 #include <QStyledItemDelegate>
-#include "membertreeitem.h"
 
 class DobObjectDelegate : public QStyledItemDelegate
 {

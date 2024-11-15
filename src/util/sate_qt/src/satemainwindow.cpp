@@ -70,7 +70,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     centralDockWidget->setFeature(ads::CDockWidget::NoTab, true);// set the flag before adding the widget to dock manager
     m_centralDockArea = m_dockManager->setCentralWidget(centralDockWidget);
 
-    m_typesystem = new TypesystemWidget();
+    m_typesystem = new TypesystemWidget(this);
     m_typesystem->Initialize(m_dob.get());
 
     auto* typesystemDock = new ads::CDockWidget("Typesystem");

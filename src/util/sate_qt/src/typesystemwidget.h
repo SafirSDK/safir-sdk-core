@@ -39,7 +39,7 @@ class TypesystemWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit TypesystemWidget(QWidget *parent = nullptr);
+    explicit TypesystemWidget(QWidget *parent);
     ~TypesystemWidget();
 
     void Initialize(DobInterface* dob);

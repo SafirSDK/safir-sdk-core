@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "dobobjectdelegate.h"
+#include "membertreeitem.h"
 #include "valueinput.h"
 #include <QCheckBox>
 #include <QComboBox>
