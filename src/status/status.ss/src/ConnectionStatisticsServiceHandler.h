@@ -43,12 +43,11 @@ class ConnectionStatisticsServiceHandler :
         private boost::noncopyable
 {
 public:
-    ConnectionStatisticsServiceHandler(boost::asio::io_context& io);
+    ConnectionStatisticsServiceHandler();
     void Start();
     void Stop();
 
 private:
-    boost::asio::io_context& m_io;
     Safir::Dob::SecondaryConnection m_dobConnection;
     int64_t m_nodeId;
 

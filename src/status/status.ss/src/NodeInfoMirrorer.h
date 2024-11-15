@@ -42,7 +42,7 @@ namespace Control
         private boost::noncopyable
     {
     public:
-        NodeInfoMirrorer(boost::asio::io_context& io);
+        NodeInfoMirrorer();
 
         void Start();
         void Stop();
@@ -77,7 +77,6 @@ namespace Control
     private:
         void OnNewOrUpdatedEntity(const Safir::Dob::EntityProxy& entityProxy);
         
-        boost::asio::io_context& m_io;
         Safir::Dob::SecondaryConnection m_connection;
     };
 }

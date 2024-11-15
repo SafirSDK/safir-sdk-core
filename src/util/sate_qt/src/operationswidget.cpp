@@ -28,6 +28,11 @@ namespace
     template <class T>
     T ToHashType(const QString& s)
     {
+        if (s.isEmpty())
+        {
+            return T();
+        }
+
         bool ok;
         int64_t num = s.toLongLong(&ok, 10);
         return ok ? T(num) : T(s.toStdWString());
@@ -149,6 +154,7 @@ Safir::Dob::Typesystem::HandlerId OperationsWidget::Handler() const
 
 Safir::Dob::Typesystem::InstanceId OperationsWidget::Instance() const
 {
-    return ToHashType<Safir::Dob::Typesystem::InstanceId>(instanceEdit->text());
+    auto s = idEdit->text();
+    return s.isEmpty() ? Safir::Dob::Typesystem::InstanceId::GenerateRandom() : ToHashType<Safir::Dob::Typesystem::InstanceId>(s);
 }
 

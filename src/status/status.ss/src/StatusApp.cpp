@@ -34,8 +34,8 @@ StatusApp::StatusApp()
     , m_dispatcher(m_connection, m_ioService)
     , m_statusEntityHandler(m_ioService)
     , m_commandRequestHandler(m_ioService)
-    , m_connectionStatsHandler(m_ioService)
-    , m_nodeInfoMirrorer(m_ioService)
+    , m_connectionStatsHandler()
+    , m_nodeInfoMirrorer()
 {
     m_connection.Open(L"safir_control_status",
                       L"main",

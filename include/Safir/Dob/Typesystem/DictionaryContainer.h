@@ -31,7 +31,7 @@
 #include <map>
 #include <stdexcept>
 #include <typeinfo>
-#include <vector>
+#include <type_traits>
 
 namespace Safir
 {
@@ -103,6 +103,11 @@ namespace Typesystem
          * Adds a new key to the dictionary and return the value container.
          *
          * If the key already exists, the value will be overwritten.
+         *
+         * If the dictionary does not have KeyT as its key type the behaviour is undefined.
+         * However if the keyT is an enum type together with a valid enum value, or keyT int
+         * togehter with a valid ordinal is allowed.
+         *
          *
          * @param key the key to be added.
          * @return the value container that belongs to the key.
@@ -372,7 +377,7 @@ namespace Typesystem
 
         ContainerBase& InsertNullInternal(const void* key, const std::type_info& typeInfo) override
         {
-            if (typeInfo == typeid(KeyType))
+            if (typeInfo == typeid(KeyType) || std::is_enum_v<KeyType> )
             {
                 m_bIsChanged=true;
                 ValueContainerType container;

@@ -31,6 +31,7 @@ set(sources
     registerhandlerdialog.cpp
     qdarkstyle/dark/darkstyle.qss
     qdarkstyle/dark/style.qss
+    qdarkstyle/dark/ads.qss
 )
 
 set(widget_headers

@@ -36,8 +36,7 @@ namespace Safir
 namespace Control
 {
 
-    NodeInfoMirrorer::NodeInfoMirrorer(boost::asio::io_context& io)
-        : m_io(io)
+    NodeInfoMirrorer::NodeInfoMirrorer()
     {
     }
 

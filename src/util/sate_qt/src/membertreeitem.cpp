@@ -976,161 +976,168 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
         // Handle value
         // ----------------
         const auto& valCont = dc->GetValueContainerAt(i);
-        switch (m_member->memberType)
-        {
-        case BooleanMemberType:
-        {
-            const auto c = static_cast<const BooleanContainer*>(&valCont);
-            dictItem->m_value = c->GetVal() ? "true" : "false";
-        }
-        break;
+        //dictItem
+        dictItem->m_isChanged = valCont.IsChanged();
+        dictItem->m_isNull = valCont.IsNull();
 
-        case EnumerationMemberType:
+        if (!dictItem->m_isNull)
         {
-            const auto c = static_cast<const EnumerationContainerBase*>(&valCont);
-            dictItem->m_value = QString::fromStdWString(Operations::GetEnumerationValueName(m_member->memberTypeId, c->GetOrdinal()));
-        }
-        break;
+            switch (m_member->memberType)
+            {
+            case BooleanMemberType:
+            {
+                const auto c = static_cast<const BooleanContainer*>(&valCont);
+                dictItem->m_value = c->GetVal() ? "true" : "false";
+            }
+            break;
 
-        case Int32MemberType:
-        {
-            const auto c = static_cast<const Int32Container*>(&valCont);
-            dictItem->m_value = QString::number(c->GetVal());
-        }
-        break;
+            case EnumerationMemberType:
+            {
+                const auto c = static_cast<const EnumerationContainerBase*>(&valCont);
+                dictItem->m_value = QString::fromStdWString(Operations::GetEnumerationValueName(m_member->memberTypeId, c->GetOrdinal()));
+            }
+            break;
 
-        case Int64MemberType:
-        {
-            const auto c = static_cast<const Int64Container*>(&valCont);
-            dictItem->m_value = QString::number(c->GetVal());
-        }
-        break;
+            case Int32MemberType:
+            {
+                const auto c = static_cast<const Int32Container*>(&valCont);
+                dictItem->m_value = QString::number(c->GetVal());
+            }
+            break;
 
-        case Float32MemberType:
-        {
-            const auto c = static_cast<const Float32Container*>(&valCont);
-            dictItem->m_value = QString::number(c->GetVal());
-        }
-        break;
+            case Int64MemberType:
+            {
+                const auto c = static_cast<const Int64Container*>(&valCont);
+                dictItem->m_value = QString::number(c->GetVal());
+            }
+            break;
+
+            case Float32MemberType:
+            {
+                const auto c = static_cast<const Float32Container*>(&valCont);
+                dictItem->m_value = QString::number(c->GetVal());
+            }
+            break;
 
 
-        case Float64MemberType:
-        {
-            const auto c = static_cast<const Float64Container*>(&valCont);
-            m_value = QString::number(c->GetVal());
-        }
-        break;
+            case Float64MemberType:
+            {
+                const auto c = static_cast<const Float64Container*>(&valCont);
+                m_value = QString::number(c->GetVal());
+            }
+            break;
 
-        case TypeIdMemberType:
-        {
-            const auto c = static_cast<const TypeIdContainer*>(&valCont);
-            dictItem->m_value = TypeIdToString(c->GetVal());
-        }
-        break;
+            case TypeIdMemberType:
+            {
+                const auto c = static_cast<const TypeIdContainer*>(&valCont);
+                dictItem->m_value = TypeIdToString(c->GetVal());
+            }
+            break;
 
-        case InstanceIdMemberType:
-        {
-            const auto c = static_cast<const InstanceIdContainer*>(&valCont);
-            dictItem->m_value = QString::fromStdWString(c->GetVal().ToString());
-        }
-        break;
+            case InstanceIdMemberType:
+            {
+                const auto c = static_cast<const InstanceIdContainer*>(&valCont);
+                dictItem->m_value = QString::fromStdWString(c->GetVal().ToString());
+            }
+            break;
 
-        case EntityIdMemberType:
-        {
-            const auto c = static_cast<const EntityIdContainer*>(&valCont);
-            dictItem->m_value = TypeIdToString(c->GetVal().GetTypeId()) + " : " + QString::fromStdWString(c->GetVal().GetInstanceId().ToString());
-        }
-        break;
+            case EntityIdMemberType:
+            {
+                const auto c = static_cast<const EntityIdContainer*>(&valCont);
+                dictItem->m_value = TypeIdToString(c->GetVal().GetTypeId()) + " : " + QString::fromStdWString(c->GetVal().GetInstanceId().ToString());
+            }
+            break;
 
-        case ChannelIdMemberType:
-        {
-            const auto c = static_cast<const ChannelIdContainer*>(&valCont);
-            dictItem->m_value = QString::fromStdWString(c->GetVal().ToString());
-        }
-        break;
+            case ChannelIdMemberType:
+            {
+                const auto c = static_cast<const ChannelIdContainer*>(&valCont);
+                dictItem->m_value = QString::fromStdWString(c->GetVal().ToString());
+            }
+            break;
 
-        case HandlerIdMemberType:
-        {
-            const auto c = static_cast<const HandlerIdContainer*>(&valCont);
-            dictItem->m_value = QString::fromStdWString(c->GetVal().ToString());
-        }
-        break;
+            case HandlerIdMemberType:
+            {
+                const auto c = static_cast<const HandlerIdContainer*>(&valCont);
+                dictItem->m_value = QString::fromStdWString(c->GetVal().ToString());
+            }
+            break;
 
-        case StringMemberType:
-        {
-            const auto c = static_cast<const StringContainer*>(&valCont);
-            dictItem->m_value = QString::fromStdWString(c->GetVal());
-        }
-        break;
+            case StringMemberType:
+            {
+                const auto c = static_cast<const StringContainer*>(&valCont);
+                dictItem->m_value = QString::fromStdWString(c->GetVal());
+            }
+            break;
 
-        case BinaryMemberType:
-        {
-            const auto c = static_cast<const BinaryContainer*>(&valCont);
-            auto b64 = Safir::Dob::Typesystem::Utilities::BinaryToBase64(c->GetVal());
-            m_value = QString::fromStdString(b64);
-        }
-        break;
+            case BinaryMemberType:
+            {
+                const auto c = static_cast<const BinaryContainer*>(&valCont);
+                auto b64 = Safir::Dob::Typesystem::Utilities::BinaryToBase64(c->GetVal());
+                m_value = QString::fromStdString(b64);
+            }
+            break;
 
-        case Ampere32MemberType:
-        case CubicMeter32MemberType:
-        case Hertz32MemberType:
-        case Joule32MemberType:
-        case Kelvin32MemberType:
-        case Kilogram32MemberType:
-        case Meter32MemberType:
-        case MeterPerSecond32MemberType:
-        case MeterPerSecondSquared32MemberType:
-        case Newton32MemberType:
-        case Pascal32MemberType:
-        case Radian32MemberType:
-        case RadianPerSecond32MemberType:
-        case RadianPerSecondSquared32MemberType:
-        case Second32MemberType:
-        case SquareMeter32MemberType:
-        case Steradian32MemberType:
-        case Volt32MemberType:
-        case Watt32MemberType:
-        {
-            const auto c = static_cast<const Float32Container*>(&valCont);
-            dictItem->m_value = QString::number(c->GetVal());
-        }
-        break;
+            case Ampere32MemberType:
+            case CubicMeter32MemberType:
+            case Hertz32MemberType:
+            case Joule32MemberType:
+            case Kelvin32MemberType:
+            case Kilogram32MemberType:
+            case Meter32MemberType:
+            case MeterPerSecond32MemberType:
+            case MeterPerSecondSquared32MemberType:
+            case Newton32MemberType:
+            case Pascal32MemberType:
+            case Radian32MemberType:
+            case RadianPerSecond32MemberType:
+            case RadianPerSecondSquared32MemberType:
+            case Second32MemberType:
+            case SquareMeter32MemberType:
+            case Steradian32MemberType:
+            case Volt32MemberType:
+            case Watt32MemberType:
+            {
+                const auto c = static_cast<const Float32Container*>(&valCont);
+                dictItem->m_value = QString::number(c->GetVal());
+            }
+            break;
 
-        case Ampere64MemberType:
-        case CubicMeter64MemberType:
-        case Hertz64MemberType:
-        case Joule64MemberType:
-        case Kelvin64MemberType:
-        case Kilogram64MemberType:
-        case Meter64MemberType:
-        case MeterPerSecond64MemberType:
-        case MeterPerSecondSquared64MemberType:
-        case Newton64MemberType:
-        case Pascal64MemberType:
-        case Radian64MemberType:
-        case RadianPerSecond64MemberType:
-        case RadianPerSecondSquared64MemberType:
-        case Second64MemberType:
-        case SquareMeter64MemberType:
-        case Steradian64MemberType:
-        case Volt64MemberType:
-        case Watt64MemberType:
-        {
-            const auto c = static_cast<const Float64Container*>(&valCont);
-            dictItem->m_value = QString::number(c->GetVal());
-        }
-        break;
+            case Ampere64MemberType:
+            case CubicMeter64MemberType:
+            case Hertz64MemberType:
+            case Joule64MemberType:
+            case Kelvin64MemberType:
+            case Kilogram64MemberType:
+            case Meter64MemberType:
+            case MeterPerSecond64MemberType:
+            case MeterPerSecondSquared64MemberType:
+            case Newton64MemberType:
+            case Pascal64MemberType:
+            case Radian64MemberType:
+            case RadianPerSecond64MemberType:
+            case RadianPerSecondSquared64MemberType:
+            case Second64MemberType:
+            case SquareMeter64MemberType:
+            case Steradian64MemberType:
+            case Volt64MemberType:
+            case Watt64MemberType:
+            {
+                const auto c = static_cast<const Float64Container*>(&valCont);
+                dictItem->m_value = QString::number(c->GetVal());
+            }
+            break;
 
-        case ObjectMemberType:
-        {
-            const auto objCont = static_cast<const ObjectContainerBase*>(&valCont);
-            auto object = objCont->GetObjectPointer();
-            auto objTypeId = object->GetTypeId();
-            m_cls = TypesystemRepository::Instance().GetClass(objTypeId);
-            dictItem->m_value = QString("<%1>").arg(m_cls->name);
-            SetupObject(object);
-        }
-        break;
+            case ObjectMemberType:
+            {
+                const auto objCont = static_cast<const ObjectContainerBase*>(&valCont);
+                auto object = objCont->GetObjectPointer();
+                auto objTypeId = object->GetTypeId();
+                m_cls = TypesystemRepository::Instance().GetClass(objTypeId);
+                dictItem->m_value = QString("<%1>").arg(m_cls->name);
+                SetupObject(object);
+            }
+            break;
+            }
         }
 
         m_children.emplace_back(std::move(dictItem));

@@ -69,8 +69,7 @@ namespace Safir
 namespace Control
 {
 
-ConnectionStatisticsServiceHandler::ConnectionStatisticsServiceHandler(boost::asio::io_context& io)
-    : m_io(io)
+ConnectionStatisticsServiceHandler::ConnectionStatisticsServiceHandler()
 {
 }
 
