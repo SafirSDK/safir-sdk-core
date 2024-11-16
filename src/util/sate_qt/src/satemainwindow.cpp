@@ -133,8 +133,8 @@ SateMainWindow::~SateMainWindow()
 void SateMainWindow::OnOpenInstanceViewer(const int64_t typeId, const bool includeSubclasses)
 {
     const auto* const cls = TypesystemRepository::Instance().GetClass(typeId);
-
-    auto* dock = m_dockManager->findDockWidget(cls->name);
+    const auto tabObjectName = "IV" + cls->name;
+    auto* dock = m_dockManager->findDockWidget(tabObjectName);
     if (dock != nullptr)
     {
         if (dock->property("includeSubclasses").toBool() != includeSubclasses)
@@ -152,6 +152,7 @@ void SateMainWindow::OnOpenInstanceViewer(const int64_t typeId, const bool inclu
     // no previous dock found, create new
     auto ev = new InstancesWidget(m_dob.get(), typeId, includeSubclasses, this);
     dock = new ads::CDockWidget(cls->name);
+    dock->setObjectName(tabObjectName);
     dock->setWidget(ev);
     dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
     dock->setProperty("includeSubclasses",includeSubclasses);
@@ -181,6 +182,7 @@ void SateMainWindow::OnOpenInstanceViewer(const int64_t typeId, const bool inclu
     }
 
     m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
+    connect(ev,&InstancesWidget::OpenObjectEdit,this,&SateMainWindow::OnOpenObjectEditWithInstance);
 }
 
 void SateMainWindow::OnConnectedToDob(const QString& connectionName)
@@ -201,21 +203,27 @@ void SateMainWindow::OnReceivedTableDoubleClicked(const QModelIndex& ix)
     auto recvObjItem = static_cast<ReceivedModel*>(m_received->model())->ReadItem(ix.row());
     if (recvObjItem.object)
     {
-        auto oe = new DobObjectEditWidget(m_dob.get(),
-                                          recvObjItem.typeId,
-                                          recvObjItem.channelHandler,
-                                          recvObjItem.instance,
-                                          recvObjItem.object,
-                                          this);
-        connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
-        connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
-        AddTab(TypesystemRepository::Instance().GetClass(recvObjItem.typeId)->name, oe);
+        OnOpenObjectEditWithInstance(recvObjItem.typeId,
+                                     recvObjItem.channelHandler,
+                                     recvObjItem.instance,
+                                     recvObjItem.object);
     }
 }
 
 void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
 {
     auto oe = new DobObjectEditWidget(m_dob.get(), typeId, this);
+    connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
+    connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe);
+}
+
+void SateMainWindow::OnOpenObjectEditWithInstance(int64_t typeId,
+                                                  QString channelHandler,
+                                                  int64_t instance,
+                                                  const Safir::Dob::Typesystem::ObjectPtr& object)
+{
+    auto oe = new DobObjectEditWidget(m_dob.get(), typeId, channelHandler, instance, object, this);
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
     AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe);

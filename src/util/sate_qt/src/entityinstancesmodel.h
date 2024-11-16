@@ -53,6 +53,15 @@ public:
     };
 
     void setSecond64Format(const Second64Format format);
+
+    struct Info
+    {
+        Safir::Dob::Typesystem::EntityId entityId;
+        Safir::Dob::Typesystem::HandlerId handlerId;
+        Safir::Dob::EntityPtr entity;
+    };
+
+    Info getRow(int row) const;
 private:
     int rowCount(const QModelIndex& parent) const override;
     int columnCount(const QModelIndex& parent) const override;
@@ -89,5 +98,5 @@ private:
     ColumnInfoList m_columnInfoList;
     Second64Format m_second64Format;
 
-    std::map<Safir::Dob::Typesystem::EntityId, Safir::Dob::EntityPtr> m_entities;
+    std::map<Safir::Dob::Typesystem::EntityId, Info> m_entities;
 };

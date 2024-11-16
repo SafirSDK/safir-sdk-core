@@ -161,6 +161,12 @@ EntityInstancesModel::~EntityInstancesModel()
 
 }
 
+EntityInstancesModel::Info EntityInstancesModel::getRow(int row) const
+{
+    auto it = m_entities.begin();
+    std::advance(it,row);
+    return it->second;
+}
 
 int EntityInstancesModel::rowCount(const QModelIndex& /*parent*/) const
 {
@@ -215,7 +221,7 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
     {
     case SingleValueCollectionType:
         {
-            const auto& container = entity->second->GetMember(columnInfo->MemberIndex(),0);
+            const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),0);
             if (container.IsNull())
             {
                 return QVariant();
@@ -229,7 +235,7 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
             QStringList result;
             for (int i = 0; i < columnInfo->ArrayLength(); ++i)
             {
-                const auto& container = entity->second->GetMember(columnInfo->MemberIndex(),i);
+                const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),i);
                 if (!container.IsNull())
                 {
                     result += ContainerToVariant(container, columnInfo->MemberType(), columnInfo->MemberTypeId()).toString();
@@ -247,7 +253,7 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
 
     case SequenceCollectionType:
         {
-            const auto& container = entity->second->GetMember(columnInfo->MemberIndex(),0);
+            const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),0);
             if (container.IsNull())
             {
                 return QVariant();
@@ -259,7 +265,7 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
 
     case DictionaryCollectionType:
         {
-            const auto& container = entity->second->GetMember(columnInfo->MemberIndex(),0);
+            const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),0);
             if (container.IsNull())
             {
                 return QVariant();
@@ -316,7 +322,7 @@ void EntityInstancesModel::setupColumns()
 }
 
 void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
-                                    const sdt::HandlerId& /*handler*/,
+                                    const sdt::HandlerId& handlerId,
                                     const Safir::Dob::EntityPtr& entity,
                                     const DobInterface::EntityOperation operation)
 {
@@ -324,7 +330,7 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
     {
     case DobInterface::NewEntity:
         {
-            const auto result = m_entities.insert(std::make_pair(entityId, entity));
+            const auto result = m_entities.insert(std::make_pair(entityId, Info{entityId, handlerId, entity}));
             const auto row = std::distance(m_entities.begin(), result.first);
             beginInsertRows(QModelIndex(), row, row);
             endInsertRows();
@@ -333,7 +339,7 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
     case DobInterface::UpdatedEntity:
         {
             const auto result = m_entities.insert_or_assign(entityId,
-                                                            entity);
+                                                            Info{entityId, handlerId, entity});
             const auto row = std::distance(m_entities.begin(), result.first);
             emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1));
         }

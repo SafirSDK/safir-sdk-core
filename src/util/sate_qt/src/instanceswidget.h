@@ -27,6 +27,7 @@
 #include <QTableView>
 
 class EntityInstancesModel;
+class QSortFilterProxyModel;
 
 class InstancesWidget
     : public QTableView
@@ -47,6 +48,7 @@ signals:
 private slots:
     void OnDoubleClicked(const QModelIndex &index);
 private:
-    EntityInstancesModel* m_model = nullptr;
+    QSortFilterProxyModel* m_proxyModel = nullptr;
+    EntityInstancesModel* m_sourceModel = nullptr;
 };
 

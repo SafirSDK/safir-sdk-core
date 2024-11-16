@@ -47,6 +47,10 @@ private slots:
     void OnConnectedToDob(const QString& connectionName);
     void OnReceivedTableDoubleClicked(const QModelIndex& ix);
     void OnOpenObjectEdit(const int64_t typeId);
+    void OnOpenObjectEditWithInstance(int64_t typeId,
+                                      QString channelHandler,
+                                      int64_t instance,
+                                      const Safir::Dob::Typesystem::ObjectPtr& object);
     void OnOpenDouFile(const int64_t typeId);
 
 private:

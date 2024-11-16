@@ -24,6 +24,7 @@
 #include "instanceswidget.h"
 
 #include <QHeaderView>
+#include <QSortFilterProxyModel>
 #include <iostream>
 #include "entityinstancesmodel.h"
 #include "typesystemrepository.h"
@@ -38,8 +39,10 @@ InstancesWidget::InstancesWidget(DobInterface* dob, int64_t typeId, bool include
     }
     else if (cls->dobBaseClass == TypesystemRepository::Entity)
     {
-        m_model = new EntityInstancesModel(dob, typeId, includeSubclasses, this);
-        setModel(m_model);
+        m_sourceModel = new EntityInstancesModel(dob, typeId, includeSubclasses, this);
+        m_proxyModel = new QSortFilterProxyModel(this);
+        m_proxyModel->setSourceModel(m_sourceModel);
+        setModel(m_proxyModel);
     }
     else
     {
@@ -68,6 +71,19 @@ void InstancesWidget::OnDoubleClicked(const QModelIndex &index)
     {
         return;
     }
+
+    const auto sourceIndex = m_proxyModel->mapToSource(index);
+    if (!sourceIndex.isValid())
+    {
+        return;
+    }
+    const auto& info = m_sourceModel->getRow(sourceIndex.row());
+    emit OpenObjectEdit(info.entityId.GetTypeId(),
+                        QString::fromStdWString(info.handlerId.ToString()),
+                        info.entityId.GetInstanceId().GetRawValue(),
+                        info.entity);
+
+    //    m_sourceModel->getObject
 
     //TODO: emit signal
 }
