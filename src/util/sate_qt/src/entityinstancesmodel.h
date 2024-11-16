@@ -34,10 +34,11 @@
 
 class EntityInstancesModel
     : public QAbstractTableModel
-//    , public Safir::Dob::EntitySubscriber
 {
     Q_OBJECT
 public:
+    enum {FilterRole = Qt::UserRole};
+
     EntityInstancesModel(DobInterface* dob,
                          const Safir::Dob::Typesystem::TypeId typeId,
                          bool includeSubclasses,

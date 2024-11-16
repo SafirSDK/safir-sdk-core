@@ -23,15 +23,78 @@
 ******************************************************************************/
 #include "instanceswidget.h"
 
+#include <QTableView>
+#include <QScrollBar>
 #include <QHeaderView>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLineEdit>
 #include <QSortFilterProxyModel>
 #include <iostream>
 #include "entityinstancesmodel.h"
 #include "typesystemrepository.h"
+#include <map>
+
+class ColumnSortFilterProxyModel
+    : public QSortFilterProxyModel
+{
+public:
+    ColumnSortFilterProxyModel(QWidget* parent)
+        : QSortFilterProxyModel(parent)
+    {
+    }
+
+    void clearFilterRegularExpression(const int column)
+    {
+        m_filters.erase(column);
+        invalidateFilter();
+    }
+
+    void setFilterRegularExpression(const int column, const QRegularExpression& regex)
+    {
+        m_filters[column] = regex;
+        invalidateFilter();
+    }
+
+protected:
+    bool filterAcceptsRow(int source_row, const QModelIndex&) const override
+    {
+        for (const auto& filter: m_filters)
+        {
+            const auto column = filter.first;
+            const auto& regex = filter.second;
+            const auto& data = sourceModel()->data(sourceModel()->index(source_row, column), filterRole()).toString();
+            if (!regex.match(data).hasMatch())
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+private:
+    std::map<int, QRegularExpression> m_filters;
+};
+
 
 InstancesWidget::InstancesWidget(DobInterface* dob, int64_t typeId, bool includeSubclasses, QWidget* parent)
-    : QTableView(parent)
+    : QWidget(parent)
+    , m_table(new QTableView(this))
+    , m_filterArea(new QWidget(this))
+    , m_filterAreaLayout(new QHBoxLayout(m_filterArea))
 {
+    auto* layout = new QVBoxLayout(this);
+    layout->addWidget(m_table,100);
+    layout->addWidget(m_filterArea,1);
+
+    m_filterArea->setLayout(m_filterAreaLayout);
+    m_filterAreaLayout->setSpacing(2);
+    m_filterAreaLayout->setContentsMargins(0,0,0,0);
+
+    //connect the header count and sizes
+    connect(m_table->horizontalHeader(),&QHeaderView::sectionResized, this, &InstancesWidget::OnSectionResized);
+    connect(m_table->horizontalHeader(),&QHeaderView::sectionCountChanged, this, &InstancesWidget::OnSectionCountChanged);
+
     const auto* cls = TypesystemRepository::Instance().GetClass(typeId);
     if (cls == nullptr)
     {
@@ -40,23 +103,25 @@ InstancesWidget::InstancesWidget(DobInterface* dob, int64_t typeId, bool include
     else if (cls->dobBaseClass == TypesystemRepository::Entity)
     {
         m_sourceModel = new EntityInstancesModel(dob, typeId, includeSubclasses, this);
-        m_proxyModel = new QSortFilterProxyModel(this);
+        m_proxyModel = new ColumnSortFilterProxyModel(this);
         m_proxyModel->setSourceModel(m_sourceModel);
-        setModel(m_proxyModel);
+        m_proxyModel->setFilterRole(EntityInstancesModel::FilterRole);
+        m_table->setModel(m_proxyModel);
     }
     else
     {
         throw std::logic_error("InstancesWidget only supports entities at the moment.");
     }
 
-    setSortingEnabled(true);
-    setSelectionBehavior(SelectRows);
-    horizontalHeader()->setStretchLastSection(true);
-    horizontalHeader()->setHighlightSections(false);
-    verticalHeader()->setVisible(false);
-    resizeColumnsToContents();
+    m_table->setSortingEnabled(true);
+    m_table->setSelectionBehavior(QTableView::SelectRows);
+    m_table->horizontalHeader()->setHighlightSections(false);
+    m_table->verticalHeader()->setVisible(false);
+    m_table->resizeColumnsToContents();
+    m_table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    connect(this, &QTableView::doubleClicked, this, &InstancesWidget::OnDoubleClicked);
+    connect(m_table, &QTableView::doubleClicked, this, &InstancesWidget::OnDoubleClicked);
 }
 
 InstancesWidget::~InstancesWidget()
@@ -82,8 +147,52 @@ void InstancesWidget::OnDoubleClicked(const QModelIndex &index)
                         QString::fromStdWString(info.handlerId.ToString()),
                         info.entityId.GetInstanceId().GetRawValue(),
                         info.entity);
-
-    //    m_sourceModel->getObject
-
-    //TODO: emit signal
 }
+
+void InstancesWidget::OnFilterTextChanged(const int column, const QString &text)
+{
+    const QRegularExpression regex(text,QRegularExpression::CaseInsensitiveOption);
+
+    if (text.isEmpty())
+    {
+        m_proxyModel->clearFilterRegularExpression(column);
+    }
+    else if (!regex.isValid())
+    {
+        m_filters[column]->setStyleSheet("background:red;");
+        m_filters[column]->setToolTip(regex.errorString());
+        return;
+    }
+    else
+    {
+        m_proxyModel->setFilterRegularExpression(column, regex);
+    }
+
+    m_filters[column]->setStyleSheet("");
+    m_filters[column]->setToolTip("");
+
+}
+
+
+
+void InstancesWidget::OnSectionResized(const int logicalIndex, const int /*oldSize*/, const int newSize)
+{
+    m_filters[logicalIndex]->setFixedWidth(newSize-2);
+}
+
+void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int newCount)
+{
+    m_filterAreaLayout->addSpacing(2);
+    for (int i = 0; i < newCount; ++i)
+    {
+        m_filters.push_back(new QLineEdit(this));
+        m_filters.back()->setPlaceholderText("Filter");
+        m_filters.back()->setClearButtonEnabled(true);
+        m_filters.back()->setFixedWidth(m_table->columnWidth(i)-2);
+        connect(m_filters.back(),&QLineEdit::textChanged,this,
+                [this,i](const QString& text){OnFilterTextChanged(i,text);});
+        m_filterAreaLayout->addWidget(m_filters.back(),1);
+    }
+    m_filterAreaLayout->addStretch(100);
+}
+

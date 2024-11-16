@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright Saab AB, 2014, 2022 (http://safirsdkcore.com)
+ * Copyright Saab AB, 2014, 2022, 2024 (http://safirsdkcore.com)
  *
  * Created by: Patrik Fundberg / patrik.fundberg@saabgroup.com
  *
@@ -203,7 +203,12 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
 {
     using namespace Safir::Dob::Typesystem;
 
-    if (role != Qt::DisplayRole && role != Qt::ToolTipRole)
+    if (!index.isValid())
+    {
+        return QVariant();
+    }
+
+    if (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != FilterRole)
     {
         return QVariant();
     }
@@ -232,6 +237,10 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
 
     case ArrayCollectionType:
         {
+            if (role == Qt::DisplayRole)
+            {
+                return "<array>";
+            }
             QStringList result;
             for (int i = 0; i < columnInfo->ArrayLength(); ++i)
             {
@@ -253,6 +262,10 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
 
     case SequenceCollectionType:
         {
+            if (role == Qt::DisplayRole)
+            {
+                return "<sequence>";
+            }
             const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),0);
             if (container.IsNull())
             {
@@ -265,6 +278,11 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
 
     case DictionaryCollectionType:
         {
+            if (role == Qt::DisplayRole)
+            {
+                return "<dictionary>";
+            }
+
             const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),0);
             if (container.IsNull())
             {

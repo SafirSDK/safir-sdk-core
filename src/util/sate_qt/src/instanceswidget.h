@@ -24,13 +24,17 @@
 #pragma once
 
 #include "dobinterface.h"
-#include <QTableView>
+#include <QWidget>
 
+class QTableView;
+class QWidget;
+class QLineEdit;
+class QHBoxLayout;
 class EntityInstancesModel;
-class QSortFilterProxyModel;
+class ColumnSortFilterProxyModel;
 
 class InstancesWidget
-    : public QTableView
+    : public QWidget
 {
     Q_OBJECT
 
@@ -47,8 +51,15 @@ signals:
 
 private slots:
     void OnDoubleClicked(const QModelIndex &index);
+    void OnFilterTextChanged(const int column, const QString &text);
+    void OnSectionResized(const int logicalIndex, const int oldSize, const int newSize);
+    void OnSectionCountChanged(const int oldCount, const int newCount);
 private:
-    QSortFilterProxyModel* m_proxyModel = nullptr;
+    QTableView* m_table;
+    QWidget* m_filterArea;
+    QHBoxLayout* m_filterAreaLayout;
+    QList<QLineEdit*> m_filters;
+    ColumnSortFilterProxyModel* m_proxyModel = nullptr;
     EntityInstancesModel* m_sourceModel = nullptr;
 };
 
