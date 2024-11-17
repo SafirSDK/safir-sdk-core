@@ -154,7 +154,7 @@ Safir::Dob::Typesystem::HandlerId OperationsWidget::Handler() const
 
 Safir::Dob::Typesystem::InstanceId OperationsWidget::Instance() const
 {
-    auto s = idEdit->text();
+    auto s = instanceEdit->text();
     return s.isEmpty() ? Safir::Dob::Typesystem::InstanceId::GenerateRandom() : ToHashType<Safir::Dob::Typesystem::InstanceId>(s);
 }
 
