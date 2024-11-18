@@ -28,7 +28,11 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QMenu>
+#include <QAction>
 #include <QLineEdit>
+#include <QCheckBox>
+#include <QWidgetAction>
 #include <QSortFilterProxyModel>
 #include <iostream>
 #include "entityinstancesmodel.h"
@@ -117,11 +121,16 @@ InstancesWidget::InstancesWidget(DobInterface* dob, int64_t typeId, bool include
     m_table->setSelectionBehavior(QTableView::SelectRows);
     m_table->horizontalHeader()->setHighlightSections(false);
     m_table->verticalHeader()->setVisible(false);
-    m_table->resizeColumnsToContents();
-    m_table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_table->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+    m_table->setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(m_table, &QTableView::doubleClicked, this, &InstancesWidget::OnDoubleClicked);
+    connect(m_table->horizontalHeader(), &QWidget::customContextMenuRequested, this, &InstancesWidget::OnCustomContextMenuRequestedHeader);
+    connect(m_table, &QWidget::customContextMenuRequested, this, &InstancesWidget::OnCustomContextMenuRequestedTable);
+
+    //Resize table columns after the table has been populated
+    QMetaObject::invokeMethod(this, [this]{m_table->resizeColumnsToContents();}, Qt::QueuedConnection);
 }
 
 InstancesWidget::~InstancesWidget()
@@ -177,7 +186,11 @@ void InstancesWidget::OnFilterTextChanged(const int column, const QString &text)
 
 void InstancesWidget::OnSectionResized(const int logicalIndex, const int /*oldSize*/, const int newSize)
 {
-    m_filters[logicalIndex]->setFixedWidth(newSize-2);
+    m_filters[logicalIndex]->setHidden(newSize == 0);
+    if (newSize != 0)
+    {
+        m_filters[logicalIndex]->setFixedWidth(newSize-2);
+    }
 }
 
 void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int newCount)
@@ -196,3 +209,75 @@ void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int ne
     m_filterAreaLayout->addStretch(100);
 }
 
+
+void InstancesWidget::OnCustomContextMenuRequestedHeader(const QPoint& pos)
+{
+    const auto logicalIndex = m_table->horizontalHeader()->logicalIndexAt(pos);
+    const auto globalPos = m_table->horizontalHeader()->mapToGlobal(pos);
+    RunColumnContextMenu(globalPos, logicalIndex);
+}
+
+
+void InstancesWidget::OnCustomContextMenuRequestedTable(const QPoint& pos)
+{
+    if (m_table->horizontalHeader()->hiddenSectionCount() == m_table->horizontalHeader()->count())
+    {
+        const auto globalPos = m_table->mapToGlobal(pos);
+        RunColumnContextMenu(globalPos, -1);
+    }
+}
+
+void InstancesWidget::RunColumnContextMenu(const QPoint& globalPos, const int logicalIndex)
+{
+    QMenu menu(this);
+    auto* hideAction = new QAction(tr("Hide this column"));
+    auto* showAllAction = new QAction(tr("Show all columns"));
+    auto* hideAllAction = new QAction(tr("Hide all columns"));
+    if (logicalIndex != -1)
+    {
+        menu.addAction(hideAction);
+        menu.addSeparator();
+    }
+
+    menu.addAction(showAllAction);
+    menu.addAction(hideAllAction);
+    menu.addSeparator();
+    for (int i = 0; i < m_table->horizontalHeader()->count(); ++i)
+    {
+        auto* action = new QAction(m_table->model()->headerData(i, Qt::Horizontal).toString());
+        action->setProperty("columnNumber", i);
+        action->setCheckable(true);
+        action->setChecked(!m_table->isColumnHidden(i));
+        menu.addAction(action);
+    }
+
+    const auto* const chosenAction = menu.exec(globalPos);
+
+    if (chosenAction == nullptr)
+    {
+        return;
+    }
+    else if (chosenAction == hideAction)
+    {
+        m_table->hideColumn(logicalIndex);
+    }
+    else if (chosenAction == showAllAction)
+    {
+        for (int i = 0; i < m_table->horizontalHeader()->count(); ++i)
+        {
+            m_table->showColumn(i);
+        }
+    }
+    else if (chosenAction == hideAllAction)
+    {
+        for (int i = 0; i < m_table->horizontalHeader()->count(); ++i)
+        {
+            m_table->hideColumn(i);
+        }
+    }
+    else
+    {
+        auto column = chosenAction->property("columnNumber").toInt();
+        m_table->setColumnHidden(column, !chosenAction->isChecked());
+    }
+}

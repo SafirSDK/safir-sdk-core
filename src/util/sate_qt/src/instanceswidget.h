@@ -54,6 +54,9 @@ private slots:
     void OnFilterTextChanged(const int column, const QString &text);
     void OnSectionResized(const int logicalIndex, const int oldSize, const int newSize);
     void OnSectionCountChanged(const int oldCount, const int newCount);
+    void OnCustomContextMenuRequestedHeader(const QPoint& pos);
+    void OnCustomContextMenuRequestedTable(const QPoint& pos);
+    void RunColumnContextMenu(const QPoint& globalPos, const int logicalIndex);
 private:
     QTableView* m_table;
     QWidget* m_filterArea;
