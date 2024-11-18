@@ -136,20 +136,28 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
     {
         return QVariant();
     }
-    if (role == Qt::SizeHintRole)
-    {
-        //qDebug() << "SizeHintRole" << index;
-    }
-    if (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != FilterRole)
+
+    //first get rid of all roles we don't handle
+    if (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != FilterRole && role != Qt::TextAlignmentRole)
     {
         return QVariant();
     }
+
     auto columnInfo = m_columnInfoList.at(index.column());
+
+    if (role == Qt::TextAlignmentRole)
+    {
+        return QVariant(columnInfo->Alignment());
+    }
+
 
     const auto entity = std::next(m_entities.cbegin(), index.row());
 
-    //Handle first column
-    if (columnInfo->IsEntityIdColumn())
+    if (columnInfo->IsTypeNameColumn())
+    {
+        return QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(entity->first.GetTypeId()));
+    }
+    if (columnInfo->IsInstanceIdColumn())
     {
         return static_cast<qlonglong>(entity->first.GetInstanceId().GetRawValue());
     }
@@ -249,7 +257,11 @@ void EntityInstancesModel::setupColumns()
     Safir::Dob::Typesystem::TypeId keyTypeId;
     Safir::Dob::Typesystem::CollectionType collectionType;
 
-    m_columnInfoList.append(ColumnInfo::Create(tr("InstanceId")));
+    if (m_includeSubclasses)
+    {
+        m_columnInfoList.append(ColumnInfo::CreateTypeName(tr("TypeName")));
+    }
+    m_columnInfoList.append(ColumnInfo::CreateInstanceId(tr("InstanceId")));
 
     Safir::Dob::Typesystem::Int32 numberOfMembers = Safir::Dob::Typesystem::Members::GetNumberOfMembers(m_typeId);
     for(Safir::Dob::Typesystem::Int32 memberIndex = 0 ; memberIndex < numberOfMembers ; ++memberIndex)
@@ -306,20 +318,6 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
 }
 
 
-#if 0
-void EntityInstancesModel::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
-{
-}
-
-void EntityInstancesModel::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
-{
-}
-
-void EntityInstancesModel::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*deprecated*/)
-{
-}
-#endif
-
 void EntityInstancesModel::setSecond64Format(const Second64Format format)
 {
     if (m_second64Format == format)
@@ -349,8 +347,18 @@ QVariant EntityInstancesModel::ContainerToVariant(const Safir::Dob::Typesystem::
     case Int32MemberType:
         return static_cast<const Int32Container&>(container).GetVal();
     case Int64MemberType:
-    case TypeIdMemberType:
         return static_cast<qlonglong>(static_cast<const Int64Container&>(container).GetVal());
+    case TypeIdMemberType:
+        try
+        {
+            return QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName
+                                           (static_cast<const TypeIdContainer&>(container).GetVal()));
+        }
+        catch(const Safir::Dob::Typesystem::IllegalValueException&)
+        {
+            return static_cast<qlonglong>(static_cast<const Int64Container&>(container).GetVal());
+        }
+
     case InstanceIdMemberType:
         return static_cast<qlonglong>(static_cast<const InstanceIdContainer&>(container).GetVal().GetRawValue());
     case EntityIdMemberType:
@@ -417,8 +425,8 @@ QVariant EntityInstancesModel::ContainerToVariant(const Safir::Dob::Typesystem::
 }
 
 QStringList EntityInstancesModel::SequenceToStrings(const Safir::Dob::Typesystem::ContainerBase& container,
-                                           const Safir::Dob::Typesystem::MemberType memberType,
-                                           const Safir::Dob::Typesystem::TypeId memberTypeId) const
+                                                    const Safir::Dob::Typesystem::MemberType memberType,
+                                                    const Safir::Dob::Typesystem::TypeId memberTypeId) const
 {
     using namespace Safir::Dob::Typesystem;
     switch (memberType)
@@ -438,8 +446,20 @@ QStringList EntityInstancesModel::SequenceToStrings(const Safir::Dob::Typesystem
     case Int32MemberType:
         return ::SequenceToStrings<Int32SequenceContainer>(container);
     case Int64MemberType:
-    case TypeIdMemberType:
         return ::SequenceToStrings<Int64SequenceContainer>(container);
+    case TypeIdMemberType:
+        return ::SequenceToStrings<TypeIdSequenceContainer>(container,[](const TypeId v)
+        {
+            try
+            {
+                return QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(v));
+            }
+            catch(const Safir::Dob::Typesystem::IllegalValueException&)
+            {
+                return QVariant(static_cast<qint64>(v)).toString();
+            }
+        });
+
     case InstanceIdMemberType:
         return ::SequenceToStrings<InstanceIdSequenceContainer>(container,
                                                               [](const auto& v){return QString::fromStdWString(v.ToString());});
@@ -590,4 +610,3 @@ QVariant EntityInstancesModel::Second64ToVariant(const Safir::Dob::Typesystem::S
     }
     throw std::logic_error("Invalid Second64 format");
 }
-

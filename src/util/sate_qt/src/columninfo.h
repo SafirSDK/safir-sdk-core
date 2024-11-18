@@ -42,9 +42,8 @@ class ColumnInfo
 public:
     ~ColumnInfo();
 
-    //! Static factory method.
-    static ColumnInfoPtr Create(const QString &name);
-    //! Static factory method.
+    static ColumnInfoPtr CreateTypeName(const QString &name);
+    static ColumnInfoPtr CreateInstanceId(const QString &name);
     static ColumnInfoPtr Create(const QString &name,
                                 const Safir::Dob::Typesystem::TypeId typeId,
                                 const Safir::Dob::Typesystem::MemberIndex memberIndex,
@@ -55,8 +54,8 @@ public:
                                 const Safir::Dob::Typesystem::CollectionType collectionType,
                                 const Safir::Dob::Typesystem::Int32 arrayLength);
 
-    // Is entity id column or not.
-    bool IsEntityIdColumn() const { return m_entityIdColumn; }
+    bool IsTypeNameColumn() const { return m_typeNameColumn; }
+    bool IsInstanceIdColumn() const { return m_instanceIdColumn; }
 
     QString Name() const { return m_name; }
 
@@ -69,9 +68,10 @@ public:
     Safir::Dob::Typesystem::CollectionType CollectionType() const {return m_collectionType;}
     Safir::Dob::Typesystem::Int32 ArrayLength() const {return m_arrayLength;}
 
+    Qt::Alignment Alignment() const;
 private:
 
-    ColumnInfo(const QString &name);
+    ColumnInfo(const QString &name, bool typeNameColumn);
     ColumnInfo(const QString &name,
                const Safir::Dob::Typesystem::TypeId typeId,
                const Safir::Dob::Typesystem::MemberIndex memberIndex,
@@ -82,16 +82,16 @@ private:
                const Safir::Dob::Typesystem::CollectionType collectionType,
                const Safir::Dob::Typesystem::Int32 arrayLength);
 
-    // Member variables.
-    const bool m_entityIdColumn;
+    const bool m_typeNameColumn;
+    const bool m_instanceIdColumn;
     const QString m_name;
-    const Safir::Dob::Typesystem::TypeId m_typeId;
-    const Safir::Dob::Typesystem::Int32 m_memberIndex;
-    const Safir::Dob::Typesystem::MemberType m_memberType;
-    const Safir::Dob::Typesystem::MemberType m_keyType;
-    const Safir::Dob::Typesystem::TypeId m_memberTypeId;
-    const Safir::Dob::Typesystem::TypeId m_keyTypeId;
-    const Safir::Dob::Typesystem::CollectionType m_collectionType;
-    const Safir::Dob::Typesystem::Int32 m_arrayLength;
+    const Safir::Dob::Typesystem::TypeId m_typeId = 0;
+    const Safir::Dob::Typesystem::Int32 m_memberIndex = 0;
+    const Safir::Dob::Typesystem::MemberType m_memberType = BooleanMemberType;
+    const Safir::Dob::Typesystem::MemberType m_keyType = BooleanMemberType;
+    const Safir::Dob::Typesystem::TypeId m_memberTypeId = 0;
+    const Safir::Dob::Typesystem::TypeId m_keyTypeId = 0;
+    const Safir::Dob::Typesystem::CollectionType m_collectionType = SingleValueCollectionType;
+    const Safir::Dob::Typesystem::Int32 m_arrayLength = 0;
 
 };

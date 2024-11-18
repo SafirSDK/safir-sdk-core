@@ -23,17 +23,11 @@
 ******************************************************************************/
 #include "columninfo.h"
 
-ColumnInfo::ColumnInfo(const QString &name)
-    : m_entityIdColumn(true)
+ColumnInfo::ColumnInfo(const QString &name, bool typeNameColumn)
+    : m_typeNameColumn(typeNameColumn)
+    , m_instanceIdColumn(!typeNameColumn)
     , m_name(name)
-    , m_typeId(0)
-    , m_memberIndex(0)
-    , m_memberType(BooleanMemberType)
-    , m_keyType(BooleanMemberType)
-    , m_memberTypeId(0)
-    , m_keyTypeId(0)
-    , m_collectionType(SingleValueCollectionType)
-    , m_arrayLength(0)
+    , m_memberType(typeNameColumn?TypeIdMemberType:InstanceIdMemberType)
 {
 
 }
@@ -51,7 +45,8 @@ ColumnInfo::ColumnInfo(const QString &name,
                        const Safir::Dob::Typesystem::TypeId keyTypeId,
                        const Safir::Dob::Typesystem::CollectionType collectionType,
                        const Safir::Dob::Typesystem::Int32 arrayLength)
-    : m_entityIdColumn(false)
+    : m_typeNameColumn(false)
+    , m_instanceIdColumn(false)
     , m_name(name)
     , m_typeId(typeId)
     , m_memberIndex(memberIndex)
@@ -67,11 +62,16 @@ ColumnInfo::ColumnInfo(const QString &name,
 
 ColumnInfo::~ColumnInfo() = default;
 
-
-ColumnInfoPtr ColumnInfo::Create(const QString &name)
+ColumnInfoPtr ColumnInfo::CreateTypeName(const QString &name)
 {
-    return ColumnInfoPtr(new ColumnInfo(name));
+    return ColumnInfoPtr(new ColumnInfo(name,true));
 }
+
+ColumnInfoPtr ColumnInfo::CreateInstanceId(const QString &name)
+{
+    return ColumnInfoPtr(new ColumnInfo(name,false));
+}
+
 
 
 ColumnInfoPtr ColumnInfo::Create(const QString &name,
@@ -88,3 +88,72 @@ ColumnInfoPtr ColumnInfo::Create(const QString &name,
 }
 
 
+Qt::Alignment ColumnInfo::Alignment() const
+{
+    switch (m_memberType)
+    {
+    case BooleanMemberType:
+    case EnumerationMemberType:
+        return Qt::AlignLeft | Qt::AlignVCenter;
+    case Int32MemberType:
+    case Int64MemberType:
+    case Float32MemberType:
+    case Float64MemberType:
+        return Qt::AlignRight | Qt::AlignVCenter;
+    case TypeIdMemberType:
+        return Qt::AlignLeft | Qt::AlignVCenter;
+    case InstanceIdMemberType:
+        return Qt::AlignRight | Qt::AlignVCenter;
+    case EntityIdMemberType:
+    case ChannelIdMemberType:
+    case HandlerIdMemberType:
+    case StringMemberType:
+    case ObjectMemberType:
+    case BinaryMemberType:
+        return Qt::AlignLeft | Qt::AlignVCenter;
+        //  SI32 Types
+    case Ampere32MemberType:
+    case CubicMeter32MemberType:
+    case Hertz32MemberType:
+    case Joule32MemberType:
+    case Kelvin32MemberType:
+    case Kilogram32MemberType:
+    case Meter32MemberType:
+    case MeterPerSecond32MemberType:
+    case MeterPerSecondSquared32MemberType:
+    case Newton32MemberType:
+    case Pascal32MemberType:
+    case Radian32MemberType:
+    case RadianPerSecond32MemberType:
+    case RadianPerSecondSquared32MemberType:
+    case Second32MemberType:
+    case SquareMeter32MemberType:
+    case Steradian32MemberType:
+    case Volt32MemberType:
+    case Watt32MemberType:
+
+        //  SI Long Types
+    case Ampere64MemberType:
+    case CubicMeter64MemberType:
+    case Hertz64MemberType:
+    case Joule64MemberType:
+    case Kelvin64MemberType:
+    case Kilogram64MemberType:
+    case Meter64MemberType:
+    case MeterPerSecond64MemberType:
+    case MeterPerSecondSquared64MemberType:
+    case Newton64MemberType:
+    case Pascal64MemberType:
+    case Radian64MemberType:
+    case RadianPerSecond64MemberType:
+    case RadianPerSecondSquared64MemberType:
+    case Second64MemberType:
+    case SquareMeter64MemberType:
+    case Steradian64MemberType:
+    case Volt64MemberType:
+    case Watt64MemberType:
+        return Qt::AlignRight | Qt::AlignVCenter;
+    }
+
+    return Qt::AlignLeft;
+}
