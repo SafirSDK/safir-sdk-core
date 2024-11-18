@@ -22,12 +22,13 @@
 *
 ******************************************************************************/
 #include "satemainwindow.h"
-#include "./ui_satemainwindow.h"
+#include "ui_satemainwindow.h"
 #include "typesystemrepository.h"
 #include "dobobjecteditwidget.h"
 #include "dobhandler.h"
 #include "instanceswidget.h"
 #include "receivedmodel.h"
+#include "typesystemwidget.h"
 
 #include <QtConcurrent/QtConcurrent>
 #include <QLabel>
@@ -58,12 +59,10 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     //ads::CDockManager::setAutoHideConfigFlags(ads::CDockManager::DefaultAutoHideConfig);
 
     m_dockManager = new ads::CDockManager(this);
-    QFile f(":qdarkstyle/dark/ads.qss");
-    if (f.exists())   {
-        f.open(QFile::ReadOnly | QFile::Text);
-        QTextStream ts(&f);
-        m_dockManager->setStyleSheet(ts.readAll());
-    }
+    m_dockManager->setStyleSheet("");
+
+    //now we have everything we need to set the initial stylesheets
+    OnDarkMode();
 
     //Set up the central area as always present
     QLabel* label = new QLabel();
@@ -107,6 +106,9 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     receivedDock->setWidget(m_received);
     m_dockManager->addDockWidget(ads::BottomDockWidgetArea, receivedDock);
     ui->menuView->addAction(receivedDock->toggleViewAction());
+
+    connect(ui->actionDarkMode, &QAction::triggered, this, &SateMainWindow::OnDarkMode);
+    connect(ui->actionLightMode, &QAction::triggered, this, &SateMainWindow::OnLightMode);
 
     // DOB signal handling
     connect(m_dob.get(), &DobInterface::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
@@ -283,4 +285,55 @@ void SateMainWindow::AddTab(const QString& title, QWidget* widget)
     dock->setWidget(widget);
     dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
     m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
+}
+
+void SateMainWindow::OnDarkMode()
+{
+    ui->actionDarkMode->setChecked(true);
+    ui->actionLightMode->setChecked(false);
+
+    QFile ds(":qdarkstyle/dark/darkstyle.qss");
+    QFile tweaks(":customizations/tweaks.qss");
+    if (ds.exists() && tweaks.exists())
+    {
+        ds.open(QFile::ReadOnly | QFile::Text);
+        tweaks.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts1(&ds);
+        QTextStream ts2(&tweaks);
+        qApp->setStyleSheet(ts1.readAll() + "\n" + ts2.readAll());
+    }
+
+    QFile ads(":customizations/ads-dark.qss");
+    if (ads.exists())
+    {
+        ads.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts(&ads);
+        m_dockManager->setStyleSheet(ts.readAll());
+    }
+
+}
+
+void SateMainWindow::OnLightMode()
+{
+    ui->actionDarkMode->setChecked(false);
+    ui->actionLightMode->setChecked(true);
+
+    QFile ds(":qdarkstyle/light/lightstyle.qss");
+    QFile tweaks(":customizations/tweaks.qss");
+    if (ds.exists() && tweaks.exists())
+    {
+        ds.open(QFile::ReadOnly | QFile::Text);
+        tweaks.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts1(&ds);
+        QTextStream ts2(&tweaks);
+        qApp->setStyleSheet(ts1.readAll() + "\n" + ts2.readAll());
+    }
+
+    QFile ads(":customizations/ads-light.qss");
+    if (ads.exists())
+    {
+        ads.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts(&ads);
+        m_dockManager->setStyleSheet(ts.readAll());
+    }
 }

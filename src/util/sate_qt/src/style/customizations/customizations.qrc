@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="customizations">
+      <file>ads-light.qss</file>
+      <file>ads-dark.qss</file>
+      <file>tweaks.qss</file>
+  </qresource>
+</RCC>

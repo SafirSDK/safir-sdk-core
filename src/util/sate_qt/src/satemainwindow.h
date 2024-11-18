@@ -52,7 +52,8 @@ private slots:
                                       int64_t instance,
                                       const Safir::Dob::Typesystem::ObjectPtr& object);
     void OnOpenDouFile(const int64_t typeId);
-
+    void OnDarkMode();
+    void OnLightMode();
 private:
     Ui::SateMainWindow *ui;
     QLabel* m_instanceLabel = nullptr;

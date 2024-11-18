@@ -17,34 +17,47 @@
    <iconset resource="sate_resources.qrc">
     <normaloff>:/img/icons/sate.png</normaloff>:/img/icons/sate.png</iconset>
   </property>
-  <widget class="QWidget" name="centralwidget">
-  </widget>
+  <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>1704</width>
-     <height>23</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
+    <addaction name="actionDarkMode"/>
+    <addaction name="actionLightMode"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  </widget>
- <customwidgets>
-  <customwidget>
-   <class>TypesystemWidget</class>
-   <extends>QWidget</extends>
-   <header>typesystemwidget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
+  <action name="actionDarkMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Dark Mode</string>
+   </property>
+  </action>
+  <action name="actionLightMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Light Mode</string>
+   </property>
+  </action>
+ </widget>
  <resources>
   <include location="sate_resources.qrc"/>
  </resources>

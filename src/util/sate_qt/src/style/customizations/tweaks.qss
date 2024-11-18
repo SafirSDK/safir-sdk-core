@@ -1,0 +1,14 @@
+
+
+QTreeView:branch:has-siblings:!adjoins-item {
+  border-image: none;
+}
+
+QTreeView:branch:has-siblings:adjoins-item {
+  border-image: none;
+}
+
+QTreeView:branch:!has-children:!has-siblings:adjoins-item {
+  border-image: none;
+}
+

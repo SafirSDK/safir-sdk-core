@@ -32,9 +32,6 @@ set(sources
     instanceswidget.cpp
     entityinstancesmodel.cpp
     columninfo.cpp
-    qdarkstyle/dark/darkstyle.qss
-    qdarkstyle/dark/style.qss
-    qdarkstyle/dark/ads.qss
 )
 
 set(widget_headers
@@ -71,7 +68,12 @@ endif()
 
 QT_WRAP_UI(ui_headers ${ui})
 QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
-QT_ADD_RESOURCES(rcc_sources sate_resources.qrc qdarkstyle/dark/darkstyle.qrc)
+QT_ADD_RESOURCES(rcc_sources
+  sate_resources.qrc
+  style/dark/darkstyle.qrc
+  style/light/lightstyle.qrc
+  style/customizations/customizations.qrc
+)
 
 ADD_EXECUTABLE(sate_next WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} ${rcc_sources})
 
