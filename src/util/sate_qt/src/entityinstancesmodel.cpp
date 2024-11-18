@@ -293,9 +293,12 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
     case DobInterface::NewEntity:
         {
             const auto result = m_entities.insert(std::make_pair(entityId, Info{entityId, handlerId, entity}));
-            const auto row = std::distance(m_entities.begin(), result.first);
-            beginInsertRows(QModelIndex(), row, row);
-            endInsertRows();
+            if (result.second)
+            {
+                const auto row = std::distance(m_entities.begin(), result.first);
+                beginInsertRows(QModelIndex(), row, row);
+                endInsertRows();
+            }
         }
         break;
     case DobInterface::UpdatedEntity:
