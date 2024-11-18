@@ -34,75 +34,6 @@
 
 namespace
 {
-    int ColumnWidth(const Safir::Dob::Typesystem::MemberType memberType)
-    {
-        switch(memberType)
-        {
-        case StringMemberType:
-            return 150;
-        case EntityIdMemberType:
-            return 320;
-        case TypeIdMemberType:
-        case InstanceIdMemberType:
-            return 150;
-        case Int32MemberType:
-        case Int64MemberType:
-            return 100;
-        case EnumerationMemberType:
-            return 150;
-        case ChannelIdMemberType:
-        case HandlerIdMemberType:
-        case ObjectMemberType:
-        case BinaryMemberType:
-        case Float64MemberType:
-        case Ampere64MemberType:
-        case CubicMeter64MemberType:
-        case Hertz64MemberType:
-        case Joule64MemberType:
-        case Kelvin64MemberType:
-        case Kilogram64MemberType:
-        case Meter64MemberType:
-        case MeterPerSecond64MemberType:
-        case MeterPerSecondSquared64MemberType:
-        case Newton64MemberType:
-        case Pascal64MemberType:
-        case Radian64MemberType:
-        case RadianPerSecond64MemberType:
-        case RadianPerSecondSquared64MemberType:
-        case SquareMeter64MemberType:
-        case Steradian64MemberType:
-        case Volt64MemberType:
-        case Watt64MemberType:
-        case Float32MemberType:
-        case Ampere32MemberType:
-        case CubicMeter32MemberType:
-        case Hertz32MemberType:
-        case Joule32MemberType:
-        case Kelvin32MemberType:
-        case Kilogram32MemberType:
-        case Meter32MemberType:
-        case MeterPerSecond32MemberType:
-        case MeterPerSecondSquared32MemberType:
-        case Newton32MemberType:
-        case Pascal32MemberType:
-        case Radian32MemberType:
-        case RadianPerSecond32MemberType:
-        case RadianPerSecondSquared32MemberType:
-        case Second32MemberType:
-        case SquareMeter32MemberType:
-        case Steradian32MemberType:
-        case Volt32MemberType:
-        case Watt32MemberType:
-            return 100;
-        case Second64MemberType:
-            return 120;
-        case BooleanMemberType:
-            return 50;
-        }
-
-        return 50;
-    }
-
 
     template<class T, class U>
     QStringList SequenceToStrings(const Safir::Dob::Typesystem::ContainerBase& container, const U& transform)
@@ -190,8 +121,6 @@ QVariant EntityInstancesModel::headerData(const int section, const Qt::Orientati
             {
             case Qt::DisplayRole:
                 return columnInfo->Name();
-            case Qt::SizeHintRole:
-                return QSize(columnInfo->Width(), 20);
             }
         }
     }
@@ -207,7 +136,10 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
     {
         return QVariant();
     }
-
+    if (role == Qt::SizeHintRole)
+    {
+        //qDebug() << "SizeHintRole" << index;
+    }
     if (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != FilterRole)
     {
         return QVariant();
@@ -317,7 +249,7 @@ void EntityInstancesModel::setupColumns()
     Safir::Dob::Typesystem::TypeId keyTypeId;
     Safir::Dob::Typesystem::CollectionType collectionType;
 
-    m_columnInfoList.append(ColumnInfo::Create(ColumnWidth(TypeIdMemberType),tr("InstanceId")));
+    m_columnInfoList.append(ColumnInfo::Create(tr("InstanceId")));
 
     Safir::Dob::Typesystem::Int32 numberOfMembers = Safir::Dob::Typesystem::Members::GetNumberOfMembers(m_typeId);
     for(Safir::Dob::Typesystem::Int32 memberIndex = 0 ; memberIndex < numberOfMembers ; ++memberIndex)
@@ -334,7 +266,7 @@ void EntityInstancesModel::setupColumns()
                                                  arrayLength);
 
         const auto columnName = QString::fromUtf8(memberName);
-        ColumnInfoPtr columnInfo = ColumnInfo::Create(ColumnWidth(memberType),columnName,m_typeId,memberIndex,memberType,keyType,memberTypeId,keyTypeId,collectionType,arrayLength);
+        ColumnInfoPtr columnInfo = ColumnInfo::Create(columnName,m_typeId,memberIndex,memberType,keyType,memberTypeId,keyTypeId,collectionType,arrayLength);
         m_columnInfoList.append(columnInfo);
     }
 }

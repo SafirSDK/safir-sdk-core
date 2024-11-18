@@ -23,10 +23,8 @@
 ******************************************************************************/
 #include "columninfo.h"
 
-ColumnInfo::ColumnInfo(const int width,
-                       const QString &name)
+ColumnInfo::ColumnInfo(const QString &name)
     : m_entityIdColumn(true)
-    , m_width(width)
     , m_name(name)
     , m_typeId(0)
     , m_memberIndex(0)
@@ -44,8 +42,7 @@ ColumnInfo::ColumnInfo(const int width,
 ///////////////////////////////////////////////////////////////////////////////
 //! Constructor.
 ///////////////////////////////////////////////////////////////////////////////
-ColumnInfo::ColumnInfo(int width,
-                       const QString &name,
+ColumnInfo::ColumnInfo(const QString &name,
                        const Safir::Dob::Typesystem::TypeId typeId,
                        const Safir::Dob::Typesystem::MemberIndex memberIndex,
                        const Safir::Dob::Typesystem::MemberType memberType,
@@ -55,7 +52,6 @@ ColumnInfo::ColumnInfo(int width,
                        const Safir::Dob::Typesystem::CollectionType collectionType,
                        const Safir::Dob::Typesystem::Int32 arrayLength)
     : m_entityIdColumn(false)
-    , m_width(width)
     , m_name(name)
     , m_typeId(typeId)
     , m_memberIndex(memberIndex)
@@ -72,15 +68,13 @@ ColumnInfo::ColumnInfo(int width,
 ColumnInfo::~ColumnInfo() = default;
 
 
-ColumnInfoPtr ColumnInfo::Create(int width,
-                                 const QString &name)
+ColumnInfoPtr ColumnInfo::Create(const QString &name)
 {
-    return ColumnInfoPtr(new ColumnInfo(width,name));
+    return ColumnInfoPtr(new ColumnInfo(name));
 }
 
 
-ColumnInfoPtr ColumnInfo::Create(const int width,
-                                 const QString &name,
+ColumnInfoPtr ColumnInfo::Create(const QString &name,
                                  const Safir::Dob::Typesystem::TypeId typeId,
                                  const Safir::Dob::Typesystem::MemberIndex memberIndex,
                                  const Safir::Dob::Typesystem::MemberType memberType,
@@ -90,7 +84,7 @@ ColumnInfoPtr ColumnInfo::Create(const int width,
                                  const Safir::Dob::Typesystem::CollectionType collectionType,
                                  const Safir::Dob::Typesystem::Int32 arrayLength)
 {
-    return ColumnInfoPtr(new ColumnInfo(width,name,typeId,memberIndex,memberType,keyType,memberTypeId,keyTypeId,collectionType,arrayLength));
+    return ColumnInfoPtr(new ColumnInfo(name,typeId,memberIndex,memberType,keyType,memberTypeId,keyTypeId,collectionType,arrayLength));
 }
 
 

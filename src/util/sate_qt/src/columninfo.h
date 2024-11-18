@@ -43,11 +43,9 @@ public:
     ~ColumnInfo();
 
     //! Static factory method.
-    static ColumnInfoPtr Create(const int width,
-                                const QString &name);
+    static ColumnInfoPtr Create(const QString &name);
     //! Static factory method.
-    static ColumnInfoPtr Create(const int width,
-                                const QString &name,
+    static ColumnInfoPtr Create(const QString &name,
                                 const Safir::Dob::Typesystem::TypeId typeId,
                                 const Safir::Dob::Typesystem::MemberIndex memberIndex,
                                 const Safir::Dob::Typesystem::MemberType memberType,
@@ -60,7 +58,6 @@ public:
     // Is entity id column or not.
     bool IsEntityIdColumn() const { return m_entityIdColumn; }
 
-    int Width() const { return m_width; }
     QString Name() const { return m_name; }
 
     Safir::Dob::Typesystem::TypeId TypeId() const { return m_typeId; }
@@ -74,10 +71,8 @@ public:
 
 private:
 
-    ColumnInfo(int width,
-               const QString &name);
-    ColumnInfo(int width,
-               const QString &name,
+    ColumnInfo(const QString &name);
+    ColumnInfo(const QString &name,
                const Safir::Dob::Typesystem::TypeId typeId,
                const Safir::Dob::Typesystem::MemberIndex memberIndex,
                const Safir::Dob::Typesystem::MemberType memberType,
@@ -89,7 +84,6 @@ private:
 
     // Member variables.
     const bool m_entityIdColumn;
-    const int m_width;
     const QString m_name;
     const Safir::Dob::Typesystem::TypeId m_typeId;
     const Safir::Dob::Typesystem::Int32 m_memberIndex;

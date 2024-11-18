@@ -12,3 +12,10 @@ QTreeView:branch:!has-children:!has-siblings:adjoins-item {
   border-image: none;
 }
 
+QHeaderView::down-arrow {
+  padding-left: -4px;
+}
+
+QHeaderView::up-arrow {
+  padding-left: -4px;
+}
