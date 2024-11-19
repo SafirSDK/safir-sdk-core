@@ -288,6 +288,17 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
                                     const Safir::Dob::EntityPtr& entity,
                                     const DobInterface::EntityOperation operation)
 {
+    if (!m_includeSubclasses && entityId.GetTypeId() != m_typeId)
+    {
+        //not a type we're looking for
+        return;
+    }
+    if(m_includeSubclasses && !Safir::Dob::Typesystem::Operations::IsOfType(entityId.GetTypeId(), m_typeId))
+    {
+        //not a type we're looking for
+        return;
+    }
+
     switch(operation)
     {
     case DobInterface::NewEntity:
