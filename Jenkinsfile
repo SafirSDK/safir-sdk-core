@@ -19,7 +19,7 @@ def runCommand(Map map) {
     }
 }
 
-def runPython(Map map) {
+def runCommandInVenv(Map map) {
     def command = map.command
     if (betterIsUnix()) {
         if (map.linux_arguments != null)
@@ -30,7 +30,7 @@ def runPython(Map map) {
                    . .venv/bin/activate
                    python -m pip install --upgrade pip
                    python -m pip install -r build/requirements.txt
-                   python """ + command
+                   """ + command
     }
     else {
         command = command.replaceAll("/","\\\\")
@@ -42,15 +42,16 @@ def runPython(Map map) {
                    call .venv\\Scripts\\activate
                    python -m pip install --upgrade pip
                    python -m pip install -r build\\requirements.txt
-                   python """ + command
+                   """ + command
     }
 }
 
 
 def clean_check_and_build(platform, arch) {
     runCommand (command: "git clean -fxd")
-    runPython (command: "build/check_source_tree.py")
-    runPython (command: "build/build.py --jenkins --package",
+    runCommandInVenv (command: "conan export build/qt-advanced-docking-system/")
+    runCommandInVenv (command: "python build/check_source_tree.py")
+    runCommandInVenv (command: "python build/build.py --jenkins --package",
                 windows_arguments: "--use-studio ${platform} --arch ${arch}")
 }
 
@@ -177,7 +178,7 @@ def run_test_suite(platform, arch, buildType, sourceJob, sourceBuildNumber, lang
         //languages are picked up from environment variable
         //and for the multicomputer tests the artifacts to copy are inferred from environment too,
         //in run_test.py (in start_slave())
-        runPython (command: "build/jenkins_stuff/run_test.py --test ${testType}")
+        runCommandInVenv (command: "python build/jenkins_stuff/run_test.py --test ${testType}")
     }
 
     //we also need to move the folders, or jenkins will merge them all
@@ -192,7 +193,7 @@ def run_test_suite(platform, arch, buildType, sourceJob, sourceBuildNumber, lang
 
 
 def build_examples(){
-    runPython (command: "build/jenkins_stuff/run_test.py --test build-examples")
+    runCommandInVenv (command: "python build/jenkins_stuff/run_test.py --test build-examples")
 }
 
 pipeline {

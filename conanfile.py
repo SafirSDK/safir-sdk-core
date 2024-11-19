@@ -91,6 +91,11 @@ class SafirSdkCoreConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows":
             self.options["qt-advanced-docking-system"].qt_from_conan = True
+            if self.settings.arch == "x86" or \
+               self.settings.compiler.version == 190 or \
+               self.settings.compiler.version == 191:
+                self.options["qt-advanced-docking-system"].qt_major_version = 5
+
 
     def generate(self):
         for dep in self.dependencies.values():

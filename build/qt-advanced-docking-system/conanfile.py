@@ -23,14 +23,18 @@ class qt_advanced_docking_systemRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "qt_from_conan": [True, False]}
+               "qt_from_conan": [True, False],
+               "qt_major_version": [5, 6]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "qt_from_conan": False}
+                       "qt_from_conan": False,
+                       "qt_major_version": 6}
 
     def requirements(self):
-        if self.options.qt_from_conan:
+        if self.options.qt_from_conan and self.options.qt_major_version == 5:
             self.requires("qt/[>=5.15]")
+        elif self.options.qt_from_conan and self.options.qt_major_version == 6:
+            self.requires("qt/[>=6.7]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -57,7 +61,8 @@ class qt_advanced_docking_systemRecipe(ConanFile):
         cmake.configure(variables={
             "ADS_VERSION": self.version,
             "BUILD_EXAMPLES": False,
-            "BUILD_STATIC" : not self.options.shared})
+            "BUILD_STATIC" : not self.options.shared,
+            "QT_VERSION_MAJOR": self.options.qt_major_version})
         cmake.build()
 
     def package(self):
@@ -65,7 +70,9 @@ class qt_advanced_docking_systemRecipe(ConanFile):
         cmake.install()
 
     def package_info(self):
-        name = "qt6advanceddocking"
+        print("BUILD_TYPE:", self.settings.build_type)
+        print("QT_MAJOR_VERSION:", self.options.qt_major_version)
+        name = "qt" + str(self.options.qt_major_version) + "advanceddocking"
         if self.settings.build_type == "Debug":
             name += "d"
         if not self.options.shared:
@@ -73,3 +80,4 @@ class qt_advanced_docking_systemRecipe(ConanFile):
         self.cpp_info.libs = [name]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs=["xcb"]
+        print("LIBRARY_NAME:", name)
