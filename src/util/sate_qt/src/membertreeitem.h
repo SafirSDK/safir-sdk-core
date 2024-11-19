@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <QMetaType>
 #include <qvariant.h>
 #include "typesystemrepository.h"
 #include <Safir/Dob/Typesystem/Object.h>
@@ -95,3 +96,5 @@ private:
     void SetItemSequenceValues(const Safir::Dob::Typesystem::ContainerBase& cb);
     void SetItemDictionaryValues(const Safir::Dob::Typesystem::ContainerBase& cb);
 };
+
+Q_DECLARE_METATYPE(MemberTreeItem*)

@@ -234,11 +234,7 @@ bool TypesystemFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelInd
     if (ix.isValid())
     {
         QString val = ix.data().toString();
-        bool hit = val.contains(m_filter, Qt::CaseInsensitive);
-        if (hit)
-        {
-            return true;
-        }
+        return val.contains(m_filter, Qt::CaseInsensitive);
     }
     return false;
 }

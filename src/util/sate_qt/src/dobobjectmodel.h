@@ -32,6 +32,9 @@ class DobObjectModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
+    static const int FilterRole = 1000;
+    static const int InternalDataRole = 1001;
+
     explicit DobObjectModel(int64_t typeId, QObject *parent);
     explicit DobObjectModel(int64_t typeId, const Safir::Dob::Typesystem::ObjectPtr& obj, QObject *parent);
 
@@ -53,12 +56,6 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
-
-    // Add data:
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-
-    // Remove data:
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
     const MemberTreeItem* InvisibleRoot() const;
 

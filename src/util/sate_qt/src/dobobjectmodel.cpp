@@ -142,14 +142,31 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
         switch (index.column())
         {
         case 0: return item->GetName();
-        case 1:
-        {
-            return item->GetValue();
-        }
+        case 1: return item->GetValue();
         case 2: return item->IsNull() ? QString::fromStdWString(L"\u2713") : "";
         case 3: return item->IsChanged() ? QString::fromStdWString(L"\u2713") : "";
         case 4: return TypesystemRepository::Instance().GetTypeName(item->GetMemberInfo()->memberType, item->GetMemberInfo()->memberTypeId);
         }
+    }
+    break;
+
+    case DobObjectModel::FilterRole:
+    {
+        auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+        switch (index.column())
+        {
+        case 0: return item->GetName();
+        case 1: return item->GetValue();
+        case 2: return item->IsNull() ? "true" : "false";
+        case 3: return item->IsChanged() ? "true" : "false";
+        case 4: return TypesystemRepository::Instance().GetTypeName(item->GetMemberInfo()->memberType, item->GetMemberInfo()->memberTypeId);
+        }
+    }
+    break;
+
+    case DobObjectModel::InternalDataRole:
+    {
+        return QVariant::fromValue(index.internalPointer());
     }
     break;
 
@@ -349,20 +366,4 @@ Qt::ItemFlags DobObjectModel::flags(const QModelIndex &index) const
 
     return QAbstractItemModel::flags(index);
     
-}
-
-bool DobObjectModel::insertRows(int row, int count, const QModelIndex &parent)
-{
-    beginInsertRows(parent, row, row + count - 1);
-    // FIXME: Implement me!
-    endInsertRows();
-    return true;
-}
-
-bool DobObjectModel::removeRows(int row, int count, const QModelIndex &parent)
-{
-    beginRemoveRows(parent, row, row + count - 1);
-    // FIXME: Implement me!
-    endRemoveRows();
-    return true;
 }

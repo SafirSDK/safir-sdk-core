@@ -51,11 +51,14 @@ private:
     Ui::DobObjectEditWidget *ui;
     DobInterface* m_dob;
     int64_t m_typeId;
+    DobObjectModel* m_sourceModel = nullptr;
 
-    void Init(DobObjectModel* model);
+    void Init();
     void EditValue(const QModelIndex& index);
 
     bool eventFilter(QObject *object, QEvent *event) override;
 
     Safir::Dob::Typesystem::ObjectPtr BuildObject() const;
+    void OnSectionResized(int index, int oldSize, int newSize);
+    void ApplyFilter(const QString& filterText, int column, QWidget* filterWidget);
 };

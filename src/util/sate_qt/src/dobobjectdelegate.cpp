@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "dobobjectdelegate.h"
+#include "dobobjectmodel.h"
 #include "membertreeitem.h"
 #include "valueinput.h"
 #include <QCheckBox>
@@ -160,7 +161,7 @@ QWidget* DobObjectDelegate::createEditor(QWidget *parent,
 {
     if (index.isValid())
     {
-        auto item = static_cast<MemberTreeItem*>(index.internalPointer());
+        auto item = static_cast<MemberTreeItem*>(index.data(DobObjectModel::InternalDataRole).value<void*>());
         ValueInput* editor = nullptr;
         if (item->GetMemberInfo()->collectionType == SequenceCollectionType)
         {
@@ -207,7 +208,7 @@ void DobObjectDelegate::setEditorData(QWidget* editor, const QModelIndex& index)
 {
     if (index.isValid() && editor != nullptr)
     {
-        auto item = static_cast<MemberTreeItem*>(index.internalPointer());
+        auto item = static_cast<MemberTreeItem*>(index.data(DobObjectModel::InternalDataRole).value<void*>());
 
         if (item->IsContainerRootItem())
         {

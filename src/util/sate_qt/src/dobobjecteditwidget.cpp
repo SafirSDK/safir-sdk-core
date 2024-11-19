@@ -29,7 +29,47 @@
 #include <QTreeView>
 #include <QKeyEvent>
 #include <QTimer>
+#include <QSortFilterProxyModel>
 #include <Safir/Dob/Typesystem/Serialization.h>
+
+class ObjectSortFilterProxyModel
+    : public QSortFilterProxyModel
+{
+public:
+    ObjectSortFilterProxyModel(QWidget* parent) : QSortFilterProxyModel(parent)
+    {
+        setRecursiveFilteringEnabled(true); // show parent nodes when a child node is matching a search filter
+    }
+
+    void setFilterRegularExpression(const int column, QRegularExpression&& regex)
+    {
+        m_filters[column] = std::move(regex);
+        invalidateFilter();
+    }
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            if (m_filters[i].isValid())
+            {
+                auto ix = sourceModel()->index(sourceRow, i, sourceParent);
+                auto data = sourceModel()->data(ix, filterRole()).toString();
+                if (!m_filters[i].match(data).hasMatch())
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+private:
+    QRegularExpression m_filters[5];
+};
+
 
 DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QWidget *parent)
     : QWidget(parent)
@@ -37,7 +77,8 @@ DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QWid
     , m_dob(dob)
     , m_typeId(typeId)
 {
-    Init(new DobObjectModel(m_typeId, this));
+    m_sourceModel = new DobObjectModel(m_typeId, this);
+    Init();
 }
 
 DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QString channelHandler,
@@ -47,7 +88,8 @@ DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QStr
     , m_dob(dob)
     , m_typeId(typeId)
 {
-    Init(new DobObjectModel(m_typeId, object, this));
+    m_sourceModel = new DobObjectModel(m_typeId, object, this);
+    Init();
     ui->operationsWidget->idEdit->setText(channelHandler);
     ui->operationsWidget->instanceEdit->setText(QString::number(instance));
 }
@@ -57,19 +99,47 @@ DobObjectEditWidget::~DobObjectEditWidget()
     delete ui;
 }
 
-void DobObjectEditWidget::Init(DobObjectModel* model)
+void DobObjectEditWidget::Init()
 {
     ui->setupUi(this);
 
-    ui->objectEditTreeView->setModel(model);
+    auto proxyModel = new ObjectSortFilterProxyModel(this);
+    proxyModel->setSourceModel(m_sourceModel);
+    proxyModel->setFilterRole(DobObjectModel::FilterRole);
+    ui->objectEditTreeView->setModel(proxyModel);
+
     ui->objectEditTreeView->setItemDelegateForColumn(1, new DobObjectDelegate());
     ui->objectEditTreeView->setItemDelegateForColumn(3, new CheckboxDelegate());
 
-    ui->objectEditTreeView->setColumnWidth(0, 400);
+    ui->objectEditTreeView->setColumnWidth(0, 300);
     ui->objectEditTreeView->setColumnWidth(1, 400);
-    ui->objectEditTreeView->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-    ui->objectEditTreeView->header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    ui->objectEditTreeView->setColumnWidth(2, 80);
+    ui->objectEditTreeView->setColumnWidth(3, 80);
     ui->objectEditTreeView->header()->setStretchLastSection(true);
+    ui->filterLayout->addStretch(100);
+
+    connect(ui->objectEditTreeView->header(), &QHeaderView::sectionResized, this, &DobObjectEditWidget::OnSectionResized);
+    QTimer::singleShot(1, [this]{
+        OnSectionResized(0, 0, ui->objectEditTreeView->columnWidth(0));
+        OnSectionResized(1, 0, ui->objectEditTreeView->columnWidth(1));
+        OnSectionResized(2, 0, ui->objectEditTreeView->columnWidth(2));
+        OnSectionResized(3, 0, ui->objectEditTreeView->columnWidth(3));
+        OnSectionResized(4, 0, ui->objectEditTreeView->columnWidth(4));
+        auto height = ui->nameFilterEdit->height();
+        ui->nullFilterCombo->setFixedHeight(height);
+        ui->nullFilterCombo->setMaximumHeight(height);
+        ui->nullFilterCombo->setMinimumHeight(height);
+        ui->changedFilterCombo->setFixedHeight(height);
+        ui->changedFilterCombo->setMaximumHeight(height);
+        ui->changedFilterCombo->setMinimumHeight(height);
+    });
+
+    // Handle filter changes
+    connect(ui->nameFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 0, ui->nameFilterEdit); });
+    connect(ui->valueFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 1, ui->valueFilterEdit); });
+    connect(ui->nullFilterCombo, &QComboBox::currentIndexChanged, this, [this](int i){ ApplyFilter(i == 0 ? "" : ui->nullFilterCombo->currentText(), 2, ui->nullFilterCombo); });
+    connect(ui->changedFilterCombo, &QComboBox::currentIndexChanged, this, [this](int i) { ApplyFilter(i == 0 ? "" : ui->changedFilterCombo->currentText(), 3, ui->changedFilterCombo); });
+    connect(ui->typeFilterCombo, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 4, ui->typeFilterCombo); });
 
     // Disable built in edit triggers and handle it manually below.
     ui->objectEditTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -83,7 +153,7 @@ void DobObjectEditWidget::Init(DobObjectModel* model)
         if (!index.isValid())
             return;
 
-        auto p = static_cast<const MemberTreeItem*>(index.internalPointer());
+        auto p = static_cast<MemberTreeItem*>(index.data(DobObjectModel::InternalDataRole).value<void*>());
         
         // Array root elements have no edit mode
         if (p->IsContainerRootItem() && p->GetMemberInfo()->collectionType == ArrayCollectionType)
@@ -101,7 +171,7 @@ void DobObjectEditWidget::Init(DobObjectModel* model)
         }
     });
 
-    connect(model, &DobObjectModel::OpenEditor, this, [this](const QModelIndex& index)
+    connect(m_sourceModel, &DobObjectModel::OpenEditor, this, [this](const QModelIndex& index)
     {
         // For some reason, sometimes the node we want to edit will not expand unless we do a collpse-expand before enter edit mode.
         // We also queue up the calls to let any currently open editor close before we open a new one. If not Qt outputs error messages.
@@ -111,7 +181,7 @@ void DobObjectEditWidget::Init(DobObjectModel* model)
     });
 
     // Expand containers when a child item is added.
-    connect(model, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int /*first*/, int /*last*/){
+    connect(m_sourceModel, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int /*first*/, int /*last*/){
         ui->objectEditTreeView->expand(parent);
     });
 
@@ -202,8 +272,56 @@ bool DobObjectEditWidget::eventFilter(QObject* /*object*/, QEvent *event)
 
 Safir::Dob::Typesystem::ObjectPtr DobObjectEditWidget::BuildObject() const
 {
-    auto root = static_cast<DobObjectModel*>(ui->objectEditTreeView->model())->InvisibleRoot();
     DobObjectBuilder builder;
-    auto obj = builder.CreateObject(root);
+    auto obj = builder.CreateObject(m_sourceModel->InvisibleRoot());
     return obj;
+}
+
+void DobObjectEditWidget::OnSectionResized(int index, int /*oldSize*/, int newSize)
+{
+    auto size = newSize - 2;
+    switch (index)
+    {
+    case 0:
+        ui->nameFilterEdit->setFixedWidth(size);
+        break;
+    case 1:
+        ui->valueFilterEdit->setFixedWidth(size);
+        break;
+    case 2:
+        ui->nullFilterCombo->setFixedWidth(size);
+        break;
+    case 3:
+        ui->changedFilterCombo->setFixedWidth(size);
+        break;
+    case 4:
+        ui->typeFilterCombo->setFixedWidth(size);
+        break;
+    }
+}
+
+void DobObjectEditWidget::ApplyFilter(const QString& filterText, int column, QWidget* filterWidget)
+{
+    auto proxyModel = static_cast<ObjectSortFilterProxyModel*>(ui->objectEditTreeView->model());
+    if (filterText.isEmpty())
+    {
+        proxyModel->setFilterRegularExpression(column, QRegularExpression());
+    }
+    else
+    {
+        QRegularExpression regex(filterText, QRegularExpression::CaseInsensitiveOption);
+        if (regex.isValid())
+        {
+            proxyModel->setFilterRegularExpression(column, std::move(regex));
+        }
+        else
+        {
+            filterWidget->setStyleSheet("background:red;");
+            filterWidget->setToolTip(regex.errorString());
+            return;
+        }
+    }
+
+    filterWidget->setStyleSheet("");
+    filterWidget->setToolTip("");
 }
