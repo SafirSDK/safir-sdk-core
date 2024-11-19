@@ -56,16 +56,16 @@ namespace
 Safir::Dob::Typesystem::ObjectPtr DobObjectBuilder::CreateObject(const MemberTreeItem* objectRoot) const
 {
     if (objectRoot == nullptr || objectRoot->GetMemberClass() == nullptr || !objectRoot->IsObjectRootItem() || objectRoot->IsNull())
-	{
-		return nullptr;
-	}
+    {
+        return nullptr;
+    }
 
-	auto cls = objectRoot->GetMemberClass();
-	auto obj = sdt::ObjectFactory::Instance().CreateObject(cls->typeId);
+    auto cls = objectRoot->GetMemberClass();
+    auto obj = sdt::ObjectFactory::Instance().CreateObject(cls->typeId);
 
-	for (auto memberIndex = 0; memberIndex < cls->totalNumberOfMembers; ++memberIndex)
-	{
-		const auto& member = cls->GetMember(memberIndex);
+    for (auto memberIndex = 0; memberIndex < cls->totalNumberOfMembers; ++memberIndex)
+    {
+        const auto& member = cls->GetMember(memberIndex);
         const auto memberItem = objectRoot->GetConstChildMember(memberIndex);
 
         switch (member.collectionType)
@@ -102,9 +102,9 @@ Safir::Dob::Typesystem::ObjectPtr DobObjectBuilder::CreateObject(const MemberTre
         }
         break;
         }
-	}
+    }
 
-	return obj;
+    return obj;
 }
 
 void DobObjectBuilder::SetSingleValue(const MemberTreeItem* mi, Safir::Dob::Typesystem::ContainerBase& cb) const

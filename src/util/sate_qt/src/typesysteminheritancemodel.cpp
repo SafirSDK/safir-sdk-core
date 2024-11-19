@@ -27,6 +27,20 @@
 #include <QDebug>
 #include <QIcon>
 
+namespace
+{
+    //Qt5 and Qt6 have different constness in the third parameter of the createIndex function.
+    //This casting function allows us to be compatible with both.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    template<class T>
+    const void* compat_cast(const T* ptr) {return ptr;}
+#else
+    template<class T>
+    void* compat_cast(const T* ptr) {return const_cast<void*>(static_cast<const void*>(ptr));}
+#endif
+
+}
+
 TypesystemInheritanceModel::TypesystemInheritanceModel(QObject* parent)
     : QAbstractItemModel(parent)
     , m_rootEnum(new TypesystemRepository::DobEnum())
@@ -54,7 +68,7 @@ QModelIndex TypesystemInheritanceModel::index(int row, int column, const QModelI
     {
         if (row == 0)
         {
-            return createIndex(row, column, TypesystemRepository::Instance().GetRootObject());
+            return createIndex(row, column, compat_cast(TypesystemRepository::Instance().GetRootObject()));
         }
         else if (row == 1)
         {
@@ -70,14 +84,14 @@ QModelIndex TypesystemInheritanceModel::index(int row, int column, const QModelI
         auto clsPtr = static_cast<const TypesystemRepository::DobClass*>(parent.internalPointer());
         if (clsPtr != nullptr && ix < clsPtr->children.size())
         {
-            return createIndex(row, column, clsPtr->children[ix]);
+            return createIndex(row, column, compat_cast(clsPtr->children[ix]));
         }
     }
     else if (parentPtr->category == TypesystemRepository::Enum)
     {
         if (ix < TypesystemRepository::Instance().EnumsSorted().size())
         {
-            return createIndex(row, column, TypesystemRepository::Instance().EnumsSorted()[ix]);
+            return createIndex(row, column, compat_cast(TypesystemRepository::Instance().EnumsSorted()[ix]));
         }
     }
 
@@ -105,12 +119,12 @@ QModelIndex TypesystemInheritanceModel::parent(const QModelIndex &index) const
                 // We have parent and grand parent. row number for our parent in grandparents children-vector
                 auto it = std::find(me->parent->parent->children.begin(), me->parent->parent->children.end(), me->parent);
                 size_t ix = std::distance(me->parent->parent->children.begin(), it);
-                return createIndex(static_cast<int>(ix), 0, me->parent);
+                return createIndex(static_cast<int>(ix), 0, compat_cast(me->parent));
             }
             else
             {
                 // We have a parent but no grand parent. Then our parent must have row = 0
-                return createIndex(0, 0, me->parent);
+                return createIndex(0, 0, compat_cast(me->parent));
             }
         }
     }
@@ -119,7 +133,7 @@ QModelIndex TypesystemInheritanceModel::parent(const QModelIndex &index) const
         auto me = static_cast<const TypesystemRepository::DobEnum*>(index.internalPointer());
         if (me != m_rootEnum.get())
         {
-            return createIndex(1, 0, m_rootEnum.get());
+            return createIndex(1, 0, compat_cast(m_rootEnum.get()));
         }
     }
 
@@ -243,7 +257,7 @@ QVariant TypesystemFilterProxyModel::data(const QModelIndex &index, int role) co
 {
     if (role == Qt::BackgroundRole && !m_filter.isEmpty() && index.data().toString().contains(m_filter, Qt::CaseInsensitive))
     {
-        return QColorConstants::Svg::gray;
+        return QColor(128,128,128); //Gray. The QColorConstants don't seem to work in vs2015...
     }
 
     return QSortFilterProxyModel::data(index, role);

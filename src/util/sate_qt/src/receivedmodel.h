@@ -47,7 +47,7 @@ public:
         {
         }
 
-        ReceivedObjectInfo(ReceivedObjectInfo& r) = default;
+        ReceivedObjectInfo(const ReceivedObjectInfo& r) = default;
     };
 
     explicit ReceivedModel(DobInterface* dob, QObject *parent);

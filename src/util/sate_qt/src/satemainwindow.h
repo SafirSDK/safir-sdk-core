@@ -24,7 +24,12 @@
 #pragma once
 
 #include <QMainWindow>
-#include <qt6advanceddocking/DockManager.h>
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+#  include <qt6advanceddocking/DockManager.h>
+#else
+#  include <qt5advanceddocking/DockManager.h>
+#endif
 
 #include "dobinterface.h"
 

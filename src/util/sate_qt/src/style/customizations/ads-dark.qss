@@ -99,11 +99,11 @@ ads--CDockAreaTabBar {
 
 
 ads--CDockWidgetTab {
-	background-color: #455364;
-	border-color: transparent;
-	border-style: solid;
-	border-width: 0 1px 0 0;
-	padding: 2 0px;
+    background-color: #455364;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 0 1px 0 0;
+    padding: 2 0px;
     margin-right: 1px;
     margin-left: 1px;
 }
@@ -115,14 +115,14 @@ ads--CDockWidgetTab[activeTab="true"] {
 
 
 ads--CDockWidgetTab QLabel {
-	color:  #19232D;
+    color:  #19232D;
     background-color: transparent;
-	padding: 0 0px;
+    padding: 0 0px;
 }
 
 
 ads--CDockWidgetTab[activeTab="true"] QLabel {
-	color: #DFE1E2;
+    color: #DFE1E2;
 }
 
 
@@ -153,16 +153,16 @@ ads--CDockWidgetTab[activeTab="true"] QLabel {
  * CDockWidget
  *****************************************************************************/
 ads--CDockWidget {
-	background: #19232D;
-	border-color: #19232D;
-	border-style: solid;
-	border-width: 1px 0 0 0;
+    background: #19232D;
+    border-color: #19232D;
+    border-style: solid;
+    border-width: 1px 0 0 0;
 }
 
 
 QScrollArea#dockWidgetScrollArea {
-	padding: 0px;
-	border: none;
+    padding: 0px;
+    border: none;
 }
 
 
@@ -365,9 +365,9 @@ ads--CAutoHideDockContainer ads--CDockAreaWidget[focused="true"] ads--CDockAreaT
  * CAutoHideDockContainer titlebar buttons
  *****************************************************************************/
 #dockAreaAutoHideButton {
-	qproperty-icon: url(:/ads/images/vs-pin-button.svg),
-		url(:/ads/images/vs-pin-button-disabled.svg) disabled;
-	qproperty-iconSize: 16px;
+    qproperty-icon: url(:/ads/images/vs-pin-button.svg),
+        url(:/ads/images/vs-pin-button-disabled.svg) disabled;
+    qproperty-iconSize: 16px;
 }
 
 ads--CAutoHideDockContainer #dockAreaAutoHideButton {
@@ -377,8 +377,8 @@ ads--CAutoHideDockContainer #dockAreaAutoHideButton {
 
 
 ads--CAutoHideDockContainer #dockAreaMinimizeButton {
-	qproperty-icon: url(:/ads/images/minimize-button-focused.svg);
-	qproperty-iconSize: 16px;	
+    qproperty-icon: url(:/ads/images/minimize-button-focused.svg);
+    qproperty-iconSize: 16px;
 }
 
 

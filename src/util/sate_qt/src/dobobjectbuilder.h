@@ -28,9 +28,9 @@
 class DobObjectBuilder
 {
 public:
-	DobObjectBuilder() = default;
+    DobObjectBuilder() = default;
 
-	Safir::Dob::Typesystem::ObjectPtr CreateObject(const MemberTreeItem* objectRoot) const;
+    Safir::Dob::Typesystem::ObjectPtr CreateObject(const MemberTreeItem* objectRoot) const;
 
 private:
     void SetSingleValue(const MemberTreeItem* mi, Safir::Dob::Typesystem::ContainerBase& cb) const;

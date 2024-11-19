@@ -25,6 +25,18 @@
 #include "iconfactory.h"
 #include <QDebug>
 
+namespace
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    template<class T>
+    const void* compat_cast(const T* ptr) {return ptr;}
+#else
+    template<class T>
+    void* compat_cast(const T* ptr) {return const_cast<void*>(static_cast<const void*>(ptr));}
+#endif
+
+}
+
 TypesystemNamespaceModel::TypesystemNamespaceModel(QObject* parent)
     : QAbstractItemModel(parent)
 {
@@ -43,7 +55,7 @@ QModelIndex TypesystemNamespaceModel::index(int row, int column, const QModelInd
         const auto& rootNs = TypesystemRepository::Instance().GetRootNamespaces();
         if (rowIndex < rootNs.size() && column == 0)
         {
-            return createIndex(row, column, rootNs[rowIndex]);
+            return createIndex(row, column, compat_cast(rootNs[rowIndex]));
         }
 
         return {}; // invalid index
@@ -58,12 +70,12 @@ QModelIndex TypesystemNamespaceModel::index(int row, int column, const QModelInd
             if (ix.second)
             {
                 // Namespace node
-                return createIndex(row, column, parentPtr->children[static_cast<size_t>(ix.first)]);
+                return createIndex(row, column, compat_cast(parentPtr->children[static_cast<size_t>(ix.first)]));
             }
             else
             {
                 // Class node
-                return createIndex(row, column, parentPtr->units[static_cast<size_t>(ix.first)]);
+                return createIndex(row, column, compat_cast(parentPtr->units[static_cast<size_t>(ix.first)]));
             }
         }
     }
@@ -93,7 +105,7 @@ QModelIndex TypesystemNamespaceModel::parent(const QModelIndex &index) const
             // We have parent and grand parent. Find row number for our parent in grandparents children-vector
             auto it = std::find(parent->parent->children.begin(), parent->parent->children.end(), parent);
             size_t ix = std::distance(parent->parent->children.begin(), it);
-            return createIndex(static_cast<int>(ix), 0, parent);
+            return createIndex(static_cast<int>(ix), 0, compat_cast(parent));
         }
         else
         {
@@ -101,7 +113,7 @@ QModelIndex TypesystemNamespaceModel::parent(const QModelIndex &index) const
             const auto& rootNamespaces = TypesystemRepository::Instance().GetRootNamespaces();
             auto it = std::find(rootNamespaces.begin(), rootNamespaces.end(), parent);
             size_t ix = std::distance(rootNamespaces.begin(), it);
-            return createIndex(static_cast<int>(ix), 0, parent);
+            return createIndex(static_cast<int>(ix), 0, compat_cast(parent));
         }
     }
 
@@ -207,5 +219,3 @@ std::pair<int, bool> TypesystemNamespaceModel::RowIndex(int row, const Typesyste
 
     return std::make_pair(-1, false);
 }
-
-

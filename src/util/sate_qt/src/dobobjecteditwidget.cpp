@@ -28,6 +28,7 @@
 #include "dobobjectbuilder.h"
 #include <QTreeView>
 #include <QKeyEvent>
+#include <QComboBox>
 #include <QTimer>
 #include <QSortFilterProxyModel>
 #include <Safir/Dob/Typesystem/Serialization.h>
@@ -147,8 +148,8 @@ void DobObjectEditWidget::Init()
     // Handle filter changes
     connect(ui->nameFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 0, ui->nameFilterEdit); });
     connect(ui->valueFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 1, ui->valueFilterEdit); });
-    connect(ui->nullFilterCombo, &QComboBox::currentIndexChanged, this, [this](int i){ ApplyFilter(i == 0 ? "" : ui->nullFilterCombo->currentText(), 2, ui->nullFilterCombo); });
-    connect(ui->changedFilterCombo, &QComboBox::currentIndexChanged, this, [this](int i) { ApplyFilter(i == 0 ? "" : ui->changedFilterCombo->currentText(), 3, ui->changedFilterCombo); });
+    connect(ui->nullFilterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int i){ ApplyFilter(i == 0 ? "" : ui->nullFilterCombo->currentText(), 2, ui->nullFilterCombo); });
+    connect(ui->changedFilterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int i) { ApplyFilter(i == 0 ? "" : ui->changedFilterCombo->currentText(), 3, ui->changedFilterCombo); });
     connect(ui->typeFilterCombo, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 4, ui->typeFilterCombo); });
 
     // Disable built in edit triggers and handle it manually below.

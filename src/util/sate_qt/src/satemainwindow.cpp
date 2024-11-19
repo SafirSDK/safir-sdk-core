@@ -213,7 +213,9 @@ void SateMainWindow::OnReceivedTableDoubleClicked(const QModelIndex& ix)
         return;
     }
 
-    auto recvObjItem = static_cast<ReceivedModel*>(m_received->model())->ReadItem(ix.row());
+    const auto recvObjItem =
+        static_cast<ReceivedModel*>(m_received->model())->ReadItem(ix.row());
+
     if (recvObjItem.object)
     {
         OnOpenObjectEditWithInstance(recvObjItem.typeId,
