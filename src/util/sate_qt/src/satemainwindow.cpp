@@ -37,6 +37,7 @@
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QDateTime>
 
 #include <QTextBrowser>
 #include <QFile>
@@ -99,14 +100,24 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     m_received->setColumnWidth(3, 250);
     m_received->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     m_received->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+    m_received->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     connect(m_received, &QTableView::doubleClicked, this, &SateMainWindow::OnReceivedTableDoubleClicked);
 
     auto* receivedDock = new ads::CDockWidget("Received");
     receivedDock->setWidget(m_received);
-    m_dockManager->addDockWidget(ads::BottomDockWidgetArea, receivedDock);
+    m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, receivedDock);
     ui->menuView->addAction(receivedDock->toggleViewAction());
 
+    // Output window
+    m_output = new QTextBrowser(this);
+    auto* outputDock = new ads::CDockWidget("Output", this);
+    outputDock->setWidget(m_output);
+    m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, outputDock);
+    ui->menuView->addAction(outputDock->toggleViewAction());
+    connect(m_dob.get(), &DobInterface::Info, this, &SateMainWindow::OnInfo);
+
+    // Style sheet menu
     connect(ui->actionDarkMode, &QAction::triggered, this, &SateMainWindow::OnDarkMode);
     connect(ui->actionLightMode, &QAction::triggered, this, &SateMainWindow::OnLightMode);
 
@@ -336,4 +347,10 @@ void SateMainWindow::OnLightMode()
         QTextStream ts(&ads);
         m_dockManager->setStyleSheet(ts.readAll());
     }
+}
+
+void SateMainWindow::OnInfo(const QString& info)
+{
+    auto time = "<i style='color:grey'>" + QDateTime::currentDateTime().toString("hh:mm:ss") + "</i>: ";
+    m_output->insertHtml(time + info + "<br>");
 }

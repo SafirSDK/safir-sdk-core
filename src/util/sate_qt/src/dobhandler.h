@@ -82,9 +82,6 @@ signals:
 private:
     Safir::Dob::Connection m_dobConnection;
 
-    std::vector<DobInterface::RegistrationInfo> m_registrations;
-    std::vector<DobInterface::SubscriptionInfo> m_subscriptions;
-
     Safir::Dob::InstanceIdPolicy::Enumeration GetInstanceIdPolicy(int64_t typeId, const sdt::HandlerId& handler) const;
 
     // Dispatcher interface

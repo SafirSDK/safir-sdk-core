@@ -78,7 +78,15 @@ DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QWid
     , m_typeId(typeId)
 {
     m_sourceModel = new DobObjectModel(m_typeId, this);
+
     Init();
+
+    auto reg = m_dob->GetMyRegistration(typeId);
+    if (reg != nullptr)
+    {
+        // If we are registered handler, set HandlerId to the one we have registered.
+        ui->operationsWidget->idEdit->setText(QString::fromStdWString(reg->handler.ToString()));
+    }
 }
 
 DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QString channelHandler,
@@ -89,7 +97,9 @@ DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QStr
     , m_typeId(typeId)
 {
     m_sourceModel = new DobObjectModel(m_typeId, object, this);
+
     Init();
+
     ui->operationsWidget->idEdit->setText(channelHandler);
     ui->operationsWidget->instanceEdit->setText(QString::number(instance));
 }

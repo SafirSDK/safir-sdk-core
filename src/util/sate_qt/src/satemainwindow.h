@@ -31,6 +31,7 @@
 class QLabel;
 class QTableView;
 class TypesystemWidget;
+class QTextBrowser;
 
 namespace Ui { class SateMainWindow; }
 
@@ -52,6 +53,7 @@ private slots:
                                       int64_t instance,
                                       const Safir::Dob::Typesystem::ObjectPtr& object);
     void OnOpenDouFile(const int64_t typeId);
+    void OnInfo(const QString& info);
     void OnDarkMode();
     void OnLightMode();
 private:
@@ -66,9 +68,11 @@ private:
 
     TypesystemWidget* m_typesystem;
     QTableView* m_received;
+    QTextBrowser* m_output;
 
     void AddXmlPage(const QString& title, const QString& text);
     void AddJsonPage(const QString& title, const QString& text);
 
     void AddTab(const QString& title, QWidget* widget);
 };
+

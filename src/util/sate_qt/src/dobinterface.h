@@ -30,6 +30,7 @@
 #include <Safir/Dob/Response.h>
 #include <Safir/Dob/Service.h>
 #include <Safir/Dob/InstanceIdPolicy.h>
+#include <vector>
 
 namespace sdt = Safir::Dob::Typesystem;
 
@@ -43,7 +44,7 @@ public:
     struct RegistrationInfo
     {
         int64_t typeId;
-        int64_t id; //HandlerId
+        sdt::HandlerId handler;
         bool pending;
         bool injection;
         Safir::Dob::InstanceIdPolicy::Enumeration instanceIdPolicy;
@@ -52,7 +53,7 @@ public:
     struct SubscriptionInfo
     {
         int64_t typeId;
-        int64_t id; //HandlerId or ChannelId
+        sdt::ChannelId channel;
         bool includeSubclasses;
     };
 
@@ -84,6 +85,18 @@ public:
     virtual void Delete(const sdt::EntityId& entityId, const sdt::HandlerId& handler) = 0;
     virtual void DeleteAll(int64_t typeId, const sdt::HandlerId& handler) = 0;
 
+    const RegistrationInfo* GetMyRegistration(int64_t typeId) const
+    {
+        auto it = std::find_if(m_registrations.begin(), m_registrations.end(), [typeId](const auto& ri){return ri.typeId == typeId;});
+        return it == m_registrations.end() ? nullptr : &(*it);
+    }
+
+    const SubscriptionInfo* GetMySubscription(int64_t typeId) const
+    {
+        auto it = std::find_if(m_subscriptions.begin(), m_subscriptions.end(), [typeId](const auto& si){return si.typeId == typeId;});
+        return it == m_subscriptions.end() ? nullptr : &(*it);
+    }
+
 signals:
     void ConnectedToDob(const QString& connectionName);
     void ConnectionClosed();
@@ -99,6 +112,25 @@ signals:
     void OnRegistered(const DobInterface::RegistrationInfo& info);
     void OnUnregistered(int64_t typeId);
 
-    void Info(const QString& label, const QString& message, bool error);
+    void Info(const QString& info);
+
+protected:
+    std::vector<DobInterface::RegistrationInfo> m_registrations;
+    std::vector<DobInterface::SubscriptionInfo> m_subscriptions;
+
+    void RemoveRegistrations(int64_t typeId)
+    {
+        m_registrations.erase(std::remove_if(m_registrations.begin(), m_registrations.end(), [typeId](const auto& v){return v.typeId == typeId;}), m_registrations.end());
+    }
+
+    void RemoveRegistration(int64_t typeId, const sdt::HandlerId& handler)
+    {
+        m_registrations.erase(std::remove_if(m_registrations.begin(), m_registrations.end(), [typeId, &handler](const auto& v){return v.typeId == typeId && v.handler == handler;}), m_registrations.end());
+    }
+
+    void RemoveSubscriptions(int64_t typeId)
+    {
+        m_subscriptions.erase(std::remove_if(m_subscriptions.begin(), m_subscriptions.end(), [typeId](const auto& v){return v.typeId == typeId;}), m_subscriptions.end());
+    }
 
 };

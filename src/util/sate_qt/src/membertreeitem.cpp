@@ -367,7 +367,7 @@ void MemberTreeItem::SetupObject(const Safir::Dob::Typesystem::ObjectConstPtr& o
         return;
     }
 
-    m_isContainerRoot = true;
+    m_isObjectRoot = true;
 
     // Create object with data
     for (int memberIndex = 0; memberIndex < m_cls->totalNumberOfMembers; ++memberIndex)
