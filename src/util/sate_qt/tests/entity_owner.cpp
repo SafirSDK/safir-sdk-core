@@ -200,11 +200,11 @@ int main()
         owner.SetBig();
 
         Safir::Utilities::Internal::AsioPeriodicTimer updateSmall
-            (ioService,std::chrono::seconds(1), [&owner](const boost::system::error_code& error){owner.UpdateSomeSmall();});
+            (ioService,std::chrono::seconds(1), [&owner](const boost::system::error_code& /*error*/){owner.UpdateSomeSmall();});
         updateSmall.Start();
 
         Safir::Utilities::Internal::AsioPeriodicTimer updateBig
-            (ioService,std::chrono::seconds(1), [&owner](const boost::system::error_code& error){owner.UpdateSomeBig();});
+            (ioService,std::chrono::seconds(1), [&owner](const boost::system::error_code& /*error*/){owner.UpdateSomeBig();});
         updateBig.Start();
 
         boost::asio::io_service::work keepRunning(ioService);
