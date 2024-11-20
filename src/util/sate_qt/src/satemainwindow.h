@@ -78,6 +78,7 @@ private:
     ads::CDockAreaWidget* m_centralDockArea;
 
     std::unique_ptr<DobInterface> m_dob;
+    std::unique_ptr<DobInterface> m_ws;
     bool m_connected = false;
 
     TypesystemWidget* m_typesystem;

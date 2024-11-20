@@ -80,7 +80,7 @@ class SafirSdkCoreConan(ConanFile):
                        "qt/*:qtvirtualkeyboard": False,
                        "qt/*:qtwebchannel": False,
                        "qt/*:qtwebengine": False,
-                       "qt/*:qtwebsockets": False,
+                       "qt/*:qtwebsockets": True,
                        "qt/*:qtwebview": False,
                        "qt/*:gui": True,
                        "qt/*:widgets": True,

@@ -52,25 +52,24 @@ void DobHandler::Open(const QString& name, int context)
 {
     // Connect to DOB in another thread. Signals the ConnectedToDobSignal when done.
     auto dummy = QtConcurrent::run([this, name, context]
-                                   {
-                                       int instancePart = 0;
-                                       while (true)
-                                       {
-                                           try
-                                           {
-                                               m_dobConnection.Open(name.toStdWString(), std::to_wstring(instancePart), context, this, this);
-                                               break;
-                                           }
-                                           catch (const Safir::Dob::NotOpenException&)
-                                           {
-                                               ++instancePart;
-                                           }
-                                       }
+    {
+        int instancePart = 0;
+        while (true)
+        {
+            try
+            {
+                m_dobConnection.Open(name.toStdWString(), std::to_wstring(instancePart), context, this, this);
+                break;
+            }
+            catch (const Safir::Dob::NotOpenException&)
+            {
+                ++instancePart;
+            }
+        }
 
-                                       emit DobInterface::ConnectedToDob(Str(Safir::Dob::ConnectionAspectMisc(this->m_dobConnection).GetConnectionName()));
-                                       emit DobInterface::Info("<b>Connected to DOB!</b>");
-                                   });
-
+        emit DobInterface::ConnectedToDob(Str(Safir::Dob::ConnectionAspectMisc(this->m_dobConnection).GetConnectionName()));
+        emit DobInterface::Info("<b>Connected to DOB!</b>");
+    });
 }
 
 

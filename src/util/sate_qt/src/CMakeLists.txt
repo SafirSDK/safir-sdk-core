@@ -1,4 +1,5 @@
 find_package(qt-advanced-docking-system CONFIG REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS WebSockets)
 
 set(ui
     satemainwindow.ui
@@ -22,6 +23,7 @@ set(sources
     typesystemcontextmenuhandler.cpp
     membertreeitem.cpp
     dobhandler.cpp
+    dobwebsocket.cpp
     iconfactory.cpp
     receivedmodel.cpp
     dobobjectdelegate.cpp
@@ -45,6 +47,7 @@ set(widget_headers
     typesystemnamespacemodel.h
     typesystemcontextmenuhandler.h
     dobhandler.h
+    dobwebsocket.h
     dobinterface.h
     receivedmodel.h
     dobobjectdelegate.h
@@ -91,6 +94,7 @@ TARGET_LINK_LIBRARIES(sate_next PRIVATE
   dose_internal
   dose_cpp
   qt-advanced-docking-system::qt-advanced-docking-system
+  Qt6::WebSockets
   Qt::Widgets)
 
 SAFIR_INSTALL(TARGETS sate_next COMPONENT Tools)

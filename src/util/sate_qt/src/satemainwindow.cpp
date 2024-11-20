@@ -26,6 +26,7 @@
 #include "typesystemrepository.h"
 #include "dobobjecteditwidget.h"
 #include "dobhandler.h"
+#include "dobwebsocket.h"
 #include "instanceswidget.h"
 #include "receivedmodel.h"
 #include "typesystemwidget.h"
@@ -52,6 +53,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->setupUi(this);
 
     m_dob = std::make_unique<DobHandler>();
+    m_ws = std::make_unique<DobWebSocket>("localhost", 10000);
 
     ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasUndockButton, false);
     ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasCloseButton, false);
@@ -125,6 +127,11 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     // DOB signal handling
     connect(m_dob.get(), &DobInterface::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
     m_dob->Open("SATE", 0);
+
+
+    // TODO: just testing
+    connect(m_ws.get(), &DobInterface::Info, this, &SateMainWindow::OnInfo);
+    m_ws->Open("SateWs", 0);
 }
 
 SateMainWindow::~SateMainWindow()
