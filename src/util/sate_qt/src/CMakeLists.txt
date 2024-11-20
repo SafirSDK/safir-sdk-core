@@ -1,5 +1,4 @@
 find_package(qt-advanced-docking-system CONFIG REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS WebSockets)
 
 set(ui
     satemainwindow.ui
@@ -94,7 +93,7 @@ TARGET_LINK_LIBRARIES(sate_next PRIVATE
   dose_internal
   dose_cpp
   qt-advanced-docking-system::qt-advanced-docking-system
-  Qt6::WebSockets
+  Qt::WebSockets
   Qt::Widgets)
 
 SAFIR_INSTALL(TARGETS sate_next COMPONENT Tools)
