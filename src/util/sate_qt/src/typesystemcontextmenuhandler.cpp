@@ -79,39 +79,104 @@ TypesystemContextMenuHandler::TypesystemContextMenuHandler(DobInterface* dob, QT
 void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemRepository::DobBaseClass baseClass)
 {
     QMenu menu;
+    menu.setToolTipsVisible(true);
+
+    //create all the actions
+    auto* subscribeEntity = new QAction(tr("Subscribe"), &menu);
+    auto* subscribeEntityRecursive = new QAction(tr("Subscribe recursive"), &menu);
+    auto* openObjectEditor = new QAction(tr("Edit new instance"), &menu);
+    auto* registerDefaultEntityHandler = new QAction(tr("Register default handler"), &menu);
+    auto* registerEntityHandlerEllipsis = new QAction(tr("Register handler..."), &menu);
+    auto* unregisterAllHandlers = new QAction(tr("Register handlers"), &menu);
+    auto* unsubscribeEntity = new QAction(tr("Unsibscribe"), &menu);
+    auto* subscribeMessage = new QAction(tr("Subscribe"), &menu);
+    auto* subscribeMessageEllipsis = new QAction(tr("Subscribe..."), &menu);
+    auto* unsubscribeMessage = new QAction(tr("Unsibscribe"), &menu);
+    auto* registerDefaultServiceHandler = new QAction(tr("Register default handler"), &menu);
+    auto* registerServiceHandlerEllipsis = new QAction(tr("Register handler..."), &menu);
+    auto* subscribeServiceRegistrations = new  QAction(tr("Subscribe registration"), &menu);
+    auto* unsubscribeServiceRegistrations = new  QAction(tr("Subscribe registration"), &menu);
+    auto* openDouFile = new QAction(tr("Open dou-file"), &menu);
+
+    //set up tooltips
+    subscribeEntity->setToolTip(tr("Subscribe to this entity type and open a view that displays all instances of it.\n"
+                                   "Also subscribes to registrations.\n"
+                                   "Shortcut: double click"));
+    subscribeEntityRecursive->setToolTip(tr("Subscribe to this entity type and all its subclasses, and open a view "
+                                            "that displays all instances of it.\n"
+                                            "Shortcut: shift+double click"));
+    openObjectEditor->setToolTip(tr("Open a new empty instance of this type in an object edit view.\n"
+                                    "Shortcut: ctrl+double click"));
+
+    registerDefaultEntityHandler->setToolTip(tr("Register the DEFAULT_HANDLER for this entity type as a\n"
+                                                "non-pending, non-injection, RequestorDecidesInstanceId handler."));
+    registerEntityHandlerEllipsis->setToolTip(tr("Register a handler for this entity type. Opens a dialog to allow\n"
+                                                 "different options to be selected."));
+    unregisterAllHandlers->setToolTip(tr("Unregister all handlers for this type."));
+    unsubscribeEntity->setToolTip(tr("Unsubscribe to this entity and all subclasses."));
+    subscribeMessage->setToolTip(tr("Subscribe to all channels of this message and all its subclasses."));
+    subscribeMessageEllipsis->setToolTip(tr("Subscribe to this message type. Opens a dialog to allow\n"
+                                            "different options to be selected."));
+    unsubscribeMessage->setToolTip(tr("Unsubscribe all channels of this message and its subclasses."));
+    registerDefaultServiceHandler->setToolTip(tr("Register the DEFAULT_HANDLER for this service type, as a\n"
+                                                 "non-pending handler."));
+    registerServiceHandlerEllipsis->setToolTip(tr("Register a handler for this service type. Opens a dialog to allow\n"
+                                                  "different options to be selected."));
+    subscribeServiceRegistrations->setToolTip(tr("Subscribe to registrations of this type and all its subclasses."));
+    unsubscribeServiceRegistrations->setToolTip(tr("Unsubscribe to registrations of this type and all its subclasses."));
+    openDouFile->setToolTip(tr("Open the dou file of this type."));
+
+    //Create the menu
     switch(baseClass) {
     case TypesystemRepository::Entity:
-    {
-        connect(menu.addAction("Register handler"), &QAction::triggered, this, [this, typeId]{ m_dob->RegisterEntityHandler(typeId, sdt::HandlerId(), Safir::Dob::InstanceIdPolicy::RequestorDecidesInstanceId, false, false); });
-        connect(menu.addAction("Register handler..."), &QAction::triggered, this, [this, typeId]{ m_registerDlg->Show(typeId); });
-        connect(menu.addAction("Unregister handler"), &QAction::triggered, this, [this, typeId]{ m_dob->Unregister(typeId); });
-        connect(menu.addAction("Subscribe"), &QAction::triggered, this, [this, typeId]{ emit OpenInstanceViewer(typeId, false); });
-        connect(menu.addAction("Subscribe recursive"), &QAction::triggered, this, [this, typeId]{ emit OpenInstanceViewer(typeId, true); });
-        connect(menu.addAction("Unsubscribe"), &QAction::triggered, this, [this, typeId]
-                {
-                    m_dob->UnsubscribeRegistrations(typeId);
-                    m_dob->UnsubscribeEntity(typeId);
-                });
-        menu.addSeparator();
-    }
+        {
+            menu.addAction(subscribeEntity);
+            menu.addAction(subscribeEntityRecursive);
+            menu.addAction(openObjectEditor);
+
+            menu.addSeparator();
+
+            menu.addAction(registerDefaultEntityHandler);
+            menu.addAction(registerEntityHandlerEllipsis);
+            menu.addAction(unregisterAllHandlers);
+            menu.addAction(unsubscribeEntity);
+
+            menu.addSeparator();
+
+            menu.addAction(openDouFile);
+        }
         break;
     case TypesystemRepository::Message:
-    {
-        connect(menu.addAction("Subscribe"), &QAction::triggered, this, [this, typeId]{ m_dob->SubscribeMessage(typeId, sdt::ChannelId(), true); });
-        connect(menu.addAction("Subscribe..."), &QAction::triggered, this, []{QMessageBox m;m.setText("sub with options");m.exec();});
-        connect(menu.addAction("Unsubscribe"), &QAction::triggered, this, [this, typeId]{m_dob->UnsubscribeMessage(typeId);});
-        menu.addSeparator();
-    }
+        {
+            menu.addAction(subscribeMessage);
+            menu.addAction(subscribeMessageEllipsis);
+            menu.addAction(openObjectEditor);
+
+            menu.addSeparator();
+
+            menu.addAction(unsubscribeMessage);
+
+            menu.addSeparator();
+
+            menu.addAction(openDouFile);
+        }
         break;
     case TypesystemRepository::Service:
-    {
-        connect(menu.addAction("Register handler"), &QAction::triggered, this, [this, typeId]{ m_dob->RegisterServiceHandler(typeId, sdt::HandlerId(), false); });
-        connect(menu.addAction("Register handler..."), &QAction::triggered, this, [this, typeId]{ m_registerDlg->Show(typeId, false); });
-        connect(menu.addAction("Unregister handler"), &QAction::triggered, this, [this, typeId]{ m_dob->Unregister(typeId); });
-        connect(menu.addAction("Subscribe registrations"), &QAction::triggered, this, [this, typeId]{m_dob->SubscribeRegistrations(typeId, sdt::HandlerId::ALL_HANDLERS, true);});
-        connect(menu.addAction("Unsubscribe"), &QAction::triggered, this, [this, typeId]{m_dob->UnsubscribeRegistrations(typeId);});
-        menu.addSeparator();
-    }
+        {
+            menu.addAction(openObjectEditor);
+
+            menu.addSeparator();
+
+            menu.addAction(registerDefaultServiceHandler);
+            menu.addAction(registerServiceHandlerEllipsis);
+            menu.addAction(unregisterAllHandlers);
+            menu.addAction(subscribeServiceRegistrations);
+            menu.addAction(unsubscribeServiceRegistrations);
+
+            menu.addSeparator();
+
+            menu.addAction(openDouFile);
+        }
         break;
 
     case TypesystemRepository::Response:
@@ -119,11 +184,81 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     case TypesystemRepository::Item:
     case TypesystemRepository::Struct:
     case TypesystemRepository::Object:
+        {
+            menu.addAction(openObjectEditor);
+
+            menu.addSeparator();
+
+            menu.addAction(openDouFile);
+        }
         break;
     }
 
-    connect(menu.addAction("Open ObjectEditor"), &QAction::triggered, this, [this, typeId]{ emit OpenObjectEdit(typeId); });
-    connect(menu.addAction("Open dou-file"), &QAction::triggered, this, [this, typeId]{ emit OpenDouFile(typeId);});
 
-    menu.exec(m_treeView->cursor().pos());
+    //execute the menu and run the actions
+    auto* chosenAction = menu.exec(m_treeView->cursor().pos());
+
+    if (chosenAction == subscribeEntity)
+    {
+        emit OpenInstanceViewer(typeId, false);
+    }
+    else if (chosenAction == subscribeEntityRecursive)
+    {
+        emit OpenInstanceViewer(typeId, true);
+    }
+    else if (chosenAction == openObjectEditor)
+    {
+        emit OpenObjectEdit(typeId);
+    }
+    else if (chosenAction == registerDefaultEntityHandler)
+    {
+        m_dob->RegisterEntityHandler(typeId,
+                                     sdt::HandlerId(),
+                                     Safir::Dob::InstanceIdPolicy::RequestorDecidesInstanceId,
+                                     false,
+                                     false);
+    }
+    else if (chosenAction == registerEntityHandlerEllipsis ||
+             chosenAction == registerServiceHandlerEllipsis)
+    {
+        m_registerDlg->Show(typeId);
+    }
+    else if (chosenAction == unregisterAllHandlers)
+    {
+        m_dob->Unregister(typeId);
+    }
+    else if (chosenAction == unsubscribeEntity)
+    {
+        m_dob->UnsubscribeRegistrations(typeId);
+        m_dob->UnsubscribeEntity(typeId);
+    }
+    else if (chosenAction == subscribeMessage)
+    {
+         m_dob->SubscribeMessage(typeId, sdt::ChannelId(), true);
+    }
+    else if (chosenAction == subscribeMessageEllipsis)
+    {
+        QMessageBox m;m.setText("sub with options");
+        m.exec();
+    }
+    else if (chosenAction == unsubscribeMessage)
+    {
+        m_dob->UnsubscribeMessage(typeId);
+    }
+    else if (chosenAction == registerDefaultServiceHandler)
+    {
+        m_dob->RegisterServiceHandler(typeId, sdt::HandlerId(), false);
+    }
+    else if (chosenAction == subscribeServiceRegistrations)
+    {
+        m_dob->SubscribeRegistrations(typeId, sdt::HandlerId::ALL_HANDLERS, true);
+    }
+    else if (chosenAction == unsubscribeServiceRegistrations)
+    {
+        m_dob->UnsubscribeRegistrations(typeId);
+    }
+    else if (chosenAction == openDouFile)
+    {
+        emit OpenDouFile(typeId);
+    }
 }

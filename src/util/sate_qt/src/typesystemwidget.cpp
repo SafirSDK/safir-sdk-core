@@ -69,25 +69,37 @@ void TypesystemWidget::Initialize(DobInterface* dob)
         auto baseClassVal = ix.data(TypesystemRepository::DobBaseClassRole);
         if (typeIdVal.isValid())
         {
-            if (typeIdVal.isValid())
+            if (baseClassVal.isValid())
             {
-                if (baseClassVal.isValid())
+                const auto baseClass = static_cast<TypesystemRepository::DobBaseClass>(baseClassVal.toInt()); 
+                const bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
+                const bool shiftKey = qApp->keyboardModifiers().testFlag(Qt::ShiftModifier);
+
+                if (ctrlKey && !shiftKey)
                 {
-                    bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
-                    if (baseClassVal.isValid() && static_cast<TypesystemRepository::DobBaseClass>(baseClassVal.toInt()) == TypesystemRepository::Entity && !ctrlKey)
+                    emit OpenObjectEdit(typeIdVal.toLongLong());
+                }
+                else if (shiftKey && !ctrlKey)
+                {
+                    if (baseClass == TypesystemRepository::Entity)
+                    {
+                        emit OpenInstanceViewer(typeIdVal.toLongLong(), true);
+                    }
+                    //TODO do other ctrl click actions
+                }
+                else if (!shiftKey && !ctrlKey)
+                {
+                    if (baseClass == TypesystemRepository::Entity)
                     {
                         emit OpenInstanceViewer(typeIdVal.toLongLong(), false);
                     }
-                    else
-                    {
-                        emit OpenObjectEdit(typeIdVal.toLongLong());
-                    }
+                    //TODO do other shift click actions
                 }
-                else
-                {
-                    // TypeId but no baseClass, must be an Enum
-                    emit OpenDouFile(typeIdVal.toLongLong());
-                }
+            }
+            else
+            {
+                // TypeId but no baseClass, must be an Enum
+                emit OpenDouFile(typeIdVal.toLongLong());
             }
         }
     });
