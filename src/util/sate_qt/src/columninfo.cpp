@@ -23,11 +23,9 @@
 ******************************************************************************/
 #include "columninfo.h"
 
-ColumnInfo::ColumnInfo(const QString &name, bool typeNameColumn)
-    : m_typeNameColumn(typeNameColumn)
-    , m_instanceIdColumn(!typeNameColumn)
+ColumnInfo::ColumnInfo(const ColumnType columnType, const QString &name)
+    : m_columnType(columnType)
     , m_name(name)
-    , m_memberType(typeNameColumn?TypeIdMemberType:InstanceIdMemberType)
 {
 
 }
@@ -45,8 +43,7 @@ ColumnInfo::ColumnInfo(const QString &name,
                        const Safir::Dob::Typesystem::TypeId keyTypeId,
                        const Safir::Dob::Typesystem::CollectionType collectionType,
                        const Safir::Dob::Typesystem::Int32 arrayLength)
-    : m_typeNameColumn(false)
-    , m_instanceIdColumn(false)
+    : m_columnType(Member)
     , m_name(name)
     , m_typeId(typeId)
     , m_memberIndex(memberIndex)
@@ -62,27 +59,20 @@ ColumnInfo::ColumnInfo(const QString &name,
 
 ColumnInfo::~ColumnInfo() = default;
 
-ColumnInfoPtr ColumnInfo::CreateTypeName(const QString &name)
+ColumnInfoPtr ColumnInfo::CreateOtherColumn(const ColumnType columnType, const QString &name)
 {
-    return ColumnInfoPtr(new ColumnInfo(name,true));
+    return ColumnInfoPtr(new ColumnInfo(columnType,name));
 }
 
-ColumnInfoPtr ColumnInfo::CreateInstanceId(const QString &name)
-{
-    return ColumnInfoPtr(new ColumnInfo(name,false));
-}
-
-
-
-ColumnInfoPtr ColumnInfo::Create(const QString &name,
-                                 const Safir::Dob::Typesystem::TypeId typeId,
-                                 const Safir::Dob::Typesystem::MemberIndex memberIndex,
-                                 const Safir::Dob::Typesystem::MemberType memberType,
-                                 const Safir::Dob::Typesystem::MemberType keyType,
-                                 const Safir::Dob::Typesystem::TypeId memberTypeId,
-                                 const Safir::Dob::Typesystem::TypeId keyTypeId,
-                                 const Safir::Dob::Typesystem::CollectionType collectionType,
-                                 const Safir::Dob::Typesystem::Int32 arrayLength)
+ColumnInfoPtr ColumnInfo::CreateMemberColumn(const QString &name,
+                                             const Safir::Dob::Typesystem::TypeId typeId,
+                                             const Safir::Dob::Typesystem::MemberIndex memberIndex,
+                                             const Safir::Dob::Typesystem::MemberType memberType,
+                                             const Safir::Dob::Typesystem::MemberType keyType,
+                                             const Safir::Dob::Typesystem::TypeId memberTypeId,
+                                             const Safir::Dob::Typesystem::TypeId keyTypeId,
+                                             const Safir::Dob::Typesystem::CollectionType collectionType,
+                                             const Safir::Dob::Typesystem::Int32 arrayLength)
 {
     return ColumnInfoPtr(new ColumnInfo(name,typeId,memberIndex,memberType,keyType,memberTypeId,keyTypeId,collectionType,arrayLength));
 }

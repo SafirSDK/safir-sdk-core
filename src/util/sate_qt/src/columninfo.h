@@ -42,20 +42,28 @@ class ColumnInfo
 public:
     ~ColumnInfo();
 
-    static ColumnInfoPtr CreateTypeName(const QString &name);
-    static ColumnInfoPtr CreateInstanceId(const QString &name);
-    static ColumnInfoPtr Create(const QString &name,
-                                const Safir::Dob::Typesystem::TypeId typeId,
-                                const Safir::Dob::Typesystem::MemberIndex memberIndex,
-                                const Safir::Dob::Typesystem::MemberType memberType,
-                                const Safir::Dob::Typesystem::MemberType keyType,
-                                const Safir::Dob::Typesystem::TypeId memberTypeId,
-                                const Safir::Dob::Typesystem::TypeId keyTypeId,
-                                const Safir::Dob::Typesystem::CollectionType collectionType,
-                                const Safir::Dob::Typesystem::Int32 arrayLength);
+    enum ColumnType
+    {
+        TypeName,
+        InstanceId,
+        ChannelId,
+        Timestamp,
+        Member
+    };
 
-    bool IsTypeNameColumn() const { return m_typeNameColumn; }
-    bool IsInstanceIdColumn() const { return m_instanceIdColumn; }
+    static ColumnInfoPtr CreateOtherColumn(const ColumnType columnType, const QString &name);
+
+    static ColumnInfoPtr CreateMemberColumn(const QString &name,
+                                            const Safir::Dob::Typesystem::TypeId typeId,
+                                            const Safir::Dob::Typesystem::MemberIndex memberIndex,
+                                            const Safir::Dob::Typesystem::MemberType memberType,
+                                            const Safir::Dob::Typesystem::MemberType keyType,
+                                            const Safir::Dob::Typesystem::TypeId memberTypeId,
+                                            const Safir::Dob::Typesystem::TypeId keyTypeId,
+                                            const Safir::Dob::Typesystem::CollectionType collectionType,
+                                            const Safir::Dob::Typesystem::Int32 arrayLength);
+
+    ColumnType GetColumnType() const {return m_columnType;}
 
     QString Name() const { return m_name; }
 
@@ -69,9 +77,10 @@ public:
     Safir::Dob::Typesystem::Int32 ArrayLength() const {return m_arrayLength;}
 
     Qt::Alignment Alignment() const;
+    bool HiddenByDefault() const {return m_columnType == ChannelId;}
 private:
 
-    ColumnInfo(const QString &name, bool typeNameColumn);
+    ColumnInfo(const ColumnType columnType, const QString &name);
     ColumnInfo(const QString &name,
                const Safir::Dob::Typesystem::TypeId typeId,
                const Safir::Dob::Typesystem::MemberIndex memberIndex,
@@ -82,8 +91,7 @@ private:
                const Safir::Dob::Typesystem::CollectionType collectionType,
                const Safir::Dob::Typesystem::Int32 arrayLength);
 
-    const bool m_typeNameColumn;
-    const bool m_instanceIdColumn;
+    const ColumnType m_columnType;
     const QString m_name;
     const Safir::Dob::Typesystem::TypeId m_typeId = 0;
     const Safir::Dob::Typesystem::Int32 m_memberIndex = 0;

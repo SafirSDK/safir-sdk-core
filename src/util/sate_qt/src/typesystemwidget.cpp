@@ -83,17 +83,23 @@ void TypesystemWidget::Initialize(DobInterface* dob)
                 {
                     if (baseClass == TypesystemRepository::Entity)
                     {
-                        emit OpenInstanceViewer(typeIdVal.toLongLong(), true);
+                        emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), true);
                     }
-                    //TODO do other ctrl click actions
+                    //TODO do other ctrl double click actions
                 }
                 else if (!shiftKey && !ctrlKey)
                 {
                     if (baseClass == TypesystemRepository::Entity)
                     {
-                        emit OpenInstanceViewer(typeIdVal.toLongLong(), false);
+                        emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), false);
                     }
-                    //TODO do other shift click actions
+                    else if (baseClass == TypesystemRepository::Message)
+                    {
+                        emit OpenMessageInstanceViewer(typeIdVal.toLongLong(),
+                                                       Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS,
+                                                       true);
+                    }
+                    //TODO do other double click actions
                 }
             }
             else
@@ -112,7 +118,8 @@ void TypesystemWidget::Initialize(DobInterface* dob)
     // TODO: remove std functions and use signals
     m_contextMenuHandler = new TypesystemContextMenuHandler(m_dob, ui->treeView);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenObjectEdit, this, &TypesystemWidget::OpenObjectEdit);
-    connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenInstanceViewer, this, &TypesystemWidget::OpenInstanceViewer);
+    connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenEntityInstanceViewer, this, &TypesystemWidget::OpenEntityInstanceViewer);
+    connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenMessageInstanceViewer, this, &TypesystemWidget::OpenMessageInstanceViewer);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenDouFile, this, &TypesystemWidget::OpenDouFile);
 }
 

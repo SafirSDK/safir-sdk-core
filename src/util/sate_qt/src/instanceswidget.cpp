@@ -36,6 +36,7 @@
 #include <QSortFilterProxyModel>
 #include <iostream>
 #include "entityinstancesmodel.h"
+#include "messageinstancesmodel.h"
 #include "typesystemrepository.h"
 #include <map>
 
@@ -80,8 +81,7 @@ private:
     std::map<int, QRegularExpression> m_filters;
 };
 
-
-InstancesWidget::InstancesWidget(DobInterface* dob, int64_t typeId, bool includeSubclasses, QWidget* parent)
+InstancesWidget::InstancesWidget(QWidget* parent)
     : QWidget(parent)
     , m_table(new QTableView(this))
     , m_filterArea(new QWidget(this))
@@ -99,24 +99,6 @@ InstancesWidget::InstancesWidget(DobInterface* dob, int64_t typeId, bool include
     connect(m_table->horizontalHeader(),&QHeaderView::sectionResized, this, &InstancesWidget::OnSectionResized);
     connect(m_table->horizontalHeader(),&QHeaderView::sectionCountChanged, this, &InstancesWidget::OnSectionCountChanged);
 
-    const auto* cls = TypesystemRepository::Instance().GetClass(typeId);
-    if (cls == nullptr)
-    {
-        throw std::logic_error("Failed to find type for InstancesWidget");
-    }
-    else if (cls->dobBaseClass == TypesystemRepository::Entity)
-    {
-        m_sourceModel = new EntityInstancesModel(dob, typeId, includeSubclasses, this);
-        m_proxyModel = new ColumnSortFilterProxyModel(this);
-        m_proxyModel->setSourceModel(m_sourceModel);
-        m_proxyModel->setFilterRole(EntityInstancesModel::FilterRole);
-        m_table->setModel(m_proxyModel);
-    }
-    else
-    {
-        throw std::logic_error("InstancesWidget only supports entities at the moment.");
-    }
-
     m_table->setSortingEnabled(true);
     m_table->setSelectionBehavior(QTableView::SelectRows);
     m_table->horizontalHeader()->setHighlightSections(false);
@@ -131,7 +113,52 @@ InstancesWidget::InstancesWidget(DobInterface* dob, int64_t typeId, bool include
 
     //Resize table columns after the table has been populated
     QMetaObject::invokeMethod(this, [this]{m_table->resizeColumnsToContents();}, Qt::QueuedConnection);
+    //TODO use default comumn sizes and add a button somewhere to resize to contents
 }
+
+InstancesWidget::InstancesWidget(DobInterface* dob,
+                                 int64_t typeId,
+                                 bool includeSubclasses,
+                                 QWidget* parent)
+    : InstancesWidget(parent)
+{
+    const auto* cls = TypesystemRepository::Instance().GetClass(typeId);
+    if (cls != nullptr && cls->dobBaseClass == TypesystemRepository::Entity)
+    {
+        m_sourceModelEntities = new EntityInstancesModel(dob, typeId, includeSubclasses, this);
+        m_proxyModel = new ColumnSortFilterProxyModel(this);
+        m_proxyModel->setSourceModel(m_sourceModelEntities);
+        m_proxyModel->setFilterRole(EntityInstancesModel::FilterRole);
+        m_table->setModel(m_proxyModel);
+    }
+    else
+    {
+        throw std::logic_error("Failed to find that Entity type for InstancesWidget");
+    }
+}
+
+InstancesWidget::InstancesWidget(DobInterface* dob,
+                                 int64_t typeId,
+                                 const Safir::Dob::Typesystem::ChannelId& channel,
+                                 bool includeSubclasses,
+                                 QWidget* parent)
+    : InstancesWidget(parent)
+{
+    const auto* cls = TypesystemRepository::Instance().GetClass(typeId);
+    if (cls != nullptr && cls->dobBaseClass == TypesystemRepository::Message)
+    {
+        m_sourceModelMessages = new MessageInstancesModel(dob, typeId, channel, includeSubclasses, this);
+        m_proxyModel = new ColumnSortFilterProxyModel(this);
+        m_proxyModel->setSourceModel(m_sourceModelMessages);
+        m_proxyModel->setFilterRole(MessageInstancesModel::FilterRole);
+        m_table->setModel(m_proxyModel);
+    }
+    else
+    {
+        throw std::logic_error("Failed to find that Message type for InstancesWidget");
+    }
+}
+
 
 InstancesWidget::~InstancesWidget()
 {
@@ -151,11 +178,22 @@ void InstancesWidget::OnDoubleClicked(const QModelIndex &index)
     {
         return;
     }
-    const auto& info = m_sourceModel->getRow(sourceIndex.row());
-    emit OpenObjectEdit(info.entityId.GetTypeId(),
-                        QString::fromStdWString(info.handlerId.ToString()),
-                        info.entityId.GetInstanceId().GetRawValue(),
-                        info.entity);
+    if (m_sourceModelEntities != nullptr)
+    {
+        const auto& info = m_sourceModelEntities->getRow(sourceIndex.row());
+        emit OpenObjectEdit(info.entityId.GetTypeId(),
+                            QString::fromStdWString(info.handlerId.ToString()),
+                            info.entityId.GetInstanceId().GetRawValue(),
+                            info.entity);
+    }
+    else if (m_sourceModelMessages != nullptr)
+    {
+        const auto& info = m_sourceModelMessages->getRow(sourceIndex.row());
+        emit OpenObjectEdit(info.typeId,
+                            QString::fromStdWString(info.channelId.ToString()),
+                            0,
+                            info.message);
+    }
 }
 
 void InstancesWidget::OnFilterTextChanged(const int column, const QString &text)
@@ -195,6 +233,16 @@ void InstancesWidget::OnSectionResized(const int logicalIndex, const int /*oldSi
 
 void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int newCount)
 {
+    while (auto* item = m_filterAreaLayout->takeAt(0))
+    {
+        if (auto* widget = item->widget())
+        {
+            widget->deleteLater();
+        }
+        delete item;
+    }
+
+    qDebug() << "OnSectionCountChanged" << newCount;
     m_filterAreaLayout->addSpacing(2);
     for (int i = 0; i < newCount; ++i)
     {
@@ -206,6 +254,7 @@ void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int ne
                 [this,i](const QString& text){OnFilterTextChanged(i,text);});
         m_filterAreaLayout->addWidget(m_filters.back(),1);
     }
+    qDebug() << "  adding stretch";
     m_filterAreaLayout->addStretch(100);
 }
 

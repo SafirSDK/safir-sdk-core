@@ -36,7 +36,10 @@ public:
 
 signals:
     void OpenObjectEdit(int64_t typeId);
-    void OpenInstanceViewer(int64_t typeId, bool includeSubclasses);
+    void OpenEntityInstanceViewer(int64_t typeId, bool includeSubclasses);
+    void OpenMessageInstanceViewer(int64_t typeId,
+                                   const Safir::Dob::Typesystem::ChannelId& channel,
+                                   bool includeSubclasses);
     void OpenDouFile(int64_t typeId);
 
 private:

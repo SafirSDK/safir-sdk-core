@@ -88,7 +88,8 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     // TypesystemWidget signal handling
     connect(m_typesystem, &TypesystemWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEdit);
-    connect(m_typesystem, &TypesystemWidget::OpenInstanceViewer, this, &SateMainWindow::OnOpenInstanceViewer);
+    connect(m_typesystem, &TypesystemWidget::OpenEntityInstanceViewer, this, &SateMainWindow::OnOpenEntityInstanceViewer);
+    connect(m_typesystem, &TypesystemWidget::OpenMessageInstanceViewer, this, &SateMainWindow::OnOpenMessageInstanceViewer);
     connect(m_typesystem, &TypesystemWidget::OpenDouFile, this, &SateMainWindow::OnOpenDouFile);
 
     // Received table
@@ -143,7 +144,25 @@ SateMainWindow::~SateMainWindow()
     }
 }
 
-void SateMainWindow::OnOpenInstanceViewer(const int64_t typeId, const bool includeSubclasses)
+void SateMainWindow::OnOpenEntityInstanceViewer(const int64_t typeId, const bool includeSubclasses)
+{
+    OpenInstanceViewer(typeId, includeSubclasses,
+                       [this, typeId, includeSubclasses]
+                       {return new InstancesWidget(m_dob.get(), typeId, includeSubclasses, this);});
+}
+
+void SateMainWindow::OnOpenMessageInstanceViewer(const int64_t typeId,
+                                                 const Safir::Dob::Typesystem::ChannelId& channel,
+                                                 const bool includeSubclasses)
+{
+    OpenInstanceViewer(typeId, includeSubclasses,
+                       [this, typeId, channel, includeSubclasses]
+                       {return new InstancesWidget(m_dob.get(), typeId, channel, includeSubclasses, this);});
+}
+
+void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
+                                        const bool includeSubclasses,
+                                        const std::function<InstancesWidget* ()>& factory)
 {
     const auto* const cls = TypesystemRepository::Instance().GetClass(typeId);
     const auto tabObjectName = "IV" + cls->name;
@@ -163,10 +182,10 @@ void SateMainWindow::OnOpenInstanceViewer(const int64_t typeId, const bool inclu
     }
 
     // no previous dock found, create new
-    auto ev = new InstancesWidget(m_dob.get(), typeId, includeSubclasses, this);
+    auto* iv = factory();
     dock = new ads::CDockWidget(cls->name);
     dock->setObjectName(tabObjectName);
-    dock->setWidget(ev);
+    dock->setWidget(iv);
     dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
     dock->setProperty("includeSubclasses",includeSubclasses);
     if (includeSubclasses)
@@ -189,13 +208,25 @@ void SateMainWindow::OnOpenInstanceViewer(const int64_t typeId, const bool inclu
             dock->setTabToolTip(tr("All instances of the entity %1").arg(cls->name));
         }
     }
+    else if (cls->dobBaseClass == TypesystemRepository::Message)
+    {
+        if (includeSubclasses)
+        {
+            dock->setTabToolTip(tr("The most recently received instances of the message %1 and its subclasses")
+                                .arg(cls->name));
+        }
+        else
+        {
+            dock->setTabToolTip(tr("The most recently received instances of the message %1").arg(cls->name));
+        }
+    }
     else
     {
         throw std::logic_error("Need to add an approprate tooltip for this type");
     }
 
     m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
-    connect(ev,&InstancesWidget::OpenObjectEdit,this,&SateMainWindow::OnOpenObjectEditWithInstance);
+    connect(iv,&InstancesWidget::OpenObjectEdit,this,&SateMainWindow::OnOpenObjectEditWithInstance);
 }
 
 void SateMainWindow::OnConnectedToDob(const QString& connectionName)

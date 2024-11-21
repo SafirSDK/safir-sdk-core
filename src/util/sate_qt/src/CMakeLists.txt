@@ -31,6 +31,7 @@ set(sources
     registerhandlerdialog.cpp
     instanceswidget.cpp
     entityinstancesmodel.cpp
+    messageinstancesmodel.cpp
     columninfo.cpp
 )
 
@@ -51,6 +52,7 @@ set(widget_headers
     registerhandlerdialog.h
     instanceswidget.h
     entityinstancesmodel.h
+    messageinstancesmodel.h
     columninfo.h
   )
 

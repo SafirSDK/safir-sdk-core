@@ -24,6 +24,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <functional>
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 #  include <qt6advanceddocking/DockManager.h>
@@ -37,6 +38,7 @@ class QLabel;
 class QTableView;
 class TypesystemWidget;
 class QTextBrowser;
+class InstancesWidget;
 
 namespace Ui { class SateMainWindow; }
 
@@ -49,7 +51,10 @@ public:
     ~SateMainWindow();
 
 private slots:
-    void OnOpenInstanceViewer(const int64_t typeId, const bool includeSubclasses);
+    void OnOpenEntityInstanceViewer(const int64_t typeId, const bool includeSubclasses);
+    void OnOpenMessageInstanceViewer(const int64_t typeId,
+                                     const Safir::Dob::Typesystem::ChannelId& channel,
+                                     const bool includeSubclasses);
     void OnConnectedToDob(const QString& connectionName);
     void OnReceivedTableDoubleClicked(const QModelIndex& ix);
     void OnOpenObjectEdit(const int64_t typeId);
@@ -62,6 +67,10 @@ private slots:
     void OnDarkMode();
     void OnLightMode();
 private:
+    void OpenInstanceViewer(const int64_t typeId,
+                            const bool includeSubclasses,
+                            const std::function<InstancesWidget* ()>& factory);
+
     Ui::SateMainWindow *ui;
     QLabel* m_instanceLabel = nullptr;
 

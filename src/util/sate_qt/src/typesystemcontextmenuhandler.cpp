@@ -200,11 +200,11 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
 
     if (chosenAction == subscribeEntity)
     {
-        emit OpenInstanceViewer(typeId, false);
+        emit OpenEntityInstanceViewer(typeId, false);
     }
     else if (chosenAction == subscribeEntityRecursive)
     {
-        emit OpenInstanceViewer(typeId, true);
+        emit OpenEntityInstanceViewer(typeId, true);
     }
     else if (chosenAction == openObjectEditor)
     {
@@ -234,7 +234,7 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     }
     else if (chosenAction == subscribeMessage)
     {
-         m_dob->SubscribeMessage(typeId, sdt::ChannelId(), true);
+        emit OpenMessageInstanceViewer(typeId, sdt::ChannelId::ALL_CHANNELS, true);
     }
     else if (chosenAction == subscribeMessageEllipsis)
     {

@@ -31,6 +31,7 @@ class QWidget;
 class QLineEdit;
 class QHBoxLayout;
 class EntityInstancesModel;
+class MessageInstancesModel;
 class ColumnSortFilterProxyModel;
 
 class InstancesWidget
@@ -39,7 +40,17 @@ class InstancesWidget
     Q_OBJECT
 
 public:
-    explicit InstancesWidget(DobInterface* dob, int64_t typeId, bool includeSubclasses, QWidget* parent);
+    //create an entity instances widget
+    InstancesWidget(DobInterface* dob,
+                    int64_t typeId,
+                    bool includeSubclasses,
+                    QWidget* parent);
+
+    //create a message instances widget
+    InstancesWidget(DobInterface* dob, int64_t typeId,
+                    const Safir::Dob::Typesystem::ChannelId& channel,
+                    bool includeSubclasses,
+                    QWidget* parent);
 
     ~InstancesWidget() override;
 
@@ -58,11 +69,15 @@ private slots:
     void OnCustomContextMenuRequestedTable(const QPoint& pos);
     void RunColumnContextMenu(const QPoint& globalPos, const int logicalIndex);
 private:
+    //common constructor
+    InstancesWidget(QWidget* parent);
+
     QTableView* m_table;
     QWidget* m_filterArea;
     QHBoxLayout* m_filterAreaLayout;
     QList<QLineEdit*> m_filters;
     ColumnSortFilterProxyModel* m_proxyModel = nullptr;
-    EntityInstancesModel* m_sourceModel = nullptr;
+    EntityInstancesModel* m_sourceModelEntities = nullptr;
+    MessageInstancesModel* m_sourceModelMessages = nullptr;
 };
 

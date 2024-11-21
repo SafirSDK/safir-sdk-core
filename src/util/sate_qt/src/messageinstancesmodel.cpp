@@ -21,17 +21,18 @@
  * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#include "entityinstancesmodel.h"
+#include "messageinstancesmodel.h"
 
 #include <iostream>
 
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
-#include <Safir/Dob/Entity.h>
+#include <Safir/Dob/Message.h>
 #include <Safir/Time/TimeProvider.h>
 #include <QSize>
 
+#if 1
 namespace
 {
 
@@ -71,45 +72,46 @@ namespace
 
 }
 
+#endif
 
-
-EntityInstancesModel::EntityInstancesModel(DobInterface* dob,
-                                           const Safir::Dob::Typesystem::TypeId typeId,
-                                           bool includeSubclasses,
-                                           QObject* parent)
+MessageInstancesModel::MessageInstancesModel(DobInterface* dob,
+                                             const Safir::Dob::Typesystem::TypeId typeId,
+                                             const Safir::Dob::Typesystem::ChannelId& channel,
+                                             bool includeSubclasses,
+                                             QObject* parent)
     : QAbstractTableModel(parent)
     , m_dob(dob)
     , m_typeId(typeId)
+    , m_channel(channel)
     , m_includeSubclasses(includeSubclasses)
 {
     setupColumns();
-    connect(m_dob, &DobInterface::OnEntity, this, &EntityInstancesModel::OnEntity);
-    m_dob->SubscribeEntity(m_typeId,Safir::Dob::Typesystem::InstanceId(), m_includeSubclasses);
+    connect(m_dob, &DobInterface::OnMessage, this, &MessageInstancesModel::OnMessage);
+    m_dob->SubscribeMessage(m_typeId, channel, m_includeSubclasses);
 }
 
-EntityInstancesModel::~EntityInstancesModel()
+MessageInstancesModel::~MessageInstancesModel()
 {
 
 }
 
-EntityInstancesModel::Info EntityInstancesModel::getRow(int row) const
+
+MessageInstancesModel::Info MessageInstancesModel::getRow(int row) const
 {
-    auto it = m_entities.begin();
-    std::advance(it,row);
-    return it->second;
+    return m_messages[row];
 }
 
-int EntityInstancesModel::rowCount(const QModelIndex& /*parent*/) const
+int MessageInstancesModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    return static_cast<int>(m_entities.size());
+    return static_cast<int>(m_messages.size());
 }
 
-int EntityInstancesModel::columnCount(const QModelIndex& /*parent*/) const
+int MessageInstancesModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return m_columnInfoList.count();
 }
 
-QVariant EntityInstancesModel::headerData(const int section, const Qt::Orientation orientation, const int role) const
+QVariant MessageInstancesModel::headerData(const int section, const Qt::Orientation orientation, const int role) const
 {
     if(orientation == Qt::Horizontal &&
        section >= 0 && section < m_columnInfoList.count())
@@ -128,7 +130,7 @@ QVariant EntityInstancesModel::headerData(const int section, const Qt::Orientati
     return QVariant();
 }
 
-QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) const
+QVariant MessageInstancesModel::data(const QModelIndex& index, const int role) const
 {
     using namespace Safir::Dob::Typesystem;
 
@@ -150,23 +152,26 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
         return QVariant(columnInfo->Alignment());
     }
 
+    const auto& messageInfo = m_messages.at(index.row());
 
-    const auto entity = std::next(m_entities.cbegin(), index.row());
-
+    if (columnInfo->GetColumnType() == ColumnInfo::Timestamp)
+    {
+        return messageInfo.receiveTime.toString("hh:mm:ss.zzz");
+    }
     if (columnInfo->GetColumnType() == ColumnInfo::TypeName)
     {
-        return QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(entity->first.GetTypeId()));
+        return QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(messageInfo.typeId));
     }
-    if (columnInfo->GetColumnType() == ColumnInfo::InstanceId)
+    if (columnInfo->GetColumnType() == ColumnInfo::ChannelId)
     {
-        return static_cast<qlonglong>(entity->first.GetInstanceId().GetRawValue());
+        return QString::fromStdWString(messageInfo.channelId.ToString());
     }
 
     switch (columnInfo->CollectionType())
     {
     case SingleValueCollectionType:
         {
-            const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),0);
+            const auto& container = messageInfo.message->GetMember(columnInfo->MemberIndex(),0);
             if (container.IsNull())
             {
                 return QVariant();
@@ -184,7 +189,7 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
             QStringList result;
             for (int i = 0; i < columnInfo->ArrayLength(); ++i)
             {
-                const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),i);
+                const auto& container = messageInfo.message->GetMember(columnInfo->MemberIndex(),i);
                 if (!container.IsNull())
                 {
                     result += ContainerToVariant(container, columnInfo->MemberType(), columnInfo->MemberTypeId()).toString();
@@ -206,7 +211,7 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
             {
                 return "<sequence>";
             }
-            const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),0);
+            const auto& container = messageInfo.message->GetMember(columnInfo->MemberIndex(),0);
             if (container.IsNull())
             {
                 return QVariant();
@@ -223,7 +228,7 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
                 return "<dictionary>";
             }
 
-            const auto& container = entity->second.entity->GetMember(columnInfo->MemberIndex(),0);
+            const auto& container = messageInfo.message->GetMember(columnInfo->MemberIndex(),0);
             if (container.IsNull())
             {
                 return QVariant();
@@ -240,10 +245,10 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
 }
 
 
-void EntityInstancesModel::setupColumns()
+void MessageInstancesModel::setupColumns()
 {
     if(!Safir::Dob::Typesystem::Operations::Exists(m_typeId) ||
-       !Safir::Dob::Typesystem::Operations::IsOfType(m_typeId,Safir::Dob::Entity::ClassTypeId))
+       !Safir::Dob::Typesystem::Operations::IsOfType(m_typeId,Safir::Dob::Message::ClassTypeId))
     {
         throw std::logic_error("Invalid type");
     }
@@ -257,11 +262,12 @@ void EntityInstancesModel::setupColumns()
     Safir::Dob::Typesystem::TypeId keyTypeId;
     Safir::Dob::Typesystem::CollectionType collectionType;
 
+    m_columnInfoList.append(ColumnInfo::CreateOtherColumn(ColumnInfo::Timestamp, tr("Receive time")));
     if (m_includeSubclasses)
     {
         m_columnInfoList.append(ColumnInfo::CreateOtherColumn(ColumnInfo::TypeName,tr("TypeName")));
     }
-    m_columnInfoList.append(ColumnInfo::CreateOtherColumn(ColumnInfo::InstanceId,tr("InstanceId")));
+    m_columnInfoList.append(ColumnInfo::CreateOtherColumn(ColumnInfo::ChannelId,tr("ChannelId")));
 
     Safir::Dob::Typesystem::Int32 numberOfMembers = Safir::Dob::Typesystem::Members::GetNumberOfMembers(m_typeId);
     for(Safir::Dob::Typesystem::Int32 memberIndex = 0 ; memberIndex < numberOfMembers ; ++memberIndex)
@@ -284,56 +290,48 @@ void EntityInstancesModel::setupColumns()
     }
 }
 
-void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
-                                    const sdt::HandlerId& handlerId,
-                                    const Safir::Dob::EntityPtr& entity,
-                                    const DobInterface::EntityOperation operation)
+void MessageInstancesModel::OnMessage(const int64_t typeId,
+                                      const sdt::ChannelId& channel,
+                                      const Safir::Dob::MessagePtr& message)
 {
-    if (!m_includeSubclasses && entityId.GetTypeId() != m_typeId)
+    if (!m_includeSubclasses && typeId != m_typeId)
     {
         //not a type we're looking for
         return;
     }
-    if(m_includeSubclasses && !Safir::Dob::Typesystem::Operations::IsOfType(entityId.GetTypeId(), m_typeId))
+    if(m_includeSubclasses && !Safir::Dob::Typesystem::Operations::IsOfType(typeId, m_typeId))
     {
         //not a type we're looking for
+        return;
+    }
+    if (m_channel != Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS && channel != m_channel)
+    {
+        //not a channel we're looking for
         return;
     }
 
-    switch(operation)
+    m_messages.push_front(Info{QDateTime::currentDateTime(),
+                               typeId,
+                               channel,
+                               message});
+
+    beginInsertRows(QModelIndex(), 0, 0);
+    endInsertRows();
+
+    if (m_messages.size() > m_maxRows)
     {
-    case DobInterface::NewEntity:
+        beginRemoveRows(QModelIndex(), m_maxRows, m_messages.size() - 1);
+        while(m_messages.size() > m_maxRows)
         {
-            const auto result = m_entities.insert(std::make_pair(entityId, Info{entityId, handlerId, entity}));
-            if (result.second)
-            {
-                const auto row = std::distance(m_entities.begin(), result.first);
-                beginInsertRows(QModelIndex(), row, row);
-                endInsertRows();
-            }
+            m_messages.pop_back();
         }
-        break;
-    case DobInterface::UpdatedEntity:
-        {
-            const auto result = m_entities.insert_or_assign(entityId,
-                                                            Info{entityId, handlerId, entity});
-            const auto row = std::distance(m_entities.begin(), result.first);
-            emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1));
-        }
-        break;
-    case DobInterface::DeletedEntity:
-        {
-            const auto row = std::distance(m_entities.begin(), m_entities.find(entityId));
-            beginRemoveRows(QModelIndex(),row,row);
-            m_entities.erase(entityId);
-            endRemoveRows();
-        }
-        break;
+        endRemoveRows();
     }
 }
 
 
-void EntityInstancesModel::setSecond64Format(const Second64Format format)
+#if 1
+void MessageInstancesModel::setSecond64Format(const Second64Format format)
 {
     if (m_second64Format == format)
     {
@@ -346,7 +344,7 @@ void EntityInstancesModel::setSecond64Format(const Second64Format format)
 }
 
 
-QVariant EntityInstancesModel::ContainerToVariant(const Safir::Dob::Typesystem::ContainerBase& container,
+QVariant MessageInstancesModel::ContainerToVariant(const Safir::Dob::Typesystem::ContainerBase& container,
                                          const Safir::Dob::Typesystem::MemberType memberType,
                                          const Safir::Dob::Typesystem::TypeId memberTypeId) const
 {
@@ -439,7 +437,7 @@ QVariant EntityInstancesModel::ContainerToVariant(const Safir::Dob::Typesystem::
     throw std::logic_error("Unhandled MemberType");
 }
 
-QStringList EntityInstancesModel::SequenceToStrings(const Safir::Dob::Typesystem::ContainerBase& container,
+QStringList MessageInstancesModel::SequenceToStrings(const Safir::Dob::Typesystem::ContainerBase& container,
                                                     const Safir::Dob::Typesystem::MemberType memberType,
                                                     const Safir::Dob::Typesystem::TypeId memberTypeId) const
 {
@@ -554,7 +552,7 @@ QStringList EntityInstancesModel::SequenceToStrings(const Safir::Dob::Typesystem
     throw std::logic_error("Unhandled MemberType");
 }
 
-QStringList EntityInstancesModel::DictionaryToStrings(const Safir::Dob::Typesystem::DictionaryContainerBase& container,
+QStringList MessageInstancesModel::DictionaryToStrings(const Safir::Dob::Typesystem::DictionaryContainerBase& container,
                                              const Safir::Dob::Typesystem::MemberType keyType,
                                              const Safir::Dob::Typesystem::MemberType memberType,
                                              const Safir::Dob::Typesystem::TypeId memberTypeId,
@@ -612,7 +610,7 @@ QStringList EntityInstancesModel::DictionaryToStrings(const Safir::Dob::Typesyst
 }
 
 
-QVariant EntityInstancesModel::Second64ToVariant(const Safir::Dob::Typesystem::Si64::Second seconds) const
+QVariant MessageInstancesModel::Second64ToVariant(const Safir::Dob::Typesystem::Si64::Second seconds) const
 {
     switch (m_second64Format)
     {
@@ -625,3 +623,4 @@ QVariant EntityInstancesModel::Second64ToVariant(const Safir::Dob::Typesystem::S
     }
     throw std::logic_error("Invalid Second64 format");
 }
+#endif
