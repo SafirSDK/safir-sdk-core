@@ -102,6 +102,6 @@ private:
     ColumnInfoList m_columnInfoList;
     Second64Format m_second64Format;
 
-    size_t m_maxRows = 5;
+    size_t m_maxRows = 100;
     std::deque<Info> m_messages;
 };

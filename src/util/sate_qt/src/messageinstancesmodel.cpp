@@ -320,7 +320,7 @@ void MessageInstancesModel::OnMessage(const int64_t typeId,
 
     if (m_messages.size() > m_maxRows)
     {
-        beginRemoveRows(QModelIndex(), m_maxRows, m_messages.size() - 1);
+        beginRemoveRows(QModelIndex(), static_cast<int>(m_maxRows), static_cast<int>(m_messages.size() - 1));
         while(m_messages.size() > m_maxRows)
         {
             m_messages.pop_back();
