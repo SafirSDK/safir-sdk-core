@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2014, 2022, 2024 (http://safirsdkcore.com)
 *
 * Created by: Patrik Fundberg / patrik.fundberg@saabgroup.com
 *
@@ -31,9 +31,11 @@
 
 #include "columninfo.h"
 #include "dobinterface.h"
+#include "instancesmodelutils.h"
 
 class EntityInstancesModel
     : public QAbstractTableModel
+    , private InstancesModelUtils
 {
     Q_OBJECT
 public:
@@ -45,15 +47,6 @@ public:
                          QObject* parent);
 
     ~EntityInstancesModel() override;
-
-    enum Second64Format
-    {
-        FloatingPoint,
-        LocalTime,
-        UtcTime
-    };
-
-    void setSecond64Format(const Second64Format format);
 
     struct Info
     {
@@ -71,21 +64,6 @@ private:
 
     void setupColumns();
 
-    QVariant ContainerToVariant(const Safir::Dob::Typesystem::ContainerBase& container,
-                                const Safir::Dob::Typesystem::MemberType memberType,
-                                const Safir::Dob::Typesystem::TypeId memberTypeId) const;
-
-    QStringList SequenceToStrings(const Safir::Dob::Typesystem::ContainerBase& container,
-                                  const Safir::Dob::Typesystem::MemberType memberType,
-                                  const Safir::Dob::Typesystem::TypeId memberTypeId) const;
-
-    QStringList DictionaryToStrings(const Safir::Dob::Typesystem::DictionaryContainerBase& container,
-                                    const Safir::Dob::Typesystem::MemberType keyType,
-                                    const Safir::Dob::Typesystem::MemberType memberType,
-                                    const Safir::Dob::Typesystem::TypeId memberTypeId,
-                                    const Safir::Dob::Typesystem::TypeId keyTypeId) const;
-
-    QVariant Second64ToVariant(const Safir::Dob::Typesystem::Si64::Second seconds) const;
 private slots:
     void OnEntity(const sdt::EntityId& entityId,
                   const sdt::HandlerId& handler,
@@ -97,7 +75,6 @@ private:
     const Safir::Dob::Typesystem::TypeId m_typeId;
     const bool m_includeSubclasses;
     ColumnInfoList m_columnInfoList;
-    Second64Format m_second64Format;
 
     std::map<Safir::Dob::Typesystem::EntityId, Info> m_entities;
 };

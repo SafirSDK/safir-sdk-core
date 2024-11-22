@@ -241,8 +241,8 @@ void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int ne
         }
         delete item;
     }
+    m_filters.clear();
 
-    qDebug() << "OnSectionCountChanged" << newCount;
     m_filterAreaLayout->addSpacing(2);
     for (int i = 0; i < newCount; ++i)
     {
@@ -254,7 +254,6 @@ void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int ne
                 [this,i](const QString& text){OnFilterTextChanged(i,text);});
         m_filterAreaLayout->addWidget(m_filters.back(),1);
     }
-    qDebug() << "  adding stretch";
     m_filterAreaLayout->addStretch(100);
 }
 

@@ -30,6 +30,7 @@ set(sources
     dobobjectbuilder.cpp
     registerhandlerdialog.cpp
     instanceswidget.cpp
+    instancesmodelutils.cpp
     entityinstancesmodel.cpp
     messageinstancesmodel.cpp
     columninfo.cpp
@@ -61,6 +62,7 @@ set(headers
     membertreeitem.h
     iconfactory.h
     dobobjectbuilder.h
+    instancesmodelutils.h
 )
 
 if (NOT TARGET Qt::Widgets)

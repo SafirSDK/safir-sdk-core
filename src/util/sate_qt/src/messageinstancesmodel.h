@@ -32,9 +32,11 @@
 
 #include "columninfo.h"
 #include "dobinterface.h"
+#include "instancesmodelutils.h"
 
 class MessageInstancesModel
     : public QAbstractTableModel
+    , private InstancesModelUtils
 {
     Q_OBJECT
 public:
@@ -47,15 +49,6 @@ public:
                           QObject* parent);
 
     ~MessageInstancesModel() override;
-
-    enum Second64Format
-    {
-        FloatingPoint,
-        LocalTime,
-        UtcTime
-    };
-
-    void setSecond64Format(const Second64Format format);
 
     struct Info
     {
@@ -74,21 +67,6 @@ private:
 
     void setupColumns();
 
-    QVariant ContainerToVariant(const Safir::Dob::Typesystem::ContainerBase& container,
-                                const Safir::Dob::Typesystem::MemberType memberType,
-                                const Safir::Dob::Typesystem::TypeId memberTypeId) const;
-
-    QStringList SequenceToStrings(const Safir::Dob::Typesystem::ContainerBase& container,
-                                  const Safir::Dob::Typesystem::MemberType memberType,
-                                  const Safir::Dob::Typesystem::TypeId memberTypeId) const;
-
-    QStringList DictionaryToStrings(const Safir::Dob::Typesystem::DictionaryContainerBase& container,
-                                    const Safir::Dob::Typesystem::MemberType keyType,
-                                    const Safir::Dob::Typesystem::MemberType memberType,
-                                    const Safir::Dob::Typesystem::TypeId memberTypeId,
-                                    const Safir::Dob::Typesystem::TypeId keyTypeId) const;
-
-    QVariant Second64ToVariant(const Safir::Dob::Typesystem::Si64::Second seconds) const;
 private slots:
     void OnMessage(const int64_t typeId,
                    const sdt::ChannelId& channel,
@@ -100,7 +78,6 @@ private:
     const Safir::Dob::Typesystem::ChannelId m_channel;
     const bool m_includeSubclasses;
     ColumnInfoList m_columnInfoList;
-    Second64Format m_second64Format;
 
     size_t m_maxRows = 100;
     std::deque<Info> m_messages;
