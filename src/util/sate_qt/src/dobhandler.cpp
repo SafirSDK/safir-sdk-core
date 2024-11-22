@@ -79,6 +79,7 @@ void DobHandler::Close()
     {
         m_dobConnection.Close();
         emit DobInterface::ConnectionClosed();
+        emit DobInterface::Info("<b>Disconnected from DOB!</b>");
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
@@ -230,7 +231,7 @@ void DobHandler::RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesy
             emit DobInterface::Info("Register service handler: " + Str(typeId) + Str(handler));
         }
 
-        DobInterface::RegistrationInfo info{typeId, handler, false, false, Safir::Dob::InstanceIdPolicy::RequestorDecidesInstanceId};
+        DobInterface::RegistrationInfo info{typeId, handler, pending, false, Safir::Dob::InstanceIdPolicy::RequestorDecidesInstanceId};
         m_registrations.push_back(info);
         emit DobInterface::OnRegistered(info);
     }

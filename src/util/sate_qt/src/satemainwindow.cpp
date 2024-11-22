@@ -39,6 +39,7 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QDateTime>
+#include <QScrollBar>
 
 #include <QTextBrowser>
 #include <QFile>
@@ -53,7 +54,6 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->setupUi(this);
 
     m_dob = std::make_unique<DobHandler>();
-    m_ws = std::make_unique<DobWebSocket>("localhost", 10000);
 
     ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasUndockButton, false);
     ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasCloseButton, false);
@@ -120,6 +120,9 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->menuView->addAction(outputDock->toggleViewAction());
     connect(m_dob.get(), &DobInterface::Info, this, &SateMainWindow::OnInfo);
 
+    // Connection menu
+    connect(ui->actionConnect, &QAction::triggered, this, [this]{ m_dob->Close(); });
+
     // Style sheet menu
     connect(ui->actionDarkMode, &QAction::triggered, this, &SateMainWindow::OnDarkMode);
     connect(ui->actionLightMode, &QAction::triggered, this, &SateMainWindow::OnLightMode);
@@ -127,11 +130,6 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     // DOB signal handling
     connect(m_dob.get(), &DobInterface::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
     m_dob->Open("SATE", 0);
-
-
-    // TODO: just testing
-    connect(m_ws.get(), &DobInterface::Info, this, &SateMainWindow::OnInfo);
-    m_ws->Open("SateWs", 0);
 }
 
 SateMainWindow::~SateMainWindow()
@@ -393,4 +391,6 @@ void SateMainWindow::OnInfo(const QString& info)
 {
     auto time = "<i style='color:grey'>" + QDateTime::currentDateTime().toString("hh:mm:ss") + "</i>: ";
     m_output->insertHtml(time + info + "<br>");
+    auto *sb = m_output->verticalScrollBar();
+    sb->setValue(sb->maximum());
 }

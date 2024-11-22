@@ -31,6 +31,8 @@
 #include <QtWebSockets/QWebSocket>
 #include <QUrl>
 
+class QJsonObject;
+
 class DobWebSocket : public DobInterface
 {
     Q_OBJECT
@@ -69,8 +71,19 @@ public:
 private:
     QWebSocket m_webSocket;
     QUrl m_url;
+    bool m_isConnected = false;
+    bool m_reconnect = false;
+    QString m_name = "sate";
+    int m_context = 0;
 
     void WsConnected();
     void WsDisconnected();
-    
+    void WsRecv(const QString& data);
+
+    void HandleResult(const QJsonObject& j);
+    void HandleNotification(const QJsonObject& j);
+    void HandleError(const QJsonObject& j);
+
+    void Send(const QJsonObject& j);
+    void Error(const QString& msg);
 };

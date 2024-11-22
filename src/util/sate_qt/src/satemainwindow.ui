@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>1704</width>
-     <height>24</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuView">
@@ -35,6 +35,15 @@
     <addaction name="actionLightMode"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuConnection">
+    <property name="title">
+     <string>Connection</string>
+    </property>
+    <addaction name="actionConnect"/>
+    <addaction name="actionConnectWs"/>
+    <addaction name="actionDisconnect"/>
+   </widget>
+   <addaction name="menuConnection"/>
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -55,6 +64,21 @@
    </property>
    <property name="text">
     <string>Light Mode</string>
+   </property>
+  </action>
+  <action name="actionConnect">
+   <property name="text">
+    <string>Connect</string>
+   </property>
+  </action>
+  <action name="actionConnectWs">
+   <property name="text">
+    <string>Connect websocket...</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="text">
+    <string>Disconnect</string>
    </property>
   </action>
  </widget>
