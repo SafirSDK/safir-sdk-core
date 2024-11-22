@@ -54,8 +54,12 @@ TypesystemContextMenuHandler::TypesystemContextMenuHandler(DobInterface* dob, QT
                 {
                     // Valid typeId but no baseClass, must be an Enum
                     QMenu menu;
+                    menu.setToolTipsVisible(true);
                     int64_t typeId = tid.toLongLong();
-                    connect(menu.addAction("Open dou-file"), &QAction::triggered, this, [this, typeId]{ emit OpenDouFile(typeId);});
+                    auto* openDouFile = new QAction(tr("Open dou-file"), &menu);
+                    openDouFile->setToolTip(tr("Open the dou file of this Enum type."));
+                    menu.addAction(openDouFile);
+                    connect(openDouFile, &QAction::triggered, this, [this, typeId]{ emit OpenDouFile(typeId);});
                     menu.exec(m_treeView->cursor().pos());
                 }
             }
@@ -87,8 +91,8 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     auto* openObjectEditor = new QAction(tr("Edit new instance"), &menu);
     auto* registerDefaultEntityHandler = new QAction(tr("Register default handler"), &menu);
     auto* registerEntityHandlerEllipsis = new QAction(tr("Register handler..."), &menu);
-    auto* unregisterAllHandlers = new QAction(tr("Register handlers"), &menu);
-    auto* unsubscribeEntity = new QAction(tr("Unsibscribe"), &menu);
+    auto* unregisterAllHandlers = new QAction(tr("Unregister handlers"), &menu);
+    auto* unsubscribeEntity = new QAction(tr("Unsubscribe"), &menu);
     auto* subscribeMessage = new QAction(tr("Subscribe"), &menu);
     auto* subscribeMessageEllipsis = new QAction(tr("Subscribe..."), &menu);
     auto* unsubscribeMessage = new QAction(tr("Unsibscribe"), &menu);
