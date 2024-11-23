@@ -72,7 +72,7 @@ private:
 };
 
 
-DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QWidget *parent)
+DobObjectEditWidget::DobObjectEditWidget(DobHandler* dob, int64_t typeId, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::DobObjectEditWidget)
     , m_dob(dob)
@@ -90,7 +90,7 @@ DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QWid
     }
 }
 
-DobObjectEditWidget::DobObjectEditWidget(DobInterface* dob, int64_t typeId, QString channelHandler,
+DobObjectEditWidget::DobObjectEditWidget(DobHandler* dob, int64_t typeId, QString channelHandler,
                              int64_t instance, const Safir::Dob::Typesystem::ObjectPtr& object,  QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::DobObjectEditWidget)

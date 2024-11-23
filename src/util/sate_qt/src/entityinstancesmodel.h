@@ -30,8 +30,8 @@
 #include <Safir/Dob/Connection.h>
 
 #include "columninfo.h"
-#include "dobinterface.h"
 #include "instancesmodelutils.h"
+#include "dobhandler.h"
 
 class EntityInstancesModel
     : public QAbstractTableModel
@@ -41,7 +41,7 @@ class EntityInstancesModel
 public:
     enum {FilterRole = Qt::UserRole};
 
-    EntityInstancesModel(DobInterface* dob,
+    EntityInstancesModel(DobHandler* dob,
                          const Safir::Dob::Typesystem::TypeId typeId,
                          bool includeSubclasses,
                          QObject* parent);
@@ -71,7 +71,7 @@ private slots:
                   DobInterface::EntityOperation operation);
 
 private:
-    DobInterface* const m_dob;
+    DobHandler* const m_dob;
     const Safir::Dob::Typesystem::TypeId m_typeId;
     const bool m_includeSubclasses;
     ColumnInfoList m_columnInfoList;

@@ -24,108 +24,70 @@
 #pragma once
 
 #include <QObject>
-#include <Safir/Dob/Connection.h>
-#include <Safir/Dob/Consumer.h>
 #include "dobinterface.h"
 
-class DobHandler : public DobInterface,
-                   public Safir::Dob::Dispatcher,
-                   public Safir::Dob::StopHandler,
-                   public Safir::Dob::EntityHandler,
-                   public Safir::Dob::EntityHandlerInjection,
-                   public Safir::Dob::EntityHandlerPending,
-                   public Safir::Dob::ServiceHandler,
-                   public Safir::Dob::ServiceHandlerPending,
-                   public Safir::Dob::Requestor,
-                   public Safir::Dob::MessageSender,
-                   public Safir::Dob::RegistrationSubscriber,
-                   public Safir::Dob::MessageSubscriber,
-                   public Safir::Dob::EntitySubscriber
+class DobHandler : public QObject
 {
     Q_OBJECT
 public:
 
     DobHandler();
 
-    void Open(const QString& name, int context) override;
-    void Close() override;
+    bool IsOpen() const;
 
-    void SubscribeMessage(int64_t typeId, const sdt::ChannelId& channel, bool includeSubclasses) override;
-    void UnsubscribeMessage(int64_t typeId) override;
+    void OpenNativeConnection(const QString& name, int context);
+    void OpenWebsocketConnection(const QString& address, int port, const QString& name, int context);
 
-    void SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::InstanceId &instance, bool includeSubclasses) override;
-    void UnsubscribeEntity(int64_t typeId) override;
+    void Close();
 
-    void SubscribeRegistrations(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool includeSubclasses) override;
-    void UnsubscribeRegistrations(int64_t typeId) override;
+    void SubscribeMessage(int64_t typeId, const sdt::ChannelId& channel, bool includeSubclasses);
+    void UnsubscribeMessage(int64_t typeId);
 
-    void RegisterEntityHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, Safir::Dob::InstanceIdPolicy::Enumeration instanceIdPolicy, bool pending,  bool injection) override;
-    void RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool pending) override;
-    void Unregister(int64_t typeId) override;
+    void SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::InstanceId &instance, bool includeSubclasses);
+    void UnsubscribeEntity(int64_t typeId);
 
-    void SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel) override;
-    void SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler) override;
+    void SubscribeRegistrations(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool includeSubclasses);
+    void UnsubscribeRegistrations(int64_t typeId);
 
-    void CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler) override;
-    void UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance) override;
-    void DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId) override;
+    void RegisterEntityHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, Safir::Dob::InstanceIdPolicy::Enumeration instanceIdPolicy, bool pending,  bool injection);
+    void RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool pending);
+    void Unregister(int64_t typeId);
 
-    void SetChanges(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler) override;
-    void SetAll(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler) override;
-    void Delete(const Safir::Dob::Typesystem::EntityId &entityId, const Safir::Dob::Typesystem::HandlerId &handler) override;
-    void DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler) override;
+    void SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel);
+    void SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler);
+
+    void CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler);
+    void UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance);
+    void DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId);
+
+    void SetChanges(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler);
+    void SetAll(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler);
+    void Delete(const Safir::Dob::Typesystem::EntityId &entityId, const Safir::Dob::Typesystem::HandlerId &handler);
+    void DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler);
+
+    const DobInterface::RegistrationInfo* GetMyRegistration(int64_t typeId) const;
+    const DobInterface::SubscriptionInfo* GetMySubscription(int64_t typeId) const;
 
 signals:
-    // For internal use only. Signals can't be declared private. All public signals are declared in DobInterface.
-    void DispatchSignal();
+    void ConnectedToDob(const QString& connectionName);
+    void ConnectionClosed();
+
+    void OnMessage(int64_t typeId, const sdt::ChannelId& channel, const Safir::Dob::MessagePtr& message);
+    void OnEntity(const sdt::EntityId& entityId, const sdt::HandlerId& handler, const Safir::Dob::EntityPtr& entity, DobInterface::EntityOperation operation);
+    void OnResponse(const Safir::Dob::ResponsePtr& response);
+    void OnRequest(const Safir::Dob::Typesystem::ObjectPtr request, DobInterface::RequestCategory category);
+
+    void SubscriptionStarted(const DobInterface::SubscriptionInfo& info);
+    void SubscriptionStopped(int64_t typeId);
+
+    void OnRegistered(const DobInterface::RegistrationInfo& info);
+    void OnUnregistered(int64_t typeId);
+
+    void Info(const QString& info);
 
 private:
-    Safir::Dob::Connection m_dobConnection;
+    std::unique_ptr<DobInterface> m_dob;
 
-    Safir::Dob::InstanceIdPolicy::Enumeration GetInstanceIdPolicy(int64_t typeId, const sdt::HandlerId& handler) const;
-
-    // Dispatcher interface
-    void OnDoDispatch() override;
-
-    // StopHandler interface
-    void OnStopOrder() override;
-
-    // EntityRequestBase interface
-    void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender) override;
-    void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender) override;
-    void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender) override;
-
-    // RevokedRegistrationBase interface
-    void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId) override;
-
-    // EntityInjectionBase interface
-    void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy) override;
-    void OnInjectedUpdatedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy) override;
-    void OnInjectedDeletedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy) override;
-    void OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId) override;
-
-    // CompletedRegistrationBase interface
-    void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId) override;
-
-    // ServiceRequestBase interface
-    void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy, Safir::Dob::ResponseSenderPtr responseSender) override;
-
-    // Requestor interface
-    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
-    void OnNotRequestOverflow() override;
-
-    // MessageSender interface
-    void OnNotMessageOverflow() override;
-
-    // RegistrationSubscriber interface
-    void OnRegistered(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId) override;
-    void OnUnregistered(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId) override;
-
-    // MessageSubscriber interface
-    void OnMessage(const Safir::Dob::MessageProxy messageProxy) override;
-
-    // EntitySubscriber interface
-    void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
-    void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
-    void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*deprecated*/) override;
+    bool IsInitiated();
+    void SetupSignalSlots();
 };

@@ -32,7 +32,7 @@
 #  include <qt5advanceddocking/DockManager.h>
 #endif
 
-#include "dobinterface.h"
+#include "dobhandler.h"
 
 class QLabel;
 class QTableView;
@@ -77,7 +77,7 @@ private:
     ads::CDockManager* m_dockManager;
     ads::CDockAreaWidget* m_centralDockArea;
 
-    std::unique_ptr<DobInterface> m_dob;
+    DobHandler m_dob;
     bool m_connected = false;
 
     TypesystemWidget* m_typesystem;

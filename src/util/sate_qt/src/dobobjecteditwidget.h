@@ -25,7 +25,7 @@
 
 #include <QWidget>
 #include <Safir/Dob/Typesystem/Object.h>
-#include "dobinterface.h"
+#include "dobhandler.h"
 
 class DobObjectModel;
 
@@ -38,8 +38,8 @@ class DobObjectEditWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit DobObjectEditWidget(DobInterface* dob, int64_t typeId, QWidget *parent);
-    explicit DobObjectEditWidget(DobInterface* dob, int64_t typeId, QString channelHandler,
+    explicit DobObjectEditWidget(DobHandler* dob, int64_t typeId, QWidget *parent);
+    explicit DobObjectEditWidget(DobHandler* dob, int64_t typeId, QString channelHandler,
                                  int64_t instance, const Safir::Dob::Typesystem::ObjectPtr& object,  QWidget *parent);
     ~DobObjectEditWidget();
 
@@ -49,7 +49,7 @@ signals:
 
 private:
     Ui::DobObjectEditWidget *ui;
-    DobInterface* m_dob;
+    DobHandler* m_dob;
     int64_t m_typeId;
     DobObjectModel* m_sourceModel = nullptr;
 

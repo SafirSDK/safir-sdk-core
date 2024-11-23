@@ -40,6 +40,7 @@ public:
 
     DobWebSocket(const QString& address, int port);
 
+    bool IsOpen() const override;
     void Open(const QString& name, int context) override;
     void Close() override;
 

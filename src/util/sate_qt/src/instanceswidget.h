@@ -23,7 +23,7 @@
 ******************************************************************************/
 #pragma once
 
-#include "dobinterface.h"
+#include "dobhandler.h"
 #include <QWidget>
 
 class QTableView;
@@ -41,13 +41,13 @@ class InstancesWidget
 
 public:
     //create an entity instances widget
-    InstancesWidget(DobInterface* dob,
+    InstancesWidget(DobHandler* dob,
                     int64_t typeId,
                     bool includeSubclasses,
                     QWidget* parent);
 
     //create a message instances widget
-    InstancesWidget(DobInterface* dob, int64_t typeId,
+    InstancesWidget(DobHandler* dob, int64_t typeId,
                     const Safir::Dob::Typesystem::ChannelId& channel,
                     bool includeSubclasses,
                     QWidget* parent);

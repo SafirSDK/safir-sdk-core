@@ -25,14 +25,14 @@
 
 #include <QTreeView>
 #include "typesystemrepository.h"
-#include "dobinterface.h"
+#include "dobhandler.h"
 #include "registerhandlerdialog.h"
 
 class TypesystemContextMenuHandler : public QObject
 {
     Q_OBJECT
 public:
-    TypesystemContextMenuHandler(DobInterface* dob, QTreeView* parent);
+    TypesystemContextMenuHandler(DobHandler* dob, QTreeView* parent);
 
 signals:
     void OpenObjectEdit(int64_t typeId);
@@ -43,7 +43,7 @@ signals:
     void OpenDouFile(int64_t typeId);
 
 private:
-    DobInterface* m_dob;
+    DobHandler* m_dob;
     QTreeView* m_treeView;
     RegisterHandlerDialog* m_registerDlg;
 

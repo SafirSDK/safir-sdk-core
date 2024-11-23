@@ -23,7 +23,7 @@
 ******************************************************************************/
 #pragma once
 
-#include "dobinterface.h"
+#include "dobhandler.h"
 #include <QAbstractItemModel>
 #include <deque>
 
@@ -50,7 +50,7 @@ public:
         ReceivedObjectInfo(const ReceivedObjectInfo& r) = default;
     };
 
-    explicit ReceivedModel(DobInterface* dob, QObject *parent);
+    explicit ReceivedModel(DobHandler* dob, QObject *parent);
 
     // Header:
     QVariant headerData(int section,

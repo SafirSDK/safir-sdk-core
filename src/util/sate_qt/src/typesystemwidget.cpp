@@ -43,7 +43,7 @@ TypesystemWidget::~TypesystemWidget()
     delete ui;
 }
 
-void TypesystemWidget::Initialize(DobInterface* dob)
+void TypesystemWidget::Initialize(DobHandler* dob)
 {
     m_dob = dob;
     m_inheritanceProxyModel = new TypesystemFilterProxyModel(this);

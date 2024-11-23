@@ -126,6 +126,11 @@ void DobWebSocket::WsRecv(const QString& data)
     }
 }
 
+bool DobWebSocket::IsOpen() const
+{
+    return m_isConnected;
+}
+
 void DobWebSocket::Open(const QString& name, int context)
 {
     if (m_isConnected)

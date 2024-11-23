@@ -50,10 +50,9 @@
 SateMainWindow::SateMainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::SateMainWindow)
+    , m_dob()
 {
     ui->setupUi(this);
-
-    m_dob = std::make_unique<DobHandler>();
 
     ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasUndockButton, false);
     ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasCloseButton, false);
@@ -77,7 +76,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     m_centralDockArea = m_dockManager->setCentralWidget(centralDockWidget);
 
     m_typesystem = new TypesystemWidget(this);
-    m_typesystem->Initialize(m_dob.get());
+    m_typesystem->Initialize(&m_dob);
 
     auto* typesystemDock = new ads::CDockWidget("Typesystem");
     typesystemDock->setWidget(m_typesystem);
@@ -96,7 +95,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     // Received table
     m_received = new QTableView();
-    m_received->setModel(new ReceivedModel(m_dob.get(), m_received));
+    m_received->setModel(new ReceivedModel(&m_dob, m_received));
     m_received->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     m_received->setColumnWidth(1, 250);
     m_received->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
@@ -118,18 +117,23 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     outputDock->setWidget(m_output);
     m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, outputDock);
     ui->menuView->addAction(outputDock->toggleViewAction());
-    connect(m_dob.get(), &DobInterface::Info, this, &SateMainWindow::OnInfo);
+    connect(&m_dob, &DobHandler::Info, this, &SateMainWindow::OnInfo);
 
     // Connection menu
-    connect(ui->actionConnect, &QAction::triggered, this, [this]{ m_dob->Close(); });
+    connect(ui->actionDisconnect, &QAction::triggered, this, [this]{ m_dob.Close(); });
+    connect(ui->actionConnect, &QAction::triggered, this, [this]{ m_dob.OpenNativeConnection("SATE", 0); });
+    connect(ui->actionConnectWs, &QAction::triggered, this, [this]{ m_dob.OpenWebsocketConnection("localhost", 10000, "SATE", 0); });
+
+    // Connection menu
+    connect(ui->actionConnect, &QAction::triggered, this, [this]{ m_dob.Close(); });
 
     // Style sheet menu
     connect(ui->actionDarkMode, &QAction::triggered, this, &SateMainWindow::OnDarkMode);
     connect(ui->actionLightMode, &QAction::triggered, this, &SateMainWindow::OnLightMode);
 
     // DOB signal handling
-    connect(m_dob.get(), &DobInterface::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
-    m_dob->Open("SATE", 0);
+    connect(&m_dob, &DobHandler::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
+    m_dob.OpenNativeConnection("SATE", 0);
 }
 
 SateMainWindow::~SateMainWindow()
@@ -153,7 +157,7 @@ void SateMainWindow::OnOpenEntityInstanceViewer(const int64_t typeId, const bool
 {
     OpenInstanceViewer(typeId, includeSubclasses,
                        [this, typeId, includeSubclasses]
-                       {return new InstancesWidget(m_dob.get(), typeId, includeSubclasses, this);});
+                       {return new InstancesWidget(&m_dob, typeId, includeSubclasses, this);});
 }
 
 void SateMainWindow::OnOpenMessageInstanceViewer(const int64_t typeId,
@@ -162,7 +166,7 @@ void SateMainWindow::OnOpenMessageInstanceViewer(const int64_t typeId,
 {
     OpenInstanceViewer(typeId, includeSubclasses,
                        [this, typeId, channel, includeSubclasses]
-                       {return new InstancesWidget(m_dob.get(), typeId, channel, includeSubclasses, this);});
+                       {return new InstancesWidget(&m_dob, typeId, channel, includeSubclasses, this);});
 }
 
 void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
@@ -263,7 +267,7 @@ void SateMainWindow::OnReceivedTableDoubleClicked(const QModelIndex& ix)
 
 void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
 {
-    auto oe = new DobObjectEditWidget(m_dob.get(), typeId, this);
+    auto oe = new DobObjectEditWidget(&m_dob, typeId, this);
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
     AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe);
@@ -274,7 +278,7 @@ void SateMainWindow::OnOpenObjectEditWithInstance(int64_t typeId,
                                                   int64_t instance,
                                                   const Safir::Dob::Typesystem::ObjectPtr& object)
 {
-    auto oe = new DobObjectEditWidget(m_dob.get(), typeId, channelHandler, instance, object, this);
+    auto oe = new DobObjectEditWidget(&m_dob, typeId, channelHandler, instance, object, this);
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
     AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe);

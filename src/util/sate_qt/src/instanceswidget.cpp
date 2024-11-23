@@ -116,7 +116,7 @@ InstancesWidget::InstancesWidget(QWidget* parent)
     //TODO use default comumn sizes and add a button somewhere to resize to contents
 }
 
-InstancesWidget::InstancesWidget(DobInterface* dob,
+InstancesWidget::InstancesWidget(DobHandler* dob,
                                  int64_t typeId,
                                  bool includeSubclasses,
                                  QWidget* parent)
@@ -137,7 +137,7 @@ InstancesWidget::InstancesWidget(DobInterface* dob,
     }
 }
 
-InstancesWidget::InstancesWidget(DobInterface* dob,
+InstancesWidget::InstancesWidget(DobHandler* dob,
                                  int64_t typeId,
                                  const Safir::Dob::Typesystem::ChannelId& channel,
                                  bool includeSubclasses,

@@ -61,10 +61,10 @@ QString Str(DobInterface::RequestCategory category)
 }
 }
 
-ReceivedModel::ReceivedModel(DobInterface* dob, QObject *parent)
+ReceivedModel::ReceivedModel(DobHandler* dob, QObject *parent)
     : QAbstractItemModel(parent)
 {
-    connect(dob, &DobInterface::OnEntity, this, [this](const sdt::EntityId& entityId, const sdt::HandlerId& handler, const Safir::Dob::EntityPtr& entity, DobInterface::EntityOperation operation)
+    connect(dob, &DobHandler::OnEntity, this, [this](const sdt::EntityId& entityId, const sdt::HandlerId& handler, const Safir::Dob::EntityPtr& entity, DobInterface::EntityOperation operation)
     {
         beginResetModel();
         m_items.emplace_front(entityId.GetTypeId(), entityId.GetInstanceId().GetRawValue(), QString::fromStdWString(handler.ToString()), Str(operation), entity);
@@ -75,7 +75,7 @@ ReceivedModel::ReceivedModel(DobInterface* dob, QObject *parent)
         endResetModel();
     });
 
-    connect(dob, &DobInterface::OnMessage, [this](int64_t typeId, const sdt::ChannelId& channel, const Safir::Dob::MessagePtr& message)
+    connect(dob, &DobHandler::OnMessage, [this](int64_t typeId, const sdt::ChannelId& channel, const Safir::Dob::MessagePtr& message)
     {
         beginResetModel();
         m_items.emplace_front(typeId, 0, QString::fromStdWString(channel.ToString()), "Received Message", message);
@@ -86,7 +86,7 @@ ReceivedModel::ReceivedModel(DobInterface* dob, QObject *parent)
         endResetModel();
     });
 
-    connect(dob, &DobInterface::OnRequest, [this](const Safir::Dob::Typesystem::ObjectPtr& request, DobInterface::RequestCategory category)
+    connect(dob, &DobHandler::OnRequest, [this](const Safir::Dob::Typesystem::ObjectPtr& request, DobInterface::RequestCategory category)
     {
         beginResetModel();
         m_items.emplace_front(request->GetTypeId(), 0, "", Str(category), request);
@@ -97,7 +97,7 @@ ReceivedModel::ReceivedModel(DobInterface* dob, QObject *parent)
         endResetModel();
     });
 
-    connect(dob, &DobInterface::OnResponse, [this](const Safir::Dob::ResponsePtr& response)
+    connect(dob, &DobHandler::OnResponse, [this](const Safir::Dob::ResponsePtr& response)
     {
         beginResetModel();
         m_items.emplace_front(response->GetTypeId(), 0, "", "Received Response", response);

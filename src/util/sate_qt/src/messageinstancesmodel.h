@@ -31,8 +31,8 @@
 #include <Safir/Dob/Connection.h>
 
 #include "columninfo.h"
-#include "dobinterface.h"
 #include "instancesmodelutils.h"
+#include "dobhandler.h"
 
 class MessageInstancesModel
     : public QAbstractTableModel
@@ -42,7 +42,7 @@ class MessageInstancesModel
 public:
     enum {FilterRole = Qt::UserRole};
 
-    MessageInstancesModel(DobInterface* dob,
+    MessageInstancesModel(DobHandler* dob,
                           const Safir::Dob::Typesystem::TypeId typeId,
                           const Safir::Dob::Typesystem::ChannelId& channel,
                           bool includeSubclasses,
@@ -73,7 +73,7 @@ private slots:
                    const Safir::Dob::MessagePtr& message);
 
 private:
-    DobInterface* const m_dob;
+    DobHandler* const m_dob;
     const Safir::Dob::Typesystem::TypeId m_typeId;
     const Safir::Dob::Typesystem::ChannelId m_channel;
     const bool m_includeSubclasses;

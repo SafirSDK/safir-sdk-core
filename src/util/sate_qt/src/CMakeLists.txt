@@ -22,6 +22,7 @@ set(sources
     typesystemcontextmenuhandler.cpp
     membertreeitem.cpp
     dobhandler.cpp
+    dobnative.cpp
     dobwebsocket.cpp
     iconfactory.cpp
     receivedmodel.cpp
@@ -46,6 +47,7 @@ set(widget_headers
     typesystemnamespacemodel.h
     typesystemcontextmenuhandler.h
     dobhandler.h
+    dobnative.h
     dobwebsocket.h
     dobinterface.h
     receivedmodel.h

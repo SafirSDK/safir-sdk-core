@@ -25,7 +25,7 @@
 
 #include <QWidget>
 #include "typesystemrepository.h"
-#include "dobinterface.h"
+#include "dobhandler.h"
 #include "typesysteminheritancemodel.h"
 #include "typesystemnamespacemodel.h"
 #include "typesystemcontextmenuhandler.h"
@@ -42,7 +42,7 @@ public:
     explicit TypesystemWidget(QWidget *parent);
     ~TypesystemWidget();
 
-    void Initialize(DobInterface* dob);
+    void Initialize(DobHandler* dob);
 
 signals:
     void OpenObjectEdit(int64_t typeId);
@@ -54,7 +54,7 @@ signals:
 
 private:
     Ui::TypesystemWidget *ui;
-    DobInterface* m_dob = nullptr;
+    DobHandler* m_dob = nullptr;
     TypesystemFilterProxyModel* m_inheritanceProxyModel = nullptr;
     TypesystemFilterProxyModel* m_namespaceProxyModel = nullptr;
     TypesystemContextMenuHandler* m_contextMenuHandler = nullptr;

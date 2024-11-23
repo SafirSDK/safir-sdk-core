@@ -29,7 +29,7 @@
 #include <QDebug>
 #include <QMessageBox>
 
-TypesystemContextMenuHandler::TypesystemContextMenuHandler(DobInterface* dob, QTreeView* parent)
+TypesystemContextMenuHandler::TypesystemContextMenuHandler(DobHandler* dob, QTreeView* parent)
     : QObject(parent)
     , m_dob(dob)
     , m_treeView(parent)

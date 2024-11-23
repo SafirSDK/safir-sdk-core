@@ -33,7 +33,7 @@
 #include <QSize>
 
 
-MessageInstancesModel::MessageInstancesModel(DobInterface* dob,
+MessageInstancesModel::MessageInstancesModel(DobHandler* dob,
                                              const Safir::Dob::Typesystem::TypeId typeId,
                                              const Safir::Dob::Typesystem::ChannelId& channel,
                                              bool includeSubclasses,
@@ -45,7 +45,7 @@ MessageInstancesModel::MessageInstancesModel(DobInterface* dob,
     , m_includeSubclasses(includeSubclasses)
 {
     setupColumns();
-    connect(m_dob, &DobInterface::OnMessage, this, &MessageInstancesModel::OnMessage);
+    connect(m_dob, &DobHandler::OnMessage, this, &MessageInstancesModel::OnMessage);
     m_dob->SubscribeMessage(m_typeId, channel, m_includeSubclasses);
 }
 

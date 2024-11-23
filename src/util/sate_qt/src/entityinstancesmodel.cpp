@@ -30,7 +30,7 @@
 
 
 
-EntityInstancesModel::EntityInstancesModel(DobInterface* dob,
+EntityInstancesModel::EntityInstancesModel(DobHandler* dob,
                                            const Safir::Dob::Typesystem::TypeId typeId,
                                            bool includeSubclasses,
                                            QObject* parent)
@@ -40,7 +40,7 @@ EntityInstancesModel::EntityInstancesModel(DobInterface* dob,
     , m_includeSubclasses(includeSubclasses)
 {
     setupColumns();
-    connect(m_dob, &DobInterface::OnEntity, this, &EntityInstancesModel::OnEntity);
+    connect(m_dob, &DobHandler::OnEntity, this, &EntityInstancesModel::OnEntity);
     m_dob->SubscribeEntity(m_typeId,Safir::Dob::Typesystem::InstanceId(), m_includeSubclasses);
 }
 
