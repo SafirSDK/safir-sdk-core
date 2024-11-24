@@ -81,8 +81,6 @@ signals:
     void DispatchSignal();
 
 private:
-    Safir::Dob::Connection m_dobConnection;
-
     Safir::Dob::InstanceIdPolicy::Enumeration GetInstanceIdPolicy(int64_t typeId, const sdt::HandlerId& handler) const;
 
     // Dispatcher interface
@@ -129,4 +127,7 @@ private:
     void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
     void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
     void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*deprecated*/) override;
+
+    Safir::Dob::Connection m_dobConnection;
+    std::atomic_flag m_isDispatchSignalled;
 };

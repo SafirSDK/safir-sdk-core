@@ -34,18 +34,22 @@
 
 #include <QDebug>
 
-namespace {
-QString Str(int64_t typeId) {return QString::fromStdWString(sdt::Operations::GetName(typeId));}
-QString Str(const std::wstring& s) { return QString::fromStdWString(s);}
-QString Str(const sdt::HandlerId& v) { return QString(", handler=%1").arg(Str(v.ToString())); }
-QString Str(const sdt::ChannelId& v) { return QString(", channel=%1").arg(Str(v.ToString())); }
-QString Str(const sdt::InstanceId& v) { return QString(", instance=%1").arg(Str(v.ToString())); }
-QString Str(const sdt::EntityId& v) { return Str(v.ToString()); }
+namespace
+{
+    QString Str(int64_t typeId) {return QString::fromStdWString(sdt::Operations::GetName(typeId));}
+    QString Str(const std::wstring& s) { return QString::fromStdWString(s);}
+    QString Str(const sdt::HandlerId& v) { return QString(", handler=%1").arg(Str(v.ToString())); }
+    QString Str(const sdt::ChannelId& v) { return QString(", channel=%1").arg(Str(v.ToString())); }
+    QString Str(const sdt::InstanceId& v) { return QString(", instance=%1").arg(Str(v.ToString())); }
+    QString Str(const sdt::EntityId& v) { return Str(v.ToString()); }
 }
-DobNative::DobNative() : m_dobConnection()
+
+DobNative::DobNative()
+    : m_dobConnection()
+    , m_isDispatchSignalled()
 {
     // DOB signal handling
-    connect(this, &DobNative::DispatchSignal, this, [this]{ m_dobConnection.Dispatch(); });
+    connect(this, &DobNative::DispatchSignal, this, [this]{ m_isDispatchSignalled.clear(); m_dobConnection.Dispatch(); });
 }
 
 bool DobNative::IsOpen() const
@@ -393,7 +397,10 @@ void DobNative::DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerI
 // Dispatcher interface
 void DobNative::OnDoDispatch()
 {
-    emit DispatchSignal();
+    if (!m_isDispatchSignalled.test_and_set())
+    {
+        emit DispatchSignal();
+    }
 }
 
 // StopHandler interface
