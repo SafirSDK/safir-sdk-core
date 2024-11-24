@@ -113,6 +113,12 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     // Output window
     m_output = new QTextBrowser(this);
+#if 0
+    m_output->setReadOnly(true);
+    m_output->setUndoRedoEnabled(false);
+    m_output->setAcceptRichText(false);
+    m_output->setOpenLinks(false);
+#endif
     auto* outputDock = new ads::CDockWidget("Output", this);
     outputDock->setWidget(m_output);
     m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, outputDock);
@@ -394,7 +400,20 @@ void SateMainWindow::OnLightMode()
 void SateMainWindow::OnInfo(const QString& info)
 {
     auto time = "<i style='color:grey'>" + QDateTime::currentDateTime().toString("hh:mm:ss") + "</i>: ";
-    m_output->insertHtml(time + info + "<br>");
-    auto *sb = m_output->verticalScrollBar();
-    sb->setValue(sb->maximum());
+    m_pendingText += (time + info + "<br>");
+
+    if (!m_outputRefreshPending.test_and_set())
+    {
+        QTimer::singleShot(std::chrono::milliseconds(200),
+                           [this]
+                           {
+                               m_outputRefreshPending.clear();
+                               m_output->setUpdatesEnabled(false);
+                               m_output->insertHtml(m_pendingText.join("\n"));
+                               m_output->setUpdatesEnabled(true);
+                               m_pendingText.clear();
+                               auto *sb = m_output->verticalScrollBar();
+                               sb->setValue(sb->maximum());
+                           });
+    }
 }

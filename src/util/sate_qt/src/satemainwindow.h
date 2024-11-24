@@ -83,6 +83,8 @@ private:
     TypesystemWidget* m_typesystem;
     QTableView* m_received;
     QTextBrowser* m_output;
+    std::atomic_flag m_outputRefreshPending = {};
+    QStringList m_pendingText;
 
     void AddXmlPage(const QString& title, const QString& text);
     void AddJsonPage(const QString& title, const QString& text);
