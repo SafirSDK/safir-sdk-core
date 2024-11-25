@@ -95,7 +95,7 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     auto* unsubscribeEntity = new QAction(tr("Unsubscribe"), &menu);
     auto* subscribeMessage = new QAction(tr("Subscribe"), &menu);
     auto* subscribeMessageEllipsis = new QAction(tr("Subscribe..."), &menu);
-    auto* unsubscribeMessage = new QAction(tr("Unsibscribe"), &menu);
+    auto* unsubscribeMessage = new QAction(tr("Unsubscribe"), &menu);
     auto* registerDefaultServiceHandler = new QAction(tr("Register default handler"), &menu);
     auto* registerServiceHandlerEllipsis = new QAction(tr("Register handler..."), &menu);
     auto* subscribeServiceRegistrations = new  QAction(tr("Subscribe registration"), &menu);

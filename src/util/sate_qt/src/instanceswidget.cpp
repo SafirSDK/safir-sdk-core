@@ -23,17 +23,18 @@
 ******************************************************************************/
 #include "instanceswidget.h"
 
-#include <QTableView>
-#include <QScrollBar>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QMenu>
 #include <QAction>
-#include <QLineEdit>
 #include <QCheckBox>
-#include <QWidgetAction>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QLineEdit>
+#include <QMenu>
+#include <QScrollArea>
+#include <QScrollBar>
 #include <QSortFilterProxyModel>
+#include <QTableView>
+#include <QVBoxLayout>
+#include <QWidgetAction>
 #include <iostream>
 #include "entityinstancesmodel.h"
 #include "messageinstancesmodel.h"
@@ -84,26 +85,41 @@ private:
 InstancesWidget::InstancesWidget(QWidget* parent)
     : QWidget(parent)
     , m_table(new QTableView(this))
-    , m_filterArea(new QWidget(this))
+    , m_filterArea(new QFrame())
     , m_filterAreaLayout(new QHBoxLayout(m_filterArea))
+    , m_filterScroller(new QScrollArea(this))
 {
     auto* layout = new QVBoxLayout(this);
-    layout->addWidget(m_table,100);
-    layout->addWidget(m_filterArea,1);
+    layout->addWidget(m_table,10000);
 
     m_filterArea->setLayout(m_filterAreaLayout);
     m_filterAreaLayout->setSpacing(2);
     m_filterAreaLayout->setContentsMargins(0,0,0,0);
+    m_filterArea->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    m_filterScroller->setWidget(m_filterArea);
+    layout->addWidget(m_filterScroller,1);
+    m_filterScroller->show();
+    m_filterArea->show();
+    m_filterScroller->show();
+    m_filterScroller->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_filterScroller->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_filterScroller->horizontalScrollBar()->setEnabled(false);
+    m_filterScroller->verticalScrollBar()->setEnabled(false);
+    m_filterScroller->setStyleSheet("QScrollArea {border:none;padding:0px;}");
 
-    //connect the header count and sizes
+    //connect the header count, sizes and positions
     connect(m_table->horizontalHeader(),&QHeaderView::sectionResized, this, &InstancesWidget::OnSectionResized);
     connect(m_table->horizontalHeader(),&QHeaderView::sectionCountChanged, this, &InstancesWidget::OnSectionCountChanged);
+    connect(m_table->horizontalHeader(),&QHeaderView::geometriesChanged, this, &InstancesWidget::PositionFilters);
+    connect(m_table->horizontalScrollBar(), &QAbstractSlider::rangeChanged, this,  &InstancesWidget::PositionFilters);
+    connect(m_table->horizontalScrollBar(), &QAbstractSlider::actionTriggered, this, &InstancesWidget::PositionFilters);
 
     m_table->setSortingEnabled(true);
+    m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_table->setSelectionBehavior(QTableView::SelectRows);
     m_table->horizontalHeader()->setHighlightSections(false);
     m_table->verticalHeader()->setVisible(false);
-    m_table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
     m_table->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     m_table->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -114,6 +130,7 @@ InstancesWidget::InstancesWidget(QWidget* parent)
     //Resize table columns after the table has been populated
     QMetaObject::invokeMethod(this, [this]{m_table->resizeColumnsToContents();}, Qt::QueuedConnection);
     //TODO use default comumn sizes and add a button somewhere to resize to contents
+    //TODO instance count in status bar?
 }
 
 InstancesWidget::InstancesWidget(DobHandler* dob,
@@ -229,6 +246,8 @@ void InstancesWidget::OnSectionResized(const int logicalIndex, const int /*oldSi
     {
         m_filters[logicalIndex]->setFixedWidth(newSize-2);
     }
+
+    PositionFilters();
 }
 
 void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int newCount)
@@ -246,15 +265,22 @@ void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int ne
     m_filterAreaLayout->addSpacing(2);
     for (int i = 0; i < newCount; ++i)
     {
-        m_filters.push_back(new QLineEdit(this));
-        m_filters.back()->setPlaceholderText("Filter");
-        m_filters.back()->setClearButtonEnabled(true);
-        m_filters.back()->setFixedWidth(m_table->columnWidth(i)-2);
-        connect(m_filters.back(),&QLineEdit::textChanged,this,
+        auto* le = new QLineEdit(this);
+        m_filters.push_back(le);
+        le->setPlaceholderText("Filter");
+        le->setClearButtonEnabled(true);
+        le->setFixedWidth(m_table->columnWidth(i)-2);
+        connect(le,&QLineEdit::textChanged,this,
                 [this,i](const QString& text){OnFilterTextChanged(i,text);});
-        m_filterAreaLayout->addWidget(m_filters.back(),1);
+        m_filterAreaLayout->addWidget(le,1);
     }
-    m_filterAreaLayout->addStretch(100);
+
+    m_filters.push_back(new QWidget(this));
+    m_filters.back()->setFixedHeight(10);
+
+    m_filterAreaLayout->addWidget(m_filters.back(),1);
+
+    PositionFilters();
 }
 
 
@@ -328,4 +354,18 @@ void InstancesWidget::RunColumnContextMenu(const QPoint& globalPos, const int lo
         auto column = chosenAction->property("columnNumber").toInt();
         m_table->setColumnHidden(column, !chosenAction->isChecked());
     }
+}
+
+void InstancesWidget::PositionFilters()
+{
+    QMetaObject::invokeMethod(this,[this]
+        {
+            m_filters.back()->setFixedWidth(std::max(0,m_table->contentsRect().width() -
+                                                     m_table->columnViewportPosition(m_table->horizontalHeader()->count() -1) -
+                                                     m_table->columnWidth(m_table->horizontalHeader()->count() -1)));
+            m_filterArea->setFixedSize(m_filterAreaLayout->minimumSize());
+            m_filterScroller->setFixedHeight(m_filterArea->height());
+            m_filterScroller->horizontalScrollBar()->setSliderPosition(m_table->horizontalScrollBar()->sliderPosition());
+        },
+        Qt::QueuedConnection);
 }

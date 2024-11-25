@@ -26,13 +26,14 @@
 #include "dobhandler.h"
 #include <QWidget>
 
-class QTableView;
-class QWidget;
-class QLineEdit;
 class QHBoxLayout;
+class QLineEdit;
+class QScrollArea;
+class QTableView;
+
+class ColumnSortFilterProxyModel;
 class EntityInstancesModel;
 class MessageInstancesModel;
-class ColumnSortFilterProxyModel;
 
 class InstancesWidget
     : public QWidget
@@ -68,6 +69,7 @@ private slots:
     void OnCustomContextMenuRequestedHeader(const QPoint& pos);
     void OnCustomContextMenuRequestedTable(const QPoint& pos);
     void RunColumnContextMenu(const QPoint& globalPos, const int logicalIndex);
+    void PositionFilters();
 private:
     //common constructor
     InstancesWidget(QWidget* parent);
@@ -75,7 +77,8 @@ private:
     QTableView* m_table;
     QWidget* m_filterArea;
     QHBoxLayout* m_filterAreaLayout;
-    QList<QLineEdit*> m_filters;
+    QScrollArea* m_filterScroller;
+    QList<QWidget*> m_filters;
     ColumnSortFilterProxyModel* m_proxyModel = nullptr;
     EntityInstancesModel* m_sourceModelEntities = nullptr;
     MessageInstancesModel* m_sourceModelMessages = nullptr;

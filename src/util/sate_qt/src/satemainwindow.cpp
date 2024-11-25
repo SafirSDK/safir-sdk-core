@@ -200,7 +200,7 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
     auto* iv = factory();
     dock = new ads::CDockWidget(cls->name);
     dock->setObjectName(tabObjectName);
-    dock->setWidget(iv);
+    dock->setWidget(iv, ads::CDockWidget::ForceNoScrollArea);
     dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
     dock->setProperty("includeSubclasses",includeSubclasses);
     if (includeSubclasses)

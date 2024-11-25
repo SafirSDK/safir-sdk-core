@@ -26,15 +26,21 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Consumer.h>
+#include <Safir/Dob/OverflowException.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
 #include <DoseTest/ComplexGlobalEntity.h>
 #include <DoseTest/GlobalEntity.h>
+#include <DoseTest/ComplexGlobalMessage.h>
+#include <DoseTest/GlobalMessage.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/hex.hpp>
 
-const int NUM_SMALL=10000;
-const int NUM_BIG=100;
+const int NUM_SMALL_ENTITIES=10000;
+const int NUM_BIG_ENTITIES=100;
+
+const int NUM_SMALL_MESSAGES=10;
+const int NUM_BIG_MESSAGES=1;
 
 //disable stupid incorrect microsoft warning.
 #ifdef _MSC_VER
@@ -74,6 +80,7 @@ private:
 
 class EntityOwner
     : public Safir::Dob::EntityHandler
+    , public Safir::Dob::MessageSender
 {
 public:
     explicit EntityOwner(boost::asio::io_service& ioService)
@@ -92,7 +99,7 @@ public:
 
     void SetSmall()
     {
-        for (int i = 0; i < NUM_SMALL; ++i)
+        for (int i = 0; i < NUM_SMALL_ENTITIES; ++i)
         {
             auto ent = DoseTest::GlobalEntity::Create();
             ent->Info() = L"Some info";
@@ -105,12 +112,12 @@ public:
 
     void UpdateSomeSmall()
     {
-        static_assert(NUM_SMALL >= 100, "NUM_SMALL has to be more than 100");
+        static_assert(NUM_SMALL_ENTITIES >= 100, "NUM_SMALL_ENTITIES has to be more than 100");
         using namespace Safir::Dob;
         EntityIterator it = m_connection.GetEntityIterator(DoseTest::GlobalEntity::ClassTypeId,false);
         for (int i = 0; i < 100; ++i)
         {
-            std::advance(it, rand() % (NUM_SMALL/100));
+            std::advance(it, rand() % (NUM_SMALL_ENTITIES/100));
             auto ent = std::static_pointer_cast<DoseTest::GlobalEntity>(it->GetEntity());
             ent->MoreInfo() = random_string(rand()%256);
             m_connection.SetChanges(ent,
@@ -122,7 +129,7 @@ public:
 
     void SetBig()
     {
-        for (int i = 0; i < NUM_BIG; ++i)
+        for (int i = 0; i < NUM_BIG_ENTITIES; ++i)
         {
             auto ent = DoseTest::ComplexGlobalEntity::Create();
 
@@ -139,23 +146,67 @@ public:
 
     void UpdateSomeBig()
     {
-        static_assert(NUM_BIG >= 10, "NUM_BIG has to be more than 10");
+        static_assert(NUM_BIG_ENTITIES >= 10, "NUM_BIG_ENTITIES has to be more than 10");
         using namespace Safir::Dob;
         EntityIterator it = m_connection.GetEntityIterator(DoseTest::ComplexGlobalEntity::ClassTypeId,false);
         for (int i = 0; i < 10; ++i)
         {
-            std::advance(it, rand() % (NUM_BIG/10));
+            std::advance(it, rand() % (NUM_BIG_ENTITIES/10));
             auto ent = std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(it->GetEntity());
 
             ent->MoreInfo() = random_string(rand()%256);
 
             //TODO update more stuff
-            
+
             m_connection.SetChanges(ent,
                                     it->GetInstanceId(),
                                     Safir::Dob::Typesystem::HandlerId());
         }
     }
+
+    void SendSmall()
+    {
+        try
+        {
+            for (int i = 0; i < NUM_SMALL_MESSAGES; ++i)
+            {
+                auto msg = DoseTest::GlobalMessage::Create();
+                msg->Info() = random_string(rand()%256);
+                m_connection.Send(msg,
+                                  Safir::Dob::Typesystem::ChannelId(),
+                                  this);
+            }
+        }
+        catch(const Safir::Dob::OverflowException&)
+        {
+
+        }
+    }
+
+    void SendBig()
+    {
+        try
+        {
+            for (int i = 0; i < NUM_BIG_MESSAGES; ++i)
+            {
+                auto msg = DoseTest::ComplexGlobalMessage::Create();
+
+                msg->Info() = random_string(rand()%256);
+
+                //TODO: put some stuff in the members...
+
+                m_connection.Send(msg,
+                                  Safir::Dob::Typesystem::ChannelId(),
+                                  this);
+            }
+        }
+        catch(const Safir::Dob::OverflowException&)
+        {
+
+        }
+
+    }
+
 private:
     void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId,
         const Safir::Dob::Typesystem::HandlerId&) override {}
@@ -168,6 +219,8 @@ private:
 
     void OnDeleteRequest(const Safir::Dob::EntityRequestProxy /*entityRequestProxy*/,
         Safir::Dob::ResponseSenderPtr        /*responseSender*/) override {}
+
+    void OnNotMessageOverflow() override {}
 
     Safir::Dob::SecondaryConnection m_connection;
     boost::asio::io_service& m_ioService;
@@ -206,6 +259,14 @@ int main()
         Safir::Utilities::Internal::AsioPeriodicTimer updateBig
             (ioService,std::chrono::seconds(1), [&owner](const boost::system::error_code& /*error*/){owner.UpdateSomeBig();});
         updateBig.Start();
+
+        Safir::Utilities::Internal::AsioPeriodicTimer sendSmall
+            (ioService,std::chrono::milliseconds(10), [&owner](const boost::system::error_code& /*error*/){owner.SendSmall();});
+        sendSmall.Start();
+
+        Safir::Utilities::Internal::AsioPeriodicTimer sendBig
+            (ioService,std::chrono::milliseconds(100), [&owner](const boost::system::error_code& /*error*/){owner.SendBig();});
+        sendBig.Start();
 
         boost::asio::io_service::work keepRunning(ioService);
         ioService.run();
