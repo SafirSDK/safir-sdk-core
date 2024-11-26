@@ -83,7 +83,7 @@ signals:
     void OnRegistered(const DobInterface::RegistrationInfo& info);
     void OnUnregistered(int64_t typeId);
 
-    void Info(const QString& info);
+    void Info(const QString& info, const QtMsgType msgType);
 
 private:
     std::unique_ptr<DobInterface> m_dob;

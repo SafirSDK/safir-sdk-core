@@ -39,7 +39,7 @@ bool DobHandler::IsInitiated()
 {
     if (!m_dob)
     {
-        emit Info("<span style='color:red'>Not connected to DOB!</span>");
+        emit Info("Not connected to DOB!", QtCriticalMsg);
         return false;
     }
     return true;

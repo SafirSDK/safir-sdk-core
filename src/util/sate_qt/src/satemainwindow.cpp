@@ -86,8 +86,10 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->menuView->addAction(typesystemDock->toggleViewAction());
 
     m_instanceLabel = new QLabel(tr("SAFIR_INSTANCE: %1").arg(Safir::Utilities::Internal::Expansion::GetSafirInstance()));
+    m_connectionStringLabel = new QLabel();
+    ui->statusbar->addPermanentWidget(m_connectionStringLabel);
     ui->statusbar->addPermanentWidget(m_instanceLabel);
-    ui->statusbar->showMessage(tr("Trying to connect to DOB..."), std::numeric_limits<int>::max());
+    OnInfo("Trying to connect to DOB...", QtInfoMsg);
 
     // TypesystemWidget signal handling
     connect(m_typesystem, &TypesystemWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEdit);
@@ -196,7 +198,7 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
         if (dock->property("includeSubclasses").toBool() != includeSubclasses)
         {
             m_dockManager->removeDockWidget(dock);
-            ui->statusbar->showMessage("Closed a previous viewer for the same type but with different recursiveness.", 30000);
+            OnInfo("Closed a previous viewer for the same type but with different recursiveness.", QtWarningMsg);
         }
         else
         {
@@ -256,8 +258,9 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
 void SateMainWindow::OnConnectedToDob(const QString& connectionName)
 {
     QString msg = tr("Connected as %1").arg(connectionName);
-    ui->statusbar->showMessage(msg, 30000);
-    m_instanceLabel->setToolTip(msg);
+    OnInfo(msg,QtInfoMsg);
+    m_connectionStringLabel->setText(connectionName);
+    m_connectionStringLabel->setToolTip(tr("Connection name of this instance of Sate"));
     m_connected = true;
 }
 
@@ -406,21 +409,55 @@ void SateMainWindow::OnLightMode()
     }
 }
 
-void SateMainWindow::OnInfo(const QString& info)
+void SateMainWindow::OnInfo(const QString& info, const QtMsgType msgType)
 {
-    auto time = "<i style='color:grey'>" + QDateTime::currentDateTime().toString("hh:mm:ss") + "</i>: ";
-    m_pendingText += (time + info + "<br>");
+    const bool startTimer = m_pendingOutput.empty();
 
-    if (!m_outputRefreshPending.test_and_set())
+    QStringList line;
+    line += "<i style='color:grey'>" + QDateTime::currentDateTime().toString("hh:mm:ss") + "</i>: ";
+    switch (msgType)
+    {
+    case QtDebugMsg:
+    case QtInfoMsg:
+        break;
+    case QtWarningMsg:
+        line+="<b>";
+        break;
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        line+="<span style='color:red'>";
+        break;
+    }
+
+    line += info;
+
+        switch (msgType)
+    {
+    case QtDebugMsg:
+    case QtInfoMsg:
+        break;
+    case QtWarningMsg:
+        line+="</b>";
+        break;
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        line+="</span>";
+        break;
+    }
+
+    line += "<br>";
+
+    m_pendingOutput += line.join("");
+
+    if (startTimer)
     {
         QTimer::singleShot(std::chrono::milliseconds(200),
                            [this]
                            {
-                               m_outputRefreshPending.clear();
                                m_output->setUpdatesEnabled(false);
-                               m_output->insertHtml(m_pendingText.join("\n"));
+                               m_output->insertHtml(m_pendingOutput.join("\n"));
                                m_output->setUpdatesEnabled(true);
-                               m_pendingText.clear();
+                               m_pendingOutput.clear();
                                auto *sb = m_output->verticalScrollBar();
                                sb->setValue(sb->maximum());
                            });
