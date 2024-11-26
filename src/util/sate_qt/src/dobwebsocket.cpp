@@ -33,11 +33,11 @@
 
 namespace
 {
-	QUrl ToUrl(const QString& address, int port)
-	{
-		QString url = (address.startsWith("ws") ? address : QString("ws://%1").arg(address)) + ":" + QString::number(port);
-		return QUrl(url);
-	}
+    QUrl ToUrl(const QString& address, int port)
+    {
+        QString url = (address.startsWith("ws") ? address : QString("ws://%1").arg(address)) + ":" + QString::number(port);
+        return QUrl(url);
+    }
 
     QString Str(int64_t typeId) {return QString::fromStdWString(sdt::Operations::GetName(typeId));}
     QString Str(const std::wstring& s) { return QString::fromStdWString(s);}
@@ -52,8 +52,8 @@ namespace
 }
 
 DobWebSocket::DobWebSocket(const QString& address, int port)
-	: m_webSocket()
-	, m_url(ToUrl(address, port))
+    : m_webSocket()
+    , m_url(ToUrl(address, port))
 {
     connect(&m_webSocket, &QWebSocket::connected, this, &DobWebSocket::WsConnected);
     connect(&m_webSocket, &QWebSocket::disconnected, this, &DobWebSocket::WsDisconnected);
