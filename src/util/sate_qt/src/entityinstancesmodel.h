@@ -80,5 +80,8 @@ private:
     const bool m_includeSubclasses;
     ColumnInfoList m_columnInfoList;
 
+    size_t m_numNew = 0;
+    size_t m_numUpdate = 0;
+    size_t m_numDelete = 0;
     std::map<Safir::Dob::Typesystem::EntityId, Info> m_entities;
 };

@@ -58,8 +58,14 @@ EntityInstancesModel::Info EntityInstancesModel::getRow(int row) const
 
 QStringList EntityInstancesModel::statusBarInfo() const
 {
-    return {(m_includeSubclasses?"Recursive":""),
-            tr("Instances: %1").arg(m_entities.size())};
+    return
+        {
+            (m_includeSubclasses?"Recursive":""),
+            tr("Instances: %1").arg(m_entities.size()),
+            tr("#New: %1").arg(m_numNew),
+            tr("#Update: %1").arg(m_numUpdate),
+            tr("#Delete: %1").arg(m_numDelete),
+        };
 }
 
 int EntityInstancesModel::rowCount(const QModelIndex& /*parent*/) const
@@ -173,7 +179,7 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
                 beginInsertRows(QModelIndex(), row, row);
                 endInsertRows();
             }
-            emit statusBarInfoChanged();
+            ++m_numNew;
         }
         break;
     case DobInterface::UpdatedEntity:
@@ -182,6 +188,7 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
                                                             Info{entityId, handlerId, entity});
             const auto row = std::distance(m_entities.begin(), result.first);
             emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1));
+            ++m_numUpdate;
         }
         break;
     case DobInterface::DeletedEntity:
@@ -190,8 +197,9 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
             beginRemoveRows(QModelIndex(),row,row);
             m_entities.erase(entityId);
             endRemoveRows();
-            emit statusBarInfoChanged();
+            ++m_numDelete;
         }
         break;
     }
+    emit statusBarInfoChanged();
 }
