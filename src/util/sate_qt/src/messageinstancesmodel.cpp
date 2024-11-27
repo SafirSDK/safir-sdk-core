@@ -60,6 +60,14 @@ MessageInstancesModel::Info MessageInstancesModel::getRow(int row) const
     return m_messages[row];
 }
 
+QStringList MessageInstancesModel::statusBarInfo() const
+{
+    return {(m_includeSubclasses?"Recursive":""),
+            tr("Received: %1").arg(m_messages.size()),
+            tr("Total: %1").arg(m_numReceived),
+            (m_messages.size() >= m_maxRows?"Discarding":"")};
+}
+
 int MessageInstancesModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return static_cast<int>(m_messages.size());
@@ -185,5 +193,7 @@ void MessageInstancesModel::OnMessage(const int64_t typeId,
         }
         endRemoveRows();
     }
-}
 
+    ++m_numReceived;
+    emit statusBarInfoChanged();
+}

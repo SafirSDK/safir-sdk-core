@@ -55,11 +55,15 @@ public:
 
     ~InstancesWidget() override;
 
+    Q_PROPERTY(QStringList statusBarInfo READ statusBarInfo NOTIFY statusBarInfoChanged)
+
+    QStringList statusBarInfo() const;
 signals:
     void OpenObjectEdit(int64_t typeId,
                         QString channelHandler,
                         int64_t instance,
                         const Safir::Dob::Typesystem::ObjectPtr& object);
+    void statusBarInfoChanged();
 
 private slots:
     void OnDoubleClicked(const QModelIndex &index);

@@ -56,6 +56,12 @@ EntityInstancesModel::Info EntityInstancesModel::getRow(int row) const
     return it->second;
 }
 
+QStringList EntityInstancesModel::statusBarInfo() const
+{
+    return {(m_includeSubclasses?"Recursive":""),
+            tr("Instances: %1").arg(m_entities.size())};
+}
+
 int EntityInstancesModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return static_cast<int>(m_entities.size());
@@ -167,6 +173,7 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
                 beginInsertRows(QModelIndex(), row, row);
                 endInsertRows();
             }
+            emit statusBarInfoChanged();
         }
         break;
     case DobInterface::UpdatedEntity:
@@ -183,6 +190,7 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
             beginRemoveRows(QModelIndex(),row,row);
             m_entities.erase(entityId);
             endRemoveRows();
+            emit statusBarInfoChanged();
         }
         break;
     }

@@ -130,7 +130,6 @@ InstancesWidget::InstancesWidget(QWidget* parent)
     //Resize table columns after the table has been populated
     QMetaObject::invokeMethod(this, [this]{m_table->resizeColumnsToContents();}, Qt::QueuedConnection);
     //TODO use default comumn sizes and add a button somewhere to resize to contents
-    //TODO instance count in status bar?
 }
 
 InstancesWidget::InstancesWidget(DobHandler* dob,
@@ -147,6 +146,9 @@ InstancesWidget::InstancesWidget(DobHandler* dob,
         m_proxyModel->setSourceModel(m_sourceModelEntities);
         m_proxyModel->setFilterRole(EntityInstancesModel::FilterRole);
         m_table->setModel(m_proxyModel);
+
+        connect(m_sourceModelEntities,&EntityInstancesModel::statusBarInfoChanged,
+                this, &InstancesWidget::statusBarInfoChanged);
     }
     else
     {
@@ -169,6 +171,9 @@ InstancesWidget::InstancesWidget(DobHandler* dob,
         m_proxyModel->setSourceModel(m_sourceModelMessages);
         m_proxyModel->setFilterRole(MessageInstancesModel::FilterRole);
         m_table->setModel(m_proxyModel);
+
+        connect(m_sourceModelMessages,&MessageInstancesModel::statusBarInfoChanged,
+                this, &InstancesWidget::statusBarInfoChanged);
     }
     else
     {
@@ -368,4 +373,17 @@ void InstancesWidget::PositionFilters()
             m_filterScroller->horizontalScrollBar()->setSliderPosition(m_table->horizontalScrollBar()->sliderPosition());
         },
         Qt::QueuedConnection);
+}
+
+QStringList InstancesWidget::statusBarInfo() const
+{
+    if (m_sourceModelEntities != nullptr)
+    {
+        return m_sourceModelEntities->statusBarInfo();
+    }
+    else if (m_sourceModelMessages != nullptr)
+    {
+        return m_sourceModelMessages->statusBarInfo();
+    }
+    throw std::logic_error("Not implemented");
 }

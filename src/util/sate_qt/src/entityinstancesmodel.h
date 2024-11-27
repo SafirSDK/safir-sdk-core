@@ -56,6 +56,10 @@ public:
     };
 
     Info getRow(int row) const;
+
+    QStringList statusBarInfo() const;
+signals:
+    void statusBarInfoChanged();
 private:
     int rowCount(const QModelIndex& parent) const override;
     int columnCount(const QModelIndex& parent) const override;

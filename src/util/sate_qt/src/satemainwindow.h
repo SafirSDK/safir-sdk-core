@@ -67,14 +67,21 @@ private slots:
     void OnInfo(const QString& info, const QtMsgType msgType);
     void OnDarkMode();
     void OnLightMode();
+    void OnFocusedDockWidgetChanged(ads::CDockWidget* old, ads::CDockWidget* now);
+    Q_INVOKABLE void OnStatusBarInfoChanged();
 private:
     void OpenInstanceViewer(const int64_t typeId,
                             const bool includeSubclasses,
                             const std::function<InstancesWidget* ()>& factory);
 
+    void AddXmlPage(const QString& title, const QString& text);
+    void AddJsonPage(const QString& title, const QString& text);
+
+    void AddTab(const QString& title, QWidget* widget);
+
     Ui::SateMainWindow *ui;
     QLabel* m_instanceLabel = nullptr;
-    QLabel* m_connectionStringLabel = nullptr;
+    QLabel* m_connectedLabel = nullptr;
 
     ads::CDockManager* m_dockManager;
     ads::CDockAreaWidget* m_centralDockArea;
@@ -88,9 +95,8 @@ private:
     QTextBrowser* m_output;
     QStringList m_pendingOutput;
 
-    void AddXmlPage(const QString& title, const QString& text);
-    void AddJsonPage(const QString& title, const QString& text);
-
-    void AddTab(const QString& title, QWidget* widget);
+    QList<QLabel*> m_statusBarLabels;
+    QList<QWidget*> m_statusBarSeparators;
+    QMetaObject::Connection m_currentStatusBarConnection;
 };
 

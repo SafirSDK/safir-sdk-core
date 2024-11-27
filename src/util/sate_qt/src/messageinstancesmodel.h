@@ -59,6 +59,9 @@ public:
     };
 
     Info getRow(int row) const;
+    QStringList statusBarInfo() const;
+signals:
+    void statusBarInfoChanged();
 private:
     int rowCount(const QModelIndex& parent) const override;
     int columnCount(const QModelIndex& parent) const override;
@@ -79,6 +82,7 @@ private:
     const bool m_includeSubclasses;
     ColumnInfoList m_columnInfoList;
 
-    size_t m_maxRows = 100;
+    size_t m_maxRows = 1000;
+    size_t m_numReceived = 0;
     std::deque<Info> m_messages;
 };

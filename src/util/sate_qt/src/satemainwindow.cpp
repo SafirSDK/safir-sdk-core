@@ -32,18 +32,19 @@
 #include "typesystemwidget.h"
 #include "connectdialog.h"
 
-#include <QtConcurrent/QtConcurrent>
+#include <QCloseEvent>
+#include <QDateTime>
+#include <QDebug>
+#include <QFile>
+#include <QHeaderView>
 #include <QLabel>
+#include <QMessageBox>
+#include <QScrollBar>
 #include <QTabWidget>
 #include <QTableView>
-#include <QHeaderView>
-#include <QCloseEvent>
-#include <QMessageBox>
-#include <QDateTime>
-#include <QScrollBar>
-
 #include <QTextBrowser>
-#include <QFile>
+#include <QtConcurrent/QtConcurrent>
+
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 
 #include <Safir/Utilities/Internal/Expansion.h>
@@ -60,12 +61,13 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasCloseButton, false);
     ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab, true);
     ads::CDockManager::setConfigFlag(ads::CDockManager::TabCloseButtonIsToolButton, true);
-    //ads::CDockManager::setAutoHideConfigFlags(ads::CDockManager::DefaultAutoHideConfig);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
+
 
     m_dockManager = new ads::CDockManager(this);
-    m_dockManager->setStyleSheet("");
 
     //now we have everything we need to set the initial stylesheets
+    m_dockManager->setStyleSheet("");
     OnDarkMode();
 
     //Set up the central area as always present
@@ -75,6 +77,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     auto* centralDockWidget = new ads::CDockWidget("CentralWidget");
     centralDockWidget->setWidget(label);
     centralDockWidget->setFeature(ads::CDockWidget::NoTab, true);
+    centralDockWidget->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_centralDockArea = m_dockManager->setCentralWidget(centralDockWidget);
 
     m_typesystem = new TypesystemWidget(this);
@@ -82,12 +85,14 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     auto* typesystemDock = new ads::CDockWidget("Typesystem");
     typesystemDock->setWidget(m_typesystem);
+    typesystemDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_dockManager->addDockWidget(ads::LeftDockWidgetArea, typesystemDock);
     ui->menuView->addAction(typesystemDock->toggleViewAction());
 
     m_instanceLabel = new QLabel(tr("SAFIR_INSTANCE: %1").arg(Safir::Utilities::Internal::Expansion::GetSafirInstance()));
-    m_connectionStringLabel = new QLabel();
-    ui->statusbar->addPermanentWidget(m_connectionStringLabel);
+    m_connectedLabel = new QLabel(tr("Not connected"));
+    m_connectedLabel->setStyleSheet("color:red;");
+    ui->statusbar->addPermanentWidget(m_connectedLabel);
     ui->statusbar->addPermanentWidget(m_instanceLabel);
     OnInfo("Trying to connect to DOB...", QtInfoMsg);
 
@@ -112,6 +117,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     auto* receivedDock = new ads::CDockWidget("Received");
     receivedDock->setWidget(m_received);
+    receivedDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, receivedDock);
     ui->menuView->addAction(receivedDock->toggleViewAction());
 
@@ -125,6 +131,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 #endif
     auto* outputDock = new ads::CDockWidget("Output", this);
     outputDock->setWidget(m_output);
+    outputDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, outputDock);
     ui->menuView->addAction(outputDock->toggleViewAction());
     connect(&m_dob, &DobHandler::Info, this, &SateMainWindow::OnInfo);
@@ -151,6 +158,9 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     // DOB signal handling
     connect(&m_dob, &DobHandler::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
     m_dob.OpenNativeConnection("SATE", 0);
+
+    connect(m_dockManager,&ads::CDockManager::focusedDockWidgetChanged,this,&SateMainWindow::OnFocusedDockWidgetChanged);
+
 }
 
 SateMainWindow::~SateMainWindow()
@@ -213,6 +223,7 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
     dock->setObjectName(tabObjectName);
     dock->setWidget(iv, ads::CDockWidget::ForceNoScrollArea);
     dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
+
     dock->setProperty("includeSubclasses",includeSubclasses);
     if (includeSubclasses)
     {
@@ -259,8 +270,9 @@ void SateMainWindow::OnConnectedToDob(const QString& connectionName)
 {
     QString msg = tr("Connected as %1").arg(connectionName);
     OnInfo(msg,QtInfoMsg);
-    m_connectionStringLabel->setText(connectionName);
-    m_connectionStringLabel->setToolTip(tr("Connection name of this instance of Sate"));
+    m_connectedLabel->setText(tr("Connected"));
+    m_connectedLabel->setToolTip(tr("Connection name: %1").arg(connectionName));
+    m_connectedLabel->setStyleSheet("color:green;");
     m_connected = true;
 }
 
@@ -461,5 +473,78 @@ void SateMainWindow::OnInfo(const QString& info, const QtMsgType msgType)
                                auto *sb = m_output->verticalScrollBar();
                                sb->setValue(sb->maximum());
                            });
+    }
+}
+
+void SateMainWindow::OnFocusedDockWidgetChanged(ads::CDockWidget* /*old*/, ads::CDockWidget* now)
+{
+    for (auto* widget: m_statusBarLabels)
+    {
+        ui->statusbar->removeWidget(widget);
+        widget->deleteLater();
+    }
+    m_statusBarLabels.clear();
+    for (auto* widget: m_statusBarSeparators)
+    {
+        ui->statusbar->removeWidget(widget);
+        widget->deleteLater();
+    }
+    m_statusBarSeparators.clear();
+
+    if (now == nullptr || now->widget() == nullptr)
+    {
+        return;
+    }
+
+    auto prop = now->widget()->property("statusBarInfo");
+    if (prop.isValid())
+    {
+        auto* srcMo = now->widget()->metaObject();
+        const auto srcMp = srcMo->property(srcMo->indexOfProperty("statusBarInfo"));
+        const auto srcSignal = srcMp.notifySignal();
+        //qDebug() << srcMo->className() << srcMp.name() << srcSignal.name();
+
+        const auto dstMo = metaObject();
+        const auto dstMethodIndex = dstMo->indexOfMethod("OnStatusBarInfoChanged()");
+        const auto dstMethod = dstMo->method(dstMethodIndex);
+        //qDebug() << dstMo->className() << dstMethodIndex << dstMethod.name();
+
+        disconnect(m_currentStatusBarConnection);
+
+        m_currentStatusBarConnection = connect(now->widget(),
+                srcSignal,
+                this,
+                dstMethod);
+
+        auto infos = prop.toStringList();
+        for (const auto& info: infos)
+        {
+            auto* label = new QLabel(info);
+            label->setMinimumWidth(100);
+            m_statusBarLabels.push_back(label);
+            ui->statusbar->addWidget(label);
+
+            auto line = new QFrame;
+            line->setObjectName("StatusBarSeparator");
+            line->setStyleSheet("background-color:red;");
+            line->setFrameShape(QFrame::VLine);
+
+            m_statusBarSeparators.push_back(line);
+            ui->statusbar->addWidget(line);
+        }
+    }
+}
+
+void SateMainWindow::OnStatusBarInfoChanged()
+{
+    auto prop = m_dockManager->focusedDockWidget()->widget()->property("statusBarInfo");
+    if (prop.isValid())
+    {
+        auto infos = prop.toStringList();
+        for (auto it = infos.begin(); it != infos.end(); ++it)
+        {
+            auto* label = m_statusBarLabels.at(std::distance(infos.begin(), it));
+            label->setText(*it);
+        }
     }
 }
