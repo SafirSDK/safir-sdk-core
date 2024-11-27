@@ -275,6 +275,7 @@ void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int ne
         le->setPlaceholderText("Filter");
         le->setClearButtonEnabled(true);
         le->setFixedWidth(m_table->columnWidth(i)-2);
+        le->setToolTip(tr("Accepts regular expression."));
         connect(le,&QLineEdit::textChanged,this,
                 [this,i](const QString& text){OnFilterTextChanged(i,text);});
         m_filterAreaLayout->addWidget(le,1);

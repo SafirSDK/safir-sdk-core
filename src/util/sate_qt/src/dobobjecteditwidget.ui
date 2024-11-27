@@ -29,6 +29,9 @@
        </property>
        <item>
         <widget class="QLineEdit" name="nameFilterEdit">
+         <property name="toolTip">
+          <string>Accepts regular expression.</string>
+         </property>
          <property name="styleSheet">
           <string notr="true"/>
          </property>
@@ -42,6 +45,9 @@
        </item>
        <item>
         <widget class="QLineEdit" name="valueFilterEdit">
+         <property name="toolTip">
+          <string>Accepts regular expression.</string>
+         </property>
          <property name="styleSheet">
           <string notr="true"/>
          </property>
@@ -59,7 +65,7 @@
           <string notr="true">text-align: left;</string>
          </property>
          <property name="sizeAdjustPolicy">
-          <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+          <enum>QComboBox::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
          </property>
          <property name="iconSize">
           <size>
@@ -117,6 +123,9 @@
        </item>
        <item>
         <widget class="QLineEdit" name="typeFilterCombo">
+         <property name="toolTip">
+          <string>Accepts regular expression.</string>
+         </property>
          <property name="placeholderText">
           <string>Filter</string>
          </property>
