@@ -52,6 +52,7 @@
 SateMainWindow::SateMainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::SateMainWindow)
+    , m_connectedLabel(new QLabel())
     , m_dob()
     , m_connectDialog(new ConnectDialog(this))
 {
@@ -90,10 +91,9 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->menuView->addAction(typesystemDock->toggleViewAction());
 
     m_instanceLabel = new QLabel(tr("SAFIR_INSTANCE: %1").arg(Safir::Utilities::Internal::Expansion::GetSafirInstance()));
-    m_connectedLabel = new QLabel(tr("Not connected"));
-    m_connectedLabel->setStyleSheet("color:red;");
     ui->statusbar->addPermanentWidget(m_connectedLabel);
     ui->statusbar->addPermanentWidget(m_instanceLabel);
+    OnConnectionClosed(); //set the status bar correctly
     OnInfo("Trying to connect to DOB...", QtInfoMsg);
 
     // TypesystemWidget signal handling
@@ -272,17 +272,24 @@ void SateMainWindow::OnConnectedToDob(const QString& connectionName)
     QString msg = tr("Connected as %1").arg(connectionName);
     OnInfo(msg,QtInfoMsg);
     m_connectedLabel->setText(tr("Connected"));
+    m_connectedLabel->setObjectName("ConnectedLabelConnected");
     m_connectedLabel->setToolTip(tr("Connection name: %1").arg(connectionName));
-    m_connectedLabel->setStyleSheet("color:green;");
     m_connected = true;
+
+    style()->unpolish(m_connectedLabel);
+    style()->polish(m_connectedLabel);
 }
 
 void SateMainWindow::OnConnectionClosed()
 {
-    m_connectedLabel->setText(tr("Disconnected"));
+    m_connectedLabel->setText(tr("Not connected"));
+    m_connectedLabel->setObjectName("ConnectedLabelDisconnected");
     m_connectedLabel->setToolTip("");
-    m_connectedLabel->setStyleSheet("color:red;");
     m_connected = false;
+
+    style()->unpolish(m_connectedLabel);
+    style()->polish(m_connectedLabel);
+
 }
 
 void SateMainWindow::OnReceivedTableDoubleClicked(const QModelIndex& ix)
@@ -385,14 +392,17 @@ void SateMainWindow::OnDarkMode()
     ui->actionLightMode->setChecked(false);
 
     QFile ds(":qdarkstyle/dark/darkstyle.qss");
-    QFile tweaks(":customizations/tweaks.qss");
-    if (ds.exists() && tweaks.exists())
+    QFile tweaksBoth(":customizations/tweaks-both.qss");
+    QFile tweaksDark(":customizations/tweaks-dark.qss");
+    if (ds.exists() && tweaksBoth.exists() && tweaksDark.exists())
     {
         ds.open(QFile::ReadOnly | QFile::Text);
-        tweaks.open(QFile::ReadOnly | QFile::Text);
+        tweaksBoth.open(QFile::ReadOnly | QFile::Text);
+        tweaksDark.open(QFile::ReadOnly | QFile::Text);
         QTextStream ts1(&ds);
-        QTextStream ts2(&tweaks);
-        qApp->setStyleSheet(ts1.readAll() + "\n" + ts2.readAll());
+        QTextStream ts2(&tweaksBoth);
+        QTextStream ts3(&tweaksDark);
+        qApp->setStyleSheet(ts1.readAll() + "\n" + ts2.readAll() + "\n" + ts3.readAll());
     }
 
     QFile ads(":customizations/ads-dark.qss");
@@ -411,14 +421,17 @@ void SateMainWindow::OnLightMode()
     ui->actionLightMode->setChecked(true);
 
     QFile ds(":qdarkstyle/light/lightstyle.qss");
-    QFile tweaks(":customizations/tweaks.qss");
-    if (ds.exists() && tweaks.exists())
+    QFile tweaksBoth(":customizations/tweaks-both.qss");
+    QFile tweaksLight(":customizations/tweaks-light.qss");
+    if (ds.exists() && tweaksBoth.exists() && tweaksLight.exists())
     {
         ds.open(QFile::ReadOnly | QFile::Text);
-        tweaks.open(QFile::ReadOnly | QFile::Text);
+        tweaksBoth.open(QFile::ReadOnly | QFile::Text);
+        tweaksLight.open(QFile::ReadOnly | QFile::Text);
         QTextStream ts1(&ds);
-        QTextStream ts2(&tweaks);
-        qApp->setStyleSheet(ts1.readAll() + "\n" + ts2.readAll());
+        QTextStream ts2(&tweaksBoth);
+        QTextStream ts3(&tweaksLight);
+        qApp->setStyleSheet(ts1.readAll() + "\n" + ts2.readAll() + "\n" + ts3.readAll());
     }
 
     QFile ads(":customizations/ads-light.qss");
@@ -535,7 +548,6 @@ void SateMainWindow::OnFocusedDockWidgetChanged(ads::CDockWidget* /*old*/, ads::
 
             auto line = new QFrame;
             line->setObjectName("StatusBarSeparator");
-            line->setStyleSheet("background-color:dimgray;");
             line->setFrameShape(QFrame::VLine);
 
             m_statusBarSeparators.push_back(line);

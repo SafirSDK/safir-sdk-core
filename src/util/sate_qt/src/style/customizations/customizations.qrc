@@ -2,6 +2,8 @@
   <qresource prefix="customizations">
       <file>ads-light.qss</file>
       <file>ads-dark.qss</file>
-      <file>tweaks.qss</file>
+      <file>tweaks-both.qss</file>
+      <file>tweaks-dark.qss</file>
+      <file>tweaks-light.qss</file>
   </qresource>
 </RCC>

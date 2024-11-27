@@ -1,0 +1,13 @@
+QLabel#ConnectedLabelConnected {
+    color: lightgreen;
+}
+
+QLabel#ConnectedLabelDisconnected {
+    color: red;
+}
+
+QFrame#StatusBarSeparator {
+    background-color:#19232D;
+    border: 0px;
+    width:1px;
+}
