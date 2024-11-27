@@ -157,6 +157,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     // DOB signal handling
     connect(&m_dob, &DobHandler::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
+    connect(&m_dob, &DobHandler::ConnectionClosed, this, &SateMainWindow::OnConnectionClosed);
     m_dob.OpenNativeConnection("SATE", 0);
 
     connect(m_dockManager,&ads::CDockManager::focusedDockWidgetChanged,this,&SateMainWindow::OnFocusedDockWidgetChanged);
@@ -274,6 +275,14 @@ void SateMainWindow::OnConnectedToDob(const QString& connectionName)
     m_connectedLabel->setToolTip(tr("Connection name: %1").arg(connectionName));
     m_connectedLabel->setStyleSheet("color:green;");
     m_connected = true;
+}
+
+void SateMainWindow::OnConnectionClosed()
+{
+    m_connectedLabel->setText(tr("Disconnected"));
+    m_connectedLabel->setToolTip("");
+    m_connectedLabel->setStyleSheet("color:red;");
+    m_connected = false;
 }
 
 void SateMainWindow::OnReceivedTableDoubleClicked(const QModelIndex& ix)

@@ -57,6 +57,7 @@ private slots:
                                      const Safir::Dob::Typesystem::ChannelId& channel,
                                      const bool includeSubclasses);
     void OnConnectedToDob(const QString& connectionName);
+    void OnConnectionClosed();
     void OnReceivedTableDoubleClicked(const QModelIndex& ix);
     void OnOpenObjectEdit(const int64_t typeId);
     void OnOpenObjectEditWithInstance(int64_t typeId,
