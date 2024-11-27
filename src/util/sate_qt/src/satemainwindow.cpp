@@ -30,6 +30,7 @@
 #include "instanceswidget.h"
 #include "receivedmodel.h"
 #include "typesystemwidget.h"
+#include "connectdialog.h"
 
 #include <QtConcurrent/QtConcurrent>
 #include <QLabel>
@@ -51,6 +52,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::SateMainWindow)
     , m_dob()
+    , m_connectDialog(new ConnectDialog(this))
 {
     ui->setupUi(this);
 
@@ -127,11 +129,18 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     // Connection menu
     connect(ui->actionDisconnect, &QAction::triggered, this, [this]{ m_dob.Close(); });
-    connect(ui->actionConnect, &QAction::triggered, this, [this]{ m_dob.OpenNativeConnection("SATE", 0); });
-    connect(ui->actionConnectWs, &QAction::triggered, this, [this]{ m_dob.OpenWebsocketConnection("localhost", 10000, "SATE", 0); });
-
-    // Connection menu
-    connect(ui->actionConnect, &QAction::triggered, this, [this]{ m_dob.Close(); });
+    connect(ui->actionConnect, &QAction::triggered, this, [this]{ m_connectDialog->show(); });
+    connect(m_connectDialog, &QDialog::accepted, this, [this]
+    {
+        if (m_connectDialog->NativeConnection())
+        {
+            m_dob.OpenNativeConnection(m_connectDialog->ConnectionName(), m_connectDialog->Context());
+        }
+        else // websocket connection
+        {
+            m_dob.OpenWebsocketConnection(m_connectDialog->WsAddress(), m_connectDialog->WsPort(), m_connectDialog->ConnectionName(), m_connectDialog->Context());
+        }
+    });
 
     // Style sheet menu
     connect(ui->actionDarkMode, &QAction::triggered, this, &SateMainWindow::OnDarkMode);

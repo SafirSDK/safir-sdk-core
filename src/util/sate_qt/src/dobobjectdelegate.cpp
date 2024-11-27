@@ -118,7 +118,7 @@ const QValidator* CreateValidator(Safir::Dob::Typesystem::MemberType memberType,
     }
 }
 
-ValueInput* CreateSingleEditor(Safir::Dob::Typesystem::MemberType memberType, int64_t memberTypeId, bool nullValue, const QString& deleteBtnText, QWidget *parent)
+ValueInput* CreateSingleEditor(Safir::Dob::Typesystem::MemberType memberType, int64_t memberTypeId, int maxLength, bool nullValue, const QString& deleteBtnText, QWidget *parent)
 {
     // ComboBox value input
     if (memberType == BooleanMemberType)
@@ -146,6 +146,11 @@ ValueInput* CreateSingleEditor(Safir::Dob::Typesystem::MemberType memberType, in
     // Text value input
     auto editor = new TextValueInput(nullValue, deleteBtnText, parent);
     editor->SetValidator(CreateValidator(memberType, parent));
+
+    if (maxLength > 0)
+    {
+        editor->SetMaxLength(maxLength);
+    }
     return editor;
 }
 
@@ -163,33 +168,34 @@ QWidget* DobObjectDelegate::createEditor(QWidget *parent,
     {
         auto item = static_cast<MemberTreeItem*>(index.data(DobObjectModel::InternalDataRole).value<void*>());
         ValueInput* editor = nullptr;
-        if (item->GetMemberInfo()->collectionType == SequenceCollectionType)
+        auto mi = item->GetMemberInfo();
+        if (mi->collectionType == SequenceCollectionType)
         {
             if (item->IsContainerRootItem())
             {
-                editor = CreateSingleEditor(item->GetMemberInfo()->memberType, item->GetMemberInfo()->memberTypeId, false, "Clear", parent);
+                editor = CreateSingleEditor(mi->memberType, mi->memberTypeId, mi->stringLength, false, "Clear", parent);
             }
             else
             {
-                editor = CreateSingleEditor(item->GetMemberInfo()->memberType, item->GetMemberInfo()->memberTypeId, false, "Delete", parent);
+                editor = CreateSingleEditor(mi->memberType, mi->memberTypeId, mi->stringLength, false, "Delete", parent);
             }
         }
-        else if (item->GetMemberInfo()->collectionType == DictionaryCollectionType)
+        else if (mi->collectionType == DictionaryCollectionType)
         {
             if (item->IsContainerRootItem())
             {
                 // Create editor for dictionary key
-                editor = CreateSingleEditor(item->GetMemberInfo()->keyType, item->GetMemberInfo()->keyTypeId, false, "Clear", parent);
+                editor = CreateSingleEditor(mi->keyType, mi->keyTypeId, mi->stringLength, false, "Clear", parent);
             }
             else
             {
                 // Create editor for dictionary value
-                editor = CreateSingleEditor(item->GetMemberInfo()->memberType, item->GetMemberInfo()->memberTypeId, true, "Delete", parent);
+                editor = CreateSingleEditor(mi->memberType, mi->memberTypeId, mi->stringLength, true, "Delete", parent);
             }
         }
         else
         {
-            editor = CreateSingleEditor(item->GetMemberInfo()->memberType, item->GetMemberInfo()->memberTypeId, true, QString(), parent);
+            editor = CreateSingleEditor(mi->memberType, mi->memberTypeId, mi->stringLength, true, QString(), parent);
         }
 
         if (editor != nullptr)
@@ -197,6 +203,7 @@ QWidget* DobObjectDelegate::createEditor(QWidget *parent,
             editor->setMinimumHeight(24);
             editor->setMaximumHeight(24);
             connect(editor, &ValueInput::Commit, this, &DobObjectDelegate::CommitAndCloseEditor, Qt::QueuedConnection);
+
             return editor;
         }
     }
@@ -265,6 +272,12 @@ void DobObjectDelegate::CommitAndCloseEditor(int nextRow)
     {
         emit closeEditor(editor, QStyledItemDelegate::NoHint);
     }
+}
+
+void DobObjectDelegate::CloseEditor()
+{
+    auto editor = static_cast<QWidget*>(sender());
+    emit closeEditor(editor, QStyledItemDelegate::NoHint);
 }
 
 //---------------------------------------

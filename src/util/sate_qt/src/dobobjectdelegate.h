@@ -39,6 +39,7 @@ public:
 private slots:
     // Commit data and move to next row. If nextRow=0 just close editor, if 1 move to next row, if -1 move to previous row.
     void CommitAndCloseEditor(int nextRow);
+    void CloseEditor();
 };
 
 class CheckboxDelegate : public QStyledItemDelegate

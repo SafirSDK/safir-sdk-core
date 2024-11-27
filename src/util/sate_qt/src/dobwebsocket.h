@@ -86,5 +86,5 @@ private:
     void HandleError(const QJsonObject& j);
 
     void Send(const QJsonObject& j);
-    void Error(const QString& msg);
+    void LogError(const QString& msg);
 };

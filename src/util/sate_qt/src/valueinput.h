@@ -66,6 +66,7 @@ public:
     bool IsDelete() const override;
     QString GetValue() const override;
     void SetValidator(const QValidator* validator) override;
+    void SetMaxLength(int len);
 
 private:
     Ui::TextValueInput *ui;

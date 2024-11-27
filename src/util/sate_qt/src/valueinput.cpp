@@ -26,6 +26,7 @@
 #include "ui_comboboxvalueinput.h"
 
 #include <QKeyEvent>
+#include <QFocusEvent>
 
 // ---------- TEXT --------------
 TextValueInput::TextValueInput(bool showNullButton, const QString& deleteButtonText, QWidget* parent)
@@ -110,6 +111,11 @@ void TextValueInput::SetValidator(const QValidator *validator)
     {
         ui->valueLineEdit->setValidator(validator);
     }
+}
+
+void TextValueInput::SetMaxLength(int len)
+{
+    ui->valueLineEdit->setMaxLength(len);
 }
 
 //---------------- COMBO -----------------

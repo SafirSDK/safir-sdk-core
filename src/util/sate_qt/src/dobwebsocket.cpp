@@ -30,9 +30,50 @@
 #include <QTimer>
 
 #include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Dob/Response.h>
+#include <Safir/Dob/Entity.h>
+#include <Safir/Dob/Message.h>
+#include <Safir/Dob/Service.h>
+#include <Safir/Dob/SuccessResponse.h>
 
 namespace
 {
+    template <class T>
+    T ToHashVal(const QString& val)
+    {
+        bool ok = false;
+        auto num = val.toLongLong(&ok);
+        if (ok)
+        {
+            return T(num);
+        }
+
+        return T(val.toStdWString());
+    }
+
+    template <class T>
+    void SetHashVal(QJsonObject& jobj, const QString& name, const T& val)
+    {
+        if (val.GetRawString().empty())
+        {
+            jobj[name] = static_cast<qint64>(val.GetRawValue());
+        }
+        else
+        {
+            jobj[name] = QString::fromStdWString(val.GetRawString());
+        }
+    }
+
+    template <class T>
+    T JsonToHash(const QJsonValueConstRef& val)
+    {
+        if (val.isString())
+        {
+            return T(val.toString().toStdWString());
+        }
+        return T(val.toInteger());
+    }
+
     QUrl ToUrl(const QString& address, int port)
     {
         QString url = (address.startsWith("ws") ? address : QString("ws://%1").arg(address)) + ":" + QString::number(port);
@@ -40,15 +81,21 @@ namespace
     }
 
     QString Str(int64_t typeId) {return QString::fromStdWString(sdt::Operations::GetName(typeId));}
+
     QString Str(const std::wstring& s) { return QString::fromStdWString(s);}
-    QString Str(const sdt::HandlerId& v) { return QString(", handler=%1").arg(Str(v.ToString())); }
-    QString Str(const sdt::ChannelId& v) { return QString(", channel=%1").arg(Str(v.ToString())); }
-    QString Str(const sdt::InstanceId& v) { return QString(", instance=%1").arg(Str(v.ToString())); }
+
     QString Str(const QJsonObject& j) { return QString(QJsonDocument(j).toJson(QJsonDocument::Compact)); }
+
     QJsonObject ToJsonObject(const Safir::Dob::Typesystem::ObjectPtr& ptr)
     {
         return QJsonDocument::fromJson(QString::fromStdWString(sdt::Serialization::ToJson(ptr)).toUtf8()).object();
     }
+    sdt::ObjectPtr ToObjectPtr(const QJsonObject& jobj)
+    {
+        return sdt::Serialization::ToObjectFromJson(Str(jobj).toStdWString());
+    }
+
+
 }
 
 DobWebSocket::DobWebSocket(const QString& address, int port)
@@ -100,7 +147,7 @@ void DobWebSocket::WsRecv(const QString& data)
     QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8());
     if (doc.isNull() || !doc.isObject())
     {
-        Error("Recv unexpected data: " + data);
+        LogError("Recv unexpected data: " + data);
         return;
     }
     auto j = doc.object();
@@ -122,7 +169,7 @@ void DobWebSocket::WsRecv(const QString& data)
     }
     else
     {
-        Error("Recv unexpected data: " + data);
+        LogError("Recv unexpected data: " + data);
     }
 }
 
@@ -156,20 +203,20 @@ void DobWebSocket::SubscribeMessage(int64_t typeId, const sdt::ChannelId& channe
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
     p["typeId"] = Str(typeId);
-    p["channelId"] = Str(channel);
+    SetHashVal(p, "channelId", channel);
     p["includeSubclasses"] = includeSubclasses;
 
     // Method object
     QJsonObject j;
     j["method"] = "subscribeMessage";
-    j["id"] = QString("subscribeMessage;%1;%2;%3").arg(Str(typeId), Str(channel), (includeSubclasses ? "1" : "0"));
+    j["id"] = QString("subscribeMessage;%1;%2;%3").arg(Str(typeId), Str(channel.ToString()), (includeSubclasses ? "1" : "0"));
     j["params"] = p;
 
     Send(j);
@@ -179,7 +226,7 @@ void DobWebSocket::UnsubscribeMessage(int64_t typeId)
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
@@ -200,7 +247,7 @@ void DobWebSocket::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem:
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
@@ -208,10 +255,9 @@ void DobWebSocket::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem:
     QJsonObject p;
     p["typeId"] = Str(typeId);
 
-    if (instance == sdt::InstanceId())
+    if (instance != sdt::InstanceId())
     {
-        p["instanceId"] = Str(instance);
-
+        SetHashVal(p, "instanceId", instance);
     }
     else
     {
@@ -231,7 +277,7 @@ void DobWebSocket::UnsubscribeEntity(int64_t typeId)
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
@@ -252,14 +298,14 @@ void DobWebSocket::SubscribeRegistrations(int64_t typeId, const Safir::Dob::Type
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
+    SetHashVal(p, "handlerId", handler);
     p["typeId"] = Str(typeId);
-    p["handlerId"] = Str(handler);
     p["includeSubclasses"] = includeSubclasses;
 
     // Method object
@@ -275,7 +321,7 @@ void DobWebSocket::UnsubscribeRegistrations(int64_t typeId)
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
@@ -296,15 +342,15 @@ void DobWebSocket::RegisterEntityHandler(int64_t typeId, const Safir::Dob::Types
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     auto instPolicy = instanceIdPolicy == Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId ? "HandlerDecidesInstanceId" : "RequestorDecidesInstanceId";
     QJsonObject p;
+    SetHashVal(p, "handlerId", handler);
     p["typeId"] = Str(typeId);
-    p["handlerId"] = Str(handler);
     p["instanceIdPolicy"] = instPolicy;
     p["pending"] = pending;
     p["injectionHandler"] = injection;
@@ -312,7 +358,7 @@ void DobWebSocket::RegisterEntityHandler(int64_t typeId, const Safir::Dob::Types
     // Method object
     QJsonObject j;
     j["method"] = "registerEntityHandler";
-    j["id"] = QString("registerEntityHandler;%1;%2;%3;%4;%5").arg(Str(typeId), Str(handler), instPolicy, (pending ? "1" : "0"), (injection ? "1" : "0"));
+    j["id"] = QString("registerEntityHandler;%1;%2;%3;%4;%5").arg(Str(typeId), Str(handler.ToString()), instPolicy, (pending ? "1" : "0"), (injection ? "1" : "0"));
     j["params"] = p;
 
     Send(j);
@@ -322,20 +368,20 @@ void DobWebSocket::RegisterServiceHandler(int64_t typeId, const Safir::Dob::Type
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
     p["typeId"] = Str(typeId);
-    p["handlerId"] = Str(handler);
+    SetHashVal(p, "handlerId", handler);
     p["pending"] = pending;
 
     // Method object
     QJsonObject j;
     j["method"] = "registerServiceHandler";
-    j["id"] = QString("registerServiceHandler;%1;%2;%3").arg(Str(typeId), Str(handler), (pending ? "1" : "0"));
+    j["id"] = QString("registerServiceHandler;%1;%2;%3").arg(Str(typeId), Str(handler.ToString()), (pending ? "1" : "0"));
     j["params"] = p;
 
     Send(j);
@@ -345,7 +391,7 @@ void DobWebSocket::Unregister(int64_t typeId)
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
@@ -366,19 +412,19 @@ void DobWebSocket::SendMessage(const Safir::Dob::MessagePtr& message, const Safi
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
-    p["channelId"] = Str(channel);
+    SetHashVal(p, "channelId", channel);
     p["message"] = ToJsonObject(message);
 
     // Method object
     QJsonObject j;
     j["method"] = "sendMessage";
-    j["id"] = QString("sendMessage;%1;%2").arg(Str(message->GetTypeId()), Str(channel));
+    j["id"] = QString("sendMessage;%1;%2").arg(Str(message->GetTypeId()), Str(channel.ToString()));
     j["params"] = p;
 
     Send(j);
@@ -388,19 +434,19 @@ void DobWebSocket::SendServiceRequest(const Safir::Dob::ServicePtr& request, con
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
-    p["handlerId"] = Str(handler);
+    SetHashVal(p, "handlerId", handler);
     p["service"] = ToJsonObject(request);
 
     // Method object
     QJsonObject j;
     j["method"] = "serviceRequest";
-    j["id"] = "serviceRequest";
+    j["id"] = QString("serviceRequest;%1").arg(Str(handler.ToString()));
     j["params"] = p;
 
     Send(j);
@@ -410,23 +456,23 @@ void DobWebSocket::CreateRequest(const Safir::Dob::EntityPtr& entity, const Safi
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
-    p["handlerId"] = Str(handler);
+    SetHashVal(p, "handlerId", handler);
     p["entity"] = ToJsonObject(entity);
     if (instance != sdt::InstanceId())
     {
-        p["instanceId"] = Str(instance);
+        SetHashVal(p, "instanceId", instance);
     }
 
     // Method object
     QJsonObject j;
     j["method"] = "createRequest";
-    j["id"] = "createRequest";
+    j["id"] = QString("createRequest;%1").arg(Str(handler.ToString()));
     j["params"] = p;
 
     Send(j);
@@ -436,19 +482,19 @@ void DobWebSocket::UpdateRequest(const Safir::Dob::EntityPtr& entity, const Safi
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
     p["entity"] = ToJsonObject(entity);
-    p["instanceId"] = Str(instance);
+    SetHashVal(p, "instanceId", instance);
 
     // Method object
     QJsonObject j;
     j["method"] = "updateRequest";
-    j["id"] = "updateRequest";
+    j["id"] = QString("updateRequest;%1").arg(Str(instance.ToString()));
     j["params"] = p;
 
     Send(j);
@@ -458,19 +504,19 @@ void DobWebSocket::DeleteRequest(const Safir::Dob::Typesystem::EntityId& entityI
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
     p["typeId"] = Str(entityId.GetTypeId());
-    p["instanceId"] = Str(entityId.GetInstanceId());
+    p["instanceId"] = Str(entityId.GetInstanceId().ToString());
 
     // Method object
     QJsonObject j;
     j["method"] = "deleteRequest";
-    j["id"] = "deleteRequest";
+    j["id"] = QString("deleteRequest;%1;%2").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId().ToString()));
     j["params"] = p;
 
     Send(j);
@@ -480,20 +526,20 @@ void DobWebSocket::SetChanges(const Safir::Dob::EntityPtr& entity, const Safir::
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
     p["entity"] = ToJsonObject(entity);
-    p["instanceId"] = Str(instance);
-    p["handlerId"] = Str(handler);
+    SetHashVal(p, "instanceId", instance);
+    SetHashVal(p, "handlerId", handler);
 
     // Method object
     QJsonObject j;
     j["method"] = "setEntityChanges";
-    j["id"] = QString("setEntityChanges;%1;%2;%3").arg(Str(entity->GetTypeId()), Str(instance), Str(handler));
+    j["id"] = QString("setEntityChanges;%1;%2;%3").arg(Str(entity->GetTypeId()), Str(instance.ToString()), Str(handler.ToString()));
     j["params"] = p;
 
     Send(j);
@@ -503,20 +549,20 @@ void DobWebSocket::SetAll(const Safir::Dob::EntityPtr& entity, const sdt::Instan
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
     p["entity"] = ToJsonObject(entity);
-    p["instanceId"] = Str(instance);
-    p["handlerId"] = Str(handler);
+    SetHashVal(p, "instanceId", instance);
+    SetHashVal(p, "handlerId", handler);
 
     // Method object
     QJsonObject j;
     j["method"] = "setEntity";
-    j["id"] = QString("setEntity;%1;%2;%3").arg(Str(entity->GetTypeId()), Str(instance), Str(handler));
+    j["id"] = QString("setEntity;%1;%2;%3").arg(Str(entity->GetTypeId()), Str(instance.ToString()), Str(handler.ToString()));
     j["params"] = p;
 
     Send(j);
@@ -526,20 +572,20 @@ void DobWebSocket::Delete(const Safir::Dob::Typesystem::EntityId& entityId, cons
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
     p["typeId"] = Str(entityId.GetTypeId());
-    p["instanceId"] = Str(entityId.GetInstanceId());
-    p["handlerId"] = Str(handler);
+    p["instanceId"] = Str(entityId.GetInstanceId().ToString());
+    SetHashVal(p, "handlerId", handler);
 
     // Method object
     QJsonObject j;
     j["method"] = "deleteEntity";
-    j["id"] = QString("deleteEntity;%1;%2;%3").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId()), Str(handler));
+    j["id"] = QString("deleteEntity;%1;%2;%3").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId().ToString()), Str(handler.ToString()));
     j["params"] = p;
 
     Send(j);
@@ -549,19 +595,19 @@ void DobWebSocket::DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::Handl
 {
     if (!m_isConnected)
     {
-        Error("Not connected!");
+        LogError("Not connected!");
         return;
     }
 
     // Params
     QJsonObject p;
     p["typeId"] = Str(typeId);
-    p["handlerId"] = Str(handler);
+    SetHashVal(p, "handlerId", handler);
 
     // Method object
     QJsonObject j;
     j["method"] = "deleteAllInstances";
-    j["id"] = QString("deleteAllInstances;%1;%2;%3").arg(Str(typeId), Str(handler));
+    j["id"] = QString("deleteAllInstances;%1;%2;%3").arg(Str(typeId), Str(handler.ToString()));
     j["params"] = p;
 
     Send(j);
@@ -577,109 +623,482 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
 
     auto idList = idValue.toString().split(';', Qt::SkipEmptyParts);
     auto id = idList[0];
-    auto result = j["result"].toString();
+    auto result = j["result"];
 
     if (id == "open")
     {
-        if (result == "OK")
+        if (result.isString() && result.toString() == "OK")
         {
             emit DobInterface::ConnectedToDob(m_name);
             emit DobInterface::Info("<b>Connected to DOB (websocket)!</b>");
         }
         else
         {
-            Error("Open failed: " + result);
+            LogError("Open failed: " + result.toString());
         }
     }
     else if (id == "sendMessage")
     {
-        if (result == "OK")
+        if (result.isString() && result.toString() == "OK")
         {
             emit DobInterface::Info(QString("Message sent OK: %1, channel=%2").arg(idList[1], idList[2]));
         }
         else
         {
-            Error("sendMessage failed: " + result);
+            LogError("sendMessage failed: " + result.toString());
         }
     }
     else if (id == "setEntityChanges")
     {
-        if (result == "OK")
+        if (result.isString() && result.toString() == "OK")
         {
             emit DobInterface::Info(QString("Set entity changes OK: %1, instance=%2, handler=%3").arg(idList[1], idList[2], idList[3]));
         }
         else
         {
-            Error("SetEntityChanges failed: " + result);
+            LogError("SetEntityChanges failed: " + result.toString());
         }
     }
     else if (id == "setEntity")
     {
-        if (result == "OK")
+        if (result.isString() && result.toString() == "OK")
         {
             emit DobInterface::Info(QString("Set entity OK: %1, instance=%2, handler=%3").arg(idList[1], idList[2], idList[3]));
         }
         else
         {
-            Error("SetEntity failed: " + result);
+            LogError("SetEntity failed: " + result.toString());
         }
     }
     else if (id == "deleteEntity")
     {
-        if (result == "OK")
+        if (result.isString() && result.toString() == "OK")
         {
             emit DobInterface::Info(QString("Delete entity OK: %1, instance=%2, handler=%3").arg(idList[1], idList[2], idList[3]));
         }
         else
         {
-            Error("DeleteEntity failed: " + result);
+            LogError("DeleteEntity failed: " + result.toString());
         }
     }
     else if (id == "deleteAllInstances")
     {
-        if (result == "OK")
+        if (result.isString() && result.toString() == "OK")
         {
             emit DobInterface::Info(QString("Delete all instances OK: %1, handler=%2").arg(idList[1], idList[2]));
         }
         else
         {
-            Error("DeleteAllInstances failed: " + result);
+            LogError("DeleteAllInstances failed: " + result.toString());
         }
     }
+    else if (id == "createRequest")
+    {
+        if (result.isObject())
+        {
+            auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
+            emit DobInterface::OnResponse(response);
+            emit DobInterface::Info(QString("Received response for entity create request, handler=%1").arg(idList[1]));
+        }
+        else
+        {
+            LogError("CreateRequest failed: " + Str(j));
+        }
+    }
+    else if (id == "updateRequest")
+    {
+        if (result.isObject())
+        {
+            auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
+            emit DobInterface::OnResponse(response);
+            emit DobInterface::Info(QString("Received response for entity update request, handler=%1").arg(idList[1]));
+        }
+        else
+        {
+            LogError("UpdateRequest failed: " + Str(j));
+        }
+    }
+    else if (id == "deleteRequest")
+    {
+        if (result.isObject())
+        {
+            auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
+            emit DobInterface::OnResponse(response);
+            emit DobInterface::Info(QString("Received response for entity delete request: %1, instancer=%2").arg(idList[1], idList[2]));
+        }
+        else
+        {
+            LogError("DeleteRequest failed: " + Str(j));
+        }
+    }
+    else if (id == "serviceRequest")
+    {
+        if (result.isObject())
+        {
+            auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
+            emit DobInterface::OnResponse(response);
+            emit DobInterface::Info(QString("Received response for service request, handler=%1").arg(idList[1]));
+        }
+        else
+        {
+            LogError("ServiceRequest failed: " + Str(j));
+        }
+    }
+    else if (id == "subscribeMessage")
+    {
+        if (result.isString() && result.toString() == "OK")
+        {
+            auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
+            auto channel = ToHashVal<sdt::ChannelId>(idList[2]);
+            auto includeSubclasses = idList[3] == "1";
+            DobInterface::SubscriptionInfo info{typeId, channel, includeSubclasses};
+            m_subscriptions.push_back(info);
+            emit DobInterface::SubscriptionStarted(info);
+            emit DobInterface::Info(QString("Subscribe message OK: %1, channel=%2, recursive=%3").arg(idList[1], idList[2], idList[3]));
+        }
+        else
+        {
+            LogError("SubscribeMessage failed: " + result.toString());
+        }
+    }
+    else if (id == "unsubscribeMessage")
+    {
+        if (result.isString() && result.toString() == "OK")
+        {
+            auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
+            RemoveSubscriptions(typeId);
+            emit DobInterface::SubscriptionStopped(typeId);
+            emit DobInterface::Info(QString("Unsubscribe message OK: %1").arg(idList[1]));
+        }
+        else
+        {
+            LogError("UnsubscribeMessage failed: " + result.toString());
+        }
+    }
+    else if (id == "subscribeEntity")
+    {
+        if (result.isString() && result.toString() == "OK")
+        {
+            auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
+            auto includeSubclasses = idList[2] == "1";
+            DobInterface::SubscriptionInfo info{typeId, sdt::ChannelId(), includeSubclasses};
+            m_subscriptions.push_back(info);
+            emit DobInterface::SubscriptionStarted(info);
+            emit DobInterface::Info(QString("Subscribe entity OK: %1, recursvie=%2").arg(idList[1], idList[2]));
+        }
+        else
+        {
+            LogError("subscribeEntity failed: " + result.toString());
+        }
+    }
+    else if (id == "unsubscribeEntity")
+    {
+        if (result.isString() && result.toString() == "OK")
+        {
+            auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
+            RemoveSubscriptions(typeId);
+            emit DobInterface::SubscriptionStopped(typeId);
+            emit DobInterface::Info(QString("Unsubscribe entity OK: %1").arg(idList[1]));
+        }
+        else
+        {
+            LogError("UnsubscribeEntity failed: " + result.toString());
+        }
+    }
+    else if (id == "subscribeRegistration")
+    {
+        if (result.isString() && result.toString() == "OK")
+        {
+            emit DobInterface::Info(QString("Subscribe registrations OK: %1, recursvie=%2").arg(idList[1], idList[2]));
+        }
+        else
+        {
+            LogError("SubscribeRegistration failed: " + result.toString());
+        }
+    }
+    else if (id == "unsubscribeRegistration")
+    {
+        if (result.isString() && result.toString() == "OK")
+        {
+            emit DobInterface::Info(QString("Unsubscribe registration OK: %1").arg(idList[1]));
+        }
+        else
+        {
+            LogError("UnsubscribeRegistration failed: " + result.toString());
+        }
+    }
+    else if (id == "registerEntityHandler")
+    {
+        if (result.isString() && result.toString() == "OK")
+        {
+            auto msg = QString("Register entity handler OK: %1, handler=%2").arg(idList[1], idList[2]);
+            if (idList[4] == "1")
+            {
+                msg += ", pending";
+            }
+            if (idList[5] == "1")
+            {
+                msg += ", injectionHandler";
+            }
+            emit DobInterface::Info(msg);
 
-    /*
-subscribeMessage
-unsubscribeMessage
-subscribeEntity
-unsubscribeEntity
-subscribeRegistration
-unsubscribeRegistration
-registerEntityHandler
-registerServiceHandler
-unregisterHandler
-createRequest
-updateRequest
-deleteRequest
-serviceRequest
-     */
 
+            auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
+            auto handler = ToHashVal<sdt::HandlerId>(idList[2]);
+            auto instanceIdPolicy = Safir::Dob::InstanceIdPolicy::ToValue(idList[3].toStdWString());
+            auto pending = idList[4] == "1";
+            auto injection = idList[5] == "1";
+            DobInterface::RegistrationInfo info{typeId, handler, pending, injection, instanceIdPolicy};
+            m_registrations.push_back(info);
+            emit DobInterface::OnRegistered(info);
+        }
+        else
+        {
+            LogError("RegisterEntityHandler failed: " + result.toString());
+        }
+    }
+    else if (id == "registerServiceHandler")
+    {
+        if (result.isString() && result.toString() == "OK")
+        {
+            auto msg = QString("Register service handler OK: %1, handler=%2").arg(idList[1], idList[2]);
+            if (idList[3] == "1")
+            {
+                msg += ", pending";
+            }
+            emit DobInterface::Info(msg);
+
+            auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
+            auto handler = ToHashVal<sdt::HandlerId>(idList[2]);
+            auto pending = idList[3] == "1";
+            DobInterface::RegistrationInfo info{typeId, handler, pending, false, Safir::Dob::InstanceIdPolicy::RequestorDecidesInstanceId};
+            m_registrations.push_back(info);
+            emit DobInterface::OnRegistered(info);
+        }
+        else
+        {
+            LogError("RegisterServiceHandler failed: " + result.toString());
+        }
+    }
+    else if (id == "unregisterHandler")
+    {
+        if (result.isString() && result.toString() == "OK")
+        {
+            auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
+            RemoveRegistrations(typeId);
+            emit DobInterface::OnUnregistered(typeId);
+
+            emit DobInterface::Info(QString("Unregister handler OK: %1").arg(idList[1]));
+        }
+        else
+        {
+            LogError("UnregisterHandler failed: " + result.toString());
+        }
+    }
 }
 
 void DobWebSocket::HandleNotification(const QJsonObject& j)
 {
+    auto method = j["method"].toString();
+    auto p = j["params"].toObject();
+
+    if (method == "onMessage")
+    {
+        auto channel = JsonToHash<sdt::ChannelId>(p["channelId"]);
+        auto message = std::dynamic_pointer_cast<Safir::Dob::Message>(ToObjectPtr(p["message"].toObject()));
+        emit DobInterface::Info("Received message: " + Str(message->GetTypeId()));
+        emit DobInterface::OnMessage(message->GetTypeId(), channel, message);
+
+    }
+    else if (method == "onUpdatedEntity")
+    {
+        auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
+        auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
+        sdt::EntityId eid(entity->GetTypeId(), instance);
+        emit DobInterface::Info("Received updated entity: " + Str(eid.ToString()));
+        emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::UpdatedEntity);
+
+    }
+    else if (method == "onNewEntity")
+    {
+        auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
+        auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
+        sdt::EntityId eid(entity->GetTypeId(), instance);
+        emit DobInterface::Info("Received new entity: " + Str(eid.ToString()));
+        emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::NewEntity);
+    }
+    else if (method == "onDeletedEntity")
+    {
+        auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
+        auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
+        sdt::EntityId eid(entity->GetTypeId(), instance);
+        emit DobInterface::Info("Received deleted entity: " + Str(eid.ToString()));
+        emit DobInterface::OnEntity(eid, sdt::HandlerId(), nullptr, DobInterface::DeletedEntity);
+    }
+    else if (method == "onUpdateRequest")
+    {
+        auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
+        auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
+
+        emit DobInterface::Info("Received update request: " + Str(entity->GetTypeId()) + ", instance=" + Str(instance.ToString()));
+        emit DobInterface::OnRequest(entity, DobInterface::UpdateEntity);
+
+        SetChanges(entity, instance, handler);
+
+        // Create response
+        auto success = Safir::Dob::SuccessResponse::Create();
+        QJsonObject response;
+        response["id"] = j["id"];
+        response["result"] = ToJsonObject(success);
+        Send(response);
+    }
+    else if (method == "onCreateRequest")
+    {
+        auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
+        auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
+
+        emit DobInterface::Info("Received create request: " + Str(entity->GetTypeId()) + ", handler=" + Str(handler.ToString()));
+        emit DobInterface::OnRequest(entity, DobInterface::CreateEntity);
+
+        SetAll(entity, instance, handler);
+
+        // Create response
+        auto success = Safir::Dob::SuccessResponse::Create();
+        QJsonObject response;
+        response["id"] = j["id"];
+        response["result"] = ToJsonObject(success);
+        Send(response);
+    }
+    else if (method == "onDeleteRequest")
+    {
+        auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
+        auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
+        sdt::EntityId eid(typeId, instance);
+        // Response
+
+        emit DobInterface::Info("Received delete request: " + Str(eid.ToString()));
+        Delete(eid, handler);
+
+        // Create response
+        auto success = Safir::Dob::SuccessResponse::Create();
+        QJsonObject response;
+        response["id"] = j["id"];
+        response["result"] = ToJsonObject(success);
+        Send(response);
+    }
+    else if (method == "onServiceRequest")
+    {
+        auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        auto request = std::dynamic_pointer_cast<Safir::Dob::Service>(ToObjectPtr(p["request"].toObject()));
+
+        emit DobInterface::Info("Received service request: " + Str(request->GetTypeId()));
+        emit DobInterface::OnRequest(request, DobInterface::Service);
+
+        // Create response
+        auto success = Safir::Dob::SuccessResponse::Create();
+        QJsonObject response;
+        response["id"] = j["id"];
+        response["result"] = ToJsonObject(success);
+        Send(response);
+    }
+    else if (method == "onRegistered")
+    {
+        auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
+
+        emit DobInterface::Info("OnRegistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+        DobInterface::RegistrationInfo info{typeId, handler, false, false, Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId};
+        emit DobInterface::OnRegistered(info);
+    }
+    else if (method == "onUnregistered")
+    {
+        auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
+        emit DobInterface::Info("OnUnregistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+        emit DobInterface::OnUnregistered(typeId);
+    }
+    else if (method == "onRevokedRegistration")
+    {
+        auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
+
+        emit DobInterface::Info("Revoked registration: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+        RemoveRegistration(typeId, handler);
+        emit DobInterface::OnUnregistered(typeId);
+
+    }
+    else if (method == "onCompletedRegistration")
+    {
+        // TODO
+        // auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        // auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
+
+        // emit DobInterface::Info("Registration completed: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+
+        // // TODO: remove pending flag in myReg
+        // //DobInterface::RegistrationInfo info{typeId, handler, false, false, GetInstanceIdPolicy(typeId, handlerId)};
+        // emit DobInterface::OnRegistered(info);
+
+    }
+    else if (method == "onInitialInjectionsDone")
+    {
+        auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
+        emit DobInterface::Info("Initial injection done: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+    }
+    else if (method == "onInjectedNewEntity")
+    {
+        auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
+        auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
+        sdt::EntityId eid(entity->GetTypeId(), instance);
+
+        emit DobInterface::Info("Injected new entity: " + Str(eid.ToString()));
+        emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::NewEntity);
+    }
+    else if (method == "onInjectedUpdatedEntity")
+    {
+        auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
+        auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
+        sdt::EntityId eid(entity->GetTypeId(), instance);
+
+        emit DobInterface::Info("Injected updated entity: " + Str(eid.ToString()));
+        emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::UpdatedEntity);
+    }
+    else if (method == "onInjectedDeletedEntity")
+    {
+        auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
+        auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
+        sdt::EntityId eid(entity->GetTypeId(), instance);
+
+        emit DobInterface::Info("Injected deleted entity: " + Str(eid.ToString()));
+        emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::DeletedEntity);
+    }
+    else if (method == "onNotMessageOverflow")
+    {
+        emit DobInterface::Info("OnNotMessageOverflow");
+    }
+    else if (method == "onNotRequestOverflow")
+    {
+        emit DobInterface::Info("OnNotRequestOverflow");
+    }
 }
 
 void DobWebSocket::HandleError(const QJsonObject& j)
 {
-    Error("Received error: " + Str(j));
+    LogError("Received error: " + Str(j));
 }
 
 void DobWebSocket::Send(const QJsonObject& j)
 {
+    auto json = Str(j);
+    emit DobInterface::Info(QString("Send: %1").arg(json));
     m_webSocket.sendTextMessage(Str(j));
 }
 
-void DobWebSocket::Error(const QString& msg)
+void DobWebSocket::LogError(const QString& msg)
 {
     emit DobInterface::Info(QString("<span style='color:red'>%1</span>").arg(msg));
 }

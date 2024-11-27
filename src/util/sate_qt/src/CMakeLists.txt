@@ -8,6 +8,7 @@ set(ui
     comboboxvalueinput.ui
     operationswidget.ui
     registerhandlerdialog.ui
+    connectdialog.ui
 )
 
 set(sources
@@ -31,6 +32,7 @@ set(sources
     operationswidget.cpp
     dobobjectbuilder.cpp
     registerhandlerdialog.cpp
+    connectdialog.cpp
     instanceswidget.cpp
     instancesmodelutils.cpp
     entityinstancesmodel.cpp
@@ -55,6 +57,7 @@ set(widget_headers
     valueinput.h
     operationswidget.h
     registerhandlerdialog.h
+    connectdialog.h
     instanceswidget.h
     entityinstancesmodel.h
     messageinstancesmodel.h

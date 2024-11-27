@@ -39,6 +39,7 @@ class QTableView;
 class TypesystemWidget;
 class QTextBrowser;
 class InstancesWidget;
+class ConnectDialog;
 
 namespace Ui { class SateMainWindow; }
 
@@ -79,6 +80,7 @@ private:
 
     DobHandler m_dob;
     bool m_connected = false;
+    ConnectDialog* m_connectDialog;
 
     TypesystemWidget* m_typesystem;
     QTableView* m_received;
