@@ -6,6 +6,8 @@ ConnectDialog::ConnectDialog(QWidget *parent)
     , ui(new Ui::ConnectDialog)
 {
     ui->setupUi(this);
+    setModal(true);
+    setFixedSize(width(), height());
     ui->wsPortEdit->setValidator(new QIntValidator(0, 65535, this));
 }
 
