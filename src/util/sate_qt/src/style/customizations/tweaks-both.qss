@@ -1,21 +1,35 @@
-
-
 QTreeView:branch:has-siblings:!adjoins-item {
-  border-image: none;
+    border-image: none;
 }
 
 QTreeView:branch:has-siblings:adjoins-item {
-  border-image: none;
+    border-image: none;
 }
 
 QTreeView:branch:!has-children:!has-siblings:adjoins-item {
-  border-image: none;
+    border-image: none;
 }
 
 QHeaderView::down-arrow {
-  padding-left: -4px;
+    padding-left: -4px;
 }
 
 QHeaderView::up-arrow {
-  padding-left: -4px;
+    padding-left: -4px;
 }
+
+QMenuBar {
+    border: none;
+    padding: 0px;
+}
+
+QToolBar > QToolButton {
+    height: 14px;
+    width: 14px;
+}
+
+/*
+QToolButton#ResetWindows {
+    qproperty-icon: url(:/qss_icons/dark/rc/window_undock.png);
+}
+*/

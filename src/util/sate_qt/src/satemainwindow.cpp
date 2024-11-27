@@ -38,11 +38,16 @@
 #include <QFile>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMenu>
+#include <QMenuBar>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QScrollBar>
 #include <QTabWidget>
 #include <QTableView>
 #include <QTextBrowser>
+#include <QToolBar>
+#include <QToolButton>
 #include <QtConcurrent/QtConcurrent>
 
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
@@ -52,6 +57,7 @@
 SateMainWindow::SateMainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::SateMainWindow)
+    , m_toolBar(new QToolBar(this))
     , m_connectedLabel(new QLabel())
     , m_dob()
     , m_connectDialog(new ConnectDialog(this))
@@ -64,6 +70,11 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ads::CDockManager::setConfigFlag(ads::CDockManager::TabCloseButtonIsToolButton, true);
     ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
 
+    //Set up the combined toolbar and menubar
+    addToolBar(Qt::TopToolBarArea, m_toolBar);
+    m_toolBar->setFloatable(false);
+    m_toolBar->setMovable(false);
+    m_toolBar->addWidget(ui->menubar);
 
     m_dockManager = new ads::CDockManager(this);
 
@@ -73,7 +84,9 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     //Set up the central area as always present
     QLabel* label = new QLabel();
-    label->setText("Welcome to the next generation Sate. SateNext!");
+    label->setText("Welcome to the next generation Sate, rewritten in Qt.\n"
+                   "Please report any bugs you find, so we can make this the best Sate ever!\n\n"
+                   "The old Sate is still available, now renamed to sate_legacy.");
     label->setAlignment(Qt::AlignCenter);
     auto* centralDockWidget = new ads::CDockWidget("CentralWidget");
     centralDockWidget->setWidget(label);
@@ -162,6 +175,11 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     connect(m_dockManager,&ads::CDockManager::focusedDockWidgetChanged,this,&SateMainWindow::OnFocusedDockWidgetChanged);
 
+    //add toolbar buttons
+    QAction* resetWindows = new QAction(QIcon(":/img/icons/window_reset.png"),"Reset layout");
+    resetWindows->setToolTip("Move all tabs back to default positions");
+    connect(resetWindows, &QAction::triggered, this, &SateMainWindow::OnResetWindows);
+    m_toolBar->addAction(resetWindows);
 }
 
 SateMainWindow::~SateMainWindow()
@@ -567,5 +585,47 @@ void SateMainWindow::OnStatusBarInfoChanged()
             auto* label = m_statusBarLabels.at(std::distance(infos.begin(), it));
             label->setText(*it);
         }
+    }
+}
+
+void SateMainWindow::OnResetWindows()
+{
+    auto* focusedBefore = m_dockManager->focusedDockWidget();
+
+    ads::CDockWidget* output = nullptr;
+    ads::CDockWidget* typesystem = nullptr;
+
+    for (auto* dock: m_dockManager->dockWidgetsMap())
+    {
+        const QString dockName = dock->objectName();
+        if (dockName == "CentralWidget")
+        {
+            continue;
+        }
+
+        m_dockManager->removeDockWidget(dock);
+
+        if (dockName == "Output")
+        {
+            output = dock;
+            //m_dockManager->addDockWidget(ads::BottomDockWidgetArea, dock);
+        }
+        else if (dockName == "Typesystem")
+        {
+            typesystem = dock;
+            //m_dockManager->addDockWidget(ads::LeftDockWidgetArea, dock);
+        }
+        else
+        {
+            m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
+        }
+    }
+    //Need to add these last, to make sure they get back in the same place
+    m_dockManager->addDockWidget(ads::LeftDockWidgetArea, typesystem);
+    m_dockManager->addDockWidget(ads::BottomDockWidgetArea, output);
+
+    if (focusedBefore != nullptr)
+    {
+        focusedBefore->raise();
     }
 }

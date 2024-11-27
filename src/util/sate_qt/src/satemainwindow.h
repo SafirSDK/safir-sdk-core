@@ -28,8 +28,10 @@
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 #  include <qt6advanceddocking/DockManager.h>
+#  include <qt6advanceddocking/DockAreaWidget.h>
 #else
 #  include <qt5advanceddocking/DockManager.h>
+#  include <qt5advanceddocking/DockAreaWidget.h>
 #endif
 
 #include "dobhandler.h"
@@ -69,7 +71,8 @@ private slots:
     void OnDarkMode();
     void OnLightMode();
     void OnFocusedDockWidgetChanged(ads::CDockWidget* old, ads::CDockWidget* now);
-    Q_INVOKABLE void OnStatusBarInfoChanged();
+    void OnStatusBarInfoChanged();
+    void OnResetWindows();
 private:
     void OpenInstanceViewer(const int64_t typeId,
                             const bool includeSubclasses,
@@ -81,8 +84,9 @@ private:
     void AddTab(const QString& title, QWidget* widget);
 
     Ui::SateMainWindow *ui;
+    QToolBar* const m_toolBar;
     QLabel* m_instanceLabel = nullptr;
-    QLabel* m_connectedLabel = nullptr;
+    QLabel* const m_connectedLabel;
 
     ads::CDockManager* m_dockManager;
     ads::CDockAreaWidget* m_centralDockArea;

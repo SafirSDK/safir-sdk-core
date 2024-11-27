@@ -33,5 +33,6 @@
         <file>icons/instance_viewer_recursive.png</file>
         <file>icons/enum.png</file>
         <file>icons/enum_orange.png</file>
+        <file>icons/window_reset.png</file>
     </qresource>
 </RCC>

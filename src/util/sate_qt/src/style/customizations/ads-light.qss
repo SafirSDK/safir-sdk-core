@@ -50,19 +50,19 @@ ads--CTitleBarButton {
     height:16px;
 
     qproperty-icon: url(" ");
-    border-image: url(:/qss_icons/dark/rc/branch_open.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/branch_open.png) 0 0 0 0 stretch stretch;
 }
 
 #tabsMenuButton:hover {
-    border-image: url(:/qss_icons/dark/rc/branch_open_focus.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/branch_open_focus.png) 0 0 0 0 stretch stretch;
 }
 
 #tabsMenuButton:pressed {
-    border-image: url(:/qss_icons/dark/rc/branch_open_pressed.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/branch_open_pressed.png) 0 0 0 0 stretch stretch;
 }
 
 #tabsMenuButton:disabled {
-    border-image: url(:/qss_icons/dark/rc/branch_open_disabled.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/branch_open_disabled.png) 0 0 0 0 stretch stretch;
 }
 
 #dockAreaCloseButton {
@@ -72,19 +72,19 @@ ads--CTitleBarButton {
 
 #detachGroupButton {
     qproperty-icon: url(" ");
-    border-image: url(:/qss_icons/dark/rc/window_undock.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/window_undock.png) 0 0 0 0 stretch stretch;
 }
 
 #detachGroupButton:hover {
-    border-image: url(:/qss_icons/dark/rc/window_undock_focus.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/window_undock_focus.png) 0 0 0 0 stretch stretch;
 }
 
 #detachGroupButton:pressed {
-    border-image: url(:/qss_icons/dark/rc/window_undock_pressed.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/window_undock_pressed.png) 0 0 0 0 stretch stretch;
 }
 
 #detachGroupButton:disabled {
-    border-image: url(:/qss_icons/dark/rc/window_undock_disabled.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/window_undock_disabled.png) 0 0 0 0 stretch stretch;
 }
 
 /*****************************************************************************
@@ -134,19 +134,19 @@ ads--CDockWidgetTab[activeTab="true"] QLabel {
         width: 4px;
         height:4px;
         qproperty-icon: url(" ");
-        border-image: url(:/qss_icons/dark/rc/window_close.png) 0 0 0 0 stretch stretch;
+        border-image: url(:/qss_icons/light/rc/window_close.png) 0 0 0 0 stretch stretch;
 }
 
 #tabCloseButton:hover {
-    border-image: url(:/qss_icons/dark/rc/window_close_focus.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/window_close_focus.png) 0 0 0 0 stretch stretch;
 }
 
 #tabCloseButton:pressed {
-    border-image: url(:/qss_icons/dark/rc/window_close_pressed.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/window_close_pressed.png) 0 0 0 0 stretch stretch;
 }
 
 #tabCloseButton:disabled {
-    border-image: url(:/qss_icons/dark/rc/window_close_disabled.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/qss_icons/light/rc/window_close_disabled.png) 0 0 0 0 stretch stretch;
 }
 
 /*****************************************************************************
