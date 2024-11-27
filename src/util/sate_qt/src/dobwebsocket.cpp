@@ -698,7 +698,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         {
             auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
             emit DobInterface::OnResponse(response);
-            emit DobInterface::Info(QString("Received response for entity create request, handler=%1").arg(idList[1]));
+            emit DobInterface::Info(QString("Received response for entity create request, handler=%1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -711,7 +711,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         {
             auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
             emit DobInterface::OnResponse(response);
-            emit DobInterface::Info(QString("Received response for entity update request, handler=%1").arg(idList[1]));
+            emit DobInterface::Info(QString("Received response for entity update request, handler=%1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -724,7 +724,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         {
             auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
             emit DobInterface::OnResponse(response);
-            emit DobInterface::Info(QString("Received response for entity delete request: %1, instancer=%2").arg(idList[1], idList[2]));
+            emit DobInterface::Info(QString("Received response for entity delete request: %1, instancer=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
         {
@@ -737,7 +737,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         {
             auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
             emit DobInterface::OnResponse(response);
-            emit DobInterface::Info(QString("Received response for service request, handler=%1").arg(idList[1]));
+            emit DobInterface::Info(QString("Received response for service request, handler=%1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -754,7 +754,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             DobInterface::SubscriptionInfo info{typeId, channel, includeSubclasses};
             m_subscriptions.push_back(info);
             emit DobInterface::SubscriptionStarted(info);
-            emit DobInterface::Info(QString("Subscribe message OK: %1, channel=%2, recursive=%3").arg(idList[1], idList[2], idList[3]));
+            emit DobInterface::Info(QString("Subscribe message OK: %1, channel=%2, recursive=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
         }
         else
         {
@@ -768,7 +768,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
             RemoveSubscriptions(typeId);
             emit DobInterface::SubscriptionStopped(typeId);
-            emit DobInterface::Info(QString("Unsubscribe message OK: %1").arg(idList[1]));
+            emit DobInterface::Info(QString("Unsubscribe message OK: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -784,7 +784,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             DobInterface::SubscriptionInfo info{typeId, sdt::ChannelId(), includeSubclasses};
             m_subscriptions.push_back(info);
             emit DobInterface::SubscriptionStarted(info);
-            emit DobInterface::Info(QString("Subscribe entity OK: %1, recursvie=%2").arg(idList[1], idList[2]));
+            emit DobInterface::Info(QString("Subscribe entity OK: %1, recursvie=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
         {
@@ -798,7 +798,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
             RemoveSubscriptions(typeId);
             emit DobInterface::SubscriptionStopped(typeId);
-            emit DobInterface::Info(QString("Unsubscribe entity OK: %1").arg(idList[1]));
+            emit DobInterface::Info(QString("Unsubscribe entity OK: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -809,7 +809,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Info(QString("Subscribe registrations OK: %1, recursvie=%2").arg(idList[1], idList[2]));
+            emit DobInterface::Info(QString("Subscribe registrations OK: %1, recursvie=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
         {
@@ -820,7 +820,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Info(QString("Unsubscribe registration OK: %1").arg(idList[1]));
+            emit DobInterface::Info(QString("Unsubscribe registration OK: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -840,7 +840,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             {
                 msg += ", injectionHandler";
             }
-            emit DobInterface::Info(msg);
+            emit DobInterface::Info(msg, QtInfoMsg);
 
 
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
@@ -866,7 +866,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             {
                 msg += ", pending";
             }
-            emit DobInterface::Info(msg);
+            emit DobInterface::Info(msg, QtInfoMsg);
 
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
             auto handler = ToHashVal<sdt::HandlerId>(idList[2]);
@@ -888,7 +888,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             RemoveRegistrations(typeId);
             emit DobInterface::OnUnregistered(typeId);
 
-            emit DobInterface::Info(QString("Unregister handler OK: %1").arg(idList[1]));
+            emit DobInterface::Info(QString("Unregister handler OK: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -906,7 +906,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
     {
         auto channel = JsonToHash<sdt::ChannelId>(p["channelId"]);
         auto message = std::dynamic_pointer_cast<Safir::Dob::Message>(ToObjectPtr(p["message"].toObject()));
-        emit DobInterface::Info("Received message: " + Str(message->GetTypeId()));
+        emit DobInterface::Info("Received message: " + Str(message->GetTypeId()), QtInfoMsg);
         emit DobInterface::OnMessage(message->GetTypeId(), channel, message);
 
     }
@@ -915,7 +915,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         sdt::EntityId eid(entity->GetTypeId(), instance);
-        emit DobInterface::Info("Received updated entity: " + Str(eid.ToString()));
+        emit DobInterface::Info("Received updated entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::UpdatedEntity);
 
     }
@@ -924,7 +924,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         sdt::EntityId eid(entity->GetTypeId(), instance);
-        emit DobInterface::Info("Received new entity: " + Str(eid.ToString()));
+        emit DobInterface::Info("Received new entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::NewEntity);
     }
     else if (method == "onDeletedEntity")
@@ -932,7 +932,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         sdt::EntityId eid(entity->GetTypeId(), instance);
-        emit DobInterface::Info("Received deleted entity: " + Str(eid.ToString()));
+        emit DobInterface::Info("Received deleted entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), nullptr, DobInterface::DeletedEntity);
     }
     else if (method == "onUpdateRequest")
@@ -941,7 +941,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
 
-        emit DobInterface::Info("Received update request: " + Str(entity->GetTypeId()) + ", instance=" + Str(instance.ToString()));
+        emit DobInterface::Info("Received update request: " + Str(entity->GetTypeId()) + ", instance=" + Str(instance.ToString()), QtInfoMsg);
         emit DobInterface::OnRequest(entity, DobInterface::UpdateEntity);
 
         SetChanges(entity, instance, handler);
@@ -959,7 +959,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
 
-        emit DobInterface::Info("Received create request: " + Str(entity->GetTypeId()) + ", handler=" + Str(handler.ToString()));
+        emit DobInterface::Info("Received create request: " + Str(entity->GetTypeId()) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
         emit DobInterface::OnRequest(entity, DobInterface::CreateEntity);
 
         SetAll(entity, instance, handler);
@@ -979,7 +979,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         sdt::EntityId eid(typeId, instance);
         // Response
 
-        emit DobInterface::Info("Received delete request: " + Str(eid.ToString()));
+        emit DobInterface::Info("Received delete request: " + Str(eid.ToString()), QtInfoMsg);
         Delete(eid, handler);
 
         // Create response
@@ -994,7 +994,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto request = std::dynamic_pointer_cast<Safir::Dob::Service>(ToObjectPtr(p["request"].toObject()));
 
-        emit DobInterface::Info("Received service request: " + Str(request->GetTypeId()));
+        emit DobInterface::Info("Received service request: " + Str(request->GetTypeId()), QtInfoMsg);
         emit DobInterface::OnRequest(request, DobInterface::Service);
 
         // Create response
@@ -1009,7 +1009,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
 
-        emit DobInterface::Info("OnRegistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+        emit DobInterface::Info("OnRegistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
         DobInterface::RegistrationInfo info{typeId, handler, false, false, Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId};
         emit DobInterface::OnRegistered(info);
     }
@@ -1017,7 +1017,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
     {
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
-        emit DobInterface::Info("OnUnregistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+        emit DobInterface::Info("OnUnregistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
         emit DobInterface::OnUnregistered(typeId);
     }
     else if (method == "onRevokedRegistration")
@@ -1025,7 +1025,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
 
-        emit DobInterface::Info("Revoked registration: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+        emit DobInterface::Info("Revoked registration: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
         RemoveRegistration(typeId, handler);
         emit DobInterface::OnUnregistered(typeId);
 
@@ -1047,7 +1047,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
     {
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
-        emit DobInterface::Info("Initial injection done: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+        emit DobInterface::Info("Initial injection done: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
     }
     else if (method == "onInjectedNewEntity")
     {
@@ -1055,7 +1055,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
         sdt::EntityId eid(entity->GetTypeId(), instance);
 
-        emit DobInterface::Info("Injected new entity: " + Str(eid.ToString()));
+        emit DobInterface::Info("Injected new entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::NewEntity);
     }
     else if (method == "onInjectedUpdatedEntity")
@@ -1064,7 +1064,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
         sdt::EntityId eid(entity->GetTypeId(), instance);
 
-        emit DobInterface::Info("Injected updated entity: " + Str(eid.ToString()));
+        emit DobInterface::Info("Injected updated entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::UpdatedEntity);
     }
     else if (method == "onInjectedDeletedEntity")
@@ -1073,16 +1073,16 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
         sdt::EntityId eid(entity->GetTypeId(), instance);
 
-        emit DobInterface::Info("Injected deleted entity: " + Str(eid.ToString()));
+        emit DobInterface::Info("Injected deleted entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::DeletedEntity);
     }
     else if (method == "onNotMessageOverflow")
     {
-        emit DobInterface::Info("OnNotMessageOverflow");
+        emit DobInterface::Info("OnNotMessageOverflow", QtInfoMsg);
     }
     else if (method == "onNotRequestOverflow")
     {
-        emit DobInterface::Info("OnNotRequestOverflow");
+        emit DobInterface::Info("OnNotRequestOverflow", QtInfoMsg);
     }
 }
 
@@ -1094,7 +1094,7 @@ void DobWebSocket::HandleError(const QJsonObject& j)
 void DobWebSocket::Send(const QJsonObject& j)
 {
     auto json = Str(j);
-    emit DobInterface::Info(QString("Send: %1").arg(json));
+    emit DobInterface::Info(QString("Send: %1").arg(json), QtInfoMsg);
     m_webSocket.sendTextMessage(Str(j));
 }
 

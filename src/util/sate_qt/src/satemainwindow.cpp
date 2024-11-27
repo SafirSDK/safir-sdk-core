@@ -526,7 +526,7 @@ void SateMainWindow::OnFocusedDockWidgetChanged(ads::CDockWidget* /*old*/, ads::
 
             auto line = new QFrame;
             line->setObjectName("StatusBarSeparator");
-            line->setStyleSheet("background-color:red;");
+            line->setStyleSheet("background-color:dimgray;");
             line->setFrameShape(QFrame::VLine);
 
             m_statusBarSeparators.push_back(line);
