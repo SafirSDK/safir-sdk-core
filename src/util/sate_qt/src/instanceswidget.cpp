@@ -126,10 +126,6 @@ InstancesWidget::InstancesWidget(QWidget* parent)
     connect(m_table, &QTableView::doubleClicked, this, &InstancesWidget::OnDoubleClicked);
     connect(m_table->horizontalHeader(), &QWidget::customContextMenuRequested, this, &InstancesWidget::OnCustomContextMenuRequestedHeader);
     connect(m_table, &QWidget::customContextMenuRequested, this, &InstancesWidget::OnCustomContextMenuRequestedTable);
-
-    //Resize table columns after the table has been populated
-    QMetaObject::invokeMethod(this, [this]{m_table->resizeColumnsToContents();}, Qt::QueuedConnection);
-    //TODO use default comumn sizes and add a button somewhere to resize to contents
 }
 
 InstancesWidget::InstancesWidget(DobHandler* dob,
@@ -154,6 +150,10 @@ InstancesWidget::InstancesWidget(DobHandler* dob,
     {
         throw std::logic_error("Failed to find that Entity type for InstancesWidget");
     }
+
+    //this ought to just use the default sizes from the columninfo
+    m_table->resizeColumnsToContents();
+
 }
 
 InstancesWidget::InstancesWidget(DobHandler* dob,
@@ -179,6 +179,9 @@ InstancesWidget::InstancesWidget(DobHandler* dob,
     {
         throw std::logic_error("Failed to find that Message type for InstancesWidget");
     }
+
+    //this ought to just use the default sizes from the columninfo
+    m_table->resizeColumnsToContents();
 }
 
 

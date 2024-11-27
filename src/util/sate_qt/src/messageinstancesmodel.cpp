@@ -90,6 +90,8 @@ QVariant MessageInstancesModel::headerData(const int section, const Qt::Orientat
             {
             case Qt::DisplayRole:
                 return columnInfo->Name();
+            case Qt::SizeHintRole:
+                return QSize(columnInfo->DefaultColumnWidth(), 20);
             }
         }
     }

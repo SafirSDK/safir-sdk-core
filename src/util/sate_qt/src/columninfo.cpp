@@ -147,3 +147,85 @@ Qt::Alignment ColumnInfo::Alignment() const
 
     return Qt::AlignLeft;
 }
+
+
+int ColumnInfo::DefaultColumnWidth() const
+{
+    switch(m_columnType)
+    {
+    case TypeName:
+    case InstanceId:
+    case ChannelId:
+        return 150;
+    case Timestamp:
+        return 100;
+    case Member:
+        break;
+    };
+
+    switch(m_memberType)
+    {
+    case StringMemberType:
+        return 150;
+    case EntityIdMemberType:
+        return 320;
+    case TypeIdMemberType:
+    case InstanceIdMemberType:
+        return 150;
+    case Int32MemberType:
+    case Int64MemberType:
+        return 100;
+    case EnumerationMemberType:
+        return 150;
+    case ChannelIdMemberType:
+    case HandlerIdMemberType:
+    case ObjectMemberType:
+    case BinaryMemberType:
+    case Float64MemberType:
+    case Ampere64MemberType:
+    case CubicMeter64MemberType:
+    case Hertz64MemberType:
+    case Joule64MemberType:
+    case Kelvin64MemberType:
+    case Kilogram64MemberType:
+    case Meter64MemberType:
+    case MeterPerSecond64MemberType:
+    case MeterPerSecondSquared64MemberType:
+    case Newton64MemberType:
+    case Pascal64MemberType:
+    case Radian64MemberType:
+    case RadianPerSecond64MemberType:
+    case RadianPerSecondSquared64MemberType:
+    case SquareMeter64MemberType:
+    case Steradian64MemberType:
+    case Volt64MemberType:
+    case Watt64MemberType:
+    case Float32MemberType:
+    case Ampere32MemberType:
+    case CubicMeter32MemberType:
+    case Hertz32MemberType:
+    case Joule32MemberType:
+    case Kelvin32MemberType:
+    case Kilogram32MemberType:
+    case Meter32MemberType:
+    case MeterPerSecond32MemberType:
+    case MeterPerSecondSquared32MemberType:
+    case Newton32MemberType:
+    case Pascal32MemberType:
+    case Radian32MemberType:
+    case RadianPerSecond32MemberType:
+    case RadianPerSecondSquared32MemberType:
+    case Second32MemberType:
+    case SquareMeter32MemberType:
+    case Steradian32MemberType:
+    case Volt32MemberType:
+    case Watt32MemberType:
+        return 100;
+    case Second64MemberType:
+        return 120;
+    case BooleanMemberType:
+        return 50;
+    }
+
+    return 50;
+}

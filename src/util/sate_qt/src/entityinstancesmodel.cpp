@@ -90,6 +90,8 @@ QVariant EntityInstancesModel::headerData(const int section, const Qt::Orientati
             {
             case Qt::DisplayRole:
                 return columnInfo->Name();
+            case Qt::SizeHintRole:
+                return QSize(columnInfo->DefaultColumnWidth(), 20);
             }
         }
     }
