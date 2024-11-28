@@ -110,7 +110,7 @@ configuration.</string>
       <item row="0" column="1" rowspan="2">
        <widget class="Line" name="line">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -138,7 +138,7 @@ configuration.</string>
          <item row="1" column="0">
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -170,7 +170,7 @@ configuration.</string>
              <normaloff>:/icons/magnifying_glass.png</normaloff>:/icons/magnifying_glass.png</iconset>
            </property>
            <property name="toolButtonStyle">
-            <enum>Qt::ToolButtonTextBesideIcon</enum>
+            <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
            </property>
           </widget>
          </item>
@@ -198,7 +198,7 @@ the matching type name(s) are looked up.</string>
              <normaloff>:/icons/magnifying_glass.png</normaloff>:/icons/magnifying_glass.png</iconset>
            </property>
            <property name="toolButtonStyle">
-            <enum>Qt::ToolButtonTextBesideIcon</enum>
+            <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
            </property>
           </widget>
          </item>
@@ -227,7 +227,7 @@ the matching type name(s) are looked up.</string>
         <item>
          <spacer name="verticalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Vertical</enum>
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -370,7 +370,7 @@ configuration.</string>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QPushButton" name="launchEntityViewerButton">
+          <widget class="QPushButton" name="launchSateLegacyButton">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -378,7 +378,7 @@ configuration.</string>
             </size>
            </property>
            <property name="text">
-            <string>EntityViewer...</string>
+            <string>SATE legacy...</string>
            </property>
           </widget>
          </item>
@@ -414,7 +414,7 @@ configuration.</string>
       <item row="0" column="3" rowspan="2">
        <widget class="Line" name="line_2">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -450,7 +450,7 @@ from the program, or error output from the launcher.</string>
     <item>
      <spacer name="verticalSpacer">
       <property name="orientation">
-       <enum>Qt::Vertical</enum>
+       <enum>Qt::Orientation::Vertical</enum>
       </property>
       <property name="sizeHint" stdset="0">
        <size>
@@ -463,14 +463,14 @@ from the program, or error output from the launcher.</string>
     <item>
      <widget class="Line" name="buttonSeparator">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QDialogButtonBox" name="buttonBox">
       <property name="standardButtons">
-       <set>QDialogButtonBox::Close</set>
+       <set>QDialogButtonBox::StandardButton::Close</set>
       </property>
      </widget>
     </item>

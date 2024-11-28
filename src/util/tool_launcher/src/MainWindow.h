@@ -60,8 +60,8 @@ public:
 
 private slots:
     void OnLaunchSatePressed();
+    void OnLaunchSateLegacyPressed();
     void OnLaunchDobExplorerPressed();
-    void OnLaunchEntityViewerPressed();
     void OnLaunchControlGuiPressed();
     void OnCheckDouFilesPressed();
     void OnCheckGeneratedPressed();

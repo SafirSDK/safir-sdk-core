@@ -85,7 +85,7 @@ MainWindow::MainWindow()
 
     connect(m_ui->launchSateButton, &QPushButton::pressed, this, &MainWindow::OnLaunchSatePressed);
     connect(m_ui->launchDobExplorerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchDobExplorerPressed);
-    connect(m_ui->launchEntityViewerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchEntityViewerPressed);
+    connect(m_ui->launchSateLegacyButton, &QPushButton::pressed, this, &MainWindow::OnLaunchSateLegacyPressed);
     connect(m_ui->launchControlGuiButton, &QPushButton::pressed, this, &MainWindow::OnLaunchControlGuiPressed);
     connect(m_ui->checkDouFilesButton, &QPushButton::pressed, this, &MainWindow::OnCheckDouFilesPressed);
     connect(m_ui->checkGeneratedButton, &QPushButton::pressed, this, &MainWindow::OnCheckGeneratedPressed);
@@ -248,14 +248,14 @@ void MainWindow::OnLaunchSatePressed()
     LaunchProgram("sate");
 }
 
+void MainWindow::OnLaunchSateLegacyPressed()
+{
+    LaunchProgram("sate_legacy");
+}
+
 void MainWindow::OnLaunchDobExplorerPressed()
 {
     LaunchProgram("dobexplorer");
-}
-
-void MainWindow::OnLaunchEntityViewerPressed()
-{
-    LaunchProgram("safir_entity_viewer");
 }
 
 void MainWindow::OnLaunchControlGuiPressed()

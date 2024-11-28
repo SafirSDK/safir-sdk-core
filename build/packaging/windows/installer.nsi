@@ -505,8 +505,8 @@ Section /o "Tools" SecTools
   CreateShortCut "${StartMenuDir}\Sate.lnk" \
                  "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
 
-  CreateShortCut "${StartMenuDir}\EntityViewer.lnk" \
-                 "$INSTDIR\bin\safir_entity_viewer.exe" "" "" "" SW_SHOWNORMAL "" "Show entity instances in table form"
+  CreateShortCut "${StartMenuDir}\SateLegacy.lnk" \
+                 "$INSTDIR\bin\sate_legacy.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester - legacy version"
 
   CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
                  "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
@@ -641,7 +641,6 @@ Section "Uninstall"
   nsExec::Exec '"taskkill" "/f" "/im" "safir_control.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_control_cli.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_control_gui.exe"'
-  nsExec::Exec '"taskkill" "/f" "/im" "safir_entity_viewer.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_memory_allocator.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_resolver.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_show_config.exe"'

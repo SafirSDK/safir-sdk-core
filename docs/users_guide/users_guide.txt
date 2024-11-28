@@ -4589,6 +4589,9 @@ Safir SDK Core contains some tools that are useful for, among other things, appl
 === Sate
 There is an application in Safir SDK Core, Sate (stands for _Safir Application Tester_), which is very useful for testing applications that use the Dob. In short it is a GUI application that allows you to perform most operations that the Dob provides interactively.
 
+Sate has recently (as of version 7.3.3) had a major rewrite. The old version is now
+called sate_legacy, in case you want to use it instead.
+
 For example, you can set up a subscription to an entity, register entity handlers and set entity instances. You can subscribe to and send messages etc. This can be very useful for interacting with an application, for example before the real HMI is implemented fully, or pretending to be another application that your application communicates with.
 
 <<sate_overview>> shows Sate with the Safir.Application.BackdoorCommandMessage opened. All the Dob classes are listed in the left sidebar, where you can right-click to get operations you can do on the types. The right sidebar contains operations you can do on the object opened.
@@ -4628,19 +4631,6 @@ image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", width="
 endif::backend-docbook5[]
 ifndef::backend-docbook5[]
 image::images/dobexplorer_nodes.png["Dobexplorer showing node statuses", link="images/dobexplorer_nodes.png"]
-endif::backend-docbook5[]
-
-=== Entity Viewer
-
-The +safir_entity_viewer+ tool is provided as a way to quickly show many instances of one entity, in a table form.
-
-[[entity_viewer]]
-.Entity Viewer screen shot
-ifdef::backend-docbook5[]
-image::images/entity_viewer.png["Entity Viewer Screen shot", width="60%"]
-endif::backend-docbook5[]
-ifndef::backend-docbook5[]
-image::images/entity_viewer.png["Entity Viewer Screen shot", link="images/entity_viewer.png"]
 endif::backend-docbook5[]
 
 === Tool Launcher

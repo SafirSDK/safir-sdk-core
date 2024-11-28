@@ -15,7 +15,6 @@ set (USERS_GUIDE_DIAS
 
 set (USERS_GUIDE_PNGS
   images/dispatching_sequence_diagram.png
-  images/entity_viewer.png
   images/redundancy_sequence_diagram.png
   images/vehicleapp_class_diagram.png
   images/vehiclemmi_class_diagram.png
