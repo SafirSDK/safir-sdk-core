@@ -110,7 +110,6 @@ namespace Com
         std::string DataAddress() const {return m_me.dataAddress;}
 
     private:
-        ::google::protobuf::LogSilencer m_disableProtobufLogs;
         std::string m_logPrefix;
         std::atomic<bool> m_running;
         boost::asio::io_context& m_ioContext;

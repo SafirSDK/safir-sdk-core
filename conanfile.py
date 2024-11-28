@@ -114,7 +114,7 @@ class SafirSdkCoreConan(ConanFile):
     def requirements(self):
         self.requires("websocketpp/0.8.2")
         self.requires("rapidjson/cci.20230929")
-        self.requires("protobuf/3.21.12")
+        self.requires("protobuf/5.27.0")
         self.requires("ninja/1.12.1")
         self.requires("qt-advanced-docking-system/4.3.1")
         if self.settings.os == "Windows":
@@ -123,7 +123,7 @@ class SafirSdkCoreConan(ConanFile):
             if self.settings.compiler.version == 190:
                self.requires("boost/1.83.0")
             else:
-                self.requires("boost/1.85.0")
+                self.requires("boost/1.86.0")
 
             #Visual Studio 2015 and 2017 does not have support for c++17, which is required
             #by qt6. So we go for qt5 instead there.

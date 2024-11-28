@@ -21,13 +21,14 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include "CommunicationImpl.h"
+
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/Expansion.h>
 #include "Parameters.h"
-#include "CommunicationImpl.h"
 #include "Message.h"
 
 namespace Safir
@@ -68,8 +69,7 @@ namespace
                                          bool isControlInstance,
                                          const NodeTypeMap& nodeTypes,
                                          int fragmentSize)
-        :m_disableProtobufLogs()
-        ,m_logPrefix(Parameters::LogPrefix)
+        :m_logPrefix(Parameters::LogPrefix)
         ,m_running(false)
         ,m_ioContext(ioContext)
         ,m_receiveStrand(ioContext)
