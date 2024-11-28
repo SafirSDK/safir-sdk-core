@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <atomic>
 #include <QObject>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Consumer.h>
