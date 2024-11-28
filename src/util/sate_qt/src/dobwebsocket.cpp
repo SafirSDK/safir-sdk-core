@@ -64,8 +64,8 @@ namespace
         }
     }
 
-    template <class T>
-    T JsonToHash(const QJsonValueConstRef& val)
+    template <class T, class U>
+    T JsonToHash(const U& val)
     {
         if (val.isString())
         {
