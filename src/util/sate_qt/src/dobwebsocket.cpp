@@ -71,7 +71,7 @@ namespace
         {
             return T(val.toString().toStdWString());
         }
-        return T(val.toInteger());
+        return T(val.toInt());
     }
 
     QUrl ToUrl(const QString& address, int port)
