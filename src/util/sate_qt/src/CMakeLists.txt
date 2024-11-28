@@ -26,7 +26,6 @@ set(sources
     dobnative.cpp
     dobwebsocket.cpp
     iconfactory.cpp
-    receivedmodel.cpp
     dobobjectdelegate.cpp
     valueinput.cpp
     operationswidget.cpp
@@ -52,7 +51,6 @@ set(widget_headers
     dobnative.h
     dobwebsocket.h
     dobinterface.h
-    receivedmodel.h
     dobobjectdelegate.h
     valueinput.h
     operationswidget.h

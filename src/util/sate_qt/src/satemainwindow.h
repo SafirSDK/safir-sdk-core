@@ -60,7 +60,6 @@ private slots:
                                      const bool includeSubclasses);
     void OnConnectedToDob(const QString& connectionName);
     void OnConnectionClosed();
-    void OnReceivedTableDoubleClicked(const QModelIndex& ix);
     void OnOpenObjectEdit(const int64_t typeId);
     void OnOpenObjectEditWithInstance(int64_t typeId,
                                       QString channelHandler,
@@ -96,7 +95,6 @@ private:
     ConnectDialog* m_connectDialog;
 
     TypesystemWidget* m_typesystem;
-    QTableView* m_received;
     QTextBrowser* m_output;
     QStringList m_pendingOutput;
 

@@ -28,7 +28,6 @@
 #include "dobhandler.h"
 #include "dobwebsocket.h"
 #include "instanceswidget.h"
-#include "receivedmodel.h"
 #include "typesystemwidget.h"
 #include "connectdialog.h"
 
@@ -114,25 +113,6 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     connect(m_typesystem, &TypesystemWidget::OpenEntityInstanceViewer, this, &SateMainWindow::OnOpenEntityInstanceViewer);
     connect(m_typesystem, &TypesystemWidget::OpenMessageInstanceViewer, this, &SateMainWindow::OnOpenMessageInstanceViewer);
     connect(m_typesystem, &TypesystemWidget::OpenDouFile, this, &SateMainWindow::OnOpenDouFile);
-
-    // Received table
-    m_received = new QTableView();
-    m_received->setModel(new ReceivedModel(&m_dob, m_received));
-    m_received->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    m_received->setColumnWidth(1, 250);
-    m_received->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-    m_received->setColumnWidth(3, 250);
-    m_received->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    m_received->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
-    m_received->setSelectionBehavior(QAbstractItemView::SelectRows);
-
-    connect(m_received, &QTableView::doubleClicked, this, &SateMainWindow::OnReceivedTableDoubleClicked);
-
-    auto* receivedDock = new ads::CDockWidget("Received");
-    receivedDock->setWidget(m_received);
-    receivedDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
-    m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, receivedDock);
-    ui->menuView->addAction(receivedDock->toggleViewAction());
 
     // Output window
     m_output = new QTextBrowser(this);
@@ -308,25 +288,6 @@ void SateMainWindow::OnConnectionClosed()
     style()->unpolish(m_connectedLabel);
     style()->polish(m_connectedLabel);
 
-}
-
-void SateMainWindow::OnReceivedTableDoubleClicked(const QModelIndex& ix)
-{
-    if (!ix.isValid())
-    {
-        return;
-    }
-
-    const auto recvObjItem =
-        static_cast<ReceivedModel*>(m_received->model())->ReadItem(ix.row());
-
-    if (recvObjItem.object)
-    {
-        OnOpenObjectEditWithInstance(recvObjItem.typeId,
-                                     recvObjItem.channelHandler,
-                                     recvObjItem.instance,
-                                     recvObjItem.object);
-    }
 }
 
 void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
@@ -608,12 +569,10 @@ void SateMainWindow::OnResetWindows()
         if (dockName == "Output")
         {
             output = dock;
-            //m_dockManager->addDockWidget(ads::BottomDockWidgetArea, dock);
         }
         else if (dockName == "Typesystem")
         {
             typesystem = dock;
-            //m_dockManager->addDockWidget(ads::LeftDockWidgetArea, dock);
         }
         else
         {
