@@ -5,7 +5,7 @@ endif()
 FILE(GLOB sources *.cs)
 FILE(GLOB resx_files *.resx)
 
-ADD_CSHARP_ASSEMBLY(sate WINEXE
+ADD_CSHARP_ASSEMBLY(sate_legacy WINEXE
   SIGN ${safir-sdk-core_SOURCE_DIR}/src/cmake/safirkey.snk
   ICON sate_logo.ico
   SOURCES ${sources}
@@ -19,4 +19,4 @@ ADD_CSHARP_ASSEMBLY(sate WINEXE
       System.Xml
       System.Xml.Serialization)
 
-SAFIR_INSTALL(TARGETS sate COMPONENT Tools)
+SAFIR_INSTALL(TARGETS sate_legacy COMPONENT Tools)

@@ -9,7 +9,7 @@ if (NOT ASCIIDOCTOR_FOUND)
 endif()
 
 add_asciidoctor_manpage(sate.1 COMPONENT Tools)
-add_asciidoctor_manpage(sate_next.1 COMPONENT Tools)
+add_asciidoctor_manpage(sate_legacy.1 COMPONENT Tools)
 add_asciidoctor_manpage(dose_main.1 COMPONENT Runtime)
 add_asciidoctor_manpage(dope_main.1 COMPONENT Runtime)
 add_asciidoctor_manpage(dope_bin2xml.1 COMPONENT Runtime)

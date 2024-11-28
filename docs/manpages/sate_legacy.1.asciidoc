@@ -1,20 +1,21 @@
-SATE(1)
-=======
+SATE_LEGACY(1)
+==============
 :doctype: manpage
 
 
 NAME
 ----
-sate_next - Safir Application Tester Next Generation
+sate_legacy - Safir Application Tester
 
 
 SYNOPSIS
 --------
-*sate*
+*sate_legacy*
 
 DESCRIPTION
 -----------
 Sate is a tool for testing Safir applications. It can be used to perform most operations on Dob objects.
+This is the unmaintained, deprecated legacy version.
 
 
 RESOURCES
@@ -24,6 +25,6 @@ Web site: <http://www.safirsdkcore.com/>
 
 COPYING
 -------
-Copyright \(C) 2004-2024 Saab AB. Free use of this software is granted under
+Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
 the terms of the GNU General Public License Version 3 (GPL-3).
 

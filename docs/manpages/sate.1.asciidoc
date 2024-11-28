@@ -5,7 +5,7 @@ SATE(1)
 
 NAME
 ----
-sate - Safir Application Tester
+sate - Safir Application Tester Next Generation
 
 
 SYNOPSIS
@@ -24,6 +24,6 @@ Web site: <http://www.safirsdkcore.com/>
 
 COPYING
 -------
-Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
+Copyright \(C) 2024 Saab AB. Free use of this software is granted under
 the terms of the GNU General Public License Version 3 (GPL-3).
 

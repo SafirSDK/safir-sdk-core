@@ -86,9 +86,9 @@ QT_ADD_RESOURCES(rcc_sources
   style/customizations/customizations.qrc
 )
 
-ADD_EXECUTABLE(sate_next WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} ${rcc_sources})
+ADD_EXECUTABLE(sate WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} ${rcc_sources})
 
-TARGET_LINK_LIBRARIES(sate_next PRIVATE
+TARGET_LINK_LIBRARIES(sate PRIVATE
   douf_time_cpp
   lluf_internal
   lluf_crash_reporter
@@ -101,4 +101,4 @@ TARGET_LINK_LIBRARIES(sate_next PRIVATE
   Qt::WebSockets
   Qt::Widgets)
 
-SAFIR_INSTALL(TARGETS sate_next COMPONENT Tools)
+SAFIR_INSTALL(TARGETS sate COMPONENT Tools)
