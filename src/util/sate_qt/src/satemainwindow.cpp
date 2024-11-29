@@ -464,7 +464,7 @@ void SateMainWindow::OnInfo(const QString& info, const QtMsgType msgType)
 
     if (startTimer)
     {
-        QTimer::singleShot(std::chrono::milliseconds(200),
+        QTimer::singleShot(300, //milliseconds
                            [this]
                            {
                                m_output->setUpdatesEnabled(false);
