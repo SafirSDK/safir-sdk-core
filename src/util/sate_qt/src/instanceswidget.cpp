@@ -126,6 +126,19 @@ InstancesWidget::InstancesWidget(QWidget* parent)
     connect(m_table, &QTableView::doubleClicked, this, &InstancesWidget::OnDoubleClicked);
     connect(m_table->horizontalHeader(), &QWidget::customContextMenuRequested, this, &InstancesWidget::OnCustomContextMenuRequestedHeader);
     connect(m_table, &QWidget::customContextMenuRequested, this, &InstancesWidget::OnCustomContextMenuRequestedTable);
+
+    QMetaObject::invokeMethod(this,[this]
+        {
+            for (int i = 0; i < m_table->horizontalHeader()->count(); ++i)
+            {
+                auto data = m_proxyModel->headerData(i,Qt::Horizontal, InstancesModelUtils::HideColumnByDefaultRole);
+                if (data.isValid() && data.toBool())
+                {
+                    m_table->hideColumn(i);
+                }
+            }
+        },
+        Qt::QueuedConnection);
 }
 
 InstancesWidget::InstancesWidget(DobHandler* dob,
@@ -140,7 +153,7 @@ InstancesWidget::InstancesWidget(DobHandler* dob,
         m_sourceModelEntities = new EntityInstancesModel(dob, typeId, includeSubclasses, this);
         m_proxyModel = new ColumnSortFilterProxyModel(this);
         m_proxyModel->setSourceModel(m_sourceModelEntities);
-        m_proxyModel->setFilterRole(EntityInstancesModel::FilterRole);
+        m_proxyModel->setFilterRole(InstancesModelUtils::FilterRole);
         m_table->setModel(m_proxyModel);
 
         connect(m_sourceModelEntities,&EntityInstancesModel::statusBarInfoChanged,
@@ -169,7 +182,7 @@ InstancesWidget::InstancesWidget(DobHandler* dob,
         m_sourceModelMessages = new MessageInstancesModel(dob, typeId, channel, includeSubclasses, this);
         m_proxyModel = new ColumnSortFilterProxyModel(this);
         m_proxyModel->setSourceModel(m_sourceModelMessages);
-        m_proxyModel->setFilterRole(MessageInstancesModel::FilterRole);
+        m_proxyModel->setFilterRole(InstancesModelUtils::FilterRole);
         m_table->setModel(m_proxyModel);
 
         connect(m_sourceModelMessages,&MessageInstancesModel::statusBarInfoChanged,
@@ -313,11 +326,16 @@ void InstancesWidget::OnCustomContextMenuRequestedTable(const QPoint& pos)
 void InstancesWidget::RunColumnContextMenu(const QPoint& globalPos, const int logicalIndex)
 {
     QMenu menu(this);
+    auto* resizeColumnAction = new QAction(tr("Resize this column to contents"));
+    auto* resizeAllColumnAction = new QAction(tr("Resize all columns to contents"));
     auto* hideAction = new QAction(tr("Hide this column"));
     auto* showAllAction = new QAction(tr("Show all columns"));
     auto* hideAllAction = new QAction(tr("Hide all columns"));
     if (logicalIndex != -1)
     {
+        menu.addAction(resizeColumnAction);
+        menu.addAction(resizeAllColumnAction);
+        menu.addSeparator();
         menu.addAction(hideAction);
         menu.addSeparator();
     }
@@ -339,6 +357,14 @@ void InstancesWidget::RunColumnContextMenu(const QPoint& globalPos, const int lo
     if (chosenAction == nullptr)
     {
         return;
+    }
+    else if (chosenAction == resizeColumnAction)
+    {
+        m_table->resizeColumnToContents(logicalIndex);
+    }
+    else if (chosenAction == resizeAllColumnAction)
+    {
+        m_table->resizeColumnsToContents();
     }
     else if (chosenAction == hideAction)
     {

@@ -156,7 +156,7 @@ int ColumnInfo::DefaultColumnWidth() const
     case TypeName:
     case InstanceId:
     case ChannelId:
-        return 150;
+        return 180;
     case Timestamp:
         return 100;
     case Member:
@@ -171,7 +171,7 @@ int ColumnInfo::DefaultColumnWidth() const
         return 320;
     case TypeIdMemberType:
     case InstanceIdMemberType:
-        return 150;
+        return 180;
     case Int32MemberType:
     case Int64MemberType:
         return 100;

@@ -40,8 +40,6 @@ class MessageInstancesModel
 {
     Q_OBJECT
 public:
-    enum {FilterRole = Qt::UserRole};
-
     MessageInstancesModel(DobHandler* dob,
                           const Safir::Dob::Typesystem::TypeId typeId,
                           const Safir::Dob::Typesystem::ChannelId& channel,

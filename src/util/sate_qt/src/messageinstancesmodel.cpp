@@ -63,7 +63,7 @@ MessageInstancesModel::Info MessageInstancesModel::getRow(int row) const
 QStringList MessageInstancesModel::statusBarInfo() const
 {
     return {(m_includeSubclasses?"Recursive":""),
-            tr("Received: %1").arg(m_messages.size()),
+            tr("Showing: %1").arg(m_messages.size()),
             tr("Total: %1").arg(m_numReceived),
             (m_messages.size() >= m_maxRows?"Discarding":"")};
 }
@@ -92,6 +92,8 @@ QVariant MessageInstancesModel::headerData(const int section, const Qt::Orientat
                 return columnInfo->Name();
             case Qt::SizeHintRole:
                 return QSize(columnInfo->DefaultColumnWidth(), 20);
+            case HideColumnByDefaultRole:
+                return columnInfo->HiddenByDefault();
             }
         }
     }

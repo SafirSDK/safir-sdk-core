@@ -32,6 +32,9 @@
 class InstancesModelUtils
 {
 public:
+    enum InstancesModelRoles {FilterRole = Qt::UserRole, HideColumnByDefaultRole};
+
+
     static void AddMembers(const int64_t typeId, ColumnInfoList& columnInfoList);
 
     static QVariant MemberToQVariant(const Safir::Dob::Typesystem::ObjectPtr& object,

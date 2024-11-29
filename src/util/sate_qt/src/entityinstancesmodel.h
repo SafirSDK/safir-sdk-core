@@ -39,8 +39,6 @@ class EntityInstancesModel
 {
     Q_OBJECT
 public:
-    enum {FilterRole = Qt::UserRole};
-
     EntityInstancesModel(DobHandler* dob,
                          const Safir::Dob::Typesystem::TypeId typeId,
                          bool includeSubclasses,
