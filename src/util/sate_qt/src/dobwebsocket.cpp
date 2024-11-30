@@ -906,8 +906,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
     {
         auto channel = JsonToHash<sdt::ChannelId>(p["channelId"]);
         auto message = std::dynamic_pointer_cast<Safir::Dob::Message>(ToObjectPtr(p["message"].toObject()));
-        emit DobInterface::Info("Received message: " + Str(message->GetTypeId()), QtInfoMsg);
-        emit DobInterface::OnMessage(message->GetTypeId(), channel, message);
+        emit DobInterface::OnMessage(channel, message);
 
     }
     else if (method == "onUpdatedEntity")
@@ -915,7 +914,6 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         sdt::EntityId eid(entity->GetTypeId(), instance);
-        emit DobInterface::Info("Received updated entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::UpdatedEntity);
 
     }
@@ -924,7 +922,6 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         sdt::EntityId eid(entity->GetTypeId(), instance);
-        emit DobInterface::Info("Received new entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::NewEntity);
     }
     else if (method == "onDeletedEntity")
@@ -932,7 +929,6 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         sdt::EntityId eid(entity->GetTypeId(), instance);
-        emit DobInterface::Info("Received deleted entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), nullptr, DobInterface::DeletedEntity);
     }
     else if (method == "onUpdateRequest")
@@ -941,8 +937,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
 
-        emit DobInterface::Info("Received update request: " + Str(entity->GetTypeId()) + ", instance=" + Str(instance.ToString()), QtInfoMsg);
-        emit DobInterface::OnRequest(entity, DobInterface::UpdateEntity);
+        emit DobInterface::OnUpdateRequest(entity, handler, instance);
 
         SetChanges(entity, instance, handler);
 
@@ -959,8 +954,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
 
-        emit DobInterface::Info("Received create request: " + Str(entity->GetTypeId()) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
-        emit DobInterface::OnRequest(entity, DobInterface::CreateEntity);
+        emit DobInterface::OnCreateRequest(entity, handler, instance);
 
         SetAll(entity, instance, handler);
 
@@ -977,9 +971,9 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         sdt::EntityId eid(typeId, instance);
-        // Response
 
-        emit DobInterface::Info("Received delete request: " + Str(eid.ToString()), QtInfoMsg);
+        emit DobInterface::OnDeleteRequest(eid, handler);
+
         Delete(eid, handler);
 
         // Create response
@@ -994,8 +988,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto request = std::dynamic_pointer_cast<Safir::Dob::Service>(ToObjectPtr(p["request"].toObject()));
 
-        emit DobInterface::Info("Received service request: " + Str(request->GetTypeId()), QtInfoMsg);
-        emit DobInterface::OnRequest(request, DobInterface::Service);
+        emit DobInterface::OnServiceRequest(request, handler);
 
         // Create response
         auto success = Safir::Dob::SuccessResponse::Create();

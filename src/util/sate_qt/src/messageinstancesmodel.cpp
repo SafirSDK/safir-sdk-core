@@ -160,10 +160,10 @@ void MessageInstancesModel::setupColumns()
     AddMembers(m_typeId, m_columnInfoList);
 }
 
-void MessageInstancesModel::OnMessage(const int64_t typeId,
-                                      const sdt::ChannelId& channel,
+void MessageInstancesModel::OnMessage(const sdt::ChannelId& channel,
                                       const Safir::Dob::MessagePtr& message)
 {
+    auto typeId = message->GetTypeId();
     if (!m_includeSubclasses && typeId != m_typeId)
     {
         //not a type we're looking for

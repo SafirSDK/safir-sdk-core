@@ -23,26 +23,6 @@
 ******************************************************************************/
 #include "iconfactory.h"
 
-namespace
-{
-QString Prefix(bool subscriberMark, bool registationMark)
-{
-    if (subscriberMark && registationMark)
-    {
-        return "_sr.png";
-    }
-    else if (subscriberMark)
-    {
-        return "_s.png";
-    }
-    else if (registationMark)
-    {
-        return "_r.png";
-    }
-    return ".png";
-}
-}
-
 void IconFactory::LoadIcons()
 {
     // TODO: cache icons
@@ -58,16 +38,16 @@ QIcon IconFactory::GetEnumIcon()
     return QIcon(":/img/icons/enum_orange.png");
 }
 
-QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass, bool subscriberMark, bool registationMark)
+QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass)
 {
     switch (baseClass)
     {
     case TypesystemRepository::Entity:
-        return QIcon(":/img/icons/entity_orange" + Prefix(subscriberMark, registationMark));
+        return QIcon(":/img/icons/entity_orange");
     case TypesystemRepository::Message:
-        return QIcon(":/img/icons/message_orange" + Prefix(subscriberMark, registationMark));
+        return QIcon(":/img/icons/message_orange");
     case TypesystemRepository::Service:
-        return QIcon(":/img/icons/gear_orange" + Prefix(subscriberMark, registationMark));
+        return QIcon(":/img/icons/gear_orange");
     case TypesystemRepository::Response:
         return QIcon(":/img/icons/response_orange.png");
     case TypesystemRepository::Parametrization:

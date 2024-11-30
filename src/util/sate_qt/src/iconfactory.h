@@ -33,7 +33,7 @@ public:
     static void LoadIcons();
     static QIcon GetNamespaceIcon();
     static QIcon GetEnumIcon();
-    static QIcon GetIcon(TypesystemRepository::DobBaseClass baseClass, bool subscriberMark, bool registationMark);
+    static QIcon GetIcon(TypesystemRepository::DobBaseClass baseClass);
 
 private:
     static std::map<QString, QIcon> m_icons;

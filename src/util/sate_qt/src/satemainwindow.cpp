@@ -26,7 +26,7 @@
 #include "typesystemrepository.h"
 #include "dobobjecteditwidget.h"
 #include "dobhandler.h"
-#include "dobwebsocket.h"
+#include "outputwidget.h"
 #include "instanceswidget.h"
 #include "typesystemwidget.h"
 #include "connectdialog.h"
@@ -106,7 +106,6 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->statusbar->addPermanentWidget(m_connectedLabel);
     ui->statusbar->addPermanentWidget(m_instanceLabel);
     OnConnectionClosed(); //set the status bar correctly
-    OnInfo("Trying to connect to DOB...", QtInfoMsg);
 
     // TypesystemWidget signal handling
     connect(m_typesystem, &TypesystemWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEdit);
@@ -115,19 +114,13 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     connect(m_typesystem, &TypesystemWidget::OpenDouFile, this, &SateMainWindow::OnOpenDouFile);
 
     // Output window
-    m_output = new QTextBrowser(this);
-#if 0
-    m_output->setReadOnly(true);
-    m_output->setUndoRedoEnabled(false);
-    m_output->setAcceptRichText(false);
-    m_output->setOpenLinks(false);
-#endif
+    m_output = new OutputWidget(&m_dob, this);
     auto* outputDock = new ads::CDockWidget("Output", this);
     outputDock->setWidget(m_output);
     outputDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, outputDock);
     ui->menuView->addAction(outputDock->toggleViewAction());
-    connect(&m_dob, &DobHandler::Info, this, &SateMainWindow::OnInfo);
+    connect(m_output ,&OutputWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEditWithInstance);
 
     // Connection menu
     connect(ui->actionDisconnect, &QAction::triggered, this, [this]{ m_dob.Close(); });
@@ -207,7 +200,7 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
         if (dock->property("includeSubclasses").toBool() != includeSubclasses)
         {
             m_dockManager->removeDockWidget(dock);
-            OnInfo("Closed a previous viewer for the same type but with different recursiveness.", QtWarningMsg);
+            m_output->OnInfo("Closed a previous viewer for the same type but with different recursiveness.", QtWarningMsg);
         }
         else
         {
@@ -268,7 +261,7 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
 void SateMainWindow::OnConnectedToDob(const QString& connectionName)
 {
     QString msg = tr("Connected as %1").arg(connectionName);
-    OnInfo(msg,QtInfoMsg);
+    m_output->OnInfo(msg,QtInfoMsg);
     m_connectedLabel->setText(tr("Connected"));
     m_connectedLabel->setObjectName("ConnectedLabelConnected");
     m_connectedLabel->setToolTip(tr("Connection name: %1").arg(connectionName));
@@ -419,61 +412,6 @@ void SateMainWindow::OnLightMode()
         ads.open(QFile::ReadOnly | QFile::Text);
         QTextStream ts(&ads);
         m_dockManager->setStyleSheet(ts.readAll());
-    }
-}
-
-void SateMainWindow::OnInfo(const QString& info, const QtMsgType msgType)
-{
-    const bool startTimer = m_pendingOutput.empty();
-
-    QStringList line;
-    line += "<i style='color:grey'>" + QDateTime::currentDateTime().toString("hh:mm:ss") + "</i>: ";
-    switch (msgType)
-    {
-    case QtDebugMsg:
-    case QtInfoMsg:
-        break;
-    case QtWarningMsg:
-        line+="<b>";
-        break;
-    case QtCriticalMsg:
-    case QtFatalMsg:
-        line+="<span style='color:red'>";
-        break;
-    }
-
-    line += info;
-
-        switch (msgType)
-    {
-    case QtDebugMsg:
-    case QtInfoMsg:
-        break;
-    case QtWarningMsg:
-        line+="</b>";
-        break;
-    case QtCriticalMsg:
-    case QtFatalMsg:
-        line+="</span>";
-        break;
-    }
-
-    line += "<br>";
-
-    m_pendingOutput += line.join("");
-
-    if (startTimer)
-    {
-        QTimer::singleShot(300, //milliseconds
-                           [this]
-                           {
-                               m_output->setUpdatesEnabled(false);
-                               m_output->insertHtml(m_pendingOutput.join("\n"));
-                               m_output->setUpdatesEnabled(true);
-                               m_pendingOutput.clear();
-                               auto *sb = m_output->verticalScrollBar();
-                               sb->setValue(sb->maximum());
-                           });
     }
 }
 

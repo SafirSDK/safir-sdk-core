@@ -69,8 +69,7 @@ private:
     void setupColumns();
 
 private slots:
-    void OnMessage(const int64_t typeId,
-                   const sdt::ChannelId& channel,
+    void OnMessage(const sdt::ChannelId& channel,
                    const Safir::Dob::MessagePtr& message);
 
 private:

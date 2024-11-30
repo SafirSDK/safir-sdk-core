@@ -166,7 +166,7 @@ QVariant TypesystemNamespaceModel::data(const QModelIndex &index, int role) cons
     {
         switch (du->category)
         {
-        case TypesystemRepository::Class: return IconFactory::GetIcon(static_cast<const TypesystemRepository::DobClass*>(du)->dobBaseClass, false, false);
+        case TypesystemRepository::Class: return IconFactory::GetIcon(static_cast<const TypesystemRepository::DobClass*>(du)->dobBaseClass);
         case TypesystemRepository::Enum: return IconFactory::GetEnumIcon();
         case TypesystemRepository::Namespace: return IconFactory::GetNamespaceIcon();
         default: return {};

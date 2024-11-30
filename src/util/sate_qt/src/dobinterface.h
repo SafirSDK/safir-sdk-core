@@ -25,6 +25,7 @@
 
 #include <QObject>
 #include <Safir/Dob/Typesystem/ChannelId.h>
+#include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Response.h>
@@ -39,7 +40,6 @@ class DobInterface : public QObject
     Q_OBJECT
 public:
     enum EntityOperation { NewEntity, UpdatedEntity, DeletedEntity};
-    enum RequestCategory { CreateEntity, UpdateEntity, DeleteEntity, Service};
 
     struct RegistrationInfo
     {
@@ -102,10 +102,14 @@ signals:
     void ConnectedToDob(const QString& connectionName);
     void ConnectionClosed();
 
-    void OnMessage(int64_t typeId, const sdt::ChannelId& channel, const Safir::Dob::MessagePtr& message);
+    void OnMessage(const sdt::ChannelId& channel, const Safir::Dob::MessagePtr& message);
     void OnEntity(const sdt::EntityId& entityId, const sdt::HandlerId& handler, const Safir::Dob::EntityPtr& entity, EntityOperation operation);
     void OnResponse(const Safir::Dob::ResponsePtr& response);
-    void OnRequest(const Safir::Dob::Typesystem::ObjectPtr request, RequestCategory category);
+
+    void OnCreateRequest(const Safir::Dob::EntityPtr& request, const sdt::HandlerId& handler, const sdt::InstanceId& instance);
+    void OnUpdateRequest(const Safir::Dob::EntityPtr& request, const sdt::HandlerId& handler, const sdt::InstanceId& instance);
+    void OnDeleteRequest(const Safir::Dob::Typesystem::EntityId& entityId, const sdt::HandlerId& handler);
+    void OnServiceRequest(const Safir::Dob::ServicePtr& request, const sdt::HandlerId& handler);
 
     void SubscriptionStarted(const DobInterface::SubscriptionInfo& info);
     void SubscriptionStopped(int64_t typeId);

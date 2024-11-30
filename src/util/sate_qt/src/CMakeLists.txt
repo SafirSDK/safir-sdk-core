@@ -9,6 +9,7 @@ set(ui
     operationswidget.ui
     registerhandlerdialog.ui
     connectdialog.ui
+    outputwidget.ui
 )
 
 set(sources
@@ -37,6 +38,7 @@ set(sources
     entityinstancesmodel.cpp
     messageinstancesmodel.cpp
     columninfo.cpp
+    outputwidget.cpp
 )
 
 set(widget_headers
@@ -60,6 +62,7 @@ set(widget_headers
     entityinstancesmodel.h
     messageinstancesmodel.h
     columninfo.h
+    outputwidget.h
   )
 
 set(headers

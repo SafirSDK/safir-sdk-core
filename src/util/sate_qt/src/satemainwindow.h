@@ -42,6 +42,7 @@ class TypesystemWidget;
 class QTextBrowser;
 class InstancesWidget;
 class ConnectDialog;
+class OutputWidget;
 
 namespace Ui { class SateMainWindow; }
 
@@ -66,7 +67,6 @@ private slots:
                                       int64_t instance,
                                       const Safir::Dob::Typesystem::ObjectPtr& object);
     void OnOpenDouFile(const int64_t typeId);
-    void OnInfo(const QString& info, const QtMsgType msgType);
     void OnDarkMode();
     void OnLightMode();
     void OnFocusedDockWidgetChanged(ads::CDockWidget* old, ads::CDockWidget* now);
@@ -95,8 +95,7 @@ private:
     ConnectDialog* m_connectDialog;
 
     TypesystemWidget* m_typesystem;
-    QTextBrowser* m_output;
-    QStringList m_pendingOutput;
+    OutputWidget* m_output;
 
     QList<QLabel*> m_statusBarLabels;
     QList<QWidget*> m_statusBarSeparators;

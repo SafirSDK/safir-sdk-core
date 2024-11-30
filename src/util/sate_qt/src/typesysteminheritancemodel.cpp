@@ -188,7 +188,7 @@ QVariant TypesystemInheritanceModel::data(const QModelIndex &index, int role) co
             return ptr->name;
 
         case Qt::DecorationRole:
-            return IconFactory::GetIcon(ptr->dobBaseClass, false, false);
+            return IconFactory::GetIcon(ptr->dobBaseClass);
 
         case TypesystemRepository::DobBaseClassRole:
             return ptr->dobBaseClass;

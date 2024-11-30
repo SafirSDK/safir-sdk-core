@@ -20,19 +20,13 @@
         <file>icons/item.png</file>
         <file>icons/item_orange.png</file>
         <file>icons/sate.png</file>
-        <file>icons/entity_orange_r.png</file>
-        <file>icons/entity_orange_s.png</file>
-        <file>icons/entity_orange_sr.png</file>
-        <file>icons/gear_orange_r.png</file>
-        <file>icons/gear_orange_s.png</file>
-        <file>icons/gear_orange_sr.png</file>
-        <file>icons/message_orange_r.png</file>
-        <file>icons/message_orange_s.png</file>
-        <file>icons/message_orange_sr.png</file>
         <file>icons/instance_viewer.png</file>
         <file>icons/instance_viewer_recursive.png</file>
         <file>icons/enum.png</file>
         <file>icons/enum_orange.png</file>
         <file>icons/window_reset.png</file>
+        <file>icons/error.png</file>
+        <file>icons/bug.png</file>
+        <file>icons/info.png</file>
     </qresource>
 </RCC>

@@ -34,6 +34,7 @@ public:
     DobHandler();
 
     bool IsOpen() const;
+    bool IsNativeConnection() const; // True if open connection is native Dob, false if WS connection
 
     void OpenNativeConnection(const QString& name, int context);
     void OpenWebsocketConnection(const QString& address, int port, const QString& name, int context);
@@ -72,10 +73,14 @@ signals:
     void ConnectedToDob(const QString& connectionName);
     void ConnectionClosed();
 
-    void OnMessage(int64_t typeId, const sdt::ChannelId& channel, const Safir::Dob::MessagePtr& message);
+    void OnMessage(const sdt::ChannelId& channel, const Safir::Dob::MessagePtr& message);
     void OnEntity(const sdt::EntityId& entityId, const sdt::HandlerId& handler, const Safir::Dob::EntityPtr& entity, DobInterface::EntityOperation operation);
     void OnResponse(const Safir::Dob::ResponsePtr& response);
-    void OnRequest(const Safir::Dob::Typesystem::ObjectPtr request, DobInterface::RequestCategory category);
+
+    void OnCreateRequest(const Safir::Dob::EntityPtr& request, const sdt::HandlerId& handler, const sdt::InstanceId& instance);
+    void OnUpdateRequest(const Safir::Dob::EntityPtr& request, const sdt::HandlerId& handler, const sdt::InstanceId& instance);
+    void OnDeleteRequest(const Safir::Dob::Typesystem::EntityId& entityId, const sdt::HandlerId& handler);
+    void OnServiceRequest(const Safir::Dob::ServicePtr& request, const sdt::HandlerId& handler);
 
     void SubscriptionStarted(const DobInterface::SubscriptionInfo& info);
     void SubscriptionStopped(int64_t typeId);

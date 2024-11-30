@@ -419,25 +419,24 @@ void DobNative::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityReque
     auto instance = (it != m_registrations.end() && it->instanceIdPolicy == Safir::Dob::InstanceIdPolicy::RequestorDecidesInstanceId) ?
                         entityRequestProxy.GetInstanceId() : sdt::InstanceId::GenerateRandom();
 
-    emit DobInterface::Info("Received create request: " + Str(typeId) + Str(handlerId), QtInfoMsg);
+    emit DobInterface::OnCreateRequest(entityRequestProxy.GetRequest(), handlerId, instance);
     m_dobConnection.SetAll(entityRequestProxy.GetRequest(), instance, handlerId);
-    emit DobInterface::OnRequest(entityRequestProxy.GetRequest(), DobInterface::CreateEntity);
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 }
 
 void DobNative::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
 {
-    emit DobInterface::Info("Received update request: " + Str(entityRequestProxy.GetEntityId()), QtInfoMsg);
+    auto handlerId = entityRequestProxy.GetReceivingHandlerId();
+    auto instanceId = entityRequestProxy.GetEntityId().GetInstanceId();
+    emit DobInterface::OnUpdateRequest(entityRequestProxy.GetRequest(), handlerId, instanceId);
     m_dobConnection.SetChanges(entityRequestProxy.GetRequest(), entityRequestProxy.GetInstanceId(), entityRequestProxy.GetReceivingHandlerId());
-    emit DobInterface::OnRequest(entityRequestProxy.GetRequest(), DobInterface::UpdateEntity);
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 }
 
 void DobNative::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
 {
-    emit DobInterface::Info("Received delete request: " + Str(entityRequestProxy.GetEntityId()), QtInfoMsg);
+    emit DobInterface::OnDeleteRequest(entityRequestProxy.GetEntityId(), entityRequestProxy.GetReceivingHandlerId());
     m_dobConnection.Delete(entityRequestProxy.GetEntityId(), entityRequestProxy.GetReceivingHandlerId());
-    emit DobInterface::OnRequest(entityRequestProxy.GetRequest(), DobInterface::DeleteEntity);
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 }
 
@@ -484,15 +483,13 @@ void DobNative::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId typ
 // ServiceRequestBase interface
 void DobNative::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
 {
-    emit DobInterface::Info("Received service request: " + Str(serviceRequestProxy.GetTypeId()), QtInfoMsg);
-    emit DobInterface::OnRequest(serviceRequestProxy.GetRequest(), DobInterface::Service);
+    emit DobInterface::OnServiceRequest(serviceRequestProxy.GetRequest(), serviceRequestProxy.GetReceivingHandlerId());
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 }
 
 // Requestor interface
 void DobNative::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
-{
-    emit DobInterface::Info("Received response: " + Str(responseProxy.GetTypeId()), QtInfoMsg);
+{    
     emit DobInterface::OnResponse(responseProxy.GetResponse());
 }
 
@@ -524,25 +521,21 @@ void DobNative::OnUnregistered(const Safir::Dob::Typesystem::TypeId typeId, cons
 // MessageSubscriber interface
 void DobNative::OnMessage(const Safir::Dob::MessageProxy messageProxy)
 {
-    emit DobInterface::Info("Received message: " + Str(messageProxy.GetTypeId()), QtInfoMsg);
-    emit DobInterface::OnMessage(messageProxy.GetTypeId(), messageProxy.GetChannelIdWithStringRepresentation(), messageProxy.GetMessage());
+    emit DobInterface::OnMessage(messageProxy.GetChannelIdWithStringRepresentation(), messageProxy.GetMessage());
 }
 
 // EntitySubscriber interface
 void DobNative::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 {
-    emit DobInterface::Info("Received new entity: " + Str(entityProxy.GetEntityId()), QtInfoMsg);
     emit DobInterface::OnEntity(entityProxy.GetEntityId(), entityProxy.GetOwner(), entityProxy.GetEntity(), DobInterface::NewEntity);
 }
 void DobNative::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
 {
-    emit DobInterface::Info("Received updated entity: " + Str(entityProxy.GetEntityId()), QtInfoMsg);
     emit DobInterface::OnEntity(entityProxy.GetEntityId(), entityProxy.GetOwner(), entityProxy.GetEntity(), DobInterface::UpdatedEntity);
 }
 
 void DobNative::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*deprecated*/)
 {
-    emit DobInterface::Info("Received deleted entity: " + Str(entityProxy.GetEntityId()), QtInfoMsg);
     emit DobInterface::OnEntity(entityProxy.GetEntityId(), entityProxy.GetOwner(), nullptr, DobInterface::DeletedEntity);
 }
 

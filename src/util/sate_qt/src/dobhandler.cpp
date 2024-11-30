@@ -54,7 +54,10 @@ void DobHandler::SetupSignalSlots()
         connect(m_dob.get(), &DobInterface::OnMessage, this, &DobHandler::OnMessage);
         connect(m_dob.get(), &DobInterface::OnEntity, this, &DobHandler::OnEntity);
         connect(m_dob.get(), &DobInterface::OnResponse, this, &DobHandler::OnResponse);
-        connect(m_dob.get(), &DobInterface::OnRequest, this, &DobHandler::OnRequest);
+        connect(m_dob.get(), &DobInterface::OnCreateRequest, this, &DobHandler::OnCreateRequest);
+        connect(m_dob.get(), &DobInterface::OnUpdateRequest, this, &DobHandler::OnUpdateRequest);
+        connect(m_dob.get(), &DobInterface::OnDeleteRequest, this, &DobHandler::OnDeleteRequest);
+        connect(m_dob.get(), &DobInterface::OnServiceRequest, this, &DobHandler::OnServiceRequest);
         connect(m_dob.get(), &DobInterface::SubscriptionStarted, this, &DobHandler::SubscriptionStarted);
         connect(m_dob.get(), &DobInterface::SubscriptionStopped, this, &DobHandler::SubscriptionStopped);
         connect(m_dob.get(), &DobInterface::OnRegistered, this, &DobHandler::OnRegistered);
@@ -70,6 +73,11 @@ bool DobHandler::IsOpen() const
         return false;
     }
     return m_dob->IsOpen();
+}
+
+bool DobHandler::IsNativeConnection() const
+{
+    return !m_dob || dynamic_cast<DobNative*>(m_dob.get()) != nullptr;
 }
 
 void DobHandler::OpenNativeConnection(const QString& name, int context)
