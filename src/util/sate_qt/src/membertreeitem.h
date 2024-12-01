@@ -41,8 +41,6 @@ public:
     MemberTreeItem(MemberTreeItem* parent, const TypesystemRepository::DobMember* member);
     MemberTreeItem(MemberTreeItem* parent, const TypesystemRepository::DobMember* member, const Safir::Dob::Typesystem::ContainerBase& cb);
 
-    // Members with data created from an object
-
 
     const TypesystemRepository::DobMember* GetMemberInfo() const;
     QString GetName() const;
@@ -62,6 +60,7 @@ public:
     MemberTreeItem* GetParentMember();
     int RowNumber() const; // Returns the index this item is in the parents children list
     void DeleteChild(int row);
+    void AddChild(std::unique_ptr<MemberTreeItem>&& child);
 
     // only meaningful if MemberType is Object
     void SetMemberClass(const TypesystemRepository::DobClass* c);

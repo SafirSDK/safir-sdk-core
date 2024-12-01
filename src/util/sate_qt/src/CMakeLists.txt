@@ -39,6 +39,7 @@ set(sources
     messageinstancesmodel.cpp
     columninfo.cpp
     outputwidget.cpp
+    parametersmodel.cpp
 )
 
 set(widget_headers
@@ -63,6 +64,7 @@ set(widget_headers
     messageinstancesmodel.h
     columninfo.h
     outputwidget.h
+    parametersmodel.h
   )
 
 set(headers

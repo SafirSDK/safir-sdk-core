@@ -87,7 +87,6 @@ MemberTreeItem::MemberTreeItem(MemberTreeItem* parent, const TypesystemRepositor
     {
         m_isObjectRoot = true;
     }
-
 }
 
 MemberTreeItem::MemberTreeItem(MemberTreeItem* parent, const TypesystemRepository::DobMember* member, const Safir::Dob::Typesystem::ContainerBase& cb)
@@ -290,6 +289,11 @@ void MemberTreeItem::DeleteChild(int row)
 {
     auto ix = static_cast<size_t>(row);
     m_children.erase(m_children.begin() + ix);
+}
+
+void MemberTreeItem::AddChild(std::unique_ptr<MemberTreeItem>&& child)
+{
+    m_children.emplace_back(std::move(child));
 }
 
 void MemberTreeItem::SetMemberClass(const TypesystemRepository::DobClass* c)

@@ -222,9 +222,7 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
     break;
     }
 
-
     return {};
-
 }
 
 bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, int role)
