@@ -258,7 +258,7 @@ void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const
 
 void OutputWidget::StartTimer()
 {
-    QTimer::singleShot(std::chrono::milliseconds(200), [this]
+    QTimer::singleShot(300, [this] //milliseconds
        {
            ui->output->setUpdatesEnabled(false);
            ui->output->insertHtml(m_pendingOutput.join(""));
