@@ -85,7 +85,10 @@ QModelIndex DobObjectModel::index(int row, int column, const QModelIndex &parent
     }
 
     // Not the root, i.e nested objects or a container member (array/seq/dict)
-    auto childItem = static_cast<MemberTreeItem*>(parent.internalPointer())->GetChildMember(row);
+    auto parentPtr =static_cast<MemberTreeItem*>(parent.internalPointer());
+    auto name = parentPtr->GetName();
+    auto childItem = parentPtr->GetChildMember(row);
+    //auto childItem = static_cast<MemberTreeItem*>(parent.internalPointer())->GetChildMember(row);
     if (childItem != nullptr)
     {
         return createIndex(row, column, childItem);
@@ -328,14 +331,40 @@ bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, in
         // --- Handle init object value ---
         if (item->IsObjectRootItem())
         {
-            item->SetValue(value.toString());
-            auto newChildCount = item->NumberOfChildMembers();
-            beginInsertRows(index, childCount, newChildCount - 1);
-            item->SetChanged(true);
-            endInsertRows();
-            auto valIndex = DobObjectModel::index(childCount, 1, index);
+            auto parentIndex = createIndex(index.row(), 0, index.internalPointer());
+            auto className = value.toString();
+            auto numberOfMembers = TypesystemRepository::Instance().GetClass(className)->totalNumberOfMembers;
+            if (childCount < numberOfMembers)
+            {
+                beginInsertRows(parentIndex, childCount, numberOfMembers - 1);
+                item->SetValue(className);
+                item->SetChanged(true);
+                endInsertRows();
+            }
+            else if (childCount > numberOfMembers)
+            {
+                beginRemoveRows(parentIndex, numberOfMembers, childCount - 1);
+                item->SetValue(className);
+                item->SetChanged(true);
+                endRemoveRows();
+            }
+            else
+            {
+                item->SetValue(className);
+                item->SetChanged(true);
+            }
+
             emit dataChanged(createIndex(index.row(), 0, index.internalPointer()), createIndex(index.row(), 3, index.internalPointer()), { role });
-            emit OpenEditor(valIndex);
+
+            if (numberOfMembers > 0)
+            {
+                emit dataChanged(this->index(0, 0, index), this->index(numberOfMembers-1, NumberOfColumns-1, index), { role });
+                auto valIndex = DobObjectModel::index(0, 1, index);
+                QTimer::singleShot(0, [this, valIndex]{
+                    emit OpenEditor(valIndex);
+                });
+            }
+
             return true;
         }
 

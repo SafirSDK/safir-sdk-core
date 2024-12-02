@@ -182,8 +182,10 @@ void DobObjectEditWidget::Init()
         }
     });
 
-    connect(m_sourceModel, &DobObjectModel::OpenEditor, this, [this](const QModelIndex& index)
+    connect(m_sourceModel, &DobObjectModel::OpenEditor, this, [this](const QModelIndex& srcIndex)
     {
+        auto proxyModel = static_cast<ObjectSortFilterProxyModel*>(ui->objectEditTreeView->model());
+        auto index = proxyModel->mapFromSource(srcIndex);
         // For some reason, sometimes the node we want to edit will not expand unless we do a collpse-expand before enter edit mode.
         // We also queue up the calls to let any currently open editor close before we open a new one. If not Qt outputs error messages.
         QMetaObject::invokeMethod(qApp, [this, index]{ui->objectEditTreeView->collapse(index.parent());}, Qt::QueuedConnection);
@@ -192,7 +194,9 @@ void DobObjectEditWidget::Init()
     });
 
     // Expand containers when a child item is added.
-    connect(m_sourceModel, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int /*first*/, int /*last*/){
+    connect(m_sourceModel, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &srcParent, int /*first*/, int /*last*/){
+        auto proxyModel = static_cast<ObjectSortFilterProxyModel*>(ui->objectEditTreeView->model());
+        auto parent = proxyModel->mapFromSource(srcParent);
         ui->objectEditTreeView->expand(parent);
     });
 
