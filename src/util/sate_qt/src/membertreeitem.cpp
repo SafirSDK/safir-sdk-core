@@ -101,6 +101,11 @@ const TypesystemRepository::DobMember* MemberTreeItem::GetMemberInfo() const
     return m_member;
 }
 
+void MemberTreeItem::SetMemberInfo(const TypesystemRepository::DobMember* memberInfo)
+{
+    m_member = memberInfo;
+}
+
 QString MemberTreeItem::GetName() const
 {
     return m_key.isEmpty() ? m_member->name : QString("[%1]").arg(m_key);
@@ -244,6 +249,12 @@ bool MemberTreeItem::IsContainerRootItem() const
     return m_isContainerRoot;
 }
 
+void MemberTreeItem::SetIsContainerRootItem(const QString& name)
+{
+    m_isContainerRoot = true;
+    m_value = name;
+}
+
 int MemberTreeItem::NumberOfChildMembers() const
 {
     return static_cast<int>(m_children.size());
@@ -293,6 +304,7 @@ void MemberTreeItem::DeleteChild(int row)
 
 void MemberTreeItem::AddChild(std::unique_ptr<MemberTreeItem>&& child)
 {
+    child->m_parent = this;
     m_children.emplace_back(std::move(child));
 }
 

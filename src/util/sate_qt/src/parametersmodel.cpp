@@ -25,12 +25,15 @@
 #include <QColor>
 #include <QFont>
 #include <Safir/Dob/Typesystem/Parameters.h>
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/BasicTypeOperations.h>
 #include <memory>
 
 namespace sdt = Safir::Dob::Typesystem;
 
 namespace {
-static const int NumberOfColumns = 5;
+static const int NumberOfColumns = 3;
+
+QString Str(const std::wstring& s) { return QString::fromStdWString(s); }
 }
 
 ParametersModel::ParametersModel(int64_t typeId, QObject *parent)
@@ -225,9 +228,9 @@ void ParametersModel::SetupModel()
     sdt::Int32 numberOfValues;
 
     auto num = sdt::Parameters::GetNumberOfParameters(m_typeId);
-    for (int parIx = 0; parIx < num; ++parIx)
+    for (int parameterIndex = 0; parameterIndex < num; ++parameterIndex)
     {
-        sdt::Parameters::GetInfo(m_typeId, parIx, parameterType, keyType, parameterName, parameterTypeId, keyTypeId, collectionType, numberOfValues);
+        sdt::Parameters::GetInfo(m_typeId, parameterIndex, parameterType, keyType, parameterName, parameterTypeId, keyTypeId, collectionType, numberOfValues);
 
         TypesystemRepository::DobMember m;
         m.name = QString::fromStdWString(parameterName);
@@ -238,10 +241,310 @@ void ParametersModel::SetupModel()
         m.collectionType = collectionType;
         m.arrayLength = numberOfValues;
         m_parameterMembers.push_back(m);
+        auto& memberRef = m_parameterMembers.back();
 
-        auto memberItem = std::make_unique<MemberTreeItem>(m_invisibleRootItem.get(), &m_parameterMembers.back());
-        auto mi = memberItem.get();
-        m_invisibleRootItem->AddChild(std::move(memberItem));
+        switch (m.collectionType)
+        {
+        case SingleValueCollectionType:
+        {
+            CreateItem(memberRef, parameterIndex, 0, m_invisibleRootItem.get());
+        }
+        break;
 
+        case ArrayCollectionType:
+        {
+            auto arrayRoot = std::make_unique<MemberTreeItem>(m_invisibleRootItem.get(), &memberRef);
+            arrayRoot->SetIsContainerRootItem("<array>");
+            for (int arrIx = 0; arrIx < m.arrayLength; ++arrIx)
+            {
+                CreateItem(memberRef, parameterIndex, arrIx, arrayRoot.get());
+            }
+            m_invisibleRootItem->AddChild(std::move(arrayRoot));
+        }
+        break;
+
+        case SequenceCollectionType:
+        {
+            auto seqRoot = std::make_unique<MemberTreeItem>(m_invisibleRootItem.get(), &memberRef);
+            seqRoot->SetIsContainerRootItem("<sequence>");
+            for (int arrIx = 0; arrIx < m.arrayLength; ++arrIx)
+            {
+                CreateItem(memberRef, parameterIndex, arrIx, seqRoot.get());
+            }
+            m_invisibleRootItem->AddChild(std::move(seqRoot));
+        }
+        break;
+
+        case DictionaryCollectionType:
+        {
+            using namespace Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations;
+            auto dictRoot = std::make_unique<MemberTreeItem>(m_invisibleRootItem.get(), &memberRef);
+            auto keyTypeName = IsBasicMemberType(m.keyType) ? QString::fromStdString(MemberTypeToString(m.keyType)) : QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(m.keyTypeId));
+            dictRoot->SetIsContainerRootItem(QString("<dictionary keyType=%1>").arg(keyTypeName));
+            for (int arrIx = 0; arrIx < m.arrayLength; ++arrIx)
+            {
+                CreateItem(memberRef, parameterIndex, arrIx, dictRoot.get());
+            }
+            m_invisibleRootItem->AddChild(std::move(dictRoot));
+        }
+        break;
+        }
     }
+}
+
+void ParametersModel::CreateItem(const TypesystemRepository::DobMember& memberInfo, int parameterIndex, int arrayIndex, MemberTreeItem* parent) const
+{
+    std::unique_ptr<MemberTreeItem> mi;
+
+    switch (memberInfo.memberType)
+    {
+    case BooleanMemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetBoolean(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(val ? "true" : "false");
+    }
+    break;
+
+    case EnumerationMemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto ordinal = sdt::Parameters::GetEnumeration(m_typeId, parameterIndex, arrayIndex);
+        auto val = sdt::Operations::GetEnumerationValueName(memberInfo.memberTypeId, ordinal);
+        mi->SetValue(Str(val));
+    }
+    break;
+
+    case Int32MemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetInt32(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(QString::number(val));
+    }
+    break;
+
+    case Int64MemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetInt64(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(QString::number(val));
+    }
+    break;
+
+    case Float32MemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetFloat32(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(QString::number(val));
+    }
+    break;
+
+
+    case Float64MemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetFloat64(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(QString::number(val));
+    }
+    break;
+
+    case TypeIdMemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetTypeId(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(Str(sdt::Operations::GetName(val)));
+    }
+    break;
+
+    case InstanceIdMemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetInstanceId(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(Str(val.ToString()));
+    }
+    break;
+
+    case EntityIdMemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetEntityId(m_typeId, parameterIndex, arrayIndex);
+        auto eidStr = QString("%1 : %2").arg(Str(sdt::Operations::GetName(val.GetTypeId())), Str(val.GetInstanceId().ToString()));
+        mi->SetValue(eidStr);
+    }
+    break;
+
+    case ChannelIdMemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetChannelId(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(Str(val.ToString()));
+    }
+    break;
+
+    case HandlerIdMemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetHandlerId(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(Str(val.ToString()));
+    }
+    break;
+
+    case StringMemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetString(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(Str(val));
+    }
+    break;
+
+    case BinaryMemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetBinary(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(QString::fromStdString(sdt::Utilities::BinaryToBase64(val)));
+    }
+    break;
+
+    case Ampere32MemberType:
+    case CubicMeter32MemberType:
+    case Hertz32MemberType:
+    case Joule32MemberType:
+    case Kelvin32MemberType:
+    case Kilogram32MemberType:
+    case Meter32MemberType:
+    case MeterPerSecond32MemberType:
+    case MeterPerSecondSquared32MemberType:
+    case Newton32MemberType:
+    case Pascal32MemberType:
+    case Radian32MemberType:
+    case RadianPerSecond32MemberType:
+    case RadianPerSecondSquared32MemberType:
+    case Second32MemberType:
+    case SquareMeter32MemberType:
+    case Steradian32MemberType:
+    case Volt32MemberType:
+    case Watt32MemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetFloat32(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(QString::number(val));
+    }
+    break;
+
+    case Ampere64MemberType:
+    case CubicMeter64MemberType:
+    case Hertz64MemberType:
+    case Joule64MemberType:
+    case Kelvin64MemberType:
+    case Kilogram64MemberType:
+    case Meter64MemberType:
+    case MeterPerSecond64MemberType:
+    case MeterPerSecondSquared64MemberType:
+    case Newton64MemberType:
+    case Pascal64MemberType:
+    case Radian64MemberType:
+    case RadianPerSecond64MemberType:
+    case RadianPerSecondSquared64MemberType:
+    case Second64MemberType:
+    case SquareMeter64MemberType:
+    case Steradian64MemberType:
+    case Volt64MemberType:
+    case Watt64MemberType:
+    {
+        mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
+        auto val = sdt::Parameters::GetFloat64(m_typeId, parameterIndex, arrayIndex);
+        mi->SetValue(QString::number(val));
+    }
+    break;
+
+    case ObjectMemberType:
+    {
+        auto obj = sdt::Parameters::GetObject(m_typeId, parameterIndex, arrayIndex);
+        auto dc = TypesystemRepository::Instance().GetClass(memberInfo.memberTypeId);
+        mi = std::make_unique<MemberTreeItem>(dc, obj);
+        mi->SetMemberInfo(&memberInfo);
+    }
+        break;
+    }
+
+    // Handle keys
+    if (memberInfo.collectionType == ArrayCollectionType || memberInfo.collectionType == SequenceCollectionType)
+    {
+        mi->SetKey(QString::number(arrayIndex));
+    }
+    else if (memberInfo.collectionType == DictionaryCollectionType)
+    {
+        switch (memberInfo.keyType)
+        {
+        case EnumerationMemberType:
+        {
+            auto ordinal = sdt::Parameters::GetEnumerationDictionaryKey(m_typeId, parameterIndex, arrayIndex);
+            auto val = sdt::Operations::GetEnumerationValueName(memberInfo.keyTypeId, ordinal);
+            mi->SetKey(Str(val));
+        }
+        break;
+
+        case Int32MemberType:
+        {
+            auto val = sdt::Parameters::GetInt32DictionaryKey(m_typeId, parameterIndex, arrayIndex);
+            mi->SetKey(QString::number(val));
+        }
+        break;
+
+        case Int64MemberType:
+        {
+            auto val = sdt::Parameters::GetInt64DictionaryKey(m_typeId, parameterIndex, arrayIndex);
+            mi->SetKey(QString::number(val));
+        }
+        break;
+
+        case TypeIdMemberType:
+        {
+            auto val = sdt::Parameters::GetTypeIdDictionaryKey(m_typeId, parameterIndex, arrayIndex);
+            mi->SetKey(Str(sdt::Operations::GetName(val)));
+        }
+        break;
+
+        case InstanceIdMemberType:
+        {
+            auto val = sdt::Parameters::GetInstanceIdDictionaryKey(m_typeId, parameterIndex, arrayIndex);
+            mi->SetKey(Str(val.ToString()));
+        }
+        break;
+
+        case EntityIdMemberType:
+        {
+            auto val = sdt::Parameters::GetEntityIdDictionaryKey(m_typeId, parameterIndex, arrayIndex);
+            auto eidStr = QString("%1 : %2").arg(Str(sdt::Operations::GetName(val.GetTypeId())), Str(val.GetInstanceId().ToString()));
+            mi->SetKey(eidStr);
+        }
+        break;
+
+        case ChannelIdMemberType:
+        {
+            auto val = sdt::Parameters::GetChannelIdDictionaryKey(m_typeId, parameterIndex, arrayIndex);
+            mi->SetKey(Str(val.ToString()));
+        }
+        break;
+
+        case HandlerIdMemberType:
+        {
+            auto val = sdt::Parameters::GetHandlerIdDictionaryKey(m_typeId, parameterIndex, arrayIndex);
+            mi->SetKey(Str(val.ToString()));
+        }
+        break;
+
+        case StringMemberType:
+        {
+            auto val = sdt::Parameters::GetStringDictionaryKey(m_typeId, parameterIndex, arrayIndex);
+            mi->SetKey(Str(val));
+        }
+        break;
+
+        default:
+            break;
+        }
+    }
+
+    parent->AddChild(std::move(mi));
 }

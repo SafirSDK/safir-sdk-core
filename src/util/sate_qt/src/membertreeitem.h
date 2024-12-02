@@ -43,6 +43,7 @@ public:
 
 
     const TypesystemRepository::DobMember* GetMemberInfo() const;
+    void SetMemberInfo(const TypesystemRepository::DobMember* memberInfo);
     QString GetName() const;
     void SetNull(bool val);
     bool IsNull() const;
@@ -71,6 +72,7 @@ public:
 
     // Returns true if this item is just a rootItem for a container: Array, Sequence or Dictionary, i.e this item does not contain any real data.
     bool IsContainerRootItem() const;
+    void SetIsContainerRootItem(const QString& name);
 
     void DebugPrint() const;
 

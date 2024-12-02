@@ -50,6 +50,7 @@ signals:
     void OpenMessageInstanceViewer(int64_t typeId,
                                    const Safir::Dob::Typesystem::ChannelId& channel,
                                    bool includeSubclasses);
+    void OpenParameterViewer(int64_t typeId);
     void OpenDouFile(int64_t typeId);
 
 private:

@@ -75,7 +75,11 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                 const bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
                 const bool shiftKey = qApp->keyboardModifiers().testFlag(Qt::ShiftModifier);
 
-                if (ctrlKey && !shiftKey)
+                if (baseClass == TypesystemRepository::Parametrization)
+                {
+                    emit OpenParameterViewer(typeIdVal.toLongLong());
+                }
+                else if (ctrlKey && !shiftKey)
                 {
                     emit OpenObjectEdit(typeIdVal.toLongLong());
                 }

@@ -57,4 +57,5 @@ private:
     std::list<TypesystemRepository::DobMember> m_parameterMembers;
 
     void SetupModel();
+    void CreateItem(const TypesystemRepository::DobMember& memberInfo, int parameterIndex, int arrayIndex, MemberTreeItem* parent) const;
 };

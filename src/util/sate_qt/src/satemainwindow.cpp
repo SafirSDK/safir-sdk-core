@@ -30,6 +30,7 @@
 #include "instanceswidget.h"
 #include "typesystemwidget.h"
 #include "connectdialog.h"
+#include "parametersmodel.h"
 
 #include <QCloseEvent>
 #include <QDateTime>
@@ -111,6 +112,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     connect(m_typesystem, &TypesystemWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEdit);
     connect(m_typesystem, &TypesystemWidget::OpenEntityInstanceViewer, this, &SateMainWindow::OnOpenEntityInstanceViewer);
     connect(m_typesystem, &TypesystemWidget::OpenMessageInstanceViewer, this, &SateMainWindow::OnOpenMessageInstanceViewer);
+    connect(m_typesystem, &TypesystemWidget::OpenParameterViewer, this, &SateMainWindow::OnOpenParameterViewer);
     connect(m_typesystem, &TypesystemWidget::OpenDouFile, this, &SateMainWindow::OnOpenDouFile);
 
     // Output window
@@ -289,6 +291,14 @@ void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
     AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe);
+}
+
+void SateMainWindow::OnOpenParameterViewer(const int64_t typeId)
+{
+    auto paramTree = new QTreeView(this);
+    auto model = new ParametersModel(typeId, paramTree);
+    paramTree->setModel(model);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, paramTree);
 }
 
 void SateMainWindow::OnOpenObjectEditWithInstance(int64_t typeId,
