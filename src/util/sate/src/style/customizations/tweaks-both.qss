@@ -29,7 +29,9 @@ QToolBar > QToolButton {
 }
 
 /*
-QToolButton#ResetWindows {
-    qproperty-icon: url(:/qss_icons/dark/rc/window_undock.png);
-}
+Make the tool buttons in the output widget have no background when unchecked.
+Makes it easier to see what state is what.
 */
+OutputWidget > QToolButton {
+  background-color: none;
+}

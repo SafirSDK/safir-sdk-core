@@ -71,7 +71,7 @@ OutputWidget::~OutputWidget()
 
 void OutputWidget::Output(const QString& info, const QtMsgType msgType)
 {
-    if (ui->infoToolButton->isChecked())
+    if (!ui->infoToolButton->isChecked())
     {
         return;
     }
@@ -82,7 +82,7 @@ void OutputWidget::Output(const QString& info, const QtMsgType msgType)
     {
     case QtDebugMsg:
     {
-        if (!ui->jsonToolButton->isChecked())
+        if (ui->jsonToolButton->isChecked())
         {
             QStringList line;
             line << Timestamp() << info;
@@ -92,7 +92,7 @@ void OutputWidget::Output(const QString& info, const QtMsgType msgType)
     break;
     case QtInfoMsg:
     {
-        if (!ui->infoToolButton->isChecked())
+        if (ui->infoToolButton->isChecked())
         {
             QStringList line;
             line << Timestamp() << info;
@@ -102,7 +102,7 @@ void OutputWidget::Output(const QString& info, const QtMsgType msgType)
     break;
     case QtWarningMsg:
     {
-        if (!ui->errorToolButton->isChecked())
+        if (ui->errorToolButton->isChecked())
         {
             QStringList line;
             line << Timestamp() << QString("<b>%1</b>").arg(info);
@@ -113,7 +113,7 @@ void OutputWidget::Output(const QString& info, const QtMsgType msgType)
     case QtCriticalMsg:
     case QtFatalMsg:
     {
-        if (!ui->errorToolButton->isChecked())
+        if (ui->errorToolButton->isChecked())
         {
             QStringList line;
             line << Timestamp() << QString("<span style='color:red'>%1</span>").arg(info);
@@ -131,7 +131,7 @@ void OutputWidget::Output(const QString& info, const QtMsgType msgType)
 
 void OutputWidget::OnMessage(const sdt::ChannelId& channel, const Safir::Dob::MessagePtr& message)
 {
-    if (ui->messagesToolButton->isChecked())
+    if (!ui->messagesToolButton->isChecked())
     {
         return;
     }
@@ -153,7 +153,7 @@ void OutputWidget::OnMessage(const sdt::ChannelId& channel, const Safir::Dob::Me
 
 void OutputWidget::OnEntity(const sdt::EntityId& entityId, const sdt::HandlerId& handler, const Safir::Dob::EntityPtr& entity, DobInterface::EntityOperation operation)
 {
-    if (ui->entitiesTtoolButton->isChecked())
+    if (!ui->entitiesTtoolButton->isChecked())
     {
         return;
     }
@@ -193,7 +193,7 @@ void OutputWidget::OnEntity(const sdt::EntityId& entityId, const sdt::HandlerId&
 
 void OutputWidget::OnResponse(const Safir::Dob::ResponsePtr& response)
 {
-    if (ui->responseToolButton->isChecked())
+    if (!ui->responseToolButton->isChecked())
     {
         return;
     }
@@ -215,7 +215,7 @@ void OutputWidget::OnResponse(const Safir::Dob::ResponsePtr& response)
 
 void OutputWidget::OnCreateRequest(const Safir::Dob::EntityPtr& request, const sdt::HandlerId& handler, const sdt::InstanceId& instance)
 {
-    if (ui->requestToolButton->isChecked())
+    if (!ui->requestToolButton->isChecked())
     {
         return;
     }
@@ -237,7 +237,7 @@ void OutputWidget::OnCreateRequest(const Safir::Dob::EntityPtr& request, const s
 
 void OutputWidget::OnUpdateRequest(const Safir::Dob::EntityPtr& request, const sdt::HandlerId& handler, const sdt::InstanceId& instance)
 {
-    if (ui->requestToolButton->isChecked())
+    if (!ui->requestToolButton->isChecked())
     {
         return;
     }
@@ -259,7 +259,7 @@ void OutputWidget::OnUpdateRequest(const Safir::Dob::EntityPtr& request, const s
 
 void OutputWidget::OnDeleteRequest(const Safir::Dob::Typesystem::EntityId& entityId, const sdt::HandlerId& handler)
 {
-    if (ui->requestToolButton->isChecked())
+    if (!ui->requestToolButton->isChecked())
     {
         return;
     }
@@ -279,7 +279,7 @@ void OutputWidget::OnDeleteRequest(const Safir::Dob::Typesystem::EntityId& entit
 }
 void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const sdt::HandlerId& handler)
 {
-    if (ui->requestToolButton->isChecked())
+    if (!ui->requestToolButton->isChecked())
     {
         return;
     }
@@ -348,7 +348,7 @@ void OutputWidget::SetToolTip(QToolButton* btn)
 {
     if (btn == ui->infoToolButton)
     {
-        if (btn->isChecked())
+        if (!btn->isChecked())
         {
             btn->setToolTip("<p>Informational logging is <b>disabled</b>.</p><p><i>Informational logging is any output that is not an error and doesn't have any object attached.</i></p>");
         }
@@ -359,7 +359,7 @@ void OutputWidget::SetToolTip(QToolButton* btn)
     }
     else if (btn == ui->errorToolButton)
     {
-        if (btn->isChecked())
+        if (!btn->isChecked())
         {
             btn->setToolTip("<p>Error logging is <b>disabled</b>.</p><p><i>Error logging is output from exceptions or any other errors that occurs.</i></p>");
         }
@@ -370,7 +370,7 @@ void OutputWidget::SetToolTip(QToolButton* btn)
     }
     else if (btn == ui->jsonToolButton)
     {
-        if (btn->isChecked())
+        if (!btn->isChecked())
         {
             btn->setToolTip("<p>Websocket logging is <b>disabled</b>.</p><p><i>Websocket logging will output all messages sent and received on the socket.</i></p>");
         }
@@ -381,7 +381,7 @@ void OutputWidget::SetToolTip(QToolButton* btn)
     }
     else if (btn == ui->entitiesTtoolButton)
     {
-        if (btn->isChecked())
+        if (!btn->isChecked())
         {
             btn->setToolTip("<p>Entity logging is <b>disabled</b>.</p><p><i>Logging when the Dob event OnNewEntity, OnUpdatedEntity, OnDeletedEntity etc occurs. The log has an attached Entity.</i></p>");
         }
@@ -392,7 +392,7 @@ void OutputWidget::SetToolTip(QToolButton* btn)
     }
     else if (btn == ui->messagesToolButton)
     {
-        if (btn->isChecked())
+        if (!btn->isChecked())
         {
             btn->setToolTip("<p>Message logging is <b>disabled</b>.</p><p><i>Logging when Dob event OnMessage occurs. The log has an attached Message.</i></p>");
         }
@@ -403,7 +403,7 @@ void OutputWidget::SetToolTip(QToolButton* btn)
     }
     else if (btn == ui->requestToolButton)
     {
-        if (btn->isChecked())
+        if (!btn->isChecked())
         {
             btn->setToolTip("<p>Request logging is <b>disabled</b>.</p><p><i>Logging when a request is received (create, update, delete or service). The log has the request attached.</i></p>");
         }
@@ -414,7 +414,7 @@ void OutputWidget::SetToolTip(QToolButton* btn)
     }
     else if (btn == ui->responseToolButton)
     {
-        if (btn->isChecked())
+        if (!btn->isChecked())
         {
             btn->setToolTip("<p>Response logging is <b>disabled</b>.</p><p><i>Logging when a response is received. The log has the response attached.</i></p>");
         }
