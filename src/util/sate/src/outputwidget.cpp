@@ -25,6 +25,7 @@ OutputWidget::OutputWidget(DobHandler* dob, QWidget *parent)
     ui->output->setUndoRedoEnabled(false);
     ui->output->setAcceptRichText(false);
     ui->output->setOpenLinks(false);
+    ui->jsonToolButton->setVisible(false);
 
     connect(ui->output, &QTextBrowser::anchorClicked, this, [this](const QUrl& url)
             {

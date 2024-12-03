@@ -142,6 +142,12 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                     {
                         emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), true);
                     }
+                    else if (baseClass == TypesystemRepository::Message)
+                    {
+                        emit OpenMessageInstanceViewer(typeIdVal.toLongLong(),
+                                                       Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS,
+                                                       true);
+                    }
                 }
                 else if (!shiftKey && !ctrlKey)
                 {
@@ -153,7 +159,7 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                     {
                         emit OpenMessageInstanceViewer(typeIdVal.toLongLong(),
                                                        Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS,
-                                                       true);
+                                                       false);
                     }
                 }
             }

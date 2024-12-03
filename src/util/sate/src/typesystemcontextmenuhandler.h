@@ -27,6 +27,7 @@
 #include "typesystemrepository.h"
 #include "dobhandler.h"
 #include "registerhandlerdialog.h"
+#include "subscribedialog.h"
 
 class TypesystemContextMenuHandler : public QObject
 {
@@ -46,6 +47,7 @@ private:
     DobHandler* m_dob;
     QTreeView* m_treeView;
     RegisterHandlerDialog* m_registerDlg;
+    SubscribeDialog* m_subscribeDlg;
 
     void CreateContextMenu(int64_t typeId, TypesystemRepository::DobBaseClass baseClass);
 };

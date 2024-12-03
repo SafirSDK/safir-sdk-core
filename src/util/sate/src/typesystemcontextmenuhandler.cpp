@@ -34,6 +34,7 @@ TypesystemContextMenuHandler::TypesystemContextMenuHandler(DobHandler* dob, QTre
     , m_dob(dob)
     , m_treeView(parent)
     , m_registerDlg(new RegisterHandlerDialog(parent))
+    , m_subscribeDlg(new SubscribeDialog(parent))
 {
     m_treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_treeView, &QTreeView::customContextMenuRequested, [this](const QPoint&){
@@ -66,6 +67,7 @@ TypesystemContextMenuHandler::TypesystemContextMenuHandler(DobHandler* dob, QTre
         }
     });
 
+    // Handle registration dialog
     connect(m_registerDlg, &QDialog::accepted, this, [this]
     {
         auto typeId = m_registerDlg->TypeId();
@@ -76,6 +78,16 @@ TypesystemContextMenuHandler::TypesystemContextMenuHandler(DobHandler* dob, QTre
         else
         {
             m_dob->RegisterServiceHandler(typeId, m_registerDlg->Handler().toStdWString(), m_registerDlg->Pending());
+        }
+    } );
+
+    // Handle subscription dialog
+    connect(m_subscribeDlg, &QDialog::accepted, this, [this]
+    {
+        auto typeId = m_subscribeDlg->TypeId();
+        if (TypesystemRepository::Instance().GetClass(typeId)->dobBaseClass == TypesystemRepository::Message)
+        {
+            emit OpenMessageInstanceViewer(typeId, m_subscribeDlg->Channel(), m_subscribeDlg->IncludeSubclasses());
         }
     } );
 }
@@ -99,7 +111,7 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     auto* registerDefaultServiceHandler = new QAction(tr("Register default handler"), &menu);
     auto* registerServiceHandlerEllipsis = new QAction(tr("Register handler..."), &menu);
     auto* subscribeServiceRegistrations = new  QAction(tr("Subscribe registration"), &menu);
-    auto* unsubscribeServiceRegistrations = new  QAction(tr("Subscribe registration"), &menu);
+    auto* unsubscribeServiceRegistrations = new  QAction(tr("Unsubscribe registration"), &menu);
     auto* openDouFile = new QAction(tr("Open dou-file"), &menu);
 
     //set up tooltips
@@ -134,51 +146,38 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     switch(baseClass) {
     case TypesystemRepository::Entity:
         {
-            menu.addAction(subscribeEntity);
-            menu.addAction(subscribeEntityRecursive);
             menu.addAction(openObjectEditor);
-
-            menu.addSeparator();
-
             menu.addAction(registerDefaultEntityHandler);
             menu.addAction(registerEntityHandlerEllipsis);
             menu.addAction(unregisterAllHandlers);
-            menu.addAction(unsubscribeEntity);
-
             menu.addSeparator();
-
+            menu.addAction(subscribeEntity);
+            menu.addAction(subscribeEntityRecursive);
+            menu.addAction(unsubscribeEntity);
+            menu.addSeparator();
             menu.addAction(openDouFile);
         }
         break;
     case TypesystemRepository::Message:
         {
+            menu.addAction(openObjectEditor);
             menu.addAction(subscribeMessage);
             menu.addAction(subscribeMessageEllipsis);
-            menu.addAction(openObjectEditor);
-
-            menu.addSeparator();
-
             menu.addAction(unsubscribeMessage);
-
             menu.addSeparator();
-
             menu.addAction(openDouFile);
         }
         break;
     case TypesystemRepository::Service:
         {
             menu.addAction(openObjectEditor);
-
-            menu.addSeparator();
-
             menu.addAction(registerDefaultServiceHandler);
             menu.addAction(registerServiceHandlerEllipsis);
             menu.addAction(unregisterAllHandlers);
+            menu.addSeparator();
             menu.addAction(subscribeServiceRegistrations);
             menu.addAction(unsubscribeServiceRegistrations);
-
             menu.addSeparator();
-
             menu.addAction(openDouFile);
         }
         break;
@@ -242,8 +241,7 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     }
     else if (chosenAction == subscribeMessageEllipsis)
     {
-        QMessageBox m;m.setText("sub with options");
-        m.exec();
+        m_subscribeDlg->Show(typeId);
     }
     else if (chosenAction == unsubscribeMessage)
     {

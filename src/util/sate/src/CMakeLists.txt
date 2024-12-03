@@ -11,6 +11,7 @@ set(ui
     connectdialog.ui
     outputwidget.ui
     parameterswidget.ui
+    subscribedialog.ui
 )
 
 set(sources
@@ -42,6 +43,7 @@ set(sources
     outputwidget.cpp
     parametersmodel.cpp
     parameterswidget.cpp
+    subscribedialog.cpp
 )
 
 set(widget_headers
@@ -68,6 +70,7 @@ set(widget_headers
     outputwidget.h
     parametersmodel.h
     parameterswidget.h
+    subscribedialog.h
   )
 
 set(headers
