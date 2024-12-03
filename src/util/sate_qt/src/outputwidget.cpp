@@ -93,7 +93,7 @@ void OutputWidget::OnMessage(const sdt::ChannelId& channel, const Safir::Dob::Me
     QStringList line;
     line += Timestamp();
     line += "&nbsp;<img src=':/img/icons/message_orange' width='12' height='12'/>&nbsp;";
-    line += QString("<a href='%1' style='color:#78c4fc'>OnMessage %2 on channel %3</a><br>").arg(link, Str(message->GetTypeId()), Str(channel.ToString()));
+    line += QString("OnMessage <a href='%1' style='color:#78c4fc'>%2</a> on channel %3<br>").arg(link, Str(message->GetTypeId()), Str(channel.ToString()));
 
     m_pendingOutput += line.join("");
 
@@ -119,13 +119,13 @@ void OutputWidget::OnEntity(const sdt::EntityId& entityId, const sdt::HandlerId&
     case DobInterface::NewEntity:
     {
         auto link = AddLink(entity, Str(handler.ToString()), entityId.GetInstanceId().GetRawValue());
-        line += QString("<a href='%1' style='color:#78c4fc'>OnNewEntity %2 from handler %3</a><br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
+        line += QString("OnNewEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
     }
         break;
     case DobInterface::UpdatedEntity:
     {
         auto link = AddLink(entity, Str(handler.ToString()), entityId.GetInstanceId().GetRawValue());
-        line += QString("<a href='%1' style='color:#78c4fc'>OnUpdatedEntity %2 from handler %3</a><br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
+        line += QString("OnUpdatedEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
     }
         break;
 
@@ -157,7 +157,7 @@ void OutputWidget::OnResponse(const Safir::Dob::ResponsePtr& response)
     line += "&nbsp;<img src=':/img/icons/response_orange' width='12' height='12'/>&nbsp;";
 
     auto link = AddLink(response, "", -1);
-    line += QString("<a href='%1' style='color:#78c4fc'>OnResponse %2</a><br>").arg(link, Str(response->GetTypeId()));
+    line += QString("OnResponse <a href='%1' style='color:#78c4fc'>%2</a><br>").arg(link, Str(response->GetTypeId()));
 
     m_pendingOutput += line.join("");
 
@@ -180,7 +180,7 @@ void OutputWidget::OnCreateRequest(const Safir::Dob::EntityPtr& request, const s
     line += "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;";
 
     auto link = AddLink(request, Str(handler.ToString()), instance.GetRawValue());
-    line += QString("<a href='%1' style='color:#78c4fc'>OnCreateEntityRequest %2, handler: %3</a><br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+    line += QString("OnCreateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
     m_pendingOutput += line.join("");
 
@@ -203,7 +203,7 @@ void OutputWidget::OnUpdateRequest(const Safir::Dob::EntityPtr& request, const s
     line += "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;";
 
     auto link = AddLink(request, Str(handler.ToString()), instance.GetRawValue());
-    line += QString("<a href='%1' style='color:#78c4fc'>OnUpdateEntityRequest %2, handler: %3</a><br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+    line += QString("OnUpdateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
     m_pendingOutput += line.join("");
 
@@ -246,7 +246,7 @@ void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const
     line += "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;";
 
     auto link = AddLink(request, Str(handler.ToString()), -1);
-    line += QString("<a href='%1' style='color:#78c4fc'>OnServiceRequest %2, handler: %3</a><br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+    line += QString("OnServiceRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
     m_pendingOutput += line.join("");
 
