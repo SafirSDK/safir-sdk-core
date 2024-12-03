@@ -24,7 +24,8 @@ To install all build dependencies "in one go" run the following from the command
 
   sudo apt-get install python3 python3-pip python-is-python3 python3-distro build-essential \
        g++ cmake default-jdk asciidoctor cli-common-dev libboost-all-dev unixodbc-dev doxygen \
-       graphviz qt6-base-dev dia dblatex devscripts debhelper fakeroot
+       graphviz qt6-base-dev qt6-websockets-dev qt6-base-private-dev dia dblatex devscripts \
+       debhelper fakeroot
 
 The last three packages - devscripts, debhelper and fakeroot - are used for debian
 package creation, and dblatex is for generating pdf documentation.
@@ -36,6 +37,12 @@ dependencies, and python websockets, which we use for some tests.
 
 If you're building for another Debian-based distribution you may have to adjust some
 package names.
+
+We're using a Conan recipe that is not yet updated in the Conan repositories, so that
+needs to be installed. Open a terminal in the root of the unpacked Safir SDK Core source
+code and run:
+
+  conan export build/qt-advanced-docking-system
 
 Building Safir SDK Core Installation Packages
 ---------------------------------------------

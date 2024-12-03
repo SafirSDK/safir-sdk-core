@@ -44,6 +44,12 @@ dependencies, and python websockets, which we use for some tests.
 
   pip3 install "conan>=2.5.0" websockets
 
+We're using a Conan recipe that is not yet updated in the Conan repositories, so that
+needs to be installed. Open a terminal in the root of the unpacked Safir SDK Core source
+code and run:
+
+  conan export build/qt-advanced-docking-system
+
 Conan and Visual Studio Build Tools
 -----------------------------------
 If you are using Visual Studio Build Tools instead of the IDE to build Safir SDK Core you
