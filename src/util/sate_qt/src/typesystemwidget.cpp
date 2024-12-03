@@ -23,13 +23,66 @@
 ******************************************************************************/
 #include "typesystemwidget.h"
 #include "ui_typesystemwidget.h"
+#include "typesystemrepository.h"
+#include "typesysteminheritancemodel.h"
+#include "typesystemnamespacemodel.h"
 #include <QLineEdit>
 #include <QDebug>
 #include <QTreeView>
 #include <QModelIndex>
 #include <QRadioButton>
 
+// -----------------------------------------------------
+// TypesystemFilterProxyModel
+// -----------------------------------------------------
+class TypesystemFilterProxyModel : public QSortFilterProxyModel
+{
+public:
+    TypesystemFilterProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
+    {
+        setRecursiveFilteringEnabled(true); // show parent nodes when a child node is matching a search filter
+        setFilterCaseSensitivity(Qt::CaseInsensitive);
+    }
 
+    void SetFilter(const QString& filter)
+    {
+        m_filter = filter;
+        invalidateFilter();
+    }
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
+    {
+        if (m_filter.isEmpty())
+        {
+            return true;
+        }
+        auto ix = sourceModel()->index(sourceRow, 0, sourceParent);
+        if (ix.isValid())
+        {
+            QString val = ix.data().toString();
+            return val.contains(m_filter, Qt::CaseInsensitive);
+        }
+        return false;
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
+    {
+        if (role == Qt::BackgroundRole && !m_filter.isEmpty() && index.data().toString().contains(m_filter, Qt::CaseInsensitive))
+        {
+            return QColor(128,128,128); //Gray. The QColorConstants don't seem to work in vs2015...
+        }
+
+        return QSortFilterProxyModel::data(index, role);
+    }
+
+private:
+    QString m_filter;
+};
+
+// -----------------------------------------------------
+// TypesystemWidget
+// -----------------------------------------------------
 TypesystemWidget::TypesystemWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TypesystemWidget)
@@ -89,7 +142,6 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                     {
                         emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), true);
                     }
-                    //TODO do other ctrl double click actions
                 }
                 else if (!shiftKey && !ctrlKey)
                 {
@@ -103,7 +155,6 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                                                        Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS,
                                                        true);
                     }
-                    //TODO do other double click actions
                 }
             }
             else
@@ -119,7 +170,6 @@ void TypesystemWidget::Initialize(DobHandler* dob)
         SetTreeViewModel(checked);
     });
 
-    // TODO: remove std functions and use signals
     m_contextMenuHandler = new TypesystemContextMenuHandler(m_dob, ui->treeView);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenObjectEdit, this, &TypesystemWidget::OpenObjectEdit);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenEntityInstanceViewer, this, &TypesystemWidget::OpenEntityInstanceViewer);

@@ -52,17 +52,3 @@ public:
 private:
     std::unique_ptr<TypesystemRepository::DobEnum> m_rootEnum;
 };
-
-class TypesystemFilterProxyModel : public QSortFilterProxyModel
-{
-public:
-    TypesystemFilterProxyModel(QObject* parent);
-    void SetFilter(const QString& filter);
-
-protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-
-private:
-    QString m_filter;
-};

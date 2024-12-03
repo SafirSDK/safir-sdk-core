@@ -33,8 +33,7 @@
 #include <QSortFilterProxyModel>
 #include <Safir/Dob/Typesystem/Serialization.h>
 
-class ObjectSortFilterProxyModel
-    : public QSortFilterProxyModel
+class ObjectSortFilterProxyModel : public QSortFilterProxyModel
 {
 public:
     ObjectSortFilterProxyModel(QWidget* parent) : QSortFilterProxyModel(parent)
@@ -150,7 +149,7 @@ void DobObjectEditWidget::Init()
     connect(ui->valueFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 1, ui->valueFilterEdit); });
     connect(ui->nullFilterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int i){ ApplyFilter(i == 0 ? "" : ui->nullFilterCombo->currentText(), 2, ui->nullFilterCombo); });
     connect(ui->changedFilterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int i) { ApplyFilter(i == 0 ? "" : ui->changedFilterCombo->currentText(), 3, ui->changedFilterCombo); });
-    connect(ui->typeFilterCombo, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 4, ui->typeFilterCombo); });
+    connect(ui->typeFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 4, ui->typeFilterEdit); });
 
     // Disable built in edit triggers and handle it manually below.
     ui->objectEditTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -310,7 +309,7 @@ void DobObjectEditWidget::OnSectionResized(int index, int /*oldSize*/, int newSi
         ui->changedFilterCombo->setFixedWidth(size);
         break;
     case 4:
-        ui->typeFilterCombo->setFixedWidth(size);
+        ui->typeFilterEdit->setFixedWidth(size);
         break;
     }
 }

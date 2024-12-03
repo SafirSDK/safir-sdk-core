@@ -10,6 +10,8 @@ namespace Ui {
 class OutputWidget;
 }
 
+class QToolButton;
+
 class OutputWidget : public QWidget
 {
     Q_OBJECT
@@ -18,7 +20,7 @@ public:
     explicit OutputWidget(DobHandler* dobHandler, QWidget *parent);
     ~OutputWidget();
 
-    void OnInfo(const QString& info, const QtMsgType msgType);
+    void Output(const QString& info, const QtMsgType msgType);
 
 signals:
     void OpenObjectEdit(int64_t typeId,
@@ -52,6 +54,8 @@ private:
     void StartTimer();
     QString AddLink(const Safir::Dob::Typesystem::ObjectPtr& obj, const QString& ch, int64_t inst);
     const RecvData* FindLink(const QString& link) const;
+
+    void SetToolTip(QToolButton* btn);
 };
 
 #endif // OUTPUTWIDGET_H

@@ -21,18 +21,18 @@ OutputWidget::OutputWidget(DobHandler* dob, QWidget *parent)
 {
     ui->setupUi(this);
     connect(ui->output, &QTextBrowser::anchorClicked, this, [this](const QUrl& url)
-    {
-        auto data = FindLink(url.toString());
-        if (data != nullptr)
-        {
-            emit OpenObjectEdit(data->object->GetTypeId(), data->channelHandler, data->instance, data->object);
-        }
-    });
+            {
+                auto data = FindLink(url.toString());
+                if (data != nullptr)
+                {
+                    emit OpenObjectEdit(data->object->GetTypeId(), data->channelHandler, data->instance, data->object);
+                }
+            });
 
     QStringList head;
 
     connect(dob, &DobHandler::ConnectedToDob, this, [this, dob](const QString&){ui->jsonToolButton->setVisible(!dob->IsNativeConnection());});
-    connect(dob, &DobHandler::Info, this, &OutputWidget::OnInfo);
+    connect(dob, &DobHandler::Output, this, &OutputWidget::Output);
     connect(dob, &DobHandler::OnEntity, this, &OutputWidget::OnEntity);
     connect(dob, &DobHandler::OnMessage, this, &OutputWidget::OnMessage);
     connect(dob, &DobHandler::OnResponse, this, &OutputWidget::OnResponse);
@@ -40,6 +40,22 @@ OutputWidget::OutputWidget(DobHandler* dob, QWidget *parent)
     connect(dob, &DobHandler::OnUpdateRequest, this, &OutputWidget::OnUpdateRequest);
     connect(dob, &DobHandler::OnDeleteRequest, this, &OutputWidget::OnDeleteRequest);
     connect(dob, &DobHandler::OnServiceRequest, this, &OutputWidget::OnServiceRequest);
+
+    // ToolTip handling
+    connect(ui->infoToolButton, &QToolButton::clicked, [this]{SetToolTip(ui->infoToolButton);});
+    connect(ui->errorToolButton, &QToolButton::clicked, [this]{SetToolTip(ui->errorToolButton);});
+    connect(ui->jsonToolButton, &QToolButton::clicked, [this]{SetToolTip(ui->jsonToolButton);});
+    connect(ui->entitiesTtoolButton, &QToolButton::clicked, [this]{SetToolTip(ui->entitiesTtoolButton);});
+    connect(ui->messagesToolButton, &QToolButton::clicked, [this]{SetToolTip(ui->messagesToolButton);});
+    connect(ui->requestToolButton, &QToolButton::clicked, [this]{SetToolTip(ui->requestToolButton);});
+    connect(ui->responseToolButton, &QToolButton::clicked, [this]{SetToolTip(ui->responseToolButton);});
+    SetToolTip(ui->infoToolButton);
+    SetToolTip(ui->errorToolButton);
+    SetToolTip(ui->jsonToolButton);
+    SetToolTip(ui->entitiesTtoolButton);
+    SetToolTip(ui->messagesToolButton);
+    SetToolTip(ui->requestToolButton);
+    SetToolTip(ui->responseToolButton);
 }
 
 OutputWidget::~OutputWidget()
@@ -47,35 +63,61 @@ OutputWidget::~OutputWidget()
     delete ui;
 }
 
-void OutputWidget::OnInfo(const QString& info, const QtMsgType msgType)
+void OutputWidget::Output(const QString& info, const QtMsgType msgType)
 {
     if (ui->infoToolButton->isChecked())
     {
         return;
     }
-    const bool startTimer = m_pendingOutput.empty();
 
-    QStringList line;
-    line += Timestamp();
+    auto wasEmpty = m_pendingOutput.empty();
+
     switch (msgType)
     {
     case QtDebugMsg:
+    {
+        if (!ui->jsonToolButton->isChecked())
+        {
+            QStringList line;
+            line << Timestamp() << info << "<br>";
+            m_pendingOutput << line.join("");
+        }
+    }
+    break;
     case QtInfoMsg:
-        line +=info;
-        break;
+    {
+        if (!ui->infoToolButton->isChecked())
+        {
+            QStringList line;
+            line << Timestamp() << info << "<br>";
+            m_pendingOutput << line.join("");
+        }
+    }
+    break;
     case QtWarningMsg:
-        line+= QString("<b>%1</b>").arg(info);
-        break;
+    {
+        if (!ui->errorToolButton->isChecked())
+        {
+            QStringList line;
+            line << Timestamp() << QString("<b>%1</b>").arg(info) << "<br>";
+            m_pendingOutput << line.join("");
+        }
+    }
+    break;
     case QtCriticalMsg:
     case QtFatalMsg:
-        line += QString("<span style='color:red'>%1</span>").arg(info);
-        break;
+    {
+        if (!ui->errorToolButton->isChecked())
+        {
+            QStringList line;
+            line << Timestamp() << QString("<span style='color:red'>%1</span>").arg(info) << "<br>";
+            m_pendingOutput << line.join("");
+        }
+    }
+    break;
     }
 
-    line += "<br>";
-    m_pendingOutput += line.join("");
-
-    if (startTimer)
+    if (wasEmpty && !m_pendingOutput.empty())
     {
         StartTimer();
     }
@@ -91,11 +133,11 @@ void OutputWidget::OnMessage(const sdt::ChannelId& channel, const Safir::Dob::Me
 
     auto link = AddLink(message, Str(channel.ToString()), 0);
     QStringList line;
-    line += Timestamp();
-    line += "&nbsp;<img src=':/img/icons/message_orange' width='12' height='12'/>&nbsp;";
-    line += QString("OnMessage <a href='%1' style='color:#78c4fc'>%2</a> on channel %3<br>").arg(link, Str(message->GetTypeId()), Str(channel.ToString()));
+    line << Timestamp()
+         << "&nbsp;<img src=':/img/icons/message_orange' width='12' height='12'/>&nbsp;"
+         << QString("<a href='%1' style='color:#78c4fc'>OnMessage</a> %2 on channel %3<br>").arg(link, Str(message->GetTypeId()), Str(channel.ToString()));
 
-    m_pendingOutput += line.join("");
+    m_pendingOutput << line.join("");
 
     if (startTimer)
     {
@@ -112,31 +154,30 @@ void OutputWidget::OnEntity(const sdt::EntityId& entityId, const sdt::HandlerId&
     const bool startTimer = m_pendingOutput.empty();
 
     QStringList line;
-    line += Timestamp();
-    line += "&nbsp;<img src=':/img/icons/entity_orange' width='12' height='12'/>&nbsp;";
+    line << Timestamp() << "&nbsp;<img src=':/img/icons/entity_orange' width='12' height='12'/>&nbsp;";
 
     switch (operation) {
     case DobInterface::NewEntity:
     {
         auto link = AddLink(entity, Str(handler.ToString()), entityId.GetInstanceId().GetRawValue());
-        line += QString("OnNewEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
+        line << QString("<a href='%1' style='color:#78c4fc'>OnNewEntity</a> %2 from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
     }
-        break;
+    break;
     case DobInterface::UpdatedEntity:
     {
         auto link = AddLink(entity, Str(handler.ToString()), entityId.GetInstanceId().GetRawValue());
-        line += QString("OnUpdatedEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
+        line << QString("<a href='%1' style='color:#78c4fc'>OnUpdatedEntity</a> %2 from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
     }
-        break;
+    break;
 
     case DobInterface::DeletedEntity:
     {
-        line += QString("OnDeletedEntity %1 from handler %2<br>").arg(Str(entityId.ToString()), Str(handler.ToString()));
+        line << QString("OnDeletedEntity %1 from handler %2<br>").arg(Str(entityId.ToString()), Str(handler.ToString()));
     }
-        break;
+    break;
     }
 
-    m_pendingOutput += line.join("");
+    m_pendingOutput << line.join("");
 
     if (startTimer)
     {
@@ -152,14 +193,13 @@ void OutputWidget::OnResponse(const Safir::Dob::ResponsePtr& response)
     }
     const bool startTimer = m_pendingOutput.empty();
 
-    QStringList line;
-    line += Timestamp();
-    line += "&nbsp;<img src=':/img/icons/response_orange' width='12' height='12'/>&nbsp;";
-
     auto link = AddLink(response, "", -1);
-    line += QString("OnResponse <a href='%1' style='color:#78c4fc'>%2</a><br>").arg(link, Str(response->GetTypeId()));
+    QStringList line;
+    line << Timestamp()
+         << "&nbsp;<img src=':/img/icons/response_orange' width='12' height='12'/>&nbsp;"
+         << QString("<a href='%1' style='color:#78c4fc'>OnResponse</a> %2<br>").arg(link, Str(response->GetTypeId()));
 
-    m_pendingOutput += line.join("");
+    m_pendingOutput << line.join("");
 
     if (startTimer)
     {
@@ -175,14 +215,13 @@ void OutputWidget::OnCreateRequest(const Safir::Dob::EntityPtr& request, const s
     }
     const bool startTimer = m_pendingOutput.empty();
 
-    QStringList line;
-    line += Timestamp();
-    line += "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;";
-
     auto link = AddLink(request, Str(handler.ToString()), instance.GetRawValue());
-    line += QString("OnCreateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+    QStringList line;
+    line << Timestamp()
+         << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
+         << QString("<a href='%1' style='color:#78c4fc'>OnCreateEntityRequest</a> %2, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
-    m_pendingOutput += line.join("");
+    m_pendingOutput << line.join("");
 
     if (startTimer)
     {
@@ -198,14 +237,13 @@ void OutputWidget::OnUpdateRequest(const Safir::Dob::EntityPtr& request, const s
     }
     const bool startTimer = m_pendingOutput.empty();
 
-    QStringList line;
-    line += Timestamp();
-    line += "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;";
-
     auto link = AddLink(request, Str(handler.ToString()), instance.GetRawValue());
-    line += QString("OnUpdateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+    QStringList line;
+    line << Timestamp()
+         << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
+         << QString("<a href='%1' style='color:#78c4fc'>OnUpdateEntityRequest</a> %2, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
-    m_pendingOutput += line.join("");
+    m_pendingOutput << line.join("");
 
     if (startTimer)
     {
@@ -222,11 +260,11 @@ void OutputWidget::OnDeleteRequest(const Safir::Dob::Typesystem::EntityId& entit
     const bool startTimer = m_pendingOutput.empty();
 
     QStringList line;
-    line += Timestamp();
-    line += "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;";
-    line += QString("OnDeleteEntityRequest %1, handler: %2<br>").arg(Str(entityId.ToString()), Str(handler.ToString()));
+    line << Timestamp()
+         << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
+         << QString("OnDeleteEntityRequest %1, handler: %2<br>").arg(Str(entityId.ToString()), Str(handler.ToString()));
 
-    m_pendingOutput += line.join("");
+    m_pendingOutput << line.join("");
 
     if (startTimer)
     {
@@ -241,14 +279,13 @@ void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const
     }
     const bool startTimer = m_pendingOutput.empty();
 
-    QStringList line;
-    line += Timestamp();
-    line += "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;";
-
     auto link = AddLink(request, Str(handler.ToString()), -1);
-    line += QString("OnServiceRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+    QStringList line;
+    line << Timestamp()
+         << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
+         << QString("<a href='%1' style='color:#78c4fc'>OnServiceRequest</a> %2, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
-    m_pendingOutput += line.join("");
+    m_pendingOutput << line.join("");
 
     if (startTimer)
     {
@@ -258,15 +295,15 @@ void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const
 
 void OutputWidget::StartTimer()
 {
-    QTimer::singleShot(300, [this] //milliseconds
-       {
-           ui->output->setUpdatesEnabled(false);
-           ui->output->append(m_pendingOutput.join(""));
-           ui->output->setUpdatesEnabled(true);
-           m_pendingOutput.clear();
-           auto *sb = ui->output->verticalScrollBar();
-           sb->setValue(sb->maximum());
-       });
+    QTimer::singleShot(std::chrono::milliseconds(200), [this]
+                       {
+                           ui->output->setUpdatesEnabled(false);
+                           ui->output->insertHtml(m_pendingOutput.join(""));
+                           ui->output->setUpdatesEnabled(true);
+                           m_pendingOutput.clear();
+                           auto *sb = ui->output->verticalScrollBar();
+                           sb->setValue(sb->maximum());
+                       });
 }
 
 QString OutputWidget::AddLink(const Safir::Dob::Typesystem::ObjectPtr& obj, const QString& ch, int64_t inst)
@@ -299,4 +336,86 @@ const OutputWidget::RecvData* OutputWidget::FindLink(const QString& link) const
     }
 
     return nullptr;
+}
+
+void OutputWidget::SetToolTip(QToolButton* btn)
+{
+    if (btn == ui->infoToolButton)
+    {
+        if (btn->isChecked())
+        {
+            btn->setToolTip("<p>Informational logging is <b>disabled</b>.</p><p><i>Informational logging is any output that is not an error and doesn't have any object attached.</i></p>");
+        }
+        else
+        {
+            btn->setToolTip("<p>Informational logging is <b>enabled</b>.</p><p><i>Informational logging is any output that is not an error and doesn't have any object attached.</i></p>");
+        }
+    }
+    else if (btn == ui->errorToolButton)
+    {
+        if (btn->isChecked())
+        {
+            btn->setToolTip("<p>Error logging is <b>disabled</b>.</p><p><i>Error logging is output from exceptions or any other errors that occurs.</i></p>");
+        }
+        else
+        {
+            btn->setToolTip("<p>Error logging is <b>enabled</b>.</p><p><i>Error logging is output from exceptions or any other errors that occurs.</i></p>");
+        }
+    }
+    else if (btn == ui->jsonToolButton)
+    {
+        if (btn->isChecked())
+        {
+            btn->setToolTip("<p>Websocket logging is <b>disabled</b>.</p><p><i>Websocket logging will output all messages sent and received on the socket.</i></p>");
+        }
+        else
+        {
+            btn->setToolTip("<p>Websocket logging is <b>enabled</b>.</p><p><i>Websocket logging will output all messages sent and received on the socket.</i></p>");
+        }
+    }
+    else if (btn == ui->entitiesTtoolButton)
+    {
+        if (btn->isChecked())
+        {
+            btn->setToolTip("<p>Entity logging is <b>disabled</b>.</p><p><i>Logging when the Dob event OnNewEntity, OnUpdatedEntity, OnDeletedEntity etc occurs. The log has an attached Entity.</i></p>");
+        }
+        else
+        {
+            btn->setToolTip("<p>Entity logging is <b>enabled</b>.</p><p><i>Logging when the Dob event OnNewEntity, OnUpdatedEntity, OnDeletedEntity etc occurs. The log has an attached Entity.</i></p>");
+        }
+    }
+    else if (btn == ui->messagesToolButton)
+    {
+        if (btn->isChecked())
+        {
+            btn->setToolTip("<p>Message logging is <b>disabled</b>.</p><p><i>Logging when Dob event OnMessage occurs. The log has an attached Message.</i></p>");
+        }
+        else
+        {
+            btn->setToolTip("<p>Message logging is <b>enabled</b>.</p><p><i>Logging when Dob event OnMessage occurs. The log has an attached Message.</i></p>");
+        }
+    }
+    else if (btn == ui->requestToolButton)
+    {
+        if (btn->isChecked())
+        {
+            btn->setToolTip("<p>Request logging is <b>disabled</b>.</p><p><i>Logging when a request is received (create, update, delete or service). The log has the request attached.</i></p>");
+        }
+        else
+        {
+            btn->setToolTip("<p>Request logging is <b>enabled</b>.</p><p><i>Logging when a request is received (create, update, delete or service). The log has the request attached.</i></p>");
+        }
+    }
+    else if (btn == ui->responseToolButton)
+    {
+        if (btn->isChecked())
+        {
+            btn->setToolTip("<p>Response logging is <b>disabled</b>.</p><p><i>Logging when a response is received. The log has the response attached.</i></p>");
+        }
+        else
+        {
+            btn->setToolTip("<p>Response logging is <b>enabled</b>.</p><p><i>Logging when a response is received. The log has the response attached.</i></p>");
+        }
+    }
+
 }

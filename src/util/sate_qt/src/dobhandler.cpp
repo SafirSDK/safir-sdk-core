@@ -39,7 +39,7 @@ bool DobHandler::IsInitiated()
 {
     if (!m_dob)
     {
-        emit Info("Not connected to DOB!", QtCriticalMsg);
+        emit Output("Not connected to DOB!", QtCriticalMsg);
         return false;
     }
     return true;
@@ -62,7 +62,7 @@ void DobHandler::SetupSignalSlots()
         connect(m_dob.get(), &DobInterface::SubscriptionStopped, this, &DobHandler::SubscriptionStopped);
         connect(m_dob.get(), &DobInterface::OnRegistered, this, &DobHandler::OnRegistered);
         connect(m_dob.get(), &DobInterface::OnUnregistered, this, &DobHandler::OnUnregistered);
-        connect(m_dob.get(), &DobInterface::Info, this, &DobHandler::Info);
+        connect(m_dob.get(), &DobInterface::Output, this, &DobHandler::Output);
     }
 }
 

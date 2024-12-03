@@ -30,7 +30,7 @@
 #include "instanceswidget.h"
 #include "typesystemwidget.h"
 #include "connectdialog.h"
-#include "parametersmodel.h"
+#include "parameterswidget.h"
 
 #include <QCloseEvent>
 #include <QDateTime>
@@ -202,7 +202,7 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
         if (dock->property("includeSubclasses").toBool() != includeSubclasses)
         {
             m_dockManager->removeDockWidget(dock);
-            m_output->OnInfo("Closed a previous viewer for the same type but with different recursiveness.", QtWarningMsg);
+            m_output->Output("Closed a previous viewer for the same type but with different recursiveness.", QtWarningMsg);
         }
         else
         {
@@ -263,7 +263,7 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
 void SateMainWindow::OnConnectedToDob(const QString& connectionName)
 {
     QString msg = tr("Connected as %1").arg(connectionName);
-    m_output->OnInfo(msg,QtInfoMsg);
+    m_output->Output(msg, QtInfoMsg);
     m_connectedLabel->setText(tr("Connected"));
     m_connectedLabel->setObjectName("ConnectedLabelConnected");
     m_connectedLabel->setToolTip(tr("Connection name: %1").arg(connectionName));
@@ -295,10 +295,8 @@ void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
 
 void SateMainWindow::OnOpenParameterViewer(const int64_t typeId)
 {
-    auto paramTree = new QTreeView(this);
-    auto model = new ParametersModel(typeId, paramTree);
-    paramTree->setModel(model);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, paramTree);
+    auto paramWidget = new ParametersWidget(typeId, this);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, paramWidget);
 }
 
 void SateMainWindow::OnOpenObjectEditWithInstance(int64_t typeId,

@@ -63,6 +63,7 @@ void Print(MemberTreeItem* item, QString indent)
 
 MemberTreeItem::MemberTreeItem(const TypesystemRepository::DobClass* cls)
     : m_isNull(false)
+    , m_value(cls->name)
     , m_key("root")
     , m_cls(cls)
 {
@@ -72,6 +73,7 @@ MemberTreeItem::MemberTreeItem(const TypesystemRepository::DobClass* cls)
 // Members with data created from an object
 MemberTreeItem::MemberTreeItem(const TypesystemRepository::DobClass* cls, const Safir::Dob::Typesystem::ObjectConstPtr& obj)
     : m_isNull(false)
+    , m_value(cls->name)
     , m_key("root")
     , m_cls(cls)
 {

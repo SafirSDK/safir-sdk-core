@@ -24,15 +24,14 @@
 #pragma once
 
 #include <QWidget>
-#include "typesystemrepository.h"
 #include "dobhandler.h"
-#include "typesysteminheritancemodel.h"
-#include "typesystemnamespacemodel.h"
 #include "typesystemcontextmenuhandler.h"
 
 namespace Ui {
 class TypesystemWidget;
 }
+
+class TypesystemFilterProxyModel;
 
 class TypesystemWidget : public QWidget
 {

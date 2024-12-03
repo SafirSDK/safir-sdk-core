@@ -111,7 +111,7 @@ void DobWebSocket::WsConnected()
 {
     m_isConnected = true;
 
-    emit DobInterface::Info("Connected to websocket " + m_url.toString(), QtInfoMsg);
+    emit DobInterface::Output("Connected to websocket " + m_url.toString(), QtInfoMsg);
     QJsonObject j;
     j["method"] = "open";
     j["id"] = "open";
@@ -129,20 +129,20 @@ void DobWebSocket::WsDisconnected()
 
     if (m_reconnect)
     {
-        emit DobInterface::Info("try reconnect " + m_url.toString(), QtInfoMsg);
+        emit DobInterface::Output("try reconnect " + m_url.toString(), QtInfoMsg);
         // We did not explicitly call close, then try to reconnect.
         QTimer::singleShot(1000, [this]{m_webSocket.open(m_url);});
     }
     else
     {
         emit DobInterface::ConnectionClosed();
-        emit DobInterface::Info("Disconnected from DOB websocket on " + m_url.toString(), QtInfoMsg);
+        emit DobInterface::Output("Disconnected from DOB websocket on " + m_url.toString(), QtInfoMsg);
     }
 }
 
 void DobWebSocket::WsRecv(const QString& data)
 {
-    emit DobInterface::Info("WsRecv: " + data, QtInfoMsg);
+    emit DobInterface::Output("WsRecv: " + data, QtDebugMsg);
 
     QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8());
     if (doc.isNull() || !doc.isObject())
@@ -182,14 +182,14 @@ void DobWebSocket::Open(const QString& name, int context)
 {
     if (m_isConnected)
     {
-        emit DobInterface::Info("Already connected to " + m_url.toString(), QtInfoMsg);
+        emit DobInterface::Output("Already connected to " + m_url.toString(), QtInfoMsg);
         return;
     }
 
     m_name = name;
     m_context = context;
     m_reconnect = true;
-    emit DobInterface::Info("Trying to connect to websocket " + m_url.toString(), QtInfoMsg);
+    emit DobInterface::Output("Trying to connect to websocket " + m_url.toString(), QtInfoMsg);
     m_webSocket.open(m_url);
 }
 
@@ -630,7 +630,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         if (result.isString() && result.toString() == "OK")
         {
             emit DobInterface::ConnectedToDob(m_name);
-            emit DobInterface::Info("Connected to DOB (websocket)!", QtWarningMsg);
+            emit DobInterface::Output("Connected to DOB (websocket)!", QtWarningMsg);
         }
         else
         {
@@ -641,7 +641,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Info(QString("Message sent OK: %1, channel=%2").arg(idList[1], idList[2]), QtInfoMsg);
+            emit DobInterface::Output(QString("Message sent OK: %1, channel=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
         {
@@ -652,7 +652,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Info(QString("Set entity changes OK: %1, instance=%2, handler=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
+            emit DobInterface::Output(QString("Set entity changes OK: %1, instance=%2, handler=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
         }
         else
         {
@@ -663,7 +663,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Info(QString("Set entity OK: %1, instance=%2, handler=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
+            emit DobInterface::Output(QString("Set entity OK: %1, instance=%2, handler=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
         }
         else
         {
@@ -674,7 +674,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Info(QString("Delete entity OK: %1, instance=%2, handler=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
+            emit DobInterface::Output(QString("Delete entity OK: %1, instance=%2, handler=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
         }
         else
         {
@@ -685,7 +685,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Info(QString("Delete all instances OK: %1, handler=%2").arg(idList[1], idList[2]), QtInfoMsg);
+            emit DobInterface::Output(QString("Delete all instances OK: %1, handler=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
         {
@@ -698,7 +698,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         {
             auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
             emit DobInterface::OnResponse(response);
-            emit DobInterface::Info(QString("Received response for entity create request, handler=%1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Received response for entity create request, handler=%1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -711,7 +711,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         {
             auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
             emit DobInterface::OnResponse(response);
-            emit DobInterface::Info(QString("Received response for entity update request, handler=%1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Received response for entity update request, handler=%1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -724,7 +724,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         {
             auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
             emit DobInterface::OnResponse(response);
-            emit DobInterface::Info(QString("Received response for entity delete request: %1, instancer=%2").arg(idList[1], idList[2]), QtInfoMsg);
+            emit DobInterface::Output(QString("Received response for entity delete request: %1, instancer=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
         {
@@ -737,7 +737,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         {
             auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(ToObjectPtr(result.toObject()));
             emit DobInterface::OnResponse(response);
-            emit DobInterface::Info(QString("Received response for service request, handler=%1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Received response for service request, handler=%1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -754,7 +754,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             DobInterface::SubscriptionInfo info{typeId, channel, includeSubclasses};
             m_subscriptions.push_back(info);
             emit DobInterface::SubscriptionStarted(info);
-            emit DobInterface::Info(QString("Subscribe message OK: %1, channel=%2, recursive=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
+            emit DobInterface::Output(QString("Subscribe message OK: %1, channel=%2, recursive=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
         }
         else
         {
@@ -768,7 +768,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
             RemoveSubscriptions(typeId);
             emit DobInterface::SubscriptionStopped(typeId);
-            emit DobInterface::Info(QString("Unsubscribe message OK: %1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Unsubscribe message OK: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -784,7 +784,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             DobInterface::SubscriptionInfo info{typeId, sdt::ChannelId(), includeSubclasses};
             m_subscriptions.push_back(info);
             emit DobInterface::SubscriptionStarted(info);
-            emit DobInterface::Info(QString("Subscribe entity OK: %1, recursvie=%2").arg(idList[1], idList[2]), QtInfoMsg);
+            emit DobInterface::Output(QString("Subscribe entity OK: %1, recursvie=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
         {
@@ -798,7 +798,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
             RemoveSubscriptions(typeId);
             emit DobInterface::SubscriptionStopped(typeId);
-            emit DobInterface::Info(QString("Unsubscribe entity OK: %1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Unsubscribe entity OK: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -809,7 +809,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Info(QString("Subscribe registrations OK: %1, recursvie=%2").arg(idList[1], idList[2]), QtInfoMsg);
+            emit DobInterface::Output(QString("Subscribe registrations OK: %1, recursvie=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
         {
@@ -820,7 +820,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Info(QString("Unsubscribe registration OK: %1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Unsubscribe registration OK: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -840,7 +840,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             {
                 msg += ", injectionHandler";
             }
-            emit DobInterface::Info(msg, QtInfoMsg);
+            emit DobInterface::Output(msg, QtInfoMsg);
 
 
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
@@ -866,7 +866,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             {
                 msg += ", pending";
             }
-            emit DobInterface::Info(msg, QtInfoMsg);
+            emit DobInterface::Output(msg, QtInfoMsg);
 
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
             auto handler = ToHashVal<sdt::HandlerId>(idList[2]);
@@ -888,7 +888,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             RemoveRegistrations(typeId);
             emit DobInterface::OnUnregistered(typeId);
 
-            emit DobInterface::Info(QString("Unregister handler OK: %1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Unregister handler OK: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -1002,7 +1002,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
 
-        emit DobInterface::Info("OnRegistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
+        emit DobInterface::Output("OnRegistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
         DobInterface::RegistrationInfo info{typeId, handler, false, false, Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId};
         emit DobInterface::OnRegistered(info);
     }
@@ -1010,7 +1010,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
     {
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
-        emit DobInterface::Info("OnUnregistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
+        emit DobInterface::Output("OnUnregistered: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
         emit DobInterface::OnUnregistered(typeId);
     }
     else if (method == "onRevokedRegistration")
@@ -1018,7 +1018,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
 
-        emit DobInterface::Info("Revoked registration: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
+        emit DobInterface::Output("Revoked registration: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
         RemoveRegistration(typeId, handler);
         emit DobInterface::OnUnregistered(typeId);
 
@@ -1029,7 +1029,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         // auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         // auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
 
-        // emit DobInterface::Info("Registration completed: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
+        // emit DobInterface::Output("Registration completed: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
 
         // // TODO: remove pending flag in myReg
         // //DobInterface::RegistrationInfo info{typeId, handler, false, false, GetInstanceIdPolicy(typeId, handlerId)};
@@ -1040,7 +1040,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
     {
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
-        emit DobInterface::Info("Initial injection done: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
+        emit DobInterface::Output("Initial injection done: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
     }
     else if (method == "onInjectedNewEntity")
     {
@@ -1048,7 +1048,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
         sdt::EntityId eid(entity->GetTypeId(), instance);
 
-        emit DobInterface::Info("Injected new entity: " + Str(eid.ToString()), QtInfoMsg);
+        emit DobInterface::Output("Injected new entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::NewEntity);
     }
     else if (method == "onInjectedUpdatedEntity")
@@ -1057,7 +1057,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
         sdt::EntityId eid(entity->GetTypeId(), instance);
 
-        emit DobInterface::Info("Injected updated entity: " + Str(eid.ToString()), QtInfoMsg);
+        emit DobInterface::Output("Injected updated entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::UpdatedEntity);
     }
     else if (method == "onInjectedDeletedEntity")
@@ -1066,16 +1066,16 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = p.contains("instanceId") ? JsonToHash<sdt::InstanceId>(p["instanceId"]) : sdt::InstanceId::GenerateRandom();
         sdt::EntityId eid(entity->GetTypeId(), instance);
 
-        emit DobInterface::Info("Injected deleted entity: " + Str(eid.ToString()), QtInfoMsg);
+        emit DobInterface::Output("Injected deleted entity: " + Str(eid.ToString()), QtInfoMsg);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::DeletedEntity);
     }
     else if (method == "onNotMessageOverflow")
     {
-        emit DobInterface::Info("OnNotMessageOverflow", QtInfoMsg);
+        emit DobInterface::Output("OnNotMessageOverflow", QtInfoMsg);
     }
     else if (method == "onNotRequestOverflow")
     {
-        emit DobInterface::Info("OnNotRequestOverflow", QtInfoMsg);
+        emit DobInterface::Output("OnNotRequestOverflow", QtInfoMsg);
     }
 }
 
@@ -1087,11 +1087,11 @@ void DobWebSocket::HandleError(const QJsonObject& j)
 void DobWebSocket::Send(const QJsonObject& j)
 {
     auto json = Str(j);
-    emit DobInterface::Info(QString("Send: %1").arg(json), QtInfoMsg);
+    emit DobInterface::Output(QString("WsSend: %1").arg(json), QtDebugMsg);
     m_webSocket.sendTextMessage(Str(j));
 }
 
 void DobWebSocket::LogError(const QString& msg)
 {
-    emit DobInterface::Info(msg,QtCriticalMsg);
+    emit DobInterface::Output(msg, QtCriticalMsg);
 }

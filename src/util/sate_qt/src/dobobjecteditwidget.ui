@@ -65,7 +65,7 @@
           <string notr="true">text-align: left;</string>
          </property>
          <property name="sizeAdjustPolicy">
-          <enum>QComboBox::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
+          <enum>QComboBox::AdjustToContents</enum>
          </property>
          <property name="iconSize">
           <size>
@@ -122,7 +122,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="typeFilterCombo">
+        <widget class="QLineEdit" name="typeFilterEdit">
          <property name="toolTip">
           <string>Accepts regular expression.</string>
          </property>

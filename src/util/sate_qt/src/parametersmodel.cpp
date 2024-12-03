@@ -158,36 +158,29 @@ QVariant ParametersModel::data(const QModelIndex &index, int role) const
 
     case Qt::ForegroundRole:
     {
-        if (index.column() == 1)
+        if (index.column() == 0)
         {
             auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
-            bool hasNonNullValues = false;
-            if (item->IsContainerRootItem() || item->IsObjectRootItem())
+            auto isContainer = item->GetMemberInfo()->collectionType != SingleValueCollectionType;
+
+            // Blue color if item name is a key
+            return (isContainer && !item->IsContainerRootItem()) ? QColor(116, 192, 252) :QVariant{};
+        }
+        else if (index.column() == 1)
+        {
+            auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+            if (item->IsContainerRootItem())
             {
                 for (int i = 0; i < item->NumberOfChildMembers(); ++i)
                 {
                     if (!item->GetConstChildMember(i)->IsNull())
                     {
-                        hasNonNullValues = true;
-                        break;
+                        return QColor(116, 192, 252);
                     }
                 }
             }
-            else
-            {
-                hasNonNullValues = !item->IsNull();
-            }
 
-            return hasNonNullValues ? QColor(250, 185, 0) : QColor(135, 134, 132);
-        }
-    }
-    break;
-
-    case Qt::TextAlignmentRole:
-    {
-        if (index.column() == 2 || index.column() == 3)
-        {
-            return Qt::AlignHCenter;
+            return item->IsNull() ? QColor(135, 134, 132) : QColor(250, 185, 0);
         }
     }
     break;
@@ -231,6 +224,12 @@ void ParametersModel::SetupModel()
     for (int parameterIndex = 0; parameterIndex < num; ++parameterIndex)
     {
         sdt::Parameters::GetInfo(m_typeId, parameterIndex, parameterType, keyType, parameterName, parameterTypeId, keyTypeId, collectionType, numberOfValues);
+
+        auto name = QString::fromStdWString(parameterName);
+        if (name.contains('@'))
+        {
+            continue; // hidden parameter
+        }
 
         TypesystemRepository::DobMember m;
         m.name = QString::fromStdWString(parameterName);

@@ -10,6 +10,7 @@ set(ui
     registerhandlerdialog.ui
     connectdialog.ui
     outputwidget.ui
+    parameterswidget.ui
 )
 
 set(sources
@@ -40,6 +41,7 @@ set(sources
     columninfo.cpp
     outputwidget.cpp
     parametersmodel.cpp
+    parameterswidget.cpp
 )
 
 set(widget_headers
@@ -65,6 +67,7 @@ set(widget_headers
     columninfo.h
     outputwidget.h
     parametersmodel.h
+    parameterswidget.h
   )
 
 set(headers

@@ -27,6 +27,7 @@
 #include <QFont>
 #include <QTreeView>
 #include <QTimer>
+#include <QDebug>
 
 namespace {
 static const int NumberOfColumns = 5;
@@ -85,13 +86,10 @@ QModelIndex DobObjectModel::index(int row, int column, const QModelIndex &parent
     }
 
     // Not the root, i.e nested objects or a container member (array/seq/dict)
-    auto parentPtr =static_cast<MemberTreeItem*>(parent.internalPointer());
-    auto name = parentPtr->GetName();
-    auto childItem = parentPtr->GetChildMember(row);
-    //auto childItem = static_cast<MemberTreeItem*>(parent.internalPointer())->GetChildMember(row);
-    if (childItem != nullptr)
+    auto parentItem =static_cast<MemberTreeItem*>(parent.internalPointer());
+    if (row < parentItem->NumberOfChildMembers())
     {
-        return createIndex(row, column, childItem);
+        return createIndex(row, column, parentItem->GetChildMember(row));
     }
 
     return{};
@@ -175,27 +173,29 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
 
     case Qt::ForegroundRole:
     {
+        if (index.column() == 0)
+        {
+            auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+            auto isContainer = item->GetMemberInfo()->collectionType != SingleValueCollectionType;
+
+            // Blue color if item name is a key, i.e container but not rootItem
+            return (isContainer && !item->IsContainerRootItem()) ? QColor(116, 192, 252) :QVariant{};
+        }
         if (index.column() == 1)
         {
             auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
-            bool hasNonNullValues = false;
-            if (item->IsContainerRootItem() || item->IsObjectRootItem())
+            if (item->IsContainerRootItem())
             {
                 for (int i = 0; i < item->NumberOfChildMembers(); ++i)
                 {
                     if (!item->GetConstChildMember(i)->IsNull())
                     {
-                        hasNonNullValues = true;
-                        break;
+                        return QColor(116, 192, 252);
                     }
                 }
             }
-            else
-            {
-                hasNonNullValues = !item->IsNull();
-            }
 
-            return hasNonNullValues ? QColor(250, 185, 0) : QColor(135, 134, 132);
+            return item->IsNull() ? QColor(135, 134, 132) : QColor(250, 185, 0);
         }
     }
     break;
@@ -265,7 +265,8 @@ bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, in
             if (item->IsContainerRootItem())
             {
                 // Rows will be deleted.
-                beginRemoveRows(index, 0, childCount - 1);
+                auto parentIndex = createIndex(index.row(), 0, index.internalPointer());
+                beginRemoveRows(parentIndex, 0, childCount - 1);
                 item->SetNull(true); // Will clear all children.
                 item->SetChanged(true);
                 endRemoveRows();
@@ -277,7 +278,6 @@ bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, in
                 if (parentContainer->IsContainerRootItem())
                 {
                     // The delete must be deferred to after the editor has been closed.
-                    // TODO: Check if this can be done by calling removeRows immediately from the delegate instead.
                     auto row = item->RowNumber();
                     auto parentIndex = index.parent();
                     QTimer::singleShot(0, [this, parentIndex, row]
@@ -301,7 +301,8 @@ bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, in
                 if (childCount > 0)
                 {
                     // Rows will be deleted.
-                    beginRemoveRows(index, 0, childCount - 1);
+                    auto parentIndex = createIndex(index.row(), 0, index.internalPointer());
+                    beginRemoveRows(parentIndex, 0, childCount - 1);
                     item->SetNull(true);
                     item->SetChanged(true);
                     endRemoveRows();

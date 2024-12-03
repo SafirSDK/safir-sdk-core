@@ -77,7 +77,7 @@ void DobNative::Open(const QString& name, int context)
                                        }
 
                                        emit DobInterface::ConnectedToDob(Str(Safir::Dob::ConnectionAspectMisc(this->m_dobConnection).GetConnectionName()));
-                                       emit DobInterface::Info("Connected to DOB!", QtWarningMsg);
+                                       emit DobInterface::Output("Connected to DOB!", QtWarningMsg);
                                    });
 }
 
@@ -88,11 +88,11 @@ void DobNative::Close()
     {
         m_dobConnection.Close();
         emit DobInterface::ConnectionClosed();
-        emit DobInterface::Info("Disconnected from DOB!", QtWarningMsg);
+        emit DobInterface::Output("Disconnected from DOB!", QtWarningMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -104,11 +104,11 @@ void DobNative::SubscribeMessage(int64_t typeId, const sdt::ChannelId& channel, 
         DobInterface::SubscriptionInfo info{typeId, channel, includeSubclasses};
         m_subscriptions.push_back(info);
         emit DobInterface::SubscriptionStarted(info);
-        emit DobInterface::Info("Subscription message: " + Str(typeId) + Str(channel), QtInfoMsg);
+        emit DobInterface::Output("Subscription message: " + Str(typeId) + Str(channel), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -119,11 +119,11 @@ void DobNative::UnsubscribeMessage(int64_t typeId)
         m_dobConnection.UnsubscribeMessage(typeId, Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, this);
         RemoveSubscriptions(typeId);
         emit DobInterface::SubscriptionStopped(typeId);
-        emit DobInterface::Info("Unsubscribe message: " + Str(typeId), QtInfoMsg);
+        emit DobInterface::Output("Unsubscribe message: " + Str(typeId), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -134,13 +134,13 @@ void DobNative::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::In
         if (instance == Safir::Dob::Typesystem::InstanceId())
         {
             m_dobConnection.SubscribeEntity(typeId, true, includeSubclasses, true, this);
-            emit DobInterface::Info("Subscription entity: " + Str(typeId), QtInfoMsg);
+            emit DobInterface::Output("Subscription entity: " + Str(typeId), QtInfoMsg);
         }
         else
         {
             Safir::Dob::Typesystem::EntityId eid(typeId, instance);
             m_dobConnection.SubscribeEntity(eid, true, true, this);
-            emit DobInterface::Info("Subscription entity: " + Str(eid.ToString()), QtInfoMsg);
+            emit DobInterface::Output("Subscription entity: " + Str(eid.ToString()), QtInfoMsg);
         }
         DobInterface::SubscriptionInfo info{typeId, sdt::ChannelId(), includeSubclasses};
         m_subscriptions.push_back(info);
@@ -149,7 +149,7 @@ void DobNative::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::In
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -160,11 +160,11 @@ void DobNative::UnsubscribeEntity(int64_t typeId)
         m_dobConnection.UnsubscribeEntity(typeId, this);
         RemoveSubscriptions(typeId);
         emit DobInterface::SubscriptionStopped(typeId);
-        emit DobInterface::Info("Unsubscribe entity: " + Str(typeId), QtInfoMsg);
+        emit DobInterface::Output("Unsubscribe entity: " + Str(typeId), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -173,12 +173,12 @@ void DobNative::SubscribeRegistrations(int64_t typeId, const Safir::Dob::Typesys
     try
     {
         m_dobConnection.SubscribeRegistration(typeId, handler, includeSubclasses, true, this);
-        emit DobInterface::Info("Subscribe for registrations: " + Str(typeId) + Str(handler), QtInfoMsg);
+        emit DobInterface::Output("Subscribe for registrations: " + Str(typeId) + Str(handler), QtInfoMsg);
 
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -187,11 +187,11 @@ void DobNative::UnsubscribeRegistrations(int64_t typeId)
     try
     {
         m_dobConnection.UnsubscribeRegistration(typeId, sdt::HandlerId::ALL_HANDLERS, true, this);
-        emit DobInterface::Info("Unsubscribe registrations: " + Str(typeId), QtInfoMsg);
+        emit DobInterface::Output("Unsubscribe registrations: " + Str(typeId), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -202,17 +202,17 @@ void DobNative::RegisterEntityHandler(int64_t typeId, const Safir::Dob::Typesyst
         if (injection)
         {
             m_dobConnection.RegisterEntityHandlerInjection(typeId, handler, instanceIdPolicy, this);
-            emit DobInterface::Info("Register injection entity handler: " + Str(typeId) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Register injection entity handler: " + Str(typeId) + Str(handler), QtInfoMsg);
         }
         else if (pending)
         {
             m_dobConnection.RegisterEntityHandlerPending(typeId, handler, instanceIdPolicy, this);
-            emit DobInterface::Info("Register pending entity handler: " + Str(typeId) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Register pending entity handler: " + Str(typeId) + Str(handler), QtInfoMsg);
         }
         else
         {
             m_dobConnection.RegisterEntityHandler(typeId, handler, instanceIdPolicy, this);
-            emit DobInterface::Info("Register entity handler: " + Str(typeId) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Register entity handler: " + Str(typeId) + Str(handler), QtInfoMsg);
         }
 
         DobInterface::RegistrationInfo info{typeId, handler, pending, injection, instanceIdPolicy};
@@ -221,7 +221,7 @@ void DobNative::RegisterEntityHandler(int64_t typeId, const Safir::Dob::Typesyst
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -232,12 +232,12 @@ void DobNative::RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesys
         if (pending)
         {
             m_dobConnection.RegisterServiceHandlerPending(typeId, handler, this);
-            emit DobInterface::Info("Register pending service handler: " + Str(typeId) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Register pending service handler: " + Str(typeId) + Str(handler), QtInfoMsg);
         }
         else
         {
             m_dobConnection.RegisterServiceHandler(typeId, handler, this);
-            emit DobInterface::Info("Register service handler: " + Str(typeId) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Register service handler: " + Str(typeId) + Str(handler), QtInfoMsg);
         }
 
         DobInterface::RegistrationInfo info{typeId, handler, pending, false, Safir::Dob::InstanceIdPolicy::RequestorDecidesInstanceId};
@@ -246,7 +246,7 @@ void DobNative::RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesys
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -257,11 +257,11 @@ void DobNative::Unregister(int64_t typeId)
         m_dobConnection.UnregisterHandler(typeId, Safir::Dob::Typesystem::HandlerId::ALL_HANDLERS);
         RemoveRegistrations(typeId);
         emit DobInterface::OnUnregistered(typeId);
-        emit DobInterface::Info("Unregister handler: " + Str(typeId), QtInfoMsg);
+        emit DobInterface::Output("Unregister handler: " + Str(typeId), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -270,11 +270,11 @@ void DobNative::SendMessage(const Safir::Dob::MessagePtr &message, const Safir::
     try
     {
         m_dobConnection.Send(message, channel, this);
-        emit DobInterface::Info("Send message: " + Str(message->GetTypeId()) + Str(channel), QtInfoMsg);
+        emit DobInterface::Output("Send message: " + Str(message->GetTypeId()) + Str(channel), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -283,11 +283,11 @@ void DobNative::SendServiceRequest(const Safir::Dob::ServicePtr &request, const 
     try
     {
         m_dobConnection.ServiceRequest(request, handler, this);
-        emit DobInterface::Info("Send service request: " + Str(request->GetTypeId()) + Str(handler), QtInfoMsg);
+        emit DobInterface::Output("Send service request: " + Str(request->GetTypeId()) + Str(handler), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -299,17 +299,17 @@ void DobNative::CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::
         if (policy == Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId)
         {
             m_dobConnection.CreateRequest(entity, handler, this);
-            emit DobInterface::Info("Send create request (HandlerDecidesInstanceId): " + Str(entity->GetTypeId()) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Send create request (HandlerDecidesInstanceId): " + Str(entity->GetTypeId()) + Str(handler), QtInfoMsg);
         }
         else
         {
             m_dobConnection.CreateRequest(entity, instance, handler, this);
-            emit DobInterface::Info("Send create request (RequestorDecidesInstanceId): " + Str(entity->GetTypeId()) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Send create request (RequestorDecidesInstanceId): " + Str(entity->GetTypeId()) + Str(handler), QtInfoMsg);
         }
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -318,11 +318,11 @@ void DobNative::UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::
     try
     {
         m_dobConnection.UpdateRequest(entity, instance, this);
-        emit DobInterface::Info("Send update request: " + Str(entity->GetTypeId()) + Str(instance), QtInfoMsg);
+        emit DobInterface::Output("Send update request: " + Str(entity->GetTypeId()) + Str(instance), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -331,11 +331,11 @@ void DobNative::DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId)
     try
     {
         m_dobConnection.DeleteRequest(entityId, this);
-        emit DobInterface::Info("Send delete request: " + Str(entityId), QtInfoMsg);
+        emit DobInterface::Output("Send delete request: " + Str(entityId), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -344,11 +344,11 @@ void DobNative::SetChanges(const Safir::Dob::EntityPtr &entity, const Safir::Dob
     try
     {
         m_dobConnection.SetChanges(entity, instance, handler);
-        emit DobInterface::Info("Set changes: " + Str(entity->GetTypeId()) + Str(instance) + Str(handler), QtInfoMsg);
+        emit DobInterface::Output("Set changes: " + Str(entity->GetTypeId()) + Str(instance) + Str(handler), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -357,11 +357,11 @@ void DobNative::SetAll(const Safir::Dob::EntityPtr& entity, const sdt::InstanceI
     try
     {
         m_dobConnection.SetAll(entity, instance, handler);
-        emit DobInterface::Info("Set all: " + Str(entity->GetTypeId()) + Str(instance) + Str(handler), QtInfoMsg);
+        emit DobInterface::Output("Set all: " + Str(entity->GetTypeId()) + Str(instance) + Str(handler), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -370,11 +370,11 @@ void DobNative::Delete(const Safir::Dob::Typesystem::EntityId &entityId, const S
     try
     {
         m_dobConnection.Delete(entityId, handler);
-        emit DobInterface::Info("Delete entity: " + Str(entityId) + Str(handler), QtInfoMsg);
+        emit DobInterface::Output("Delete entity: " + Str(entityId) + Str(handler), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -383,11 +383,11 @@ void DobNative::DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerI
     try
     {
         m_dobConnection.DeleteAllInstances(typeId, handler);
-        emit DobInterface::Info("Delete entity all instances: " + Str(typeId) + Str(handler), QtInfoMsg);
+        emit DobInterface::Output("Delete entity all instances: " + Str(typeId) + Str(handler), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
-        emit DobInterface::Info(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
 }
 
@@ -406,7 +406,7 @@ void DobNative::OnDoDispatch()
 // StopHandler interface
 void DobNative::OnStopOrder()
 {
-    emit DobInterface::Info("Got stop order, close connection", QtInfoMsg);
+    emit DobInterface::Output("Got stop order, close connection", QtInfoMsg);
     Close();
 }
 
@@ -443,7 +443,7 @@ void DobNative::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityReque
 // RevokedRegistrationBase interface
 void DobNative::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId)
 {
-    emit DobInterface::Info("Revoked registration: " + Str(typeId) + Str(handlerId), QtInfoMsg);
+    emit DobInterface::Output("Revoked registration: " + Str(typeId) + Str(handlerId), QtInfoMsg);
     RemoveRegistration(typeId, handlerId);
     emit DobInterface::OnUnregistered(typeId);
 }
@@ -451,31 +451,31 @@ void DobNative::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeI
 // EntityInjectionBase interface
 void DobNative::OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
 {
-    emit DobInterface::Info("Injected new entity: " + Str(injectedEntityProxy.GetEntityId()), QtInfoMsg);
+    emit DobInterface::Output("Injected new entity: " + Str(injectedEntityProxy.GetEntityId()), QtInfoMsg);
     emit DobInterface::OnEntity(injectedEntityProxy.GetEntityId(), sdt::HandlerId(), injectedEntityProxy.GetInjection(), DobInterface::NewEntity);
 }
 
 void DobNative::OnInjectedUpdatedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
 {
-    emit DobInterface::Info("Injected updated entity: " + Str(injectedEntityProxy.GetEntityId()), QtInfoMsg);
+    emit DobInterface::Output("Injected updated entity: " + Str(injectedEntityProxy.GetEntityId()), QtInfoMsg);
     emit DobInterface::OnEntity(injectedEntityProxy.GetEntityId(), sdt::HandlerId(), injectedEntityProxy.GetInjection(), DobInterface::UpdatedEntity);
 }
 
 void DobNative::OnInjectedDeletedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
 {
-    emit DobInterface::Info("Injected deleted entity: " + Str(injectedEntityProxy.GetEntityId()), QtInfoMsg);
+    emit DobInterface::Output("Injected deleted entity: " + Str(injectedEntityProxy.GetEntityId()), QtInfoMsg);
     emit DobInterface::OnEntity(injectedEntityProxy.GetEntityId(), sdt::HandlerId(), nullptr, DobInterface::DeletedEntity);
 }
 
 void DobNative::OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId)
 {
-    emit DobInterface::Info("Initial injection done: " + Str(typeId) + Str(handlerId), QtInfoMsg);
+    emit DobInterface::Output("Initial injection done: " + Str(typeId) + Str(handlerId), QtInfoMsg);
 }
 
 // CompletedRegistrationBase interface
 void DobNative::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId)
 {
-    emit DobInterface::Info("Registration completed: " + Str(typeId) + Str(handlerId), QtInfoMsg);
+    emit DobInterface::Output("Registration completed: " + Str(typeId) + Str(handlerId), QtInfoMsg);
     DobInterface::RegistrationInfo info{typeId, handlerId, false, false, GetInstanceIdPolicy(typeId, handlerId)};
     emit DobInterface::OnRegistered(info);
 }
@@ -495,26 +495,26 @@ void DobNative::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
 void DobNative::OnNotRequestOverflow()
 {
-    emit DobInterface::Info("OnNotRequestOverflow", QtInfoMsg);
+    emit DobInterface::Output("OnNotRequestOverflow", QtInfoMsg);
 }
 
 // MessageSender interface
 void DobNative::OnNotMessageOverflow()
 {
-    emit DobInterface::Info("OnNotMessageOverflow", QtInfoMsg);
+    emit DobInterface::Output("OnNotMessageOverflow", QtInfoMsg);
 }
 
 // RegistrationSubscriber interface
 void DobNative::OnRegistered(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId)
 {
-    emit DobInterface::Info("OnRegistered: " + Str(typeId) + Str(handlerId), QtInfoMsg);
+    emit DobInterface::Output("OnRegistered: " + Str(typeId) + Str(handlerId), QtInfoMsg);
     DobInterface::RegistrationInfo info{typeId, handlerId, false, false, Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId};
     emit DobInterface::OnRegistered(info);
 }
 
 void DobNative::OnUnregistered(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId)
 {
-    emit DobInterface::Info("OnUnregistered: " + Str(typeId) + Str(handlerId), QtInfoMsg);
+    emit DobInterface::Output("OnUnregistered: " + Str(typeId) + Str(handlerId), QtInfoMsg);
     emit DobInterface::OnUnregistered(typeId);
 }
 
