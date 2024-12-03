@@ -26,7 +26,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # do not run using conan.
 set(QT_NO_CREATE_VERSIONLESS_TARGETS True)
 
-find_package(Qt6 COMPONENTS Core Widgets Network WebSockets)
+find_package(Qt6 COMPONENTS Core Widgets Network WebSockets QUIET)
 
 if (MSVC)
   # On Windows we build qt in Conan and link statically
