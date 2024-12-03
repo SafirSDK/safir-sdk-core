@@ -20,6 +20,12 @@ OutputWidget::OutputWidget(DobHandler* dob, QWidget *parent)
     , ui(new Ui::OutputWidget)
 {
     ui->setupUi(this);
+
+    ui->output->setReadOnly(true);
+    ui->output->setUndoRedoEnabled(false);
+    ui->output->setAcceptRichText(false);
+    ui->output->setOpenLinks(false);
+
     connect(ui->output, &QTextBrowser::anchorClicked, this, [this](const QUrl& url)
             {
                 auto data = FindLink(url.toString());
@@ -295,7 +301,7 @@ void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const
 
 void OutputWidget::StartTimer()
 {
-    QTimer::singleShot(std::chrono::milliseconds(200), [this]
+    QTimer::singleShot(std::chrono::milliseconds(300), [this]
                        {
                            ui->output->setUpdatesEnabled(false);
                            ui->output->append(m_pendingOutput.join("<br>"));
