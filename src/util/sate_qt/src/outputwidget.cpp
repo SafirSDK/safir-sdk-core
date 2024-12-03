@@ -79,7 +79,7 @@ void OutputWidget::Output(const QString& info, const QtMsgType msgType)
         if (!ui->jsonToolButton->isChecked())
         {
             QStringList line;
-            line << Timestamp() << info << "<br>";
+            line << Timestamp() << info;
             m_pendingOutput << line.join("");
         }
     }
@@ -89,7 +89,7 @@ void OutputWidget::Output(const QString& info, const QtMsgType msgType)
         if (!ui->infoToolButton->isChecked())
         {
             QStringList line;
-            line << Timestamp() << info << "<br>";
+            line << Timestamp() << info;
             m_pendingOutput << line.join("");
         }
     }
@@ -99,7 +99,7 @@ void OutputWidget::Output(const QString& info, const QtMsgType msgType)
         if (!ui->errorToolButton->isChecked())
         {
             QStringList line;
-            line << Timestamp() << QString("<b>%1</b>").arg(info) << "<br>";
+            line << Timestamp() << QString("<b>%1</b>").arg(info);
             m_pendingOutput << line.join("");
         }
     }
@@ -110,7 +110,7 @@ void OutputWidget::Output(const QString& info, const QtMsgType msgType)
         if (!ui->errorToolButton->isChecked())
         {
             QStringList line;
-            line << Timestamp() << QString("<span style='color:red'>%1</span>").arg(info) << "<br>";
+            line << Timestamp() << QString("<span style='color:red'>%1</span>").arg(info);
             m_pendingOutput << line.join("");
         }
     }
@@ -135,7 +135,7 @@ void OutputWidget::OnMessage(const sdt::ChannelId& channel, const Safir::Dob::Me
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/message_orange' width='12' height='12'/>&nbsp;"
-         << QString("OnMessage <a href='%1' style='color:#78c4fc'>%2</a> on channel %3<br>").arg(link, Str(message->GetTypeId()), Str(channel.ToString()));
+         << QString("OnMessage <a href='%1' style='color:#78c4fc'>%2</a> on channel %3").arg(link, Str(message->GetTypeId()), Str(channel.ToString()));
 
     m_pendingOutput << line.join("");
 
@@ -160,19 +160,19 @@ void OutputWidget::OnEntity(const sdt::EntityId& entityId, const sdt::HandlerId&
     case DobInterface::NewEntity:
     {
         auto link = AddLink(entity, Str(handler.ToString()), entityId.GetInstanceId().GetRawValue());
-        line << QString("OnNewEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
+        line << QString("OnNewEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
     }
     break;
     case DobInterface::UpdatedEntity:
     {
         auto link = AddLink(entity, Str(handler.ToString()), entityId.GetInstanceId().GetRawValue());
-        line << QString(<"OnUpdatedEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
+        line << QString("OnUpdatedEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
     }
     break;
 
     case DobInterface::DeletedEntity:
     {
-        line << QString("OnDeletedEntity %1 from handler %2<br>").arg(Str(entityId.ToString()), Str(handler.ToString()));
+        line << QString("OnDeletedEntity %1 from handler %2").arg(Str(entityId.ToString()), Str(handler.ToString()));
     }
     break;
     }
@@ -197,7 +197,7 @@ void OutputWidget::OnResponse(const Safir::Dob::ResponsePtr& response)
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/response_orange' width='12' height='12'/>&nbsp;"
-         << QString("OnResponse <a href='%1' style='color:#78c4fc'>%2</a><br>").arg(link, Str(response->GetTypeId()));
+         << QString("OnResponse <a href='%1' style='color:#78c4fc'>%2</a>").arg(link, Str(response->GetTypeId()));
 
     m_pendingOutput << line.join("");
 
@@ -219,7 +219,7 @@ void OutputWidget::OnCreateRequest(const Safir::Dob::EntityPtr& request, const s
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
-         << QString("OnCreateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+         << QString("OnCreateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
     m_pendingOutput << line.join("");
 
@@ -241,7 +241,7 @@ void OutputWidget::OnUpdateRequest(const Safir::Dob::EntityPtr& request, const s
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
-         << QString("OnUpdateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+         << QString("OnUpdateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
     m_pendingOutput << line.join("");
 
@@ -262,7 +262,7 @@ void OutputWidget::OnDeleteRequest(const Safir::Dob::Typesystem::EntityId& entit
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
-         << QString("OnDeleteEntityRequest %1, handler: %2<br>").arg(Str(entityId.ToString()), Str(handler.ToString()));
+         << QString("OnDeleteEntityRequest %1, handler: %2").arg(Str(entityId.ToString()), Str(handler.ToString()));
 
     m_pendingOutput << line.join("");
 
@@ -283,7 +283,7 @@ void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
-         << QString("OnServiceRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+         << QString("OnServiceRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
     m_pendingOutput << line.join("");
 
@@ -298,7 +298,7 @@ void OutputWidget::StartTimer()
     QTimer::singleShot(std::chrono::milliseconds(200), [this]
                        {
                            ui->output->setUpdatesEnabled(false);
-                           ui->output->append(m_pendingOutput.join(""));
+                           ui->output->append(m_pendingOutput.join("<br>"));
                            ui->output->setUpdatesEnabled(true);
                            m_pendingOutput.clear();
                            auto *sb = ui->output->verticalScrollBar();
