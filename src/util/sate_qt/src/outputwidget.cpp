@@ -261,7 +261,7 @@ void OutputWidget::StartTimer()
     QTimer::singleShot(300, [this] //milliseconds
        {
            ui->output->setUpdatesEnabled(false);
-           ui->output->insertHtml(m_pendingOutput.join(""));
+           ui->output->append(m_pendingOutput.join(""));
            ui->output->setUpdatesEnabled(true);
            m_pendingOutput.clear();
            auto *sb = ui->output->verticalScrollBar();
