@@ -135,7 +135,7 @@ void OutputWidget::OnMessage(const sdt::ChannelId& channel, const Safir::Dob::Me
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/message_orange' width='12' height='12'/>&nbsp;"
-         << QString("<a href='%1' style='color:#78c4fc'>OnMessage</a> %2 on channel %3<br>").arg(link, Str(message->GetTypeId()), Str(channel.ToString()));
+         << QString("OnMessage <a href='%1' style='color:#78c4fc'>%2</a> on channel %3<br>").arg(link, Str(message->GetTypeId()), Str(channel.ToString()));
 
     m_pendingOutput << line.join("");
 
@@ -160,13 +160,13 @@ void OutputWidget::OnEntity(const sdt::EntityId& entityId, const sdt::HandlerId&
     case DobInterface::NewEntity:
     {
         auto link = AddLink(entity, Str(handler.ToString()), entityId.GetInstanceId().GetRawValue());
-        line << QString("<a href='%1' style='color:#78c4fc'>OnNewEntity</a> %2 from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
+        line << QString("OnNewEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
     }
     break;
     case DobInterface::UpdatedEntity:
     {
         auto link = AddLink(entity, Str(handler.ToString()), entityId.GetInstanceId().GetRawValue());
-        line << QString("<a href='%1' style='color:#78c4fc'>OnUpdatedEntity</a> %2 from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
+        line << QString(<"OnUpdatedEntity <a href='%1' style='color:#78c4fc'>%2</a> from handler %3<br>").arg(link, Str(entityId.ToString()), Str(handler.ToString()));
     }
     break;
 
@@ -197,7 +197,7 @@ void OutputWidget::OnResponse(const Safir::Dob::ResponsePtr& response)
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/response_orange' width='12' height='12'/>&nbsp;"
-         << QString("<a href='%1' style='color:#78c4fc'>OnResponse</a> %2<br>").arg(link, Str(response->GetTypeId()));
+         << QString("OnResponse <a href='%1' style='color:#78c4fc'>%2</a><br>").arg(link, Str(response->GetTypeId()));
 
     m_pendingOutput << line.join("");
 
@@ -219,7 +219,7 @@ void OutputWidget::OnCreateRequest(const Safir::Dob::EntityPtr& request, const s
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
-         << QString("<a href='%1' style='color:#78c4fc'>OnCreateEntityRequest</a> %2, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+         << QString("OnCreateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
     m_pendingOutput << line.join("");
 
@@ -241,7 +241,7 @@ void OutputWidget::OnUpdateRequest(const Safir::Dob::EntityPtr& request, const s
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
-         << QString("<a href='%1' style='color:#78c4fc'>OnUpdateEntityRequest</a> %2, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+         << QString("OnUpdateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
     m_pendingOutput << line.join("");
 
@@ -283,7 +283,7 @@ void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
-         << QString("<a href='%1' style='color:#78c4fc'>OnServiceRequest</a> %2, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+         << QString("OnServiceRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3<br>").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
 
     m_pendingOutput << line.join("");
 
@@ -298,7 +298,7 @@ void OutputWidget::StartTimer()
     QTimer::singleShot(std::chrono::milliseconds(200), [this]
                        {
                            ui->output->setUpdatesEnabled(false);
-                           ui->output->insertHtml(m_pendingOutput.join(""));
+                           ui->output->append(m_pendingOutput.join(""));
                            ui->output->setUpdatesEnabled(true);
                            m_pendingOutput.clear();
                            auto *sb = ui->output->verticalScrollBar();
