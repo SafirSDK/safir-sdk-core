@@ -30,6 +30,7 @@
 #include <QKeyEvent>
 #include <QComboBox>
 #include <QTimer>
+#include <QScrollBar>
 #include <QSortFilterProxyModel>
 #include <Safir/Dob/Typesystem/Serialization.h>
 
@@ -121,12 +122,15 @@ void DobObjectEditWidget::Init()
     ui->objectEditTreeView->setItemDelegateForColumn(1, new DobObjectDelegate());
     ui->objectEditTreeView->setItemDelegateForColumn(3, new CheckboxDelegate());
 
-    ui->objectEditTreeView->setColumnWidth(0, 300);
-    ui->objectEditTreeView->setColumnWidth(1, 400);
+    ui->objectEditTreeView->setColumnWidth(0, 200);
+    ui->objectEditTreeView->setColumnWidth(1, 300);
     ui->objectEditTreeView->setColumnWidth(2, 80);
     ui->objectEditTreeView->setColumnWidth(3, 80);
     ui->objectEditTreeView->header()->setStretchLastSection(true);
-    ui->filterLayout->addStretch(100);
+
+    ui->filterScroller->horizontalScrollBar()->setEnabled(false);
+    ui->filterScroller->verticalScrollBar()->setEnabled(false);
+    ui->filterScroller->setStyleSheet("QScrollArea {border:none;padding:0px;}");
 
     connect(ui->objectEditTreeView->header(), &QHeaderView::sectionResized, this, &DobObjectEditWidget::OnSectionResized);
     QTimer::singleShot(1, [this]{
@@ -143,6 +147,10 @@ void DobObjectEditWidget::Init()
         ui->changedFilterCombo->setMaximumHeight(height);
         ui->changedFilterCombo->setMinimumHeight(height);
     });
+
+    connect(ui->objectEditTreeView->header(),&QHeaderView::geometriesChanged, this, &DobObjectEditWidget::PositionFilters);
+    connect(ui->objectEditTreeView->horizontalScrollBar(), &QAbstractSlider::rangeChanged, this,  &DobObjectEditWidget::PositionFilters);
+    connect(ui->objectEditTreeView->horizontalScrollBar(), &QAbstractSlider::actionTriggered, this, &DobObjectEditWidget::PositionFilters);
 
     // Handle filter changes
     connect(ui->nameFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 0, ui->nameFilterEdit); });
@@ -164,7 +172,7 @@ void DobObjectEditWidget::Init()
             return;
 
         auto p = static_cast<MemberTreeItem*>(index.data(DobObjectModel::InternalDataRole).value<void*>());
-        
+
         // Array root elements have no edit mode
         if (p->IsContainerRootItem() && p->GetMemberInfo()->collectionType == ArrayCollectionType)
         {
@@ -312,6 +320,7 @@ void DobObjectEditWidget::OnSectionResized(int index, int /*oldSize*/, int newSi
         ui->typeFilterEdit->setFixedWidth(size);
         break;
     }
+    PositionFilters();
 }
 
 void DobObjectEditWidget::ApplyFilter(const QString& filterText, int column, QWidget* filterWidget)
@@ -338,4 +347,21 @@ void DobObjectEditWidget::ApplyFilter(const QString& filterText, int column, QWi
 
     filterWidget->setStyleSheet("");
     filterWidget->setToolTip("");
+}
+
+
+void DobObjectEditWidget::PositionFilters()
+{
+    QMetaObject::invokeMethod(this,[this]
+        {
+            /*
+            m_filters.back()->setFixedWidth(std::max(0,m_table->contentsRect().width() -
+                                                     m_table->columnViewportPosition(m_table->horizontalHeader()->count() -1) -
+                                                     m_table->columnWidth(m_table->horizontalHeader()->count() -1)));
+            */
+            ui->filterArea->setFixedSize(ui->filterAreaLayout->minimumSize());
+            ui->filterScroller->setFixedHeight(ui->filterArea->height());
+            ui->filterScroller->horizontalScrollBar()->setSliderPosition(ui->objectEditTreeView->horizontalScrollBar()->sliderPosition());
+        },
+        Qt::QueuedConnection);
 }

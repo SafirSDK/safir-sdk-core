@@ -47,6 +47,10 @@ signals:
     void XmlSerializedObject(const QString& title, const QString& text);
     void JsonSerializedObject(const QString& title, const QString& text);
 
+private slots:
+    void PositionFilters();
+    void OnSectionResized(int index, int oldSize, int newSize);
+    
 private:
     Ui::DobObjectEditWidget *ui;
     DobHandler* m_dob;
@@ -59,6 +63,5 @@ private:
     bool eventFilter(QObject *object, QEvent *event) override;
 
     Safir::Dob::Typesystem::ObjectPtr BuildObject() const;
-    void OnSectionResized(int index, int oldSize, int newSize);
     void ApplyFilter(const QString& filterText, int column, QWidget* filterWidget);
 };

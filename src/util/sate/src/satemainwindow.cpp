@@ -98,10 +98,10 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     m_typesystem->Initialize(&m_dob);
 
     auto* typesystemDock = new ads::CDockWidget("Typesystem");
-    typesystemDock->setWidget(m_typesystem);
+    typesystemDock->setWidget(m_typesystem, ads::CDockWidget::ForceNoScrollArea);
     typesystemDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_dockManager->addDockWidget(ads::LeftDockWidgetArea, typesystemDock);
-    ui->menuView->addAction(typesystemDock->toggleViewAction());
+    typesystemDock->toggleViewAction()->setShortcut(QKeySequence(tr("Ctrl+T")));;
 
     m_instanceLabel = new QLabel(tr("SAFIR_INSTANCE: %1").arg(Safir::Utilities::Internal::Expansion::GetSafirInstance()));
     ui->statusbar->addPermanentWidget(m_connectedLabel);
@@ -118,10 +118,10 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     // Output window
     m_output = new OutputWidget(&m_dob, this);
     auto* outputDock = new ads::CDockWidget("Output", this);
-    outputDock->setWidget(m_output);
+    outputDock->setWidget(m_output, ads::CDockWidget::ForceNoScrollArea);
     outputDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, outputDock);
-    ui->menuView->addAction(outputDock->toggleViewAction());
+    outputDock->toggleViewAction()->setShortcut(QKeySequence(tr("Ctrl+O")));;
     connect(m_output ,&OutputWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEditWithInstance);
 
     // Connection menu
@@ -151,10 +151,26 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     connect(m_dockManager,&ads::CDockManager::focusedDockWidgetChanged,this,&SateMainWindow::OnFocusedDockWidgetChanged);
 
     //add toolbar buttons
-    QAction* resetWindows = new QAction(QIcon(":/img/icons/window_reset.png"),"Reset layout");
-    resetWindows->setToolTip("Move all tabs back to default positions");
-    connect(resetWindows, &QAction::triggered, this, &SateMainWindow::OnResetWindows);
-    m_toolBar->addAction(resetWindows);
+    m_midnightCommanderModeAction = new QAction(QIcon(":/img/icons/moon.png"), "Midnight Commander Mode");
+    m_midnightCommanderModeAction->setShortcut(QKeySequence(tr("Ctrl+M")));;
+    m_midnightCommanderModeAction->setCheckable(true);
+    m_midnightCommanderModeAction->setToolTip("Enable Midnight Commander Mode\n\n"
+                                              "Opens object edit views that are clicked on inside\n"
+                                              "instance views open in a separate tab group.");
+    connect(m_midnightCommanderModeAction, &QAction::triggered, this, &SateMainWindow::OnMidnightCommanderToggled);
+    m_toolBar->addAction(m_midnightCommanderModeAction);
+
+    m_resetWindowsAction = new QAction(QIcon(":/img/icons/window_reset.png"),"Reset layout");
+    m_resetWindowsAction->setShortcut(QKeySequence(tr("Ctrl+R")));;
+    m_resetWindowsAction->setToolTip("Move all tabs back to default positions");
+    connect(m_resetWindowsAction, &QAction::triggered, this, &SateMainWindow::OnResetWindows);
+    m_toolBar->addAction(m_resetWindowsAction);
+
+    ui->menuView->addAction(m_midnightCommanderModeAction);
+    ui->menuView->addAction(m_resetWindowsAction);
+    ui->menuView->addSeparator();
+    ui->menuView->addAction(typesystemDock->toggleViewAction());
+    ui->menuView->addAction(outputDock->toggleViewAction());
 }
 
 SateMainWindow::~SateMainWindow()
@@ -290,13 +306,13 @@ void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
     auto oe = new DobObjectEditWidget(&m_dob, typeId, this);
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe, false);
 }
 
 void SateMainWindow::OnOpenParameterViewer(const int64_t typeId)
 {
     auto paramWidget = new ParametersWidget(typeId, this);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, paramWidget);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, paramWidget, false);
 }
 
 void SateMainWindow::OnOpenObjectEditWithInstance(int64_t typeId,
@@ -307,7 +323,7 @@ void SateMainWindow::OnOpenObjectEditWithInstance(int64_t typeId,
     auto oe = new DobObjectEditWidget(&m_dob, typeId, channelHandler, instance, object, this);
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe, m_midnightCommanderModeAction->isChecked());
 }
 
 void SateMainWindow::OnOpenDouFile(const int64_t typeId)
@@ -345,7 +361,7 @@ void SateMainWindow::AddXmlPage(const QString& title, const QString& text)
 
     auto textBrowser = new  QTextBrowser();
     textBrowser->setPlainText(xmlFormatted);
-    AddTab(title, textBrowser);
+    AddTab(title, textBrowser, false);
 }
 
 void SateMainWindow::AddJsonPage(const QString& title, const QString& text)
@@ -354,16 +370,33 @@ void SateMainWindow::AddJsonPage(const QString& title, const QString& text)
     QString formattedJsonString = doc.toJson(QJsonDocument::Indented);
     auto textBrowser = new  QTextBrowser();
     textBrowser->setPlainText(formattedJsonString);
-    AddTab(title, textBrowser);
+    AddTab(title, textBrowser, false);
 }
 
-void SateMainWindow::AddTab(const QString& title, QWidget* widget)
+void SateMainWindow::AddTab(const QString& title,
+                            QWidget* widget,
+                            const bool openInRightHandPanel)
 {
     auto* dock = new ads::CDockWidget(title);
     widget->setParent(dock);
-    dock->setWidget(widget);
+    dock->setWidget(widget, ads::CDockWidget::ForceNoScrollArea);
     dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
-    m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
+    if (openInRightHandPanel)
+    {
+        if (m_rightDockArea == nullptr)
+        {
+            m_rightDockArea = m_dockManager->addDockWidget(ads::RightDockWidgetArea, dock, m_centralDockArea);
+            connect(m_rightDockArea, &QObject::destroyed, this, [this]{m_rightDockArea = nullptr;});
+        }
+        else
+        {
+            m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_rightDockArea);
+        }
+    }
+    else
+    {
+        m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
+    }
 }
 
 void SateMainWindow::OnDarkMode()
@@ -532,5 +565,22 @@ void SateMainWindow::OnResetWindows()
     if (focusedBefore != nullptr)
     {
         focusedBefore->raise();
+    }
+
+    m_midnightCommanderModeAction->setChecked(false);
+}
+
+
+void SateMainWindow::OnMidnightCommanderToggled()
+{
+    if (m_rightDockArea && !m_midnightCommanderModeAction->isChecked())
+    {
+        for (auto* dock: m_rightDockArea->dockWidgets())
+        {
+            m_dockManager->removeDockWidget(dock);
+            m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
+        }
+        m_rightDockArea->closeArea();
+        m_rightDockArea = nullptr;
     }
 }

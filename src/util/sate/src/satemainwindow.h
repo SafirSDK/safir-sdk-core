@@ -73,6 +73,7 @@ private slots:
     void OnFocusedDockWidgetChanged(ads::CDockWidget* old, ads::CDockWidget* now);
     void OnStatusBarInfoChanged();
     void OnResetWindows();
+    void OnMidnightCommanderToggled();
 private:
     void OpenInstanceViewer(const int64_t typeId,
                             const bool includeSubclasses,
@@ -81,16 +82,19 @@ private:
     void AddXmlPage(const QString& title, const QString& text);
     void AddJsonPage(const QString& title, const QString& text);
 
-    void AddTab(const QString& title, QWidget* widget);
+    void AddTab(const QString& title, QWidget* widget, const bool openInRightHandPanel);
 
     Ui::SateMainWindow *ui;
     QToolBar* const m_toolBar;
     QLabel* m_instanceLabel = nullptr;
     QLabel* const m_connectedLabel;
 
-    ads::CDockManager* m_dockManager;
-    ads::CDockAreaWidget* m_centralDockArea;
+    ads::CDockManager* m_dockManager = nullptr;
+    ads::CDockAreaWidget* m_centralDockArea = nullptr;
+    ads::CDockAreaWidget* m_rightDockArea = nullptr;
 
+    QAction* m_midnightCommanderModeAction = nullptr;
+    QAction* m_resetWindowsAction = nullptr;
     DobHandler m_dob;
     bool m_connected = false;
     ConnectDialog* m_connectDialog;

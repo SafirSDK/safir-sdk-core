@@ -28,5 +28,6 @@
         <file>icons/error.png</file>
         <file>icons/bug.png</file>
         <file>icons/info.png</file>
+        <file>icons/moon.png</file>
     </qresource>
 </RCC>
