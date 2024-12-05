@@ -83,8 +83,7 @@ class EntityOwner
     , public Safir::Dob::MessageSender
 {
 public:
-    explicit EntityOwner(boost::asio::io_service& ioService)
-        : m_ioService(ioService)
+    explicit EntityOwner()
     {
         m_connection.Attach();
         m_connection.RegisterEntityHandler(DoseTest::GlobalEntity::ClassTypeId,
@@ -223,7 +222,6 @@ private:
     void OnNotMessageOverflow() override {}
 
     Safir::Dob::SecondaryConnection m_connection;
-    boost::asio::io_service& m_ioService;
 };
 
 int main()
@@ -247,7 +245,7 @@ int main()
                         &stopHandler,
                         &dispatcher);
 
-        EntityOwner owner(ioService);
+        EntityOwner owner;
 
         owner.SetSmall();
         owner.SetBig();

@@ -26,13 +26,16 @@
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 #include "typesystemrepository.h"
+#include "typesystemrepository.h"
+
+class DobHandler;
 
 class TypesystemNamespaceModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    explicit TypesystemNamespaceModel(QObject* parent);
+    explicit TypesystemNamespaceModel(DobHandler* dob, QObject* parent);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -50,4 +53,6 @@ public:
 private:
     // Get a valid index in children or classes vector of ns. If bool is true its a namespace, else class
     std::pair<int, bool> RowIndex(int row, const TypesystemRepository::DobNamespace* ns) const;
+
+    DobHandler* m_dob;
 };

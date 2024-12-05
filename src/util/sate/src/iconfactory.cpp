@@ -22,10 +22,71 @@
 *
 ******************************************************************************/
 #include "iconfactory.h"
+#include <QPixmap>
+#include <QPainter>
+#include <QColor>
+#include <QPoint>
 
-void IconFactory::LoadIcons()
+namespace
 {
-    // TODO: cache icons
+QPixmap GetIconPixmap(TypesystemRepository::DobBaseClass baseClass, bool hasLetter)
+{
+    switch (baseClass)
+    {
+    case TypesystemRepository::Entity:
+        return QPixmap(":/img/icons/entity_orange");
+    case TypesystemRepository::Message:
+        return QPixmap(":/img/icons/message_orange");
+    case TypesystemRepository::Service: // For visibility a special version of gearIcon is used if letter is to be drawn
+        return hasLetter ? QPixmap(":/img/icons/gear_orange") : QPixmap(":/img/icons/gear_orange_filled");
+    case TypesystemRepository::Response:
+        return QPixmap(":/img/icons/response_orange.png");
+    case TypesystemRepository::Parametrization:
+        return QPixmap(":/img/icons/parameters_orange.png");
+    case TypesystemRepository::Item:
+        return QPixmap(":/img/icons/item_orange.png");
+    case TypesystemRepository::Struct:
+        return QPixmap(":/img/icons/struct_orange.png");
+    case TypesystemRepository::Object:
+        return {};
+    default:
+        return {};
+    }
+}
+
+QPixmap GetLetterPixmap(char letter)
+{
+    if (letter == 's')
+    {
+        return QPixmap(":/img/icons/s_black");
+
+    }
+    else if (letter == 'r')
+    {
+        return QPixmap(":/img/icons/r_black");
+    }
+    else if (letter == 'p')
+    {
+        return QPixmap(":/img/icons/p_black");
+    }
+
+    return {};
+}
+
+QPoint GetOffset(TypesystemRepository::DobBaseClass baseClass)
+{
+    switch (baseClass)
+    {
+    case TypesystemRepository::Entity:
+        return QPoint{4, 13};
+    case TypesystemRepository::Message:
+        return QPoint{11, 5};
+    case TypesystemRepository::Service:
+        return QPoint{11, 7};
+    default:
+        return {};
+    }
+}
 }
 
 QIcon IconFactory::GetNamespaceIcon()
@@ -38,27 +99,16 @@ QIcon IconFactory::GetEnumIcon()
     return QIcon(":/img/icons/enum_orange.png");
 }
 
-QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass)
+QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass, char letter)
 {
-    switch (baseClass)
+    auto hasLetter = letter != ' ';
+    auto pixmap = GetIconPixmap(baseClass, hasLetter);
+    if (hasLetter)
     {
-    case TypesystemRepository::Entity:
-        return QIcon(":/img/icons/entity_orange");
-    case TypesystemRepository::Message:
-        return QIcon(":/img/icons/message_orange");
-    case TypesystemRepository::Service:
-        return QIcon(":/img/icons/gear_orange");
-    case TypesystemRepository::Response:
-        return QIcon(":/img/icons/response_orange.png");
-    case TypesystemRepository::Parametrization:
-        return QIcon(":/img/icons/parameters_orange.png");
-    case TypesystemRepository::Item:
-        return QIcon(":/img/icons/item_orange.png");
-    case TypesystemRepository::Struct:
-        return QIcon(":/img/icons/struct_orange.png");
-    case TypesystemRepository::Object:
-        return {};
-    default:
-        return {};
+        auto l = GetLetterPixmap(letter);
+        auto offset = GetOffset(baseClass);
+        QPainter painter(&pixmap);
+        painter.drawPixmap(offset, l);
     }
+    return QIcon(pixmap);
 }

@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "typesysteminheritancemodel.h"
 #include "iconfactory.h"
+#include "dobhandler.h"
 #include <QSize>
 #include <QDebug>
 #include <QIcon>
@@ -41,9 +42,10 @@ namespace
 
 }
 
-TypesystemInheritanceModel::TypesystemInheritanceModel(QObject* parent)
+TypesystemInheritanceModel::TypesystemInheritanceModel(DobHandler* dob, QObject* parent)
     : QAbstractItemModel(parent)
     , m_rootEnum(new TypesystemRepository::DobEnum())
+    , m_dob(dob)
 {
     m_rootEnum->name = "Enums";
 }
@@ -188,7 +190,19 @@ QVariant TypesystemInheritanceModel::data(const QModelIndex &index, int role) co
             return ptr->name;
 
         case Qt::DecorationRole:
+        {
+            auto reg = m_dob->GetMyRegistration(ptr->typeId);
+            if (reg != nullptr)
+            {
+                char letter = reg->pending ? 'p' : 'r';
+                return IconFactory::GetIcon(ptr->dobBaseClass, letter);
+            }
+            if (m_dob->GetMySubscription(ptr->typeId) != nullptr)
+            {
+                return IconFactory::GetIcon(ptr->dobBaseClass, 's');
+            }
             return IconFactory::GetIcon(ptr->dobBaseClass);
+        }
 
         case TypesystemRepository::DobBaseClassRole:
             return ptr->dobBaseClass;

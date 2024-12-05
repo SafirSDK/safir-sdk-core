@@ -10,8 +10,6 @@
         <file>icons/parameters_orange.png</file>
         <file>icons/response.png</file>
         <file>icons/response_orange.png</file>
-        <file>icons/service.png</file>
-        <file>icons/service_orange.png</file>
         <file>icons/entity.png</file>
         <file>icons/entity_orange.png</file>
         <file>icons/sate.ico</file>
@@ -29,5 +27,9 @@
         <file>icons/bug.png</file>
         <file>icons/info.png</file>
         <file>icons/moon.png</file>
+        <file>icons/s_black.png</file>
+        <file>icons/p_black.png</file>
+        <file>icons/r_black.png</file>
+        <file>icons/gear_orange_filled.png</file>
     </qresource>
 </RCC>

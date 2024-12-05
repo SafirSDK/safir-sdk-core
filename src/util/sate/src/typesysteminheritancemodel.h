@@ -27,12 +27,14 @@
 #include <QSortFilterProxyModel>
 #include "typesystemrepository.h"
 
+class DobHandler;
+
 class TypesystemInheritanceModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    explicit TypesystemInheritanceModel(QObject* parent);
+    explicit TypesystemInheritanceModel(DobHandler* dob, QObject* parent);
 
     ~TypesystemInheritanceModel();
 
@@ -51,4 +53,6 @@ public:
 
 private:
     std::unique_ptr<TypesystemRepository::DobEnum> m_rootEnum;
+
+    DobHandler* m_dob;
 };

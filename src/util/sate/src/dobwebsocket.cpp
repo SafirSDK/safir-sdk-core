@@ -1025,16 +1025,15 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
     }
     else if (method == "onCompletedRegistration")
     {
-        // TODO
-        // auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
-        // auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
-
-        // emit DobInterface::Output("Registration completed: " + Str(typeId) + ", handler=" + Str(handler.ToString()));
-
-        // // TODO: remove pending flag in myReg
-        // //DobInterface::RegistrationInfo info{typeId, handler, false, false, GetInstanceIdPolicy(typeId, handlerId)};
-        // emit DobInterface::OnRegistered(info);
-
+        auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
+        auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
+        emit DobInterface::Output("Registration completed: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
+        auto reg = DobInterface::GetMyRegistration(typeId, handler);
+        if (reg != nullptr)
+        {
+            reg->pending = false;
+            emit DobInterface::OnRegistered(*reg);
+        }
     }
     else if (method == "onInitialInjectionsDone")
     {

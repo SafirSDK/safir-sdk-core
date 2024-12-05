@@ -100,15 +100,15 @@ void TypesystemWidget::Initialize(DobHandler* dob)
 {
     m_dob = dob;
     m_inheritanceProxyModel = new TypesystemFilterProxyModel(this);
-    m_inheritanceProxyModel->setSourceModel(new TypesystemInheritanceModel(this));
+    m_inheritanceProxyModel->setSourceModel(new TypesystemInheritanceModel(m_dob, this));
     m_namespaceProxyModel = new TypesystemFilterProxyModel(this);
-    m_namespaceProxyModel->setSourceModel(new TypesystemNamespaceModel(this));
+    m_namespaceProxyModel->setSourceModel(new TypesystemNamespaceModel(m_dob, this));
 
     SetTreeViewModel(true);
 
     connect(ui->filterLineEdit, &QLineEdit::textChanged, this, [this](const QString& f)
     {
-            ApplyFilter(f);
+        ApplyFilter(f);
     });
 
     connect(ui->treeView, &QTreeView::doubleClicked, this, [this](const QModelIndex& ix)

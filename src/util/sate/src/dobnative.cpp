@@ -476,8 +476,12 @@ void DobNative::OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typ
 void DobNative::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId)
 {
     emit DobInterface::Output("Registration completed: " + Str(typeId) + Str(handlerId), QtInfoMsg);
-    DobInterface::RegistrationInfo info{typeId, handlerId, false, false, GetInstanceIdPolicy(typeId, handlerId)};
-    emit DobInterface::OnRegistered(info);
+    auto reg = DobInterface::GetMyRegistration(typeId, handlerId);
+    if (reg != nullptr)
+    {
+        reg->pending = false;
+        emit DobInterface::OnRegistered(*reg);
+    }
 }
 
 // ServiceRequestBase interface

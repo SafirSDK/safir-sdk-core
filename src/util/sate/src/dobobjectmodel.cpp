@@ -178,7 +178,7 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
             auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
             auto isContainer = item->GetMemberInfo()->collectionType != SingleValueCollectionType;
 
-            // Blue color if item name is a key, i.e container but not rootItem
+            // Blue color if item name is a key, i.e container but not rootItem #74C0FC
             return (isContainer && !item->IsContainerRootItem()) ? QColor(116, 192, 252) :QVariant{};
         }
         if (index.column() == 1)

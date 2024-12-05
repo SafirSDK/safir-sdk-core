@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "typesystemnamespacemodel.h"
 #include "iconfactory.h"
+#include "dobhandler.h"
 #include <QDebug>
 
 namespace
@@ -37,8 +38,9 @@ namespace
 
 }
 
-TypesystemNamespaceModel::TypesystemNamespaceModel(QObject* parent)
+TypesystemNamespaceModel::TypesystemNamespaceModel(DobHandler* dob, QObject* parent)
     : QAbstractItemModel(parent)
+    , m_dob(dob)
 {
 }
 

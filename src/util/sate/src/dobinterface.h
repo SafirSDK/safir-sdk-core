@@ -123,6 +123,12 @@ protected:
     std::vector<DobInterface::RegistrationInfo> m_registrations;
     std::vector<DobInterface::SubscriptionInfo> m_subscriptions;
 
+    RegistrationInfo* GetMyRegistration(int64_t typeId, const sdt::HandlerId& handler)
+    {
+        auto it = std::find_if(m_registrations.begin(), m_registrations.end(), [typeId, &handler](const auto& ri){return ri.typeId == typeId && ri.handler == handler;});
+        return it == m_registrations.end() ? nullptr : &(*it);
+    }
+
     void RemoveRegistrations(int64_t typeId)
     {
         m_registrations.erase(std::remove_if(m_registrations.begin(), m_registrations.end(), [typeId](const auto& v){return v.typeId == typeId;}), m_registrations.end());
