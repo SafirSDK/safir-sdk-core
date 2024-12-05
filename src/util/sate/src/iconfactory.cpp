@@ -38,7 +38,7 @@ QPixmap GetIconPixmap(TypesystemRepository::DobBaseClass baseClass, bool hasLett
     case TypesystemRepository::Message:
         return QPixmap(":/img/icons/message_orange");
     case TypesystemRepository::Service: // For visibility a special version of gearIcon is used if letter is to be drawn
-        return hasLetter ? QPixmap(":/img/icons/gear_orange") : QPixmap(":/img/icons/gear_orange_filled");
+        return hasLetter ? QPixmap(":/img/icons/gear_orange_filled") : QPixmap(":/img/icons/gear_orange");
     case TypesystemRepository::Response:
         return QPixmap(":/img/icons/response_orange.png");
     case TypesystemRepository::Parametrization:

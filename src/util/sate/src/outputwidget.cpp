@@ -63,6 +63,8 @@ OutputWidget::OutputWidget(DobHandler* dob, QWidget *parent)
     SetToolTip(ui->messagesToolButton);
     SetToolTip(ui->requestToolButton);
     SetToolTip(ui->responseToolButton);
+
+    connect(ui->clearToolButton, &QToolButton::clicked, [this] { ui->output->clear(); });
 }
 
 OutputWidget::~OutputWidget()
