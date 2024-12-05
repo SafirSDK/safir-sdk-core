@@ -237,7 +237,7 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     }
     else if (chosenAction == subscribeMessage)
     {
-        emit OpenMessageInstanceViewer(typeId, sdt::ChannelId::ALL_CHANNELS, true);
+        emit OpenMessageInstanceViewer(typeId, sdt::ChannelId::ALL_CHANNELS, false);
     }
     else if (chosenAction == subscribeMessageEllipsis)
     {

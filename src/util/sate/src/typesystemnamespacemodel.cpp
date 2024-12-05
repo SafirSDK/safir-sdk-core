@@ -168,7 +168,21 @@ QVariant TypesystemNamespaceModel::data(const QModelIndex &index, int role) cons
     {
         switch (du->category)
         {
-        case TypesystemRepository::Class: return IconFactory::GetIcon(static_cast<const TypesystemRepository::DobClass*>(du)->dobBaseClass);
+        case TypesystemRepository::Class:
+        {
+            auto cls = static_cast<const TypesystemRepository::DobClass*>(du);
+            auto reg = m_dob->GetMyRegistration(cls->typeId);
+            if (reg != nullptr)
+            {
+                return IconFactory::GetIcon(cls->dobBaseClass, reg->pending ? IconFactory::Pending : IconFactory::Register);
+            }
+            auto sub = m_dob->GetMySubscription(cls->typeId);
+            if (sub != nullptr)
+            {
+                return IconFactory::GetIcon(cls->dobBaseClass, sub->includeSubclasses ? IconFactory::SubscribeRecursive : IconFactory::Subscribe);
+            }
+            return IconFactory::GetIcon(cls->dobBaseClass);
+        }
         case TypesystemRepository::Enum: return IconFactory::GetEnumIcon();
         case TypesystemRepository::Namespace: return IconFactory::GetNamespaceIcon();
         default: return {};

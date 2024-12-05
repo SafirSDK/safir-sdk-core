@@ -194,12 +194,12 @@ QVariant TypesystemInheritanceModel::data(const QModelIndex &index, int role) co
             auto reg = m_dob->GetMyRegistration(ptr->typeId);
             if (reg != nullptr)
             {
-                char letter = reg->pending ? 'p' : 'r';
-                return IconFactory::GetIcon(ptr->dobBaseClass, letter);
+                return IconFactory::GetIcon(ptr->dobBaseClass, reg->pending ? IconFactory::Pending : IconFactory::Register);
             }
-            if (m_dob->GetMySubscription(ptr->typeId) != nullptr)
+            auto sub = m_dob->GetMySubscription(ptr->typeId);
+            if (sub != nullptr)
             {
-                return IconFactory::GetIcon(ptr->dobBaseClass, 's');
+                return IconFactory::GetIcon(ptr->dobBaseClass, sub->includeSubclasses ? IconFactory::SubscribeRecursive : IconFactory::Subscribe);
             }
             return IconFactory::GetIcon(ptr->dobBaseClass);
         }

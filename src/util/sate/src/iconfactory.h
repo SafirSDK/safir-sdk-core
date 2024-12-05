@@ -30,9 +30,12 @@
 class IconFactory
 {
 public:
+
+    enum Modifier {None, Register, Pending, Subscribe, SubscribeRecursive};
+
     static QIcon GetNamespaceIcon();
     static QIcon GetEnumIcon();
-    static QIcon GetIcon(TypesystemRepository::DobBaseClass baseClass, char letter = ' ');
+    static QIcon GetIcon(TypesystemRepository::DobBaseClass baseClass, Modifier modifier = IconFactory::None);
 
 private:
     static std::map<QString, QIcon> m_icons;

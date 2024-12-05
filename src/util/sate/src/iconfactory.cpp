@@ -29,16 +29,16 @@
 
 namespace
 {
-QPixmap GetIconPixmap(TypesystemRepository::DobBaseClass baseClass, bool hasLetter)
+QPixmap GetIconPixmap(TypesystemRepository::DobBaseClass baseClass, IconFactory::Modifier modifier)
 {
     switch (baseClass)
     {
     case TypesystemRepository::Entity:
-        return QPixmap(":/img/icons/entity_orange");
+        return modifier == IconFactory::SubscribeRecursive ? QPixmap(":/img/icons/entity_orange_filled") : QPixmap(":/img/icons/entity_orange");
     case TypesystemRepository::Message:
         return QPixmap(":/img/icons/message_orange");
-    case TypesystemRepository::Service: // For visibility a special version of gearIcon is used if letter is to be drawn
-        return hasLetter ? QPixmap(":/img/icons/gear_orange_filled") : QPixmap(":/img/icons/gear_orange");
+    case TypesystemRepository::Service:
+        return modifier != IconFactory::None ? QPixmap(":/img/icons/gear_orange_filled") : QPixmap(":/img/icons/gear_orange");
     case TypesystemRepository::Response:
         return QPixmap(":/img/icons/response_orange.png");
     case TypesystemRepository::Parametrization:
@@ -54,33 +54,26 @@ QPixmap GetIconPixmap(TypesystemRepository::DobBaseClass baseClass, bool hasLett
     }
 }
 
-QPixmap GetLetterPixmap(char letter)
+QPixmap GetModifierPixmap(IconFactory::Modifier modifier)
 {
-    if (letter == 's')
+    switch (modifier)
     {
-        return QPixmap(":/img/icons/s_black");
-
+    case IconFactory::None: return {};
+    case IconFactory::Register: return QPixmap(":/img/icons/r_black");
+    case IconFactory::Pending: return QPixmap(":/img/icons/p_black");
+    case IconFactory::Subscribe: return QPixmap(":/img/icons/s_black");
+    case IconFactory::SubscribeRecursive: return QPixmap(":/img/icons/s_plus_black");
     }
-    else if (letter == 'r')
-    {
-        return QPixmap(":/img/icons/r_black");
-    }
-    else if (letter == 'p')
-    {
-        return QPixmap(":/img/icons/p_black");
-    }
-
-    return {};
 }
 
-QPoint GetOffset(TypesystemRepository::DobBaseClass baseClass)
+QPoint GetOffset(TypesystemRepository::DobBaseClass baseClass, IconFactory::Modifier modifier)
 {
     switch (baseClass)
     {
     case TypesystemRepository::Entity:
         return QPoint{4, 13};
     case TypesystemRepository::Message:
-        return QPoint{11, 5};
+        return modifier == IconFactory::SubscribeRecursive ? QPoint{8, 5} : QPoint{11, 5};
     case TypesystemRepository::Service:
         return QPoint{11, 7};
     default:
@@ -99,16 +92,15 @@ QIcon IconFactory::GetEnumIcon()
     return QIcon(":/img/icons/enum_orange.png");
 }
 
-QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass, char letter)
+QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass, IconFactory::Modifier modifier)
 {
-    auto hasLetter = letter != ' ';
-    auto pixmap = GetIconPixmap(baseClass, hasLetter);
-    if (hasLetter)
+    auto pixmap = GetIconPixmap(baseClass, modifier);
+    if (modifier != IconFactory::None)
     {
-        auto l = GetLetterPixmap(letter);
-        auto offset = GetOffset(baseClass);
+        auto letter = GetModifierPixmap(modifier);
+        auto offset = GetOffset(baseClass, modifier);
         QPainter painter(&pixmap);
-        painter.drawPixmap(offset, l);
+        painter.drawPixmap(offset, letter);
     }
     return QIcon(pixmap);
 }

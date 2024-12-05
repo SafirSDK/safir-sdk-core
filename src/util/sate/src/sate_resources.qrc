@@ -31,5 +31,8 @@
         <file>icons/p_black.png</file>
         <file>icons/r_black.png</file>
         <file>icons/gear_orange_filled.png</file>
+        <file>icons/clear.png</file>
+        <file>icons/s_plus_black.png</file>
+        <file>icons/entity_orange_filled.png</file>
     </qresource>
 </RCC>
