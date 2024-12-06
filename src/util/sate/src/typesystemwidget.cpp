@@ -243,3 +243,15 @@ void TypesystemWidget::ApplyFilter(const QString& filterText)
         m_namespaceProxyModel->SetFilter("");
     }
 }
+
+void TypesystemWidget::LocateType(int64_t typeId)
+{
+    auto startIndex = ui->treeView->model()->index(0, 0);
+    auto ix = ui->treeView->model()->match(startIndex, TypesystemRepository::DobTypeIdRole, QVariant::fromValue(typeId), 1, Qt::MatchFlags(Qt::MatchExactly | Qt::MatchRecursive));
+    if (ix.size() > 0 && ix.constFirst().isValid())
+    {
+        ui->filterLineEdit->clear();
+        ui->treeView->collapseAll();
+        ExpandTo(ix.constFirst());
+    }
+}

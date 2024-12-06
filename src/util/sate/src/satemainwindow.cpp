@@ -658,9 +658,8 @@ void SateMainWindow::OnFindType()
     if (focused != nullptr)
     {
         const QString name = focused->tabWidget()->text().split(" ")[0];
-
-        //TODO: Joel, do magic here!
-        qDebug() << "OnFindType:" << name;
+        auto typeId = sdt::Operations::GetTypeId(name.toStdWString());
+        m_typesystem->LocateType(typeId);
     }
 
 }

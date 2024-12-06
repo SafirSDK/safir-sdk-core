@@ -43,6 +43,8 @@ public:
 
     void Initialize(DobHandler* dob);
 
+    void LocateType(int64_t typeId);
+
 signals:
     void OpenObjectEdit(int64_t typeId);
     void OpenEntityInstanceViewer(int64_t typeId, bool includeSubclasses);
