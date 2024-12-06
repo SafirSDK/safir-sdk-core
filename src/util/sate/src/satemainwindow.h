@@ -29,9 +29,11 @@
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 #  include <qt6advanceddocking/DockManager.h>
 #  include <qt6advanceddocking/DockAreaWidget.h>
+#  include <qt6advanceddocking/DockWidgetTab.h>
 #else
 #  include <qt5advanceddocking/DockManager.h>
 #  include <qt5advanceddocking/DockAreaWidget.h>
+#  include <qt5advanceddocking/DockWidgetTab.h>
 #endif
 
 #include "dobhandler.h"
@@ -76,7 +78,7 @@ private slots:
     void OnMidnightCommanderToggled();
     void OnCloseCurrentTab();
     void OnCloseAllTabs();
-
+    void OnFindType();
 private:
     void OpenInstanceViewer(const int64_t typeId,
                             const bool includeSubclasses,

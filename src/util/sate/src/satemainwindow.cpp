@@ -165,6 +165,11 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     quitAction->setToolTip("Quit Sate");
     connect(quitAction, &QAction::triggered, this, []{QApplication::quit();});
 
+    auto* showTypeInTreeAction = new QAction(QIcon(":/img/icons/magnifying-glass-location-solid.svg"),"Find tab type in tree");
+    showTypeInTreeAction->setShortcut(QKeySequence(tr("Ctrl+F")));;
+    showTypeInTreeAction->setToolTip("Find the type of the current tab in the typesystem tree view.");
+    connect(showTypeInTreeAction, &QAction::triggered, this, &SateMainWindow::OnFindType);
+
     
     m_midnightCommanderModeAction = new QAction(QIcon(":/img/icons/moon.png"), "Midnight Commander Mode");
     m_midnightCommanderModeAction->setShortcut(QKeySequence(tr("Ctrl+M")));;
@@ -179,11 +184,13 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     m_resetWindowsAction->setToolTip("Move all tabs back to default positions");
     connect(m_resetWindowsAction, &QAction::triggered, this, &SateMainWindow::OnResetWindows);
 
+    m_toolBar->addAction(showTypeInTreeAction);
     m_toolBar->addAction(m_midnightCommanderModeAction);
     m_toolBar->addAction(m_resetWindowsAction);
 
     ui->menuView->addAction(m_midnightCommanderModeAction);
     ui->menuView->addAction(m_resetWindowsAction);
+    ui->menuView->addAction(showTypeInTreeAction);
     ui->menuView->addAction(closeCurrentTabAction);
     ui->menuView->addAction(closeAllTabsAction);
     ui->menuView->addSeparator();
@@ -641,6 +648,19 @@ void SateMainWindow::OnCloseAllTabs()
             qDebug() << "Closing dock" << dockName;
             dock->deleteDockWidget();
         }
+    }
+
+}
+
+void SateMainWindow::OnFindType()
+{
+    auto* focused = m_dockManager->focusedDockWidget();
+    if (focused != nullptr)
+    {
+        const QString name = focused->tabWidget()->text().split(" ")[0];
+
+        //TODO: Joel, do magic here!
+        qDebug() << "OnFindType:" << name;
     }
 
 }
