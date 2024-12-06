@@ -170,8 +170,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     showTypeInTreeAction->setToolTip("Find the type of the current tab in the typesystem tree view.");
     connect(showTypeInTreeAction, &QAction::triggered, this, &SateMainWindow::OnFindType);
 
-    
-    m_midnightCommanderModeAction = new QAction(QIcon(":/img/icons/moon.png"), "Midnight Commander Mode");
+    m_midnightCommanderModeAction = new QAction(QIcon(":/img/icons/moon-solid.svg"), "Midnight Commander Mode");
     m_midnightCommanderModeAction->setShortcut(QKeySequence(tr("Ctrl+M")));;
     m_midnightCommanderModeAction->setCheckable(true);
     m_midnightCommanderModeAction->setToolTip("Enable Midnight Commander Mode\n\n"
