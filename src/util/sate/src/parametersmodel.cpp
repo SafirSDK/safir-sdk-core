@@ -207,9 +207,9 @@ QVariant ParametersModel::data(const QModelIndex &index, int role) const
 
 void ParametersModel::SetupModel()
 {
-    TypesystemRepository::DobMember m;
-    m.name = "root";
-    m_parameterMembers.push_back(m);
+    TypesystemRepository::DobMember rootM;
+    rootM.name = "root";
+    m_parameterMembers.push_back(rootM);
     m_invisibleRootItem = std::make_unique<MemberTreeItem>(nullptr, &m_parameterMembers.back());
 
     sdt::MemberType parameterType;

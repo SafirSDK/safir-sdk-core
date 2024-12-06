@@ -64,6 +64,8 @@ QPixmap GetModifierPixmap(IconFactory::Modifier modifier)
     case IconFactory::Subscribe: return QPixmap(":/img/icons/s_black");
     case IconFactory::SubscribeRecursive: return QPixmap(":/img/icons/s_plus_black");
     }
+
+    return {};
 }
 
 QPoint GetOffset(TypesystemRepository::DobBaseClass baseClass, IconFactory::Modifier modifier)
