@@ -303,6 +303,12 @@ bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, in
         // --- Handle setNull ---
         if (value.isNull())
         {
+            if (item->IsContainerRootItem() &&
+                (item->GetMemberInfo()->collectionType == SequenceCollectionType || item->GetMemberInfo()->collectionType == DictionaryCollectionType))
+            {
+                return false; // We only clear sequences or dictionaries by DeleteItemRole
+            }
+
             if (!item->IsNull())
             {
                 // Set value to null
@@ -345,8 +351,12 @@ bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, in
         // --- Handle init object value ---
         if (item->IsObjectRootItem())
         {
-            auto parentIndex = createIndex(index.row(), 0, index.internalPointer());
             auto className = value.toString();
+            if (!item->IsNull() && item->GetMemberClass()->name == className)
+            {
+                return false; // Change to same type is ignored.
+            }
+            auto parentIndex = createIndex(index.row(), 0, index.internalPointer());
             auto numberOfMembers = TypesystemRepository::Instance().GetClass(className)->totalNumberOfMembers;
             if (childCount < numberOfMembers)
             {
