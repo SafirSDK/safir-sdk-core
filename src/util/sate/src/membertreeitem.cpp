@@ -647,6 +647,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
         return;
     }
 
+    int count = 0;
     switch (m_member->memberType)
     {
     case BooleanMemberType:
@@ -657,6 +658,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = (*it) ? "true" : "false";
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -670,6 +672,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::fromStdWString(Operations::GetEnumerationValueName(m_member->memberTypeId, c->GetOrdinal(i)));
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -683,6 +686,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::number(*it);
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -696,6 +700,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::number(*it);
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -709,6 +714,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::number(*it);
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -723,6 +729,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::number(*it);
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -736,6 +743,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = TypeIdToString(*it);
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -749,6 +757,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::fromStdWString(it->ToString());
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -762,6 +771,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = TypeIdToString(it->GetTypeId()) + " : " + QString::fromStdWString(it->GetInstanceId().ToString());
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -775,6 +785,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::fromStdWString(it->ToString());
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -788,6 +799,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::fromStdWString(it->ToString());
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -801,6 +813,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::fromStdWString(*it);
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -815,6 +828,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             seqItem->SetNull(false);
             auto b64 = Safir::Dob::Typesystem::Utilities::BinaryToBase64(*it);
             seqItem->m_value = QString::fromStdString(b64);
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -846,6 +860,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::number(*it);
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -871,12 +886,13 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
     case Volt64MemberType:
     case Watt64MemberType:
     {
-        const auto c = static_cast<const Float64SequenceContainer*>(&cb);
+        const auto c = static_cast<const Float64SequenceContainer*>(&cb);        
         for (auto it = c->begin(); it != c->end(); ++it)
         {
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
             seqItem->m_value = QString::number(*it);
+            seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
     }
@@ -888,9 +904,11 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
         for (size_t i = 0; i < objCont->size(); ++i)
         {
             const auto object = objCont->GetObj(i);
-            m_cls = TypesystemRepository::Instance().GetClass(object->GetTypeId());
-            m_value = QString("<%1>").arg(m_cls->name);
-            SetupObject(object);
+            const auto cls = TypesystemRepository::Instance().GetClass(object->GetTypeId());
+            auto seqItem = std::make_unique<MemberTreeItem>(cls, object);
+            seqItem->SetMemberInfo(m_member);
+            seqItem->m_key = QString::number(count++);
+            AddChild(std::move(seqItem));
         }
     }
     break;
@@ -1091,7 +1109,7 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
             {
                 const auto c = static_cast<const BinaryContainer*>(&valCont);
                 auto b64 = Safir::Dob::Typesystem::Utilities::BinaryToBase64(c->GetVal());
-                m_value = QString::fromStdString(b64);
+                dictItem->m_value = QString::fromStdString(b64);
             }
             break;
 
@@ -1149,10 +1167,9 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
             {
                 const auto objCont = static_cast<const ObjectContainerBase*>(&valCont);
                 auto object = objCont->GetObjectPointer();
-                auto objTypeId = object->GetTypeId();
-                m_cls = TypesystemRepository::Instance().GetClass(objTypeId);
-                dictItem->m_value = QString("<%1>").arg(m_cls->name);
-                SetupObject(object);
+                dictItem->m_cls = TypesystemRepository::Instance().GetClass(object->GetTypeId());
+                dictItem->m_value = dictItem->m_cls->name;
+                dictItem->SetupObject(object);
             }
             break;
             }

@@ -686,7 +686,7 @@ void DobObjectBuilder::SetDictionaryValues(const MemberTreeItem* mi, Safir::Dob:
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto key = m->GetKey();
+            auto key = m->GetKey().toStdWString();
             auto& c = dc->InsertNull(key);
             SetSingleValue(m, c);
         }
