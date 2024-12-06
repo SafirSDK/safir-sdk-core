@@ -304,7 +304,7 @@ void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const
 
 void OutputWidget::StartTimer()
 {
-    QTimer::singleShot(std::chrono::milliseconds(300), [this]
+    QTimer::singleShot(300, [this] //vs2015 cannot understand std::chorono::milliseconds
                        {
                            ui->output->setUpdatesEnabled(false);
                            ui->output->append(m_pendingOutput.join("<br>"));
