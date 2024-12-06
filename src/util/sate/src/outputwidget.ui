@@ -89,40 +89,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="entitiesTtoolButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="sate_resources.qrc">
-         <normaloff>:/img/icons/entity_orange.png</normaloff>:/img/icons/entity_orange.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="messagesToolButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="sate_resources.qrc">
-         <normaloff>:/img/icons/message_orange.png</normaloff>:/img/icons/message_orange.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QToolButton" name="requestToolButton">
        <property name="text">
         <string>...</string>
@@ -153,6 +119,40 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="entitiesTtoolButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="sate_resources.qrc">
+         <normaloff>:/img/icons/entity_orange.png</normaloff>:/img/icons/entity_orange.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="messagesToolButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="sate_resources.qrc">
+         <normaloff>:/img/icons/message_orange.png</normaloff>:/img/icons/message_orange.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

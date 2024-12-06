@@ -1028,11 +1028,17 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto handler = JsonToHash<sdt::HandlerId>(p["handlerId"]);
         auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
         emit DobInterface::Output("Registration completed: " + Str(typeId) + ", handler=" + Str(handler.ToString()), QtInfoMsg);
-        auto reg = DobInterface::GetMyRegistration(typeId, handler);
+        auto reg = DobInterface::GetRegistration(typeId, handler);
         if (reg != nullptr)
         {
             reg->pending = false;
             emit DobInterface::OnRegistered(*reg);
+        }
+        else
+        {
+            auto policy = Safir::Dob::InstanceIdPolicy::Enumeration::HandlerDecidesInstanceId;
+            DobInterface::RegistrationInfo info{typeId, handler, false, false, policy};
+            m_registrations.push_back(info);
         }
     }
     else if (method == "onInitialInjectionsDone")

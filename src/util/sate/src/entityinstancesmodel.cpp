@@ -41,7 +41,6 @@ EntityInstancesModel::EntityInstancesModel(DobHandler* dob,
 {
     setupColumns();
     connect(m_dob, &DobHandler::OnEntity, this, &EntityInstancesModel::OnEntity);
-    m_dob->SubscribeEntity(m_typeId,Safir::Dob::Typesystem::InstanceId(), m_includeSubclasses);
 }
 
 EntityInstancesModel::~EntityInstancesModel()

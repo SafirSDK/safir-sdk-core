@@ -141,12 +141,12 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                     if (baseClass == TypesystemRepository::Entity)
                     {
                         emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), true);
+                        m_dob->SubscribeEntity(typeIdVal.toLongLong(), sdt::InstanceId(), true);
                     }
                     else if (baseClass == TypesystemRepository::Message)
                     {
-                        emit OpenMessageInstanceViewer(typeIdVal.toLongLong(),
-                                                       Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS,
-                                                       true);
+                        emit OpenMessageInstanceViewer(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, true);
+                        m_dob->SubscribeMessage(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, true);
                     }
                 }
                 else if (!shiftKey && !ctrlKey)
@@ -154,12 +154,12 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                     if (baseClass == TypesystemRepository::Entity)
                     {
                         emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), false);
+                        m_dob->SubscribeEntity(typeIdVal.toLongLong(), sdt::InstanceId(), false);
                     }
                     else if (baseClass == TypesystemRepository::Message)
                     {
-                        emit OpenMessageInstanceViewer(typeIdVal.toLongLong(),
-                                                       Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS,
-                                                       false);
+                        emit OpenMessageInstanceViewer(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, false);
+                        m_dob->SubscribeMessage(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, false);
                     }
                 }
             }

@@ -86,16 +86,43 @@ public:
     virtual void Delete(const sdt::EntityId& entityId, const sdt::HandlerId& handler) = 0;
     virtual void DeleteAll(int64_t typeId, const sdt::HandlerId& handler) = 0;
 
-    const RegistrationInfo* GetMyRegistration(int64_t typeId) const
+    RegistrationInfo* GetRegistration(int64_t typeId)
     {
         auto it = std::find_if(m_registrations.begin(), m_registrations.end(), [typeId](const auto& ri){return ri.typeId == typeId;});
         return it == m_registrations.end() ? nullptr : &(*it);
     }
 
-    const SubscriptionInfo* GetMySubscription(int64_t typeId) const
+    RegistrationInfo* GetRegistration(int64_t typeId, const sdt::HandlerId& handler)
+    {
+        auto it = std::find_if(m_registrations.begin(), m_registrations.end(), [typeId, &handler](const auto& ri){return ri.typeId == typeId && ri.handler == handler;});
+        return it == m_registrations.end() ? nullptr : &(*it);
+    }
+
+    void RemoveRegistrations(int64_t typeId)
+    {
+        m_registrations.erase(std::remove_if(m_registrations.begin(), m_registrations.end(), [typeId](const auto& v){return v.typeId == typeId;}), m_registrations.end());
+    }
+
+    void RemoveRegistration(int64_t typeId, const sdt::HandlerId& handler)
+    {
+        m_registrations.erase(std::remove_if(m_registrations.begin(), m_registrations.end(), [typeId, &handler](const auto& v){return v.typeId == typeId && v.handler == handler;}), m_registrations.end());
+    }
+
+    const SubscriptionInfo* GetSubscription(int64_t typeId) const
     {
         auto it = std::find_if(m_subscriptions.begin(), m_subscriptions.end(), [typeId](const auto& si){return si.typeId == typeId;});
         return it == m_subscriptions.end() ? nullptr : &(*it);
+    }
+
+    const SubscriptionInfo* GetSubscription(int64_t typeId, sdt::ChannelId channel) const
+    {
+        auto it = std::find_if(m_subscriptions.begin(), m_subscriptions.end(), [typeId, &channel](const auto& si){return si.typeId == typeId && si.channel == channel;});
+        return it == m_subscriptions.end() ? nullptr : &(*it);
+    }
+
+    void RemoveSubscriptions(int64_t typeId)
+    {
+        m_subscriptions.erase(std::remove_if(m_subscriptions.begin(), m_subscriptions.end(), [typeId](const auto& v){return v.typeId == typeId;}), m_subscriptions.end());
     }
 
 signals:
@@ -122,26 +149,4 @@ signals:
 protected:
     std::vector<DobInterface::RegistrationInfo> m_registrations;
     std::vector<DobInterface::SubscriptionInfo> m_subscriptions;
-
-    RegistrationInfo* GetMyRegistration(int64_t typeId, const sdt::HandlerId& handler)
-    {
-        auto it = std::find_if(m_registrations.begin(), m_registrations.end(), [typeId, &handler](const auto& ri){return ri.typeId == typeId && ri.handler == handler;});
-        return it == m_registrations.end() ? nullptr : &(*it);
-    }
-
-    void RemoveRegistrations(int64_t typeId)
-    {
-        m_registrations.erase(std::remove_if(m_registrations.begin(), m_registrations.end(), [typeId](const auto& v){return v.typeId == typeId;}), m_registrations.end());
-    }
-
-    void RemoveRegistration(int64_t typeId, const sdt::HandlerId& handler)
-    {
-        m_registrations.erase(std::remove_if(m_registrations.begin(), m_registrations.end(), [typeId, &handler](const auto& v){return v.typeId == typeId && v.handler == handler;}), m_registrations.end());
-    }
-
-    void RemoveSubscriptions(int64_t typeId)
-    {
-        m_subscriptions.erase(std::remove_if(m_subscriptions.begin(), m_subscriptions.end(), [typeId](const auto& v){return v.typeId == typeId;}), m_subscriptions.end());
-    }
-
 };

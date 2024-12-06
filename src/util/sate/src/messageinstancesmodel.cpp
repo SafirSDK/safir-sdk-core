@@ -46,7 +46,6 @@ MessageInstancesModel::MessageInstancesModel(DobHandler* dob,
 {
     setupColumns();
     connect(m_dob, &DobHandler::OnMessage, this, &MessageInstancesModel::OnMessage);
-    m_dob->SubscribeMessage(m_typeId, channel, m_includeSubclasses);
 }
 
 MessageInstancesModel::~MessageInstancesModel()

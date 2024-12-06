@@ -179,11 +179,13 @@ void DobObjectEditWidget::Init()
             return;
         }
 
-        if (index.column() == 3) // Edit change flag when click column 3
+        // Edit change flag when click column 3, except for Sequences that does not have change flags on individual items.
+        auto isSequenceItem = p->GetMemberInfo()->collectionType == SequenceCollectionType && !p->IsContainerRootItem();
+        if (index.column() == 3 && !isSequenceItem)
         {
             ui->objectEditTreeView->edit(index);
         }
-        else // Click elsewhere on a row will edit value
+        else if (index.column() < 3) // Click on name, value, null column opens the ValueEditor
         {
             EditValue(index);
         }

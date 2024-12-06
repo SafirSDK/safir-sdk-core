@@ -88,6 +88,7 @@ TypesystemContextMenuHandler::TypesystemContextMenuHandler(DobHandler* dob, QTre
         if (TypesystemRepository::Instance().GetClass(typeId)->dobBaseClass == TypesystemRepository::Message)
         {
             emit OpenMessageInstanceViewer(typeId, m_subscribeDlg->Channel(), m_subscribeDlg->IncludeSubclasses());
+            m_dob->SubscribeMessage(typeId, m_subscribeDlg->Channel(), m_subscribeDlg->IncludeSubclasses());
         }
     } );
 }
@@ -204,10 +205,12 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     if (chosenAction == subscribeEntity)
     {
         emit OpenEntityInstanceViewer(typeId, false);
+        m_dob->SubscribeEntity(typeId, Safir::Dob::Typesystem::InstanceId(), false);
     }
     else if (chosenAction == subscribeEntityRecursive)
     {
         emit OpenEntityInstanceViewer(typeId, true);
+        m_dob->SubscribeEntity(typeId, Safir::Dob::Typesystem::InstanceId(), true);
     }
     else if (chosenAction == openObjectEditor)
     {
@@ -238,6 +241,7 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     else if (chosenAction == subscribeMessage)
     {
         emit OpenMessageInstanceViewer(typeId, sdt::ChannelId::ALL_CHANNELS, false);
+        m_dob->SubscribeMessage(typeId, sdt::ChannelId::ALL_CHANNELS, false);
     }
     else if (chosenAction == subscribeMessageEllipsis)
     {

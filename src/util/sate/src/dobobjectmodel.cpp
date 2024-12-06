@@ -186,11 +186,19 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
             auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
             if (item->IsContainerRootItem())
             {
-                for (int i = 0; i < item->NumberOfChildMembers(); ++i)
+                auto collectionType = item->GetMemberInfo()->collectionType;
+                if (item->NumberOfChildMembers() > 0 && (collectionType == SequenceCollectionType || collectionType == DictionaryCollectionType))
                 {
-                    if (!item->GetConstChildMember(i)->IsNull())
+                    return QColor(116, 192, 252); // blue
+                }
+                else if (collectionType == ArrayCollectionType)
+                {
+                    for (int i = 0; i < item->NumberOfChildMembers(); ++i)
                     {
-                        return QColor(116, 192, 252);
+                        if (!item->GetConstChildMember(i)->IsNull())
+                        {
+                            return QColor(116, 192, 252);
+                        }
                     }
                 }
             }
@@ -320,6 +328,11 @@ bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, in
         // --- Handle insert row in a container ---
         if (item->IsContainerRootItem())
         {
+            if (item->GetMemberInfo()->collectionType == DictionaryCollectionType && item->HasChildWithKey(value.toString()))
+            {
+                return false; // Key already exist in dictionary.
+            }
+
             auto parentIndex = createIndex(index.row(), 0, index.internalPointer());
             beginInsertRows(parentIndex, childCount, childCount);
             item->SetValue(value.toString());

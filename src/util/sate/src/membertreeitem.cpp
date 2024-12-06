@@ -132,6 +132,12 @@ bool MemberTreeItem::IsNull() const
 {
     if (m_isContainerRoot)
     {
+        if (m_member->collectionType == SequenceCollectionType || m_member->collectionType == DictionaryCollectionType)
+        {
+            return m_children.empty();
+        }
+
+        // ArrayCollectionType - ArrayContainer doesn't have null-flag but for convenience show null in Gui if all items are null.
         for (const auto& i : m_children)
         {
             if (!i->m_isNull)
@@ -148,20 +154,30 @@ bool MemberTreeItem::IsNull() const
 void MemberTreeItem::SetChanged(bool val)
 {
     m_isChanged = val;
+    if (m_isContainerRoot && m_member->collectionType == DictionaryCollectionType)
+    {
+        for (auto& child : m_children)
+        {
+            child->m_isChanged = val;
+        }
+    }
 }
 
 bool MemberTreeItem::IsChanged() const
 {
     if (m_isContainerRoot)
     {
-        for (const auto& i : m_children)
+        if (m_member->collectionType == ArrayCollectionType)
         {
-            if (i->m_isChanged)
+            for (const auto& i : m_children)
             {
-                return true;
+                if (i->m_isChanged)
+                {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     return m_isChanged;
@@ -199,6 +215,7 @@ void MemberTreeItem::SetValue(const QString& value)
             }
 
             m_children.emplace_back(std::move(seqItem));
+            m_isChanged = true;
         }
         break;
 
@@ -206,7 +223,9 @@ void MemberTreeItem::SetValue(const QString& value)
         {
             auto dictItem = std::make_unique<MemberTreeItem>(this, m_member);
             dictItem->m_key = value;
+            dictItem->m_isChanged = true;
             m_children.emplace_back(std::move(dictItem));
+            m_isChanged = true;
         }
         break;
 
@@ -216,6 +235,7 @@ void MemberTreeItem::SetValue(const QString& value)
     {
         m_value = value;
         m_isNull = false;
+        m_isChanged = true;
 
         if (m_member->memberType == ObjectMemberType && m_isObjectRoot)
         {
@@ -224,6 +244,12 @@ void MemberTreeItem::SetValue(const QString& value)
             SetupObject();
         }
     }
+}
+
+bool MemberTreeItem::HasChildWithKey(const QString& key) const
+{
+    auto it = std::find_if(m_children.cbegin(), m_children.cend(), [&key](const auto& ptr){ return ptr->m_key == key;});
+    return it != m_children.cend();
 }
 
 QString MemberTreeItem::GetValue() const

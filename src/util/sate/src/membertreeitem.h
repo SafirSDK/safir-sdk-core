@@ -54,7 +54,6 @@ public:
     void SetKey(const QString& key);
     QString GetKey() const;
 
-
     int NumberOfChildMembers() const;
     const MemberTreeItem* GetConstChildMember(int row) const;
     MemberTreeItem* GetChildMember(int row);
@@ -62,6 +61,7 @@ public:
     int RowNumber() const; // Returns the index this item is in the parents children list
     void DeleteChild(int row);
     void AddChild(std::unique_ptr<MemberTreeItem>&& child);
+    bool HasChildWithKey(const QString& key) const;
 
     // only meaningful if MemberType is Object
     void SetMemberClass(const TypesystemRepository::DobClass* c);

@@ -119,6 +119,13 @@ void DobHandler::SubscribeMessage(int64_t typeId, const sdt::ChannelId& channel,
         return;
     }
 
+    auto sub = m_dob->GetSubscription(typeId, channel);
+    if (sub != nullptr)
+    {
+        emit Output("Subscription already exists!", QtInfoMsg);
+        return;
+    }
+
     m_dob->SubscribeMessage(typeId, channel, includeSubclasses);
 }
 
@@ -138,6 +145,14 @@ void DobHandler::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::I
     {
         return;
     }
+
+    auto sub = m_dob->GetSubscription(typeId);
+    if (sub != nullptr)
+    {
+        emit Output("Subscription already exists!", QtInfoMsg);
+        return;
+    }
+
     m_dob->SubscribeEntity(typeId, instance, includeSubclasses);
 }
 
@@ -281,7 +296,7 @@ const DobInterface::RegistrationInfo* DobHandler::GetMyRegistration(int64_t type
 {
     if (m_dob)
     {
-        return m_dob->GetMyRegistration(typeId);
+        return m_dob->GetRegistration(typeId);
     }
 
     return nullptr;
@@ -291,7 +306,7 @@ const DobInterface::SubscriptionInfo* DobHandler::GetMySubscription(int64_t type
 {
     if (m_dob)
     {
-        return m_dob->GetMySubscription(typeId);
+        return m_dob->GetSubscription(typeId);
     }
 
     return nullptr;
