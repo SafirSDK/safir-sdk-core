@@ -74,6 +74,9 @@ private slots:
     void OnStatusBarInfoChanged();
     void OnResetWindows();
     void OnMidnightCommanderToggled();
+    void OnCloseCurrentTab();
+    void OnCloseAllTabs();
+
 private:
     void OpenInstanceViewer(const int64_t typeId,
                             const bool includeSubclasses,
@@ -82,7 +85,10 @@ private:
     void AddXmlPage(const QString& title, const QString& text);
     void AddJsonPage(const QString& title, const QString& text);
 
-    void AddTab(const QString& title, QWidget* widget, const bool openInRightHandPanel);
+    void AddTab(const QString& title,
+                const QString& tabType, //a prefix string to uniquely identify the type of tab this is
+                QWidget* widget,
+                const bool openInRightHandPanel);
 
     Ui::SateMainWindow *ui;
     QToolBar* const m_toolBar;

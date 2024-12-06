@@ -150,7 +150,22 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     connect(m_dockManager,&ads::CDockManager::focusedDockWidgetChanged,this,&SateMainWindow::OnFocusedDockWidgetChanged);
 
-    //add toolbar buttons
+    auto* closeCurrentTabAction = new QAction("Close current tab");
+    closeCurrentTabAction->setShortcut(QKeySequence(tr("Ctrl+W")));;
+    closeCurrentTabAction->setToolTip("Close the currently active tab");
+    connect(closeCurrentTabAction, &QAction::triggered, this, &SateMainWindow::OnCloseCurrentTab);
+
+    auto* closeAllTabsAction = new QAction("Close all tabs");
+    closeAllTabsAction->setShortcut(QKeySequence(tr("Ctrl+Shift+W")));;
+    closeAllTabsAction->setToolTip("Close all open tabs");
+    connect(closeAllTabsAction, &QAction::triggered, this, &SateMainWindow::OnCloseAllTabs);
+
+    auto* quitAction = new QAction("Quit");
+    quitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));;
+    quitAction->setToolTip("Quit Sate");
+    connect(quitAction, &QAction::triggered, this, []{QApplication::quit();});
+
+    
     m_midnightCommanderModeAction = new QAction(QIcon(":/img/icons/moon.png"), "Midnight Commander Mode");
     m_midnightCommanderModeAction->setShortcut(QKeySequence(tr("Ctrl+M")));;
     m_midnightCommanderModeAction->setCheckable(true);
@@ -158,29 +173,30 @@ SateMainWindow::SateMainWindow(QWidget *parent)
                                               "Opens object edit views that are clicked on inside\n"
                                               "instance views open in a separate tab group.");
     connect(m_midnightCommanderModeAction, &QAction::triggered, this, &SateMainWindow::OnMidnightCommanderToggled);
-    m_toolBar->addAction(m_midnightCommanderModeAction);
 
     m_resetWindowsAction = new QAction(QIcon(":/img/icons/window_reset.png"),"Reset layout");
     m_resetWindowsAction->setShortcut(QKeySequence(tr("Ctrl+R")));;
     m_resetWindowsAction->setToolTip("Move all tabs back to default positions");
     connect(m_resetWindowsAction, &QAction::triggered, this, &SateMainWindow::OnResetWindows);
+
+    m_toolBar->addAction(m_midnightCommanderModeAction);
     m_toolBar->addAction(m_resetWindowsAction);
 
     ui->menuView->addAction(m_midnightCommanderModeAction);
     ui->menuView->addAction(m_resetWindowsAction);
+    ui->menuView->addAction(closeCurrentTabAction);
+    ui->menuView->addAction(closeAllTabsAction);
     ui->menuView->addSeparator();
     ui->menuView->addAction(typesystemDock->toggleViewAction());
     ui->menuView->addAction(outputDock->toggleViewAction());
+
+    ui->menuConnection->addSeparator();
+    ui->menuConnection->addAction(quitAction);
 }
 
 SateMainWindow::~SateMainWindow()
 {
     delete ui;
-
-    for (auto&& dock: m_dockManager->dockWidgetsMap())
-    {
-        m_dockManager->removeDockWidget(dock);
-    }
 
     if (!m_connected)
     {
@@ -306,13 +322,13 @@ void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
     auto oe = new DobObjectEditWidget(&m_dob, typeId, this);
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe, false);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name,"OE", oe, false);
 }
 
 void SateMainWindow::OnOpenParameterViewer(const int64_t typeId)
 {
     auto paramWidget = new ParametersWidget(typeId, this);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, paramWidget, false);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, "PV", paramWidget, false);
 }
 
 void SateMainWindow::OnOpenObjectEditWithInstance(int64_t typeId,
@@ -323,7 +339,7 @@ void SateMainWindow::OnOpenObjectEditWithInstance(int64_t typeId,
     auto oe = new DobObjectEditWidget(&m_dob, typeId, channelHandler, instance, object, this);
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, oe, m_midnightCommanderModeAction->isChecked());
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, "OE", oe, m_midnightCommanderModeAction->isChecked());
 }
 
 void SateMainWindow::OnOpenDouFile(const int64_t typeId)
@@ -361,7 +377,7 @@ void SateMainWindow::AddXmlPage(const QString& title, const QString& text)
 
     auto textBrowser = new  QTextBrowser();
     textBrowser->setPlainText(xmlFormatted);
-    AddTab(title, textBrowser, false);
+    AddTab(title, "XML", textBrowser, false);
 }
 
 void SateMainWindow::AddJsonPage(const QString& title, const QString& text)
@@ -370,14 +386,29 @@ void SateMainWindow::AddJsonPage(const QString& title, const QString& text)
     QString formattedJsonString = doc.toJson(QJsonDocument::Indented);
     auto textBrowser = new  QTextBrowser();
     textBrowser->setPlainText(formattedJsonString);
-    AddTab(title, textBrowser, false);
+    AddTab(title,"JSON", textBrowser, false);
 }
 
 void SateMainWindow::AddTab(const QString& title,
+                            const QString& tabType,
                             QWidget* widget,
                             const bool openInRightHandPanel)
 {
-    auto* dock = new ads::CDockWidget(title);
+    auto tabNameBeginning = tabType + title + " ";
+
+    //find next number in series for the tab
+    int lastNum = 0;
+    for (auto* dock: m_dockManager->dockWidgetsMap())
+    {
+        const QString dockName = dock->objectName();
+        if (dockName.startsWith(tabNameBeginning))
+        {
+            lastNum = std::max(lastNum, dockName.section(' ', -1).toInt());
+        }
+    }
+
+    auto* dock = new ads::CDockWidget(tr("%1 %2").arg(title).arg(lastNum+1));
+    dock->setObjectName(tr("%1%2 %3").arg(tabType).arg(title).arg(lastNum+1));
     widget->setParent(dock);
     dock->setWidget(widget, ads::CDockWidget::ForceNoScrollArea);
     dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
@@ -583,4 +614,33 @@ void SateMainWindow::OnMidnightCommanderToggled()
         m_rightDockArea->closeArea();
         m_rightDockArea = nullptr;
     }
+}
+
+void SateMainWindow::OnCloseCurrentTab()
+{
+    auto* focused = m_dockManager->focusedDockWidget();
+    if (focused != nullptr)
+    {
+        focused->closeDockWidget();
+    }
+}
+
+void SateMainWindow::OnCloseAllTabs()
+{
+    auto docks = m_dockManager->dockWidgetsMap();
+    qDebug() << docks;
+    for (auto* dock: docks)
+    {
+        const QString dockName = dock->objectName();
+        if (dockName == "CentralWidget" || dockName == "Output" || dockName == "Typesystem")
+        {
+            continue;
+        }
+        else
+        {
+            qDebug() << "Closing dock" << dockName;
+            dock->deleteDockWidget();
+        }
+    }
+
 }

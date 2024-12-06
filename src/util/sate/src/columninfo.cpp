@@ -158,7 +158,7 @@ int ColumnInfo::DefaultColumnWidth() const
     case ChannelId:
         return 180;
     case Timestamp:
-        return 100;
+        return 120;
     case Member:
         break;
     };
