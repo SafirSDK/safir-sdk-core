@@ -37,6 +37,7 @@
 #if defined (SAFIR_LINK_QT_STATICALLY) && defined (_MSC_VER)
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
+Q_IMPORT_PLUGIN(QSvgIconPlugin);
 
 #  if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
 Q_IMPORT_PLUGIN(QModernWindowsStylePlugin);

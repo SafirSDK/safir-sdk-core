@@ -26,7 +26,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # do not run using conan.
 set(QT_NO_CREATE_VERSIONLESS_TARGETS True)
 
-find_package(Qt6 COMPONENTS Core Widgets Network WebSockets Svg QUIET)
+set(NEEDED_QT_MODULES Core Widgets Network WebSockets Svg)
+
+find_package(Qt6 COMPONENTS ${NEEDED_QT_MODULES} QUIET)
 
 if (MSVC)
   # On Windows we build qt in Conan and link statically
@@ -50,9 +52,14 @@ if (MSVC)
       Setupapi
       Dcomp
       D3d12)
+
+    target_link_libraries(Qt6::Svg
+      INTERFACE
+      Qt6::QSvgIconPlugin)
+
     unset(windows_plugin)
   else()
-    find_package(Qt5 COMPONENTS Core Widgets Network WebSockets Svg QUIET)
+    find_package(Qt5 COMPONENTS ${NEEDED_QT_MODULES} QUIET)
     if (Qt5_FOUND)
       # On Windows we build qt in Conan and link statically
       target_link_libraries(Qt5::Widgets
@@ -67,6 +74,10 @@ if (MSVC)
         optimized Qt5EventDispatcherSupport
         optimized Qt5ThemeSupport
         optimized Qt5WindowsUIAutomationSupport)
+
+      target_link_libraries(Qt5::Svg
+        INTERFACE
+        Qt5::QSvgIconPlugin)
     endif()
   endif()
 
@@ -89,7 +100,7 @@ elseif(Qt5_FOUND)
   add_library (Qt::Svg ALIAS Qt5::Svg)
   add_library (Qt::Gui ALIAS Qt5::Gui)
 else()
-  message(WARNING "Appropriate version of Qt was not found. Will not build tools that depend on Qt.")
+  message(FATAL_ERROR "Appropriate version of Qt with the needed modules (${NEEDED_QT_MODULES}) was not found.")
 endif()
 
 #
