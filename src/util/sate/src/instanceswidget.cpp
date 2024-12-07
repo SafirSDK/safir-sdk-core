@@ -35,7 +35,6 @@
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QWidgetAction>
-#include <iostream>
 #include "entityinstancesmodel.h"
 #include "messageinstancesmodel.h"
 #include "typesystemrepository.h"
@@ -219,17 +218,15 @@ void InstancesWidget::OnDoubleClicked(const QModelIndex &index)
     if (m_sourceModelEntities != nullptr)
     {
         const auto& info = m_sourceModelEntities->getRow(sourceIndex.row());
-        emit OpenObjectEdit(info.entityId.GetTypeId(),
-                            QString::fromStdWString(info.handlerId.ToString()),
+        emit OpenObjectEdit(QString::fromStdWString(info.handlerId.ToString()),
                             info.entityId.GetInstanceId().GetRawValue(),
                             info.entity);
     }
     else if (m_sourceModelMessages != nullptr)
     {
         const auto& info = m_sourceModelMessages->getRow(sourceIndex.row());
-        emit OpenObjectEdit(info.typeId,
-                            QString::fromStdWString(info.channelId.ToString()),
-                            0,
+        emit OpenObjectEdit(QString::fromStdWString(info.channelId.ToString()),
+                            -1,
                             info.message);
     }
 }

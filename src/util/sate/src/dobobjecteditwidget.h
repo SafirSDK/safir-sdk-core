@@ -39,8 +39,7 @@ class DobObjectEditWidget : public QWidget
 
 public:
     explicit DobObjectEditWidget(DobHandler* dob, int64_t typeId, QWidget *parent);
-    explicit DobObjectEditWidget(DobHandler* dob, int64_t typeId, QString channelHandler,
-                                 int64_t instance, const Safir::Dob::Typesystem::ObjectPtr& object,  QWidget *parent);
+    explicit DobObjectEditWidget(DobHandler* dob, QString channelHandler, int64_t instance, const Safir::Dob::Typesystem::ObjectPtr& object,  QWidget *parent);
     ~DobObjectEditWidget();
 
 signals:
@@ -64,4 +63,6 @@ private:
 
     Safir::Dob::Typesystem::ObjectPtr BuildObject() const;
     void ApplyFilter(const QString& filterText, int column, QWidget* filterWidget);
+
+    QString GetDefaultValueForChannelOrHandler() const;
 };

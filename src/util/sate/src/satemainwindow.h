@@ -64,8 +64,7 @@ private slots:
     void OnConnectedToDob(const QString& connectionName);
     void OnConnectionClosed();
     void OnOpenObjectEdit(const int64_t typeId);
-    void OnOpenObjectEditWithInstance(int64_t typeId,
-                                      QString channelHandler,
+    void OnOpenObjectEditWithInstance(QString channelHandler,
                                       int64_t instance,
                                       const Safir::Dob::Typesystem::ObjectPtr& object);
     void OnOpenParameterViewer(const int64_t typeId);
@@ -91,6 +90,10 @@ private:
                 const QString& tabType, //a prefix string to uniquely identify the type of tab this is
                 QWidget* widget,
                 const bool openInRightHandPanel);
+
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *e) override;
+    void OpenSerializedObject(const QString& file);
 
     Ui::SateMainWindow *ui;
     QToolBar* const m_toolBar;

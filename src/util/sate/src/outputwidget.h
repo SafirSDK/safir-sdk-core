@@ -23,8 +23,7 @@ public:
     void Output(const QString& info, const QtMsgType msgType);
 
 signals:
-    void OpenObjectEdit(int64_t typeId,
-                        QString channelHandler,
+    void OpenObjectEdit(QString channelHandler,
                         int64_t instance,
                         const Safir::Dob::Typesystem::ObjectPtr& object);
 private:

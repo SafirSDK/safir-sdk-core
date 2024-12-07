@@ -48,9 +48,11 @@
 #include <QTextBrowser>
 #include <QToolBar>
 #include <QToolButton>
+#include <QFileDialog>
 #include <QtConcurrent/QtConcurrent>
 
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
+#include <Safir/Dob/Typesystem/Serialization.h>
 
 #include <Safir/Utilities/Internal/Expansion.h>
 
@@ -63,6 +65,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     , m_connectDialog(new ConnectDialog(this))
 {
     ui->setupUi(this);
+    setAcceptDrops(true);
 
     ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasUndockButton, false);
     ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasCloseButton, false);
@@ -121,12 +124,16 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     outputDock->setWidget(m_output, ads::CDockWidget::ForceNoScrollArea);
     outputDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, outputDock);
-    outputDock->toggleViewAction()->setShortcut(QKeySequence(tr("Ctrl+O")));;
+    outputDock->toggleViewAction()->setShortcut(QKeySequence(tr("Ctrl+L")));;
     connect(m_output ,&OutputWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEditWithInstance);
 
     // Connection menu
     connect(ui->actionDisconnect, &QAction::triggered, this, [this]{ m_dob.Close(); });
     connect(ui->actionConnect, &QAction::triggered, this, [this]{ m_connectDialog->show(); });
+    connect(ui->actionOpenObject, &QAction::triggered, this, [this]{
+        OpenSerializedObject(QFileDialog::getOpenFileName(this, "Deserialize Object", "", "XML/JSON files (*.xml *.json);;Any file (*.*)"));
+    });
+    connect(ui->actionQuit, &QAction::triggered, this, []{QApplication::quit();});
     connect(m_connectDialog, &QDialog::accepted, this, [this]
     {
         if (m_connectDialog->NativeConnection())
@@ -160,11 +167,6 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     closeAllTabsAction->setToolTip("Close all open tabs");
     connect(closeAllTabsAction, &QAction::triggered, this, &SateMainWindow::OnCloseAllTabs);
 
-    auto* quitAction = new QAction("Quit");
-    quitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));;
-    quitAction->setToolTip("Quit Sate");
-    connect(quitAction, &QAction::triggered, this, []{QApplication::quit();});
-
     auto* showTypeInTreeAction = new QAction(QIcon(":/img/icons/magnifying-glass-location-solid.svg"),"Find tab type in tree");
     showTypeInTreeAction->setShortcut(QKeySequence(tr("Ctrl+F")));;
     showTypeInTreeAction->setToolTip("Find the type of the current tab in the typesystem tree view.");
@@ -195,9 +197,6 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->menuView->addSeparator();
     ui->menuView->addAction(typesystemDock->toggleViewAction());
     ui->menuView->addAction(outputDock->toggleViewAction());
-
-    ui->menuConnection->addSeparator();
-    ui->menuConnection->addAction(quitAction);
 }
 
 SateMainWindow::~SateMainWindow()
@@ -337,15 +336,14 @@ void SateMainWindow::OnOpenParameterViewer(const int64_t typeId)
     AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, "PV", paramWidget, false);
 }
 
-void SateMainWindow::OnOpenObjectEditWithInstance(int64_t typeId,
-                                                  QString channelHandler,
+void SateMainWindow::OnOpenObjectEditWithInstance(QString channelHandler,
                                                   int64_t instance,
                                                   const Safir::Dob::Typesystem::ObjectPtr& object)
 {
-    auto oe = new DobObjectEditWidget(&m_dob, typeId, channelHandler, instance, object, this);
+    auto oe = new DobObjectEditWidget(&m_dob, channelHandler, instance, object, this);
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, "OE", oe, m_midnightCommanderModeAction->isChecked());
+    AddTab(TypesystemRepository::Instance().GetClass(object->GetTypeId())->name, "OE", oe, m_midnightCommanderModeAction->isChecked());
 }
 
 void SateMainWindow::OnOpenDouFile(const int64_t typeId)
@@ -660,5 +658,56 @@ void SateMainWindow::OnFindType()
         auto typeId = sdt::Operations::GetTypeId(name.toStdWString());
         m_typesystem->LocateType(typeId);
     }
+}
 
+void SateMainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasUrls())
+    {
+        event->acceptProposedAction();
+    }
+}
+
+void SateMainWindow::dropEvent(QDropEvent *e)
+{
+    if (e->mimeData()->hasUrls())
+    {
+        foreach (const QUrl &url, e->mimeData()->urls()) {
+            QString fileName = url.toLocalFile();
+            OpenSerializedObject(fileName);
+        }
+    }
+}
+
+void SateMainWindow::OpenSerializedObject(const QString& file)
+{
+    if (file.isNull())
+    {
+        return;
+    }
+    QFile f(file);
+    if (f.exists())
+    {
+        f.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts(&f);
+        QString text = ts.readAll();
+        auto probablyXml = file.endsWith(".xml", Qt::CaseInsensitive) ||
+                           !( file.endsWith(".json", Qt::CaseInsensitive) || text.contains("_DouType"));
+
+        try
+        {
+            auto objPtr = probablyXml ? sdt::Serialization::ToObject(text.toStdWString()) : sdt::Serialization::ToObjectFromJson(text.toStdWString());
+            OnOpenObjectEditWithInstance({}, -1, objPtr);
+        }
+        catch (const std::exception& ex)
+        {
+            QString format = probablyXml ? "XML" : "JSON";
+            QString error(ex.what());
+            m_output->Output(QString("Failed to deserialize %1 object. %2").arg(format, error), QtFatalMsg);
+        }
+    }
+    else
+    {
+        m_output->Output(QString("Deserialize object failed. File doesn't exist: %1").arg(file), QtFatalMsg);
+    }
 }

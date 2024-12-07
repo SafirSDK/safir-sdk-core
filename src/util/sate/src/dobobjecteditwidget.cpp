@@ -82,27 +82,64 @@ DobObjectEditWidget::DobObjectEditWidget(DobHandler* dob, int64_t typeId, QWidge
 
     Init();
 
-    auto reg = m_dob->GetMyRegistration(typeId);
-    if (reg != nullptr)
+    auto ch = GetDefaultValueForChannelOrHandler();
+    if (!ch.isNull())
     {
-        // If we are registered handler, set HandlerId to the one we have registered.
-        ui->operationsWidget->idEdit->setText(QString::fromStdWString(reg->handler.ToString()));
+        ui->operationsWidget->idEdit->setText(ch);
     }
 }
 
-DobObjectEditWidget::DobObjectEditWidget(DobHandler* dob, int64_t typeId, QString channelHandler,
-                             int64_t instance, const Safir::Dob::Typesystem::ObjectPtr& object,  QWidget *parent)
+DobObjectEditWidget::DobObjectEditWidget(DobHandler* dob, QString channelHandler, int64_t instance, const Safir::Dob::Typesystem::ObjectPtr& object,  QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::DobObjectEditWidget)
     , m_dob(dob)
-    , m_typeId(typeId)
+    , m_typeId(object->GetTypeId())
 {
     m_sourceModel = new DobObjectModel(m_typeId, object, this);
 
     Init();
 
-    ui->operationsWidget->idEdit->setText(channelHandler);
-    ui->operationsWidget->instanceEdit->setText(QString::number(instance));
+    if (!channelHandler.isNull() && !channelHandler.isEmpty())
+    {
+        ui->operationsWidget->idEdit->setText(channelHandler);
+    }
+    else
+    {
+        auto ch = GetDefaultValueForChannelOrHandler();
+        if (!ch.isNull())
+        {
+            ui->operationsWidget->idEdit->setText(ch);
+        }
+    }
+
+    if (instance != -1 && instance != 0)
+    {
+        ui->operationsWidget->instanceEdit->setText(QString::number(instance));
+    }
+}
+
+QString DobObjectEditWidget::GetDefaultValueForChannelOrHandler() const
+{
+    auto cls = TypesystemRepository::Instance().GetClass(m_typeId);
+    if (cls != nullptr)
+    {
+        if (cls->dobBaseClass == TypesystemRepository::Entity || cls->dobBaseClass == TypesystemRepository::Service)
+        {
+            auto reg = m_dob->GetMyRegistration(m_typeId);
+            if (reg != nullptr)
+            {
+                // If we are registered handler, set HandlerId to the one we have registered.
+                return QString::fromStdWString(reg->handler.ToString());
+            }
+            return "DEFAULT_HANDLER";
+        }
+        else if (cls->dobBaseClass == TypesystemRepository::Message)
+        {
+            return "DEFAULT_CHANNEL";
+        }
+    }
+
+    return {};
 }
 
 DobObjectEditWidget::~DobObjectEditWidget()

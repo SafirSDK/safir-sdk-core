@@ -32,7 +32,7 @@ OutputWidget::OutputWidget(DobHandler* dob, QWidget *parent)
                 auto data = FindLink(url.toString());
                 if (data != nullptr)
                 {
-                    emit OpenObjectEdit(data->object->GetTypeId(), data->channelHandler, data->instance, data->object);
+                    emit OpenObjectEdit(data->channelHandler, data->instance, data->object);
                 }
             });
 
@@ -140,7 +140,7 @@ void OutputWidget::OnMessage(const sdt::ChannelId& channel, const Safir::Dob::Me
     }
     const bool startTimer = m_pendingOutput.empty();
 
-    auto link = AddLink(message, Str(channel.ToString()), 0);
+    auto link = AddLink(message, Str(channel.ToString()), -1);
     QStringList line;
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/message_orange' width='12' height='12'/>&nbsp;"
