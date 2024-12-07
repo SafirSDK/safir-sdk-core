@@ -26,7 +26,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # do not run using conan.
 set(QT_NO_CREATE_VERSIONLESS_TARGETS True)
 
-find_package(Qt6 COMPONENTS Core Widgets Network WebSockets QUIET)
+find_package(Qt6 COMPONENTS Core Widgets Network WebSockets Svg QUIET)
 
 if (MSVC)
   # On Windows we build qt in Conan and link statically
@@ -52,7 +52,7 @@ if (MSVC)
       D3d12)
     unset(windows_plugin)
   else()
-    find_package(Qt5 COMPONENTS Core Widgets Network WebSockets QUIET)
+    find_package(Qt5 COMPONENTS Core Widgets Network WebSockets Svg QUIET)
     if (Qt5_FOUND)
       # On Windows we build qt in Conan and link statically
       target_link_libraries(Qt5::Widgets
@@ -79,11 +79,13 @@ if (Qt6_FOUND)
   add_library (Qt::Widgets ALIAS Qt6::Widgets)
   add_library (Qt::WebSockets ALIAS Qt6::WebSockets)
   add_library (Qt::Network ALIAS Qt6::Network)
+  add_library (Qt::Svg ALIAS Qt6::Svg)
 elseif(Qt5_FOUND)
   add_library (Qt::Core ALIAS Qt5::Core)
   add_library (Qt::Widgets ALIAS Qt5::Widgets)
   add_library (Qt::WebSockets ALIAS Qt5::WebSockets)
   add_library (Qt::Network ALIAS Qt5::Network)
+  add_library (Qt::Svg ALIAS Qt5::Svg)
 else()
   message(WARNING "Appropriate version of Qt was not found. Will not build tools that depend on Qt.")
 endif()

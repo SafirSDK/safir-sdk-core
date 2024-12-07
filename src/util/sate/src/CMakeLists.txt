@@ -108,6 +108,7 @@ TARGET_LINK_LIBRARIES(sate PRIVATE
   dose_cpp
   qt-advanced-docking-system::qt-advanced-docking-system
   Qt::WebSockets
+  Qt::Svg
   Qt::Widgets)
 
 SAFIR_INSTALL(TARGETS sate COMPONENT Tools)

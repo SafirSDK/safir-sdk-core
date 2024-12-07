@@ -76,7 +76,7 @@ class SafirSdkCoreConan(ConanFile):
                        "qt/*:qtsensors": False,
                        "qt/*:qtserialbus": False,
                        "qt/*:qtserialport": False,
-                       "qt/*:qtsvg": False,
+                       "qt/*:qtsvg": True,
                        "qt/*:qtvirtualkeyboard": False,
                        "qt/*:qtwebchannel": False,
                        "qt/*:qtwebengine": False,
