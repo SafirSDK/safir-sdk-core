@@ -4,6 +4,7 @@
 
 #include <QSortFilterProxyModel>
 #include <QTimer>
+#include <QDebug>
 
 class ParametersSortFilterProxyModel : public QSortFilterProxyModel
 {
@@ -22,12 +23,13 @@ public:
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 3; i++)
         {
             if (m_filters[i].isValid())
             {
                 auto ix = sourceModel()->index(sourceRow, i, sourceParent);
                 auto data = sourceModel()->data(ix, filterRole()).toString();
+
                 if (!m_filters[i].match(data).hasMatch())
                 {
                     return false;
@@ -39,7 +41,7 @@ protected:
     }
 
 private:
-    QRegularExpression m_filters[5];
+    QRegularExpression m_filters[3];
 };
 
 ParametersWidget::ParametersWidget(int64_t typeId, QWidget *parent)
@@ -51,6 +53,7 @@ ParametersWidget::ParametersWidget(int64_t typeId, QWidget *parent)
     auto srcModel = new ParametersModel(typeId, this);
     auto proxyModel = new ParametersSortFilterProxyModel(this);
     proxyModel->setSourceModel(srcModel);
+    proxyModel->setFilterRole(ParametersModel::FilterRole);
     ui->parametersTreeView->setModel(proxyModel);
 
     ui->parametersTreeView->resizeColumnToContents(0);
@@ -67,7 +70,7 @@ ParametersWidget::ParametersWidget(int64_t typeId, QWidget *parent)
     // Handle filter changes
     connect(ui->nameFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 0, ui->nameFilterEdit); });
     connect(ui->valueFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 1, ui->valueFilterEdit); });
-    connect(ui->typeFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 4, ui->typeFilterEdit); });
+    connect(ui->typeFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 2, ui->typeFilterEdit); });
 }
 
 ParametersWidget::~ParametersWidget()
