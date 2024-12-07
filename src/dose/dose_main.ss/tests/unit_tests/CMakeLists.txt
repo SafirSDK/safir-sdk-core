@@ -9,7 +9,7 @@ ADD_EXECUTABLE(PoolHandler_test PoolHandlerTest.cpp
 PROTOBUF_GENERATE(TARGET PoolHandler_test APPEND_PATH OUT_VAR generated_files)
 
 if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4100")
+  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4100 /wd4702")
 endif()
 
 TARGET_LINK_LIBRARIES(Distribution_test PRIVATE

@@ -15,7 +15,7 @@ add_executable(communication_unit_tests ${sources} ${headers} ../../src/MessageQ
 PROTOBUF_GENERATE(TARGET communication_unit_tests APPEND_PATH OUT_VAR generated_files)
 
 if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4100")
+  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4100 /wd4702")
 endif()
 
 
