@@ -44,7 +44,9 @@ set(sources
     parametersmodel.cpp
     parameterswidget.cpp
     subscribedialog.cpp
-)
+
+    sate.rc
+  )
 
 set(widget_headers
     satemainwindow.h
