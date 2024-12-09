@@ -26,6 +26,12 @@
 #include <QMainWindow>
 #include <functional>
 
+
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning (disable: 4275)
+#endif
+
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 #  include <qt6advanceddocking/DockManager.h>
 #  include <qt6advanceddocking/DockAreaWidget.h>
@@ -35,6 +41,11 @@
 #  include <qt5advanceddocking/DockAreaWidget.h>
 #  include <qt5advanceddocking/DockWidgetTab.h>
 #endif
+
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
+
 
 #include "dobhandler.h"
 
