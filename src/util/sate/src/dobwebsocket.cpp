@@ -64,14 +64,15 @@ namespace
         }
     }
 
-    template <class T, class U>
-    T JsonToHash(const U& val)
+    template <class T>
+    T JsonToHash(const QJsonValueRef& val)
     {
         if (val.isString())
         {
             return T(val.toString().toStdWString());
         }
-        return T(val.toInt());
+        
+        return T(val.toVariant().toLongLong());
     }
 
     QUrl ToUrl(const QString& address, int port)
