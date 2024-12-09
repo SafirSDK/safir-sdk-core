@@ -527,7 +527,7 @@ void RemoteClient::WsUnsubscribeRegistration(const JsonRpcRequest& req)
 {
     CommandValidator::ValidateUnsubscribeRegistration(req);
     auto handler=req.HasHandlerId() ? req.HandlerId() : ts::HandlerId::ALL_HANDLERS;
-    auto inclSub=req.IncludeSubclasses() ? req.IncludeSubclasses() : true;
+    auto inclSub=req.HasIncludeSubclasses() ? req.IncludeSubclasses() : true;
     m_dob.UnsubscribeRegistration(req.TypeId(), handler, inclSub);
     if (!req.Id().IsNull())
         SendToClient(JsonRpcResponse::String(req.Id(), "OK"));
