@@ -159,6 +159,7 @@ QVariant TypesystemNamespaceModel::data(const QModelIndex &index, int role) cons
 
     switch (role)
     {
+    case Qt::ToolTipRole:
     case Qt::DisplayRole:
     {
         return du->name;

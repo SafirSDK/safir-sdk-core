@@ -186,6 +186,7 @@ QVariant TypesystemInheritanceModel::data(const QModelIndex &index, int role) co
         auto ptr = static_cast<TypesystemRepository::DobClass*>(index.internalPointer());
         switch (role)
         {
+        case Qt::ToolTipRole:
         case Qt::DisplayRole:
             return ptr->name;
 
