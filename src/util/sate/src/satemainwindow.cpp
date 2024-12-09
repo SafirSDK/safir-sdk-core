@@ -258,11 +258,11 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
     dock->setProperty("includeSubclasses",includeSubclasses);
     if (includeSubclasses)
     {
-        dock->setIcon(QIcon(":/img/icons/instance_viewer_recursive.png"));
+        dock->setIcon(QIcon(":/img/icons/eye-solid-red.svg"));
     }
     else
     {
-        dock->setIcon(QIcon(":/img/icons/instance_viewer.png"));
+        dock->setIcon(QIcon(":/img/icons/eye-solid.svg"));
     }
 
     if (cls->dobBaseClass == TypesystemRepository::Entity)
