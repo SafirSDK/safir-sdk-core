@@ -4594,7 +4594,7 @@ called sate_legacy, in case you want to use it instead.
 
 For example, you can set up a subscription to an entity, register entity handlers and set entity instances. You can subscribe to and send messages etc. This can be very useful for interacting with an application, for example before the real HMI is implemented fully, or pretending to be another application that your application communicates with.
 
-<<sate_overview>> shows Sate with the Safir.Application.BackdoorCommandMessage opened. All the Dob classes are listed in the left sidebar, where you can right-click to get operations you can do on the types. The right sidebar contains operations you can do on the object opened.
+<<sate_overview>> shows Sate with the Safir.Dob.ProcessInfo entity opened. All the Dob classes are listed to the left, where you can right-click to get operations you can do on the types. The middle tab shows all instances of the entity, and the right tab shows an object editor for a single instance of the entity. The right-hand side of the right tab contains buttons for operations you can do on the opened instance.
 
 [[sate_overview]]
 .Sate screen shot
