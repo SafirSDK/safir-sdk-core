@@ -22,6 +22,8 @@
 *
 ******************************************************************************/
 #include "columninfo.h"
+#include <QVariant>
+#include <QColor>
 
 ColumnInfo::ColumnInfo(const ColumnType columnType, const QString &name)
     : m_columnType(columnType)
@@ -80,6 +82,25 @@ ColumnInfoPtr ColumnInfo::CreateMemberColumn(const QString &name,
 
 Qt::Alignment ColumnInfo::Alignment() const
 {
+    switch(m_columnType)
+    {
+    case TypeName:
+        return Qt::AlignLeft | Qt::AlignVCenter;
+    case InstanceId:
+        return Qt::AlignRight | Qt::AlignVCenter;
+    case ChannelId:
+        return Qt::AlignLeft | Qt::AlignVCenter;
+    case Timestamp:
+        return Qt::AlignRight | Qt::AlignVCenter;
+    case Member:
+        break;
+    };
+
+    if (m_collectionType != SingleValueCollectionType)
+    {
+        return Qt::AlignRight | Qt::AlignVCenter;
+    }
+
     switch (m_memberType)
     {
     case BooleanMemberType:
@@ -228,4 +249,18 @@ int ColumnInfo::DefaultColumnWidth() const
     }
 
     return 50;
+}
+
+QVariant ColumnInfo::Color() const
+{
+    if (m_collectionType == SingleValueCollectionType)
+    {
+        return QVariant();
+    }
+    else
+    {
+        return QColor(116, 192, 252); // blue
+    }
+
+
 }

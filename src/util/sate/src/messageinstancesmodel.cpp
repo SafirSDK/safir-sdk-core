@@ -109,35 +109,40 @@ QVariant MessageInstancesModel::data(const QModelIndex& index, const int role) c
         return QVariant();
     }
 
-    //first get rid of all roles we don't handle
-    if (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != FilterRole && role != Qt::TextAlignmentRole)
-    {
-        return QVariant();
-    }
+    const auto& columnInfo = m_columnInfoList.at(index.column());
 
-    auto columnInfo = m_columnInfoList.at(index.column());
-
-    if (role == Qt::TextAlignmentRole)
+    switch (role)
     {
+    case Qt::TextAlignmentRole:
         return QVariant(columnInfo->Alignment());
+
+    case Qt::ForegroundRole:
+        return columnInfo->Color();
+
+    case Qt::DisplayRole:
+    case Qt::ToolTipRole:
+    case FilterRole:
+        {
+            const auto& messageInfo = m_messages.at(index.row());
+
+            if (columnInfo->GetColumnType() == ColumnInfo::Timestamp)
+            {
+                return messageInfo.receiveTime.toString("hh:mm:ss.zzz");
+            }
+            if (columnInfo->GetColumnType() == ColumnInfo::TypeName)
+            {
+                return QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(messageInfo.typeId));
+            }
+            if (columnInfo->GetColumnType() == ColumnInfo::ChannelId)
+            {
+                return QString::fromStdWString(messageInfo.channelId.ToString());
+            }
+
+            return MemberToQVariant(messageInfo.message,columnInfo,role);
+        }
     }
 
-    const auto& messageInfo = m_messages.at(index.row());
-
-    if (columnInfo->GetColumnType() == ColumnInfo::Timestamp)
-    {
-        return messageInfo.receiveTime.toString("hh:mm:ss.zzz");
-    }
-    if (columnInfo->GetColumnType() == ColumnInfo::TypeName)
-    {
-        return QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(messageInfo.typeId));
-    }
-    if (columnInfo->GetColumnType() == ColumnInfo::ChannelId)
-    {
-        return QString::fromStdWString(messageInfo.channelId.ToString());
-    }
-
-    return MemberToQVariant(messageInfo.message,columnInfo,role);
+    return QVariant();
 }
 
 

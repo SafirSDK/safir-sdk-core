@@ -109,32 +109,36 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
         return QVariant();
     }
 
-    //first get rid of all roles we don't handle
-    if (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != FilterRole && role != Qt::TextAlignmentRole)
-    {
-        return QVariant();
-    }
+    const auto& columnInfo = m_columnInfoList.at(index.column());
 
-    auto columnInfo = m_columnInfoList.at(index.column());
-
-    if (role == Qt::TextAlignmentRole)
+    switch (role)
     {
+    case Qt::TextAlignmentRole:
         return QVariant(columnInfo->Alignment());
-    }
 
+    case Qt::ForegroundRole:
+        return columnInfo->Color();
 
-    const auto entity = std::next(m_entities.cbegin(), index.row());
+    case Qt::DisplayRole:
+    case Qt::ToolTipRole:
+    case FilterRole:
+        {
+            const auto entity = std::next(m_entities.cbegin(), index.row());
 
-    if (columnInfo->GetColumnType() == ColumnInfo::TypeName)
-    {
-        return QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(entity->first.GetTypeId()));
-    }
-    if (columnInfo->GetColumnType() == ColumnInfo::InstanceId)
-    {
-        return static_cast<qlonglong>(entity->first.GetInstanceId().GetRawValue());
-    }
+            if (columnInfo->GetColumnType() == ColumnInfo::TypeName)
+            {
+                return QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(entity->first.GetTypeId()));
+            }
+            if (columnInfo->GetColumnType() == ColumnInfo::InstanceId)
+            {
+                return static_cast<qlonglong>(entity->first.GetInstanceId().GetRawValue());
+            }
 
-    return MemberToQVariant(entity->second.entity,columnInfo,role);
+            return MemberToQVariant(entity->second.entity,columnInfo,role);
+        }
+    };
+
+    return QVariant();
 }
 
 

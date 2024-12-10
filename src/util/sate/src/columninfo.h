@@ -79,6 +79,8 @@ public:
     Qt::Alignment Alignment() const;
     bool HiddenByDefault() const {return m_columnType == ChannelId;}
     int DefaultColumnWidth() const;
+
+    QVariant Color() const;
 private:
 
     ColumnInfo(const ColumnType columnType, const QString &name);
