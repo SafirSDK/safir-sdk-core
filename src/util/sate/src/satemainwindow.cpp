@@ -632,8 +632,7 @@ void SateMainWindow::OnCloseCurrentTab()
 void SateMainWindow::OnCloseAllTabs()
 {
     auto docks = m_dockManager->dockWidgetsMap();
-    qDebug() << docks;
-    for (auto* dock: docks)
+        for (auto* dock: docks)
     {
         const QString dockName = dock->objectName();
         if (dockName == "CentralWidget" || dockName == "Output" || dockName == "Typesystem")
@@ -642,7 +641,6 @@ void SateMainWindow::OnCloseAllTabs()
         }
         else
         {
-            qDebug() << "Closing dock" << dockName;
             dock->deleteDockWidget();
         }
     }

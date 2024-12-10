@@ -75,7 +75,7 @@ MemberTreeItem::MemberTreeItem(const TypesystemRepository::DobClass* cls, const 
     , m_value(cls->name)
     , m_cls(cls)
 {
-    qDebug() << QString::fromStdWString(Safir::Dob::Typesystem::Serialization::ToJson(obj));
+    //qDebug() << QString::fromStdWString(Safir::Dob::Typesystem::Serialization::ToJson(obj));
     SetupObject(obj);
 }
 
