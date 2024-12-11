@@ -31,6 +31,8 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 
+#include <QColor>
+
 namespace
 {
 
@@ -469,4 +471,61 @@ QVariant InstancesModelUtils::MemberToQVariant(const Safir::Dob::Typesystem::Obj
     }
     throw std::logic_error("Unhandled CollectionType");
 
+}
+
+
+QVariant InstancesModelUtils::MemberColor(const Safir::Dob::Typesystem::ObjectPtr& object,
+                                          const ColumnInfoPtr& columnInfo)
+{
+    using namespace Safir::Dob::Typesystem;
+
+    bool changed = false;
+    
+    switch (columnInfo->CollectionType())
+    {
+    case SingleValueCollectionType:
+        {
+            const auto& container = object->GetMember(columnInfo->MemberIndex(),0);
+            changed = container.IsChanged();
+        }
+        break;
+
+    case ArrayCollectionType:
+        {
+            for (int i = 0; i < columnInfo->ArrayLength(); ++i)
+            {
+                const auto& container = object->GetMember(columnInfo->MemberIndex(),i);
+                if (container.IsChanged())
+                {
+                    changed = true;
+                    break;
+                }
+            }
+        }
+        break;
+
+    case SequenceCollectionType:
+        {
+            const auto& container = object->GetMember(columnInfo->MemberIndex(),0);
+            changed = container.IsChanged();
+        }
+        break;
+
+    case DictionaryCollectionType:
+        {
+            const auto& container = object->GetMember(columnInfo->MemberIndex(),0);
+            changed = container.IsChanged();
+        }
+        break;
+
+    }
+
+    if (changed)
+    {
+        return QColor(116, 192, 252, 100); // transparent blue
+    }
+    else
+    {
+        return QVariant();
+    }
 }

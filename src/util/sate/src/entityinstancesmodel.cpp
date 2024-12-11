@@ -116,8 +116,11 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
     case Qt::TextAlignmentRole:
         return QVariant(columnInfo->Alignment());
 
-    case Qt::ForegroundRole:
-        return columnInfo->Color();
+    case Qt::BackgroundRole:
+        {
+            const auto entity = std::next(m_entities.cbegin(), index.row());
+            return MemberColor(entity->second.entity,columnInfo);
+        }
 
     case Qt::DisplayRole:
     case Qt::ToolTipRole:

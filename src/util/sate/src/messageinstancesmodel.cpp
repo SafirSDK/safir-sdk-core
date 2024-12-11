@@ -116,8 +116,11 @@ QVariant MessageInstancesModel::data(const QModelIndex& index, const int role) c
     case Qt::TextAlignmentRole:
         return QVariant(columnInfo->Alignment());
 
-    case Qt::ForegroundRole:
-        return columnInfo->Color();
+    case Qt::BackgroundRole:
+        {
+            const auto& messageInfo = m_messages.at(index.row());
+            return MemberColor(messageInfo.message,columnInfo);
+        }
 
     case Qt::DisplayRole:
     case Qt::ToolTipRole:

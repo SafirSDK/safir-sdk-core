@@ -251,16 +251,3 @@ int ColumnInfo::DefaultColumnWidth() const
     return 50;
 }
 
-QVariant ColumnInfo::Color() const
-{
-    if (m_collectionType == SingleValueCollectionType)
-    {
-        return QVariant();
-    }
-    else
-    {
-        return QColor(116, 192, 252); // blue
-    }
-
-
-}

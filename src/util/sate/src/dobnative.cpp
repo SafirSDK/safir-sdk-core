@@ -537,11 +537,11 @@ void DobNative::OnMessage(const Safir::Dob::MessageProxy messageProxy)
 // EntitySubscriber interface
 void DobNative::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 {
-    emit DobInterface::OnEntity(entityProxy.GetEntityId(), entityProxy.GetOwner(), entityProxy.GetEntity(), DobInterface::NewEntity);
+    emit DobInterface::OnEntity(entityProxy.GetEntityId(), entityProxy.GetOwner(), entityProxy.GetEntityWithChangeInfo(), DobInterface::NewEntity);
 }
 void DobNative::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
 {
-    emit DobInterface::OnEntity(entityProxy.GetEntityId(), entityProxy.GetOwner(), entityProxy.GetEntity(), DobInterface::UpdatedEntity);
+    emit DobInterface::OnEntity(entityProxy.GetEntityId(), entityProxy.GetOwner(), entityProxy.GetEntityWithChangeInfo(), DobInterface::UpdatedEntity);
 }
 
 void DobNative::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*deprecated*/)

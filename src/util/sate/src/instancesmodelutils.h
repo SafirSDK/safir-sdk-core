@@ -41,6 +41,9 @@ public:
                                      const ColumnInfoPtr& columnInfo,
                                      const int role);
 
+    static QVariant MemberColor(const Safir::Dob::Typesystem::ObjectPtr& object,
+                                const ColumnInfoPtr& columnInfo);
+
 private:
     static QVariant ContainerToVariant(const Safir::Dob::Typesystem::ContainerBase& container,
                                        const Safir::Dob::Typesystem::MemberType memberType,
