@@ -32,7 +32,23 @@
 #include <QTimer>
 #include <QScrollBar>
 #include <QSortFilterProxyModel>
+#include <QDebug>
 #include <Safir/Dob/Typesystem/Serialization.h>
+
+struct ExpandedRow
+{
+    int row = -1;
+    std::vector<ExpandedRow> subRows;
+
+    void Debug(const QString& indent) const
+    {
+        qDebug() << indent << row;
+        for (const auto& c : subRows)
+        {
+            c.Debug(indent + " ");
+        }
+    }
+};
 
 class ObjectSortFilterProxyModel : public QSortFilterProxyModel
 {
@@ -247,7 +263,26 @@ void DobObjectEditWidget::Init()
     });
 
     // Setup operation buttons
-    ui->operationsWidget->SetConfiguration(TypesystemRepository::Instance().GetClass(m_typeId)->dobBaseClass);
+    auto dobBaseClass = TypesystemRepository::Instance().GetClass(m_typeId)->dobBaseClass;
+
+    if (dobBaseClass == TypesystemRepository::Entity)
+    {
+        connect(ui->operationsWidget->liveUpdateCheckBox, &QCheckBox::toggled, this, [this](bool checked)
+        {
+            if (checked)
+            {
+                connect(m_dob, &DobHandler::OnEntity, this, &DobObjectEditWidget::OnLiveUpdateEntity);
+
+            }
+            else
+            {
+                m_sourceModel->DisableLiveUpdate();
+                disconnect(m_dob, &DobHandler::OnEntity, this, &DobObjectEditWidget::OnLiveUpdateEntity);
+            }
+        });
+    }
+
+    ui->operationsWidget->SetConfiguration(dobBaseClass);
     connect(ui->operationsWidget->setChangesBtn, &QPushButton::clicked, this, [this]
     {
         auto obj = BuildObject();
@@ -304,6 +339,54 @@ void DobObjectEditWidget::Init()
         auto json = QString::fromStdWString(Safir::Dob::Typesystem::Serialization::ToJson(obj));
         emit JsonSerializedObject(QString::fromStdWString(sdt::Operations::GetName(m_typeId)), json);
     });
+}
+
+void DobObjectEditWidget::OnLiveUpdateEntity(const sdt::EntityId& entityId, const sdt::HandlerId&, const Safir::Dob::EntityPtr& entity, DobInterface::EntityOperation operation)
+{
+    if (entityId.GetTypeId() != m_typeId || ui->operationsWidget->Instance() != entityId.GetInstanceId() || operation == DobInterface::DeletedEntity)
+    {
+        return;
+    }
+
+    // Save the expanded node state
+    ExpandedRow state;
+    std::function<void(const QModelIndex&, ExpandedRow&)> saveExpandedState;
+    saveExpandedState = [this, &saveExpandedState](const QModelIndex &ix, ExpandedRow& expanded)
+    {
+        if (ix.isValid() && ui->objectEditTreeView->isExpanded(ix))
+        {
+            ExpandedRow er;
+            er.row = ix.row();
+            for (auto row = 0; row < ui->objectEditTreeView->model()->rowCount(ix); ++row)
+            {
+                saveExpandedState(ui->objectEditTreeView->model()->index(row, 0, ix), er);
+            }
+            expanded.subRows.push_back(er);
+        }
+    };
+    for (auto row = 0; row < ui->objectEditTreeView->model()->rowCount(); ++row)
+    {
+        saveExpandedState(ui->objectEditTreeView->model()->index(row, 0), state);
+    }
+
+    // Update the model
+    m_sourceModel->LiveUpdateModel(entity);
+
+    // Reset expanded state
+    std::function<void(const QModelIndex&, ExpandedRow&)> resetExpandedState;
+    resetExpandedState = [this, &resetExpandedState](const QModelIndex& parent, ExpandedRow& expanded)
+    {
+        auto ix = ui->objectEditTreeView->model()->index(expanded.row, 0, parent);
+        ui->objectEditTreeView->expand(ix);
+        for (auto& er : expanded.subRows)
+        {
+            resetExpandedState(ix, er);
+        }
+    };
+    for (auto& er : state.subRows)
+    {
+        resetExpandedState({}, er);
+    }
 }
 
 void DobObjectEditWidget::EditValue(const QModelIndex& index)

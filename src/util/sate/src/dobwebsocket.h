@@ -74,6 +74,7 @@ private:
     QUrl m_url;
     bool m_isConnected = false;
     bool m_reconnect = false;
+    bool m_hasReportedConnectionProblem = false;
     QString m_name = "sate";
     int m_context = 0;
 

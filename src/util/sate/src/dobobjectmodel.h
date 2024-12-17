@@ -58,6 +58,9 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     const MemberTreeItem* InvisibleRoot() const;
+    void LiveUpdateModel(const Safir::Dob::Typesystem::ObjectPtr& obj);
+    void DisableLiveUpdate() { m_liveUpdate = false; }
+
 
 signals:
     void OpenEditor(const QModelIndex& index);
@@ -65,4 +68,5 @@ signals:
 private:
     std::unique_ptr<MemberTreeItem> m_invisibleRootItem;
     int64_t m_typeId;
+    bool m_liveUpdate = false;
 };

@@ -47,6 +47,14 @@ DobObjectModel::DobObjectModel(int64_t typeId, const Safir::Dob::Typesystem::Obj
 {
 }
 
+void DobObjectModel::LiveUpdateModel(const Safir::Dob::Typesystem::ObjectPtr& obj)
+{
+    m_liveUpdate = true;
+    beginResetModel();
+    m_invisibleRootItem = std::make_unique<MemberTreeItem>(TypesystemRepository::Instance().GetClass(m_typeId), obj);
+    endResetModel();
+}
+
 const MemberTreeItem* DobObjectModel::InvisibleRoot() const
 {
     return m_invisibleRootItem.get();
@@ -204,6 +212,19 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
             }
 
             return item->IsNull() ? QColor(135, 134, 132) : QColor(250, 185, 0);
+        }
+    }
+    break;
+
+    case Qt::BackgroundRole:
+    {
+        if (m_liveUpdate)
+        {
+            auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+            if (item->IsChanged())
+            {
+                return QColor(116, 192, 252, 100); // transparent blue
+            }
         }
     }
     break;

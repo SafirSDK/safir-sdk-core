@@ -111,6 +111,7 @@ DobWebSocket::DobWebSocket(const QString& address, int port)
 void DobWebSocket::WsConnected()
 {
     m_isConnected = true;
+    m_hasReportedConnectionProblem = false;
 
     emit DobInterface::Output("Connected to websocket " + m_url.toString(), QtInfoMsg);
     QJsonObject j;
@@ -127,16 +128,20 @@ void DobWebSocket::WsConnected()
 void DobWebSocket::WsDisconnected()
 {
     m_isConnected = false;
+    emit DobInterface::ConnectionClosed();
 
     if (m_reconnect)
     {
-        emit DobInterface::Output("try reconnect " + m_url.toString(), QtInfoMsg);
+        if (!m_hasReportedConnectionProblem)
+        {
+            m_hasReportedConnectionProblem = true;
+            LogError("Websocket connection closed. Try to reconnect to " + m_url.toString());
+        }
         // We did not explicitly call close, then try to reconnect.
         QTimer::singleShot(1000, [this]{m_webSocket.open(m_url);});
     }
     else
     {
-        emit DobInterface::ConnectionClosed();
         emit DobInterface::Output("Disconnected from DOB websocket on " + m_url.toString(), QtInfoMsg);
     }
 }
@@ -631,7 +636,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         if (result.isString() && result.toString() == "OK")
         {
             emit DobInterface::ConnectedToDob(m_name);
-            emit DobInterface::Output("Connected to DOB (websocket)!", QtWarningMsg);
+            emit DobInterface::Output("Connected to DOB via websocket!", QtWarningMsg);
         }
         else
         {

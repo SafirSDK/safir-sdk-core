@@ -82,6 +82,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         sendReqBtn->setVisible(false);
         instanceLabel->setVisible(false);
         instanceEdit->setVisible(false);
+        liveUpdateCheckBox->setVisible(false);
     }
     break;
 
@@ -100,6 +101,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         sendMsgBtn->setVisible(false);
         instanceLabel->setVisible(false);
         instanceEdit->setVisible(false);
+        liveUpdateCheckBox->setVisible(false);
     }
     break;
 
@@ -117,6 +119,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         idEdit->setVisible(false);
         instanceLabel->setVisible(false);
         instanceEdit->setVisible(false);
+        liveUpdateCheckBox->setVisible(false);
     }
     break;
 
@@ -137,6 +140,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         idEdit->setVisible(false);
         instanceLabel->setVisible(false);
         instanceEdit->setVisible(false);
+        liveUpdateCheckBox->setVisible(false);
     }
     break;
     }

@@ -65,4 +65,5 @@ private:
     void ApplyFilter(const QString& filterText, int column, QWidget* filterWidget);
 
     QString GetDefaultValueForChannelOrHandler() const;
+    void OnLiveUpdateEntity(const sdt::EntityId& entityId, const sdt::HandlerId& handler, const Safir::Dob::EntityPtr& entity, DobInterface::EntityOperation operation);
 };
