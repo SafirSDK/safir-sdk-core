@@ -281,7 +281,7 @@ void InstancesWidget::OnSectionCountChanged(const int /*oldCount*/, const int ne
     m_filters.clear();
 
     m_filterAreaLayout->addSpacing(2);
-    auto placeholder = QString("%1  Filter").arg(QString::fromUtf8("\xF0\x9F\x94\x8D")); // utf-8 Left-Pointing Magnifying Glass
+    auto placeholder = QString("%1 Filter").arg(QString::fromUtf8("\xF0\x9F\x94\x8D")); // utf-8 Left-Pointing Magnifying Glass
     for (int i = 0; i < newCount; ++i)
     {
         auto* le = new QLineEdit(this);

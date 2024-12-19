@@ -208,7 +208,7 @@ void DobObjectEditWidget::Init()
     connect(ui->objectEditTreeView->horizontalScrollBar(), &QAbstractSlider::actionTriggered, this, &DobObjectEditWidget::PositionFilters);
 
     // Handle filter changes
-    auto placeholder = QString("%1  Filter").arg(QString::fromUtf8("\xF0\x9F\x94\x8D")); // utf-8 Left-Pointing Magnifying Glass
+    auto placeholder = QString("%1 Filter").arg(QString::fromUtf8("\xF0\x9F\x94\x8D")); // utf-8 Left-Pointing Magnifying Glass
     ui->nameFilterEdit->setPlaceholderText(placeholder);
     ui->valueFilterEdit->setPlaceholderText(placeholder);
     ui->typeFilterEdit->setPlaceholderText(placeholder);
