@@ -27,6 +27,9 @@
      </property>
      <item>
       <widget class="QLineEdit" name="nameFilterEdit">
+       <property name="placeholderText">
+        <string>Filter</string>
+       </property>
        <property name="clearButtonEnabled">
         <bool>true</bool>
        </property>
@@ -34,6 +37,9 @@
      </item>
      <item>
       <widget class="QLineEdit" name="valueFilterEdit">
+       <property name="placeholderText">
+        <string>Filter</string>
+       </property>
        <property name="clearButtonEnabled">
         <bool>true</bool>
        </property>
@@ -41,6 +47,9 @@
      </item>
      <item>
       <widget class="QLineEdit" name="typeFilterEdit">
+       <property name="placeholderText">
+        <string>Filter</string>
+       </property>
        <property name="clearButtonEnabled">
         <bool>true</bool>
        </property>

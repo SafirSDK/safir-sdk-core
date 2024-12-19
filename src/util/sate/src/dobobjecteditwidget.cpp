@@ -175,7 +175,9 @@ void DobObjectEditWidget::Init()
     ui->objectEditTreeView->setItemDelegateForColumn(1, new DobObjectDelegate());
     ui->objectEditTreeView->setItemDelegateForColumn(3, new CheckboxDelegate());
 
-    ui->objectEditTreeView->setColumnWidth(0, 200);
+    ui->objectEditTreeView->resizeColumnToContents(0);
+    auto col0Width = ui->objectEditTreeView->columnWidth(0);
+    ui->objectEditTreeView->setColumnWidth(0, col0Width > 200 ? col0Width : 200); // Min start width at least 200 to make it look better
     ui->objectEditTreeView->setColumnWidth(1, 300);
     ui->objectEditTreeView->setColumnWidth(2, 80);
     ui->objectEditTreeView->setColumnWidth(3, 80);
@@ -206,6 +208,11 @@ void DobObjectEditWidget::Init()
     connect(ui->objectEditTreeView->horizontalScrollBar(), &QAbstractSlider::actionTriggered, this, &DobObjectEditWidget::PositionFilters);
 
     // Handle filter changes
+    auto placeholder = QString("%1  Filter").arg(QString::fromUtf8("\xF0\x9F\x94\x8D")); // utf-8 Left-Pointing Magnifying Glass
+    ui->nameFilterEdit->setPlaceholderText(placeholder);
+    ui->valueFilterEdit->setPlaceholderText(placeholder);
+    ui->typeFilterEdit->setPlaceholderText(placeholder);
+
     connect(ui->nameFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 0, ui->nameFilterEdit); });
     connect(ui->valueFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 1, ui->valueFilterEdit); });
     connect(ui->nullFilterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int i){ ApplyFilter(i == 0 ? "" : ui->nullFilterCombo->currentText(), 2, ui->nullFilterCombo); });

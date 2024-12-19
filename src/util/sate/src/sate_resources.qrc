@@ -35,5 +35,6 @@
         <file>icons/s_plus_black.png</file>
         <file>icons/entity_orange_filled.png</file>
         <file>icons/magnifying-glass-location-solid.svg</file>
+        <file>icons/magnifying-glass-search.svg</file>
     </qresource>
 </RCC>

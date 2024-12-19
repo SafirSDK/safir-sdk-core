@@ -106,6 +106,8 @@ void TypesystemWidget::Initialize(DobHandler* dob)
 
     SetTreeViewModel(true);
 
+    auto placeholder = QString("%1  Filter").arg(QString::fromUtf8("\xF0\x9F\x94\x8D")); // utf-8 Left-Pointing Magnifying Glass
+    ui->filterLineEdit->setPlaceholderText(placeholder);
     connect(ui->filterLineEdit, &QLineEdit::textChanged, this, [this](const QString& f)
     {
         ApplyFilter(f);

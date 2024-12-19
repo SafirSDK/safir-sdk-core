@@ -35,6 +35,7 @@ public:
 
     static QIcon GetNamespaceIcon();
     static QIcon GetEnumIcon();
+    static QIcon GetSearchIcon();
     static QIcon GetIcon(TypesystemRepository::DobBaseClass baseClass, Modifier modifier = IconFactory::None);
 
 private:

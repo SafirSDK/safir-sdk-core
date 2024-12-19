@@ -152,8 +152,8 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
         {
         case 0: return item->GetName();
         case 1: return item->GetValue();
-        case 2: return item->IsNull() ? QString::fromStdWString(L"\u2713") : "";
-        case 3: return item->IsChanged() ? QString::fromStdWString(L"\u2713") : "";
+        case 2: return item->IsNull() ? QString::fromUtf8("\u2713") : "";
+        case 3: return item->IsChanged() ? QString::fromUtf8("\u2713") : "";
         case 4: return TypesystemRepository::Instance().GetTypeName(item->GetMemberInfo()->memberType, item->GetMemberInfo()->memberTypeId);
         }
     }

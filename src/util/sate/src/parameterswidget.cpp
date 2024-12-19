@@ -1,6 +1,7 @@
 #include "parameterswidget.h"
 #include "ui_parameterswidget.h"
 #include "parametersmodel.h"
+#include "iconfactory.h"
 
 #include <QSortFilterProxyModel>
 #include <QTimer>
@@ -59,6 +60,14 @@ ParametersWidget::ParametersWidget(int64_t typeId, QWidget *parent)
     ui->parametersTreeView->resizeColumnToContents(0);
     ui->parametersTreeView->resizeColumnToContents(1);
     ui->parametersTreeView->resizeColumnToContents(2);
+    if (ui->parametersTreeView->columnWidth(0) < 100)
+    {
+        ui->parametersTreeView->setColumnWidth(0, 100); // Min start width 100 to make it look better
+    }
+    if (ui->parametersTreeView->columnWidth(1) < 100)
+    {
+        ui->parametersTreeView->setColumnWidth(1, 100); // Min start width 100 to make it look better
+    }
 
     connect(ui->parametersTreeView->header(), &QHeaderView::sectionResized, this, &ParametersWidget::OnSectionResized);
     QTimer::singleShot(1, [this]{
@@ -68,6 +77,9 @@ ParametersWidget::ParametersWidget(int64_t typeId, QWidget *parent)
     });
 
     // Handle filter changes
+    ui->nameFilterEdit->addAction(IconFactory::GetSearchIcon(), QLineEdit::LeadingPosition);
+    ui->valueFilterEdit->addAction(IconFactory::GetSearchIcon(), QLineEdit::LeadingPosition);
+    ui->typeFilterEdit->addAction(IconFactory::GetSearchIcon(), QLineEdit::LeadingPosition);
     connect(ui->nameFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 0, ui->nameFilterEdit); });
     connect(ui->valueFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 1, ui->valueFilterEdit); });
     connect(ui->typeFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 2, ui->typeFilterEdit); });

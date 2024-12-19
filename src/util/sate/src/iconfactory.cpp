@@ -40,13 +40,13 @@ QPixmap GetIconPixmap(TypesystemRepository::DobBaseClass baseClass, IconFactory:
     case TypesystemRepository::Service:
         return modifier != IconFactory::None ? QPixmap(":/img/icons/gear_orange_filled") : QPixmap(":/img/icons/gear_orange");
     case TypesystemRepository::Response:
-        return QPixmap(":/img/icons/response_orange.png");
+        return QPixmap(":/img/icons/response_orange");
     case TypesystemRepository::Parametrization:
-        return QPixmap(":/img/icons/parameters_orange.png");
+        return QPixmap(":/img/icons/parameters_orange");
     case TypesystemRepository::Item:
-        return QPixmap(":/img/icons/item_orange.png");
+        return QPixmap(":/img/icons/item_orange");
     case TypesystemRepository::Struct:
-        return QPixmap(":/img/icons/struct_orange.png");
+        return QPixmap(":/img/icons/struct_orange");
     case TypesystemRepository::Object:
         return {};
     default:
@@ -86,12 +86,17 @@ QPoint GetOffset(TypesystemRepository::DobBaseClass baseClass, IconFactory::Modi
 
 QIcon IconFactory::GetNamespaceIcon()
 {
-    return QIcon(":/img/icons/folder_orange.png");
+    return QIcon(":/img/icons/folder_orange");
 }
 
 QIcon IconFactory::GetEnumIcon()
 {
-    return QIcon(":/img/icons/enum_orange.png");
+    return QIcon(":/img/icons/enum_orange");
+}
+
+QIcon IconFactory::GetSearchIcon()
+{
+    return QIcon(":/img/icons/magnifying-glass-search");
 }
 
 QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass, IconFactory::Modifier modifier)
