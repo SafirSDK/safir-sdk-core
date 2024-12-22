@@ -45,7 +45,13 @@ MessageInstancesModel::MessageInstancesModel(DobHandler* dob,
     , m_includeSubclasses(includeSubclasses)
 {
     setupColumns();
+
+    m_timer.setInterval(500);
+
     connect(m_dob, &DobHandler::OnMessage, this, &MessageInstancesModel::OnMessage);
+    connect(&m_timer, &QTimer::timeout, this, &MessageInstancesModel::OnTimeout);
+
+    m_timer.start(500);
 }
 
 MessageInstancesModel::~MessageInstancesModel()
@@ -119,7 +125,7 @@ QVariant MessageInstancesModel::data(const QModelIndex& index, const int role) c
     case Qt::BackgroundRole:
         {
             const auto& messageInfo = m_messages.at(index.row());
-            return MemberColor(messageInfo.message,columnInfo);
+            return MemberColor(messageInfo.message, DobInterface::NewEntity, messageInfo.greenUntil, columnInfo);
         }
 
     case Qt::DisplayRole:
@@ -190,7 +196,8 @@ void MessageInstancesModel::OnMessage(const sdt::ChannelId& channel,
     m_messages.push_front(Info{QDateTime::currentDateTime(),
                                typeId,
                                channel,
-                               message});
+                               message,
+                               std::chrono::steady_clock::now() + std::chrono::seconds(5)});
 
     beginInsertRows(QModelIndex(), 0, 0);
     endInsertRows();
@@ -207,4 +214,22 @@ void MessageInstancesModel::OnMessage(const sdt::ChannelId& channel,
 
     ++m_numReceived;
     emit statusBarInfoChanged();
+}
+
+void MessageInstancesModel::OnTimeout()
+{
+    const auto now = std::chrono::steady_clock::now();
+    for (size_t row = 0; row < m_messages.size(); ++row)
+    {
+        if (m_messages[row].greenUntil == std::chrono::steady_clock::time_point())
+        {
+            break;
+        }
+
+        if (m_messages[row].greenUntil <= now)
+        {
+            m_messages[row].greenUntil = std::chrono::steady_clock::time_point();
+            emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1), {Qt::BackgroundRole});
+        }
+    }
 }

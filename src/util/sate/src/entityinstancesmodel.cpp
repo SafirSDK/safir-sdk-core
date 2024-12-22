@@ -27,7 +27,8 @@
 
 #include <Safir/Dob/Entity.h>
 #include <QSize>
-
+#include <QTimer>
+#include <QColor>
 
 
 EntityInstancesModel::EntityInstancesModel(DobHandler* dob,
@@ -40,7 +41,13 @@ EntityInstancesModel::EntityInstancesModel(DobHandler* dob,
     , m_includeSubclasses(includeSubclasses)
 {
     setupColumns();
+
+    m_timer.setInterval(500);
+
     connect(m_dob, &DobHandler::OnEntity, this, &EntityInstancesModel::OnEntity);
+    connect(&m_timer, &QTimer::timeout, this, &EntityInstancesModel::OnTimeout);
+
+    m_timer.start(500);
 }
 
 EntityInstancesModel::~EntityInstancesModel()
@@ -119,7 +126,10 @@ QVariant EntityInstancesModel::data(const QModelIndex& index, const int role) co
     case Qt::BackgroundRole:
         {
             const auto entity = std::next(m_entities.cbegin(), index.row());
-            return MemberColor(entity->second.entity,columnInfo);
+            return MemberColor(entity->second.entity,
+                               entity->second.deleted,
+                               entity->second.greenUntil,
+                               columnInfo);
         }
 
     case Qt::DisplayRole:
@@ -182,34 +192,65 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
     {
     case DobInterface::NewEntity:
         {
-            const auto result = m_entities.insert(std::make_pair(entityId, Info{entityId, handlerId, entity}));
+            const auto result = m_entities.insert
+                (std::make_pair(entityId,
+                                Info{entityId,
+                                     handlerId,
+                                     entity,
+                                     std::chrono::steady_clock::now() + std::chrono::seconds(5)}));
             if (result.second)
             {
                 const auto row = std::distance(m_entities.begin(), result.first);
                 beginInsertRows(QModelIndex(), row, row);
                 endInsertRows();
             }
+
             ++m_numNew;
         }
         break;
     case DobInterface::UpdatedEntity:
         {
-            const auto result = m_entities.insert_or_assign(entityId,
-                                                            Info{entityId, handlerId, entity});
-            const auto row = std::distance(m_entities.begin(), result.first);
+            auto findIt = m_entities.find(entityId);
+            findIt->second.handlerId = handlerId;
+            findIt->second.entity = entity;
+            const auto row = std::distance(m_entities.begin(), findIt);
             emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1));
+
             ++m_numUpdate;
         }
         break;
     case DobInterface::DeletedEntity:
         {
-            const auto row = std::distance(m_entities.begin(), m_entities.find(entityId));
-            beginRemoveRows(QModelIndex(),row,row);
-            m_entities.erase(entityId);
-            endRemoveRows();
+            auto findIt = m_entities.find(entityId);
+            findIt->second.deleted = true;
+            const auto row = std::distance(m_entities.begin(), findIt);
+            emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1), {Qt::BackgroundRole});
+            QTimer::singleShot(5000, [this, entityId]
+            {
+                const auto row = std::distance(m_entities.begin(), m_entities.find(entityId));
+                beginRemoveRows(QModelIndex(),row,row);
+                m_entities.erase(entityId);
+                endRemoveRows();
+            });
+
             ++m_numDelete;
         }
         break;
     }
     emit statusBarInfoChanged();
+}
+
+void EntityInstancesModel::OnTimeout()
+{
+    const auto now = std::chrono::steady_clock::now();
+    for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
+    {
+        if (it->second.greenUntil != std::chrono::steady_clock::time_point() &&
+            it->second.greenUntil <= now)
+        {
+            it->second.greenUntil = std::chrono::steady_clock::time_point();
+            const auto row = std::distance(m_entities.begin(), it);
+            emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1), {Qt::BackgroundRole});
+        }
+    }
 }

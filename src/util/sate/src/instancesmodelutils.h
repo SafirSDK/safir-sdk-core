@@ -42,6 +42,8 @@ public:
                                      const int role);
 
     static QVariant MemberColor(const Safir::Dob::Typesystem::ObjectPtr& object,
+                                const bool deleted,
+                                const std::chrono::steady_clock::time_point& greenUntil,
                                 const ColumnInfoPtr& columnInfo);
 
 private:

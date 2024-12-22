@@ -25,6 +25,7 @@
 
 #include <QAbstractTableModel>
 #include <QDateTime>
+#include <QTimer>
 
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Consumer.h>
@@ -54,6 +55,7 @@ public:
         int64_t typeId;
         Safir::Dob::Typesystem::ChannelId channelId;
         Safir::Dob::MessagePtr message;
+        std::chrono::steady_clock::time_point greenUntil; //green until now is after this
     };
 
     Info getRow(int row) const;
@@ -72,6 +74,7 @@ private slots:
     void OnMessage(const sdt::ChannelId& channel,
                    const Safir::Dob::MessagePtr& message);
 
+    void OnTimeout();
 private:
     DobHandler* const m_dob;
     const Safir::Dob::Typesystem::TypeId m_typeId;
@@ -82,4 +85,5 @@ private:
     size_t m_maxRows = 1000;
     size_t m_numReceived = 0;
     std::deque<Info> m_messages;
+    QTimer m_timer;
 };

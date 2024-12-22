@@ -475,12 +475,24 @@ QVariant InstancesModelUtils::MemberToQVariant(const Safir::Dob::Typesystem::Obj
 
 
 QVariant InstancesModelUtils::MemberColor(const Safir::Dob::Typesystem::ObjectPtr& object,
+                                          const bool deleted,
+                                          const std::chrono::steady_clock::time_point& greenUntil,
                                           const ColumnInfoPtr& columnInfo)
 {
     using namespace Safir::Dob::Typesystem;
 
+    if (deleted)
+    {
+        return QColor(255,0,0,100);
+    }
+    else if (greenUntil != std::chrono::steady_clock::time_point() &&
+             greenUntil > std::chrono::steady_clock::now())
+    {
+        return QColor(0,255,0,100);
+    }
+
     bool changed = false;
-    
+
     switch (columnInfo->CollectionType())
     {
     case SingleValueCollectionType:

@@ -24,6 +24,7 @@
 #pragma once
 
 #include <QAbstractTableModel>
+#include <QTimer>
 
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Consumer.h>
@@ -32,6 +33,8 @@
 #include "columninfo.h"
 #include "instancesmodelutils.h"
 #include "dobhandler.h"
+
+class QTimer;
 
 class EntityInstancesModel
     : public QAbstractTableModel
@@ -51,6 +54,9 @@ public:
         Safir::Dob::Typesystem::EntityId entityId;
         Safir::Dob::Typesystem::HandlerId handlerId;
         Safir::Dob::EntityPtr entity;
+        std::chrono::steady_clock::time_point greenUntil;
+
+        bool deleted = false; //if deleted will be removed by timer after a while
     };
 
     Info getRow(int row) const;
@@ -72,6 +78,7 @@ private slots:
                   const Safir::Dob::EntityPtr& entity,
                   DobInterface::EntityOperation operation);
 
+    void OnTimeout();
 private:
     DobHandler* const m_dob;
     const Safir::Dob::Typesystem::TypeId m_typeId;
@@ -82,4 +89,5 @@ private:
     size_t m_numUpdate = 0;
     size_t m_numDelete = 0;
     std::map<Safir::Dob::Typesystem::EntityId, Info> m_entities;
+    QTimer m_timer;
 };
