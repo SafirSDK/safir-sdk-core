@@ -80,8 +80,7 @@ private slots:
                                       const Safir::Dob::Typesystem::ObjectPtr& object);
     void OnOpenParameterViewer(const int64_t typeId);
     void OnOpenDouFile(const int64_t typeId);
-    void OnDarkMode();
-    void OnLightMode();
+    void OnThemeChanged();
     void OnFocusedDockWidgetChanged(ads::CDockWidget* old, ads::CDockWidget* now);
     void OnStatusBarInfoChanged();
     void OnResetWindows();

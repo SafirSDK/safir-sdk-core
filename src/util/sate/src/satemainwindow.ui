@@ -34,6 +34,7 @@
     <addaction name="actionDarkMode"/>
     <addaction name="actionLightMode"/>
     <addaction name="separator"/>
+    <addaction name="actionTouchMode"/>
    </widget>
    <widget class="QMenu" name="menuConnection">
     <property name="title">
@@ -60,6 +61,9 @@
    <property name="text">
     <string>Dark Mode</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+D</string>
+   </property>
   </action>
   <action name="actionLightMode">
    <property name="checkable">
@@ -67,6 +71,9 @@
    </property>
    <property name="text">
     <string>Light Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+L</string>
    </property>
   </action>
   <action name="actionConnect">
@@ -104,6 +111,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionTouchMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Touch Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+T</string>
    </property>
   </action>
  </widget>

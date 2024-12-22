@@ -33,6 +33,7 @@
 #include "parameterswidget.h"
 
 #include <QCloseEvent>
+#include <QActionGroup>
 #include <QDateTime>
 #include <QDebug>
 #include <QFile>
@@ -83,7 +84,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     //now we have everything we need to set the initial stylesheets
     m_dockManager->setStyleSheet("");
-    OnDarkMode();
+    OnThemeChanged();
 
     //Set up the central area as always present
     QLabel* label = new QLabel();
@@ -146,9 +147,13 @@ SateMainWindow::SateMainWindow(QWidget *parent)
         }
     });
 
-    // Style sheet menu
-    connect(ui->actionDarkMode, &QAction::triggered, this, &SateMainWindow::OnDarkMode);
-    connect(ui->actionLightMode, &QAction::triggered, this, &SateMainWindow::OnLightMode);
+    auto* themeGroup = new QActionGroup(this);
+    themeGroup->addAction(ui->actionDarkMode);
+    themeGroup->addAction(ui->actionLightMode);
+    themeGroup->setExclusive(true);
+
+    connect(themeGroup, &QActionGroup::triggered, this, &SateMainWindow::OnThemeChanged);
+    connect(ui->actionTouchMode, &QAction::triggered, this, &SateMainWindow::OnThemeChanged);
 
     // DOB signal handling
     connect(&m_dob, &DobHandler::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
@@ -436,61 +441,51 @@ void SateMainWindow::AddTab(const QString& title,
     }
 }
 
-void SateMainWindow::OnDarkMode()
+namespace
 {
-    ui->actionDarkMode->setChecked(true);
-    ui->actionLightMode->setChecked(false);
-
-    QFile ds(":qdarkstyle/dark/darkstyle.qss");
-    QFile tweaksBoth(":customizations/tweaks-both.qss");
-    QFile tweaksDark(":customizations/tweaks-dark.qss");
-    if (ds.exists() && tweaksBoth.exists() && tweaksDark.exists())
+    QString readStyleSheet(const QString& path)
     {
-        ds.open(QFile::ReadOnly | QFile::Text);
-        tweaksBoth.open(QFile::ReadOnly | QFile::Text);
-        tweaksDark.open(QFile::ReadOnly | QFile::Text);
-        QTextStream ts1(&ds);
-        QTextStream ts2(&tweaksBoth);
-        QTextStream ts3(&tweaksDark);
-        qApp->setStyleSheet(ts1.readAll() + "\n" + ts2.readAll() + "\n" + ts3.readAll());
-    }
+        QFile f(path);
+        if (!f.exists())
+        {
+            throw std::logic_error(QString("Stylesheet %1 could not be found").arg(path).toStdString());
+        }
 
-    QFile ads(":customizations/ads-dark.qss");
-    if (ads.exists())
-    {
-        ads.open(QFile::ReadOnly | QFile::Text);
-        QTextStream ts(&ads);
-        m_dockManager->setStyleSheet(ts.readAll());
+        f.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts(&f);
+        return ts.readAll();
     }
-
 }
 
-void SateMainWindow::OnLightMode()
+void SateMainWindow::OnThemeChanged()
 {
-    ui->actionDarkMode->setChecked(false);
-    ui->actionLightMode->setChecked(true);
+    QStringList mainStyleSheet;
+    QStringList adsStyleSheet;
 
-    QFile ds(":qdarkstyle/light/lightstyle.qss");
-    QFile tweaksBoth(":customizations/tweaks-both.qss");
-    QFile tweaksLight(":customizations/tweaks-light.qss");
-    if (ds.exists() && tweaksBoth.exists() && tweaksLight.exists())
+    if (ui->actionTouchMode->isChecked())
     {
-        ds.open(QFile::ReadOnly | QFile::Text);
-        tweaksBoth.open(QFile::ReadOnly | QFile::Text);
-        tweaksLight.open(QFile::ReadOnly | QFile::Text);
-        QTextStream ts1(&ds);
-        QTextStream ts2(&tweaksBoth);
-        QTextStream ts3(&tweaksLight);
-        qApp->setStyleSheet(ts1.readAll() + "\n" + ts2.readAll() + "\n" + ts3.readAll());
+        mainStyleSheet.append("* {font-size:20px;}");
     }
 
-    QFile ads(":customizations/ads-light.qss");
-    if (ads.exists())
+    if (ui->actionDarkMode->isChecked())
     {
-        ads.open(QFile::ReadOnly | QFile::Text);
-        QTextStream ts(&ads);
-        m_dockManager->setStyleSheet(ts.readAll());
+        mainStyleSheet.append(readStyleSheet(":qdarkstyle/dark/darkstyle.qss"));
+        mainStyleSheet.append(readStyleSheet(":customizations/tweaks-both.qss"));
+        mainStyleSheet.append(readStyleSheet(":customizations/tweaks-dark.qss"));
+
+        adsStyleSheet.append(readStyleSheet(":customizations/ads-dark.qss"));
     }
+    else
+    {
+        mainStyleSheet.append(readStyleSheet(":qdarkstyle/light/lightstyle.qss"));
+        mainStyleSheet.append(readStyleSheet(":customizations/tweaks-both.qss"));
+        mainStyleSheet.append(readStyleSheet(":customizations/tweaks-light.qss"));
+
+        adsStyleSheet.append(readStyleSheet(":customizations/ads-light.qss"));
+    }
+
+    qApp->setStyleSheet(mainStyleSheet.join("\n"));
+    m_dockManager->setStyleSheet(adsStyleSheet.join("\n"));
 }
 
 void SateMainWindow::OnFocusedDockWidgetChanged(ads::CDockWidget* /*old*/, ads::CDockWidget* now)
