@@ -257,3 +257,8 @@ void TypesystemWidget::LocateType(int64_t typeId)
         ExpandTo(ix.constFirst());
     }
 }
+
+void TypesystemWidget::SetSearchFocus()
+{
+    ui->filterLineEdit->setFocus();
+}

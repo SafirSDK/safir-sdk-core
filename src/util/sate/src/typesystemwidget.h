@@ -45,6 +45,7 @@ public:
 
     void LocateType(int64_t typeId);
 
+    void SetSearchFocus();
 signals:
     void OpenObjectEdit(int64_t typeId);
     void OpenEntityInstanceViewer(int64_t typeId, bool includeSubclasses);

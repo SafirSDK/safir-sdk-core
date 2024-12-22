@@ -197,6 +197,8 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->menuView->addSeparator();
     ui->menuView->addAction(typesystemDock->toggleViewAction());
     ui->menuView->addAction(outputDock->toggleViewAction());
+
+    m_typesystem->SetSearchFocus();
 }
 
 SateMainWindow::~SateMainWindow()
