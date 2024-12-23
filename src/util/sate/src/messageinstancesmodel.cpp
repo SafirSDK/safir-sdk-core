@@ -229,7 +229,8 @@ void MessageInstancesModel::OnTimeout()
         if (m_messages[row].greenUntil <= now)
         {
             m_messages[row].greenUntil = std::chrono::steady_clock::time_point();
-            emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1), {Qt::BackgroundRole});
+            emit dataChanged(index(static_cast<int>(row),0),
+                             index(static_cast<int>(row), m_columnInfoList.count() - 1), {Qt::BackgroundRole});
         }
     }
 }
