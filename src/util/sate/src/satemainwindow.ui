@@ -33,8 +33,8 @@
     </property>
     <addaction name="actionDarkMode"/>
     <addaction name="actionLightMode"/>
-    <addaction name="separator"/>
     <addaction name="actionTouchMode"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuConnection">
     <property name="title">
