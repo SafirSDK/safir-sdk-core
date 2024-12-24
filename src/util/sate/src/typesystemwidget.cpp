@@ -108,6 +108,7 @@ void TypesystemWidget::Initialize(DobHandler* dob)
 
     auto placeholder = QString("%1 Filter").arg(QString::fromUtf8("\xF0\x9F\x94\x8D")); // utf-8 Left-Pointing Magnifying Glass
     ui->filterLineEdit->setPlaceholderText(placeholder);
+    //ui->filterLineEdit->addAction(IconFactory::GetSearchIcon(), QLineEdit::LeadingPosition);
     connect(ui->filterLineEdit, &QLineEdit::textChanged, this, [this](const QString& f)
     {
         ApplyFilter(f);
@@ -168,7 +169,7 @@ void TypesystemWidget::Initialize(DobHandler* dob)
             else
             {
                 // TypeId but no baseClass, must be an Enum
-                emit OpenDouFile(typeIdVal.toLongLong());
+                emit OpenEnumViewer(typeIdVal.toLongLong());
             }
         }
     });

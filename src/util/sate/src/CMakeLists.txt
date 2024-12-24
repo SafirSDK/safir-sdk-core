@@ -12,6 +12,7 @@ set(ui
     outputwidget.ui
     parameterswidget.ui
     subscribedialog.ui
+    enumwidget.ui
 )
 
 set(sources
@@ -44,6 +45,8 @@ set(sources
     parametersmodel.cpp
     parameterswidget.cpp
     subscribedialog.cpp
+    enumwidget.cpp
+    enummodel.cpp
 
     sate.rc
   )
@@ -73,6 +76,8 @@ set(widget_headers
     parametersmodel.h
     parameterswidget.h
     subscribedialog.h
+    enumwidget.h
+    enummodel.h
   )
 
 set(headers

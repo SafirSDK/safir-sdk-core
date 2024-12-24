@@ -53,6 +53,7 @@ signals:
                                    const Safir::Dob::Typesystem::ChannelId& channel,
                                    bool includeSubclasses);
     void OpenParameterViewer(int64_t typeId);
+    void OpenEnumViewer(int64_t typeId);
     void OpenDouFile(int64_t typeId);
 
 private:

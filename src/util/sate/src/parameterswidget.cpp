@@ -1,7 +1,6 @@
 #include "parameterswidget.h"
 #include "ui_parameterswidget.h"
 #include "parametersmodel.h"
-#include "iconfactory.h"
 
 #include <QSortFilterProxyModel>
 #include <QTimer>
@@ -77,9 +76,10 @@ ParametersWidget::ParametersWidget(int64_t typeId, QWidget *parent)
     });
 
     // Handle filter changes
-    ui->nameFilterEdit->addAction(IconFactory::GetSearchIcon(), QLineEdit::LeadingPosition);
-    ui->valueFilterEdit->addAction(IconFactory::GetSearchIcon(), QLineEdit::LeadingPosition);
-    ui->typeFilterEdit->addAction(IconFactory::GetSearchIcon(), QLineEdit::LeadingPosition);
+    auto placeholder = QString("%1 Filter").arg(QString::fromUtf8("\xF0\x9F\x94\x8D")); // utf-8 Left-Pointing Magnifying Glass
+    ui->nameFilterEdit->setPlaceholderText(placeholder);
+    ui->valueFilterEdit->setPlaceholderText(placeholder);
+    ui->typeFilterEdit->setPlaceholderText(placeholder);
     connect(ui->nameFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 0, ui->nameFilterEdit); });
     connect(ui->valueFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 1, ui->valueFilterEdit); });
     connect(ui->typeFilterEdit, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 2, ui->typeFilterEdit); });

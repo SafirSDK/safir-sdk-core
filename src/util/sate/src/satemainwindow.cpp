@@ -31,6 +31,7 @@
 #include "typesystemwidget.h"
 #include "connectdialog.h"
 #include "parameterswidget.h"
+#include "enumwidget.h"
 
 #include <QCloseEvent>
 #include <QActionGroup>
@@ -119,6 +120,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     connect(m_typesystem, &TypesystemWidget::OpenEntityInstanceViewer, this, &SateMainWindow::OnOpenEntityInstanceViewer);
     connect(m_typesystem, &TypesystemWidget::OpenMessageInstanceViewer, this, &SateMainWindow::OnOpenMessageInstanceViewer);
     connect(m_typesystem, &TypesystemWidget::OpenParameterViewer, this, &SateMainWindow::OnOpenParameterViewer);
+    connect(m_typesystem, &TypesystemWidget::OpenEnumViewer, this, &SateMainWindow::OnOpenEnumViewer);
     connect(m_typesystem, &TypesystemWidget::OpenDouFile, this, &SateMainWindow::OnOpenDouFile);
 
     // Output window
@@ -343,6 +345,12 @@ void SateMainWindow::OnOpenParameterViewer(const int64_t typeId)
 {
     auto paramWidget = new ParametersWidget(typeId, this);
     AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, "PV", paramWidget, false);
+}
+
+void SateMainWindow::OnOpenEnumViewer(const int64_t typeId)
+{
+    auto enumWidget = new EnumWidget(typeId, this);
+    AddTab(TypesystemRepository::Instance().GetEnum(typeId)->name, "EN", enumWidget, false);
 }
 
 void SateMainWindow::OnOpenObjectEditWithInstance(QString channelHandler,
