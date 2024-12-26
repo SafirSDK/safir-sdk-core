@@ -1,8 +1,31 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+*
+* Created by: Joel Ottosson
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
 #include "enumwidget.h"
-#include "qtimer.h"
 #include "ui_enumwidget.h"
 #include "enummodel.h"
 
+#include <QTimer>
 #include <QSortFilterProxyModel>
 
 class EnumSortFilterProxyModel : public QSortFilterProxyModel
@@ -52,7 +75,7 @@ EnumWidget::EnumWidget(int64_t typeId, QWidget *parent)
     auto proxyModel = new EnumSortFilterProxyModel(this);
     proxyModel->setSourceModel(srcModel);
     ui->tableView->setModel(proxyModel);
-    ui->tableView->resizeColumnToContents(0);
+    ui->tableView->setColumnWidth(0, 75);
     ui->tableView->resizeColumnToContents(1);
     ui->tableView->verticalHeader()->setVisible(false);
 
