@@ -34,6 +34,7 @@
 #include <QRadioButton>
 #include <QMenu>
 #include <QStandardItemModel>
+#include <QActionGroup>
 
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Parametrization.h>
@@ -126,7 +127,7 @@ void TypesystemWidget::Initialize(DobHandler* dob)
         {
             if (baseClassVal.isValid())
             {
-                const auto baseClass = static_cast<TypesystemRepository::DobBaseClass>(baseClassVal.toInt()); 
+                const auto baseClass = static_cast<TypesystemRepository::DobBaseClass>(baseClassVal.toInt());
                 const bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
                 const bool shiftKey = qApp->keyboardModifiers().testFlag(Qt::ShiftModifier);
 
@@ -194,11 +195,16 @@ void TypesystemWidget::SetupFilterEdit()
     m_typeTreeFilterAction = menu->addAction("Filter");
     m_parameterSearchAction = menu->addAction("Find parameter");
     m_enumValueSearchAction = menu->addAction("Find enum value");
-
-
     m_typeTreeFilterAction->setCheckable(true);
     m_parameterSearchAction->setCheckable(true);
     m_enumValueSearchAction->setCheckable(true);
+
+    auto* actionGroup = new QActionGroup(this);
+    actionGroup->addAction(m_typeTreeFilterAction);
+    actionGroup->addAction(m_parameterSearchAction);
+    actionGroup->addAction(m_enumValueSearchAction);
+    actionGroup->setExclusive(true);
+
     m_typeTreeFilterAction->setChecked(true);
 
     connect(m_typeTreeFilterAction, &QAction::triggered, this, &TypesystemWidget::SetTypeTreeSearch);
@@ -237,18 +243,12 @@ void TypesystemWidget::SetupFilterEdit()
 
 void TypesystemWidget::SetTypeTreeSearch(bool)
 {
-    m_typeTreeFilterAction->setChecked(true);
-    m_parameterSearchAction->setChecked(false);
-    m_enumValueSearchAction->setChecked(false);
     ui->filterLineEdit->SetModel(nullptr);
     ui->filterLineEdit->setPlaceholderText("Filter");
 }
 
 void TypesystemWidget::SetParameterSearch(bool)
 {
-    m_typeTreeFilterAction->setChecked(false);
-    m_parameterSearchAction->setChecked(true);
-    m_enumValueSearchAction->setChecked(false);
     ui->filterLineEdit->setPlaceholderText("Find parameter");
 
     if (m_parameterSearchModel == nullptr)
@@ -260,9 +260,6 @@ void TypesystemWidget::SetParameterSearch(bool)
 
 void TypesystemWidget::SetEnumValueSearch(bool)
 {
-    m_typeTreeFilterAction->setChecked(false);
-    m_parameterSearchAction->setChecked(false);
-    m_enumValueSearchAction->setChecked(true);
     ui->filterLineEdit->setPlaceholderText("Find enum value");
 
     if (m_enumValueSearchModel == nullptr)
