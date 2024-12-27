@@ -25,6 +25,7 @@
 
 #include <QAbstractTableModel>
 #include <QTimer>
+#include <chrono>
 
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Consumer.h>

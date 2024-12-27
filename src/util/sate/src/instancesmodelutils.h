@@ -28,6 +28,7 @@
 #include <QStringList>
 
 #include "columninfo.h"
+#include <chrono>
 
 class InstancesModelUtils
 {

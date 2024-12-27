@@ -192,12 +192,13 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
     {
     case DobInterface::NewEntity:
         {
-            const auto result = m_entities.insert
-                (std::make_pair(entityId,
-                                Info{entityId,
-                                     handlerId,
-                                     entity,
-                                     std::chrono::steady_clock::now() + std::chrono::seconds(5)}));
+            // For some reason initializer list doesn't seem to compile on VS2015.
+            EntityInstancesModel::Info info;
+            info.entityId = entityId;
+            info.handlerId = handlerId;
+            info.entity = entity;
+            info.greenUntil = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+            const auto result = m_entities.insert(std::make_pair(entityId, info));
             if (result.second)
             {
                 const auto row = std::distance(m_entities.begin(), result.first);

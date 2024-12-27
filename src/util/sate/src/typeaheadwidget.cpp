@@ -71,7 +71,13 @@ void TypeAheadWidget::SetModel(QSortFilterProxyModel* model)
     m_listView->setVisible(false);
     m_listView->setModel(m_model);
 
-    if (m_model != nullptr && m_model->rowCount() > 0)
+    if (m_model == nullptr)
+    {
+        return;
+    }
+
+    m_model->setFilterRegularExpression(QRegularExpression());
+    if (m_model->rowCount() > 0)
     {
         m_dropdownRowWidth = CalculateContentWidth(m_model) * 1.3;
         m_dropdownRowHeight = m_listView->visualRect(m_model->index(0,0)).height();

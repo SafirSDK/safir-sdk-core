@@ -96,7 +96,7 @@ QIcon IconFactory::GetEnumIcon()
 
 QIcon IconFactory::GetSearchIcon()
 {
-    return QIcon(":/img/icons/magnifying-glass-search");
+    return QIcon(":/img/icons/magnifying-glass-search.svg");
 }
 
 QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass, IconFactory::Modifier modifier)
