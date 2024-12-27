@@ -34,7 +34,7 @@ class ParametersWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ParametersWidget(int64_t typeId, QWidget *parent);
+    explicit ParametersWidget(int64_t typeId, const QString& currentItem, QWidget *parent);
     ~ParametersWidget();
 
 private:

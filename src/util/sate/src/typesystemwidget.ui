@@ -23,7 +23,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLineEdit" name="filterLineEdit">
+      <widget class="TypeAheadWidget" name="filterLineEdit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -83,6 +83,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TypeAheadWidget</class>
+   <extends>QLineEdit</extends>
+   <header>typeaheadwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

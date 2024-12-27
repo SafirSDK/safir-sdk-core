@@ -67,7 +67,7 @@ private:
     QRegularExpression m_filters[3];
 };
 
-ParametersWidget::ParametersWidget(int64_t typeId, QWidget *parent)
+ParametersWidget::ParametersWidget(int64_t typeId, const QString& currentItem, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ParametersWidget)
 {
@@ -78,6 +78,15 @@ ParametersWidget::ParametersWidget(int64_t typeId, QWidget *parent)
     proxyModel->setSourceModel(srcModel);
     proxyModel->setFilterRole(ParametersModel::FilterRole);
     ui->parametersTreeView->setModel(proxyModel);
+
+    if (!currentItem.isEmpty())
+    {
+        auto ix = proxyModel->match(proxyModel->index(0, 0), Qt::DisplayRole, currentItem, 1, Qt::MatchFlags(Qt::MatchExactly | Qt::MatchWrap));
+        if (ix.size() > 0 && ix.constFirst().isValid())
+        {
+            ui->parametersTreeView->setCurrentIndex(ix.first());
+        }
+    }
 
     ui->parametersTreeView->resizeColumnToContents(0);
     ui->parametersTreeView->resizeColumnToContents(1);

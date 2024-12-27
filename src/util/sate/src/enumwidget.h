@@ -34,7 +34,7 @@ class EnumWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit EnumWidget(int64_t typeId, QWidget *parent);
+    explicit EnumWidget(int64_t typeId, const QString& currentItem, QWidget *parent);
     ~EnumWidget();
 
 private:

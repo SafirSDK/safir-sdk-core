@@ -32,6 +32,7 @@ class TypesystemWidget;
 }
 
 class TypesystemFilterProxyModel;
+class QSortFilterProxyModel;
 
 class TypesystemWidget : public QWidget
 {
@@ -52,8 +53,8 @@ signals:
     void OpenMessageInstanceViewer(int64_t typeId,
                                    const Safir::Dob::Typesystem::ChannelId& channel,
                                    bool includeSubclasses);
-    void OpenParameterViewer(int64_t typeId);
-    void OpenEnumViewer(int64_t typeId);
+    void OpenParameterViewer(int64_t typeId, const QString& currentItem);
+    void OpenEnumViewer(int64_t typeId, const QString& currentItem);
     void OpenDouFile(int64_t typeId);
 
 private:
@@ -62,8 +63,22 @@ private:
     TypesystemFilterProxyModel* m_inheritanceProxyModel = nullptr;
     TypesystemFilterProxyModel* m_namespaceProxyModel = nullptr;
     TypesystemContextMenuHandler* m_contextMenuHandler = nullptr;
+    QSortFilterProxyModel* m_parameterSearchModel = nullptr;
+    QSortFilterProxyModel* m_enumValueSearchModel = nullptr;
+
+    QAction* m_typeTreeFilterAction;
+    QAction* m_parameterSearchAction;
+    QAction* m_enumValueSearchAction;
 
     void ExpandTo(const QModelIndex& index);
     void SetTreeViewModel(bool inheritanceModel);
     void ApplyFilter(const QString& filterText);
+
+    void SetupFilterEdit();
+    void SetTypeTreeSearch(bool);
+    void SetParameterSearch(bool);
+    void SetEnumValueSearch(bool);
+
+    void InitParameterSearchModel();
+    void InitEnumValueSearchModel();
 };

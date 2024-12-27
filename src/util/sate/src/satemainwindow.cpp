@@ -341,15 +341,15 @@ void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
     AddTab(TypesystemRepository::Instance().GetClass(typeId)->name,"OE", oe, false);
 }
 
-void SateMainWindow::OnOpenParameterViewer(const int64_t typeId)
+void SateMainWindow::OnOpenParameterViewer(const int64_t typeId, const QString& currentItem)
 {
-    auto paramWidget = new ParametersWidget(typeId, this);
+    auto paramWidget = new ParametersWidget(typeId, currentItem, this);
     AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, "PV", paramWidget, false);
 }
 
-void SateMainWindow::OnOpenEnumViewer(const int64_t typeId)
+void SateMainWindow::OnOpenEnumViewer(const int64_t typeId, const QString& currentItem)
 {
-    auto enumWidget = new EnumWidget(typeId, this);
+    auto enumWidget = new EnumWidget(typeId, currentItem, this);
     AddTab(TypesystemRepository::Instance().GetEnum(typeId)->name, "EN", enumWidget, false);
 }
 

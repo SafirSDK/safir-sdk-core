@@ -47,6 +47,7 @@ set(sources
     subscribedialog.cpp
     enumwidget.cpp
     enummodel.cpp
+    typeaheadwidget.cpp
 
     sate.rc
   )
@@ -78,6 +79,7 @@ set(widget_headers
     subscribedialog.h
     enumwidget.h
     enummodel.h
+    typeaheadwidget.h
   )
 
 set(headers

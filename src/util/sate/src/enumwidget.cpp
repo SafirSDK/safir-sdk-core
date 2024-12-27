@@ -65,7 +65,7 @@ private:
     QRegularExpression m_filters[2];
 };
 
-EnumWidget::EnumWidget(int64_t typeId, QWidget *parent)
+EnumWidget::EnumWidget(int64_t typeId, const QString& currentItem, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::EnumWidget)
 {
@@ -91,6 +91,15 @@ EnumWidget::EnumWidget(int64_t typeId, QWidget *parent)
     ui->valueFilter->setPlaceholderText(placeholder);
     connect(ui->ordinalFilter, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 0, ui->ordinalFilter); });
     connect(ui->valueFilter, &QLineEdit::textChanged, this, [this](const QString& f) {ApplyFilter(f, 1, ui->valueFilter); });
+
+    if (!currentItem.isEmpty())
+    {
+        auto ix = proxyModel->match(proxyModel->index(0, 1), Qt::DisplayRole, QVariant(currentItem), 1, Qt::MatchFlags(Qt::MatchExactly | Qt::MatchWrap));
+        if (ix.size() > 0 && ix.constFirst().isValid())
+        {
+            ui->tableView->setCurrentIndex(ix.first());
+        }
+    }
 }
 
 EnumWidget::~EnumWidget()

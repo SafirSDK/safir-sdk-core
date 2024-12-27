@@ -26,11 +26,17 @@
 #include "typesystemrepository.h"
 #include "typesysteminheritancemodel.h"
 #include "typesystemnamespacemodel.h"
+#include "iconfactory.h"
 #include <QLineEdit>
 #include <QDebug>
 #include <QTreeView>
 #include <QModelIndex>
 #include <QRadioButton>
+#include <QMenu>
+#include <QStandardItemModel>
+
+#include <Safir/Dob/Typesystem/Parameters.h>
+#include <Safir/Dob/Parametrization.h>
 
 // -----------------------------------------------------
 // TypesystemFilterProxyModel
@@ -104,15 +110,8 @@ void TypesystemWidget::Initialize(DobHandler* dob)
     m_namespaceProxyModel = new TypesystemFilterProxyModel(this);
     m_namespaceProxyModel->setSourceModel(new TypesystemNamespaceModel(m_dob, this));
 
+    SetupFilterEdit();
     SetTreeViewModel(true);
-
-    auto placeholder = QString("%1 Filter").arg(QString::fromUtf8("\xF0\x9F\x94\x8D")); // utf-8 Left-Pointing Magnifying Glass
-    ui->filterLineEdit->setPlaceholderText(placeholder);
-    //ui->filterLineEdit->addAction(IconFactory::GetSearchIcon(), QLineEdit::LeadingPosition);
-    connect(ui->filterLineEdit, &QLineEdit::textChanged, this, [this](const QString& f)
-    {
-        ApplyFilter(f);
-    });
 
     connect(ui->treeView, &QTreeView::doubleClicked, this, [this](const QModelIndex& ix)
     {
@@ -133,7 +132,7 @@ void TypesystemWidget::Initialize(DobHandler* dob)
 
                 if (baseClass == TypesystemRepository::Parametrization)
                 {
-                    emit OpenParameterViewer(typeIdVal.toLongLong());
+                    emit OpenParameterViewer(typeIdVal.toLongLong(), QString());
                 }
                 else if (ctrlKey && !shiftKey)
                 {
@@ -169,7 +168,7 @@ void TypesystemWidget::Initialize(DobHandler* dob)
             else
             {
                 // TypeId but no baseClass, must be an Enum
-                emit OpenEnumViewer(typeIdVal.toLongLong());
+                emit OpenEnumViewer(typeIdVal.toLongLong(), QString());
             }
         }
     });
@@ -184,6 +183,141 @@ void TypesystemWidget::Initialize(DobHandler* dob)
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenEntityInstanceViewer, this, &TypesystemWidget::OpenEntityInstanceViewer);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenMessageInstanceViewer, this, &TypesystemWidget::OpenMessageInstanceViewer);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenDouFile, this, &TypesystemWidget::OpenDouFile);
+}
+
+void TypesystemWidget::SetupFilterEdit()
+{
+    auto searchAction = new QAction(this);
+    searchAction->setIcon(IconFactory::GetSearchIcon());
+    auto menu = new QMenu();
+
+    m_typeTreeFilterAction = menu->addAction("Filter");
+    m_parameterSearchAction = menu->addAction("Find parameter");
+    m_enumValueSearchAction = menu->addAction("Find enum value");
+
+
+    m_typeTreeFilterAction->setCheckable(true);
+    m_parameterSearchAction->setCheckable(true);
+    m_enumValueSearchAction->setCheckable(true);
+    m_typeTreeFilterAction->setChecked(true);
+
+    connect(m_typeTreeFilterAction, &QAction::triggered, this, &TypesystemWidget::SetTypeTreeSearch);
+    connect(m_parameterSearchAction, &QAction::triggered, this, &TypesystemWidget::SetParameterSearch);
+    connect(m_enumValueSearchAction, &QAction::triggered, this, &TypesystemWidget::SetEnumValueSearch);
+
+    searchAction->setMenu(menu);
+    ui->filterLineEdit->addAction(searchAction, QLineEdit::LeadingPosition);
+    connect(searchAction, &QAction::triggered, this, [this, searchAction](bool)
+    {
+        auto pos = mapToGlobal(ui->filterLineEdit->pos());
+        searchAction->menu()->move(QPoint{pos.x(), pos.y() + ui->filterLineEdit->height()});
+        searchAction->menu()->show();
+    });
+
+    connect(ui->filterLineEdit, &QLineEdit::textChanged, this, &TypesystemWidget::ApplyFilter);
+    connect(ui->filterLineEdit, &TypeAheadWidget::ItemSelected, this, [this](const QModelIndex& selIx)
+    {
+        if (ui->filterLineEdit->Model() == nullptr || !selIx.isValid())
+        {
+            return;
+        }
+        auto typeId = ui->filterLineEdit->Model()->data(selIx, TypesystemRepository::DobTypeIdRole).toLongLong();
+        auto fullName = ui->filterLineEdit->Model()->data(selIx, Qt::DisplayRole).toString();
+        auto name = fullName.mid(fullName.lastIndexOf('.') + 1);
+        if (m_parameterSearchAction->isChecked())
+        {
+            emit OpenParameterViewer(typeId, name);
+        }
+        else if (m_enumValueSearchAction->isChecked())
+        {
+            emit OpenEnumViewer(typeId, name);
+        }
+    });
+}
+
+void TypesystemWidget::SetTypeTreeSearch(bool)
+{
+    m_typeTreeFilterAction->setChecked(true);
+    m_parameterSearchAction->setChecked(false);
+    m_enumValueSearchAction->setChecked(false);
+    ui->filterLineEdit->SetModel(nullptr);
+    ui->filterLineEdit->setPlaceholderText("Filter");
+}
+
+void TypesystemWidget::SetParameterSearch(bool)
+{
+    m_typeTreeFilterAction->setChecked(false);
+    m_parameterSearchAction->setChecked(true);
+    m_enumValueSearchAction->setChecked(false);
+    ui->filterLineEdit->setPlaceholderText("Find parameter");
+
+    if (m_parameterSearchModel == nullptr)
+    {
+        InitParameterSearchModel();
+    }
+    ui->filterLineEdit->SetModel(m_parameterSearchModel);
+}
+
+void TypesystemWidget::SetEnumValueSearch(bool)
+{
+    m_typeTreeFilterAction->setChecked(false);
+    m_parameterSearchAction->setChecked(false);
+    m_enumValueSearchAction->setChecked(true);
+    ui->filterLineEdit->setPlaceholderText("Find enum value");
+
+    if (m_enumValueSearchModel == nullptr)
+    {
+        InitEnumValueSearchModel();
+    }
+    ui->filterLineEdit->SetModel(m_enumValueSearchModel);
+}
+
+void TypesystemWidget::InitParameterSearchModel()
+{
+    namespace sdt = Safir::Dob::Typesystem;
+    auto model = new QStandardItemModel(this);
+    model->setColumnCount(1);
+    auto typeIds = sdt::Operations::GetClassTree(Safir::Dob::Parametrization::ClassTypeId);
+    for (auto tid : typeIds)
+    {
+        auto className = QString::fromStdWString(sdt::Operations::GetName(tid));
+        auto num = sdt::Parameters::GetNumberOfParameters(tid);
+        for (auto p = 0; p < num; ++p)
+        {
+            auto paramName = QString::fromStdWString(sdt::Parameters::GetName(tid, p));
+            if (!paramName.contains("@"))
+            {
+                auto item = new QStandardItem(QString("%1.%2").arg(className, paramName));
+                item->setData(QVariant::fromValue(tid), TypesystemRepository::DobTypeIdRole);
+                model->invisibleRootItem()->appendRow(item);
+            }
+        }
+    }
+
+    m_parameterSearchModel = new QSortFilterProxyModel(this);
+    m_parameterSearchModel->setSourceModel(model);
+    m_parameterSearchModel->sort(0);
+}
+
+void TypesystemWidget::InitEnumValueSearchModel()
+{
+    namespace sdt = Safir::Dob::Typesystem;
+    auto model = new QStandardItemModel(this);
+    model->setColumnCount(1);
+    for (const auto e : TypesystemRepository::Instance().EnumsSorted())
+    {
+        auto enumName = QString::fromStdWString(sdt::Operations::GetName(e->typeId));
+        for (const auto& v : e->values)
+        {
+            auto item = new QStandardItem(QString("%1.%2").arg(enumName, v));
+            item->setData(QVariant::fromValue(e->typeId), TypesystemRepository::DobTypeIdRole);
+            model->invisibleRootItem()->appendRow(item);
+        }
+    }
+
+    m_enumValueSearchModel = new QSortFilterProxyModel(this);
+    m_enumValueSearchModel->setSourceModel(model);
+    m_enumValueSearchModel->sort(0);
 }
 
 void TypesystemWidget::ExpandTo(const QModelIndex& index)
@@ -233,6 +367,11 @@ void TypesystemWidget::SetTreeViewModel(bool inheritanceModel)
 
 void TypesystemWidget::ApplyFilter(const QString& filterText)
 {
+    if (!m_typeTreeFilterAction->isChecked())
+    {
+        return;
+    }
+
     if (filterText.length() > 2)
     {
         m_inheritanceProxyModel->SetFilter(filterText);

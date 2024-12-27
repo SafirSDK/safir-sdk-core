@@ -78,8 +78,8 @@ private slots:
     void OnOpenObjectEditWithInstance(QString channelHandler,
                                       int64_t instance,
                                       const Safir::Dob::Typesystem::ObjectPtr& object);
-    void OnOpenParameterViewer(const int64_t typeId);
-    void OnOpenEnumViewer(const int64_t typeId);
+    void OnOpenParameterViewer(const int64_t typeId, const QString& currentItem);
+    void OnOpenEnumViewer(const int64_t typeId, const QString& currentItem);
     void OnOpenDouFile(const int64_t typeId);
     void OnThemeChanged();
     void OnFocusedDockWidgetChanged(ads::CDockWidget* old, ads::CDockWidget* now);
