@@ -113,10 +113,10 @@ public:
     {
         static_assert(NUM_SMALL_ENTITIES >= 100, "NUM_SMALL_ENTITIES has to be more than 100");
         using namespace Safir::Dob;
-        EntityIterator it = m_connection.GetEntityIterator(DoseTest::GlobalEntity::ClassTypeId,false);
         for (int i = 0; i < 100; ++i)
         {
-            std::advance(it, rand() % (NUM_SMALL_ENTITIES/100));
+            EntityIterator it = m_connection.GetEntityIterator(DoseTest::GlobalEntity::ClassTypeId,false);
+            std::advance(it, rand() % NUM_SMALL_ENTITIES);
             auto ent = std::static_pointer_cast<DoseTest::GlobalEntity>(it->GetEntity());
             ent->MoreInfo() = random_string(rand()%256);
             m_connection.SetChanges(ent,
@@ -147,10 +147,10 @@ public:
     {
         static_assert(NUM_BIG_ENTITIES >= 10, "NUM_BIG_ENTITIES has to be more than 10");
         using namespace Safir::Dob;
-        EntityIterator it = m_connection.GetEntityIterator(DoseTest::ComplexGlobalEntity::ClassTypeId,false);
         for (int i = 0; i < 10; ++i)
         {
-            std::advance(it, rand() % (NUM_BIG_ENTITIES/10));
+            EntityIterator it = m_connection.GetEntityIterator(DoseTest::ComplexGlobalEntity::ClassTypeId,false);
+            std::advance(it, rand() % NUM_BIG_ENTITIES);
             auto ent = std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(it->GetEntity());
 
             ent->MoreInfo() = random_string(rand()%256);

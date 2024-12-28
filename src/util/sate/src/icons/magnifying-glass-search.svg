@@ -10,7 +10,16 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs1" />
+     id="defs1">
+    <linearGradient
+       id="swatch1"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#e19700;stop-opacity:1;"
+         offset="0"
+         id="stop1" />
+    </linearGradient>
+  </defs>
   <sodipodi:namedview
      id="namedview1"
      pagecolor="#ffffff"
@@ -33,10 +42,11 @@
   <path
      fill="#455364"
      d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
-     id="path1" />
+     id="path1"
+     style="fill:#455364;fill-opacity:1" />
   <path
      sodipodi:type="star"
-     style="fill:#e19700;fill-opacity:1"
+     style="fill:#e19700;fill-opacity:1;stroke:#19232d;stroke-width:0.64693657;stroke-dasharray:none;stroke-opacity:1"
      id="path2"
      inkscape:flatsided="false"
      sodipodi:sides="3"
@@ -49,7 +59,7 @@
      inkscape:rounded="0"
      inkscape:randomized="0"
      d="m -29.935856,352.08237 71.605348,0 71.605348,0 -35.802677,62.01205 -35.80267,62.01205 -35.8026758,-62.01205 z"
-     inkscape:transform-center-y="19.924924"
-     transform="matrix(1.6072007,0,0,0.96392172,49.126224,52.982187)"
-     inkscape:transform-center-x="-1.8792406e-06" />
+     inkscape:transform-center-y="27.592771"
+     transform="matrix(1.7899318,0,0,1.3348735,47.215302,-111.18896)"
+     inkscape:transform-center-x="-2.1319486e-06" />
 </svg>
