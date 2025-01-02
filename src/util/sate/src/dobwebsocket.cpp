@@ -29,6 +29,7 @@
 #include <QDebug>
 #include <QTimer>
 
+#include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Response.h>
 #include <Safir/Dob/Entity.h>
@@ -81,7 +82,18 @@ namespace
         return QUrl(url);
     }
 
-    QString Str(int64_t typeId) {return QString::fromStdWString(sdt::Operations::GetName(typeId));}
+    QString Str(int64_t typeId)
+    {
+        try
+        {
+            auto name = sdt::Operations::GetName(typeId);
+            return QString::fromStdWString(name);
+        }
+        catch (const sdt::IllegalValueException&)
+        {
+            return QString();
+        }
+    }
 
     QString Str(const std::wstring& s) { return QString::fromStdWString(s);}
 
@@ -619,6 +631,35 @@ void DobWebSocket::DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::Handl
     Send(j);
 }
 
+void DobWebSocket::ReadEntity(const sdt::EntityId& entityId)
+{
+    if (!m_isConnected)
+    {
+        LogError("Not connected!");
+        return;
+    }
+
+    auto typeName = Str(entityId.GetTypeId());
+    if (typeName.isEmpty())
+    {
+        LogError("Failed to read entity! The specified typeId doesn't exist. EntityId: " + QString::fromStdWString(entityId.ToString()));
+        return;
+    }
+
+    // Params
+    QJsonObject p;
+    p["typeId"] = typeName;
+    SetHashVal(p, "instanceId", entityId.GetInstanceId());
+
+    // Method object
+    QJsonObject j;
+    j["method"] = "readEntity";
+    j["id"] = QString("readEntity;%1;%2").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId().ToString()));
+    j["params"] = p;
+
+    Send(j);
+}
+
 void DobWebSocket::HandleResult(const QJsonObject& j)
 {
     auto idValue = j["id"];
@@ -899,6 +940,19 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         else
         {
             LogError("UnregisterHandler failed: " + result.toString());
+        }
+    }
+    else if (id == "readEntity")
+    {
+        if (result.isObject())
+        {
+            auto instance = ToHashVal<sdt::InstanceId>(idList[2]);
+            auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(result.toObject()));
+            emit DobInterface::OnReadEntity(entity, instance);
+        }
+        else
+        {
+            LogError("ReadEntity failed: " + result.toString());
         }
     }
 }

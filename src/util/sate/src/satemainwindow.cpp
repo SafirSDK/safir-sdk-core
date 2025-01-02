@@ -162,6 +162,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     // DOB signal handling
     connect(&m_dob, &DobHandler::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
     connect(&m_dob, &DobHandler::ConnectionClosed, this, &SateMainWindow::OnConnectionClosed);
+    connect(&m_dob, &DobHandler::OnReadEntity, this, [this](const auto& entity, const auto& inst){ OnOpenObjectEditWithInstance("", inst.GetRawValue(), entity); });
     m_dob.OpenNativeConnection("SATE", 0);
 
     connect(m_dockManager,&ads::CDockManager::focusedDockWidgetChanged,this,&SateMainWindow::OnFocusedDockWidgetChanged);

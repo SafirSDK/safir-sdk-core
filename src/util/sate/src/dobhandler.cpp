@@ -62,6 +62,7 @@ void DobHandler::SetupSignalSlots()
         connect(m_dob.get(), &DobInterface::SubscriptionStopped, this, &DobHandler::SubscriptionStopped);
         connect(m_dob.get(), &DobInterface::OnRegistered, this, &DobHandler::OnRegistered);
         connect(m_dob.get(), &DobInterface::OnUnregistered, this, &DobHandler::OnUnregistered);
+        connect(m_dob.get(), &DobInterface::OnReadEntity, this, &DobHandler::OnReadEntity);
         connect(m_dob.get(), &DobInterface::Output, this, &DobHandler::Output);
     }
 }
@@ -276,6 +277,16 @@ void DobHandler::DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::Handler
         return;
     }
     m_dob->DeleteAll(typeId, handler);
+}
+
+void DobHandler::ReadEntity(const sdt::EntityId& entityId)
+{
+    if (!IsInitiated())
+    {
+        return;
+    }
+
+    m_dob->ReadEntity(entityId);
 }
 
 const DobInterface::RegistrationInfo* DobHandler::GetMyRegistration(int64_t typeId) const

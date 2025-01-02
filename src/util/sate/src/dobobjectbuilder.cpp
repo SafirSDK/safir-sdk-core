@@ -40,19 +40,37 @@ namespace
     sdt::TypeId ToTypeId(const QString& s)
     {
         bool ok;
-        sdt::TypeId typeId = s.toLongLong(&ok, 10);
-        return ok ? typeId : sdt::Operations::GetTypeId(s.toStdWString());
+        sdt::TypeId typeId = s.trimmed().toLongLong(&ok, 10);
+        return ok ? typeId : sdt::Operations::GetTypeId(s.trimmed().toStdWString());
     }
 
     template <class T>
     T ToHashType(const QString& s)
     {
         bool ok;
-        int64_t num = s.toLongLong(&ok, 10);
-        return ok ? T(num) : T(s.toStdWString());
+        int64_t num = s.trimmed().toLongLong(&ok, 10);
+        return ok ? T(num) : T(s.trimmed().toStdWString());
     }
 }
 
+// ----------------------------
+// Static helpers
+// ----------------------------
+std::pair<bool, Safir::Dob::Typesystem::EntityId> DobObjectBuilder::EntityIdFromString(const QString& str)
+{
+    auto stringList = str.split(QRegularExpression(":\\s"), Qt::SkipEmptyParts);
+    if (stringList.size() < 2)
+    {
+        return std::make_pair(false, sdt::EntityId());
+    }
+
+    sdt::EntityId eid(ToTypeId(stringList.at(0)), ToHashType<sdt::InstanceId>(stringList.at(1)));
+    return std::make_pair(true, eid);
+}
+
+// ----------------------------
+// Class DobObjectBuilder
+// ----------------------------
 Safir::Dob::Typesystem::ObjectPtr DobObjectBuilder::CreateObject(const MemberTreeItem* objectRoot) const
 {
     if (objectRoot == nullptr || objectRoot->GetMemberClass() == nullptr || !objectRoot->IsObjectRootItem() || objectRoot->IsNull())
@@ -190,16 +208,15 @@ void DobObjectBuilder::SetSingleValue(const MemberTreeItem* mi, Safir::Dob::Type
 
     case EntityIdMemberType:
     {
-        auto stringList = mi->GetValue().split(QRegularExpression(":\\s"), Qt::SkipEmptyParts);
-        if (stringList.size() < 2)
+        auto eid = EntityIdFromString(mi->GetValue());
+        if (eid.first)
         {
-            cb.SetNull();
+            auto c = static_cast<EntityIdContainer*>(&cb);
+            c->SetVal(eid.second);
         }
         else
         {
-            auto c = static_cast<EntityIdContainer*>(&cb);
-            EntityId eid(ToTypeId(stringList.at(0)), ToHashType<sdt::InstanceId>(stringList.at(1)));
-            c->SetVal(eid);
+            cb.SetNull();
         }
     }
     break;
@@ -424,11 +441,10 @@ void DobObjectBuilder::SetSequenceValues(const MemberTreeItem* mi, Safir::Dob::T
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto stringList = m->GetValue().split(QRegularExpression(":\\s"), Qt::SkipEmptyParts);
-            if (stringList.size() >= 2)
+            auto eid = EntityIdFromString(m->GetValue());
+            if (eid.first)
             {
-                EntityId eid(ToTypeId(stringList.at(0)), ToHashType<sdt::InstanceId>(stringList.at(1)));
-                c->push_back(eid);
+                c->push_back(eid.second);
             }
         }
     }
@@ -646,11 +662,10 @@ void DobObjectBuilder::SetDictionaryValues(const MemberTreeItem* mi, Safir::Dob:
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto stringList = m->GetKey().split(QRegularExpression(":\\s"), Qt::SkipEmptyParts);
-            if (stringList.size() >= 2)
+            auto key = EntityIdFromString(m->GetKey());
+            if (key.first)
             {
-                EntityId key(ToTypeId(stringList.at(0)), ToHashType<sdt::InstanceId>(stringList.at(1)));
-                auto& c = dc->InsertNull(key);
+                auto& c = dc->InsertNull(key.second);
                 SetSingleValue(m, c);
             }
         }

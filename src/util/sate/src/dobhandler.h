@@ -66,6 +66,8 @@ public:
     void Delete(const Safir::Dob::Typesystem::EntityId &entityId, const Safir::Dob::Typesystem::HandlerId &handler);
     void DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler);
 
+    void ReadEntity(const sdt::EntityId& entityId);
+
     const DobInterface::RegistrationInfo* GetMyRegistration(int64_t typeId) const;
     const DobInterface::SubscriptionInfo* GetMySubscription(int64_t typeId) const;
 
@@ -87,6 +89,8 @@ signals:
 
     void OnRegistered(const DobInterface::RegistrationInfo& info);
     void OnUnregistered(int64_t typeId);
+
+    void OnReadEntity(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance);
 
     void Output(const QString& msg, const QtMsgType msgType);
 

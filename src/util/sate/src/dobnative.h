@@ -77,6 +77,8 @@ public:
     void Delete(const Safir::Dob::Typesystem::EntityId &entityId, const Safir::Dob::Typesystem::HandlerId &handler) override;
     void DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler) override;
 
+    void ReadEntity(const sdt::EntityId& entityId) override;
+
 signals:
     // For internal use only. Signals can't be declared private. All public signals are declared in DobInterface.
     void DispatchSignal();

@@ -25,6 +25,7 @@
 
 #include <QtConcurrent/QtConcurrent>
 #include <Safir/Dob/NotOpenException.h>
+#include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 
 #include <Safir/Dob/SuccessResponse.h>
@@ -384,6 +385,34 @@ void DobNative::DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerI
     {
         m_dobConnection.DeleteAllInstances(typeId, handler);
         emit DobInterface::Output("Delete entity all instances: " + Str(typeId) + Str(handler), QtInfoMsg);
+    }
+    catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
+    {
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+    }
+}
+
+void DobNative::ReadEntity(const sdt::EntityId& entityId)
+{
+    if (!sdt::Operations::Exists(entityId.GetTypeId()))
+    {
+        emit DobInterface::Output("Failed to read entity! The specified typeId doesn't exist. EntityId: " +  QString::fromStdWString(entityId.ToString()), QtCriticalMsg);
+        return;
+    }
+
+    try
+    {
+
+        auto proxy = m_dobConnection.Read(entityId);
+        emit DobInterface::OnReadEntity(proxy.GetEntity(), proxy.GetInstanceId());
+    }
+    catch (const Safir::Dob::NotFoundException&)
+    {
+        emit DobInterface::Output("ReadEntity failed! Entity doesn't exist. EntityId: " +  QString::fromStdWString(entityId.ToString()), QtCriticalMsg);
+    }
+    catch (const Safir::Dob::Typesystem::FundamentalException& e)
+    {
+        emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {

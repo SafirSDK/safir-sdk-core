@@ -86,6 +86,8 @@ public:
     virtual void Delete(const sdt::EntityId& entityId, const sdt::HandlerId& handler) = 0;
     virtual void DeleteAll(int64_t typeId, const sdt::HandlerId& handler) = 0;
 
+    virtual void ReadEntity(const sdt::EntityId& entityId) = 0;
+
     RegistrationInfo* GetRegistration(int64_t typeId)
     {
         auto it = std::find_if(m_registrations.begin(), m_registrations.end(), [typeId](const auto& ri){return ri.typeId == typeId;});
@@ -143,6 +145,8 @@ signals:
 
     void OnRegistered(const DobInterface::RegistrationInfo& info);
     void OnUnregistered(int64_t typeId);
+
+    void OnReadEntity(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance);
 
     void Output(const QString& msg, const QtMsgType msgType);
 

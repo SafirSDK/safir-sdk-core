@@ -247,7 +247,19 @@ void DobObjectEditWidget::Init()
         }
         else if (index.column() < 3) // Click on name, value, null column opens the ValueEditor
         {
-            EditValue(index);
+            const bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
+            if (!ctrlKey)
+            {
+                EditValue(index);
+            }
+            else if (p->GetMemberInfo()->memberType == EntityIdMemberType && !p->IsNull())
+            {
+                auto eid = DobObjectBuilder::EntityIdFromString(p->GetValue());
+                if (eid.first)
+                {
+                    m_dob->ReadEntity(eid.second);
+                }
+            }
         }
     });
 

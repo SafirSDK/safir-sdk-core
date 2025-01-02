@@ -32,6 +32,9 @@ public:
 
     Safir::Dob::Typesystem::ObjectPtr CreateObject(const MemberTreeItem* objectRoot) const;
 
+    // static helper functions
+    static std::pair<bool /*hasValue*/, Safir::Dob::Typesystem::EntityId> EntityIdFromString(const QString& str);
+
 private:
     void SetSingleValue(const MemberTreeItem* mi, Safir::Dob::Typesystem::ContainerBase& cb) const;
     void SetSequenceValues(const MemberTreeItem* mi, Safir::Dob::Typesystem::ContainerBase& cb) const;

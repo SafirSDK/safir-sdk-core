@@ -71,6 +71,7 @@ private:
     void OnUpdateRequest(const Safir::Dob::EntityPtr& request, const sdt::HandlerId& handler, const sdt::InstanceId& instance);
     void OnDeleteRequest(const Safir::Dob::Typesystem::EntityId& entityId, const sdt::HandlerId& handler);
     void OnServiceRequest(const Safir::Dob::ServicePtr& request, const sdt::HandlerId& handler);
+    void OnReadEntity(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance);
 
     void StartTimer();
     QString AddLink(const Safir::Dob::Typesystem::ObjectPtr& obj, const QString& ch, int64_t inst);

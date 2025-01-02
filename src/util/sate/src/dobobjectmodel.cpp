@@ -27,6 +27,7 @@
 #include <QFont>
 #include <QTreeView>
 #include <QTimer>
+#include <QDateTime>
 #include <QDebug>
 
 namespace {
@@ -252,7 +253,42 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
         }
     }
     break;
+
+    case Qt::ToolTipRole:
+    {
+        auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+
+        if (!item->IsNull() && !item->IsContainerRootItem())
+        {
+            auto mt = item->GetMemberInfo()->memberType;
+            switch (mt)
+            {
+            case Second64MemberType:
+            case Second32MemberType:
+            {
+                bool ok;
+                auto seconds = item->GetValue().toDouble(&ok);
+                if (ok)
+                {
+                    auto  dt = QDateTime::fromSecsSinceEpoch(seconds, Qt::UTC);
+                    return QString("GMT: %1\nLocal: %2").arg(dt.toString("yyyy-MM-dd hh:mm::ss"), dt.toLocalTime().toString("yyyy-MM-dd hh:mm::ss"));
+                }
+            }
+            break;
+
+            case EntityIdMemberType:
+            {
+                return "Navigate to referred entity by 'Ctrl + Click'";
+            }
+            break;
+
+            default:
+                break;
+            }
+        }
     }
+    break;
+    }    
 
     return {};
 }

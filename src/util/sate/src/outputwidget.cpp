@@ -70,6 +70,7 @@ OutputWidget::OutputWidget(DobHandler* dob, QWidget *parent)
     connect(dob, &DobHandler::OnUpdateRequest, this, &OutputWidget::OnUpdateRequest);
     connect(dob, &DobHandler::OnDeleteRequest, this, &OutputWidget::OnDeleteRequest);
     connect(dob, &DobHandler::OnServiceRequest, this, &OutputWidget::OnServiceRequest);
+    connect(dob, &DobHandler::OnReadEntity, this, &OutputWidget::OnReadEntity);
 
     // ToolTip handling
     connect(ui->infoToolButton, &QToolButton::clicked, [this]{SetToolTip(ui->infoToolButton);});
@@ -316,6 +317,29 @@ void OutputWidget::OnServiceRequest(const Safir::Dob::ServicePtr& request, const
     line << Timestamp()
          << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
          << QString("OnServiceRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+
+    m_pendingOutput << line.join("");
+
+    if (startTimer)
+    {
+        StartTimer();
+    }
+}
+
+void OutputWidget::OnReadEntity(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance)
+{
+    if (!ui->entitiesTtoolButton->isChecked())
+    {
+        return;
+    }
+    const bool startTimer = m_pendingOutput.empty();
+
+    QStringList line;
+    line << Timestamp() << "&nbsp;<img src=':/img/icons/entity_orange' width='12' height='12'/>&nbsp;";
+
+    sdt::EntityId entityId(entity->GetTypeId(), instance);
+    auto link = AddLink(entity, QString(), instance.GetRawValue());
+    line << QString("Read entity result <a href='%1' style='color:#78c4fc'>%2</a>").arg(link, Str(entityId.ToString()));
 
     m_pendingOutput << line.join("");
 

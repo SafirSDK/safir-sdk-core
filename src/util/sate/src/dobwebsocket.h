@@ -69,6 +69,7 @@ public:
     void Delete(const Safir::Dob::Typesystem::EntityId& entityId, const Safir::Dob::Typesystem::HandlerId& handler) override;
     void DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerId& handler) override;
 
+    void ReadEntity(const sdt::EntityId& entityId) override;
 private:
     QWebSocket m_webSocket;
     QUrl m_url;
