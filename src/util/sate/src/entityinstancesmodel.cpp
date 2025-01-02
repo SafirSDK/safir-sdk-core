@@ -67,10 +67,19 @@ QStringList EntityInstancesModel::statusBarInfo() const
     return
         {
             (m_includeSubclasses?"Recursive":""),
+            (m_includeSubclasses?"View is showing subclasses too.":"View is not showing subclasses."),
+
             tr("Instances: %1").arg(m_entities.size()),
+            "Number of instances shown in view.",
+
             tr("#New: %1").arg(m_numNew),
+            "Number of OnNewEntity calls since view was opened.",
+
             tr("#Update: %1").arg(m_numUpdate),
+            "Number of OnUpdatedEntity calls since view was opened.",
+
             tr("#Delete: %1").arg(m_numDelete),
+            "Number of OnDeletedEntity calls since view was opened.",
         };
 }
 

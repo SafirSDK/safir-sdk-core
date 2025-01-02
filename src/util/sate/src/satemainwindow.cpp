@@ -539,9 +539,10 @@ void SateMainWindow::OnFocusedDockWidgetChanged(ads::CDockWidget* /*old*/, ads::
                 dstMethod);
 
         auto infos = prop.toStringList();
-        for (const auto& info: infos)
+        for (auto it = infos.begin(); it != infos.end(); it+=2)
         {
-            auto* label = new QLabel(info);
+            auto* label = new QLabel(*it);
+            label->setToolTip(*(it+1));
             label->setMinimumWidth(100);
             m_statusBarLabels.push_back(label);
             ui->statusbar->addWidget(label);
@@ -562,10 +563,11 @@ void SateMainWindow::OnStatusBarInfoChanged()
     if (prop.isValid())
     {
         auto infos = prop.toStringList();
-        for (auto it = infos.begin(); it != infos.end(); ++it)
+        for (auto it = infos.begin(); it != infos.end(); it+=2)
         {
             auto* label = m_statusBarLabels.at(std::distance(infos.begin(), it));
             label->setText(*it);
+            label->setToolTip(*(it+1));
         }
     }
 }

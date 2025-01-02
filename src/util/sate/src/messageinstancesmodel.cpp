@@ -68,9 +68,17 @@ MessageInstancesModel::Info MessageInstancesModel::getRow(int row) const
 QStringList MessageInstancesModel::statusBarInfo() const
 {
     return {(m_includeSubclasses?"Recursive":""),
+            (m_includeSubclasses?"View is showing subclasses too.":"View is not showing subclasses."),
+
             tr("Showing: %1").arg(m_messages.size()),
+            "Number of messages shown in view.",
+
             tr("Total: %1").arg(m_numReceived),
-            (m_messages.size() >= m_maxRows?"Discarding":"")};
+            "Total number of messages received since view was opened.",
+
+            (m_messages.size() >= m_maxRows?"Discarding":""),
+            (m_messages.size() >= m_maxRows?"Max messages in view reached, discarding old ones\n"
+                                            "when new are received.":"")};
 }
 
 int MessageInstancesModel::rowCount(const QModelIndex& /*parent*/) const
