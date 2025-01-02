@@ -30,6 +30,7 @@
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Time/TimeProvider.h>
 
 #include <QColor>
 
@@ -74,8 +75,9 @@ namespace
 
 
 QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::ContainerBase& container,
-                                                  const Safir::Dob::Typesystem::MemberType memberType,
-                                                  const Safir::Dob::Typesystem::TypeId memberTypeId)
+                                                 const Safir::Dob::Typesystem::MemberType memberType,
+                                                 const Safir::Dob::Typesystem::TypeId memberTypeId,
+                                                 const int role)
 {
     using namespace Safir::Dob::Typesystem;
     switch (memberType)
@@ -133,12 +135,14 @@ QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::C
     case Radian32MemberType:
     case RadianPerSecond32MemberType:
     case RadianPerSecondSquared32MemberType:
-    case Second32MemberType:
     case SquareMeter32MemberType:
     case Steradian32MemberType:
     case Volt32MemberType:
     case Watt32MemberType:
         return static_cast<const Float32Container&>(container).GetVal();
+
+    case Second32MemberType:
+        return Second64ToVariant(static_cast<const Float64Container&>(container).GetVal(), role);
 
     case Float64MemberType:
     case Ampere64MemberType:
@@ -161,7 +165,7 @@ QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::C
     case Watt64MemberType:
         return static_cast<const Float64Container&>(container).GetVal();
     case Second64MemberType:
-        return Second64ToVariant(static_cast<const Float64Container&>(container).GetVal());
+        return Second64ToVariant(static_cast<const Float64Container&>(container).GetVal(), role);
     }
     throw std::logic_error("Unhandled MemberType");
 }
@@ -276,16 +280,16 @@ QStringList InstancesModelUtils::SequenceToStrings(const Safir::Dob::Typesystem:
         return ::SequenceToStrings<Float64SequenceContainer>(container);
     case Second64MemberType:
         return ::SequenceToStrings<Float64SequenceContainer>
-            (container, [](const auto& v){return Second64ToVariant(v).toString();});
+            (container, [](const auto& v){return Second64ToVariant(v, Qt::DisplayRole).toString();});
     }
     throw std::logic_error("Unhandled MemberType");
 }
 
 QStringList InstancesModelUtils::DictionaryToStrings(const Safir::Dob::Typesystem::DictionaryContainerBase& container,
-                                             const Safir::Dob::Typesystem::MemberType keyType,
-                                             const Safir::Dob::Typesystem::MemberType memberType,
-                                             const Safir::Dob::Typesystem::TypeId memberTypeId,
-                                             const Safir::Dob::Typesystem::TypeId keyTypeId)
+                                                     const Safir::Dob::Typesystem::MemberType keyType,
+                                                     const Safir::Dob::Typesystem::MemberType memberType,
+                                                     const Safir::Dob::Typesystem::TypeId memberTypeId,
+                                                     const Safir::Dob::Typesystem::TypeId keyTypeId)
 {
     QStringList result;
     using namespace Safir::Dob::Typesystem;
@@ -332,16 +336,37 @@ QStringList InstancesModelUtils::DictionaryToStrings(const Safir::Dob::Typesyste
         }
         else
         {
-            result.last() += ": " + ContainerToVariant(valueContainer, memberType, memberTypeId).toString();
+            result.last() += ": " + ContainerToVariant(valueContainer, memberType, memberTypeId, Qt::DisplayRole).toString();
         }
     }
     return result;
 }
 
 
-QVariant InstancesModelUtils::Second64ToVariant(const Safir::Dob::Typesystem::Si64::Second seconds)
+QVariant InstancesModelUtils::Second64ToVariant(const Safir::Dob::Typesystem::Si64::Second seconds, const int role)
 {
-    return seconds;
+    if (role == Qt::ToolTipRole)
+    {
+        return QString("Seconds:\t%1\n"
+                       "UTC:\t%2\n"
+                       "Local:\t%3")
+            .arg(seconds)
+            .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToPtime(seconds))).replace("T", " "))
+            .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToLocalTime(seconds))).replace("T", " "));
+    }
+    else
+    {
+        const auto time = Safir::Time::TimeProvider::ToPtime(seconds);
+        if (time.date().year() > 2015 && time.date().year() < 2100)
+        {
+            return QString::fromStdString(boost::posix_time::to_iso_extended_string(time)).replace("T", " ");
+        }
+        else
+        {
+            return seconds;
+        }
+    }
+
 #if 0
     switch (m_second64Format)
     {
@@ -405,7 +430,7 @@ QVariant InstancesModelUtils::MemberToQVariant(const Safir::Dob::Typesystem::Obj
                 return QVariant();
             }
 
-            return ContainerToVariant(container, columnInfo->MemberType(), columnInfo->MemberTypeId());
+            return ContainerToVariant(container, columnInfo->MemberType(), columnInfo->MemberTypeId(), role);
         }
 
     case ArrayCollectionType:
@@ -420,7 +445,7 @@ QVariant InstancesModelUtils::MemberToQVariant(const Safir::Dob::Typesystem::Obj
                 const auto& container = object->GetMember(columnInfo->MemberIndex(),i);
                 if (!container.IsNull())
                 {
-                    result += ContainerToVariant(container, columnInfo->MemberType(), columnInfo->MemberTypeId()).toString();
+                    result += ContainerToVariant(container, columnInfo->MemberType(), columnInfo->MemberTypeId(), Qt::DisplayRole).toString();
                 }
             }
             if (result.empty())

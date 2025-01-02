@@ -50,7 +50,8 @@ public:
 private:
     static QVariant ContainerToVariant(const Safir::Dob::Typesystem::ContainerBase& container,
                                        const Safir::Dob::Typesystem::MemberType memberType,
-                                       const Safir::Dob::Typesystem::TypeId memberTypeId);
+                                       const Safir::Dob::Typesystem::TypeId memberTypeId,
+                                       const int role);
 
     static QStringList SequenceToStrings(const Safir::Dob::Typesystem::ContainerBase& container,
                                          const Safir::Dob::Typesystem::MemberType memberType,
@@ -62,7 +63,6 @@ private:
                                            const Safir::Dob::Typesystem::TypeId memberTypeId,
                                            const Safir::Dob::Typesystem::TypeId keyTypeId);
 
-    static QVariant Second64ToVariant(const Safir::Dob::Typesystem::Si64::Second seconds);
-
-
+    static QVariant Second64ToVariant(const Safir::Dob::Typesystem::Si64::Second seconds,
+                                      const int role);
 };

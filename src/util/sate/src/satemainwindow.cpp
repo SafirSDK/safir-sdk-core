@@ -565,7 +565,7 @@ void SateMainWindow::OnStatusBarInfoChanged()
         auto infos = prop.toStringList();
         for (auto it = infos.begin(); it != infos.end(); it+=2)
         {
-            auto* label = m_statusBarLabels.at(std::distance(infos.begin(), it));
+            auto* label = m_statusBarLabels.at(std::distance(infos.begin(), it)/2);
             label->setText(*it);
             label->setToolTip(*(it+1));
         }
