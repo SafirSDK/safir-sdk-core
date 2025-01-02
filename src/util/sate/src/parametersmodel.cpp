@@ -24,6 +24,7 @@
 #include "parametersmodel.h"
 #include <QColor>
 #include <QFont>
+#include <QDateTime>
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BasicTypeOperations.h>
 #include <memory>
@@ -199,8 +200,29 @@ QVariant ParametersModel::data(const QModelIndex &index, int role) const
         }
     }
     break;
-    }
 
+    case Qt::ToolTipRole:
+    {
+        auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+
+        if (!item->IsNull() && !item->IsContainerRootItem())
+        {
+            auto mt = item->GetMemberInfo()->memberType;
+            if (mt == Second64MemberType || mt == Second32MemberType)
+            {
+                bool ok;
+                auto seconds = item->GetValue().toDouble(&ok);
+                if (ok)
+                {
+                    auto  dt = QDateTime::fromSecsSinceEpoch(seconds, Qt::UTC);
+                    return QString("GMT: %1\nLocal: %2").arg(dt.toString("yyyy-MM-dd hh:mm::ss"), dt.toLocalTime().toString("yyyy-MM-dd hh:mm::ss"));
+                }
+            }
+        }
+    }
+    break;
+
+    }
 
     return {};
 }
