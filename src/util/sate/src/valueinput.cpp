@@ -62,7 +62,18 @@ TextValueInput::TextValueInput(bool showNullButton, const QString& deleteButtonT
     }
     
 
-    connect(ui->valueLineEdit, &QLineEdit::textEdited, this, [this](const QString&) { m_isNull = false; });
+    connect(ui->valueLineEdit, &QLineEdit::textEdited, this, [this](const QString&)
+    {
+        m_isNull = false;
+        if (!ui->valueLineEdit->hasAcceptableInput())
+        {
+            ui->valueLineEdit->setStyleSheet("background:red;");
+        }
+        else
+        {
+            ui->valueLineEdit->setStyleSheet("");
+        }
+    });
 
     ui->valueLineEdit->installEventFilter(this);
 
@@ -80,6 +91,7 @@ TextValueInput::~TextValueInput()
 void TextValueInput::SetNull()
 {
     ui->valueLineEdit->clear();
+    ui->valueLineEdit->setStyleSheet("");
     ui->valueLineEdit->setPlaceholderText("NULL");
     m_isNull = true;
 }
@@ -111,6 +123,11 @@ void TextValueInput::SetValidator(const QValidator *validator)
     {
         ui->valueLineEdit->setValidator(validator);
     }
+}
+
+bool TextValueInput::HasValidInput() const
+{
+    return m_isNull || ui->valueLineEdit->hasAcceptableInput();
 }
 
 void TextValueInput::SetMaxLength(int len)

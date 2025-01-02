@@ -38,6 +38,7 @@ public:
     virtual bool IsDelete() const = 0;
     virtual QString GetValue() const = 0;
     virtual void SetValidator(const QValidator* validator) = 0;
+    virtual bool HasValidInput() const = 0;
 
 signals:
     // Commit data and move to next row. If nextRow=0 just close editor, if 1 move to next row, if -1 move to previous row.
@@ -66,6 +67,7 @@ public:
     bool IsDelete() const override;
     QString GetValue() const override;
     void SetValidator(const QValidator* validator) override;
+    bool HasValidInput() const override;
     void SetMaxLength(int len);
 
 private:
@@ -88,6 +90,9 @@ public:
     bool IsDelete() const override;
     QString GetValue() const override;
     void SetValidator(const QValidator*) override {}
+    bool HasValidInput() const override {
+        return true;
+    }
 
 private:
     Ui::ComboBoxValueInput *ui;
