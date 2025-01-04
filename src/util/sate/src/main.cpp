@@ -53,6 +53,9 @@ Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin);
 
 int main(int argc, char *argv[])
 {
+    //Set a default-english locale so we do not have to worry about decimal separators etc
+    QLocale::setDefault(QLocale::c());
+
     QApplication a(argc, argv);
     SateMainWindow w;
     w.show();
