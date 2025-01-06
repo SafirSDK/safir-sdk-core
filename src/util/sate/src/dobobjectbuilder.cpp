@@ -58,7 +58,7 @@ namespace
 // ----------------------------
 std::pair<bool, Safir::Dob::Typesystem::EntityId> DobObjectBuilder::EntityIdFromString(const QString& str)
 {
-    auto stringList = str.split(QRegularExpression(":\\s"), Qt::SkipEmptyParts);
+    auto stringList = str.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
     if (stringList.size() < 2)
     {
         return std::make_pair(false, sdt::EntityId());

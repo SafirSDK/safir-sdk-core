@@ -43,6 +43,11 @@ QString TypeIdToString(int64_t typeId)
     }
 }
 
+QString EntityIdToString(const Safir::Dob::Typesystem::EntityId& eid)
+{
+    return TypeIdToString(eid.GetTypeId()) + " " + QString::fromStdWString(eid.GetInstanceId().ToString());
+}
+
 QString GetTypeName(Safir::Dob::Typesystem::MemberType memberType, int64_t typeId)
 {
     using namespace Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations;
@@ -562,7 +567,7 @@ void MemberTreeItem::SetItemValue(const Safir::Dob::Typesystem::ContainerBase& c
     case EntityIdMemberType:
     {
         const auto c = static_cast<const EntityIdContainer*>(&cb);
-        m_value = TypeIdToString(c->GetVal().GetTypeId()) + " : " + QString::fromStdWString(c->GetVal().GetInstanceId().ToString());
+        m_value = EntityIdToString(c->GetVal());
     }
     break;
 
@@ -794,7 +799,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
         {
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
-            seqItem->m_value = TypeIdToString(it->GetTypeId()) + " : " + QString::fromStdWString(it->GetInstanceId().ToString());
+            seqItem->m_value = EntityIdToString(*it);
             seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
@@ -1002,8 +1007,7 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
         case EntityIdMemberType:
         {
             auto val = dc->GetKeyAt<EntityId>(i);
-            dictItem->m_key = TypeIdToString(val.GetTypeId()) + " : " + QString::fromStdWString(val.GetInstanceId().ToString());
-            dictItem->m_key = QString::fromStdWString(val.ToString());
+            dictItem->m_key = EntityIdToString(val);
         }
         break;
 
@@ -1104,7 +1108,7 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
             case EntityIdMemberType:
             {
                 const auto c = static_cast<const EntityIdContainer*>(&valCont);
-                dictItem->m_value = TypeIdToString(c->GetVal().GetTypeId()) + " : " + QString::fromStdWString(c->GetVal().GetInstanceId().ToString());
+                dictItem->m_value = EntityIdToString(c->GetVal());
             }
             break;
 

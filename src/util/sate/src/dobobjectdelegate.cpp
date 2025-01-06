@@ -42,7 +42,7 @@ const QValidator* CreateValidator(Safir::Dob::Typesystem::MemberType memberType,
     case EntityIdMemberType:
     {
         // EntityId are written as "TypeId : Instance" or just "TypeId Instance". No check that typeId exists.
-        QRegularExpression rx("[0-9A-Za-z.-]+\\s(:\\s)?[0-9A-Za-z.-]+");
+        QRegularExpression rx("[0-9A-Za-z.-]+\\s+[0-9A-Za-z.-]+");
         return new QRegularExpressionValidator(rx, parent);
     }
     break;
