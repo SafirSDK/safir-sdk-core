@@ -48,7 +48,7 @@ set(sources
     enumwidget.cpp
     enummodel.cpp
     typeaheadwidget.cpp
-
+    utilities.cpp
     sate.rc
   )
 
@@ -88,6 +88,7 @@ set(headers
     iconfactory.h
     dobobjectbuilder.h
     instancesmodelutils.h
+    utilities.h
 )
 
 if (NOT TARGET Qt::Widgets)

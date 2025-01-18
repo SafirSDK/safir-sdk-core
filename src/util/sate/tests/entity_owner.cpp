@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <iostream>
+#include <vector>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Connection.h>
@@ -100,11 +101,14 @@ public:
     {
         for (int i = 0; i < NUM_SMALL_ENTITIES; ++i)
         {
+            m_smallEntityIds.push_back
+                (Safir::Dob::Typesystem::EntityId(DoseTest::GlobalEntity::ClassTypeId,
+                                                  Safir::Dob::Typesystem::InstanceId::GenerateRandom()));
             auto ent = DoseTest::GlobalEntity::Create();
             ent->Info() = L"Some info";
             ent->MoreInfo() = random_string(rand()%256);
             m_connection.SetChanges(ent,
-                                    Safir::Dob::Typesystem::InstanceId::GenerateRandom(),
+                                    m_smallEntityIds.back().GetInstanceId(),
                                     Safir::Dob::Typesystem::HandlerId());
         }
     }
@@ -115,12 +119,11 @@ public:
         using namespace Safir::Dob;
         for (int i = 0; i < 100; ++i)
         {
-            EntityIterator it = m_connection.GetEntityIterator(DoseTest::GlobalEntity::ClassTypeId,false);
-            std::advance(it, rand() % NUM_SMALL_ENTITIES);
-            auto ent = std::static_pointer_cast<DoseTest::GlobalEntity>(it->GetEntity());
+            const auto randomEid = m_smallEntityIds.at(rand() % m_smallEntityIds.size());
+            auto ent = std::static_pointer_cast<DoseTest::GlobalEntity>(m_connection.Read(randomEid).GetEntity());
             ent->MoreInfo() = random_string(rand()%256);
             m_connection.SetChanges(ent,
-                                    it->GetInstanceId(),
+                                    randomEid.GetInstanceId(),
                                     Safir::Dob::Typesystem::HandlerId());
         }
     }
@@ -130,6 +133,9 @@ public:
     {
         for (int i = 0; i < NUM_BIG_ENTITIES; ++i)
         {
+            m_bigEntityIds.push_back
+                (Safir::Dob::Typesystem::EntityId(DoseTest::ComplexGlobalEntity::ClassTypeId,
+                                                  Safir::Dob::Typesystem::InstanceId::GenerateRandom()));
             auto ent = DoseTest::ComplexGlobalEntity::Create();
 
             ent->Info() = L"Some other info";
@@ -138,7 +144,7 @@ public:
             //TODO: put some stuff in the members...
 
             m_connection.SetChanges(ent,
-                                    Safir::Dob::Typesystem::InstanceId::GenerateRandom(),
+                                    m_bigEntityIds.back().GetInstanceId(),
                                     Safir::Dob::Typesystem::HandlerId());
         }
     }
@@ -149,16 +155,16 @@ public:
         using namespace Safir::Dob;
         for (int i = 0; i < 10; ++i)
         {
-            EntityIterator it = m_connection.GetEntityIterator(DoseTest::ComplexGlobalEntity::ClassTypeId,false);
-            std::advance(it, rand() % NUM_BIG_ENTITIES);
-            auto ent = std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(it->GetEntity());
+            const auto randomEid = m_bigEntityIds.at(rand() % m_bigEntityIds.size());
+            auto ent = std::static_pointer_cast<DoseTest::ComplexGlobalEntity>(m_connection.Read(randomEid).GetEntity());
 
             ent->MoreInfo() = random_string(rand()%256);
+            ent->EntityIdMember() = m_bigEntityIds.at(rand() % m_bigEntityIds.size());
 
             //TODO update more stuff
 
             m_connection.SetChanges(ent,
-                                    it->GetInstanceId(),
+                                    randomEid.GetInstanceId(),
                                     Safir::Dob::Typesystem::HandlerId());
         }
     }
@@ -222,6 +228,9 @@ private:
     void OnNotMessageOverflow() override {}
 
     Safir::Dob::SecondaryConnection m_connection;
+
+    std::vector<Safir::Dob::Typesystem::EntityId> m_smallEntityIds;
+    std::vector<Safir::Dob::Typesystem::EntityId> m_bigEntityIds;
 };
 
 int main()

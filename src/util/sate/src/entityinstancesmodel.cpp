@@ -36,7 +36,6 @@ EntityInstancesModel::EntityInstancesModel(DobHandler* dob,
                                            bool includeSubclasses,
                                            QObject* parent)
     : QAbstractTableModel(parent)
-    , m_dob(dob)
     , m_typeId(typeId)
     , m_includeSubclasses(includeSubclasses)
 {
@@ -44,7 +43,7 @@ EntityInstancesModel::EntityInstancesModel(DobHandler* dob,
 
     m_timer.setInterval(500);
 
-    connect(m_dob, &DobHandler::OnEntity, this, &EntityInstancesModel::OnEntity);
+    connect(dob, &DobHandler::OnEntity, this, &EntityInstancesModel::OnEntity);
     connect(&m_timer, &QTimer::timeout, this, &EntityInstancesModel::OnTimeout);
 
     m_timer.start(500);

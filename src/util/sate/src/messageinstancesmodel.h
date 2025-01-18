@@ -59,6 +59,8 @@ public:
     };
 
     Info getRow(int row) const;
+    ColumnInfoPtr getColumnInfo(int column) const {return m_columnInfoList[column];}
+
     QStringList statusBarInfo() const;
 signals:
     void statusBarInfoChanged();
@@ -76,7 +78,6 @@ private slots:
 
     void OnTimeout();
 private:
-    DobHandler* const m_dob;
     const Safir::Dob::Typesystem::TypeId m_typeId;
     const Safir::Dob::Typesystem::ChannelId m_channel;
     const bool m_includeSubclasses;

@@ -307,6 +307,8 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
 
     m_dockManager->addDockWidget(ads::CenterDockWidgetArea, dock, m_centralDockArea);
     connect(iv,&InstancesWidget::OpenObjectEdit,this,&SateMainWindow::OnOpenObjectEditWithInstance);
+    connect(iv,&InstancesWidget::ReadEntity,this,
+            [this](const Safir::Dob::Typesystem::EntityId& entityId){m_dob.ReadEntity(entityId);});
 }
 
 void SateMainWindow::OnConnectedToDob(const QString& connectionName)

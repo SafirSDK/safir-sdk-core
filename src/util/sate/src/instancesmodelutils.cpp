@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "instancesmodelutils.h"
 
+#include "utilities.h"
 #include <Safir/Dob/Typesystem/ValueContainers.h>
 #include <Safir/Dob/Typesystem/EnumerationContainerBase.h>
 #include <Safir/Dob/Typesystem/SequenceContainer.h>
@@ -106,7 +107,7 @@ QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::C
     case InstanceIdMemberType:
         return static_cast<qlonglong>(static_cast<const InstanceIdContainer&>(container).GetVal().GetRawValue());
     case EntityIdMemberType:
-        return QString::fromStdWString(static_cast<const EntityIdContainer&>(container).GetVal().ToString());
+        return ::Utilities::EntityIdToString(static_cast<const EntityIdContainer&>(container).GetVal());
     case ChannelIdMemberType:
         return static_cast<qlonglong>(static_cast<const ChannelIdContainer&>(container).GetVal().GetRawValue());
     case HandlerIdMemberType:
@@ -211,7 +212,7 @@ QStringList InstancesModelUtils::SequenceToStrings(const Safir::Dob::Typesystem:
                                                               [](const auto& v){return QString::fromStdWString(v.ToString());});
     case EntityIdMemberType:
         return ::SequenceToStrings<EntityIdSequenceContainer>(container,
-                                                            [](const auto& v){return QString::fromStdWString(v.ToString());});
+                                                              [](const auto& v){return ::Utilities::EntityIdToString(v);});
     case ChannelIdMemberType:
         return ::SequenceToStrings<ChannelIdSequenceContainer>(container,
                                                              [](const auto& v){return QString::fromStdWString(v.ToString());});
@@ -313,7 +314,7 @@ QStringList InstancesModelUtils::DictionaryToStrings(const Safir::Dob::Typesyste
             result.last() += QString::fromStdWString(container.GetKeyAt<InstanceId>(i).ToString());
             break;
         case EntityIdMemberType:
-            result.last() += QString::fromStdWString(container.GetKeyAt<EntityId>(i).ToString());
+            result.last() += ::Utilities::EntityIdToString(container.GetKeyAt<EntityId>(i));
             break;
         case ChannelIdMemberType:
             result.last() += QString::fromStdWString(container.GetKeyAt<ChannelId>(i).ToString());
@@ -366,19 +367,6 @@ QVariant InstancesModelUtils::Second64ToVariant(const Safir::Dob::Typesystem::Si
             return seconds;
         }
     }
-
-#if 0
-    switch (m_second64Format)
-    {
-    case FloatingPoint:
-        return seconds;
-    case LocalTime:
-        return QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToLocalTime(seconds))).replace("T", " ");
-    case UtcTime:
-        return QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToPtime(seconds))).replace("T", " ");
-    }
-    throw std::logic_error("Invalid Second64 format");
-#endif
 }
 
 

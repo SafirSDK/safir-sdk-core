@@ -402,7 +402,6 @@ void DobNative::ReadEntity(const sdt::EntityId& entityId)
 
     try
     {
-
         auto proxy = m_dobConnection.Read(entityId);
         emit DobInterface::OnReadEntity(proxy.GetEntity(), proxy.GetInstanceId());
     }

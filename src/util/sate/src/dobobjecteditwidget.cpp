@@ -26,6 +26,7 @@
 #include "dobobjectmodel.h"
 #include "dobobjectdelegate.h"
 #include "dobobjectbuilder.h"
+#include "utilities.h"
 #include <QTreeView>
 #include <QKeyEvent>
 #include <QComboBox>
@@ -254,7 +255,7 @@ void DobObjectEditWidget::Init()
             }
             else if (p->GetMemberInfo()->memberType == EntityIdMemberType && !p->IsNull())
             {
-                auto eid = DobObjectBuilder::EntityIdFromString(p->GetValue());
+                auto eid = ::Utilities::StringToEntityId(p->GetValue());
                 if (eid.first)
                 {
                     m_dob->ReadEntity(eid.second);

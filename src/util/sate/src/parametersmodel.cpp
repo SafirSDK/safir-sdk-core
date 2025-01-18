@@ -22,12 +22,14 @@
 *
 ******************************************************************************/
 #include "parametersmodel.h"
+#include "utilities.h"
 #include <QColor>
 #include <QFont>
 #include <QDateTime>
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BasicTypeOperations.h>
 #include <memory>
+#include <Safir/Time/TimeProvider.h>
 
 namespace sdt = Safir::Dob::Typesystem;
 
@@ -214,8 +216,9 @@ QVariant ParametersModel::data(const QModelIndex &index, int role) const
                 auto seconds = item->GetValue().toDouble(&ok);
                 if (ok)
                 {
-                    auto  dt = QDateTime::fromSecsSinceEpoch(seconds, Qt::UTC);
-                    return QString("GMT: %1\nLocal: %2").arg(dt.toString("yyyy-MM-dd hh:mm::ss"), dt.toLocalTime().toString("yyyy-MM-dd hh:mm::ss"));
+                    return QString("GMT: %1\nLocal: %2")
+                        .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToPtime(seconds))).replace("T", " "))
+                        .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToLocalTime(seconds))).replace("T", " "));
                 }
             }
         }
@@ -389,7 +392,7 @@ void ParametersModel::CreateItem(const TypesystemRepository::DobMember& memberIn
     {
         mi = std::make_unique<MemberTreeItem>(parent, &memberInfo);
         auto val = sdt::Parameters::GetEntityId(m_typeId, parameterIndex, arrayIndex);
-        auto eidStr = QString("%1 : %2").arg(Str(sdt::Operations::GetName(val.GetTypeId())), Str(val.GetInstanceId().ToString()));
+        auto eidStr = ::Utilities::EntityIdToString(val);
         mi->SetValue(eidStr);
     }
     break;

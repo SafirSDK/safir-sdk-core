@@ -39,7 +39,6 @@ MessageInstancesModel::MessageInstancesModel(DobHandler* dob,
                                              bool includeSubclasses,
                                              QObject* parent)
     : QAbstractTableModel(parent)
-    , m_dob(dob)
     , m_typeId(typeId)
     , m_channel(channel)
     , m_includeSubclasses(includeSubclasses)
@@ -48,7 +47,7 @@ MessageInstancesModel::MessageInstancesModel(DobHandler* dob,
 
     m_timer.setInterval(500);
 
-    connect(m_dob, &DobHandler::OnMessage, this, &MessageInstancesModel::OnMessage);
+    connect(dob, &DobHandler::OnMessage, this, &MessageInstancesModel::OnMessage);
     connect(&m_timer, &QTimer::timeout, this, &MessageInstancesModel::OnTimeout);
 
     m_timer.start(500);

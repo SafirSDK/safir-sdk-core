@@ -30,6 +30,8 @@
 #include <QDateTime>
 #include <QDebug>
 
+#include <Safir/Time/TimeProvider.h>
+
 namespace {
 static const int NumberOfColumns = 5;
 }
@@ -270,8 +272,9 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
                 auto seconds = item->GetValue().toDouble(&ok);
                 if (ok)
                 {
-                    auto  dt = QDateTime::fromSecsSinceEpoch(seconds, Qt::UTC);
-                    return QString("GMT: %1\nLocal: %2").arg(dt.toString("yyyy-MM-dd hh:mm::ss"), dt.toLocalTime().toString("yyyy-MM-dd hh:mm::ss"));
+                    return QString("GMT: %1\nLocal: %2")
+                        .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToPtime(seconds))).replace("T", " "))
+                        .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToLocalTime(seconds))).replace("T", " "));
                 }
             }
             break;

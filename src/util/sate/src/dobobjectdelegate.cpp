@@ -25,6 +25,7 @@
 #include "dobobjectmodel.h"
 #include "membertreeitem.h"
 #include "valueinput.h"
+#include "utilities.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QEvent>
@@ -41,9 +42,7 @@ const QValidator* CreateValidator(Safir::Dob::Typesystem::MemberType memberType,
     {
     case EntityIdMemberType:
     {
-        // EntityId are written as "TypeId : Instance" or just "TypeId Instance". No check that typeId exists.
-        QRegularExpression rx("[0-9A-Za-z.-]+\\s+[0-9A-Za-z.-]+");
-        return new QRegularExpressionValidator(rx, parent);
+        return new QRegularExpressionValidator(::Utilities::EntityIdRegex(), parent);
     }
     break;
 

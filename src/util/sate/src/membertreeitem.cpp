@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "membertreeitem.h"
+#include "utilities.h"
 #include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/BasicTypeOperations.h>
@@ -41,11 +42,6 @@ QString TypeIdToString(int64_t typeId)
     {
         return QString::number(typeId);
     }
-}
-
-QString EntityIdToString(const Safir::Dob::Typesystem::EntityId& eid)
-{
-    return TypeIdToString(eid.GetTypeId()) + " " + QString::fromStdWString(eid.GetInstanceId().ToString());
 }
 
 QString GetTypeName(Safir::Dob::Typesystem::MemberType memberType, int64_t typeId)
@@ -567,7 +563,7 @@ void MemberTreeItem::SetItemValue(const Safir::Dob::Typesystem::ContainerBase& c
     case EntityIdMemberType:
     {
         const auto c = static_cast<const EntityIdContainer*>(&cb);
-        m_value = EntityIdToString(c->GetVal());
+        m_value = ::Utilities::EntityIdToString(c->GetVal());
     }
     break;
 
@@ -799,7 +795,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
         {
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
-            seqItem->m_value = EntityIdToString(*it);
+            seqItem->m_value = ::Utilities::EntityIdToString(*it);
             seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
@@ -1007,7 +1003,7 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
         case EntityIdMemberType:
         {
             auto val = dc->GetKeyAt<EntityId>(i);
-            dictItem->m_key = EntityIdToString(val);
+            dictItem->m_key = ::Utilities::EntityIdToString(val);
         }
         break;
 
@@ -1108,7 +1104,7 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
             case EntityIdMemberType:
             {
                 const auto c = static_cast<const EntityIdContainer*>(&valCont);
-                dictItem->m_value = EntityIdToString(c->GetVal());
+                dictItem->m_value = ::Utilities::EntityIdToString(c->GetVal());
             }
             break;
 

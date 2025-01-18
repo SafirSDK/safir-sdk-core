@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "dobobjectbuilder.h"
 #include "typesystemrepository.h"
+#include "utilities.h"
 
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/ValueContainers.h>
@@ -34,39 +35,6 @@
 #include <QRegularExpression>
 
 namespace sdt = Safir::Dob::Typesystem;
-
-namespace
-{
-    sdt::TypeId ToTypeId(const QString& s)
-    {
-        bool ok;
-        sdt::TypeId typeId = s.trimmed().toLongLong(&ok, 10);
-        return ok ? typeId : sdt::Operations::GetTypeId(s.trimmed().toStdWString());
-    }
-
-    template <class T>
-    T ToHashType(const QString& s)
-    {
-        bool ok;
-        int64_t num = s.trimmed().toLongLong(&ok, 10);
-        return ok ? T(num) : T(s.trimmed().toStdWString());
-    }
-}
-
-// ----------------------------
-// Static helpers
-// ----------------------------
-std::pair<bool, Safir::Dob::Typesystem::EntityId> DobObjectBuilder::EntityIdFromString(const QString& str)
-{
-    auto stringList = str.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-    if (stringList.size() < 2)
-    {
-        return std::make_pair(false, sdt::EntityId());
-    }
-
-    sdt::EntityId eid(ToTypeId(stringList.at(0)), ToHashType<sdt::InstanceId>(stringList.at(1)));
-    return std::make_pair(true, eid);
-}
 
 // ----------------------------
 // Class DobObjectBuilder
@@ -201,14 +169,14 @@ void DobObjectBuilder::SetSingleValue(const MemberTreeItem* mi, Safir::Dob::Type
     case InstanceIdMemberType:
     {
         auto c = static_cast<InstanceIdContainer*>(&cb);
-        auto val = ToHashType<sdt::InstanceId>(mi->GetValue());
+        auto val = ::Utilities::StringToHashType<sdt::InstanceId>(mi->GetValue());
         c->SetVal(val);
     }
     break;
 
     case EntityIdMemberType:
     {
-        auto eid = EntityIdFromString(mi->GetValue());
+        auto eid = ::Utilities::StringToEntityId(mi->GetValue());
         if (eid.first)
         {
             auto c = static_cast<EntityIdContainer*>(&cb);
@@ -224,7 +192,7 @@ void DobObjectBuilder::SetSingleValue(const MemberTreeItem* mi, Safir::Dob::Type
     case ChannelIdMemberType:
     {
         auto c = static_cast<ChannelIdContainer*>(&cb);
-        auto val = ToHashType<sdt::ChannelId>(mi->GetValue());
+        auto val = ::Utilities::StringToHashType<sdt::ChannelId>(mi->GetValue());
         c->SetVal(val);
     }
     break;
@@ -232,7 +200,7 @@ void DobObjectBuilder::SetSingleValue(const MemberTreeItem* mi, Safir::Dob::Type
     case HandlerIdMemberType:
     {
         auto c = static_cast<HandlerIdContainer*>(&cb);
-        auto val = ToHashType<sdt::HandlerId>(mi->GetValue());
+        auto val = ::Utilities::StringToHashType<sdt::HandlerId>(mi->GetValue());
         c->SetVal(val);
     }
     break;
@@ -429,7 +397,7 @@ void DobObjectBuilder::SetSequenceValues(const MemberTreeItem* mi, Safir::Dob::T
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto val = ToHashType<sdt::InstanceId>(m->GetValue());
+            auto val = ::Utilities::StringToHashType<sdt::InstanceId>(m->GetValue());
             c->push_back(val);
         }
     }
@@ -441,7 +409,7 @@ void DobObjectBuilder::SetSequenceValues(const MemberTreeItem* mi, Safir::Dob::T
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto eid = EntityIdFromString(m->GetValue());
+            auto eid = ::Utilities::StringToEntityId(m->GetValue());
             if (eid.first)
             {
                 c->push_back(eid.second);
@@ -456,7 +424,7 @@ void DobObjectBuilder::SetSequenceValues(const MemberTreeItem* mi, Safir::Dob::T
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto val = ToHashType<sdt::ChannelId>(m->GetValue());
+            auto val = ::Utilities::StringToHashType<sdt::ChannelId>(m->GetValue());
             c->push_back(val);
         }
     }
@@ -468,7 +436,7 @@ void DobObjectBuilder::SetSequenceValues(const MemberTreeItem* mi, Safir::Dob::T
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto val = ToHashType<sdt::HandlerId>(m->GetValue());
+            auto val = ::Utilities::StringToHashType<sdt::HandlerId>(m->GetValue());
             c->push_back(val);
         }
     }
@@ -650,7 +618,7 @@ void DobObjectBuilder::SetDictionaryValues(const MemberTreeItem* mi, Safir::Dob:
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto key = ToHashType<sdt::InstanceId>(m->GetKey());
+            auto key = ::Utilities::StringToHashType<sdt::InstanceId>(m->GetKey());
             auto& c = dc->InsertNull(key);
             SetSingleValue(m, c);
         }
@@ -662,7 +630,7 @@ void DobObjectBuilder::SetDictionaryValues(const MemberTreeItem* mi, Safir::Dob:
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto key = EntityIdFromString(m->GetKey());
+            auto key = ::Utilities::StringToEntityId(m->GetKey());
             if (key.first)
             {
                 auto& c = dc->InsertNull(key.second);
@@ -677,7 +645,7 @@ void DobObjectBuilder::SetDictionaryValues(const MemberTreeItem* mi, Safir::Dob:
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto key = ToHashType<sdt::ChannelId>(m->GetKey());
+            auto key = ::Utilities::StringToHashType<sdt::ChannelId>(m->GetKey());
             auto& c = dc->InsertNull(key);
             SetSingleValue(m, c);
         }
@@ -689,7 +657,7 @@ void DobObjectBuilder::SetDictionaryValues(const MemberTreeItem* mi, Safir::Dob:
         for (int i = 0; i < mi->NumberOfChildMembers(); ++i)
         {
             const auto& m = mi->GetConstChildMember(i);
-            auto key = ToHashType<sdt::HandlerId>(m->GetKey());
+            auto key = ::Utilities::StringToHashType<sdt::HandlerId>(m->GetKey());
             auto& c = dc->InsertNull(key);
             SetSingleValue(m, c);
         }

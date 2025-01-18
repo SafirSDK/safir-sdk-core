@@ -34,10 +34,12 @@
 #include <QSortFilterProxyModel>
 #include <QTableView>
 #include <QVBoxLayout>
+#include <QApplication>
 #include <QWidgetAction>
 #include "entityinstancesmodel.h"
 #include "messageinstancesmodel.h"
 #include "typesystemrepository.h"
+#include "utilities.h"
 #include <map>
 
 class ColumnSortFilterProxyModel
@@ -113,6 +115,7 @@ InstancesWidget::InstancesWidget(QWidget* parent)
     connect(m_table->horizontalScrollBar(), &QAbstractSlider::rangeChanged, this,  &InstancesWidget::PositionFilters);
     connect(m_table->horizontalScrollBar(), &QAbstractSlider::actionTriggered, this, &InstancesWidget::PositionFilters);
 
+    m_table->setWordWrap(false);
     m_table->setSortingEnabled(true);
     m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_table->setSelectionBehavior(QTableView::SelectRows);
@@ -122,6 +125,7 @@ InstancesWidget::InstancesWidget(QWidget* parent)
     m_table->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     m_table->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    connect(m_table, &QTableView::clicked, this, &InstancesWidget::OnClicked);
     connect(m_table, &QTableView::doubleClicked, this, &InstancesWidget::OnDoubleClicked);
     connect(m_table->horizontalHeader(), &QWidget::customContextMenuRequested, this, &InstancesWidget::OnCustomContextMenuRequestedHeader);
     connect(m_table, &QWidget::customContextMenuRequested, this, &InstancesWidget::OnCustomContextMenuRequestedTable);
@@ -202,6 +206,52 @@ InstancesWidget::~InstancesWidget()
 
 }
 
+void InstancesWidget::OnClicked(const QModelIndex &index)
+{
+    if (!index.isValid())
+    {
+        return;
+    }
+
+    const auto sourceIndex = m_proxyModel->mapToSource(index);
+    if (!sourceIndex.isValid())
+    {
+        return;
+    }
+
+    const bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
+    if (!ctrlKey)
+    {
+        return;
+    }
+
+    ColumnInfoPtr columnInfo;
+
+    if (m_sourceModelEntities != nullptr)
+    {
+        columnInfo = m_sourceModelEntities->getColumnInfo(sourceIndex.column());
+    }
+    else if (m_sourceModelMessages != nullptr)
+    {
+        columnInfo = m_sourceModelMessages->getColumnInfo(sourceIndex.column());
+    }
+
+    if (columnInfo->CollectionType() == SingleValueCollectionType &&
+        columnInfo->MemberType() == EntityIdMemberType)
+    {
+        const auto data = m_proxyModel->data(index).toString();
+        if (data.isEmpty())
+        {
+            return;
+        }
+        const auto eid = ::Utilities::StringToEntityId(data);
+        if(!eid.first)
+        {
+            return;
+        }
+        emit ReadEntity(eid.second);
+    }
+}
 
 void InstancesWidget::OnDoubleClicked(const QModelIndex &index)
 {
@@ -215,6 +265,7 @@ void InstancesWidget::OnDoubleClicked(const QModelIndex &index)
     {
         return;
     }
+
     if (m_sourceModelEntities != nullptr)
     {
         const auto& info = m_sourceModelEntities->getRow(sourceIndex.row());

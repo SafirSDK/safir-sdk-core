@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2025 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson
+* Created by: Lars Hagström
 *
 *******************************************************************************
 *
@@ -22,18 +22,31 @@
 *
 ******************************************************************************/
 #pragma once
-#include <Safir/Dob/Typesystem/Object.h>
-#include "membertreeitem.h"
 
-class DobObjectBuilder
+#include <Safir/Dob/Typesystem/EntityId.h>
+
+#include <QString>
+
+class Utilities
 {
 public:
-    DobObjectBuilder() = default;
+    Utilities() = delete; //only static methods in this class
 
-    Safir::Dob::Typesystem::ObjectPtr CreateObject(const MemberTreeItem* objectRoot) const;
+    static QString EntityIdToString(const Safir::Dob::Typesystem::EntityId& entityId);
 
-private:
-    void SetSingleValue(const MemberTreeItem* mi, Safir::Dob::Typesystem::ContainerBase& cb) const;
-    void SetSequenceValues(const MemberTreeItem* mi, Safir::Dob::Typesystem::ContainerBase& cb) const;
-    void SetDictionaryValues(const MemberTreeItem* mi, Safir::Dob::Typesystem::ContainerBase& cb) const;
+    //first in pair is status of parse
+    static std::pair<bool,Safir::Dob::Typesystem::EntityId> StringToEntityId(const QString& str);
+
+    static QRegularExpression EntityIdRegex();
+
+    static Safir::Dob::Typesystem::TypeId StringToTypeId(const QString& s);
+
+    template <class T>
+    static T StringToHashType(const QString& s)
+    {
+        bool ok;
+        int64_t num = s.trimmed().toLongLong(&ok);
+        return ok ? T(num) : T(s.trimmed().toStdWString());
+    }
+
 };

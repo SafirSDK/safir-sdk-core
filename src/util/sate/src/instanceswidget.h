@@ -62,10 +62,12 @@ signals:
     void OpenObjectEdit(QString channelHandler,
                         int64_t instance,
                         const Safir::Dob::Typesystem::ObjectPtr& object);
+    void ReadEntity(const Safir::Dob::Typesystem::EntityId& entityId);
     void statusBarInfoChanged();
 
 private slots:
     void OnDoubleClicked(const QModelIndex &index);
+    void OnClicked(const QModelIndex &index);
     void OnFilterTextChanged(const int column, const QString &text);
     void OnSectionResized(const int logicalIndex, const int oldSize, const int newSize);
     void OnSectionCountChanged(const int oldCount, const int newCount);
