@@ -118,7 +118,7 @@ QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::C
         return QString::fromStdWString(Serialization::ToJson
                                        (static_cast<const ObjectContainerBase&>(container).GetObjectPointer()));
     case BinaryMemberType:
-        return QString::fromStdString(Utilities::BinaryToBase64
+        return QString::fromStdString(Safir::Dob::Typesystem::Utilities::BinaryToBase64
                                       (static_cast<const BinaryContainer&>(container).GetVal()));
 
     case Float32MemberType:
@@ -235,7 +235,7 @@ QStringList InstancesModelUtils::SequenceToStrings(const Safir::Dob::Typesystem:
 
     case BinaryMemberType:
         return ::SequenceToStrings<BinarySequenceContainer>
-            (container, [](const auto& v){return QString::fromStdString(Utilities::BinaryToBase64(v));});
+            (container, [](const auto& v){return QString::fromStdString(Safir::Dob::Typesystem::Utilities::BinaryToBase64(v));});
 
     case Float32MemberType:
     case Ampere32MemberType:

@@ -216,7 +216,7 @@ void DobObjectBuilder::SetSingleValue(const MemberTreeItem* mi, Safir::Dob::Type
     {
         auto c = static_cast<BinaryContainer*>(&cb);
         Binary bin;
-        Utilities::Base64ToBinary(mi->GetValue().toStdString(), bin);
+        Safir::Dob::Typesystem::Utilities::Base64ToBinary(mi->GetValue().toStdString(), bin);
         if (bin.empty())
         {
             auto byteArray = mi->GetValue().toUtf8().toBase64();
@@ -460,7 +460,7 @@ void DobObjectBuilder::SetSequenceValues(const MemberTreeItem* mi, Safir::Dob::T
         {
             const auto& m = mi->GetConstChildMember(i);
             Binary bin;
-            Utilities::Base64ToBinary(m->GetValue().toStdString(), bin);
+            Safir::Dob::Typesystem::Utilities::Base64ToBinary(m->GetValue().toStdString(), bin);
             if (bin.empty())
             {
                 auto byteArray = m->GetValue().toUtf8().toBase64();

@@ -129,7 +129,7 @@ DobObjectEditWidget::DobObjectEditWidget(DobHandler* dob, QString channelHandler
         }
     }
 
-    if (instance != -1 && instance != 0)
+    if (instance != -1)
     {
         ui->operationsWidget->instanceEdit->setText(QString::number(instance));
     }
