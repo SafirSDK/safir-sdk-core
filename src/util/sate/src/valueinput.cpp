@@ -27,6 +27,7 @@
 
 #include <QKeyEvent>
 #include <QFocusEvent>
+#include <QAbstractItemView>
 
 // ---------- TEXT --------------
 TextValueInput::TextValueInput(bool showNullButton, const QString& deleteButtonText, QWidget* parent)
@@ -40,7 +41,7 @@ TextValueInput::TextValueInput(bool showNullButton, const QString& deleteButtonT
         connect(ui->nullButton, &QPushButton::clicked, this, [this]
         {
             SetNull();
-            emit Commit(0);
+            CommitEditor(0);
         });
     }
     else
@@ -53,7 +54,7 @@ TextValueInput::TextValueInput(bool showNullButton, const QString& deleteButtonT
         connect(ui->deleteButton, &QPushButton::clicked, this, [this]
         {
             m_delete = true;
-            emit Commit(0);
+            CommitEditor(0);
         });
     }
     else
@@ -157,7 +158,7 @@ ComboBoxValueInput::ComboBoxValueInput(const std::vector<QString>& values, bool 
         connect(ui->deleteButton, &QPushButton::clicked, this, [this]
                 {
                     m_delete = true;
-                    emit Commit(0);
+                    CommitEditor(0);
                 });
     }
     else
@@ -205,28 +206,63 @@ QString ComboBoxValueInput::GetValue() const
     return ui->valueComboBox->currentText();
 }
 
+bool ComboBoxValueInput::eventFilter(QObject* obj, QEvent *event)
+{
+    if (event->type() == QEvent::FocusOut)
+    {
+        bool dropDownVisible = ui->valueComboBox->view()->isVisible();
+        if (dropDownVisible)
+        {
+            // FocusOut occurs in QCombobox when dropdownlist becomes visible.
+            // This will prevent baseClass ValueInput from committing the editor in that case
+            // since a new value has not yet been selected.
+            // Return false will pass the event to the parent widget instead of the ValueInput
+            return false;
+        }
+    }
+
+    return ValueInput::eventFilter(obj, event);
+}
+
 // ------------- VALUEinput ------------
-bool ValueInput::eventFilter(QObject*, QEvent *event)
+bool ValueInput::eventFilter(QObject* obj, QEvent *event)
 {
     if(event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Backtab || (keyEvent->key() == Qt::Key_Tab && keyEvent->modifiers() == Qt::ShiftModifier))
         {
-            emit Commit(-1);
+            CommitEditor(-1);
             return true;
         }
         else if (keyEvent->key() == Qt::Key_Tab)
         {
-            emit Commit(1);
+            CommitEditor(1);
             return true;
         }
         else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
         {
-            emit Commit(0);
+            CommitEditor(0);
             return true;
         }
     }
+    else if (event->type() == QEvent::FocusOut)
+    {
+        // Commit editor when lost focus
+        CommitEditor(0);
+        return true;
+    }
 
-    return false;
+    return QWidget::eventFilter(obj, event);
+}
+
+void ValueInput::CommitEditor(int nextRow)
+{
+    // Prevent commiting the editor more than once since the ItemDelegate gets upset if called multiple times.
+    // For example when tab-key is clicked, both FocusOut and a TabKeyEvent is generated.
+    if (!m_isCommited)
+    {
+        m_isCommited = true;
+        emit Commit(nextRow);
+    }
 }

@@ -46,6 +46,8 @@ signals:
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
+    void CommitEditor(int nextRow);
+    bool m_isCommited = false;
 };
 
 namespace Ui {
@@ -93,6 +95,9 @@ public:
     bool HasValidInput() const override {
         return true;
     }
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
     Ui::ComboBoxValueInput *ui;

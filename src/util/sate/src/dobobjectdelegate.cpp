@@ -201,7 +201,7 @@ QWidget* DobObjectDelegate::createEditor(QWidget *parent,
         {
             editor->setMinimumHeight(24);
             editor->setMaximumHeight(24);
-            connect(editor, &ValueInput::Commit, this, &DobObjectDelegate::CommitAndCloseEditor, Qt::QueuedConnection);
+            connect(editor, &ValueInput::Commit, this, &DobObjectDelegate::CommitAndCloseEditor);
 
             return editor;
         }
