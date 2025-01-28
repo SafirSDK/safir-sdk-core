@@ -212,12 +212,12 @@ void ConnectionStatsAggregated::SendStatisticsRequest()
 void ConnectionStatsAggregated::UpdateGuiLocal()
 {
     std::vector<RowContent> rowData;
-    ConnectionStatisticsCollector::Stat s;
 
-    Safir::Dob::Internal::Connections::Instance().ForEachConnectionPtr([&s, &rowData](const Safir::Dob::Internal::ConnectionPtr& con)
+    Safir::Dob::Internal::Connections::Instance().ForEachConnectionPtr([&rowData](const Safir::Dob::Internal::ConnectionPtr& con)
     {
         if (con->IsLocal())
         {
+            ConnectionStatisticsCollector::Stat s;
             ConnectionStatisticsCollector::GetStatistics(con, s);
             auto reqInQ = GetReqInQAccumulated(s.reqInQStat);
             auto msgInQ = GetMsgInQAccumulated(s.msgInQStat);
