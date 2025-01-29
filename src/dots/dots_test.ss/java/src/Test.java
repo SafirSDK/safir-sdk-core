@@ -28,6 +28,7 @@ import com.saabgroup.safir.dob.typesystem.*;
 import com.saabgroup.safir.dob.typesystem.Object;
 import java.util.Map;
 import java.util.Locale;
+import java.util.Arrays;
 
 /**
  * Main test class
@@ -119,7 +120,7 @@ public class Test {
         misc_tests.test_Containers();
         misc_tests.Test_BlobChangeFlags();
         misc_tests.Test_Misc();
-
+        
         MergeChangesTests merge_tests = new MergeChangesTests();
         merge_tests.Test_MergeChanges();
 
@@ -9649,6 +9650,10 @@ public class Test {
             Test_DictionaryReflection_putNull();
             Test_ParameterGetInfo();
             Test_ParameterDictionaryReflection();
+            Test_Base64Conversion1();
+            Test_Base64Conversion2();
+            Test_Base64Conversion3();
+
         }
 
         private void Test_EnumerationSequenceReflection()
@@ -10030,6 +10035,50 @@ public class Test {
             check(com.saabgroup.dotstest.TestEnum.MY_SECOND == com.saabgroup.dotstest.ParameterDictionaries.getEnumObjectParameterKeyFromIndex(1));
             check(null != (com.saabgroup.dotstest.MemberDictionaries)com.saabgroup.dotstest.ParameterDictionaries.getEnumObjectParameterValueFromIndex(1));
         }
+        private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+        public static String bytesToHex(byte[] bytes) {
+            char[] hexChars = new char[bytes.length * 2];
+            for (int j = 0; j < bytes.length; j++) {
+                int v = bytes[j] & 0xFF;
+                hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+                hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+            }
+            return new String(hexChars);
+        }
+        
+        private void Test_Base64Conversion1()
+        {
+            String s = "asdfasdfasdfasdf";
+            byte[] bin = s.getBytes();
+            String base64 = com.saabgroup.safir.dob.typesystem.Utilities.binaryToBase64(bin);
+            check(base64.equals("YXNkZmFzZGZhc2RmYXNkZg=="));
+            byte[] back = com.saabgroup.safir.dob.typesystem.Utilities.base64ToBinary(base64);
+            check(Arrays.equals(back,bin));
+            check(back.length == bin.length);
+        }
+
+        private void Test_Base64Conversion2()
+        {
+            String s = "asdfasdfasdfasdfaa";
+            byte[] bin = s.getBytes();
+            String base64 = com.saabgroup.safir.dob.typesystem.Utilities.binaryToBase64(bin);
+            check(base64.equals("YXNkZmFzZGZhc2RmYXNkZmFh"));
+            byte[] back = com.saabgroup.safir.dob.typesystem.Utilities.base64ToBinary(base64);
+            check(Arrays.equals(back,bin));
+            check(back.length == bin.length);
+        }
+
+        private void Test_Base64Conversion3()
+        {
+            String s = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+            byte[] bin = s.getBytes();
+            String base64 = com.saabgroup.safir.dob.typesystem.Utilities.binaryToBase64(bin);
+            check(base64.equals("TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIGNvbnNlY3RldHVyIGFkaXBpc2NpbmcgZWxpdCwgc2VkIGRvIGVpdXNtb2QgdGVtcG9yIGluY2lkaWR1bnQgdXQgbGFib3JlIGV0IGRvbG9yZSBtYWduYSBhbGlxdWEuIFV0IGVuaW0gYWQgbWluaW0gdmVuaWFtLCBxdWlzIG5vc3RydWQgZXhlcmNpdGF0aW9uIHVsbGFtY28gbGFib3JpcyBuaXNpIHV0IGFsaXF1aXAgZXggZWEgY29tbW9kbyBjb25zZXF1YXQuIER1aXMgYXV0ZSBpcnVyZSBkb2xvciBpbiByZXByZWhlbmRlcml0IGluIHZvbHVwdGF0ZSB2ZWxpdCBlc3NlIGNpbGx1bSBkb2xvcmUgZXUgZnVnaWF0IG51bGxhIHBhcmlhdHVyLiBFeGNlcHRldXIgc2ludCBvY2NhZWNhdCBjdXBpZGF0YXQgbm9uIHByb2lkZW50LCBzdW50IGluIGN1bHBhIHF1aSBvZmZpY2lhIGRlc2VydW50IG1vbGxpdCBhbmltIGlkIGVzdCBsYWJvcnVtLg=="));
+            byte[] back = com.saabgroup.safir.dob.typesystem.Utilities.base64ToBinary(base64);
+            check(Arrays.equals(back,bin));
+            check(back.length == bin.length);
+        }
+
     }
 
     private static void printSequences(MemberSequences ms) {

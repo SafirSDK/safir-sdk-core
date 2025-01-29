@@ -159,6 +159,16 @@ namespace std
         return out << Safir::Dob::Typesystem::Utilities::ToUtf8(str);
     }
 
+    //needed by boost test, and must be in std for it to work.
+    std::ostream& operator<<(std::ostream& out, const std::vector<char>& coll)
+    {
+        for (const auto c: coll)
+        {
+            std::wcout << std::hex << static_cast<int>(c) << " ";
+        }
+        return out;
+    }
+
 }
 
 
@@ -12299,4 +12309,53 @@ BOOST_AUTO_TEST_CASE(ParameterDictionaryReflection)
     BOOST_CHECK_EQUAL(Safir::Dob::Typesystem::Object::ClassTypeId, DotsTest::ParameterDictionaries::EnumObjectParameterValueFromIndex(0)->GetTypeId());
     BOOST_CHECK_EQUAL(DotsTest::TestEnum::MySecond, DotsTest::ParameterDictionaries::EnumObjectParameterKeyFromIndex(1));
     BOOST_CHECK_NE(nullptr, std::dynamic_pointer_cast<DotsTest::MemberDictionaries>(DotsTest::ParameterDictionaries::EnumObjectParameterValueFromIndex(1)));
+}
+
+
+BOOST_AUTO_TEST_CASE(Base64Conversion1)
+{
+    const char bin [] = "asdfasdfasdfasdf";
+    const std::vector<char> binv (bin, bin+strlen(bin));
+    const auto base64 = Safir::Dob::Typesystem::Utilities::BinaryToBase64(bin,strlen(bin));
+    const auto base64v = Safir::Dob::Typesystem::Utilities::BinaryToBase64(binv);
+    BOOST_CHECK_EQUAL(base64,"YXNkZmFzZGZhc2RmYXNkZg==");
+    BOOST_CHECK_EQUAL(base64v,"YXNkZmFzZGZhc2RmYXNkZg==");
+
+    std::vector<char> back, backv;
+    Safir::Dob::Typesystem::Utilities::Base64ToBinary(base64,back);
+    Safir::Dob::Typesystem::Utilities::Base64ToBinary(base64v,backv);
+    BOOST_CHECK_EQUAL(back,binv);
+    BOOST_CHECK_EQUAL(backv,binv);
+}
+
+BOOST_AUTO_TEST_CASE(Base64Conversion2)
+{
+    const char bin [] = "asdfasdfasdfasdfaa";
+    const std::vector<char> binv (bin, bin+strlen(bin));
+    const auto base64 = Safir::Dob::Typesystem::Utilities::BinaryToBase64(bin,strlen(bin));
+    const auto base64v = Safir::Dob::Typesystem::Utilities::BinaryToBase64(binv);
+    BOOST_CHECK_EQUAL(base64,"YXNkZmFzZGZhc2RmYXNkZmFh");
+    BOOST_CHECK_EQUAL(base64v,"YXNkZmFzZGZhc2RmYXNkZmFh");
+
+    std::vector<char> back, backv;
+    Safir::Dob::Typesystem::Utilities::Base64ToBinary(base64,back);
+    Safir::Dob::Typesystem::Utilities::Base64ToBinary(base64v,backv);
+    BOOST_CHECK_EQUAL(back,binv);
+    BOOST_CHECK_EQUAL(backv,binv);
+}
+
+BOOST_AUTO_TEST_CASE(Base64Conversion3)
+{
+    const char bin [] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    const std::vector<char> binv (bin, bin+strlen(bin));
+    const auto base64 = Safir::Dob::Typesystem::Utilities::BinaryToBase64(bin,strlen(bin));
+    const auto base64v = Safir::Dob::Typesystem::Utilities::BinaryToBase64(binv);
+    BOOST_CHECK_EQUAL(base64,"TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIGNvbnNlY3RldHVyIGFkaXBpc2NpbmcgZWxpdCwgc2VkIGRvIGVpdXNtb2QgdGVtcG9yIGluY2lkaWR1bnQgdXQgbGFib3JlIGV0IGRvbG9yZSBtYWduYSBhbGlxdWEuIFV0IGVuaW0gYWQgbWluaW0gdmVuaWFtLCBxdWlzIG5vc3RydWQgZXhlcmNpdGF0aW9uIHVsbGFtY28gbGFib3JpcyBuaXNpIHV0IGFsaXF1aXAgZXggZWEgY29tbW9kbyBjb25zZXF1YXQuIER1aXMgYXV0ZSBpcnVyZSBkb2xvciBpbiByZXByZWhlbmRlcml0IGluIHZvbHVwdGF0ZSB2ZWxpdCBlc3NlIGNpbGx1bSBkb2xvcmUgZXUgZnVnaWF0IG51bGxhIHBhcmlhdHVyLiBFeGNlcHRldXIgc2ludCBvY2NhZWNhdCBjdXBpZGF0YXQgbm9uIHByb2lkZW50LCBzdW50IGluIGN1bHBhIHF1aSBvZmZpY2lhIGRlc2VydW50IG1vbGxpdCBhbmltIGlkIGVzdCBsYWJvcnVtLg==");
+    BOOST_CHECK_EQUAL(base64v,"TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIGNvbnNlY3RldHVyIGFkaXBpc2NpbmcgZWxpdCwgc2VkIGRvIGVpdXNtb2QgdGVtcG9yIGluY2lkaWR1bnQgdXQgbGFib3JlIGV0IGRvbG9yZSBtYWduYSBhbGlxdWEuIFV0IGVuaW0gYWQgbWluaW0gdmVuaWFtLCBxdWlzIG5vc3RydWQgZXhlcmNpdGF0aW9uIHVsbGFtY28gbGFib3JpcyBuaXNpIHV0IGFsaXF1aXAgZXggZWEgY29tbW9kbyBjb25zZXF1YXQuIER1aXMgYXV0ZSBpcnVyZSBkb2xvciBpbiByZXByZWhlbmRlcml0IGluIHZvbHVwdGF0ZSB2ZWxpdCBlc3NlIGNpbGx1bSBkb2xvcmUgZXUgZnVnaWF0IG51bGxhIHBhcmlhdHVyLiBFeGNlcHRldXIgc2ludCBvY2NhZWNhdCBjdXBpZGF0YXQgbm9uIHByb2lkZW50LCBzdW50IGluIGN1bHBhIHF1aSBvZmZpY2lhIGRlc2VydW50IG1vbGxpdCBhbmltIGlkIGVzdCBsYWJvcnVtLg==");
+
+    std::vector<char> back, backv;
+    Safir::Dob::Typesystem::Utilities::Base64ToBinary(base64,back);
+    Safir::Dob::Typesystem::Utilities::Base64ToBinary(base64v,backv);
+    BOOST_CHECK_EQUAL(back,binv);
+    BOOST_CHECK_EQUAL(backv,binv);
 }

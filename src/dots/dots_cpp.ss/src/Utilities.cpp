@@ -186,15 +186,14 @@ namespace Utilities
     const std::string BinaryToBase64(char const * const binarySource, int sourceSize)
     {
         DotsC_Int32 resultSize=0;
-        DotsC_Int32 size = DotsC_CalculateBase64BufferSize(sourceSize);
+        const DotsC_Int32 size = DotsC_CalculateBase64BufferSize(sourceSize);
         if (size <= 0)
         {
             throw SoftwareViolationException(L"Illegal value returned from DotsC_CalculateBase64BufferSize",__WFILE__,__LINE__);
         }
-        std::vector<char> buf(std::max(0,size)+1); //one extra for '0'
+        std::vector<char> buf(size);
         DotsC_BinaryToBase64(&buf[0], size, binarySource, sourceSize, resultSize);
-        buf.back() = '\0';
-        return std::string(buf.begin(),buf.end());
+        return std::string(buf.begin(),buf.begin() + resultSize);
     }
 
     const std::string BinaryToBase64(const Dob::Typesystem::Binary & bin)
@@ -210,6 +209,7 @@ namespace Utilities
         if (size != 0)
         {
             DotsC_Base64ToBinary(&binary[0], size, base64.c_str(), static_cast<int>(base64.length()), resultSize);
+            binary.resize(std::min(size,resultSize));
         }
     }
 

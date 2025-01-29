@@ -825,12 +825,8 @@ void DotsC_JsonToBlob(char * & blobDest,
 
 DotsC_Int32 DotsC_CalculateBase64BufferSize(DotsC_Int32 binarySourceSize)
 {
-    Init();
-
     const div_t res = div(static_cast<int>(binarySourceSize),3);
-    const int numChars = res.quot*4 + (res.rem?4:0);
-    const div_t numNewLines = div(numChars, 64); //line length 64
-    return numChars + numNewLines.quot - (numNewLines.rem==0 ? 1 : 0);
+    return res.quot*4 + (res.rem?4:0);
 }
 
 void DotsC_BinaryToBase64(char* base64Dest,
@@ -843,15 +839,13 @@ void DotsC_BinaryToBase64(char* base64Dest,
     std::ostringstream b64Stream;
     ts::BinaryToBase64(binarySource, sourceSize, b64Stream);
     std::string base64=b64Stream.str();
-    resultSize=static_cast<DotsC_Int32>(base64.size())+1; //add one char for null termination
+    resultSize=static_cast<DotsC_Int32>(base64.size()); 
     strncpy(base64Dest, base64.c_str(), std::min(resultSize, destSize));
 }
 
 DotsC_Int32 DotsC_CalculateBinaryBufferSize(DotsC_Int32 base64SourceSize)
 {
-    Init();
-    int requiredSize=(3*base64SourceSize)/4; //not exactly correct, theres a small overhead due to linebreaks.
-    return requiredSize;
+    return (3*base64SourceSize)/4;
 }
 
 void DotsC_Base64ToBinary(char* binaryDest,

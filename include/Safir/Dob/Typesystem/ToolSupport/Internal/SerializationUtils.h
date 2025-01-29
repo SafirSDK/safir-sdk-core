@@ -75,13 +75,17 @@ namespace SerializationUtils
 
     inline bool FromBase64(std::string base64, std::string& bin)
     {
+        bin.clear();
         try
         {
             typedef boost::archive::iterators::transform_width< boost::archive::iterators::binary_from_base64< boost::archive::iterators::remove_whitespace< std::string::const_iterator> >, 8, 6 > it_binary_t;
             const size_t paddChars=std::count(base64.begin(), base64.end(), '=');
             std::replace(base64.begin(),base64.end(),'=','A'); // replace '=' by base64 encoding of '\0'
             bin.insert(bin.begin(), it_binary_t(base64.begin()), it_binary_t(base64.end()));
-            bin.erase(bin.end()-paddChars,bin.end());  // erase pad
+            for (size_t i = 0; i < paddChars; ++i) // erase pad
+            {
+                bin.pop_back();
+            }
             return true;
         }
         catch (const std::exception&)

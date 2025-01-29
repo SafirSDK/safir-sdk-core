@@ -280,30 +280,6 @@ namespace Safir.Dob.Typesystem.Internal
                                                     System.IntPtr val);
 
 
-        //CalculateBase64BufferSize
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern System.Int32 DotsC_CalculateBase64BufferSize(System.Int32 binarySourceSize);
-
-        //BinaryToBase64
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void DotsC_BinaryToBase64(System.IntPtr base64Dest,
-                                                         System.Int32 destSize,
-                                                         System.IntPtr binarySource,
-                                                         System.Int32 sourceSize,
-                                                         out System.Int32 resultSize);
-
-        //CalculateBinaryBufferSize
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern System.Int32 DotsC_CalculateBinaryBufferSize(System.Int32 base64SourceSize);
-
-        //Base64ToBinary
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void DotsC_Base64ToBinary(System.IntPtr binaryDest,
-                                                         System.Int32 destSize,
-                                                         System.IntPtr base64Source,
-                                                         System.Int32 sourceSize,
-                                                         out System.Int32 resultSize);
-
         //************************************************************************************
         //* Functions for retrieval of parameters
         //************************************************************************************

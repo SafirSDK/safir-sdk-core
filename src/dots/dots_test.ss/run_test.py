@@ -68,7 +68,7 @@ proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOU
 res = proc.communicate()[0].replace("\r", "")
 
 #Boost.test prints some status messages that we need to suppress.
-res = re.sub("\n.*\*\*\* No errors detected\n.*", "", res)
+res = re.sub(r"\n.*\*\*\* No errors detected\n.*", "", res)
 res = re.sub(r"^Running [0-9]+ test cases\.\.\.\n", "", res)
 
 #java sometimes outputs some stuff
