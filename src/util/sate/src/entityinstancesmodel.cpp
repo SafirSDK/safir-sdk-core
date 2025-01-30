@@ -230,10 +230,13 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
         break;
     case DobInterface::DeletedEntity:
         {
-            auto findIt = m_entities.find(entityId);
-            findIt->second.deleted = true;
-            const auto row = std::distance(m_entities.begin(), findIt);
-            emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1), {Qt::BackgroundRole});
+            { //separate scope, since vs2015 gets upset about "row" being declared twice.
+                auto findIt = m_entities.find(entityId);
+                findIt->second.deleted = true;
+                const auto row = std::distance(m_entities.begin(), findIt);
+                emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1), {Qt::BackgroundRole});
+            }
+
             QTimer::singleShot(5000, [this, entityId]
             {
                 const auto row = std::distance(m_entities.begin(), m_entities.find(entityId));

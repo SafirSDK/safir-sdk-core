@@ -239,12 +239,12 @@ void InstancesWidget::OnClicked(const QModelIndex &index)
     if (columnInfo->CollectionType() == SingleValueCollectionType &&
         columnInfo->MemberType() == EntityIdMemberType)
     {
-        const auto data = m_proxyModel->data(index).toString();
-        if (data.isEmpty())
+        const auto str = m_proxyModel->data(index).toString();
+        if (str.isEmpty())
         {
             return;
         }
-        const auto eid = ::Utilities::StringToEntityId(data);
+        const auto eid = ::Utilities::StringToEntityId(str);
         if(!eid.first)
         {
             return;
