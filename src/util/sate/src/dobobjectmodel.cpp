@@ -29,6 +29,7 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QDebug>
+#include <qmath.h>
 
 #include <Safir/Time/TimeProvider.h>
 
