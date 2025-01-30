@@ -41,7 +41,7 @@ DobObjectModel::DobObjectModel(int64_t typeId, QObject *parent)
     : QAbstractItemModel(parent)
     , m_invisibleRootItem(new MemberTreeItem(TypesystemRepository::Instance().GetClass(typeId)))
     , m_typeId(typeId)
-{    
+{
 }
 
 DobObjectModel::DobObjectModel(int64_t typeId, const Safir::Dob::Typesystem::ObjectPtr& obj, QObject *parent)
@@ -108,7 +108,7 @@ QModelIndex DobObjectModel::index(int row, int column, const QModelIndex &parent
 }
 
 QModelIndex DobObjectModel::parent(const QModelIndex &index) const
-{    
+{
     if (!index.isValid() || index.internalPointer() == m_invisibleRootItem.get())
     {
         return{};
@@ -278,6 +278,8 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
                         .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToLocalTime(seconds))).replace("T", " "));
                 }
             }
+            break;
+
             case Radian32MemberType:
             case Radian64MemberType:
             {
@@ -302,7 +304,7 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
         }
     }
     break;
-    }    
+    }
 
     return {};
 }
@@ -336,7 +338,7 @@ bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, in
     if (index.column() == 1)
     {
         auto childCount = item->NumberOfChildMembers();
-        
+
         // --- Handle delete iems, clear container or delete single item in a container. ---
         if (role == MemberTreeItem::DeleteItemRole)
         {
@@ -487,5 +489,5 @@ Qt::ItemFlags DobObjectModel::flags(const QModelIndex &index) const
     }
 
     return QAbstractItemModel::flags(index);
-    
+
 }
