@@ -534,7 +534,7 @@ void MemberTreeItem::SetItemValue(const Safir::Dob::Typesystem::ContainerBase& c
     case Float32MemberType:
     {
         const auto c = static_cast<const Float32Container*>(&cb);
-        m_value = QString::number(c->GetVal());
+        m_value = QString::number(c->GetVal(), 'f');
     }
     break;
 
@@ -542,7 +542,7 @@ void MemberTreeItem::SetItemValue(const Safir::Dob::Typesystem::ContainerBase& c
     case Float64MemberType:
     {
         const auto c = static_cast<const Float64Container*>(&cb);
-        m_value = QString::number(c->GetVal());
+        m_value = QString::number(c->GetVal(), 'f');
     }
     break;
 
@@ -617,7 +617,7 @@ void MemberTreeItem::SetItemValue(const Safir::Dob::Typesystem::ContainerBase& c
     case Watt32MemberType:
     {
         const auto c = static_cast<const Float32Container*>(&cb);
-        m_value = QString::number(c->GetVal());
+        m_value = QString::number(c->GetVal(), 'f');
     }
     break;
 
@@ -642,7 +642,7 @@ void MemberTreeItem::SetItemValue(const Safir::Dob::Typesystem::ContainerBase& c
     case Watt64MemberType:
     {
         const auto c = static_cast<const Float64Container*>(&cb);
-        m_value = QString::number(c->GetVal());
+        m_value = QString::number(c->GetVal(), 'f');
     }
     break;
 
@@ -738,7 +738,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
         {
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
-            seqItem->m_value = QString::number(*it);
+            seqItem->m_value = QString::number(*it, 'f');
             seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
@@ -753,7 +753,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
         {
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
-            seqItem->m_value = QString::number(*it);
+            seqItem->m_value = QString::number(*it, 'f');
             seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
@@ -884,7 +884,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
         {
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
-            seqItem->m_value = QString::number(*it);
+            seqItem->m_value = QString::number(*it, 'f');
             seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
@@ -916,7 +916,7 @@ void MemberTreeItem::SetItemSequenceValues(const Safir::Dob::Typesystem::Contain
         {
             auto seqItem = std::make_unique<MemberTreeItem>(this, m_member);
             seqItem->SetNull(false);
-            seqItem->m_value = QString::number(*it);
+            seqItem->m_value = QString::number(*it, 'f');
             seqItem->m_key = QString::number(count++);
             m_children.emplace_back(std::move(seqItem));
         }
@@ -1075,7 +1075,7 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
             case Float32MemberType:
             {
                 const auto c = static_cast<const Float32Container*>(&valCont);
-                dictItem->m_value = QString::number(c->GetVal());
+                dictItem->m_value = QString::number(c->GetVal(), 'f');
             }
             break;
 
@@ -1083,7 +1083,7 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
             case Float64MemberType:
             {
                 const auto c = static_cast<const Float64Container*>(&valCont);
-                m_value = QString::number(c->GetVal());
+                m_value = QString::number(c->GetVal(), 'f');
             }
             break;
 
@@ -1158,7 +1158,7 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
             case Watt32MemberType:
             {
                 const auto c = static_cast<const Float32Container*>(&valCont);
-                dictItem->m_value = QString::number(c->GetVal());
+                dictItem->m_value = QString::number(c->GetVal(), 'f');
             }
             break;
 
@@ -1183,7 +1183,7 @@ void MemberTreeItem::SetItemDictionaryValues(const Safir::Dob::Typesystem::Conta
             case Watt64MemberType:
             {
                 const auto c = static_cast<const Float64Container*>(&valCont);
-                dictItem->m_value = QString::number(c->GetVal());
+                dictItem->m_value = QString::number(c->GetVal(), 'f');
             }
             break;
 

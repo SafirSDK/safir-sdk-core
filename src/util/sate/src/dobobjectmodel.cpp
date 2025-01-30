@@ -277,6 +277,16 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
                         .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToLocalTime(seconds))).replace("T", " "));
                 }
             }
+            case Radian32MemberType:
+            case Radian64MemberType:
+            {
+                bool ok;
+                auto rad = item->GetValue().toDouble(&ok);
+                if (ok)
+                {
+                    return QString::number(qRadiansToDegrees(rad), 'f', 2) + " degrees";
+                }
+            }
             break;
 
             case EntityIdMemberType:
