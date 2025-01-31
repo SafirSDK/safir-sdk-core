@@ -1,6 +1,23 @@
 -----------------------------------------------------------------------------------------------------------------------
-2025-01-30 version 7.3.3
+2025-01-31 version 7.3.3
 -----------------------------------------------------------------------------------------------------------------------
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#27 Convert Sate to use Qt
+#505 Moving a light node between systems causes dose_main to crash
+#518 Reading base64 encoded parameters give garbage data
+#517 Base64 encode and decode result in wrong size strings
+#516 DobExplorer ConnectionStats shows wrong values
+#510 Set permissions on StartupSynchronizer file locks
+#509 control_gui needs to be updated to understand (or ignore) MirroredNodeInfo
+#508 Update to use Java 17 JDK/JRE
+#507 Update to latest VS2022 - 17.10
+#506 Update to use Conan 2
+#504 Starting multiple safir_control using the same SAFIR_INSTANCE crashes system.
+#484 Set assembly version compatibility
+#515 Sate, open ObjectEditor from EntityId members
+#512 Sate, time in readable formatenhancement
+#502 Logging to syslog truncates messages
 
 -----------------------------------------------------------------------------------------------------------------------
 2024-05-15 version 7.3.2
