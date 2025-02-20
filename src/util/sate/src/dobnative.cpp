@@ -480,19 +480,16 @@ void DobNative::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeI
 void DobNative::OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
 {
     emit DobInterface::Output("Injected new entity: " + Str(injectedEntityProxy.GetEntityId()), QtInfoMsg);
-    emit DobInterface::OnEntity(injectedEntityProxy.GetEntityId(), sdt::HandlerId(), injectedEntityProxy.GetInjection(), DobInterface::NewEntity);
 }
 
 void DobNative::OnInjectedUpdatedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
 {
     emit DobInterface::Output("Injected updated entity: " + Str(injectedEntityProxy.GetEntityId()), QtInfoMsg);
-    emit DobInterface::OnEntity(injectedEntityProxy.GetEntityId(), sdt::HandlerId(), injectedEntityProxy.GetInjection(), DobInterface::UpdatedEntity);
 }
 
 void DobNative::OnInjectedDeletedEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
 {
     emit DobInterface::Output("Injected deleted entity: " + Str(injectedEntityProxy.GetEntityId()), QtInfoMsg);
-    emit DobInterface::OnEntity(injectedEntityProxy.GetEntityId(), sdt::HandlerId(), nullptr, DobInterface::DeletedEntity);
 }
 
 void DobNative::OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId typeId, const Safir::Dob::Typesystem::HandlerId &handlerId)
