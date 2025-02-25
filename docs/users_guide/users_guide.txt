@@ -4605,7 +4605,10 @@ ifndef::backend-docbook5[]
 image::images/sate_overview.png["Sate Screen shot", link="images/sate_overview.png"]
 endif::backend-docbook5[]
 
-The lower left part is an "inbox", containing the most recent entity updates and requests, service requests and messages received. The lower right hand part shows a history of what "has happened", e.g. showing if a request has been successfully sent, etc.
+The lower part shows a history log of what "has happened", e.g. showing if a request has
+been successfully sent, etc. There are buttons to toggle what type of events are shown in
+the log. By default the more verbose types of logs are disabled, so as not to spam the
+log window with uninteresting information.
 
 [[dobexplorer]]
 === Dobexplorer
