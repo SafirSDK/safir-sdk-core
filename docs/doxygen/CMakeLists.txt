@@ -11,10 +11,6 @@ else()
   set(CMAKE_DOXYGEN_QUIET "YES")
 endif()
 
-if (DOXYGEN_VERSION VERSION_EQUAL "1.8.17")
-  set(DOXYGEN_WORKAROUNDS "DOXYGEN_BUG_WORKAROUND=1")
-endif()
-
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 
 FILE(GLOB_RECURSE headers ${safir-sdk-core_SOURCE_DIR}/include/*.h)
