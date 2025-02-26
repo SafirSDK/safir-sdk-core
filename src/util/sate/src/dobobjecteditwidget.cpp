@@ -302,6 +302,7 @@ void DobObjectEditWidget::Init()
         });
     }
 
+    ui->operationsWidget->typeIdLabel->setText(QString::number(m_typeId));
     ui->operationsWidget->SetConfiguration(dobBaseClass);
     connect(ui->operationsWidget->setChangesBtn, &QPushButton::clicked, this, [this]
     {

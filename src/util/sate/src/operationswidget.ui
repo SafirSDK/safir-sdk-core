@@ -117,10 +117,39 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>219</height>
+       <height>40</height>
       </size>
      </property>
     </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>TypeId:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="typeIdLabel">
+     <property name="styleSheet">
+      <string notr="true">font-size: 12px;
+ margin-bottom:15px;</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="text">
+      <string>12345</string>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QPushButton" name="toXmlBtn">
