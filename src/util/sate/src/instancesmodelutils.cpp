@@ -115,6 +115,10 @@ QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::C
     case StringMemberType:
         return QString::fromStdWString(static_cast<const StringContainer&>(container).GetVal());
     case ObjectMemberType:
+        if (role == Qt::DisplayRole)
+        {
+            return "<object>";
+        }
         return QString::fromStdWString(Serialization::ToJson
                                        (static_cast<const ObjectContainerBase&>(container).GetObjectPointer()));
     case BinaryMemberType:
