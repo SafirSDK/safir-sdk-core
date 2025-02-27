@@ -1,3 +1,4 @@
+with Ada.Command_Line;
 -------------------------------------------------------------------------------
 --
 --  Copyright Saab AB, 2005-2009 (http://www.safirsdk.com)
@@ -396,161 +397,83 @@ procedure Dots_Test_Ada is
          Failed_Tests := Failed_Tests + 1;
       else
          null;
-         Put ("Check" & Natural'Image (Performed_Tests));
-         if Description /= "" then
-            Put (" (" & Description & ")");
-         end if;
-         Put_Line (" succeded");
+         --  Put ("Check" & Natural'Image (Performed_Tests));
+         --  if Description /= "" then
+         --     Put (" (" & Description & ")");
+         --  end if;
+         --  Put_Line (" succeded");
       end if;
    end Check;
 
---     function Get_Blob_Size (Obj : Safir.Dob.Typesystem.Object.Object_Type'Class)
---                                   return Safir.Dob.Typesystem.Int_32 is
---     begin
---        return Obj.Calculate_Blob_Size;
---     end Get_Blob_Size;
 
---     procedure Test_Class is
---        Parent : Test.Parent.Parent_Type;
---        Child  : Test.Child.Child_Type;
---        Grand_Child : Test.Grand_Child.Grand_Child_Type;
---
---        Parent_Class : Test.Parent.Parent_Type'Class := Parent;
---        Child_Class : Test.Parent.Parent_Type'Class := Child;
---        Grand_Child_Class : Test.Parent.Parent_Type'Class := Grand_Child;
---
---        C_Class     : Test.Child.Child_Type'Class := Child;
---        GC_Class     : Test.Grand_Child.Grand_Child_Type'Class := Grand_Child;
---
---
---        procedure Foo (Bar : Test.Parent.Parent_Type'Class) is
---        begin
---           Print ("Bollocks");
---        end;
---
---     begin
---        Print ("Parent_Class size (bits): ", Integer'Image (Parent_Class'Size));
---        Print ("Child_Class size (bits): ", Integer'Image (Child_Class'Size));
---        Print ("Grand_Child_Class size (bits): ", Integer'Image (Grand_Child_Class'Size));
---        Foo (Parent);
---        Foo (Child);
---        Foo (Grand_Child);
---        Foo (Parent_Class);
---        Foo (Child_Class);
---        Foo (Grand_Child_Class);
---        Foo (C_Class);
---        Foo (GC_Class);
---  --      Parent_Class := Test.Parent.Parent_Type'Class (Parent);
---  --      Parent_Class := Test.Parent.Parent_Type'Class (Child);
---
---        Child_Class := Test.Parent.Parent_Type'Class (Parent);
---
---        --Grand_Child_Class := Grand_Child;
---
---        --Parent_Class := Grand_Child_Class;
---
---     end Test_Class;
+   procedure Test_Smart_Pointer is
+   begin
+      -- test working downcast
+      declare
+         Parent_Ptr : constant Dots_Test.Member_Types_Base.Smart_Pointer'Class := Dots_Test.Member_Types.Create;
+         Child_Ptr  : Dots_Test.Member_Types.Smart_Pointer;
+      begin
+         Check (Parent_Ptr.Use_Count = 1);
+         Check (Child_Ptr.Use_Count = 0);
+         Child_Ptr := Dots_Test.Member_Types.Smart_Pointer(Parent_Ptr);
+         Check (Parent_Ptr.Use_Count = 2);
+         Check (Child_Ptr.Use_Count = 2);
+      end;
 
---     procedure Test_Poly is
---
---        Parent_Ptr               : Test.Parent.Smart_Pointer := Test.Parent.Create;
---        Child_Ptr                : Test.Child.Smart_Pointer := Test.Child.Create;
---        Grand_Child_Ptr          : Test.Grand_Child.Smart_Pointer := Test.Grand_Child.Create;
---        Another_Child_Ptr        : Test.Another_Child.Smart_Pointer := Test.Another_Child.Create;
---
---        Parent_Access : Test.Parent.Parent_Class_Access := Parent_Ptr.Ref;
---        Child_Access : Test.Child.Child_Class_Access := Child_Ptr.Ref;
---        Grand_Child_Access : Test.Grand_Child.Grand_Child_Class_Access := Grand_Child_Ptr.Ref;
---        Another_Child_Access : Test.Another_Child.Another_Child_Class_Access := Another_Child_Ptr.Ref;
---
---        use type Safir.Dob.Typesystem.Int_64;
---
---     begin
---        Check (Parent_Access.Get_Type_Id = 2407368795643760510);
---        Check (Child_Access.Get_Type_Id = 3398855741022430189);
---
---        Check (Get_Blob_Size (Parent_Access.all) = 21);
---        Check (Get_Blob_Size (Child_Access.all) = 30);
---        Check (Get_Blob_Size (Grand_Child_Access.all) = 39);
---
---        Check (Parent_Ptr.Use_Count = 1);
---        Check (Child_Ptr.Use_Count = 1);
---        Check (Grand_Child_Ptr.Use_Count = 1);
---
---        -- Parent doesn't point to a child so a down-cast should give Constraint_Error
---        declare
---        begin
---           Child_Ptr := Test.Child.Convert (Parent_Ptr);
---           Check (False);
---        exception
---           when Constraint_Error =>
---              Check (True);
---        end;
---
---        Parent_Access.Parent_Int.Set_Val (99);
---        Check (Parent_Access.Parent_Int.Get_Val = 99, "XX");
---
---        Grand_Child_Access.Parent_Int.Set_Val (55);
---
---        -- Convert up
---        Parent_Ptr := Test.Parent.Convert (Grand_Child_Ptr);
---        Parent_Access := Parent_Ptr.Ref;
---
---        Check (Parent_Access.Parent_Int.Get_Val = 55);
---        Check (Get_Blob_Size (Parent_Access.all) = 39);
---
---        Print ("Use count: ", Natural'Image (Parent_Ptr.Use_Count));
---
---        Check (Parent_Ptr.Use_Count = 2);
---        Check (Grand_Child_Ptr.Use_Count = 2);
---
---        declare
---           -- Convert down
---           CP : Test.Child.Smart_Pointer := Test.Child.Convert (Parent_Ptr);
---        begin
---           Check (Parent_Ptr.Use_Count = 3);
---           Check (CP.Use_Count = 3);
---        end;
---        Check (Parent_Ptr.Use_Count = 2);
---
---        -- Convert down
---        Child_Ptr := Test.Child.Convert (Parent_Ptr);
---        Child_Access := Child_Ptr.Ref;
---        Check (Get_Blob_Size (Child_Access.all) = 39);
---
---        Parent_Ptr := Test.Parent.Convert (Grand_Child_Ptr);
---        Parent_Access := Parent_Ptr.Ref;
---        --Check (Parent_Access.Get_Type_Id = -6626636272276630930);
---
---     end Test_Poly;
+      -- test not working downcast
+      declare
+         Parent_Ptr : constant Dots_Test.Member_Types_Base.Smart_Pointer'Class := Dots_Test.Member_Types_Base.Create;
+         Child_Ptr  : Dots_Test.Member_Types.Smart_Pointer;
+      begin
+         Check (Parent_Ptr.Use_Count = 1);
+         Check (Child_Ptr.Use_Count = 0);
+         Child_Ptr := Dots_Test.Member_Types.Smart_Pointer(Parent_Ptr);
+         Check (False);
+      exception
+         when Constraint_Error =>
+            Check (True);
+            Check (Parent_Ptr.Use_Count = 1);
+            Check (Child_Ptr.Use_Count = 0);
+      end;
 
---     procedure Test_Prop is
---        E : Awi_Test.My_Entity.Smart_Pointer := Awi_Test.My_Entity.Create;
---        I : Dots_Test.Test_Item.Smart_Pointer := Dots_Test.Test_Item.Create;
---     begin
---        Header ("Prop test");
---        E.Ref.My_Item.Set_Ptr (I);
---
---        Awi_Test.My_Property.Set_Member_1 (E, 55);
---        Print ("Set_member 1 ok");
---
---        Awi_Test.My_Property.Set_Member_2 (E, 99);
---        Print ("Set_member 2 ok");
---
---        if Awi_Test.My_Property.Get_Member_1 (E) = 55 then
---           Print ("Get Member 1 ok");
---        else
---           Print ("Get Member 1 NOT ok");
---        end if;
---
---        if Awi_Test.My_Property.Get_Member_2 (E) = 99 then
---           Print ("Get Member 2 ok");
---        else
---           Print ("Get Member 2 NOT ok");
---        end if;
---
---
---     end Test_Prop;
+
+      -- Values inside smart pointer class
+      declare
+         Parent_Ptr : constant Dots_Test.Member_Types_Base.Smart_Pointer'Class := Dots_Test.Member_Types.Create;
+         Child_Access  : Dots_Test.Member_Types.Member_Types_Class_Access;
+      begin
+         Check (Parent_Ptr.Use_Count = 1);
+         Child_Access := Dots_Test.Member_Types.Smart_Pointer(Parent_Ptr).Ref;
+         Check (Parent_Ptr.Use_Count = 1);
+         Child_Access.Int_32_Member.Set_Val(10);
+         Check(Parent_Ptr.Ref.Int_32_Member.Get_Val = 10);
+      end;
+
+      declare
+         Object : constant Dots_Test.Member_Types.Smart_Pointer'Class := Dots_Test.Member_Types.Create;
+         Object_Access: constant Dots_Test.Member_Types.Member_Types_Class_Access := Object.Ref;
+         Item : constant Dots_Test.Test_Item.Smart_Pointer'Class := Dots_Test.Test_Item.Create;
+         Item_Access : constant Dots_Test.Test_Item.Test_Item_Class_Access := Item.Ref;
+      begin
+         Object_Access.Int_32_Member.Set_Val(10);
+         Check (Item.Use_Count = 1);
+         Object_Access.Test_Class_Member.Set_Ptr(Item);
+         Check (Item.Use_Count = 2);
+         Check (Object_Access.Test_Class_Member.Get_Ptr.Use_Count = 3);
+         Check (Item.Use_Count = 2);
+         Object_Access.Test_Class_Member.Ref.My_Int.Set_Val(222);
+         Check(Object_Access.Int_32_Member.Get_Val = 10);
+         Check(Object_Access.Test_Class_Member.Ref.My_Int.Get_Val = 222);
+         Check (Object.Use_Count = 1);
+         Check (Dots_Test.Member_Types_Base.Smart_Pointer(Object).Ref.Test_Class_Member.Get_Ptr.Use_Count = 3);
+         Check (Item.Use_Count = 2);
+         Object_Access.Test_Class_Member.Set_Null;
+         Check (Item.Use_Count = 1);
+         Check(Item.Ref.My_Int.Get_Val = 222);
+         Check(Item_Access.My_Int.Get_Val = 222);
+      end;
+
+   end Test_Smart_Pointer;
 
    procedure Test_Int_32 is
       Null_Ok, In_Req_Ok : Boolean := True;
@@ -9394,7 +9317,9 @@ begin
    Test_IsEnumeration;
    Test_IsException;
 
+   Test_Smart_Pointer;
 
+   Ada.Command_Line.Set_Exit_Status(Ada.Command_Line.Exit_Status(Failed_Tests));
 exception
    when E : others =>
       Put_Line ("Caught Exception, message: " & Ada.Exceptions.Exception_Information (E));
