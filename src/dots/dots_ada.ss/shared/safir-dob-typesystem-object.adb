@@ -406,11 +406,11 @@ package body Safir.Dob.Typesystem.Object is
    procedure Internal_Initialize_From_Existing (Dest   : in out Smart_Pointer'Class;
                                                 Source : in Smart_Pointer'Class) is
    begin
+      if Source.Data_Ptr /= null then
+         Counter_Arithmetic.Atomic_Add(Source.Counter_Ptr.all, 1);
+      end if;
       Dest.Data_Ptr := Source.Data_Ptr;
       Dest.Counter_Ptr := Source.Counter_Ptr;
-      if Dest.Counter_Ptr /= null then
-         Counter_Arithmetic.Atomic_Add(Dest.Counter_Ptr.all, 1);
-      end if;
    end Internal_Initialize_From_Existing;
 
    function Internal_Get_Count_Ptr (Smart_Ptr : in Smart_Pointer'Class)
