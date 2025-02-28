@@ -51,7 +51,7 @@ project Safir_Defaults is
         ("-gnatf",                 -- Full source path in brief error messages
          "-gnatq",                 -- Don't quit, try semantics, even if parse errors
          "-gnatQ",                 -- Don't quit, write ali/tree file even if compile errors
-		 "-gnat2012",
+		 "-gnat2022",
 --       "-gnato",                 -- Overflow checking enabled.
 --       "-fcallgraph-info=su",    -- Output callgraph information
 --       "-fstack-usage",          -- Output stack usage information
