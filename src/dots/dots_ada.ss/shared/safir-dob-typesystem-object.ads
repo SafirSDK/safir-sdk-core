@@ -24,6 +24,7 @@
 with Ada.Finalization;
 with Safir.Dob.Typesystem.Container_Base; use Safir.Dob.Typesystem.Container_Base;
 with Safir.Dob.Typesystem.Object_Container_Base;
+with System.Address_To_Access_Conversions;
 
 package Safir.Dob.Typesystem.Object is
 
@@ -393,7 +394,8 @@ package Safir.Dob.Typesystem.Object is
    ----------------------
    -- Internal subprograms and types. NOT FOR PUBLIC USAGE!!
    --
-   type Counter_Access is access all Natural;
+   type Counter is new Natural with Atomic;
+   type Counter_Access is access all Counter;
    procedure Internal_Initialize (Smart_Ptr : in out Smart_Pointer'Class;
                                   Data_Ptr  : in Object_Class_Access);
    procedure Internal_Initialize_From_Existing (Dest : in out Smart_Pointer'Class;

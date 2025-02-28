@@ -22,9 +22,8 @@
 --
 -------------------------------------------------------------------------------
 with Ada.Unchecked_Deallocation;
---with Ada.Unchecked_Conversion;
 with Ada.Exceptions;
-with System.Address_To_Access_Conversions;
+with System.Atomic_Operations.Integer_Arithmetic;
 with Safir.Dob.Typesystem.Container_Instantiations; use Safir.Dob.Typesystem.Container_Instantiations;
 with Safir.Dob.Typesystem.Kernel;
 with Safir.Dob.Typesystem.Object_Factory;
@@ -43,8 +42,10 @@ package body Safir.Dob.Typesystem.Object is
      new Ada.Unchecked_Deallocation (Object_Type'Class, Object_Class_Access);
 
    procedure Free_Counter is
-     new Ada.Unchecked_Deallocation (Natural,
+     new Ada.Unchecked_Deallocation (Counter,
                                      Counter_Access);
+
+   package Counter_Arithmetic is new System.Atomic_Operations.Integer_Arithmetic (Counter);
 
    Initial_Size : Safir.Dob.Typesystem.Int_32;
 
@@ -381,11 +382,7 @@ package body Safir.Dob.Typesystem.Object is
    end Create;
 
    function Ref (Self : in Smart_Pointer) return Object_Class_Access is
---        function To_Ref is new Ada.Unchecked_Conversion
---          (Safir.Dob.Typesystem.Object.Object_Class_Access,
---           Object_Access);
    begin
-      --return To_Ref (Internal_Get_Raw_Ptr (Self));
       return Internal_Get_Raw_Ptr (Self);
    end Ref;
 
@@ -395,14 +392,14 @@ package body Safir.Dob.Typesystem.Object is
          return 0;
       end if;
 
-      return Self.Counter_Ptr.all;
+      return Natural(Self.Counter_Ptr.all);
    end Use_Count;
 
    procedure Internal_Initialize (Smart_Ptr : in out Smart_Pointer'Class;
                                   Data_Ptr  : in Object_Class_Access) is
    begin
       Smart_Ptr.Data_Ptr := Data_Ptr;
-      Smart_Ptr.Counter_Ptr := new Natural;
+      Smart_Ptr.Counter_Ptr := new Counter;
       Smart_Ptr.Counter_Ptr.all := 1;
    end Internal_Initialize;
 
@@ -412,7 +409,7 @@ package body Safir.Dob.Typesystem.Object is
       Dest.Data_Ptr := Source.Data_Ptr;
       Dest.Counter_Ptr := Source.Counter_Ptr;
       if Dest.Counter_Ptr /= null then
-         Dest.Counter_Ptr.all := Dest.Counter_Ptr.all + 1;
+         Counter_Arithmetic.Atomic_Add(Dest.Counter_Ptr.all, 1);
       end if;
    end Internal_Initialize_From_Existing;
 
@@ -429,13 +426,14 @@ package body Safir.Dob.Typesystem.Object is
    end Internal_Get_Raw_Ptr;
 
    overriding procedure Finalize (Self : in out Smart_Pointer) is
+      Old_Counter : Counter := 0;
    begin
       if Self.Data_Ptr = null then
          return;
       end if;
 
-      Self.Counter_Ptr.all := Self.Counter_Ptr.all - 1;
-      if Self.Counter_Ptr.all = 0 then
+      Old_Counter := Counter_Arithmetic.Atomic_Fetch_And_Subtract(Self.Counter_Ptr.all, 1);
+      if Old_Counter = 1 then
          Free_Item (Self.Data_Ptr);
          Free_Counter (Self.Counter_Ptr);
       end if;
@@ -444,7 +442,7 @@ package body Safir.Dob.Typesystem.Object is
    overriding procedure Adjust (Self : in out Smart_Pointer) is
    begin
       if Self.Data_Ptr /= null then
-         Self.Counter_Ptr.all := Self.Counter_Ptr.all + 1;
+         Counter_Arithmetic.Atomic_Add(Self.Counter_Ptr.all, 1);
       end if;
    end Adjust;
 
