@@ -136,6 +136,19 @@ void TextValueInput::SetMaxLength(int len)
     ui->valueLineEdit->setMaxLength(len);
 }
 
+bool TextValueInput::eventFilter(QObject* obj, QEvent *event)
+{
+    if (event->type() == QEvent::FocusOut)
+    {
+        if (ui->nullButton->hasFocus() || ui->deleteButton->hasFocus())
+        {
+            return false;
+        }
+    }
+
+    return ValueInput::eventFilter(obj, event);
+}
+
 //---------------- COMBO -----------------
 ComboBoxValueInput::ComboBoxValueInput(const std::vector<QString>& values, bool showNullItem, const QString& deleteButtonText, QWidget *parent)
     : ValueInput(parent)

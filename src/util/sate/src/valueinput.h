@@ -72,6 +72,9 @@ public:
     bool HasValidInput() const override;
     void SetMaxLength(int len);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
 private:
     Ui::TextValueInput *ui;
     bool m_isNull = true;
