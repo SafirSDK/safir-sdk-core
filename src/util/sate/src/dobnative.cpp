@@ -105,7 +105,7 @@ void DobNative::SubscribeMessage(int64_t typeId, const sdt::ChannelId& channel, 
         DobInterface::SubscriptionInfo info{typeId, channel, includeSubclasses};
         m_subscriptions.push_back(info);
         emit DobInterface::SubscriptionStarted(info);
-        emit DobInterface::Output("Subscription message: " + Str(typeId) + Str(channel), QtInfoMsg);
+        emit DobInterface::Output("Subscribe message: " + Str(typeId) + Str(channel), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
@@ -135,13 +135,13 @@ void DobNative::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::In
         if (instance == Safir::Dob::Typesystem::InstanceId())
         {
             m_dobConnection.SubscribeEntity(typeId, true, includeSubclasses, true, this);
-            emit DobInterface::Output("Subscription entity: " + Str(typeId), QtInfoMsg);
+            emit DobInterface::Output("Subscribe entity: " + Str(typeId), QtInfoMsg);
         }
         else
         {
             Safir::Dob::Typesystem::EntityId eid(typeId, instance);
             m_dobConnection.SubscribeEntity(eid, true, true, this);
-            emit DobInterface::Output("Subscription entity: " + Str(eid.ToString()), QtInfoMsg);
+            emit DobInterface::Output("Subscribe entity: " + Str(eid.ToString()), QtInfoMsg);
         }
         DobInterface::SubscriptionInfo info{typeId, sdt::ChannelId(), includeSubclasses};
         m_subscriptions.push_back(info);

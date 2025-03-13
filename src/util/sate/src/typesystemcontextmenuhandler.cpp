@@ -205,12 +205,14 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
     if (chosenAction == subscribeEntity)
     {
         emit OpenEntityInstanceViewer(typeId, false);
-        m_dob->SubscribeEntity(typeId, Safir::Dob::Typesystem::InstanceId(), false);
+        m_dob->SubscribeEntity(typeId, sdt::InstanceId(), false);
+        m_dob->SubscribeRegistrations(typeId, sdt::HandlerId::ALL_HANDLERS, false);
     }
     else if (chosenAction == subscribeEntityRecursive)
     {
         emit OpenEntityInstanceViewer(typeId, true);
-        m_dob->SubscribeEntity(typeId, Safir::Dob::Typesystem::InstanceId(), true);
+        m_dob->SubscribeEntity(typeId, sdt::InstanceId(), true);
+        m_dob->SubscribeRegistrations(typeId, sdt::HandlerId::ALL_HANDLERS, true);
     }
     else if (chosenAction == openObjectEditor)
     {

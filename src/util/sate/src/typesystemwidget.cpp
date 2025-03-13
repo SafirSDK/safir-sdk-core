@@ -145,6 +145,7 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                     {
                         emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), true);
                         m_dob->SubscribeEntity(typeIdVal.toLongLong(), sdt::InstanceId(), true);
+                        m_dob->SubscribeRegistrations(typeIdVal.toLongLong(), sdt::HandlerId::ALL_HANDLERS, true);
                     }
                     else if (baseClass == TypesystemRepository::Message)
                     {
@@ -158,6 +159,7 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                     {
                         emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), false);
                         m_dob->SubscribeEntity(typeIdVal.toLongLong(), sdt::InstanceId(), false);
+                        m_dob->SubscribeRegistrations(typeIdVal.toLongLong(), sdt::HandlerId::ALL_HANDLERS, false);
                     }
                     else if (baseClass == TypesystemRepository::Message)
                     {
