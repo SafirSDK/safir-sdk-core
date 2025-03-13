@@ -200,20 +200,33 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
     {
     case DobInterface::NewEntity:
         {
-            // For some reason initializer list doesn't seem to compile on VS2015.
-            EntityInstancesModel::Info info;
-            info.entityId = entityId;
-            info.handlerId = handlerId;
-            info.entity = entity;
-            info.greenUntil = std::chrono::steady_clock::now() + std::chrono::seconds(5);
-            const auto result = m_entities.insert(std::make_pair(entityId, info));
-            if (result.second)
+            //The entity might already be in there, in case it is in the "deleted" state.
+            auto findIt = m_entities.find(entityId);
+            if (findIt != m_entities.end())
             {
-                const auto row = std::distance(m_entities.begin(), result.first);
-                beginInsertRows(QModelIndex(), row, row);
-                endInsertRows();
+                findIt->second.handlerId = handlerId;
+                findIt->second.entity = entity;
+                findIt->second.deleted = false;
+                findIt->second.greenUntil = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+                const auto row = std::distance(m_entities.begin(), findIt);
+                emit dataChanged(index(row,0), index(row, m_columnInfoList.count() - 1));
             }
-
+            else
+            {
+                // For some reason initializer list doesn't seem to compile on VS2015.
+                EntityInstancesModel::Info info;
+                info.entityId = entityId;
+                info.handlerId = handlerId;
+                info.entity = entity;
+                info.greenUntil = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+                const auto result = m_entities.insert(std::make_pair(entityId, info));
+                if (result.second)
+                {
+                    const auto row = std::distance(m_entities.begin(), result.first);
+                    beginInsertRows(QModelIndex(), row, row);
+                    endInsertRows();
+                }
+            }
             ++m_numNew;
         }
         break;
@@ -239,10 +252,15 @@ void EntityInstancesModel::OnEntity(const sdt::EntityId& entityId,
 
             QTimer::singleShot(5000, [this, entityId]
             {
-                const auto row = std::distance(m_entities.begin(), m_entities.find(entityId));
-                beginRemoveRows(QModelIndex(),row,row);
-                m_entities.erase(entityId);
-                endRemoveRows();
+                auto findIt = m_entities.find(entityId);
+                if (findIt->second.deleted)
+                {
+                    const auto row = std::distance(m_entities.begin(), findIt);
+
+                    beginRemoveRows(QModelIndex(),row,row);
+                    m_entities.erase(entityId);
+                    endRemoveRows();
+                }
             });
 
             ++m_numDelete;
