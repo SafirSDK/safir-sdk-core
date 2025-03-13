@@ -276,6 +276,7 @@ void DobWebSocket::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem:
     if (instance != sdt::InstanceId())
     {
         SetHashVal(p, "instanceId", instance);
+        includeSubclasses = false;
     }
     else
     {
@@ -831,6 +832,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             DobInterface::SubscriptionInfo info{typeId, sdt::ChannelId(), includeSubclasses};
             m_subscriptions.push_back(info);
             emit DobInterface::SubscriptionStarted(info);
+            AddInstanceCounter(typeId,includeSubclasses);
             emit DobInterface::Output(QString("Subscribe entity OK: %1, recursvie=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
@@ -844,6 +846,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
         {
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
             RemoveSubscriptions(typeId);
+            RemoveInstanceCounterRecursively(typeId);
             emit DobInterface::SubscriptionStopped(typeId);
             emit DobInterface::Output(QString("Unsubscribe entity OK: %1").arg(idList[1]), QtInfoMsg);
         }
@@ -982,6 +985,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         sdt::EntityId eid(entity->GetTypeId(), instance);
+        IncreaseInstanceCounter(eid);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), entity, DobInterface::NewEntity);
     }
     else if (method == "onDeletedEntity")
@@ -989,6 +993,7 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
         auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
         sdt::EntityId eid(entity->GetTypeId(), instance);
+        DecreaseInstanceCounter(eid);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), nullptr, DobInterface::DeletedEntity);
     }
     else if (method == "onUpdateRequest")

@@ -76,6 +76,9 @@
    </item>
    <item>
     <widget class="QTreeView" name="treeView">
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+     </property>
      <property name="expandsOnDoubleClick">
       <bool>false</bool>
      </property>

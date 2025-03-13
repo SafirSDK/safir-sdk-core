@@ -51,6 +51,8 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
+private slots:
+    void OnNumberOfInstancesChanged(const int64_t typeId);
 private:
     std::unique_ptr<TypesystemRepository::DobEnum> m_rootEnum;
 

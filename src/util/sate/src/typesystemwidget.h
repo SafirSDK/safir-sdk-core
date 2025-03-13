@@ -57,6 +57,8 @@ signals:
     void OpenEnumViewer(int64_t typeId, const QString& currentItem);
     void OpenDouFile(int64_t typeId);
 
+private slots:
+    void OnEntitySubscriptionsChanged();
 private:
     Ui::TypesystemWidget *ui;
     DobHandler* m_dob = nullptr;

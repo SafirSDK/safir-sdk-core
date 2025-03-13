@@ -71,6 +71,9 @@ public:
     const DobInterface::RegistrationInfo* GetMyRegistration(int64_t typeId) const;
     const DobInterface::SubscriptionInfo* GetMySubscription(int64_t typeId) const;
 
+    int64_t NumberOfInstances(const int64_t typeId) const;
+    size_t NumberOfSubscriptions() const;
+
 signals:
     void ConnectedToDob(const QString& connectionName);
     void ConnectionClosed();
@@ -91,6 +94,8 @@ signals:
     void OnUnregistered(int64_t typeId);
 
     void OnReadEntity(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance);
+
+    void NumberOfInstancesChanged(const int64_t typeId);
 
     void Output(const QString& msg, const QtMsgType msgType);
 

@@ -44,6 +44,7 @@ public:
     class DobUnit
     {
     public:
+        virtual ~DobUnit() = default;
         DobCategory category;
         QString name;
         DobUnit(DobCategory c) : category(c) {}

@@ -50,6 +50,8 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
+private slots:
+    void OnNumberOfInstancesChanged(const int64_t typeId);
 private:
     // Get a valid index in children or classes vector of ns. If bool is true its a namespace, else class
     std::pair<int, bool> RowIndex(int row, const TypesystemRepository::DobNamespace* ns) const;

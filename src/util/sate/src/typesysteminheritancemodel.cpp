@@ -48,6 +48,7 @@ TypesystemInheritanceModel::TypesystemInheritanceModel(DobHandler* dob, QObject*
     , m_dob(dob)
 {
     m_rootEnum->name = "Enums";
+    connect(m_dob,&DobHandler::NumberOfInstancesChanged, this, &TypesystemInheritanceModel::OnNumberOfInstancesChanged);
 }
 
 TypesystemInheritanceModel::~TypesystemInheritanceModel()
@@ -61,7 +62,7 @@ QVariant TypesystemInheritanceModel::headerData(int /*section*/, Qt::Orientation
 
 QModelIndex TypesystemInheritanceModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (column != 0)
+    if (column != 0 && column != 1)
     {
         return {}; // invalid index
     }
@@ -170,7 +171,7 @@ int TypesystemInheritanceModel::rowCount(const QModelIndex &parent) const
 
 int TypesystemInheritanceModel::columnCount(const QModelIndex &/*parent*/) const
 {
-    return 1;
+    return 2;
 }
 
 QVariant TypesystemInheritanceModel::data(const QModelIndex &index, int role) const
@@ -187,11 +188,47 @@ QVariant TypesystemInheritanceModel::data(const QModelIndex &index, int role) co
         switch (role)
         {
         case Qt::ToolTipRole:
-        case Qt::DisplayRole:
+            if (index.column() == 1 && ptr->dobBaseClass == TypesystemRepository::Entity)
+            {
+                const auto instances = m_dob->NumberOfInstances(ptr->typeId);
+                if (instances >= 0)
+                {
+                    return tr("The number of instances of this class (not including subclasses)\n"
+                              "that Sate has received in its subscription.");
+                }
+            }
+
             return ptr->name;
+        case Qt::DisplayRole:
+            if (index.column() == 1)
+            {
+                if (ptr->dobBaseClass == TypesystemRepository::Entity)
+                {
+                    const auto instances = m_dob->NumberOfInstances(ptr->typeId);
+                    if (instances >= 0)
+                    {
+                        return static_cast<qlonglong>(instances);
+                    }
+                }
+
+                return {};
+            }
+            return ptr->name;
+        case Qt::TextAlignmentRole:
+            {
+                if (index.column() == 1)
+                {
+                    return int(Qt::AlignRight|Qt::AlignVCenter);
+                }
+            }
+            break;
 
         case Qt::DecorationRole:
         {
+            if (index.column() == 1)
+            {
+                return {};
+            }
             auto reg = m_dob->GetMyRegistration(ptr->typeId);
             if (reg != nullptr)
             {
@@ -217,6 +254,11 @@ QVariant TypesystemInheritanceModel::data(const QModelIndex &index, int role) co
     }
     else if (dobUnit->category == TypesystemRepository::Enum)
     {
+        if (index.column() == 1)
+        {
+            return {};
+        }
+
         auto ptr = static_cast<TypesystemRepository::DobEnum*>(index.internalPointer());
         switch (role)
         {
@@ -235,4 +277,14 @@ QVariant TypesystemInheritanceModel::data(const QModelIndex &index, int role) co
     }
 
     return {};
+}
+
+void TypesystemInheritanceModel::OnNumberOfInstancesChanged(const int64_t typeId)
+{
+    const auto ix = match(index(0,1), TypesystemRepository::DobTypeIdRole, QVariant::fromValue(typeId), 1, Qt::MatchFlags(Qt::MatchExactly | Qt::MatchRecursive));
+    if (ix.size() != 1 || !ix.constFirst().isValid())
+    {
+        throw std::logic_error("Something went terribly wrong in the type tree");
+    }
+    emit dataChanged(ix.constFirst(),ix.constFirst());
 }

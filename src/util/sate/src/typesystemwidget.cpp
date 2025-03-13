@@ -96,6 +96,8 @@ TypesystemWidget::TypesystemWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->treeView->header()->hide();
+    ui->treeView->header()->setDefaultSectionSize(0);
+    ui->treeView->header()->setSectionsMovable(false);
 }
 
 TypesystemWidget::~TypesystemWidget()
@@ -113,6 +115,11 @@ void TypesystemWidget::Initialize(DobHandler* dob)
 
     SetupFilterEdit();
     SetTreeViewModel(true);
+
+    ui->treeView->header()->setSectionResizeMode(0,QHeaderView::Stretch);
+    ui->treeView->header()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
+    ui->treeView->header()->setStretchLastSection(false);
+    ui->treeView->resizeColumnToContents(1);
 
     connect(ui->treeView, &QTreeView::doubleClicked, this, [this](const QModelIndex& ix)
     {
@@ -186,6 +193,10 @@ void TypesystemWidget::Initialize(DobHandler* dob)
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenEntityInstanceViewer, this, &TypesystemWidget::OpenEntityInstanceViewer);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenMessageInstanceViewer, this, &TypesystemWidget::OpenMessageInstanceViewer);
     connect(m_contextMenuHandler, &TypesystemContextMenuHandler::OpenDouFile, this, &TypesystemWidget::OpenDouFile);
+
+    connect(m_dob, &DobHandler::SubscriptionStarted, this, &TypesystemWidget::OnEntitySubscriptionsChanged);
+    connect(m_dob, &DobHandler::SubscriptionStopped, this, &TypesystemWidget::OnEntitySubscriptionsChanged);
+    OnEntitySubscriptionsChanged();
 }
 
 void TypesystemWidget::SetupFilterEdit()
@@ -328,7 +339,7 @@ void TypesystemWidget::ExpandTo(const QModelIndex& index)
         i = i.parent();
     }
 
-    ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::SelectCurrent);
+    ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::SelectCurrent|QItemSelectionModel::Rows);
 }
 
 void TypesystemWidget::SetTreeViewModel(bool inheritanceModel)
@@ -400,4 +411,16 @@ void TypesystemWidget::LocateType(int64_t typeId)
 void TypesystemWidget::SetSearchFocus()
 {
     ui->filterLineEdit->setFocus();
+}
+
+void TypesystemWidget::OnEntitySubscriptionsChanged()
+{
+    if (m_dob->NumberOfSubscriptions() > 0)
+    {
+        ui->treeView->showColumn(1);
+    }
+    else
+    {
+        ui->treeView->hideColumn(1);
+    }
 }

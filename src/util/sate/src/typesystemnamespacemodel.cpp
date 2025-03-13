@@ -42,6 +42,7 @@ TypesystemNamespaceModel::TypesystemNamespaceModel(DobHandler* dob, QObject* par
     : QAbstractItemModel(parent)
     , m_dob(dob)
 {
+    connect(m_dob,&DobHandler::NumberOfInstancesChanged, this, &TypesystemNamespaceModel::OnNumberOfInstancesChanged);
 }
 
 QVariant TypesystemNamespaceModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const
@@ -55,7 +56,7 @@ QModelIndex TypesystemNamespaceModel::index(int row, int column, const QModelInd
     {
         const auto rowIndex = static_cast<size_t>(row);
         const auto& rootNs = TypesystemRepository::Instance().GetRootNamespaces();
-        if (rowIndex < rootNs.size() && column == 0)
+        if (rowIndex < rootNs.size() && (column == 0 || column == 1))
         {
             return createIndex(row, column, compat_cast(rootNs[rowIndex]));
         }
@@ -64,7 +65,7 @@ QModelIndex TypesystemNamespaceModel::index(int row, int column, const QModelInd
     }
 
     auto parentPtr = static_cast<TypesystemRepository::DobNamespace*>(parent.internalPointer());
-    if (parentPtr != nullptr && column == 0)
+    if (parentPtr != nullptr && (column == 0 || column == 1))
     {
         auto ix = RowIndex(row, parentPtr);
         if (ix.first > -1)
@@ -94,10 +95,22 @@ QModelIndex TypesystemNamespaceModel::parent(const QModelIndex &index) const
 
     auto du = static_cast<const TypesystemRepository::DobUnit*>(index.internalPointer());
 
-    const TypesystemRepository::DobNamespace* parent = (du->category == TypesystemRepository::Namespace) ?
-                static_cast<const TypesystemRepository::DobNamespace*>(du)->parent :
-                static_cast<const TypesystemRepository::DobClass*>(du)->namespaze;
-
+    const TypesystemRepository::DobNamespace* parent = nullptr;
+    switch (du->category)
+    {
+    case TypesystemRepository::Namespace:
+        parent = static_cast<const TypesystemRepository::DobNamespace*>(du)->parent;
+        break;
+    case TypesystemRepository::Class:
+        parent = static_cast<const TypesystemRepository::DobClass*>(du)->namespaze;
+        break;
+    case TypesystemRepository::Enum:
+        parent = static_cast<const TypesystemRepository::DobEnum*>(du)->namespaze;
+        break;
+    default:
+        throw std::logic_error("Unexpected category in TypesystemNamespaceModel");
+    }
+    
     // This is a bit complicated. We want to find the index of our parent. So we must go back to our grand parent to wind out
     // which row our parent is in our grand parents children-vector.
     if (parent != nullptr)
@@ -145,7 +158,7 @@ int TypesystemNamespaceModel::rowCount(const QModelIndex &parent) const
 
 int TypesystemNamespaceModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 1;
+    return 2;
 }
 
 QVariant TypesystemNamespaceModel::data(const QModelIndex &index, int role) const
@@ -160,13 +173,58 @@ QVariant TypesystemNamespaceModel::data(const QModelIndex &index, int role) cons
     switch (role)
     {
     case Qt::ToolTipRole:
-    case Qt::DisplayRole:
-    {
-        return du->name;
-    }
+        if (index.column() == 1)
+        {
+            if (du->category == TypesystemRepository::Class)
+            {
+                const auto* cls = static_cast<const TypesystemRepository::DobClass*>(du);
+                if (cls->dobBaseClass == TypesystemRepository::Entity)
+                {
+                    const auto instances = m_dob->NumberOfInstances(cls->typeId);
+                    if (instances >= 0)
+                    {
+                        return tr("The number of instances of this class (not including subclasses)\n"
+                                  "that Sate has received in its subscription.");
+                    }
+                }
+            }
+        }
 
+        return du->name;
+
+    case Qt::DisplayRole:
+        if (index.column() == 1)
+        {
+            if (du->category == TypesystemRepository::Class)
+            {
+                const auto* cls = static_cast<const TypesystemRepository::DobClass*>(du);
+                if (cls->dobBaseClass == TypesystemRepository::Entity)
+                {
+                    const auto instances = m_dob->NumberOfInstances(cls->typeId);
+                    if (instances >= 0)
+                    {
+                        return static_cast<qlonglong>(instances);
+                    }
+                }
+            }
+            return {};
+        }
+        return du->name;
+
+    case Qt::TextAlignmentRole:
+        {
+            if (index.column() == 1)
+            {
+                return int(Qt::AlignRight|Qt::AlignVCenter);
+            }
+            return {};
+        }
     case Qt::DecorationRole:
     {
+        if (index.column() == 1)
+        {
+            return {};
+        }
         switch (du->category)
         {
         case TypesystemRepository::Class:
@@ -210,7 +268,6 @@ QVariant TypesystemNamespaceModel::data(const QModelIndex &index, int role) cons
         {
             return QVariant::fromValue(static_cast<const TypesystemRepository::DobEnum*>(du)->typeId);
         }
-
         return {};
     }
 
@@ -235,4 +292,14 @@ std::pair<int, bool> TypesystemNamespaceModel::RowIndex(int row, const Typesyste
     }
 
     return std::make_pair(-1, false);
+}
+
+void TypesystemNamespaceModel::OnNumberOfInstancesChanged(const int64_t typeId)
+{
+    const auto ix = match(index(0,1), TypesystemRepository::DobTypeIdRole, QVariant::fromValue(typeId), 1, Qt::MatchFlags(Qt::MatchExactly | Qt::MatchRecursive));
+    if (ix.size() != 1 || !ix.constFirst().isValid())
+    {
+        throw std::logic_error("OnNumberOfInstancesChanged: Something went terribly wrong in the type tree");
+    }
+    emit dataChanged(ix.constFirst(),ix.constFirst());
 }

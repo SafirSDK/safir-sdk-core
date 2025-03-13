@@ -32,6 +32,10 @@
 #include <Safir/Dob/Service.h>
 #include <Safir/Dob/InstanceIdPolicy.h>
 #include <vector>
+#include <map>
+#include <set>
+
+#include "typesystemrepository.h"
 
 namespace sdt = Safir::Dob::Typesystem;
 
@@ -127,6 +131,21 @@ public:
         m_subscriptions.erase(std::remove_if(m_subscriptions.begin(), m_subscriptions.end(), [typeId](const auto& v){return v.typeId == typeId;}), m_subscriptions.end());
     }
 
+    size_t NumberOfSubscriptions() const
+    {
+        return m_subscriptions.size();
+    }
+
+    int64_t NumberOfInstances(const int64_t typeId) const
+    {
+        auto findIt = m_entityInstances.find(typeId);
+        if (findIt != m_entityInstances.end())
+        {
+            return findIt->second.size();
+        }
+        return -1; //no subscription
+    }
+
 signals:
     void ConnectedToDob(const QString& connectionName);
     void ConnectionClosed();
@@ -148,9 +167,95 @@ signals:
 
     void OnReadEntity(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance);
 
+    void NumberOfInstancesChanged(const int64_t typeId);
+
     void Output(const QString& msg, const QtMsgType msgType);
 
 protected:
+
+    void AddInstanceCounter(const int64_t typeId, const bool recursive)
+    {
+        if (recursive)
+        {
+            const auto* cls = TypesystemRepository::Instance().GetClass(typeId);
+            std::function<void(const TypesystemRepository::DobClass*)> fun;
+            fun = [this, &fun](const auto* c)
+            {
+                const auto res = m_entityInstances.insert(std::make_pair(c->typeId,std::set<int64_t>()));
+                if (res.second)
+                {
+                    emit NumberOfInstancesChanged(c->typeId);
+                }
+
+                for (auto child : c->children)
+                {
+                    fun(child);
+                }
+            };
+
+            fun(cls);
+        }
+        else
+        {
+            const auto res = m_entityInstances.insert(std::make_pair(typeId,std::set<int64_t>()));
+            if (res.second)
+            {
+                emit NumberOfInstancesChanged(typeId);
+            }
+        }
+    }
+
+    void IncreaseInstanceCounter(const sdt::EntityId& entityId)
+    {
+        const auto findIt = m_entityInstances.find(entityId.GetTypeId());
+        if (findIt == m_entityInstances.end())
+        {
+            throw std::logic_error("AddInstance internal error");
+        }
+        const auto res = findIt->second.insert(entityId.GetInstanceId().GetRawValue());
+        if (res.second)
+        {
+            emit NumberOfInstancesChanged(entityId.GetTypeId());
+        }
+    }
+
+    void DecreaseInstanceCounter(const sdt::EntityId& entityId)
+    {
+        const auto findIt = m_entityInstances.find(entityId.GetTypeId());
+        if (findIt == m_entityInstances.end())
+        {
+            throw std::logic_error("AddInstance internal error");
+        }
+        const auto removed = findIt->second.erase(entityId.GetInstanceId().GetRawValue());;
+        if (removed != 0)
+        {
+            emit NumberOfInstancesChanged(entityId.GetTypeId());
+        }
+    }
+
+    void RemoveInstanceCounterRecursively(const int64_t typeId)
+    {
+        const auto* cls = TypesystemRepository::Instance().GetClass(typeId);
+        std::function<void(const TypesystemRepository::DobClass*)> fun;
+        fun = [this, &fun](const auto* c)
+        {
+            const auto removed = m_entityInstances.erase(c->typeId);
+            if (removed != 0)
+            {
+                emit NumberOfInstancesChanged(c->typeId);
+            }
+            for (auto child : c->children)
+            {
+                fun(child);
+            }
+        };
+
+        fun(cls);
+    }
+
     std::vector<DobInterface::RegistrationInfo> m_registrations;
     std::vector<DobInterface::SubscriptionInfo> m_subscriptions;
+
+private:
+    std::map<int64_t, std::set<int64_t>> m_entityInstances;
 };

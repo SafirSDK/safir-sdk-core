@@ -63,6 +63,7 @@ void DobHandler::SetupSignalSlots()
         connect(m_dob.get(), &DobInterface::OnRegistered, this, &DobHandler::OnRegistered);
         connect(m_dob.get(), &DobInterface::OnUnregistered, this, &DobHandler::OnUnregistered);
         connect(m_dob.get(), &DobInterface::OnReadEntity, this, &DobHandler::OnReadEntity);
+        connect(m_dob.get(), &DobInterface::NumberOfInstancesChanged, this, &DobHandler::NumberOfInstancesChanged);
         connect(m_dob.get(), &DobInterface::Output, this, &DobHandler::Output);
     }
 }
@@ -307,7 +308,23 @@ const DobInterface::SubscriptionInfo* DobHandler::GetMySubscription(int64_t type
     }
 
     return nullptr;
-
 }
 
 
+int64_t DobHandler::NumberOfInstances(const int64_t typeId) const
+{
+    if (m_dob)
+    {
+        return m_dob->NumberOfInstances(typeId);
+    }
+    return -1;
+}
+
+size_t DobHandler::NumberOfSubscriptions() const
+{
+    if (m_dob)
+    {
+        return m_dob->NumberOfSubscriptions();
+    }
+    return 0;
+}

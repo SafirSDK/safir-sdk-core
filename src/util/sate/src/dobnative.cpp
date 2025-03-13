@@ -135,12 +135,14 @@ void DobNative::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::In
         if (instance == Safir::Dob::Typesystem::InstanceId())
         {
             m_dobConnection.SubscribeEntity(typeId, true, includeSubclasses, true, this);
+            AddInstanceCounter(typeId, includeSubclasses);
             emit DobInterface::Output("Subscribe entity: " + Str(typeId), QtInfoMsg);
         }
         else
         {
             Safir::Dob::Typesystem::EntityId eid(typeId, instance);
             m_dobConnection.SubscribeEntity(eid, true, true, this);
+            AddInstanceCounter(typeId, false);
             emit DobInterface::Output("Subscribe entity: " + Str(eid.ToString()), QtInfoMsg);
         }
         DobInterface::SubscriptionInfo info{typeId, sdt::ChannelId(), includeSubclasses};
@@ -160,6 +162,7 @@ void DobNative::UnsubscribeEntity(int64_t typeId)
     {
         m_dobConnection.UnsubscribeEntity(typeId, this);
         RemoveSubscriptions(typeId);
+        RemoveInstanceCounterRecursively(typeId);
         emit DobInterface::SubscriptionStopped(typeId);
         emit DobInterface::Output("Unsubscribe entity: " + Str(typeId), QtInfoMsg);
     }
@@ -524,7 +527,7 @@ void DobNative::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRe
 
 // Requestor interface
 void DobNative::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
-{    
+{
     emit DobInterface::OnResponse(responseProxy.GetResponse());
 }
 
@@ -562,6 +565,7 @@ void DobNative::OnMessage(const Safir::Dob::MessageProxy messageProxy)
 // EntitySubscriber interface
 void DobNative::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
 {
+    IncreaseInstanceCounter(entityProxy.GetEntityId());
     emit DobInterface::OnEntity(entityProxy.GetEntityId(), entityProxy.GetOwner(), entityProxy.GetEntityWithChangeInfo(), DobInterface::NewEntity);
 }
 void DobNative::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
@@ -571,6 +575,7 @@ void DobNative::OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy)
 
 void DobNative::OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool /*deprecated*/)
 {
+    DecreaseInstanceCounter(entityProxy.GetEntityId());
     emit DobInterface::OnEntity(entityProxy.GetEntityId(), entityProxy.GetOwner(), nullptr, DobInterface::DeletedEntity);
 }
 
