@@ -510,6 +510,8 @@ QVariant InstancesModelUtils::MemberColor(const Safir::Dob::Typesystem::ObjectPt
 
     bool changed = false;
 
+    if (columnInfo->GetColumnType() == ColumnInfo::Member)
+    {
     switch (columnInfo->CollectionType())
     {
     case SingleValueCollectionType:
@@ -548,7 +550,7 @@ QVariant InstancesModelUtils::MemberColor(const Safir::Dob::Typesystem::ObjectPt
         break;
 
     }
-
+    }
     if (changed)
     {
         return QColor(116, 192, 252, 100); // transparent blue
