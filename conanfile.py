@@ -116,7 +116,6 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("rapidjson/cci.20230929")
         self.requires("ninja/1.12.1")
         self.requires("qt-advanced-docking-system/4.3.1")
-
         #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support).
         #0.5.3 appears to be the last one that doesn't need that. Even 0.5.4 wants it.
         if self.settings.os == "Windows" and self.settings.compiler.version == 190:
@@ -129,6 +128,9 @@ class SafirSdkCoreConan(ConanFile):
             self.requires("protobuf/3.21.12")
         else:
             self.requires("protobuf/5.27.0")
+            #newer abseils require cmake from conan, which is not available on
+            #for example x86 platforms. So we use an older one for now.
+            self.requires("abseil/20240116.2")
 
         if self.settings.os == "Windows":
             #VS2015 does not build boost 1.85 for some reason, so we use an older version for that.
