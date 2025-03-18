@@ -49,21 +49,6 @@ DistributionData CreateDistributionData(InjectableEntity4Ptr object)
     BinarySerialization bin;
     Serialization::ToBinary(object,bin);
 
-#ifdef TEST_AGAINST_CORE_5
-    static LamportClock clock;
-
-    DistributionData dd(entity_state_tag,
-                        ConnectionId(100,0,100),
-                        InjectableEntity4::ClassTypeId,
-                        HandlerId(),
-                        clock.GetNewTimestamp(),
-                        InstanceId(1),
-                        clock.GetNewTimestamp(),
-                        DistributionData::Real,
-                        false,
-                        false,
-                        &bin[0]);
-#else
     static LamportClock clock(0);
     BlobWriteHelper helper(&bin[0]);
 
@@ -78,7 +63,6 @@ DistributionData CreateDistributionData(InjectableEntity4Ptr object)
                         false,
                         false,
                         helper);
-#endif
 
     return dd;
 }
@@ -206,7 +190,6 @@ BOOST_AUTO_TEST_CASE(SetTimestampForChangedMembers_SimpleArray)
 }
 
 
-#ifndef TEST_AGAINST_CORE_5
 BOOST_AUTO_TEST_CASE(SetTimestampForChangedMembers_SimpleNewCollections)
 {
     InjectableEntity4Ptr object = InjectableEntity4::Create();
@@ -252,7 +235,6 @@ BOOST_AUTO_TEST_CASE(SetTimestampForChangedMembers_SimpleNewCollections)
     }
 
 }
-#endif
 
 BOOST_AUTO_TEST_CASE(SetTimestampForChangedMembers_Items)
 {
@@ -319,7 +301,6 @@ BOOST_AUTO_TEST_CASE(SetTimestampForChangedMembers_ItemArray)
     }
 }
 
-#ifndef TEST_AGAINST_CORE_5
 BOOST_AUTO_TEST_CASE(SetTimestampForChangedMembers_ItemNewCollection)
 {
     InjectableEntity4Ptr object = InjectableEntity4::Create();
@@ -369,7 +350,6 @@ BOOST_AUTO_TEST_CASE(SetTimestampForChangedMembers_ItemNewCollection)
 
 }
 
-#endif
 //HaveChanges never looks into any of the members, so we don't
 //need to check new types. It only looks at member timestamps
 BOOST_AUTO_TEST_CASE(HaveChanges)
@@ -536,7 +516,6 @@ BOOST_AUTO_TEST_CASE(Merge_SimpleArrays)
 
 }
 
-#ifndef TEST_AGAINST_CORE_5
 BOOST_AUTO_TEST_CASE(Merge_SimpleNewCollections)
 {
     const auto dd1 = CreateDistributionData(InjectableEntity4::Create());
@@ -567,7 +546,6 @@ BOOST_AUTO_TEST_CASE(Merge_SimpleNewCollections)
     BOOST_CHECK(!after->DictionaryMember()[30].IsChanged());
     BOOST_CHECK(after->DictionaryMember().IsChangedHere());
 }
-#endif
 
 BOOST_AUTO_TEST_CASE(Merge_ObjectArrays)
 {
@@ -624,7 +602,6 @@ BOOST_AUTO_TEST_CASE(Merge_ObjectArrays)
     BOOST_CHECK_EQUAL(after->ItemArrayMember3()[0]->MyInt(),30);
 }
 
-#ifndef TEST_AGAINST_CORE_5
 BOOST_AUTO_TEST_CASE(Merge_ObjectSequence)
 {
     const auto dd1 = CreateDistributionData(InjectableEntity4::Create());
@@ -749,20 +726,10 @@ BOOST_AUTO_TEST_CASE(Merge_ObjectDictionary)
     BOOST_CHECK(!after->ItemDictionaryMember4().at(0)->MyInt().IsChanged());
     BOOST_CHECK_EQUAL(after->ItemDictionaryMember4().at(0)->MyInt(),40);
 }
-#endif
 
 InjectableEntity4Ptr CallSetChangeFlags(const DistributionData& dd1,
                                         DistributionData& dd2)
 {
-#ifdef TEST_AGAINST_CORE_5
-    boost::shared_ptr<char> blobHolder
-        (Safir::Dob::Typesystem::Internal::CreateCopy(dd2.GetBlob()),
-         Safir::Dob::Typesystem::Internal::Delete);
-    TimestampOperations::SetChangeFlags(dd1,dd2,blobHolder.get());
-
-    auto after = std::static_pointer_cast<InjectableEntity4>
-        (ObjectFactory::Instance().CreateObject(blobHolder.get()));
-#else
     BlobWriteHelper helper(dd2.GetBlob());
     TimestampOperations::SetChangeFlags(dd1,dd2,helper);
 
@@ -773,7 +740,6 @@ InjectableEntity4Ptr CallSetChangeFlags(const DistributionData& dd1,
     auto after = std::static_pointer_cast<InjectableEntity4>
         (ObjectFactory::Instance().CreateObject(blobHolder.get()));
 
-#endif
     return after;
 }
 
@@ -832,8 +798,6 @@ BOOST_AUTO_TEST_CASE(SetChangeFlags_Object)
     BOOST_CHECK(!after->IsChanged());
 }
 
-#ifndef TEST_AGAINST_CORE_5
-
 BOOST_AUTO_TEST_CASE(SetChangeFlags_New)
 {
     auto dd1 = CreateDistributionData(InjectableEntity4::Create());
@@ -874,5 +838,3 @@ BOOST_AUTO_TEST_CASE(SetChangeFlags_New)
     after->ItemDictionaryMember1().SetChanged(false);
     BOOST_CHECK(!after->IsChanged());
 }
-
-#endif
