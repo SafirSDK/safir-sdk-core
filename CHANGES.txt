@@ -1,4 +1,14 @@
 -----------------------------------------------------------------------------------------------------------------------
+2025-03-18 version 7.3.4
+-----------------------------------------------------------------------------------------------------------------------
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#520 Sate: Entity instance view gets confused if instances are deleted and recreated fast
+#521 Sate: Entity instance view shows JSON for nested objects
+#514 Sate, number of instances in type tree
+#519 Sate register handlerId always gets treated as text
+
+-----------------------------------------------------------------------------------------------------------------------
 2025-01-31 version 7.3.3
 -----------------------------------------------------------------------------------------------------------------------
 This release fixes the following issues (see http://safirsdkcore.com for details):
