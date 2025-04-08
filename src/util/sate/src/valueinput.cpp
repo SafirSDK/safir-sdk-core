@@ -51,6 +51,7 @@ TextValueInput::TextValueInput(bool showNullButton, const QString& deleteButtonT
 
     if (!deleteButtonText.isEmpty())
     {
+        ui->deleteButton->setText(deleteButtonText);
         connect(ui->deleteButton, &QPushButton::clicked, this, [this]
         {
             m_delete = true;
@@ -168,6 +169,7 @@ ComboBoxValueInput::ComboBoxValueInput(const std::vector<QString>& values, bool 
 
     if (!deleteButtonText.isEmpty())
     {
+        ui->deleteButton->setText(deleteButtonText);
         connect(ui->deleteButton, &QPushButton::clicked, this, [this]
                 {
                     m_delete = true;
@@ -223,6 +225,13 @@ bool ComboBoxValueInput::eventFilter(QObject* obj, QEvent *event)
 {
     if (event->type() == QEvent::FocusOut)
     {
+        if (ui->deleteButton->hasFocus())
+        {
+            // If delete button has focus let parent handle this event. If delete button
+            // was clicked we get a chance to handle that event.
+            return false;
+        }
+
         bool dropDownVisible = ui->valueComboBox->view()->isVisible();
         if (dropDownVisible)
         {
