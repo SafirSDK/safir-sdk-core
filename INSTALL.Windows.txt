@@ -1,6 +1,8 @@
 Windows Building and Installing
 ===============================
 
+Note: All the below instructions are obsolete as of 4.3.6.3. The actual dependencies are correct, but the versions required and the instructions on how to install them are not.
+
 Installing Prerequisites
 ------------------------
 

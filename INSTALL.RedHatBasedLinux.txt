@@ -1,6 +1,8 @@
 Install Safir SDK Core for RedHat based Linux distributions
 ===========================================================
 
+Note: All the below instructions are obsolete as of 4.3.6.3. This release has not been built or tested on Linux at all. There is however no reason that it should not be possible to build, and these instructions may provide some hints on how to do it, but do not expect them to be correct in the details.
+
 For some RedHat based distributions we have provided our own Safir rpm repositories which contain source and binary rpm packages. The repositories
 contain not only rpm packages for Safir SDK Core itself, but also rpm packages for some software that we have dependencies to, and which can not
 be found in any of the standard repositories.

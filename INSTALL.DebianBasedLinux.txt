@@ -1,6 +1,8 @@
 Ubuntu/Debian Linux Building and Installing
 -------------------------------------------
 
+Note: All the below instructions are obsolete as of 4.3.6.3. This release has not been built or tested on Linux at all. There is however no reason that it should not be possible to build, and these instructions may provide some hints on how to do it, but do not expect them to be correct in the details.
+
 For the time being we have not provided any prebuilt Safir packages for Ubuntu/Debian based systems so you have to built Safir yourself from source.
  
 *Prerequisites*
