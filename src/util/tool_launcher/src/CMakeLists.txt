@@ -1,4 +1,4 @@
-set(ui MainWindow.ui)
+set(ui MainWindow.ui BdGui.ui)
 
 set(sources Main.cpp MainWindow.cpp tool_launcher.rc)
 

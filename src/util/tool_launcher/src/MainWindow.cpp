@@ -39,6 +39,7 @@
 #endif
 
 #include "ui_MainWindow.h"
+#include "ui_BdGui.h"
 #include <QPushButton>
 #include <QTimer>
 #include <QShortcut>
@@ -87,6 +88,7 @@ MainWindow::MainWindow()
     connect(m_ui->launchDobExplorerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchDobExplorerPressed);
     connect(m_ui->launchSateLegacyButton, &QPushButton::pressed, this, &MainWindow::OnLaunchSateLegacyPressed);
     connect(m_ui->launchControlGuiButton, &QPushButton::pressed, this, &MainWindow::OnLaunchControlGuiPressed);
+    connect(m_ui->launchBdGuiButton, &QPushButton::pressed, this, &MainWindow::OnLaunchBdGuiPressed);
     connect(m_ui->checkDouFilesButton, &QPushButton::pressed, this, &MainWindow::OnCheckDouFilesPressed);
     connect(m_ui->checkGeneratedButton, &QPushButton::pressed, this, &MainWindow::OnCheckGeneratedPressed);
     connect(m_ui->showTypesystemDetailsButton, &QPushButton::pressed, this, &MainWindow::OnShowTypesystemDetailsPressed);
@@ -261,6 +263,34 @@ void MainWindow::OnLaunchDobExplorerPressed()
 void MainWindow::OnLaunchControlGuiPressed()
 {
     LaunchProgram("safir_control_gui");
+}
+
+void MainWindow::OnLaunchBdGuiPressed()
+{
+    Ui::BdGui ui;
+    QDialog dlg;
+    ui.setupUi(&dlg);
+    ui.buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
+    connect(ui.command,&QLineEdit::textChanged,&dlg,[&ui](const QString& text){ui.buttonBox->button(QDialogButtonBox::Ok)->setDisabled(text.isEmpty());});
+    const auto result = dlg.exec();
+    if (result != QDialog::Accepted)
+    {
+        return;
+    }
+
+    std::vector<std::string> args;
+    if (!ui.connectionName->text().isEmpty())
+    {
+        args.push_back("-c");
+        args.push_back(ui.connectionName->text().toStdString());
+    }
+    if (!ui.nodeName->text().isEmpty())
+    {
+        args.push_back("-n");
+        args.push_back(ui.nodeName->text().toStdString());
+    }
+    args.push_back(ui.command->text().toStdString());
+    LaunchProgram("bd",args);
 }
 
 void MainWindow::OnCheckDouFilesPressed()

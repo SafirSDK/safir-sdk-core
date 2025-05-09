@@ -63,6 +63,7 @@ private slots:
     void OnLaunchSateLegacyPressed();
     void OnLaunchDobExplorerPressed();
     void OnLaunchControlGuiPressed();
+    void OnLaunchBdGuiPressed();
     void OnCheckDouFilesPressed();
     void OnCheckGeneratedPressed();
     void OnShowTypesystemDetailsPressed();
