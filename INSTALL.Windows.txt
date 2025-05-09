@@ -1,7 +1,82 @@
 Windows Building and Installing
 ===============================
+These instructions contain two parts. The first part is the instructions for building with VS2022 and a more modern development environment, and the second part is the old instructions. The newer instructions are less detailed than the old ones, so the old ones are in here in case hints are needed to work out problems with the new instructions. 
 
-Note: All the below instructions are obsolete as of 4.3.6.3. The actual dependencies are correct, but the versions required and the instructions on how to install them are not.
+VS2022 installation instructions 
+================================
+
+Needed tools
+------------
+python3 (any recent release)
+git
+Visual Studio 2022 (I used Build tools LTSC 2022)
+ - C++ and C#
+ - MFC and ATL support
+GNATPro 24.2 or later
+Boost 1.85 or later
+ACE 8.0 or later
+Qt 5.15 or later
+Expat 2.6.2 or later
+
+The Java interfaces were not built in the latest release, but should still build if needed.
+
+Boost
+-----
+For this release I used 
+ https://sourceforge.net/projects/boost/files/boost-binaries/1.85.0/boost_1_85_0-msvc-14.3-64.exe/download
+ https://sourceforge.net/projects/boost/files/boost-binaries/1.85.0/boost_1_85_0-msvc-14.3-32.exe/download
+
+Install to default directory
+ACE
+---
+https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-8_0_0/ACE-8.0.0.zip
+
+Unzip to for example C:\ACE_wrappers-x64 and open command prompt there
+run:
+  "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" <x86 or x64>
+  cd ace 
+  msbuild -p:Configuration=Release ACE_vs2022.vcxproj
+  msbuild -p:Configuration=Debug ACE_vs2022.vcxproj
+
+
+Expat
+-----
+https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2
+extract and open command prompt there. run:
+ "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" <x86 or x64>
+ mkdir Debug
+ cd Debug
+ cmake .. -DCMAKE_BUILD_TYPE=Debug -G Ninja -DCMAKE_INSTALL_PREFIX=c:\expat
+ ninja build
+ ninja install
+ Repeat for Release
+ 
+Qt
+--
+Instructions for how to build Qt are outside the scope of these instructions. But I have successfully used Conan to build it.
+
+ 
+Set environment variables
+-------------------------
+ACE_ROOT=C:\ACE_wrappers-x64
+QTDIR=C:\Qt\5.15.12
+SAFIR_RUNTIME=C:\safir\runtime
+SAFIR_SDK=C:\safir\sdk
+
+Add Boost, ace, qt och expats bin-directories to PATH.
+
+Build and prepare binary
+------------------------
+Open a command prompt in the root of the Safir SDK Core directory and run the following commands:
+ "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" <x86 or x64>
+ build\build.py -f build\sdk_core.txt
+ build\create_windows_distributable.py
+
+The c:\safir directory now contains the sdk and runtime parts that you have built. The binary on github is this directory added to a zip file.
+ 
+
+Old installation instructions 
+=============================
 
 Installing Prerequisites
 ------------------------

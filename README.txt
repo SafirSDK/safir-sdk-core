@@ -4,4 +4,4 @@ Safir SDK Core is released under the GPL v3 license, a copy of which can be foun
 
 This is a patch release to add support for building with Visual Studio 2022 in 64 bits, with updated GNAT, ACE and Boost.
 
-All the included build instructions are completely out of date.
+The Linux build instructions are completely out of date, but the Windows ones have been updated.
