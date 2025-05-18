@@ -227,6 +227,33 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
+        /// Get information about a specific class member.
+        /// <para/>
+        /// Exactly the same as the other variant of GetInfo, but returns the values in a structure instead.
+        /// </summary>
+        /// <param name="typeId">TypeId of class or property.</param>
+        /// <param name="member">Index of member.</param>
+        /// <returns>The member information</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>
+        public static MemberInfo GetInfo(System.Int64 typeId, int member)
+        {
+            MemberInfo info;
+            info.typeId = typeId;
+            info.memberIndex = member;
+            var name = GetInfo(typeId,
+                               member,
+                               out info.memberType,
+                               out info.keyType,
+                               out info.memberTypeId,
+                               out info.keyTypeId,
+                               out info.stringLength,
+                               out info.collectionType,
+                               out info.arrayLength);
+            info.memberName = name;
+            return info;
+        }
+
+        /// <summary>
         /// Get the array size of a member.
         /// </summary>
         /// <param name="typeId">TypeId of class.</param>

@@ -304,6 +304,24 @@ namespace Typesystem
      * A type to contain binary data.
      */
     typedef std::vector<char> Binary;
+
+    /**
+     * A type that encapsulates all member info that is useful for reflection.
+     */
+    struct MemberInfo
+    {
+        Dob::Typesystem::TypeId typeId;
+        Dob::Typesystem::MemberIndex memberIndex;
+        Dob::Typesystem::MemberType memberType;
+        Dob::Typesystem::MemberType keyType;
+        std::wstring memberName;
+        Dob::Typesystem::TypeId memberTypeId;
+        Dob::Typesystem::TypeId keyTypeId;
+        Dob::Typesystem::Int32 stringLength;
+        Dob::Typesystem::CollectionType collectionType;
+        Dob::Typesystem::Int32 arrayLength;
+    };
+
 }
 }
 }

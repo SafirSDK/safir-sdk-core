@@ -91,6 +91,41 @@ std::wstring MappingKindStr(Safir::Dob::Typesystem::PropertyMappingKind k)
     return L"";
 }
 
+void CheckGetInfo(const Safir::Dob::Typesystem::TypeId typeId,
+                  const Safir::Dob::Typesystem::MemberIndex memberIndex,
+                  const Safir::Dob::Typesystem::MemberType  lMT,
+                  const Safir::Dob::Typesystem::MemberType  lKT,
+                  const char* const                         lMN,
+                  const Safir::Dob::Typesystem::TypeId      lMTId,
+                  const Safir::Dob::Typesystem::TypeId      lKTId,
+                  const Safir::Dob::Typesystem::Int32       lSL,
+                  const Safir::Dob::Typesystem::CollectionType lCT,
+                  const Safir::Dob::Typesystem::Int32       lAL)
+{
+    const auto info = Safir::Dob::Typesystem::Members::GetInfo(typeId, memberIndex);
+    if (info.typeId != typeId ||
+        info.memberIndex != memberIndex ||
+        info.memberType != lMT ||
+        info.keyType != lKT ||
+        info.memberName != Safir::Dob::Typesystem::Utilities::ToWstring(lMN)||
+        info.memberTypeId != lMTId ||
+        info.keyTypeId != lKTId||
+        info.stringLength != lSL||
+        info.collectionType != lCT||
+        info.arrayLength != lAL)
+    {
+        std::wcout << "GetInfo mismatch! Problem in implementation of simplified GetInfo:" << std::endl;
+        std::wcout<<"GetInfo 1: " <<lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
+        std::wcout<<"GetInfo 2: "
+                  << info.memberType << ","
+                  << info.memberName << ","
+                  << info.memberTypeId<< ","
+                  << info.stringLength << ","
+                  << CollectionTypeStr(info.collectionType) << ","
+                  << info.arrayLength <<std::endl;
+    }
+}
+
 std::wstring utf8_to_wstr( const std::string& str )
 {
     int left = 0;
@@ -526,6 +561,8 @@ void Test_Int32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Int32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Int32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " <<lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " << Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -702,6 +739,8 @@ void Test_Int64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Int64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Int64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -868,6 +907,8 @@ void Test_Float32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Float32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Float32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -1039,6 +1080,8 @@ void Test_Float64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Float64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Float64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -1207,6 +1250,8 @@ void Test_Boolean()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::BooleanMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::BooleanMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -1385,6 +1430,8 @@ void Test_Enumeration()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::EnumerationMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::EnumerationMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -1613,6 +1660,8 @@ void Test_String()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::StringMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::StringMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -1797,6 +1846,8 @@ void Test_EntityId()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::EntityIdMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::EntityIdMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -1966,6 +2017,8 @@ void Test_TypeId()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::TypeIdMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::TypeIdMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -2148,6 +2201,8 @@ void Test_InstanceId()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::InstanceIdMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::InstanceIdMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -2315,6 +2370,8 @@ void Test_ChannelId()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::ChannelIdMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::ChannelIdMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -2485,6 +2542,8 @@ void Test_HandlerId()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::HandlerIdMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::HandlerIdMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -2657,6 +2716,8 @@ void Test_Object()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::ObjectMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::ObjectMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -2839,6 +2900,8 @@ void Test_Binary()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::BinaryMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::BinaryMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -3003,6 +3066,8 @@ void Test_TestClass()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::TestClassMemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::TestClassMemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -3190,6 +3255,8 @@ void Test_Ampere32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Ampere32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Ampere32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -3358,6 +3425,8 @@ void Test_CubicMeter32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::CubicMeter32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::CubicMeter32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -3529,6 +3598,8 @@ void Test_Hertz32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Hertz32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Hertz32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -3697,6 +3768,8 @@ void Test_Joule32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Joule32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Joule32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -3867,6 +3940,8 @@ void Test_Kelvin32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kelvin32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kelvin32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -4035,6 +4110,8 @@ void Test_Kilogram32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kilogram32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kilogram32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -4205,6 +4282,8 @@ void Test_Meter32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Meter32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Meter32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -4373,6 +4452,8 @@ void Test_MeterPerSecond32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecond32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecond32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -4543,6 +4624,8 @@ void Test_MeterPerSecondSquared32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecondSquared32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecondSquared32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -4711,6 +4794,8 @@ void Test_Newton32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Newton32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Newton32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -4881,6 +4966,8 @@ void Test_Pascal32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Pascal32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Pascal32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -5049,6 +5136,8 @@ void Test_Radian32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Radian32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Radian32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -5219,6 +5308,8 @@ void Test_RadianPerSecond32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecond32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecond32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -5387,6 +5478,8 @@ void Test_RadianPerSecondSquared32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecondSquared32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecondSquared32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -5557,6 +5650,8 @@ void Test_Second32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Second32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Second32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -5725,6 +5820,8 @@ void Test_SquareMeter32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::SquareMeter32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::SquareMeter32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -5895,6 +5992,8 @@ void Test_Steradian32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Steradian32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Steradian32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -6064,6 +6163,8 @@ void Test_Volt32()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Volt32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Volt32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -6231,6 +6332,8 @@ void Test_Watt32()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Watt32MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Watt32MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -6401,6 +6504,8 @@ void Test_Ampere64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Ampere64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Ampere64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -6569,6 +6674,8 @@ void Test_CubicMeter64()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::CubicMeter64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::CubicMeter64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -6739,6 +6846,8 @@ void Test_Hertz64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Hertz64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Hertz64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -6907,6 +7016,8 @@ void Test_Joule64()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Joule64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Joule64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -7077,6 +7188,8 @@ void Test_Kelvin64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kelvin64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kelvin64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -7245,6 +7358,8 @@ void Test_Kilogram64()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kilogram64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kilogram64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -7415,6 +7530,8 @@ void Test_Meter64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Meter64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Meter64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -7583,6 +7700,8 @@ void Test_MeterPerSecond64()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecond64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecond64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -7753,6 +7872,8 @@ void Test_MeterPerSecondSquared64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecondSquared64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecondSquared64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -7921,6 +8042,8 @@ void Test_Newton64()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Newton64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Newton64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -8091,6 +8214,8 @@ void Test_Pascal64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Pascal64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Pascal64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -8259,6 +8384,8 @@ void Test_Radian64()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Radian64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Radian64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -8429,6 +8556,8 @@ void Test_RadianPerSecond64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecond64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecond64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -8597,6 +8726,8 @@ void Test_RadianPerSecondSquared64()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecondSquared64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecondSquared64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -8767,6 +8898,8 @@ void Test_Second64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Second64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Second64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -8935,6 +9068,8 @@ void Test_SquareMeter64()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::SquareMeter64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::SquareMeter64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
@@ -9105,6 +9240,8 @@ void Test_Steradian64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Steradian64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Steradian64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -9274,6 +9411,8 @@ void Test_Volt64()
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Volt64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Volt64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
@@ -9442,6 +9581,8 @@ void Test_Watt64()
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Watt64MemberMemberIndex(),
                                              lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
+
+    CheckGetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Watt64MemberMemberIndex(), lMT, lKT, lMN, lMTId, lKTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
     std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << CollectionTypeStr(lCT) << "," << lAL <<std::endl;

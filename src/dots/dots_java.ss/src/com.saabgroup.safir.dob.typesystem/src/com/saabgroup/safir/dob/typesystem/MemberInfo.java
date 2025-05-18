@@ -32,6 +32,18 @@ package com.saabgroup.safir.dob.typesystem;
 public class MemberInfo
 {
    /**
+    * Get the typeId of the member.
+    * @return The typeId of the member.
+    */
+    public long getTypeId() {return m_typeId;};
+
+    /**
+    * Get the member index of the member.
+    * @return The member index of the member.
+    */
+    public int getMemberIndex() {return m_memberIndex;};
+
+    /**
     * Get the type of the member.
     * @return The type of the member.
     */
@@ -86,7 +98,9 @@ public class MemberInfo
     public int getArrayLength() {return m_arrayLength;};
 
 
-    MemberInfo(MemberType memberType,
+    MemberInfo(long typeId,
+               int memberIndex,
+               MemberType memberType,
                MemberType keyType,
                String memberName,
                long memberTypeId,
@@ -95,6 +109,8 @@ public class MemberInfo
                CollectionType collectionType,
                int arrayLength)
     {
+        m_typeId = typeId;
+        m_memberIndex = memberIndex;
         m_memberType = memberType;
         m_keyType = keyType;
         m_memberName = memberName;
@@ -105,6 +121,8 @@ public class MemberInfo
         m_arrayLength = arrayLength;
     }
 
+    private long m_typeId;
+    private int m_memberIndex;
     private MemberType m_memberType;
     private MemberType m_keyType;
     private String m_memberName;

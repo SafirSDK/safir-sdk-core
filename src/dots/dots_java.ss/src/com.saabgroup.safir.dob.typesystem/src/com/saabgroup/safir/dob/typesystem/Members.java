@@ -177,14 +177,11 @@ public class Members {
     }
 
     /**
-     * Get the type of a member.
-     *
-     * getMemberInfo is used in other languages. In Java each selector is made
-     * available. getMemberType is the only missing in other languages.
+     * Get information about a specific class member.
      *
      * @param typeId TypeId of class or property.
      * @param member Index of member.
-     * @return The MemberType of the member.
+     * @return The info for the member.
      * @throws IllegalValueException There is no such type defined or there is no such member in the type.
      */
     public static MemberInfo getInfo(long typeId, int member)
@@ -205,7 +202,9 @@ public class Members {
             throw new IllegalValueException("There is no such type or member defined");
         }
 
-        return new MemberInfo(MemberType.values()[memberType[0]],
+        return new MemberInfo(typeId,
+                              member,
+                              MemberType.values()[memberType[0]],
                               MemberType.values()[keyType[0]],
                               memberName[0],
                               complexType[0],

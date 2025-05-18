@@ -232,4 +232,42 @@ namespace Safir.Dob.Typesystem
         /// <summary>Operation wants to manipulate a value.</summary>
         ValueMode
     }
+
+    /// <summary>
+    /// A type that encapsulates all member info that is useful for reflection.
+    /// </summary>
+    public struct MemberInfo
+    {
+        ///TypeId of class or property.
+        public System.Int64 typeId;
+
+        /// Index of member.
+        public int memberIndex;
+
+        /// The type of the member.
+        public MemberType memberType;
+
+        /// The type of the key if member is dictionary.
+        public MemberType keyType;
+
+        /// The name of the member.
+        public string memberName;
+
+        /// If memberType is object or enumeration, this is the typeId of that type.
+        ///                            If memberType is something else the value is -1.
+        public System.Int64 memberTypeId;
+
+        /// If member is a dictionary and keyType is enumeration, this is the typeId of that type.
+        public System.Int64 keyTypeId;
+
+        /// Length of the string
+        public int stringLength;
+
+        /// Member collection type.
+        public CollectionType collectionType;
+
+        /// Maximum capacity of array if the member is an array (1 if not an array). Not applicable if type id is a property.
+        public int arrayLength;
+    };
+
 }

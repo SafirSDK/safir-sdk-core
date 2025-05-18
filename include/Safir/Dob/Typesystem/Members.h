@@ -138,6 +138,18 @@ namespace Members
                               Dob::Typesystem::CollectionType & collectionType,
                               Dob::Typesystem::Int32 & arrayLength);
 
+
+    /**
+     * Get information about a specific class member.
+     *
+     * Exactly the same as the above variant of GetInfo, but returns the values in a structure instead.
+     *
+     * This is likely slightly less performant than the other variant, due to the copying of some
+     * values and conversion of strings.
+     */
+    DOTS_CPP_API MemberInfo GetInfo(const Dob::Typesystem::TypeId typeId,
+                                    const Dob::Typesystem::MemberIndex member);
+
     /**
      * Get the array size of a member.
      *

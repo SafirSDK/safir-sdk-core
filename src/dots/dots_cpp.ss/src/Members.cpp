@@ -198,6 +198,28 @@ namespace Members
         }
     }
 
+    MemberInfo
+    GetInfo(const Dob::Typesystem::TypeId typeId,
+            const Dob::Typesystem::MemberIndex member)
+    {
+        MemberInfo info = {};
+        info.typeId = typeId;
+        info.memberIndex = member;
+        const char* memberName;
+        GetInfo(typeId,
+                member,
+                info.memberType,
+                info.keyType,
+                memberName,
+                info. memberTypeId,
+                info.keyTypeId,
+                info.stringLength,
+                info.collectionType,
+                info.arrayLength);
+        info.memberName = Utilities::ToWstring(memberName);
+        return info;
+    }
+
 
     Int32
     GetArraySize(const TypeId typeId,
