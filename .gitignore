@@ -12,7 +12,6 @@
 *.pch
 
 #misc generated files
-precompiled_header_for_cpp.cpp
 SafirSdkCoreVersion.h
 Manifest.generated.txt
 

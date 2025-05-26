@@ -48,7 +48,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   if (SAFIR_EXTERNAL_BUILD)
     #load compiler settings, csharp and java!
     include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirCompilerSettings.cmake)
-    include(${SAFIR_SDK_CORE_CMAKE_DIR}/PrecompiledHeader.cmake)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
     include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 
@@ -56,8 +55,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     if (MSVC)
       SET(CMAKE_DEBUG_POSTFIX "d")
     endif()
-  else()
-    include(PrecompiledHeader)
   endif()
 
   #Disable a warning we get with gcc12
@@ -290,17 +287,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     set(precompiled_header_path ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data/)
   endif()
 
-  #MSVC needs an extra source file, so we generate one
-  if (MSVC)
-    add_custom_command(
-      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp
-      COMMAND ${CMAKE_COMMAND} -E echo "//This is an automatically generated file." > ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp
-      COMMAND ${CMAKE_COMMAND} -E echo "#include <precompiled_header_for_cpp.h>" >> ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp
-      COMMENT "Creating precompiled_header_for_cpp.cpp for ${_gen_NAME}"
-      VERBATIM)
-    list (APPEND cpp_files ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp)
-  endif()
-
   #add safir link dirs.
   if (SAFIR_EXTERNAL_BUILD)
     link_directories(${SAFIR_SDK_CORE_LIBRARIES_DIR})
@@ -308,6 +294,11 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
   ADD_LIBRARY(safir_generated-${_gen_NAME}-cpp SHARED ${cpp_files})
 
+  if (NO_SAFIR_UNITY_BUILD)
+    set_target_properties(safir_generated-${_gen_NAME}-cpp PROPERTIES UNITY_BUILD False)
+  else()
+    set_target_properties(safir_generated-${_gen_NAME}-cpp PROPERTIES UNITY_BUILD True UNITY_BUILD_UNIQUE_ID "SUUID")
+  endif()
   target_include_directories(safir_generated-${_gen_NAME}-cpp BEFORE
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen/cpp/include>)
 
@@ -318,12 +309,14 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
       ${SAFIR_SDK_CORE_INCLUDE_DIRS})
   endif()
 
-  ADD_PRECOMPILED_HEADER(safir_generated-${_gen_NAME}-cpp
-    ${precompiled_header_path}/precompiled_header_for_cpp.h)
-
   #include path for precompiled_header_for_cpp.h
   target_include_directories(safir_generated-${_gen_NAME}-cpp
     PRIVATE ${precompiled_header_path})
+
+  target_precompile_headers(safir_generated-${_gen_NAME}-cpp
+    PRIVATE
+    [["precompiled_header_for_cpp.h"]]
+  )
 
   target_link_libraries(safir_generated-${_gen_NAME}-cpp PRIVATE dots_kernel)
 

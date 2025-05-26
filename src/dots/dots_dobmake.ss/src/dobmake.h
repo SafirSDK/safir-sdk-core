@@ -69,6 +69,8 @@ private slots:
 
     void on_buildAndInstall_clicked();
 
+    void on_clean_clicked();
+
     void on_debugRadioButton_clicked(bool checked);
 
     void on_releaseRadioButton_clicked(bool checked);
@@ -84,6 +86,7 @@ private slots:
 private:
     void UpdateInstallButton();
     void UpdateBuildButton();
+    void UpdateCleanButton();
     void OpenLog(const bool ignoreCheckbox = false);
 
     bool m_debug;

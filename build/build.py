@@ -35,6 +35,7 @@ import time
 import shutil
 import argparse
 import codecs
+import contextlib
 from xml.sax.saxutils import escape
 
 from os.path import join, isfile, isdir
@@ -185,6 +186,15 @@ def num_jobs():
         num = 2
     return num
 
+
+@contextlib.contextmanager
+def pushd(new_dir):
+    previous_dir = os.getcwd()
+    os.chdir(new_dir)
+    try:
+        yield
+    finally:
+        os.chdir(previous_dir)
 
 def read_version():
     """Parse the VERSION.txt file to find out our version"""
@@ -392,12 +402,10 @@ def parse_command_line():
 
     action.add_argument("--package",
                         action="store_true",
-                        default=False,
                         help=suppress("Build everything and package the results for the current platform."))
 
     action.add_argument("--package-noclean",
                         action="store_true",
-                        default=False,
                         help=suppress("Same as --package, but attempt to continue from previous build"))
 
     action.add_argument("--install",
@@ -407,11 +415,20 @@ def parse_command_line():
                         "without setting CMAKE_INSTALL_PREFIX, useful if your "
                         "CMakeLists.txt has absolute paths in the INSTALL directives.")
 
+    action.add_argument("--clean",
+                        action="store_true",
+                        help="Remove previous build results instead of building.")
+
+    parser.add_argument("--no-unity-build",
+                        action="store_true",
+                        help="Unity builds can require a lot of memory for the compiler. Try this "
+                        "if you are having trouble with dobmake crashing due to internal compiler "
+                        "errors. You may have to use --clean to clean out previous results first.")
+
     parser.add_argument("--skip-tests", action="store_true", help=suppress("Skip running the unit tests"))
 
     parser.add_argument("--jenkins",
                         action="store_true",
-                        default=False,
                         help=suppress("Increase verbosity and obey build matrix variables."))
 
     parser.add_argument("--verbose",
@@ -484,12 +501,12 @@ class BuilderBase(object):
     def build(self):
         """Build the project"""
         for config in self.configs:
-            olddir = os.getcwd()
+            if self.arguments.clean:
+                remove(config)
+                continue
             mkdir(config)
-            os.chdir(config)
-
-            self.__build_internal(os.pardir, config)
-            os.chdir(olddir)
+            with pushd(config):
+                self.__build_internal(os.pardir, config)
 
         if self.arguments.package:
             self.__package()
@@ -501,6 +518,8 @@ class BuilderBase(object):
     def __configure(self, srcdir, config):
 
         command = ("cmake", "-G", "Ninja", "-D", "CMAKE_BUILD_TYPE:string=" + config)
+
+        command += ("-D", f"NO_SAFIR_UNITY_BUILD={self.arguments.no_unity_build}")
 
         if self.install_prefix is not None:
             command += ("-D", "CMAKE_INSTALL_PREFIX=" + self.install_prefix)
@@ -995,11 +1014,11 @@ if hasattr(os, "nice"):
 try:
     (tests, failed) = main()
     LOGGER.log("Result", "header")
-    LOGGER.log("Build completed successfully!")
+    LOGGER.log("Operation completed successfully!")
     if tests == -1:
         pass
     elif tests == 0:
-        LOGGER.log("No tests were performed")
+        LOGGER.log("No tests were performed.")
     elif failed == 0:
         LOGGER.log("All tests ran successfully!")
     else:

@@ -22,9 +22,6 @@ if (UNIX)
   #make sure we get the correct posix version
   add_compile_definitions(_POSIX_C_SOURCE=200809L)
 
-  #this is defined by -pthread (above) in most cases, but at least when creating precompiled headers
-  #it is not, so we define it here as well.
-  add_compile_definitions(_REENTRANT)
 endif ()
 
 if (MSVC)

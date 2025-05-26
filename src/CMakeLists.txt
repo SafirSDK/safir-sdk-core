@@ -468,7 +468,6 @@ INSTALL(FILES
   cmake/SafirLoadCSharp.cmake
   cmake/FindCSharp.cmake
   cmake/SafirLoadJava.cmake
-  cmake/PrecompiledHeader.cmake
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
   DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
   COMPONENT Development)

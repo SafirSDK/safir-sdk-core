@@ -49,7 +49,9 @@ public:
                 const bool debug,
                 const bool release,
                 const bool force32Bit, //adds --32-bit to cmd line
-                const QString& installDir)
+                const QString& installDir,
+                const bool clean,
+                const bool noUnityBuild)
         : QThread(parent)
         , m_dobmakeBatchScript(dobmakeBatchScript)
         , m_buildDir(buildDir)
@@ -57,6 +59,8 @@ public:
         , m_release(release)
         , m_force32Bit(force32Bit)
         , m_installDir(installDir)
+        , m_clean(clean)
+        , m_noUnityBuild(noUnityBuild)
     {
 
     }
@@ -113,6 +117,16 @@ private:
             params << "--install" << m_installDir;
         }
 
+        if (m_clean)
+        {
+            params << "--clean";
+        }
+
+        if (m_noUnityBuild)
+        {
+            params << "--no-unity-build";
+        }
+        
         QProcess process;
         process.setWorkingDirectory(m_buildDir);
         process.closeReadChannel(QProcess::StandardOutput);
@@ -131,4 +145,6 @@ private:
     const bool m_release;
     const bool m_force32Bit;
     const QString m_installDir;
+    const bool m_clean;
+    const bool m_noUnityBuild;
 };

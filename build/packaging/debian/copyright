@@ -112,11 +112,6 @@ License: 3-clause BSD License
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Files: src/cmake/PrecompiledHeader.cmake
-Copyright: 2009-2013, Lars Christensen
-           2013-2014, Lars Hagström
-License: Expat
-
 Files: src/cmake/FindCSharp.cmake
 Copyright: 2007, Arno Rehn
            2008-2016, Lars Hagström

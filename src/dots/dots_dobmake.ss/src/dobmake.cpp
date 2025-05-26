@@ -82,7 +82,7 @@ Dobmake::Dobmake(QWidget *parent)
     ui->setupUi(this);
     ui->douDirectory->setText("");
     ui->installDirectory->setText("");
-
+    resize(size().width(),minimumSize().height());
 #if defined(linux) || defined(__linux) || defined(__linux__)
     ui->configCheckButtons->hide();
     m_debug = false;
@@ -182,6 +182,7 @@ void Dobmake::on_douDirectory_textChanged(const QString &path)
 
     UpdateBuildButton();
     UpdateInstallButton();
+    UpdateCleanButton();
 }
 
 void Dobmake::on_installDirectory_textChanged(const QString &path)
@@ -252,6 +253,15 @@ void Dobmake::UpdateBuildButton()
                           cmakelists.exists());
 }
 
+void Dobmake::UpdateCleanButton()
+{
+    const QFile dir(ui->douDirectory->text());
+    const QFile cmakelists(ui->douDirectory->text() + QDir::separator() + "CMakeLists.txt");
+    ui->clean->setEnabled(!m_buildRunning &&
+                          dir.exists() &&
+                          cmakelists.exists());
+}
+
 
 void Dobmake::OpenLog(const bool ignoreCheckbox)
 {
@@ -284,14 +294,16 @@ void Dobmake::on_build_clicked()
                                           m_debug,
                                           m_release,
                                           Force32Bit(),
-                                          ""); //no installation
-
+                                          "", //no installation
+                                          false, //not cleaning
+                                          ui->disableUnityBuild->isChecked());
     connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     m_buildRunning = true;
     QApplication::setOverrideCursor(Qt::BusyCursor);
     UpdateBuildButton();
     UpdateInstallButton();
+    UpdateCleanButton();
     worker->start();
     OpenLog();
 }
@@ -314,7 +326,9 @@ void Dobmake::on_buildAndInstall_clicked()
                                           m_debug,
                                           m_release,
                                           Force32Bit(),
-                                          installDir);
+                                          installDir,
+                                          false,
+                                          ui->disableUnityBuild->isChecked());
 
     connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
@@ -322,9 +336,35 @@ void Dobmake::on_buildAndInstall_clicked()
     QApplication::setOverrideCursor(Qt::BusyCursor);
     UpdateBuildButton();
     UpdateInstallButton();
+    UpdateCleanButton();
     worker->start();
     OpenLog();
 }
+
+void Dobmake::on_clean_clicked()
+{
+    BuildThread* worker = new BuildThread(this,
+                                          GetDobmakeBatchScript(),
+                                          ui->douDirectory->text(),
+                                          m_debug,
+                                          m_release,
+                                          Force32Bit(),
+                                          "", //no installation
+                                          true, //cleaning
+                                          ui->disableUnityBuild->isChecked());
+
+
+    connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
+    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+    m_buildRunning = true;
+    QApplication::setOverrideCursor(Qt::BusyCursor);
+    UpdateBuildButton();
+    UpdateInstallButton();
+    UpdateCleanButton();
+    worker->start();
+    OpenLog();
+}
+
 
 void Dobmake::BuildComplete(const bool result)
 {
@@ -332,16 +372,17 @@ void Dobmake::BuildComplete(const bool result)
     QApplication::restoreOverrideCursor();
     UpdateBuildButton();
     UpdateInstallButton();
+    UpdateCleanButton();
 
     if (result)
     {
-        QMessageBox::information(this,"Build successful!", "Build was completed successfully!");
+        QMessageBox::information(this,"Operation successful!", "Operation was completed successfully!");
     }
     else
     {
         QMessageBox box(QMessageBox::Critical,
-                        "Build failed!",
-                        "Build failed!\nPlease check your dou and CMakeLists.txt files for errors.",
+                        "Operation failed!",
+                        "Operation failed!\nPlease check your dou and CMakeLists.txt files for errors.",
                         QMessageBox::Ok);
         QAbstractButton* showLog = box.addButton("Show Log", QMessageBox::ApplyRole);
         box.exec();
