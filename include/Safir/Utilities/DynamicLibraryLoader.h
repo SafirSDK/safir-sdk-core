@@ -125,6 +125,23 @@ namespace Utilities
         {
             return reinterpret_cast<T*>(GetFunctionInternal(functionName));
         }
+
+        /**
+         * If this is true the library will be unloaded when the object
+         * is destroyed. This will invalidate any function pointers.
+         *
+         * @param [in] value New value
+         */
+        void SetUnloadOnDestruction(const bool value) {m_unloadOnDestruction = value;}
+
+        /**
+         * If this is true the library will be unloaded when the object
+         * is destroyed. This will invalidate any function pointers.
+         *
+         * @return The current value
+         */
+        bool GetUnloadOnDestruction() const {return m_unloadOnDestruction;}
+
     private:
         DynamicLibraryLoader(const DynamicLibraryLoader&) = delete;
         DynamicLibraryLoader& operator=(const DynamicLibraryLoader&) = delete;
