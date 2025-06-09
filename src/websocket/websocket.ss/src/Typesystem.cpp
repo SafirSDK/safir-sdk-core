@@ -80,7 +80,7 @@ namespace Typesystem
             try
             {
                 //localRepository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(directories);
-                auto localRepository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(directories);
+                auto localRepository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionsDirs(directories);
                 return localRepository;
             }
             catch(const Safir::Dob::Typesystem::ToolSupport::ParseError& err)

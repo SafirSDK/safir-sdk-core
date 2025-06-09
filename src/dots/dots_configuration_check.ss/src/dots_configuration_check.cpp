@@ -153,6 +153,7 @@ void TypeIdLookup(const std::string& typeIdString, const std::map<std::string, D
     }
 }
 
+#if 0
 DouDiffHelper::NameTypeVector GetMembers(DotsC_TypeId typeId)
 {
     DouDiffHelper::NameTypeVector members;
@@ -180,7 +181,6 @@ DouDiffHelper::NameTypeVector GetParameters(DotsC_TypeId typeId)
     }
     return parameters;
 }
-
 class CheckConfigurationDotsKernel
 {
 public:
@@ -399,7 +399,7 @@ private:
         exit(1); // diff between dou/dom and generated libs
     }
 };
-
+#endif
 class CheckConfigurationLocal
 {
 public:
@@ -409,12 +409,13 @@ public:
         RepPtr rep;
         try
         {
+            std::cout << "Checking local config" << std::endl;
             std::vector<boost::filesystem::path> paths;
             for (std::vector<std::string>::const_iterator it=cmd.paths.begin(); it!=cmd.paths.end(); ++it)
             {
                 paths.push_back(boost::filesystem::path(*it));
             }
-            rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(paths);
+            rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionFiles(paths);
         }
         catch(const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
         {
@@ -497,13 +498,15 @@ private:
 
 int main(int argc, char* argv[])
 {
+    std::cerr << "running dots_configuration_check" << std::endl;
     CmdLine cmd(argc, argv);
 
     try
     {
         if (cmd.paths.empty())
         {
-            return CheckConfigurationDotsKernel::Run(cmd);
+            return 1;
+            //return CheckConfigurationDotsKernel::Run(cmd);
         }
         else
         {

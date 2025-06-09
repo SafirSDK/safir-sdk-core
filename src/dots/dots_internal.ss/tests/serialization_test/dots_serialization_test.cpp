@@ -643,7 +643,7 @@ int main(int argc, char* argv[])
     RepositoryPtr repository;
     try
     {
-        repository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(douDir);
+        repository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionsDir(douDir);
 
     }
     catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)

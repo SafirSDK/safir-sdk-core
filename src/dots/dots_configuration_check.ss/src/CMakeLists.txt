@@ -4,7 +4,7 @@ TARGET_LINK_LIBRARIES(dots_configuration_check PRIVATE
   lluf_internal
   dots_kernel
   dots_internal
-  dots_cpp
+  #dots_cpp
   Boost::program_options)
 
 SAFIR_INSTALL(TARGETS dots_configuration_check)

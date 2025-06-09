@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
         };
 
         DouDiffHelper dh(roots);
-        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
+        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionsDirs(roots);
 
         if (dh.LoadType("Test.MyEntity", baseMyEntityChecksum))
         {
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
         };
 
         DouDiffHelper dh(roots);
-        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
+        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionsDirs(roots);
 
         if (dh.LoadType("Test.MyEntity", baseMyEntityChecksum))
         {
@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
         };
 
         DouDiffHelper dh(roots);
-        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
+        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionsDirs(roots);
 
         // Safir.Dob.Entity
         std::cout << "--- Type: Safir.Dob.Entity ---" << std::endl;
@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
         };
 
         DouDiffHelper dh(roots);
-        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
+        auto repo = Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionsDirs(roots);
 
         std::ostringstream os;
         //Safir::Dob::Typesystem::ToolSupport::RepositoryToString(repo.get(), true, os);

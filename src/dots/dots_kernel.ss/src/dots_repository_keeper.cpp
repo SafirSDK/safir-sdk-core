@@ -146,7 +146,7 @@ namespace Internal
         std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> localRepository;
         try
         {
-            localRepository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(m_paths);
+            localRepository=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionsDirs(m_paths);
         }
         catch(const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
         {

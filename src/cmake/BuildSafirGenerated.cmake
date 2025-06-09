@@ -218,8 +218,10 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     if (TARGET ${DEP}-dou)
       get_target_property(sd ${DEP}-dou DOU_DIR)
       list(APPEND DOTS_V_DEPS ${DEP}=${sd})
+      list(APPEND DCC_DEPS ${sd})
     else()
       list(APPEND DOTS_V_DEPS ${DEP})
+      list(APPEND DCC_DEPS ${DEP})
     endif()
   endforeach()
 
@@ -264,6 +266,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   ADD_CUSTOM_COMMAND(
     OUTPUT ${cpp_files} ${java_files} ${dotnet_files}
 
+    COMMAND $<TARGET_FILE:dots_configuration_check> -p ${_gen_DOM_FILES} ${_gen_DOU_FILES} ${DCC_DEPS}
     COMMAND ${dots_v_command} "@${response_file}"
     DEPENDS ${dod_files} ${_gen_DOU_FILES} ${_gen_NAMESPACE_MAPPINGS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

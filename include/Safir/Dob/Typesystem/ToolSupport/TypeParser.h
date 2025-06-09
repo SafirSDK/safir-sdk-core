@@ -99,7 +99,7 @@ namespace ToolSupport
      * @return TypeRepository containing all types, i.e classes, exceptions, enums, properties and property mappings.
      * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
      */
-    static inline std::shared_ptr<const TypeRepository> ParseTypeDefinitions(const std::vector<boost::filesystem::path>& roots)
+    static inline std::shared_ptr<const TypeRepository> ParseTypeDefinitionsDirs(const std::vector<boost::filesystem::path>& roots)
     {
         std::vector<boost::filesystem::path> douFiles, domFiles;
         GetFilesFromRootDirectories(roots, douFiles, domFiles);
@@ -114,13 +114,42 @@ namespace ToolSupport
      * @return TypeRepository containing all types, i.e classes, exceptions, enums, properties and property mappings.
      * @throws Safir::Dob::Typesystem::Parser:ParseError The dou- or dom- files at the specified path contains errors.
      */
-    static inline std::shared_ptr<const TypeRepository> ParseTypeDefinitions(const boost::filesystem::path& root)
+    static inline std::shared_ptr<const TypeRepository> ParseTypeDefinitionsDir(const boost::filesystem::path& root)
     {
         std::vector<boost::filesystem::path> roots;
         roots.push_back(root);
-        return ParseTypeDefinitions(roots);
+        return ParseTypeDefinitionsDirs(roots);
     }
 
+    static inline std::shared_ptr<const TypeRepository> ParseTypeDefinitionFiles(const std::vector<boost::filesystem::path>& files)
+    {
+        std::vector<boost::filesystem::path> douFiles, domFiles;
+        for (const auto& f : files)
+        {
+            if (f.extension() == ".dou")
+            {
+                douFiles.push_back(f);
+            }
+            else if (f.extension() == ".dom")
+            {
+                domFiles.push_back(f);
+            }
+            else if (boost::filesystem::is_directory(f))
+            {
+                std::vector<boost::filesystem::path> roots;
+                roots.push_back(f);
+                GetFilesFromRootDirectories(roots, douFiles, domFiles);
+            }
+            else
+            {
+                std::ostringstream os;
+                os<<"The file '"<<f<<"' is neither a dou or dom file or a directory."<<std::endl;
+                throw ParseError("Invalid file specified", os.str(), f.string(), 221);
+            }
+
+        }
+        return Internal::ParseTypeDefinitionsImpl(douFiles, domFiles);
+     }
 
 
 }

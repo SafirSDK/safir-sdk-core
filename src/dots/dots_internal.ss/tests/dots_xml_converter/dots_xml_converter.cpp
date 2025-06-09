@@ -28,7 +28,7 @@ public:
     {
         try
         {
-            m_rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(m_douDir);
+            m_rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionsDir(m_douDir);
         }
         catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
         {

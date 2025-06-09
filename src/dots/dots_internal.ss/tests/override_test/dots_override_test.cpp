@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     std::set<std::string> parsedFiles;
     try
     {
-        std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitions(roots);
+        std::shared_ptr<const Safir::Dob::Typesystem::ToolSupport::TypeRepository> rep=Safir::Dob::Typesystem::ToolSupport::ParseTypeDefinitionsDirs(roots);
         GetFiles(rep, parsedFiles);
     }
     catch (const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
