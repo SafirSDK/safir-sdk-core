@@ -1,6 +1,6 @@
-project(dobmake_test_separate_dirs_2 CXX)
-
 cmake_minimum_required(VERSION 3.11)
+
+project(dobmake_test_separate_dirs_2 CXX)
 
 find_package(SafirSDKCore REQUIRED)
 
