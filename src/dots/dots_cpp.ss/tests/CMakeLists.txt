@@ -1,1 +1,2 @@
 add_subdirectory(constants_test)
+add_subdirectory(convenience_test)
