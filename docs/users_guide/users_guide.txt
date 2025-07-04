@@ -4024,24 +4024,61 @@ are not.
 Here are some examples of connection strings for the different databases, taken from our
 test suite in its Windows configuration. Also listed are any required connection string
 options, without which something bad will happen (usually what will happen is that
-Unicode strings and dope_bin2xml will fail on Windows).
+Unicode strings and dope_bin2xml will fail on Windows). The connection strings are
+usually handled as one line of text, but they are broken up into multiple lines here, for
+readability.
 
 PostgreSQL::
-    +DRIVER=\{PostgreSQL UNICODE(x64)\};Server=localhost;ByteaAsLongVarBinary=1;LFConversion=0;Database=dope_db;Uid=dopeuser;Pwd=dopeuser+
-    +
-    Required options: *ByteaAsLongVarBinary=1;LFConversion=0*
++
+----
+DRIVER=\{PostgreSQL UNICODE(x64)\};
+Server=localhost;
+ByteaAsLongVarBinary=1;
+LFConversion=0;
+Database=dope_db;
+Uid=dopeuser;
+Pwd=dopeuser
+----
++
+Required options: *ByteaAsLongVarBinary=1;LFConversion=0*
+
 MySQL/MariaDB::
-    +DRIVER=\{MariaDB ODBC 2.0 Driver\};Server=localhost;charset=utf8;Database=dope_db;Uid=dopeuser;Pwd=dopeuser+
-    +
-    Required options: *charset=utf8*
++
+----
+DRIVER=\{MariaDB ODBC 2.0 Driver\};
+Server=localhost;
+charset=utf8;
+Database=dope_db;
+Uid=dopeuser;
+Pwd=dopeuser
+----
++
+Required options: *charset=utf8*
+
 Microsoft SQL Server::
-    +Driver=\{SQL Server\};Server=localhost\SQLEXPRESS;Database=dope_db;Uid=dopeuser;Pwd=dopeuser+
-    +
-    Required options: None
++
+----
+Driver=\{SQL Server\};
+Server=localhost\SQLEXPRESS;
+Database=dope_db;
+Uid=dopeuser;
+Pwd=dopeuser
+----
++
+Required options: None
+
 Mimer::
-    +Driver=\{MIMER\};Protocol=tcp;Node=localhost;Database=dope_db;Uid=dopeuser;Pwd=dopeuser+
-    +
-    Required options: None
++
+----
+Driver=\{MIMER\};
+Protocol=tcp;
+Node=localhost;
+Database=dope_db;
+Uid=dopeuser;
+Pwd=dopeuser
+----
++
+Required options: None
 
 Note that the Microsoft SQL Server connection string above implies that we're using mixed
 mode authentication, which is something you might not want to do. Change accordingly.
