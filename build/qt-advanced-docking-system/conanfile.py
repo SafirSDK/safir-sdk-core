@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get
+from conan.tools.files import get, patch
+import os
 
 class qt_advanced_docking_systemRecipe(ConanFile):
     name = "qt-advanced-docking-system"
-    version = "4.3.1"
+    version = "4.4.0"
     package_type = "library"
 
     # Optional metadata
@@ -29,6 +30,7 @@ class qt_advanced_docking_systemRecipe(ConanFile):
                        "fPIC": True,
                        "qt_from_conan": False,
                        "qt_major_version": 6}
+    exports_sources = "*.patch"
 
     def requirements(self):
         if self.options.qt_from_conan and self.options.qt_major_version == 5:
@@ -38,6 +40,8 @@ class qt_advanced_docking_systemRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        patch_file = os.path.join(self.export_sources_folder, "qt69-build.patch")
+        patch(self, patch_file=patch_file)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -72,7 +76,7 @@ class qt_advanced_docking_systemRecipe(ConanFile):
     def package_info(self):
         print("BUILD_TYPE:", self.settings.build_type)
         print("QT_MAJOR_VERSION:", self.options.qt_major_version)
-        name = "qt" + str(self.options.qt_major_version) + "advanceddocking"
+        name = "qtadvanceddocking-qt" + str(self.options.qt_major_version)
         if self.settings.build_type == "Debug":
             name += "d"
         if not self.options.shared:
