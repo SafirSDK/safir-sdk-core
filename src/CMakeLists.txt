@@ -47,6 +47,7 @@ if (MSVC)
       Qt6::QWindowsIntegrationPlugin
       ${windows_plugin}
       #These are windows libraries that qt needs to link against.
+      Uiautomationcore
       shcore
       UxTheme
       Setupapi
