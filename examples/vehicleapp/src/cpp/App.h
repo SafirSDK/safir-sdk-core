@@ -85,16 +85,16 @@ namespace VehicleAppCpp
         // This application is event driven. It's triggered by events
         // received in the main event loop.
         // The main event loop for this application is implemented by
-        // the asio io_service.
+        // the asio io_context.
         //
         // The Dispatcher class makes a thread switch from the calling
         // Dob thread to this applications main thread. It performs a dispatch
         // on the Dob connection that will result in callbacks to all overidden
         // Dob interface methods, for example OnCreateRequest call in EntityOwner.
-        boost::asio::io_service m_ioService;
+        boost::asio::io_context m_ioContext;
         Safir::Utilities::AsioDispatcher   m_dispatch;
 #else
-        // The StdDispatcherLoop class is a very basic replacement for Boost.Asio io_service
+        // The StdDispatcherLoop class is a very basic replacement for Boost.Asio io_context
         // All this does is to switch to the main thread and do dispatching there when an
         // OnDoDispatch callback is received. Read more about dispatching in the User's Guide.
         // This class is probably not really useful for you, it is only here to allow compilation

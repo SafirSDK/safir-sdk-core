@@ -25,7 +25,7 @@
 #include "app.h"
 #include <iostream>
 
-App::App(const std::vector<std::string> & commandLine): m_dispatch(m_Connection,m_ioService)
+App::App(const std::vector<std::string> & commandLine): m_dispatch(m_Connection,m_ioContext)
 {
     if (commandLine.size() < 3)
     {
@@ -62,13 +62,13 @@ void App::PrintHelp()
 
 void App::OnStopOrder()
 {
-    m_ioService.stop();
+    m_ioContext.stop();
 }
 
 
 
 void App::Run()
 {
-    boost::asio::io_service::work keepRunning(m_ioService);
-    m_ioService.run();
+    auto work = boost::asio::make_work_guard(m_ioContext);
+    m_ioContext.run();
 }

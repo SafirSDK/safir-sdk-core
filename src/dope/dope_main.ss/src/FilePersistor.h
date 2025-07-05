@@ -42,7 +42,7 @@ public:
     /**
      * Constructor
      */
-    explicit FilePersistor(boost::asio::io_service& ioService);
+    explicit FilePersistor(boost::asio::io_context& ioContext);
 
 private:
     void Store(const Safir::Dob::Typesystem::EntityId& entityId,

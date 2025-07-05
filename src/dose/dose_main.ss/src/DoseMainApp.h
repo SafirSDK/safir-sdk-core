@@ -58,7 +58,7 @@ namespace Internal
     class DoseMainApp : private boost::noncopyable
     {
     public:
-        explicit DoseMainApp(boost::asio::io_service& ioService);
+        explicit DoseMainApp(boost::asio::io_context& ioContext);
 
         ~DoseMainApp();
 
@@ -91,11 +91,11 @@ namespace Internal
         void HandleEvents();
 
         std::atomic<bool> m_stopped;
-        boost::asio::io_service& m_ioService;
+        boost::asio::io_context& m_ioContext;
 
-        boost::asio::io_service::strand m_strand;
-        boost::asio::io_service::strand m_wcoutStrand;
-        std::shared_ptr<boost::asio::io_service::work> m_work;
+        boost::asio::io_context::strand m_strand;
+        boost::asio::io_context::strand m_wcoutStrand;
+        boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
 
         int64_t m_nodeId;
         std::unique_ptr<Distribution> m_distribution;

@@ -110,8 +110,8 @@ public:
 
 BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
 {
-    boost::asio::io_service io;
-    auto work=std::make_shared<boost::asio::io_service::work>(io);
+    boost::asio::io_context io;
+    auto work=std::make_shared<boost::asio::io_context::work>(io);
 
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)
@@ -150,7 +150,7 @@ class PoolDistTest
 {
 public:
     PoolDistTest(int64_t nodeId, int64_t nodeType, const std::shared_ptr<SmartSyncState>&,
-       boost::asio::io_service::strand&,
+       boost::asio::io_context::strand&,
        Distribution&,
        const std::function<void(int64_t)>& completionHandler)
         :m_nodeId(nodeId)
@@ -196,8 +196,8 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         PoolDistTest::PoolDistributions[id].second(id);
     };
 
-    boost::asio::io_service io;
-    auto work=std::make_shared<boost::asio::io_service::work>(io);
+    boost::asio::io_context io;
+    auto work=std::make_shared<boost::asio::io_context::work>(io);
 
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)

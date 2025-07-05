@@ -34,7 +34,7 @@ namespace Dob
 {
 namespace Internal
 {
-    ResponseHandler::ResponseHandler(boost::asio::io_service::strand& strand,
+    ResponseHandler::ResponseHandler(boost::asio::io_context::strand& strand,
                                      Distribution& distribution,
                                      const std::function<void(const ConnectionId& connectionId)> releaseBlocking,
                                      const std::function<void(const ConnectionId& connectionId, const InternalRequestId requestId)>& responsePostedCallback)
@@ -44,7 +44,7 @@ namespace Internal
         , m_releaseBlocking(releaseBlocking)
         , m_responsePostedCallback(responsePostedCallback)
     {
-        //ioService is started after our constructor, so we do not need to be reentrant.
+        //ioContext is started after our constructor, so we do not need to be reentrant.
         distribution.SubscribeNodeEvents(m_strand.wrap([this](const std::string& /*nodeName*/,
                                                               const int64_t nodeId,
                                                               const int64_t nodeTypeId,

@@ -37,14 +37,14 @@ namespace Dob
 {
 namespace Internal
 {
-    NodeInfoHandler::NodeInfoHandler(boost::asio::io_service& ioService,
+    NodeInfoHandler::NodeInfoHandler(boost::asio::io_context& ioContext,
                                      const Distribution& distribution,
                                      Safir::Dob::NodeState::Enumeration initialState)
-        : m_dispatcher(m_connection, ioService)
+        : m_dispatcher(m_connection, ioContext)
         , m_distribution(distribution)
         , m_timer(m_dispatcher.Strand().context())
     {
-        m_dispatcher.Strand().post([this, initialState]
+        boost::asio::post(m_dispatcher.Strand(), [this, initialState]
         {
             m_connection.Open(L"DoseMain",  // Note the name. We want this to be handled as a normal connection.
                               L"NodeInfoHandler",
@@ -82,7 +82,7 @@ namespace Internal
     void NodeInfoHandler::Stop()
     {
         m_timer.cancel();
-        m_dispatcher.Strand().dispatch([this]
+        boost::asio::dispatch(m_dispatcher.Strand(), [this]
         {
             m_connection.Close();
         });
@@ -91,7 +91,7 @@ namespace Internal
 
     void NodeInfoHandler::SetNodeState(Safir::Dob::NodeState::Enumeration state)
     {
-        m_dispatcher.Strand().post([this, state]
+        boost::asio::post(m_dispatcher.Strand(), [this, state]
         {
             if (m_distribution.IsLightNode())
             {
@@ -126,7 +126,7 @@ namespace Internal
             }
         }
 
-        m_timer.expires_from_now(std::chrono::seconds(10));
+        m_timer.expires_after(std::chrono::seconds(10));
         m_timer.async_wait(boost::asio::bind_executor(m_dispatcher.Strand(),
                                                       [this](const boost::system::error_code& error)
         {

@@ -44,7 +44,7 @@ class Communication
 public:
 
     Communication(Safir::Dob::Internal::Com::DataModeTag,
-                  boost::asio::io_service& /*ioService*/,
+                  boost::asio::io_context& /*ioContext*/,
                   const std::string& /*nodeName*/,
                   int64_t /*nodeId*/, //0 is not a valid id.
                   int64_t /*nodeTypeId*/,
@@ -63,7 +63,7 @@ class SP
 public:
 
     SP(Safir::Dob::Internal::SP::slave_tag_t,
-       boost::asio::io_service& /*ioService*/,
+       boost::asio::io_context& /*ioContext*/,
        Communication& /*communication*/,
        const std::string& /*name*/,
        const int64_t /*id*/,

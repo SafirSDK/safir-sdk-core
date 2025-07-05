@@ -76,7 +76,7 @@ namespace Internal
         PoolDistribution(int64_t nodeId,
                          int64_t nodeType,
                          const std::shared_ptr<SmartSyncState>& syncState,
-                         boost::asio::io_service::strand& strand,
+                         boost::asio::io_context::strand& strand,
                          DistributionT& distribution,
                          const std::function<void(int64_t)>& completionHandler)
             :m_nodeId(nodeId)
@@ -251,7 +251,7 @@ namespace Internal
         const int64_t m_nodeType;
         std::shared_ptr<SmartSyncState> m_syncState;
         const bool m_receiverIsLightNode;
-        boost::asio::io_service::strand& m_strand;
+        boost::asio::io_context::strand& m_strand;
         boost::asio::steady_timer m_timer;
         DistributionT& m_distribution;
         std::function<void(int64_t)> m_completionHandler;
@@ -748,7 +748,7 @@ namespace Internal
                 return;
             }
 
-            m_timer.expires_from_now(std::chrono::milliseconds(10));
+            m_timer.expires_after(std::chrono::milliseconds(10));
             m_timer.async_wait(m_strand.wrap([self = this->shared_from_this(), completionHandler](const boost::system::error_code&)
             {
                 if (self->HasBeenCancelled())

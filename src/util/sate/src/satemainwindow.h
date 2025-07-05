@@ -33,13 +33,13 @@
 #endif
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-#  include <qt6advanceddocking/DockManager.h>
-#  include <qt6advanceddocking/DockAreaWidget.h>
-#  include <qt6advanceddocking/DockWidgetTab.h>
+#  include <qtadvanceddocking-qt6/DockManager.h>
+#  include <qtadvanceddocking-qt6/DockAreaWidget.h>
+#  include <qtadvanceddocking-qt6/DockWidgetTab.h>
 #else
-#  include <qt5advanceddocking/DockManager.h>
-#  include <qt5advanceddocking/DockAreaWidget.h>
-#  include <qt5advanceddocking/DockWidgetTab.h>
+#  include <qtadvanceddocking-qt5/DockManager.h>
+#  include <qtadvanceddocking-qt5/DockAreaWidget.h>
+#  include <qtadvanceddocking-qt5/DockWidgetTab.h>
 #endif
 
 #ifdef _MSC_VER

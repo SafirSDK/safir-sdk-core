@@ -63,9 +63,9 @@ namespace ForEach
 
         struct ContextData
         {
-            explicit ContextData(boost::asio::io_service& ioService) 
-                : m_dispatcher(m_connection, ioService)
-                , m_service(ioService)
+            explicit ContextData(boost::asio::io_context& ioContext) 
+                : m_dispatcher(m_connection, ioContext)
+                , m_service(ioContext)
                 , m_debug(L"ForEachApp") {}
 
             Safir::Dob::Connection m_connection;
@@ -84,7 +84,7 @@ namespace ForEach
 
         };
 
-        boost::asio::io_service m_ioService;
+        boost::asio::io_context m_ioContext;
 
         typedef std::vector<boost::shared_ptr<ContextData> > ContextVector;
 

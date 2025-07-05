@@ -255,14 +255,14 @@ int main(int argc, char * argv[])
             catch (const std::exception & exc)
             {
                 SEND_SYSTEM_LOG(Alert,
-                            << "CTRL: Caught 'std::exception' exception from io_service.run(): "
+                            << "CTRL: Caught 'std::exception' exception from io_context.run(): "
                                 << "  '" << exc.what() << "'.");
                 success.exchange(false);
             }
             catch (...)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "CTRL: Caught '...' exception from io_service.run().");
+                                << "CTRL: Caught '...' exception from io_context.run().");
                 success.exchange(false);
             }
 

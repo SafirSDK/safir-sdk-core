@@ -48,7 +48,7 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        NodeInfoHandler(boost::asio::io_service& ioService,
+        NodeInfoHandler(boost::asio::io_context& ioContext,
                         const Distribution& distribution,
                         Safir::Dob::NodeState::Enumeration initialState);
 

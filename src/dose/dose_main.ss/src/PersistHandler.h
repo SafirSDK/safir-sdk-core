@@ -66,7 +66,7 @@ namespace Internal
     {
     public:
 
-        PersistHandler(boost::asio::io_service& ioService,
+        PersistHandler(boost::asio::io_context& ioContext,
                        Distribution& distribution,
                        const std::function<void(const std::string& str)>& logStatus,
                        const std::function<void(bool /*fromDope*/)>& persistentDataReadyCb,
@@ -103,7 +103,7 @@ namespace Internal
         std::pair<Safir::Utilities::Internal::SharedConstCharArray, size_t> CreateResponse() const;
 
 
-        boost::asio::io_service::strand         m_strand;
+        boost::asio::io_context::strand         m_strand;
         const std::function<void(const std::string& str)> m_logStatus;
 
         bool                                    m_systemFormed;

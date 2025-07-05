@@ -30,7 +30,7 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-boost::asio::io_service gIoService;
+boost::asio::io_context gIoContext;
 
 
 int numPerform = 0;
@@ -64,7 +64,7 @@ public:
 class Publisher
 {
 public:
-    Publisher(boost::asio::io_service&, const std::string&, void*,void*)
+    Publisher(boost::asio::io_context&, const std::string&, void*,void*)
     {
 
     }
@@ -84,10 +84,10 @@ BOOST_AUTO_TEST_CASE( send_ten )
 {
     Handler h;
 
-    StatePublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoService,h,"foo",std::chrono::milliseconds(10));
+    StatePublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoContext,h,"foo",std::chrono::milliseconds(10));
 
     h.stopCall = [&]{publisher.Stop();};
-    gIoService.run();
+    gIoContext.run();
 
 
     BOOST_CHECK(numPerform == 10);

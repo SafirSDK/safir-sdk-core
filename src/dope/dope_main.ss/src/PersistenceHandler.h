@@ -58,7 +58,7 @@ public:
      * @param ignorePersistenceProperties: should only be set to true if implementing "no
      * persistence" backend
      */
-    PersistenceHandler(boost::asio::io_service& ioService,
+    PersistenceHandler(boost::asio::io_context& ioContext,
                        const bool ignorePersistenceProperties);
 
     /** Destructor */
@@ -80,7 +80,7 @@ public:
 protected:
 
     const TypeIdSet & GetPersistentTypes() const {return m_persistentTypes;}
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
     Safir::Dob::Connection m_dobConnection;
 
 

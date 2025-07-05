@@ -129,7 +129,7 @@ int main(int argc, char * argv[])
 
     // We start the sender and a timeout timer. If the sender is connected to the subscriber we send our action and cancel
     // the timer. Thus the timer will always expire, so in the callback for the timer we stop our worker and thus lets
-    // the ioService finish. If the timer is not canceled we take it as a failure since we have then timedout.
+    // the ioContext finish. If the timer is not canceled we take it as a failure since we have then timedout.
 
     std::unique_ptr<Safir::Dob::Internal::Control::ControlCmdSender> senderPtr;
 

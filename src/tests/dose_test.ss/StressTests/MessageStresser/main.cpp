@@ -44,7 +44,7 @@ class App:
     private boost::noncopyable
 {
 public:
-    explicit App(std::wstring name): m_dispatcher(connection,m_ioService)
+    explicit App(std::wstring name): m_dispatcher(connection,m_ioContext)
     {
         for(int instance = 0;;++instance)
         {
@@ -78,18 +78,18 @@ public:
 
     void Run()
     {
-        boost::asio::io_service::work keepRunning(m_ioService);
-        m_ioService.run();
+        auto keepRunning = boost::asio::make_work_guard(m_ioContext);
+        m_ioContext.run();
     }
 
 protected:
 
     void OnStopOrder() override
     {
-        m_ioService.stop();
+        m_ioContext.stop();
     }
 
-    boost::asio::io_service m_ioService;
+    boost::asio::io_context m_ioContext;
     Safir::Utilities::AsioDispatcher m_dispatcher;
     Safir::Dob::Connection connection;
     Sender m_sender;

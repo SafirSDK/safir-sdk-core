@@ -40,7 +40,7 @@ namespace Dob
 {
 namespace Internal
 {
-    PoolHandler::PoolHandler(boost::asio::io_service::strand& strand,
+    PoolHandler::PoolHandler(boost::asio::io_context::strand& strand,
                              Distribution& distribution,
                              const std::function<void(int64_t)>& checkPendingReg,
                              const std::function<void(const std::string& str)>& logStatus)
@@ -435,7 +435,7 @@ namespace Internal
         m_waitingStates.SanityCheck();
 
         /* We run this timer fairly infrequently, to reduce false warnings */
-        m_waitingStatesSanityTimer.expires_from_now(std::chrono::minutes(6));
+        m_waitingStatesSanityTimer.expires_after(std::chrono::minutes(6));
         m_waitingStatesSanityTimer.async_wait([this](const boost::system::error_code& error)
         {
             if (!error && m_running)

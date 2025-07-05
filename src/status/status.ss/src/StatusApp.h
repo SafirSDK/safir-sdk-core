@@ -51,9 +51,9 @@ private:
 
     void OnStopOrder() override;
 
-    boost::asio::io_service    m_ioService;
+    boost::asio::io_context    m_ioContext;
 
-    boost::shared_ptr<boost::asio::io_service::work> m_work;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     Safir::Utilities::AsioDispatcher m_dispatcher;
     Safir::Dob::Connection m_connection;
     StatusEntityHandler m_statusEntityHandler;

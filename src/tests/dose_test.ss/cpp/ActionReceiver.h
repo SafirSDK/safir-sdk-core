@@ -62,10 +62,10 @@ class ActionReceiver
 {
     typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;
 public:
-    ActionReceiver(boost::asio::io_service& ioService,
+    ActionReceiver(boost::asio::io_context& ioContext,
                    const boost::function<void(const DoseTest::ActionPtr&)>& actionCallback,
                    const int instance)
-        : m_ioService(ioService)
+        : m_ioContext(ioContext)
         , m_port(-1)
         , m_actionCallback(actionCallback)
         , m_instance(instance)
@@ -86,7 +86,7 @@ public:
             try
             {
                 m_acceptor.reset
-                    (new tcp::acceptor(m_ioService,
+                    (new tcp::acceptor(m_ioContext,
                                        tcp::endpoint(tcp::v4(),
                                                      port),
                                        false)); //no reuseaddr
@@ -108,7 +108,7 @@ public:
             throw std::logic_error("Failed to open any useful port!");
         }
 
-        m_socket.reset(new tcp::socket(m_ioService));
+        m_socket.reset(new tcp::socket(m_ioContext));
         m_acceptor->async_accept(*m_socket,
                                  [this](const auto& error){HandleAccept(error);});
     }
@@ -216,7 +216,7 @@ private:
     }
 
 private:
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
     boost::shared_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
     SocketPtr m_socket;
     std::vector<char> m_data;

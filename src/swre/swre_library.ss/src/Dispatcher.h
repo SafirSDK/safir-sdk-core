@@ -52,12 +52,12 @@ public:
      * Constructor.
      *
      * @param [in] connection - The dob connection.
-     * @param [in] ioService  - The ioService that runs the main loop
+     * @param [in] ioContext  - The ioContext that runs the main loop
      */
     Dispatcher(const Safir::Dob::Connection & connection,
-                   boost::asio::io_service& ioService)
+                   boost::asio::io_context& ioContext)
         : m_connection(connection)
-        , m_ioService(ioService)
+        , m_ioContext(ioContext)
         , m_isNotified(0) {}
 
 private:
@@ -80,13 +80,13 @@ private:
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            m_ioService.post([this]{Dispatch();});
+            boost::asio::post(m_ioContext, [this]{Dispatch();});
         }
     }
 
 
     const Safir::Dob::Connection&      m_connection;
-    boost::asio::io_service&           m_ioService;
+    boost::asio::io_context&           m_ioContext;
     Safir::Utilities::Internal::AtomicUint32 m_isNotified;
 };
 

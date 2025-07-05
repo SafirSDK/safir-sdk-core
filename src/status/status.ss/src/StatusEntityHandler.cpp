@@ -35,10 +35,10 @@ namespace Safir
 {
 namespace Control
 {
-    StatusEntityHandler::StatusEntityHandler(boost::asio::io_service& ioService)
+    StatusEntityHandler::StatusEntityHandler(boost::asio::io_context& ioContext)
     {
         m_controlInfoReceiver.reset(
-                    new Safir::Dob::Internal::Control::ControlInfoReceiver(ioService,
+                    new Safir::Dob::Internal::Control::ControlInfoReceiver(ioContext,
                                      [this](int64_t incarnationId, int64_t nodeId){SetValues(incarnationId,nodeId);} ));
 
     }

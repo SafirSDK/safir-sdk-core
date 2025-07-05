@@ -119,11 +119,12 @@ int main(int argc, char * argv[])
         return 1;
     }
 
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
 
-    auto wk = Safir::make_unique<boost::asio::io_service::work>(ioService);
+    auto wk = boost::asio::make_work_guard(ioContext);
+    //auto wk = Safir::make_unique<boost::asio::io_context::work>(ioContext);
 
-    boost::asio::signal_set signals(ioService);
+    boost::asio::signal_set signals(ioContext);
 
 #if defined (_WIN32)
     signals.add(SIGABRT);
@@ -136,14 +137,14 @@ int main(int argc, char * argv[])
     signals.add(SIGTERM);
 #endif
 
-    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::subscriber_tag, ioService);
+    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::subscriber_tag, ioContext);
 
-    auto stopFcn = [&ioService, &sp, &wk, &signals]
+    auto stopFcn = [&ioContext, &sp, &wk, &signals]
     {
         auto& sp_ = sp;
         auto& wk_ = wk;
         auto& signals_ = signals;
-        ioService.post([&sp_, &wk_, &signals_]
+        boost::asio::post(ioContext, [&sp_, &wk_, &signals_]
         {
             signals_.cancel();
             sp_.Stop();
@@ -185,6 +186,6 @@ int main(int argc, char * argv[])
                            stopFcn();
                        });
 
-    ioService.run();
+    ioContext.run();
     return 0;
 }

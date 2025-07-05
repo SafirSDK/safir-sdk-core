@@ -42,15 +42,15 @@ namespace SP
     {
     public:
         RawPublisherRemoteBasic(const std::wstring& logPrefix,
-                                boost::asio::io_service& ioService,
+                                boost::asio::io_context& ioContext,
                                 CommunicationT& communication,
                                 const std::map<int64_t, NodeType>& nodeTypes,
                                 const char* const senderId,
                                 RawHandlerT& rawHandler,
                                 const std::chrono::steady_clock::duration& period)
             : m_logPrefix(logPrefix)
-            , m_strand(ioService)
-            , m_timer(ioService)
+            , m_strand(ioContext)
+            , m_timer(ioContext)
             , m_stopped(false)
             , m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
@@ -78,7 +78,7 @@ namespace SP
             const bool was_stopped = m_stopped.exchange(true);
             if (!was_stopped)
             {
-                m_strand.dispatch([this]
+                boost::asio::dispatch(m_strand, [this]
                                   {
                                       m_timer.cancel();
                                   });
@@ -109,7 +109,7 @@ namespace SP
             }
 
             m_timer.cancel();
-            m_timer.expires_from_now(delay);
+            m_timer.expires_after(delay);
             m_timer.async_wait(m_strand.wrap([this, toNodeTypes](const boost::system::error_code& error)
             {
                 if (!error)
@@ -161,7 +161,7 @@ namespace SP
         }
 
         const std::wstring m_logPrefix;
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         boost::asio::steady_timer m_timer;
         std::atomic<bool> m_stopped;
         CommunicationT& m_communication;

@@ -44,12 +44,12 @@ namespace Dob
 namespace Internal
 {
 
-    PersistHandler::PersistHandler(boost::asio::io_service& ioService,
+    PersistHandler::PersistHandler(boost::asio::io_context& ioContext,
                                    Distribution& distribution,
                                    const std::function<void(const std::string& str)>& logStatus,
                                    const std::function<void(bool)>& persistentDataReadyCb,
                                    const std::function<void()>& persistentDataAllowedCb)
-        : m_strand(ioService),
+        : m_strand(ioContext),
           m_logStatus(logStatus),
           m_systemFormed(false),
           m_distribution(distribution),
@@ -59,7 +59,7 @@ namespace Internal
           m_persistentDataAllowed(false),
           m_dataTypeIdentifier(LlufId_Generate64("Safir.Dob.HavePersistenceData"))
     {
-        m_strand.dispatch([this, logStatus, persistentDataReadyCb, persistentDataAllowedCb]()
+        boost::asio::dispatch(m_strand, [this, logStatus, persistentDataReadyCb, persistentDataAllowedCb]()
         {
             m_persistentDataReadyCb.push_back(persistentDataReadyCb);
             m_persistentDataAllowedCb.push_back(persistentDataAllowedCb);
@@ -92,7 +92,7 @@ namespace Internal
             {
                 return; // lightnodes doesn't have persistent data
             }
-            m_strand.post([this, nodeId, nodeTypeId]
+            boost::asio::post(m_strand, [this, nodeId, nodeTypeId]
                           {
                               if (m_systemFormed || m_persistentDataReady)
                               {
@@ -110,7 +110,7 @@ namespace Internal
             {
                 return; // lightnodes doesn't have persistent data
             }
-            m_strand.post([this, nodeId, nodeTypeId]
+            boost::asio::post(m_strand, [this, nodeId, nodeTypeId]
                           {
                               if (this->m_persistentDataReady)
                               {
@@ -148,7 +148,7 @@ namespace Internal
 
     void PersistHandler::Start()
     {
-        m_strand.post([this]
+        boost::asio::post(m_strand, [this]
                       {
                           m_systemFormed = true;
 
@@ -168,12 +168,12 @@ namespace Internal
 
     void PersistHandler::Stop()
     {
-        m_strand.post([this]{m_connection.Close();});
+        boost::asio::post(m_strand, [this]{m_connection.Close();});
     }
 
     void PersistHandler::SetPersistentDataReady(bool fromDope)
     {
-        m_strand.dispatch([this, fromDope] ()
+        boost::asio::dispatch(m_strand, [this, fromDope] ()
         {
             if (m_persistentDataReady)
             {
@@ -202,7 +202,7 @@ namespace Internal
             //killing the connection that is dispatching...
 
             // We don't need the connection now
-            m_strand.post([this]{m_connection.Close();});
+            boost::asio::post(m_strand, [this]{m_connection.Close();});
         });
 
     }

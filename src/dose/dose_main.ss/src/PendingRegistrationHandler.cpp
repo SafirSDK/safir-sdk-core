@@ -88,16 +88,16 @@ namespace Internal
     }
 
 
-    PendingRegistrationHandler::PendingRegistrationHandler(boost::asio::io_service& ioService,
+    PendingRegistrationHandler::PendingRegistrationHandler(boost::asio::io_context& ioContext,
                                                            Distribution& distribution)
         : m_stopped(false)
-        , m_strand(ioService)
+        , m_strand(ioContext)
         , m_distribution(distribution)
         , m_dataTypeIdentifier(LlufId_Generate64("PendingRegistrationHandler"))
         , m_nextId(1)
         , m_pendingRegistrationClock(distribution.GetNodeId())
     {
-        //ioService is started after our constructor, so we do not need to be reentrant.
+        //ioContext is started after our constructor, so we do not need to be reentrant.
         distribution.SubscribeNodeEvents(m_strand.wrap([this](const std::string& /*nodeName*/,
                                                               const int64_t nodeId,
                                                               const int64_t nodeTypeId,
@@ -127,7 +127,7 @@ namespace Internal
                                                               DistributionData::DropReference(data);
 
                                                               auto this_ = this; //fix for vs 2010 lamba issues
-                                                              m_strand.dispatch([this_,msg,fromNodeId,fromNodeType]{this_->HandleRequest(msg,fromNodeId,fromNodeType);});
+                                                              boost::asio::dispatch(m_strand, [this_,msg,fromNodeId,fromNodeType]{this_->HandleRequest(msg,fromNodeId,fromNodeType);});
                                                           },
                                                           m_dataTypeIdentifier,
                                                           DistributionData::NewData,
@@ -139,7 +139,7 @@ namespace Internal
         const bool was_stopped = m_stopped.exchange(true);
         if (!was_stopped)
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
                               {
                                   for (auto reg = m_pendingRegistrations.cbegin(); reg != m_pendingRegistrations.cend(); ++reg)
                                   {
@@ -174,7 +174,7 @@ namespace Internal
     void
     PendingRegistrationHandler::CheckForNewOrRemovedPendingRegistration(const ConnectionPtr & connection)
     {
-        m_strand.dispatch([this,connection]
+        boost::asio::dispatch(m_strand, [this,connection]
         {
             //Check for new pending registrations
             {
@@ -350,7 +350,7 @@ namespace Internal
     void
     PendingRegistrationHandler::CheckForPending(const Safir::Dob::Typesystem::TypeId typeId)
     {
-        m_strand.dispatch([this,typeId]
+        boost::asio::dispatch(m_strand, [this,typeId]
         {
             std::vector<long> affectedRequestIds;
 
@@ -372,7 +372,7 @@ namespace Internal
     void
     PendingRegistrationHandler::CheckForPending()
     {
-        m_strand.dispatch([this]
+        boost::asio::dispatch(m_strand, [this]
         {
             for (PendingRegistrationHandler::PendingRegistrations::iterator it = m_pendingRegistrations.begin();
                  it != m_pendingRegistrations.end();)  // iterator incrementation done below
@@ -540,7 +540,7 @@ namespace Internal
 
     void PendingRegistrationHandler::RemovePendingRegistrations(const ConnectionId & id)
     {
-        m_strand.dispatch([this,id]
+        boost::asio::dispatch(m_strand, [this,id]
         {
             lllout << "RemovePendingRegistrations for " << id << std::endl;
             for (PendingRegistrationHandler::PendingRegistrations::iterator it = m_pendingRegistrations.begin();

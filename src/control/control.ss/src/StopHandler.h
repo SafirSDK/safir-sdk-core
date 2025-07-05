@@ -175,7 +175,7 @@ namespace Control
         ~StopHandlerBasic()
         {
             // This is about the last thing that happens when a node is stopped. When this destructor is
-            // executed we know that the ioService is empty and therefor this is a good place to make
+            // executed we know that the ioContext is empty and therefor this is a good place to make
             // a shutdown or reboot.
             switch (m_localNodeStopCmdAction)
             {

@@ -52,8 +52,8 @@ class Test
 {
 public:
     Test(int numUsers, int numSimultanousUsers, int requestsPerUser)
-        :m_ioService()
-        ,m_work(new boost::asio::io_service::work(m_ioService))
+        :m_ioContext()
+        ,m_work(new boost::asio::io_context::work(m_ioContext))
         ,m_handler([=]{HandlerSetupReady();})
         ,m_users()
         ,m_numUsers(numUsers)
@@ -66,14 +66,14 @@ public:
 
     void Run()
     {
-        m_ioService.post([=]{m_handler.Run();});
-        m_ioService.run();
+        m_ioContext.post([=]{m_handler.Run();});
+        m_ioContext.run();
     }
 
 private:
     typedef std::shared_ptr<ServiceUser> ServiceUserPtr;
-    boost::asio::io_service m_ioService;
-    std::shared_ptr<boost::asio::io_service::work> m_work;
+    boost::asio::io_context m_ioContext;
+    std::shared_ptr<boost::asio::io_context::work> m_work;
     ServiceHandler m_handler;
     std::map<int, ServiceUserPtr> m_users;
 
@@ -86,7 +86,7 @@ private:
 
     void HandlerSetupReady()
     {
-        m_ioService.post([=]
+        m_ioContext.post([=]
         {
             while (m_userCount<m_numSimultanousUsers)
             {
@@ -97,7 +97,7 @@ private:
 
     void UserDone(int id, bool fail)
     {
-        m_ioService.post([=]
+        m_ioContext.post([=]
         {
             if (fail)
             {
@@ -161,7 +161,7 @@ int main(int argc, const char** argv)
     {
         Test test(totalNumUsers, simultaneousUsers, reqPerUser);
         test.Run();
-        boost::this_thread::sleep_for(boost::chrono::seconds(2)); //let io_service stop
+        boost::this_thread::sleep_for(boost::chrono::seconds(2)); //let io_context stop
         std::cout<<"Test #"<<(i+1)<<" passed!"<<std::endl;
     }
 

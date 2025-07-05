@@ -86,7 +86,9 @@ class SafirSdkCoreConan(ConanFile):
                        "qt/*:widgets": True,
                        "pcre2/*:shared": False,
                        "pcre2/*:with_zlib":False,
-                       "pcre2/*:with_bzip2": False
+                       "pcre2/*:with_bzip2": False,
+                       #"cmake/*:with_openssl": False,
+                       #"cmake/*:bootstrap": True
                        }
     def configure(self):
         if self.settings.os == "Windows":
@@ -114,7 +116,7 @@ class SafirSdkCoreConan(ConanFile):
     def requirements(self):
         self.requires("websocketpp/0.8.2")
         self.requires("rapidjson/cci.20230929")
-        self.requires("ninja/1.12.1")
+        self.requires("ninja/1.13.0")
         self.requires("qt-advanced-docking-system/4.4.0")
         #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support).
         #0.5.3 appears to be the last one that doesn't need that. Even 0.5.4 wants it.
@@ -127,7 +129,8 @@ class SafirSdkCoreConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.compiler.version == 190:
             self.requires("protobuf/3.21.12")
         else:
-            self.requires("protobuf/5.27.0")
+            #newer protobufs require newer abseils than what we can use (see below).
+            self.requires("protobuf/5.29.3")
             #newer abseils require cmake from conan, which is not available on
             #for example x86 platforms. So we use an older one for now.
             self.requires("abseil/20240116.2")
@@ -145,7 +148,7 @@ class SafirSdkCoreConan(ConanFile):
             if self.settings.arch == "x86" or \
                self.settings.compiler.version == 190 or \
                self.settings.compiler.version == 191:
-                self.requires("qt/5.15.14")
+                self.requires("qt/5.15.16")
             else:
-                self.requires("qt/6.7.3")
+                self.requires("qt/6.8.3")
 

@@ -30,7 +30,7 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-boost::asio::io_service gIoService;
+boost::asio::io_context gIoContext;
 
 
 int numAllPerform = 0;
@@ -80,7 +80,7 @@ public:
 class Publisher
 {
 public:
-    Publisher(boost::asio::io_service&, const std::string&, void*, void*)
+    Publisher(boost::asio::io_context&, const std::string&, void*, void*)
     {
 
     }
@@ -100,10 +100,10 @@ BOOST_AUTO_TEST_CASE( send_ten_all )
 {
     Handler h;
 
-    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoService,h,"foo",std::chrono::milliseconds(10),true);
+    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoContext,h,"foo",std::chrono::milliseconds(10),true);
 
     h.stopCall = [&]{publisher.Stop();};
-    gIoService.run();
+    gIoContext.run();
 
 
     BOOST_CHECK(numAllPerform == 10);
@@ -115,11 +115,11 @@ BOOST_AUTO_TEST_CASE( send_ten_my )
 {
     Handler h;
 
-    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoService,h,"foo",std::chrono::milliseconds(10),false);
+    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(L"", gIoContext,h,"foo",std::chrono::milliseconds(10),false);
 
     h.stopCall = [&]{publisher.Stop();};
-    gIoService.reset();
-    gIoService.run();
+    gIoContext.restart();
+    gIoContext.run();
 
 
     BOOST_CHECK_EQUAL(numAllPerform, 10);

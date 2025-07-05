@@ -34,14 +34,14 @@ class StopHandler
     : public Safir::Dob::StopHandler
 {
 public:
-    explicit StopHandler(boost::asio::io_service& ioService)
-        : m_ioService(ioService) {}
-    void OnStopOrder() override {m_ioService.stop();}
+    explicit StopHandler(boost::asio::io_context& ioContext)
+        : m_ioContext(ioContext) {}
+    void OnStopOrder() override {m_ioContext.stop();}
 
     StopHandler(const StopHandler&) = delete;
     StopHandler& operator=(const StopHandler&) = delete;
 private:
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
 
 };
 
@@ -61,10 +61,10 @@ public:
 int main()
 {
     std::wcout <<"starting" << std::endl;
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
     Safir::Dob::Connection connection;
-    Safir::Utilities::AsioDispatcher dispatcher(connection, ioService);
-    StopHandler stopHandler(ioService);
+    Safir::Utilities::AsioDispatcher dispatcher(connection, ioContext);
+    StopHandler stopHandler(ioContext);
     std::wcout <<"connecting" << std::endl;
     connection.Open(L"dummy_dope", L"0", -1000000, &stopHandler, &dispatcher);
 
@@ -75,13 +75,13 @@ int main()
                               Safir::Dob::Typesystem::HandlerId(),
                               &r);
     //set a timer
-    boost::asio::steady_timer timer(ioService,std::chrono::milliseconds(1000));
+    boost::asio::steady_timer timer(ioContext,std::chrono::milliseconds(1000));
     timer.async_wait([](const boost::system::error_code&){});
 
     std::wcout <<"running" << std::endl;
-    //ioService will only run until the timer has timed out, since that is all the work
+    //ioContext will only run until the timer has timed out, since that is all the work
     //that there is for it.
-    ioService.run();
+    ioContext.run();
 
     return 0;
 }

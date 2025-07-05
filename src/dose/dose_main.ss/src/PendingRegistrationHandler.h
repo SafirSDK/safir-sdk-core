@@ -52,7 +52,7 @@ namespace Internal
         public boost::noncopyable
     {
     public:
-        PendingRegistrationHandler(boost::asio::io_service& ioService,
+        PendingRegistrationHandler(boost::asio::io_context& ioContext,
                                    Distribution& distribution);
 
         void Stop();
@@ -80,14 +80,14 @@ namespace Internal
 
         struct PendingRegistrationInfo
         {
-            PendingRegistrationInfo(boost::asio::io_service& ioService,
+            PendingRegistrationInfo(boost::asio::io_context& ioContext,
                                     const ConnectionId connId,
                                     const Dob::Typesystem::TypeId type,
                                     const Dob::Typesystem::HandlerId&  handler):
                 connectionId(connId),
                 typeId(type),
                 handlerId(handler),
-                timer(ioService),
+                timer(ioContext),
                 nbrOfSentRequests(0),
                 lastRequestTimestamp(),
                 acceptedNodes(),
@@ -106,7 +106,7 @@ namespace Internal
 
         std::atomic<bool> m_stopped;
 
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
 
         Distribution& m_distribution;
         const int64_t m_dataTypeIdentifier;

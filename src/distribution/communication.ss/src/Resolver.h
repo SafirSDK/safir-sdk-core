@@ -76,7 +76,7 @@ namespace Com
         /**
          * Constructor
          *
-         * @param io [in] - Reference to io_service, needed to make dns lookups.
+         * @param io [in] - Reference to io_context, needed to make dns lookups.
          */
         Resolver(boost::asio::io_context& io, bool verbose=false)
             :m_resolver(io)

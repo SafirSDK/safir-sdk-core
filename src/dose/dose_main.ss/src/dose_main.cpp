@@ -98,19 +98,19 @@ int main()
     std::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
 
     std::atomic<bool> success(true);
 
     try
     {
-        Safir::Dob::Internal::DoseMainApp theApp(ioService);
+        Safir::Dob::Internal::DoseMainApp theApp(ioContext);
 
         //We want a fair number of threads here. A word of warning: Turning this down
         //below the number of Dob connections in dose_main can cause a deadlock at startup.
         auto nbrOfThreads = std::max<size_t>(10, boost::thread::hardware_concurrency());
 
-        const auto run = [&ioService,&theApp,&success]
+        const auto run = [&ioContext,&theApp,&success]
         {
             try
             {
@@ -118,13 +118,13 @@ int main()
                 {
                     try
                     {
-                        ioService.run();
+                        ioContext.run();
                         return;
                     }
                     catch (const Safir::Dob::LowMemoryException& exc)
                     {
                         SEND_SYSTEM_LOG(Alert,
-                                        << "DOSE_MAIN: Unexpectedly caught LowMemoryException from io_service.run(): "
+                                        << "DOSE_MAIN: Unexpectedly caught LowMemoryException from io_context.run(): "
                                         << "'" << exc.what() << "'. Will continue execution, "
                                         << "but please report this exception to you nearest Dob developer!");
                     }
@@ -133,14 +133,14 @@ int main()
             catch (const std::exception & exc)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "DOSE_MAIN: Caught 'std::exception' exception from io_service.run(): "
+                                << "DOSE_MAIN: Caught 'std::exception' exception from io_context.run(): "
                                 << "  '" << exc.what() << "'.");
                 success.exchange(false);
             }
             catch (...)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "DOSE_MAIN: Caught '...' exception from io_service.run().");
+                                << "DOSE_MAIN: Caught '...' exception from io_context.run().");
                 success.exchange(false);
             }
 

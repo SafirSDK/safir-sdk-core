@@ -55,11 +55,11 @@ class ActionSender
 {
     typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;
 public:
-    explicit ActionSender(boost::asio::io_service& ioService)
+    explicit ActionSender(boost::asio::io_context& ioContext)
     {
         for (int i = 0; i < 5; ++i)
         {
-            m_sockets.push_back(SocketPtr(new boost::asio::ip::tcp::socket(ioService)));
+            m_sockets.push_back(SocketPtr(new boost::asio::ip::tcp::socket(ioContext)));
         }
     }
 
@@ -126,8 +126,12 @@ private:
             {
                 std::wcout << "Connecting to " << address.c_str() << ":" << port << std::endl;
                 //Set up address
-                const boost::asio::ip::address addr =
-                    boost::asio::ip::address::from_string(address);
+                boost::system::error_code ec;
+                boost::asio::ip::address_v4 addr=boost::asio::ip::make_address_v4(address, ec);
+                if (!ec) //ip v4 address
+                {
+                    throw std::logic_error("strange address");
+                }
 
                 const boost::asio::ip::tcp::endpoint endpoint(addr, port);
                 socket->connect(endpoint);

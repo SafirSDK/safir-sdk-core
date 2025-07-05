@@ -70,7 +70,7 @@ int disconnect_calls = 0;
 class Subscriber
 {
 public:
-    Subscriber(boost::asio::io_service&,
+    Subscriber(boost::asio::io_context&,
                const std::string& name,
                const std::function<void(const char* const data, const size_t size)>& callback)
     {
@@ -88,9 +88,9 @@ public:
 
 BOOST_AUTO_TEST_CASE( send_one )
 {
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
 
-    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(L"", ioService, "foo");
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(L"", ioContext, "foo");
 
     int dataReceived = 0;
     subscriber.Start([&](const RawStatistics& r)
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE( send_one )
     gDataCallback(data.get(),size);
 
     subscriber.Stop();
-    ioService.run();
+    ioContext.run();
 
     BOOST_CHECK_EQUAL(connect_calls, 1);
     BOOST_CHECK_EQUAL(disconnect_calls, 1);
@@ -126,9 +126,9 @@ BOOST_AUTO_TEST_CASE( send_one )
 
 BOOST_AUTO_TEST_CASE( two_subscribers )
 {
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
 
-    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(L"", ioService, "foo");
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(L"", ioContext, "foo");
 
     int dataReceived = 0;
     subscriber.Start([&](const RawStatistics& r)
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE( two_subscribers )
     gDataCallback(data.get(),size);
 
     subscriber.Stop();
-    ioService.run();
+    ioContext.run();
 
     BOOST_CHECK_EQUAL(connect_calls, 1);
     BOOST_CHECK_EQUAL(disconnect_calls, 1);
@@ -175,9 +175,9 @@ BOOST_AUTO_TEST_CASE( two_subscribers )
 
 BOOST_AUTO_TEST_CASE( add_before_start )
 {
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
 
-    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(L"", ioService, "foo");
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(L"", ioContext, "foo");
 
     int dataReceived = 0;
     subscriber.AddSubscriber([&](const RawStatistics& r)
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE( add_before_start )
     gDataCallback(data.get(),size);
 
     subscriber.Stop();
-    ioService.run();
+    ioContext.run();
 
     BOOST_CHECK_EQUAL(connect_calls, 1);
     BOOST_CHECK_EQUAL(disconnect_calls, 1);

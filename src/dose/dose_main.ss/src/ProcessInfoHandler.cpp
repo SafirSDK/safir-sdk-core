@@ -48,12 +48,12 @@ namespace Dob
 namespace Internal
 {
 
-    ProcessInfoHandler::ProcessInfoHandler(boost::asio::io_service& ioService)
-        : m_strand(ioService)
+    ProcessInfoHandler::ProcessInfoHandler(boost::asio::io_context& ioContext)
+        : m_strand(ioContext)
         , m_dispatcher(m_connection, m_strand)
         , m_stopped(false)
     {
-        m_processMonitor.reset(new Safir::Utilities::ProcessMonitor(ioService,
+        m_processMonitor.reset(new Safir::Utilities::ProcessMonitor(ioContext,
                                                                        [] (const pid_t pid)
                                                                        {
                                                                            //This marks all connections belonging to the process that died
@@ -69,7 +69,7 @@ namespace Internal
                                                                        },
                                                                        std::chrono::seconds(1)));
 
-        m_strand.dispatch([this]
+        boost::asio::dispatch(m_strand, [this]
         {
             m_connection.Open(L"dose_main",L"ProcessInfoHandler",0,nullptr,&m_dispatcher);
 
@@ -96,7 +96,7 @@ namespace Internal
         if (!was_stopped)
         {
             m_processMonitor->Stop();
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
                               {
                                   m_connection.Close();
                               });
@@ -110,7 +110,7 @@ namespace Internal
             return;
         }
 
-        m_strand.dispatch([this,connection]
+        boost::asio::dispatch(m_strand, [this,connection]
         {
             const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(connection->Pid()));
             try
@@ -198,7 +198,7 @@ namespace Internal
             return;
         }
 
-        m_strand.dispatch([this,connection]
+        boost::asio::dispatch(m_strand, [this,connection]
         {
             const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(connection->Pid()));
             try

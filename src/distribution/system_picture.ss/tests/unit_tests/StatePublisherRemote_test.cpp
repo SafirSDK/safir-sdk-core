@@ -30,7 +30,7 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-boost::asio::io_service gIoService;
+boost::asio::io_context gIoContext;
 
 
 int numPerform = 0;
@@ -105,10 +105,10 @@ BOOST_AUTO_TEST_CASE( send_ten )
     nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,std::chrono::seconds(1),22,retryTimeouts)));
 
     StatePublisherRemoteBasic<::Handler, ::Communication> publisher
-        (gIoService,communication,nodeTypes,"foo",h,std::chrono::milliseconds(10));
+        (gIoContext,communication,nodeTypes,"foo",h,std::chrono::milliseconds(10));
 
     h.stopCall = [&]{publisher.Stop();};
-    gIoService.run();
+    gIoContext.run();
 
 
     BOOST_CHECK(numPerform == 10);

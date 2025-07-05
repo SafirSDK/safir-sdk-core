@@ -149,7 +149,7 @@ template <int64_t ownNodeType>
 struct Fixture
 {
     Fixture()
-        : strand(ioService)
+        : strand(ioContext)
         , formSystemDeniesBeforeOk(0)
         , formSystemCallsBeforeJoin(10000)
     {
@@ -234,8 +234,8 @@ struct Fixture
     }
 
     Communication comm;
-    boost::asio::io_service ioService;
-    boost::asio::io_service::strand strand;
+    boost::asio::io_context ioContext;
+    boost::asio::io_context::strand strand;
 
     std::unique_ptr<RawHandlerBasic<::Communication>> rh;
 
@@ -313,19 +313,19 @@ BOOST_AUTO_TEST_CASE( start_stop )
     BOOST_CHECK(formSystemIncarnations.empty());
 
     rh->Stop();
-    ioService.run();
+    ioContext.run();
 }
 
 BOOST_AUTO_TEST_CASE( receive_from_not_known )
 {
     comm.gotReceiveFromCb(10,false,false);
-    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+    BOOST_CHECK_THROW(ioContext.run(), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE( retransmit_to_not_known )
 {
     comm.retransmitToCb(10, 2);
-    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+    BOOST_CHECK_THROW(ioContext.run(), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE( new_node )
@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE( new_node )
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes.empty());
 }
@@ -355,7 +355,7 @@ BOOST_AUTO_TEST_CASE( new_light_node )
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes.empty());
 }
@@ -363,13 +363,13 @@ BOOST_AUTO_TEST_CASE( new_light_node )
 BOOST_AUTO_TEST_CASE( new_node_of_unknown_type )
 {
     comm.newNodeCb("asdf",11,11,"asdf","asdf", false);
-    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+    BOOST_CHECK_THROW(ioContext.run(), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE( new_node_with_my_id )
 {
     comm.newNodeCb("asdf",10,10,"asdf","asdf", false);
-    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+    BOOST_CHECK_THROW(ioContext.run(), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE( new_node_twice )
@@ -380,7 +380,7 @@ BOOST_AUTO_TEST_CASE( new_node_twice )
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
 
-    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+    BOOST_CHECK_THROW(ioContext.run(), std::logic_error);
     BOOST_CHECK(comm.includedNodes == correctNodes);
 
 }
@@ -396,7 +396,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_unicast )
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
 
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes == correctNodes);
@@ -416,7 +416,7 @@ BOOST_AUTO_TEST_CASE( exclude_light_node_unicast )
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
 
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes == correctNodes);
@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_multicast )
     correctNodes.insert(11);
 
     int i = 0;
-    while(ioService.run_one())
+    while(ioContext.run_one())
     {
         ++i;
         if (!stopped)
@@ -466,7 +466,7 @@ BOOST_AUTO_TEST_CASE( exclude_light_node_multicast )
     correctNodes.insert(11);
 
     int i = 0;
-    while(ioService.run_one())
+    while(ioContext.run_one())
     {
         ++i;
         if (!stopped)
@@ -504,7 +504,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit_no_recv )
     correctNodes.insert(14);
     correctNodes.insert(17);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
 
     BOOST_CHECK(comm.excludedNodes == correctNodes);
 }
@@ -538,7 +538,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_due_to_retransmit )
     correctNodes.insert(14);
     correctNodes.insert(15);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
 
     BOOST_TEST(comm.excludedNodes == correctNodes, boost::test_tools::per_element());
 }
@@ -573,7 +573,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
     comm.gotReceiveFromCb(11,false,false);
     comm.gotReceiveFromCb(11,false,false);
     rh->Stop();
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
 }
 
@@ -608,7 +608,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback_lightnode )
     comm.gotReceiveFromCb(11,false,false);
     comm.gotReceiveFromCb(11,false,false);
     rh->Stop();
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
 }
 
@@ -657,7 +657,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
 
     comm.retransmitToCb(11, 2);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
 }
 
@@ -706,7 +706,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback_lightnode )
 
     comm.retransmitToCb(11, 2);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
 }
 
@@ -763,18 +763,18 @@ BOOST_AUTO_TEST_CASE( resurrect_lightnode )
 
     comm.retransmitToCb(11, 2);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
 
     comm.newNodeCb("asdf",11,15,"asdffff","asdfqqqq", false);
 
-    ioService.reset();
-    ioService.run();
+    ioContext.restart();
+    ioContext.run();
     BOOST_CHECK_EQUAL(cbCalls, 3);
 
     rh->ResurrectNode(11);
-    ioService.reset();
-    ioService.run();
+    ioContext.restart();
+    ioContext.run();
     BOOST_CHECK_EQUAL(cbCalls, 4);
 }
 
@@ -829,7 +829,7 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh->NewRemoteStatistics(11,data,size);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
     BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
     BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
@@ -875,7 +875,7 @@ BOOST_AUTO_TEST_CASE( no_incarnations_discard )
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh->NewRemoteStatistics(11,data,size);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
     BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 0U);
     BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 0U);
@@ -914,7 +914,7 @@ BOOST_AUTO_TEST_CASE( election_id_changed_callback)
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq", false);
     rh->SetElectionId(11, 199);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
 }
 
@@ -954,7 +954,7 @@ BOOST_AUTO_TEST_CASE( join_system_callback)
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
     rh->NewRemoteStatistics(11,data,size);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
     BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
     BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
@@ -997,7 +997,7 @@ BOOST_AUTO_TEST_CASE( join_system_forbid)
 
     rh->NewRemoteStatistics(11,data,size);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
     BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
     BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
@@ -1025,7 +1025,7 @@ BOOST_AUTO_TEST_CASE( form_system )
 
     rh->FormSystem(54321);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
     BOOST_CHECK_EQUAL(joinSystemIncarnations.size(), 0U);
     BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 1U);
@@ -1053,7 +1053,7 @@ BOOST_AUTO_TEST_CASE( form_system_denies )
     rh->FormSystem(54321);
     rh->FormSystem(54321);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
     BOOST_CHECK_EQUAL(joinSystemIncarnations.size(), 0U);
     BOOST_CHECK_EQUAL(formSystemDeniesBeforeOk, 0U);
@@ -1095,7 +1095,7 @@ BOOST_AUTO_TEST_CASE( form_system_delay_then_join )
     rh->FormSystem(54321);
     rh->FormSystem(54321);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
     BOOST_CHECK_EQUAL(joinSystemIncarnations.size(), 1U);
     BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 12345);
@@ -1145,7 +1145,7 @@ BOOST_AUTO_TEST_CASE( explicit_exclude_node )
     comm.newNodeCb("asdf",12,10,"asdffff","asdfqqqq", false);
 
     rh->Stop();
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
     BOOST_REQUIRE_EQUAL(comm.excludedNodes.size(),1U);
     BOOST_CHECK_EQUAL(*comm.excludedNodes.begin(),11);
@@ -1196,8 +1196,8 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
     comm.newNodeCb("asdf",12,10,"asdffff","asdfqqqq", false);
 
     rh->Stop();
-    ioService.run();
-    //BOOST_CHECK_NO_THROW(ioService.run());
+    ioContext.run();
+    //BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
 }
 
@@ -1225,7 +1225,7 @@ BOOST_AUTO_TEST_CASE( perform_on_all )
                                          CheckRemotesCommon(statistics.RemoteStatistics(0));
                                      });
     rh->Stop();
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
 }
 
 BOOST_AUTO_TEST_CASE( perform_on_my )
@@ -1251,7 +1251,7 @@ BOOST_AUTO_TEST_CASE( perform_on_my )
                                          BOOST_CHECK(!statistics.HasRemoteStatistics(0));
                                      });
     rh->Stop();
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -1269,7 +1269,7 @@ BOOST_AUTO_TEST_CASE( new_normal_node )
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes.empty());
 }
@@ -1286,7 +1286,7 @@ BOOST_AUTO_TEST_CASE( new_light_node )
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
 
-    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+    BOOST_CHECK_THROW(ioContext.run(), std::logic_error);
     BOOST_CHECK(comm.includedNodes.empty());
     BOOST_CHECK(comm.excludedNodes.empty());
 }
@@ -1302,7 +1302,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_unicast )
     std::set<int64_t> correctNodes;
     correctNodes.insert(11);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
 
     BOOST_CHECK(comm.includedNodes == correctNodes);
     BOOST_CHECK(comm.excludedNodes == correctNodes);
@@ -1325,7 +1325,7 @@ BOOST_AUTO_TEST_CASE( exclude_node_multicast )
     correctNodes.insert(11);
 
     int i = 0;
-    while(ioService.run_one())
+    while(ioContext.run_one())
     {
         ++i;
         if (!stopped)
@@ -1369,7 +1369,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
     comm.gotReceiveFromCb(11,false,false);
     comm.gotReceiveFromCb(11,false,false);
     rh->Stop();
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
 }
 
@@ -1426,11 +1426,11 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
 
     comm.retransmitToCb(11, 2);
 
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
-    ioService.reset();
+    ioContext.restart();
     rh->SetNodeIsDetached();
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
 }
 
@@ -1491,7 +1491,7 @@ BOOST_AUTO_TEST_CASE( reconnect_node_when_self_is_lightnode )
 
     while (!stop)
     {
-        ioService.run_one();
+        ioContext.run_one();
     }
 
     BOOST_CHECK_EQUAL(cbCalls, 2);
@@ -1505,7 +1505,7 @@ BOOST_AUTO_TEST_CASE( reconnect_node_when_self_is_lightnode )
 
     while (!stop)
     {
-        ioService.run_one();
+        ioContext.run_one();
     }
     BOOST_CHECK_EQUAL(cbCalls, 3);
 
@@ -1517,7 +1517,7 @@ BOOST_AUTO_TEST_CASE( reconnect_node_when_self_is_lightnode )
     comm.gotReceiveFromCb(11, false, true);
     comm.retransmitToCb(11, 2);
     comm.excludeCb=[&]{rh->Stop();};
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK(comm.excludedNodes == std::set<int64_t>{11});
     BOOST_CHECK(comm.includedNodes == std::set<int64_t>{11});
     BOOST_CHECK_EQUAL(cbCalls, 5);
@@ -1598,7 +1598,7 @@ BOOST_AUTO_TEST_CASE( join_and_rejoin_system_callback)
 
     while (!stop)
     {
-        ioService.run_one();
+        ioContext.run_one();
     }
     BOOST_CHECK_EQUAL(cbCalls, 3);
     BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
@@ -1612,7 +1612,7 @@ BOOST_AUTO_TEST_CASE( join_and_rejoin_system_callback)
     joinSystemIncarnations.clear();
     while (!stop)
     {
-        ioService.run_one();
+        ioContext.run_one();
     }
     BOOST_CHECK_EQUAL(cbCalls, 4);
 
@@ -1627,7 +1627,7 @@ BOOST_AUTO_TEST_CASE( join_and_rejoin_system_callback)
         rh->NewRemoteStatistics(11,data,size);
     }
     comm.excludeCb=[&]{rh->Stop();};
-    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_NO_THROW(ioContext.run());
     BOOST_CHECK_EQUAL(cbCalls, 7);
     BOOST_REQUIRE_EQUAL(joinSystemIncarnations.size(), 1U);
     BOOST_CHECK_EQUAL(*joinSystemIncarnations.begin(), 67890);

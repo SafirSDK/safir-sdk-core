@@ -61,7 +61,7 @@ const Safir::Dob::Typesystem::Int32 PERSISTENCE_CONTEXT = -1000000;
 
 //-------------------------------------------------------
 DopeApp::DopeApp():
-    m_dispatcher(m_dobConnection, m_ioService),
+    m_dispatcher(m_dobConnection, m_ioContext),
     m_persistenceStarted(false),
     m_persistenceInitialized(false),
     m_keeper(m_dobConnection),
@@ -114,7 +114,7 @@ DopeApp::~DopeApp()
 void DopeApp::OnStopOrder()
 {
     m_debug << "Got Stop order, will terminate"<< std::endl;
-    m_ioService.stop();
+    m_ioContext.stop();
 }
 
 //-------------------------------------------------------
@@ -210,13 +210,13 @@ void DopeApp::Start(bool restore)
         case Safir::Dob::PersistenceBackend::None:
             {
                 m_debug << "Using 'None' persistence" << std::endl;
-                m_persistenceHandler.reset(new NonePersistor(m_ioService));
+                m_persistenceHandler.reset(new NonePersistor(m_ioContext));
             }
             break;
         case Safir::Dob::PersistenceBackend::File:
             {
                 m_debug << "Using 'File' persistence" << std::endl;
-                m_persistenceHandler.reset(new FilePersistor(m_ioService));
+                m_persistenceHandler.reset(new FilePersistor(m_ioContext));
             }
             break;
 
@@ -230,7 +230,7 @@ void DopeApp::Start(bool restore)
                 std::setlocale(LC_CTYPE, "");
 
 #ifndef NO_DATABASE_SUPPORT
-                m_persistenceHandler.reset(new OdbcPersistor(m_ioService));
+                m_persistenceHandler.reset(new OdbcPersistor(m_ioContext));
 #endif
             }
             break;
@@ -278,8 +278,8 @@ DopeApp::GetHelpText()
 void
 DopeApp::Run()
 {
-    boost::asio::io_service::work keepRunning(m_ioService);
-    m_ioService.run();
+    auto keepRunning = boost::asio::make_work_guard(m_ioContext);
+    m_ioContext.run();
 
     if (m_persistenceHandler != nullptr)
     {
@@ -307,7 +307,7 @@ void DopeApp::ConnectionThread()
     try
     {
         tmpConnection.Open(L"DOPE_TMP",L"0",0,nullptr,&dispatcher);
-        m_ioService.post([this]
+        boost::asio::post(m_ioContext,[this]
                          {
                              SignalOkToConnect(true);
                          });
@@ -330,7 +330,7 @@ void DopeApp::ConnectionThread()
                                       L"Unhandled '...' exception in ConnectionThread");
     }
 
-    m_ioService.post([this]
+    boost::asio::post(m_ioContext,[this]
                      {
                          SignalOkToConnect(false);
                      });

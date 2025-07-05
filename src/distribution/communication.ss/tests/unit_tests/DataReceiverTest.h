@@ -249,7 +249,7 @@ public:
         work.reset();
         running=false;
         threads.join_all();
-        receiver.reset(); //make sure the DataReceiver is destructed before the io_service and the mutex
+        receiver.reset(); //make sure the DataReceiver is destructed before the io_context and the mutex
         TRACELINE
         std::cout<<"DataReceiverTester tests passed"<<std::endl;
     }

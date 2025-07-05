@@ -46,12 +46,12 @@
 const Safir::Dob::Typesystem::Int32 PERSISTENCE_CONTEXT = -1000000;
 
 //-------------------------------------------------------
-PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService,
+PersistenceHandler::PersistenceHandler(boost::asio::io_context& ioContext,
                                        const bool ignorePersistenceProperties)
-    : m_ioService(ioService)
-    , m_writeTimer(ioService)
+    : m_ioContext(ioContext)
+    , m_writeTimer(ioContext)
     , m_nextTimeout(std::chrono::steady_clock::time_point::max())
-    , m_dispatcher(m_dobConnection, ioService)
+    , m_dispatcher(m_dobConnection, ioContext)
     , m_debug(L"PersistenceHandler")
     , m_started(false)
 {
@@ -406,7 +406,7 @@ PersistenceHandler::HandleTimeout()
         }
     }
 
-    m_writeTimer.expires_from_now(std::chrono::seconds(1));
+    m_writeTimer.expires_after(std::chrono::seconds(1));
     m_writeTimer.async_wait([this](const boost::system::error_code& error)
     {
         if (!error)

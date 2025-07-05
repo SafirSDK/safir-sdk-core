@@ -35,10 +35,10 @@ class Dispatcher:
 {
 public:
     Dispatcher(const boost::function<void(void)> & dispatchCallback,
-               boost::asio::io_service & ioService)
+               boost::asio::io_context & ioContext)
         : m_dispatchCallback(dispatchCallback)
         , m_isNotified(0)
-        , m_ioService(ioService)
+        , m_ioContext(ioContext)
     {}
 
 private:
@@ -47,7 +47,7 @@ private:
         if (m_isNotified == 0)
         {
             m_isNotified = 1;
-            m_ioService.post([this]{Dispatch();});
+            boost::asio::post(m_ioContext, [this]{Dispatch();});
         }
     }
 
@@ -59,7 +59,7 @@ private:
 
     const boost::function<void(void)> m_dispatchCallback;
     Safir::Utilities::Internal::AtomicUint32 m_isNotified;
-    boost::asio::io_service & m_ioService;
+    boost::asio::io_context & m_ioContext;
 };
 
 #endif // DISPATCHER_H

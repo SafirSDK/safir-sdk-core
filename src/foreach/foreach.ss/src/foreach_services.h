@@ -72,7 +72,7 @@ namespace Safir
 
                 /** Constructor
                 */
-                explicit Services(boost::asio::io_service& ioService);
+                explicit Services(boost::asio::io_context& ioContext);
 
                 /** Destructor
                 */
@@ -110,7 +110,7 @@ namespace Safir
                 void ScheduleNextRequest(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData,
                                          bool addToQueue);
 
-                boost::asio::io_service& m_ioService;
+                boost::asio::io_context& m_ioContext;
 
                 // This class uses this secondary connection for DOB calls.
                 Safir::Dob::SecondaryConnection m_connection;

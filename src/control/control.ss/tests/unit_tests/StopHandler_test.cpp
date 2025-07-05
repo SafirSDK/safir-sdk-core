@@ -126,7 +126,7 @@ class ControlCmdReceiver
 {
 public:
 
-    ControlCmdReceiver(boost::asio::io_context& /*ioService*/,
+    ControlCmdReceiver(boost::asio::io_context& /*ioContext*/,
                        const ControlCmdCb&      cmdCb)
     {
         controlCmdCallback = cmdCb;

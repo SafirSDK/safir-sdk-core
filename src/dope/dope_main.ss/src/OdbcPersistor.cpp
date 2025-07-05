@@ -56,8 +56,8 @@ const bool USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS = true;
 #endif
 
 //-------------------------------------------------------
-OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
-    PersistenceHandler(ioService, false),
+OdbcPersistor::OdbcPersistor(boost::asio::io_context& ioContext) :
+    PersistenceHandler(ioContext, false),
     m_environment(SQL_NULL_HANDLE),
     m_odbcConnection(SQL_NULL_HANDLE),
     m_isOdbcConnected(false),
@@ -858,7 +858,7 @@ void OdbcPersistor::RestoreAll()
                 {
                     Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
                                                   L"Failed to inject persisted entities into system due to lack of shared memory. Exiting.");
-                    m_ioService.stop();
+                    m_ioContext.stop();
                 }
             }
         }

@@ -53,15 +53,15 @@ namespace SP
         : public SystemStateSubscriber
     {
     public:
-        StateSubscriberMaster(boost::asio::io_service& ioService,
+        StateSubscriberMaster(boost::asio::io_context& ioContext,
                               Coordinator& coordinator)
-            : m_strand(ioService)
+            : m_strand(ioContext)
         {
             coordinator.SetStateChangedCallback([this](const SystemStateMessage& data)
                                                 {
                                                     const auto dataCopy = SystemStateCreator::Create(Safir::make_unique<SystemStateMessage>(data));
 
-                                                    m_strand.post([this, dataCopy]
+                                                    boost::asio::post(m_strand, [this, dataCopy]
                                                                   {
                                                                       if (m_dataCallback != nullptr)
                                                                       {
@@ -73,7 +73,7 @@ namespace SP
 
         void Start(const std::function<void (const SystemState& data)>& dataCallback) override
         {
-            m_strand.dispatch([this, dataCallback]
+            boost::asio::dispatch(m_strand, [this, dataCallback]
                               {
                                   if (m_dataCallback != nullptr)
                                   {
@@ -86,7 +86,7 @@ namespace SP
 
         void Stop() override
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
                               {
                                   m_dataCallback = NULL;
                               });
@@ -95,7 +95,7 @@ namespace SP
     private:
 
         std::function<void (const SystemState& data)> m_dataCallback;
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
     };
 
 

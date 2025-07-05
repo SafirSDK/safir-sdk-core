@@ -33,10 +33,10 @@ namespace Safir
 {
 namespace Control
 {
-    CommandRequestHandler::CommandRequestHandler(boost::asio::io_service& ioService)
+    CommandRequestHandler::CommandRequestHandler(boost::asio::io_context& ioContext)
         : m_connectedToIPC(false)
     {
-        m_controlCommandSender.reset(new Safir::Dob::Internal::Control::ControlCmdSender(ioService,
+        m_controlCommandSender.reset(new Safir::Dob::Internal::Control::ControlCmdSender(ioContext,
                                                                                          [this]
                                                                                          {m_connectedToIPC = true;}));
 

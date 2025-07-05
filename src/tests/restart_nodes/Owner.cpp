@@ -114,11 +114,11 @@ class StopHandler :
     public Safir::Dob::StopHandler
 {
 public:
-    explicit StopHandler(boost::asio::io_service& ioService)
-        : m_ioService(ioService) {}
-    void OnStopOrder() override {m_ioService.stop();}
+    explicit StopHandler(boost::asio::io_context& ioContext)
+        : m_ioContext(ioContext) {}
+    void OnStopOrder() override {m_ioContext.stop();}
 private:
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
 
 };
 
@@ -128,8 +128,8 @@ class EntityOwner
     : public Safir::Dob::EntityHandlerInjection
 {
 public:
-    EntityOwner(boost::asio::io_service& ioService, const bool update, const int period, const std::int64_t handler)
-        : m_timer(ioService)
+    EntityOwner(boost::asio::io_context& ioContext, const bool update, const int period, const std::int64_t handler)
+        : m_timer(ioContext)
         , m_handler(handler)
         , m_update(update)
         , m_period(period)
@@ -233,22 +233,22 @@ int main(int argc, char * argv[])
         const std::wstring nameCommonPart = L"Owner";
         const std::wstring nameInstancePart = Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString();
 
-        boost::asio::io_service ioService;
+        boost::asio::io_context ioContext;
 
-        StopHandler stopHandler(ioService);
+        StopHandler stopHandler(ioContext);
 
         Safir::Dob::Connection connection;
 
-        Safir::Utilities::AsioDispatcher dispatcher(connection,ioService);
+        Safir::Utilities::AsioDispatcher dispatcher(connection,ioContext);
 
         connection.Open(nameCommonPart,
                         nameInstancePart,
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-        EntityOwner owner(ioService, options.update, options.period, options.handler);
-        boost::asio::io_service::work keepRunning(ioService);
-        ioService.run();
+        EntityOwner owner(ioContext, options.update, options.period, options.handler);
+        boost::asio::io_context::work keepRunning(ioContext);
+        ioContext.run();
 
         connection.Close();
     }

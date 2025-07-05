@@ -81,17 +81,17 @@ namespace Internal
         }
 #endif
     }
-    DoseMainApp::DoseMainApp(boost::asio::io_service& ioService):
+    DoseMainApp::DoseMainApp(boost::asio::io_context& ioContext):
         m_stopped(false),
-        m_ioService(ioService),
-        m_strand(ioService),
-        m_wcoutStrand(ioService),
-        m_work(new boost::asio::io_service::work(ioService)),
+        m_ioContext(ioContext),
+        m_strand(ioContext),
+        m_wcoutStrand(ioContext),
+        m_work(boost::asio::make_work_guard(ioContext)),
         m_nodeId(0),
         m_distribution(),
-        m_signalSet(ioService)
+        m_signalSet(ioContext)
     {
-        m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioService,
+        m_cmdReceiver.reset(new Control::DoseMainCmdReceiver( ioContext,
 
                                                               // StartDoseMain
                                                               Safir::Utilities::Internal::WrapInStrand(m_strand, [this](const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
@@ -193,14 +193,14 @@ namespace Internal
     void DoseMainApp::Start(const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
     {
         m_nodeId = nodeId;
-        m_memoryMonitor.reset(new MemoryMonitor(m_ioService));
-        m_distribution.reset(new Distribution(m_ioService, nodeName, nodeId, nodeTypeId, dataAddress));
+        m_memoryMonitor.reset(new MemoryMonitor(m_ioContext));
+        m_distribution.reset(new Distribution(m_ioContext, nodeName, nodeId, nodeTypeId, dataAddress));
         InitializeDoseInternalFromDoseMain(nodeId);
         m_lockMonitor.reset(new LockMonitor());
         m_messageHandler.reset(new MessageHandler(*m_distribution));
         m_requestHandler.reset(new RequestHandler(m_strand.context(), *m_distribution));
-        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService, *m_distribution));
-        m_connectionHandler.reset(new ConnectionHandler(m_ioService,
+        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioContext, *m_distribution));
+        m_connectionHandler.reset(new ConnectionHandler(m_ioContext,
                                                         *m_distribution,
                                                         [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);},
                                                         [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},

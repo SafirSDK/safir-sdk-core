@@ -103,11 +103,11 @@ class StopHandler :
     public Safir::Dob::StopHandler
 {
 public:
-    explicit StopHandler(boost::asio::io_service& ioService)
-        : m_ioService(ioService) {}
-    void OnStopOrder() override {m_ioService.stop();}
+    explicit StopHandler(boost::asio::io_context& ioContext)
+        : m_ioContext(ioContext) {}
+    void OnStopOrder() override {m_ioContext.stop();}
 private:
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
 
 };
 
@@ -195,13 +195,13 @@ int main(int argc, char * argv[])
         const std::wstring nameCommonPart = L"RequestSender";
         const std::wstring nameInstancePart = Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString();
 
-        boost::asio::io_service ioService;
+        boost::asio::io_context ioContext;
 
-        StopHandler stopHandler(ioService);
+        StopHandler stopHandler(ioContext);
 
         Safir::Dob::Connection connection;
 
-        Safir::Utilities::AsioDispatcher dispatcher(connection,ioService);
+        Safir::Utilities::AsioDispatcher dispatcher(connection,ioContext);
 
         connection.Open(nameCommonPart,
                         nameInstancePart,
@@ -209,8 +209,8 @@ int main(int argc, char * argv[])
                         &stopHandler,
                         &dispatcher);
         RequestSender sender(options.handler);
-        boost::asio::io_service::work keepRunning(ioService);
-        ioService.run();
+        auto keepRunning = boost::asio::make_work_guard(ioContext);
+        ioContext.run();
 
         connection.Close();
     }

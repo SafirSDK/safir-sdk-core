@@ -43,7 +43,7 @@ namespace Control
         private boost::noncopyable
     {
     public:
-        CommandRequestHandler(boost::asio::io_service& ioService);
+        CommandRequestHandler(boost::asio::io_context& ioContext);
 
         void Start();
         void Stop();

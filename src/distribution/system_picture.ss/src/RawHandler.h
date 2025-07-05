@@ -105,7 +105,7 @@ namespace SP
 
     public:
         RawHandlerBasic(const std::wstring& logPrefix,
-                        boost::asio::io_service::strand& strand,
+                        boost::asio::io_context::strand& strand,
                         CommunicationT& communication,
                         const std::string& name,
                         const int64_t id,
@@ -176,7 +176,7 @@ namespace SP
                                                     const std::string& dataAddress,
                                                     const bool multicast)
             {
-                m_strand.dispatch([this,name,id,nodeTypeId,controlAddress,dataAddress,multicast]
+                boost::asio::dispatch(m_strand, [this,name,id,nodeTypeId,controlAddress,dataAddress,multicast]
                 {
                     NewNode(name,id,nodeTypeId,controlAddress,dataAddress,multicast);
                 });
@@ -199,7 +199,7 @@ namespace SP
 
                 if (m_checkDeadNodesTimer != nullptr)
                 {
-                    m_strand.dispatch([this]
+                    boost::asio::dispatch(m_strand, [this]
                     {
                         m_checkDeadNodesTimer->Stop();
                     });
@@ -211,7 +211,7 @@ namespace SP
         void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char[]> data,
                                                                    const size_t size)> & fn) const
         {
-            m_strand.dispatch([this,fn]
+            boost::asio::dispatch(m_strand, [this,fn]
             {
                 //With newer protobuf (>= 2.5.0) we can be clever
                 //we just get the remote statistics out of the way before serializing a
@@ -256,7 +256,7 @@ namespace SP
         void PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
                                                                     const size_t size)> & fn) const
         {
-            m_strand.dispatch([this,fn]
+            boost::asio::dispatch(m_strand, [this,fn]
                               {
                                   const size_t size = m_allStatisticsMessage.ByteSizeLong();
                                   auto data = std::unique_ptr<char[]>(new char[size]);
@@ -268,7 +268,7 @@ namespace SP
 
         void NewRemoteStatistics(const int64_t from, const Safir::Utilities::Internal::SharedConstCharArray& data, const size_t size)
         {
-            m_strand.post([this,from,data,size]
+            boost::asio::post(m_strand, [this,from,data,size]
             {
                 lllog(9) << m_logPrefix << "NewRemoteStatistics for node " << from << std::endl;
                 auto findIt = m_nodeTable.find(from);
@@ -502,7 +502,7 @@ namespace SP
                 throw std::logic_error("Only Master should be able to receive DataChannelStatistics");
             }
 
-            m_strand.dispatch([this,data]
+            boost::asio::dispatch(m_strand, [this,data]
             {
                 lllog(9) << m_logPrefix << "NewDataChannelStatistics" << std::endl;
 
@@ -573,7 +573,7 @@ namespace SP
          */
         void AddRawChangedCallback(const StatisticsCallback& callback)
         {
-            m_strand.dispatch([this, callback]
+            boost::asio::dispatch(m_strand, [this, callback]
                               {
                                   m_rawChangedCallbacks.push_back(callback);
                               });
@@ -591,7 +591,7 @@ namespace SP
             }
             lllog(4) << m_logPrefix << "ExcludeNode " << id << std::endl;
             m_communication.ExcludeNode(id);
-            m_strand.dispatch([this, id]
+            boost::asio::dispatch(m_strand, [this, id]
                               {
                                   if (m_isLightNode && !m_master)
                                   {
@@ -633,7 +633,7 @@ namespace SP
                 throw std::logic_error("ResurrectNode on a lightnode makes no sense!");
             }
 
-            m_strand.dispatch([this, id]
+            boost::asio::dispatch(m_strand, [this, id]
                               {
                                   lllog(4) << m_logPrefix << "ResurrectNode: Resurrecting node " << id << std::endl;
                                   auto findIt = m_nodeTable.find(id);
@@ -712,7 +712,7 @@ namespace SP
                 throw std::logic_error("SetNodeIsDetached was called on a non-light node!");
             }
 
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
                               {
                                   if (m_nodeTable.empty() && m_allStatisticsMessage.more_dead_nodes_size() == 0)
                                   {
@@ -746,7 +746,7 @@ namespace SP
          */
         void RecentlyDeadNodes(const std::vector<int64_t>& nodeIds)
         {
-            m_strand.dispatch([this, nodeIds]
+            boost::asio::dispatch(m_strand, [this, nodeIds]
                               {
                                   bool changed = false;
 
@@ -770,7 +770,7 @@ namespace SP
 
         void SetElectionId(const int64_t /*nodeId*/, const int64_t electionId)
         {
-            m_strand.dispatch([this, electionId]
+            boost::asio::dispatch(m_strand, [this, electionId]
                               {
                                   lllog(7) << m_logPrefix << "Election Id " << electionId
                                            << " set in RawHandler." << std::endl;
@@ -784,7 +784,7 @@ namespace SP
         void FormSystem(const int64_t incarnationId)
         {
             lllog(4) << m_logPrefix << "FormSystem " << incarnationId << std::endl;
-            m_strand.post([this, incarnationId]
+            boost::asio::post(m_strand, [this, incarnationId]
                           {
                               if (m_allStatisticsMessage.has_incarnation_id())
                               {
@@ -1292,7 +1292,7 @@ namespace SP
                     //we've just modified the table that we're looping through, so
                     //we can't continue the loop. Post another call to this function
                     //and break out of the loop.
-                    m_strand.post([this]{CheckDeadNodes();});
+                    boost::asio::post(m_strand, [this]{CheckDeadNodes();});
 
                     break;
                 }
@@ -1332,12 +1332,12 @@ namespace SP
             for (auto it = m_rawChangedCallbacks.cbegin(); it != m_rawChangedCallbacks.cend(); ++it)
             {
                 auto cb = *it;
-                m_strand.post([cb,copy,flags,completionCaller]{cb(copy,flags,completionCaller);});
+                boost::asio::post(m_strand, [cb,copy,flags,completionCaller]{cb(copy,flags,completionCaller);});
             }
         }
 
         const std::wstring m_logPrefix;
-        boost::asio::io_service::strand& m_strand;
+        boost::asio::io_context::strand& m_strand;
         CommunicationT& m_communication;
 
         const int64_t m_id;

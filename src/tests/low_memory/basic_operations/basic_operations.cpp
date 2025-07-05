@@ -232,11 +232,11 @@ class App
 {
 public:
     App()
-        : m_ioService()
-        , m_work (new boost::asio::io_service::work(m_ioService))
-        , m_timer(m_ioService)
+        : m_ioContext()
+        , m_work (boost::asio::make_work_guard(m_ioContext))
+        , m_timer(m_ioContext)
         , m_misc(m_connection)
-        , m_dispatcher(m_connection, m_ioService)
+        , m_dispatcher(m_connection, m_ioContext)
     {
         m_shmem.reserve(10000);
     }
@@ -346,13 +346,13 @@ public:
         m_timer.expires_after(std::chrono::seconds(3));
         m_timer.async_wait([this](const boost::system::error_code&){m_work.reset();});
 
-        m_ioService.run();
+        m_ioContext.run();
 
         m_connection.Close();
     }
 private:
-    boost::asio::io_service m_ioService;
-    std::unique_ptr<boost::asio::io_service::work> m_work;
+    boost::asio::io_context m_ioContext;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     boost::asio::steady_timer m_timer;
     Safir::Dob::Connection m_connection;
     Safir::Dob::ConnectionAspectMisc m_misc;

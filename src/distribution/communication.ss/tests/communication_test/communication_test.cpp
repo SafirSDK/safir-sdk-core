@@ -104,7 +104,7 @@ public:
                 ("nsend", boost::program_options::value<uint64_t>(), "Number of messages to send to every other node, default unlimited")
                 ("nrecv", boost::program_options::value<uint64_t>(), "Number of messages to receive from all otherl nodes (accumulated), default unlimited")
                 ("size", boost::program_options::value<size_t>(), "Size of data packets, default is 1000 bytes")
-                ("thread-count", boost::program_options::value<unsigned int>(), "Number of threads to run io_service, default is 2 threads")
+                ("thread-count", boost::program_options::value<unsigned int>(), "Number of threads to run io_context, default is 2 threads")
                 ("unacked", "Send unacked messages");
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);

@@ -24,7 +24,7 @@
 #pragma once
 
 #include <memory>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <set>
 
 #ifdef _MSC_VER
@@ -78,11 +78,11 @@ private:
     static void AppendMetaText(QTextEdit* textEdit, const QString& string, bool error);
     struct Process
     {
-        Process(boost::asio::io_service& ioService)
+        Process(boost::asio::io_context& ioContext)
             : outBuf(4096)
             , errBuf(4096)
-            , outPipe(ioService)
-            , errPipe(ioService)
+            , outPipe(ioContext)
+            , errPipe(ioContext)
             , exitError(false)
         {
         }
@@ -109,7 +109,7 @@ private:
                 const int exitCode);
 
     std::unique_ptr<Ui::MainWindow> m_ui;
-    boost::asio::io_service m_ioService;
-    std::unique_ptr<boost::asio::io_service::work> m_work;
+    boost::asio::io_context m_ioContext;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     std::set<std::shared_ptr<Process>> m_processes;
 };

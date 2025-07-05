@@ -57,7 +57,7 @@ namespace Internal
     class PoolDistributionHandler
     {
     public:
-        PoolDistributionHandler(boost::asio::io_service& io, DistributionT& distribution)
+        PoolDistributionHandler(boost::asio::io_context& io, DistributionT& distribution)
             :m_strand(io)
             ,m_distribution(distribution)
             ,m_running(false)
@@ -167,7 +167,7 @@ namespace Internal
 #ifndef SAFIR_TEST
     private:
 #endif
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         DistributionT& m_distribution;
         bool m_running;
 

@@ -94,7 +94,7 @@ namespace SP
     {
     public:
         CoordinatorBasic(const std::wstring& logPrefix,
-                         boost::asio::io_service::strand& strand,
+                         boost::asio::io_context::strand& strand,
                          CommunicationT& communication,
                          const std::string& name,
                          const int64_t id,
@@ -189,7 +189,7 @@ namespace SP
 
         void SetStateChangedCallback(const std::function<void(const SystemStateMessage& data)>& callback)
         {
-            m_strand.dispatch([this,callback]
+            boost::asio::dispatch(m_strand, [this,callback]
                               {
                                   m_stateChangedCallback = callback;
                               });
@@ -202,7 +202,7 @@ namespace SP
                                    const size_t size)> & fn,
                                    const bool onlyOwnState)
         {
-            m_strand.dispatch([this,fn,onlyOwnState]
+            boost::asio::dispatch(m_strand, [this,fn,onlyOwnState]
             {
                 lllog(8) << m_logPrefix << "Coordinator::PerformOnStateMessage:" << std::endl;
                 if (onlyOwnState)
@@ -248,7 +248,7 @@ namespace SP
                                  const Safir::Utilities::Internal::SharedConstCharArray& data,
                                  const size_t size)
         {
-            m_strand.dispatch([this,from,data,size]
+            boost::asio::dispatch(m_strand, [this,from,data,size]
             {
                 if (!m_electionHandler->IsElected(from))
                 {
@@ -1077,7 +1077,7 @@ namespace SP
         }
 
         const std::wstring m_logPrefix;
-        boost::asio::io_service::strand& m_strand;
+        boost::asio::io_context::strand& m_strand;
         CommunicationT& m_communication;
 
         std::unique_ptr<ElectionHandlerT> m_electionHandler;

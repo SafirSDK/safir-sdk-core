@@ -196,7 +196,7 @@ namespace Internal
 
             my_deleter():m_deleter(SharedMemoryHolder::Instance().GetShmem().get_segment_manager()) {}
 
-            void operator()(const pointer &p){m_deleter(p);}
+            void operator()(const pointer &p) {m_deleter(p);}
 
         private:
             underlying_deleter m_deleter;

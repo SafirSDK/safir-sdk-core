@@ -66,7 +66,7 @@ namespace Internal
     {
     public:
 
-        RequestHandler(boost::asio::io_service& ioService,
+        RequestHandler(boost::asio::io_context& ioContext,
                        Distribution&            distribution);
 
         // Handle outgoing and incoming requests for this connection
@@ -136,8 +136,8 @@ namespace Internal
 
         typedef std::unordered_map<int64_t, PendingRequestsQueue> PendingRequestTable;
 
-        boost::asio::io_service&            m_ioService;
-        boost::asio::io_service::strand     m_strand;
+        boost::asio::io_context&            m_ioContext;
+        boost::asio::io_context::strand     m_strand;
         std::atomic<bool>                   m_stopped;
 
         Distribution&                       m_distribution;

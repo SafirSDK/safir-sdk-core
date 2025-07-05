@@ -49,17 +49,17 @@ namespace SP
          * The all parameter controls whether remote raw data is sent or just our own data.
          */
         RawPublisherLocalBasic(const std::wstring& logPrefix,
-                               boost::asio::io_service& ioService,
+                               boost::asio::io_context& ioContext,
                                RawHandlerT& rawHandler,
                                const char* const name,
                                const std::chrono::steady_clock::duration& period,
                                const bool all)
             : m_logPrefix(logPrefix)
             , m_rawHandler(rawHandler)
-            , m_publisher(ioService,name,NULL,NULL)
+            , m_publisher(ioContext,name,NULL,NULL)
             , m_all(all)
         {
-            m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
+            m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioContext,
                                                                                    period,
                                                                                    [this](const boost::system::error_code& error)
                                                                                    {

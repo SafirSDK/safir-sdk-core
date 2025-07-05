@@ -67,7 +67,7 @@ namespace SP
     {
     public:
         ElectionHandlerBasic(const std::wstring& logPrefix,
-                             boost::asio::io_service::strand& strand,
+                             boost::asio::io_context::strand& strand,
                              CommunicationT& communication,
                              const int64_t id,
                              const int64_t nodeTypeId,
@@ -111,7 +111,7 @@ namespace SP
             lllog(3) << m_logPrefix << "AloneTimeout will be " << std::chrono::duration_cast<std::chrono::milliseconds>(m_aloneTimeout).count() << " ms" << std::endl;
             lllog(3) << m_logPrefix << "ElectionTimeout will be " << std::chrono::duration_cast<std::chrono::milliseconds>(m_electionTimeout).count() << " ms" << std::endl;
             m_electionInProgress = true;
-            m_electionTimer.expires_from_now(m_aloneTimeout);
+            m_electionTimer.expires_after(m_aloneTimeout);
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                      {
                                                          if (!error && !m_stopped)
@@ -137,7 +137,7 @@ namespace SP
         void Stop()
         {
             lllog(4) << m_logPrefix << "ElectionHandler::Stop called." << std::endl;
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
                               {
                                   lllog(4) << m_logPrefix << "ElectionHandler executing Stop" << std::endl;
                                   m_pendingAlives.clear();
@@ -170,7 +170,7 @@ namespace SP
                 }
             }
 
-            m_strand.dispatch([this, statistics, completionSignaller]
+            boost::asio::dispatch(m_strand, [this, statistics, completionSignaller]
                               {
                                   lllog(5) << m_logPrefix << "ElectionHandler got new RawStatistics" << std::endl;
                                   m_lastStatistics = statistics;
@@ -181,7 +181,7 @@ namespace SP
         /** This can be used to force an election outside of node changes.*/
         void ForceElection()
         {
-            m_strand.dispatch([this]
+            boost::asio::dispatch(m_strand, [this]
                               {
                                   lllog(5) << m_logPrefix << "ElectionHandler is forcing an election" << std::endl;
                                   StartElection();
@@ -352,7 +352,7 @@ namespace SP
             //The number 4 is dependent on how Communication handles sending discovery information.
             //It sends discovery information every 3*electionTimeout, so we want to wait a little bit
             //longer than that.
-            m_electionTimer.expires_from_now(4*m_electionTimeout);
+            m_electionTimer.expires_after(4*m_electionTimeout);
             m_electionInProgress = true;
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {
@@ -369,7 +369,7 @@ namespace SP
                 SendPendingElectionMessages();
 
                 m_electionInProgress = true;
-                m_electionTimer.expires_from_now(m_electionTimeout);
+                m_electionTimer.expires_after(m_electionTimeout);
 
                 m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error){ElectionTimeout(error);}));
             }));
@@ -397,7 +397,7 @@ namespace SP
 
                 if (m_lastStatistics.IncarnationId() == 0)
                 {
-                    m_generateIncarnationIdTimer.expires_from_now(m_aloneTimeout);
+                    m_generateIncarnationIdTimer.expires_after(m_aloneTimeout);
 
                     m_generateIncarnationIdTimer.async_wait
                         (m_strand.wrap([this](const boost::system::error_code& error)
@@ -431,7 +431,7 @@ namespace SP
                      << message.election_id()
                      << ") from " << from << std::endl;
 
-            m_strand.dispatch([this,message, from, nodeTypeId]
+            boost::asio::dispatch(m_strand, [this,message, from, nodeTypeId]
             {
                 bool found = false;
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
@@ -633,7 +633,7 @@ namespace SP
             //Handle retry
             if (!m_pendingAlives.empty() || !m_pendingVictories.empty() || !m_pendingInquiries.empty())
             {
-                m_sendMessageTimer.expires_from_now(std::chrono::milliseconds(10));
+                m_sendMessageTimer.expires_after(std::chrono::milliseconds(10));
                 m_sendMessageTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                             {
                                                                 if (!error && !m_stopped)
@@ -655,7 +655,7 @@ namespace SP
         }
 
         const std::wstring m_logPrefix;
-        boost::asio::io_service::strand& m_strand;
+        boost::asio::io_context::strand& m_strand;
         bool m_stopped;
         CommunicationT& m_communication;
         const uint64_t m_receiverId;

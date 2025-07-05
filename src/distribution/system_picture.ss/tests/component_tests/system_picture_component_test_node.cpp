@@ -202,7 +202,7 @@ class Common
 public:
     Common(const std::int64_t id, const std::string& logPrefix)
         : m_success(true)
-        , m_work(new boost::asio::io_service::work(m_ioService))
+        , m_work(boost::asio::make_work_guard(m_ioContext))
         , m_id(id)
         , m_logPrefix(logPrefix + ": ")
     {
@@ -314,13 +314,13 @@ public:
             {
                 try
                 {
-                    m_ioService.run();
+                    m_ioContext.run();
                     return;
                 }
                 catch (const std::exception & exc)
                 {
                     {
-                        logerr << m_logPrefix << "Caught 'std::exception' exception from io_service.run(): "
+                        logerr << m_logPrefix << "Caught 'std::exception' exception from io_context.run(): "
                                << "  '" << exc.what() << "'." << std::endl;
                     }
                     quick_exit(1);
@@ -343,16 +343,16 @@ protected:
 
     bool SuccessCommon() const
     {
-        return m_work == nullptr && m_success;
+        return !m_work.owns_work() && m_success;
     }
 
     virtual ~Common() = default;
     std::atomic<bool> m_success;
     boost::thread_group m_threads;
 
-    boost::asio::io_service m_ioService;
-    //make some work to stop io_service from exiting.
-    std::unique_ptr<boost::asio::io_service::work> m_work;
+    boost::asio::io_context m_ioContext;
+    //make some work to stop io_context from exiting.
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
 
     const std::int64_t m_id;
     const std::string m_logPrefix;
@@ -372,12 +372,12 @@ public:
                      const std::int64_t id,
                      const std::function<void()>& stopFcn)
         : Common(id, "Control")
-        , m_strand(m_ioService)
+        , m_strand(m_ioContext)
         , m_stopFcn(stopFcn)
     {
         m_communication.reset(new Safir::Dob::Internal::Com::Communication
                               (Safir::Dob::Internal::Com::controlModeTag,
-                               m_ioService,
+                               m_ioContext,
                                options.name,
                                m_id,
                                options.nodeType,
@@ -400,7 +400,7 @@ public:
 
         m_systemPicture.reset(new Safir::Dob::Internal::SP::SystemPicture
                               (Safir::Dob::Internal::SP::master_tag,
-                               m_ioService,
+                               m_ioContext,
                                *m_communication,
                                options.name,
                                m_id,
@@ -445,7 +445,7 @@ protected:
         logout << "ctrl: " << data.ToJson() << std::endl;
     }
 
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_context::strand m_strand;
 
     const std::function<void()> m_stopFcn;
 };
@@ -457,13 +457,13 @@ public:
     explicit Main(const ProgramOptions& options, const std::int64_t id)
         : Common(id, "Main")
         , m_isLightNode(options.isLightNode)
-        , m_strand(m_ioService)
-        , m_sendTimer(m_ioService)
+        , m_strand(m_ioContext)
+        , m_sendTimer(m_ioContext)
         , m_timerStopped(false)
     {
         m_communication.reset(new Safir::Dob::Internal::Com::Communication
                               (Safir::Dob::Internal::Com::dataModeTag,
-                               m_ioService,
+                               m_ioContext,
                                options.name,
                                m_id,
                                options.nodeType,
@@ -474,7 +474,7 @@ public:
 
         m_systemPicture.reset(new Safir::Dob::Internal::SP::SystemPicture
                               (Safir::Dob::Internal::SP::slave_tag,
-                               m_ioService,
+                               m_ioContext,
                                *m_communication,
                                options.name,
                                m_id,
@@ -522,7 +522,7 @@ public:
                                          [](const char * data){delete[] data;});
 
 
-        m_sendTimer.expires_from_now(std::chrono::milliseconds(20));
+        m_sendTimer.expires_after(std::chrono::milliseconds(20));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
 
         m_systemPicture->StartStateSubscription(m_strand.wrap([this](const Safir::Dob::Internal::SP::SystemState& data)
@@ -571,7 +571,7 @@ private:
         m_communication->Send(0, 2, DATA, DATA_SIZE, 1000100222, false);
         m_communication->Send(0, 11, DATA, DATA_SIZE, 1000100222, false);
         m_communication->Send(0, 12, DATA, DATA_SIZE, 1000100222, false);
-        m_sendTimer.expires_from_now(std::chrono::milliseconds(20));
+        m_sendTimer.expires_after(std::chrono::milliseconds(20));
         m_sendTimer.async_wait([this](const boost::system::error_code& error){Send(error);});
     }
 
@@ -656,7 +656,7 @@ private:
     }
 
     const bool m_isLightNode;
-    boost::asio::io_service::strand m_strand;
+    boost::asio::io_context::strand m_strand;
     std::set<int64_t> m_injectedNodes;
     boost::asio::steady_timer m_sendTimer;
     std::atomic<bool> m_timerStopped;
@@ -683,10 +683,10 @@ int main(int argc, char * argv[])
 
         logerr << "Starting node '" << options.name << "' as node type " << options.nodeType << std::endl;
 
-        boost::asio::io_service ioService;
-        boost::asio::io_service::strand strand(ioService);
-        auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
-        boost::asio::signal_set signalSet(ioService);
+        boost::asio::io_context ioContext;
+        boost::asio::io_context::strand strand(ioContext);
+        auto work = boost::asio::make_work_guard(ioContext);
+        boost::asio::signal_set signalSet(ioContext);
 
 #if defined (_WIN32)
         signalSet.add(SIGABRT);
@@ -702,7 +702,7 @@ int main(int argc, char * argv[])
         signalSet.async_wait([&work](const boost::system::error_code& error,
                                      const int /*signal_number*/)
                              {
-                                 if (error && work != nullptr)
+                                 if (error && work.owns_work())
                                  {
                                      logerr << "Got a signals error: " << error << std::endl;
                                  }
@@ -743,7 +743,7 @@ int main(int argc, char * argv[])
             logerr << "Going to reset work and cancel the signalSet" << std::endl;
             work.reset();
             signalSet.cancel();
-            logerr << "Done. ioService should stop running now" << std::endl;
+            logerr << "Done. ioContext should stop running now" << std::endl;
         };
 
         const auto id = options.nodeId;
@@ -760,7 +760,7 @@ int main(int argc, char * argv[])
             main->Start();
         }
 
-        ioService.run();
+        ioContext.run();
 
         if (control != nullptr)
         {

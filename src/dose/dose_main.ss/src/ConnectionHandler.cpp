@@ -42,16 +42,16 @@ namespace
     static const int64_t ConnectionMessageDataTypeId=4477521173098643793; //DoseMain.ConnectionMessage
 }
 
-    ConnectionHandler::ConnectionHandler(boost::asio::io_service& ioService,
+    ConnectionHandler::ConnectionHandler(boost::asio::io_context& ioContext,
                                          Distribution& distribution,
                                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
                                          const std::function<void(int64_t)>& checkPendingReg,
                                          const std::function<void(const std::string& str)>& logStatus)
-        : m_strand(ioService),
+        : m_strand(ioContext),
           m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
           m_poolHandler(m_strand, distribution, checkPendingReg, logStatus),
-          m_processInfoHandler(ioService),
+          m_processInfoHandler(ioContext),
           m_keepStateWhileDetached(distribution.GetNodeTypeConfiguration().GetThisNodeType().keepStateWhileDetached)
     {
         distribution.SubscribeNodeEvents(

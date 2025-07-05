@@ -330,7 +330,7 @@ public:
 
         {
             boost::mutex::scoped_lock lock(mutex);
-            discoverState.clear(); //this step is important because discoverState has references to the io_service in this scope.
+            discoverState.clear(); //this step is important because discoverState has references to the io_context in this scope.
         }
 
         std::wcout<<"HandleDiscover tests passed"<<std::endl;
@@ -700,7 +700,7 @@ public:
 
         {
             boost::mutex::scoped_lock lock(mutex);
-            discoverState.clear(); //this step is important because discoverState has references to the io_service in this scope.
+            discoverState.clear(); //this step is important because discoverState has references to the io_context in this scope.
         }
 
         std::wcout<<"DiscoverWithLightNodes tests passed"<<std::endl;
@@ -977,7 +977,7 @@ public:
 
         {
             boost::mutex::scoped_lock lock(mutex);
-            discoverState.clear(); //this step is important because discoverState has references to the io_service in this scope.
+            discoverState.clear(); //this step is important because discoverState has references to the io_context in this scope.
         }
 
         // Last test to verify the cyclic CheckTimeLimitedExclusions

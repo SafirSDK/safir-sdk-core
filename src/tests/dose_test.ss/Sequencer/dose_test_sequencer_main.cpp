@@ -63,16 +63,16 @@ class Dispatcher:
 {
 public:
     Dispatcher(Safir::Dob::Connection & connection,
-               boost::asio::io_service & ioService)
+               boost::asio::io_context & ioContext)
         : m_connection(connection)
-        , m_ioService(ioService)
+        , m_ioContext(ioContext)
     {}
 private:
-    void OnDoDispatch() override {m_ioService.post([this]{Dispatch();});}
+    void OnDoDispatch() override {m_ioContext.post([this]{Dispatch();});}
     void Dispatch(){m_connection.Dispatch();}
 
     Safir::Dob::Connection & m_connection;
-    boost::asio::io_service & m_ioService;
+    boost::asio::io_context & m_ioContext;
 };
 
 int GetRandomContext()
@@ -179,13 +179,13 @@ int main(int argc, char* argv[])
         const std::wstring nameCommonPart = L"Sequencer";
         const std::wstring nameInstancePart = L"";
 
-        boost::asio::io_service ioService;
-        boost::asio::io_service::work keepRunning(ioService);
+        boost::asio::io_context ioContext;
+        boost::asio::io_context::work keepRunning(ioContext);
 
         StopHandler stopHandler;
 
         Safir::Dob::Connection connection;
-        Dispatcher dispatcher(connection,ioService);
+        Dispatcher dispatcher(connection,ioContext);
         std::wcout << nameCommonPart.c_str() <<  nameInstancePart.c_str() << ": Started" <<std::endl;
 
         connection.Open(nameCommonPart,
@@ -213,9 +213,9 @@ int main(int argc, char* argv[])
                             commandLine.multinode,
                             commandLine.noTimeout,
                             context,
-                            ioService);
+                            ioContext);
 
-        ioService.run();
+        ioContext.run();
 
         connection.Close();
         std::wcout << "End" << std::endl;

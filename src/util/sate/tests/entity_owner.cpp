@@ -72,11 +72,11 @@ class StopHandler :
     public Safir::Dob::StopHandler
 {
 public:
-    explicit StopHandler(boost::asio::io_service& ioService)
-        : m_ioService(ioService) {}
-    void OnStopOrder() override {m_ioService.stop();}
+    explicit StopHandler(boost::asio::io_context& ioContext)
+        : m_ioContext(ioContext) {}
+    void OnStopOrder() override {m_ioContext.stop();}
 private:
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
 };
 
 class EntityOwner
@@ -240,13 +240,13 @@ int main()
         const std::wstring nameCommonPart = L"C++";
         const std::wstring nameInstancePart = L"1";
 
-        boost::asio::io_context ioService;
+        boost::asio::io_context ioContext;
 
-        StopHandler stopHandler(ioService);
+        StopHandler stopHandler(ioContext);
 
         Safir::Dob::Connection connection;
 
-        Safir::Utilities::AsioDispatcher dispatcher(connection,ioService);
+        Safir::Utilities::AsioDispatcher dispatcher(connection,ioContext);
 
         connection.Open(nameCommonPart,
                         nameInstancePart,
@@ -260,23 +260,23 @@ int main()
         owner.SetBig();
 
         Safir::Utilities::Internal::AsioPeriodicTimer updateSmall
-            (ioService,std::chrono::seconds(1), [&owner](const boost::system::error_code& /*error*/){owner.UpdateSomeSmall();});
+            (ioContext,std::chrono::seconds(1), [&owner](const boost::system::error_code& /*error*/){owner.UpdateSomeSmall();});
         updateSmall.Start();
 
         Safir::Utilities::Internal::AsioPeriodicTimer updateBig
-            (ioService,std::chrono::seconds(1), [&owner](const boost::system::error_code& /*error*/){owner.UpdateSomeBig();});
+            (ioContext,std::chrono::seconds(1), [&owner](const boost::system::error_code& /*error*/){owner.UpdateSomeBig();});
         updateBig.Start();
 
         Safir::Utilities::Internal::AsioPeriodicTimer sendSmall
-            (ioService,std::chrono::milliseconds(10), [&owner](const boost::system::error_code& /*error*/){owner.SendSmall();});
+            (ioContext,std::chrono::milliseconds(10), [&owner](const boost::system::error_code& /*error*/){owner.SendSmall();});
         sendSmall.Start();
 
         Safir::Utilities::Internal::AsioPeriodicTimer sendBig
-            (ioService,std::chrono::milliseconds(100), [&owner](const boost::system::error_code& /*error*/){owner.SendBig();});
+            (ioContext,std::chrono::milliseconds(100), [&owner](const boost::system::error_code& /*error*/){owner.SendBig();});
         sendBig.Start();
 
-        boost::asio::io_service::work keepRunning(ioService);
-        ioService.run();
+        auto keepRunning = boost::asio::make_work_guard(ioContext);
+        ioContext.run();
 
         connection.Close();
     }

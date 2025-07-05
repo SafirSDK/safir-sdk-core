@@ -62,7 +62,7 @@ namespace Internal
     public:
         typedef ConnectionsT Connections;
 
-        PoolDistributionRequestSender(boost::asio::io_service& io, DistributionT& distribution,
+        PoolDistributionRequestSender(boost::asio::io_context& io, DistributionT& distribution,
                                       const std::function<void()>& allPoolsReceived)
             :m_running(false)
             ,m_strand(io)
@@ -146,7 +146,7 @@ namespace Internal
 
         bool m_running;
 
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_context::strand m_strand;
         DistributionT& m_distribution;
         std::function<void()> m_allPoolsReceivedCb;
 

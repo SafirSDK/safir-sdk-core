@@ -49,11 +49,11 @@ class StopHandler :
     public Safir::Dob::StopHandler
 {
 public:
-    explicit StopHandler(boost::asio::io_service& ioService)
-        : m_ioService(ioService) {}
-    void OnStopOrder() override {m_ioService.stop();}
+    explicit StopHandler(boost::asio::io_context& ioContext)
+        : m_ioContext(ioContext) {}
+    void OnStopOrder() override {m_ioContext.stop();}
 private:
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
 
 };
 
@@ -61,8 +61,8 @@ class EntityOwner
     : public Safir::Dob::EntityHandlerInjection
 {
 public:
-    explicit EntityOwner(boost::asio::io_service& ioService)
-        : m_ioService(ioService)
+    explicit EntityOwner(boost::asio::io_context& ioContext)
+        : m_ioContext(ioContext)
         , m_gotAllSmall(false)
         , m_gotAllBig(false)
     {
@@ -190,13 +190,13 @@ private:
 
         if (m_gotAllBig && m_gotAllSmall)
         {
-            m_ioService.stop();
+            m_ioContext.stop();
         }
     }
 
 
     Safir::Dob::SecondaryConnection m_connection;
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_context& m_ioContext;
     bool m_gotAllSmall;
     bool m_gotAllBig;
 };
@@ -225,13 +225,13 @@ int main(int argc, char* argv[])
         const std::wstring nameCommonPart = L"C++";
         const std::wstring nameInstancePart = L"1";
 
-        boost::asio::io_service ioService;
+        boost::asio::io_context ioContext;
 
-        StopHandler stopHandler(ioService);
+        StopHandler stopHandler(ioContext);
 
         Safir::Dob::Connection connection;
 
-        Safir::Utilities::AsioDispatcher dispatcher(connection,ioService);
+        Safir::Utilities::AsioDispatcher dispatcher(connection,ioContext);
 
         connection.Open(nameCommonPart,
                         nameInstancePart,
@@ -239,7 +239,7 @@ int main(int argc, char* argv[])
                         &stopHandler,
                         &dispatcher);
 
-        EntityOwner owner(ioService);
+        EntityOwner owner(ioContext);
         if (set)
         {
             owner.SetSmall();
@@ -247,8 +247,8 @@ int main(int argc, char* argv[])
         }
         else
         {
-            boost::asio::io_service::work keepRunning(ioService);
-            ioService.run();
+            auto keepRunning = boost::asio::make_work_guard(ioContext);
+            ioContext.run();
 
             if (update)
             {

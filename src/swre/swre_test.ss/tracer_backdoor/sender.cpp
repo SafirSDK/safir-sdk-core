@@ -39,13 +39,13 @@ class App
 {
 public:
     App()
-         : m_dispatcher(m_connection, m_ioService)
-         , m_timer(m_ioService, std::chrono::milliseconds(10))
+         : m_dispatcher(m_connection, m_ioContext)
+         , m_timer(m_ioContext, std::chrono::milliseconds(10))
          , m_razor(L"Razor")
          , m_rb(L"Rymd-B\u00f6rje") //ö
     {}
 
-    void OnStopOrder() override {m_ioService.stop();}
+    void OnStopOrder() override {m_ioContext.stop();}
 
     void Run()
     {
@@ -64,7 +64,7 @@ public:
 
         Safir::Application::TracerBackdoor::Start(m_connection);
         m_timer.async_wait([this](const auto& /*error*/){Timeout();});
-        m_ioService.run();
+        m_ioContext.run();
 
         Safir::Application::TracerBackdoor::Stop();
         m_connection.Close();
@@ -73,7 +73,7 @@ public:
     void Timeout()
     {
         static int i = 0;
-        m_timer.expires_from_now(std::chrono::milliseconds(10));
+        m_timer.expires_after(std::chrono::milliseconds(10));
         m_timer.async_wait([this](const auto& /*error*/){Timeout();});
         m_razor << "foo" << "bar" << 1234 << std::endl;
         m_rb << "blahonga, " << "blahonga, " << "blahonga" << std::endl;
@@ -83,7 +83,7 @@ public:
     }
 
 private:
-    boost::asio::io_service m_ioService;
+    boost::asio::io_context m_ioContext;
     Safir::Dob::Connection m_connection;
     Safir::Utilities::AsioDispatcher m_dispatcher;
 

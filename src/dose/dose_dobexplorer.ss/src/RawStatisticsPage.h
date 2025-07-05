@@ -62,8 +62,8 @@ private:
     void UpdateLocalTable();
     void UpdateRemoteTable();
     
-    boost::asio::io_service m_ioService;
-    QTimer m_ioServicePollTimer;
+    boost::asio::io_context m_ioContext;
+    QTimer m_ioContextPollTimer;
 
     Safir::Dob::Internal::SP::SystemPicture m_systemPicture;
 

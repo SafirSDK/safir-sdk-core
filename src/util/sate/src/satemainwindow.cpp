@@ -95,7 +95,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
                    "to use for systems debugging, please pass them on to us!\n\n"
                    "The old Sate is still available, now renamed to sate_legacy.");
     label->setAlignment(Qt::AlignCenter);
-    auto* centralDockWidget = new ads::CDockWidget("CentralWidget");
+    auto* centralDockWidget = new ads::CDockWidget(m_dockManager, "CentralWidget");
     centralDockWidget->setWidget(label);
     centralDockWidget->setFeature(ads::CDockWidget::NoTab, true);
     centralDockWidget->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
@@ -104,7 +104,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     m_typesystem = new TypesystemWidget(this);
     m_typesystem->Initialize(&m_dob);
 
-    auto* typesystemDock = new ads::CDockWidget("Typesystem");
+    auto* typesystemDock = new ads::CDockWidget(m_dockManager, "Typesystem");
     typesystemDock->setWidget(m_typesystem, ads::CDockWidget::ForceNoScrollArea);
     typesystemDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_dockManager->addDockWidget(ads::LeftDockWidgetArea, typesystemDock);
@@ -125,7 +125,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     // Output window
     m_output = new OutputWidget(&m_dob, this);
-    auto* outputDock = new ads::CDockWidget("Output", this);
+    auto* outputDock = new ads::CDockWidget(m_dockManager, "Output", this);
     outputDock->setWidget(m_output, ads::CDockWidget::ForceNoScrollArea);
     outputDock->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
     m_dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, outputDock);
@@ -262,7 +262,7 @@ void SateMainWindow::OpenInstanceViewer(const int64_t typeId,
 
     // no previous dock found, create new
     auto* iv = factory();
-    dock = new ads::CDockWidget(cls->name);
+    dock = new ads::CDockWidget(m_dockManager, cls->name);
     dock->setObjectName(tabObjectName);
     dock->setWidget(iv, ads::CDockWidget::ForceNoScrollArea);
     dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
@@ -431,7 +431,7 @@ void SateMainWindow::AddTab(const QString& title,
         }
     }
 
-    auto* dock = new ads::CDockWidget(tr("%1 %2").arg(title).arg(lastNum+1));
+    auto* dock = new ads::CDockWidget(m_dockManager, tr("%1 %2").arg(title).arg(lastNum+1));
     dock->setObjectName(tr("%1%2 %3").arg(tabType).arg(title).arg(lastNum+1));
     widget->setParent(dock);
     dock->setWidget(widget, ads::CDockWidget::ForceNoScrollArea);

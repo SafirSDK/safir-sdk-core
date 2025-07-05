@@ -185,8 +185,8 @@ FilePersistor::GetFilePath(const FilePersistor::EntityIdAndHandlerId& entityAndH
 
 
 //-------------------------------------------------------
-FilePersistor::FilePersistor(boost::asio::io_service& ioService) :
-    PersistenceHandler(ioService, false),
+FilePersistor::FilePersistor(boost::asio::io_context& ioContext) :
+    PersistenceHandler(ioContext, false),
     m_storagePath(GetStorageDirectory()),
     m_debug(L"FilePersistor")
 {
@@ -438,7 +438,7 @@ FilePersistor::RestoreAll()
         {
             Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
                                           L"Failed to inject persisted entities into system due to lack of shared memory. Exiting.");
-            m_ioService.stop();
+            m_ioContext.stop();
         }
         catch (const boost::filesystem::filesystem_error & e)
         {

@@ -631,7 +631,7 @@ class ElectionHandlerStub
 {
 public:
     ElectionHandlerStub(const std::wstring& /*logPrefix*/,
-                        boost::asio::io_service::strand& /*strand*/,
+                        boost::asio::io_context::strand& /*strand*/,
                         CommunicationStub& /*communication*/,
                         const int64_t id_,
                         const int64_t /*nodeTypeId_*/,
@@ -702,7 +702,7 @@ template <int64_t ownNodeType>
 struct Fixture
 {
     Fixture()
-        : strand(ioService)
+        : strand(ioContext)
         , coordinator(L"",
                       strand,
                       comm,
@@ -759,8 +759,8 @@ struct Fixture
     }
 
 
-    boost::asio::io_service ioService;
-    boost::asio::io_service::strand strand;
+    boost::asio::io_context ioContext;
+    boost::asio::io_context::strand strand;
     CommunicationStub comm;
     RawHandlerStub rh;
 
@@ -772,7 +772,7 @@ BOOST_FIXTURE_TEST_SUITE( self_is_normal, Fixture<10> )
 BOOST_AUTO_TEST_CASE( start_stop )
 {
     coordinator.Stop();
-    ioService.run();
+    ioContext.run();
     BOOST_REQUIRE(ElectionHandlerStub::lastInstance != nullptr);
     BOOST_CHECK(ElectionHandlerStub::lastInstance->stopped);
     BOOST_CHECK(rh.rawCb != nullptr);
@@ -787,7 +787,7 @@ BOOST_AUTO_TEST_CASE( perform_only_own_unelected )
                                           callbackCalled = true;
                                       },
                                       true);
-    ioService.run();
+    ioContext.run();
     BOOST_CHECK(!callbackCalled);
 }
 
@@ -800,7 +800,7 @@ BOOST_AUTO_TEST_CASE( perform_no_state_received )
                                           callbackCalled = true;
                                       },
                                       false);
-    ioService.run();
+    ioContext.run();
     BOOST_CHECK(!callbackCalled);
 }
 
@@ -810,7 +810,7 @@ BOOST_AUTO_TEST_CASE( election_id_propagation )
     BOOST_CHECK_EQUAL(rh.electionId,0);
 
     ElectionHandlerStub::lastInstance->electionCompleteCallback(111,100);
-    ioService.run();
+    ioContext.run();
     BOOST_CHECK_EQUAL(rh.electedId,111);
     BOOST_CHECK_EQUAL(rh.electionId,100);
 }
@@ -820,7 +820,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_propagation )
 {
     BOOST_CHECK(!ElectionHandlerStub::lastInstance->nodesChangedCalled);
     rh.rawCb(GetRawWithOneNode({10,10}),RawChanges(RawChanges::NODES_CHANGED), cs);
-    ioService.run();
+    ioContext.run();
     BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
 }
 
@@ -837,7 +837,7 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
                                       },
                                       true);
 
-    ioService.run();
+    ioContext.run();
     BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
     BOOST_CHECK(!callbackCalled);
 
@@ -852,8 +852,8 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
                                       },
                                       true);
 
-    ioService.reset();
-    ioService.run();
+    ioContext.restart();
+    ioContext.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
     BOOST_CHECK_EQUAL(stateMessage.election_id(),100);
@@ -889,7 +889,7 @@ BOOST_AUTO_TEST_CASE( simple_state_production_other_is_light )
                                       },
                                       true);
 
-    ioService.run();
+    ioContext.run();
     BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
     BOOST_CHECK(!callbackCalled);
 
@@ -904,8 +904,8 @@ BOOST_AUTO_TEST_CASE( simple_state_production_other_is_light )
                                       },
                                       true);
 
-    ioService.reset();
-    ioService.run();
+    ioContext.restart();
+    ioContext.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
     BOOST_CHECK_EQUAL(stateMessage.election_id(),100);
@@ -951,7 +951,7 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
                                           callbackCalled = true;
                                       },
                                       true);
-    ioService.run();
+    ioContext.run();
     BOOST_CHECK(!callbackCalled);
 
 
@@ -964,8 +964,8 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
                                       },
                                       false);
 
-    ioService.reset();
-    ioService.run();
+    ioContext.restart();
+    ioContext.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1001);
     BOOST_CHECK_EQUAL(stateMessage.election_id(),100);
@@ -1002,7 +1002,7 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
 
     coordinator.NewRemoteStatistics(1001,data,size);
 
-    ioService.run();
+    ioContext.run();
 
     BOOST_CHECK(rh.deadNodes.size() == 1);
     BOOST_CHECK(rh.deadNodes.find(1002) != rh.deadNodes.end());
@@ -1017,8 +1017,8 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
                                       false);
-    ioService.reset();
-    ioService.run();
+    ioContext.restart();
+    ioContext.run();
 
     BOOST_REQUIRE(callbackCalled);
 
@@ -1064,7 +1064,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
                                       },
                                       true);
 
-    ioService.run();
+    ioContext.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
     BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),3);
@@ -1092,8 +1092,8 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
                                       },
                                       true);
 
-    ioService.reset();
-    ioService.run();
+    ioContext.restart();
+    ioContext.run();
     BOOST_REQUIRE(!callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
     BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),3);
@@ -1120,8 +1120,8 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
                                       },
                                       true);
 
-    ioService.reset();
-    ioService.run();
+    ioContext.restart();
+    ioContext.run();
 
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
@@ -1162,7 +1162,7 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
                                       },
                                       true);
 
-    ioService.run();
+    ioContext.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
     BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),3);
@@ -1198,7 +1198,7 @@ BOOST_AUTO_TEST_CASE( state_sequence_consistent )
                                       },
                                       true);
 
-    ioService.run();
+    ioContext.run();
     BOOST_REQUIRE(callbackCalled);
     callbackCalled = false;
 
@@ -1219,8 +1219,8 @@ BOOST_AUTO_TEST_CASE( state_sequence_consistent )
                                       },
                                       true);
 
-    ioService.reset();
-    ioService.run();
+    ioContext.restart();
+    ioContext.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),2);
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
@@ -1253,7 +1253,7 @@ BOOST_AUTO_TEST_CASE( other_node_claims_to_be_detached )
                                           callbackCalled = true;
                                       },
                                       true);
-    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+    BOOST_CHECK_THROW(ioContext.run(), std::logic_error);
     BOOST_CHECK(!callbackCalled);
 }
 
@@ -1275,7 +1275,7 @@ BOOST_AUTO_TEST_CASE( normal_and_two_lightnodes )
                                       },
                                       true);
 
-    ioService.run();
+    ioContext.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
     BOOST_CHECK(!stateMessage.is_detached());
@@ -1313,7 +1313,7 @@ BOOST_AUTO_TEST_CASE( normal_and_two_lightnodes_invalid_dead )
                                           },
                                           true);
 
-        ioService.run();
+        ioContext.run();
         BOOST_REQUIRE(callbackCalled);
         BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
         BOOST_CHECK(!stateMessage.is_detached());
@@ -1343,8 +1343,8 @@ BOOST_AUTO_TEST_CASE( normal_and_two_lightnodes_invalid_dead )
                                               stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                           },
                                           true);
-        ioService.reset();
-        ioService.run();
+        ioContext.restart();
+        ioContext.run();
         BOOST_REQUIRE(callbackCalled);
         BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
         BOOST_CHECK(!stateMessage.is_detached());
@@ -1385,7 +1385,7 @@ BOOST_AUTO_TEST_CASE( two_normal_nodes_and_two_lightnodes_with_partial_connectiv
                                           },
                                           true);
 
-        ioService.run();
+        ioContext.run();
         BOOST_REQUIRE(callbackCalled);
         BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
         BOOST_CHECK(!stateMessage.is_detached());
@@ -1419,8 +1419,8 @@ BOOST_AUTO_TEST_CASE( two_normal_nodes_and_two_lightnodes_with_partial_connectiv
                                               stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                           },
                                           true);
-        ioService.reset();
-        ioService.run();
+        ioContext.restart();
+        ioContext.run();
         BOOST_REQUIRE(callbackCalled);
         BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
         BOOST_CHECK(!stateMessage.is_detached());
@@ -1458,8 +1458,8 @@ BOOST_AUTO_TEST_CASE( two_normal_nodes_and_two_lightnodes_with_partial_connectiv
                                               stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                           },
                                           true);
-        ioService.reset();
-        ioService.run();
+        ioContext.restart();
+        ioContext.run();
         BOOST_REQUIRE(callbackCalled);
         BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
         BOOST_CHECK(!stateMessage.is_detached());
@@ -1505,7 +1505,7 @@ BOOST_AUTO_TEST_CASE( detached_lightnode )
                                       },
                                       true);
 
-    ioService.run();
+    ioContext.run();
     BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
     BOOST_CHECK(callbackCalled);
 
@@ -1548,7 +1548,7 @@ BOOST_AUTO_TEST_CASE( detach_and_reattach )
                                               callbackCalled = true;
                                           },
                                           true);
-        ioService.run();
+        ioContext.run();
         BOOST_CHECK(!callbackCalled);
     }
     ElectionHandlerStub::lastInstance->isDetached = true;
@@ -1566,8 +1566,8 @@ BOOST_AUTO_TEST_CASE( detach_and_reattach )
                                               stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                           },
                                           true);
-        ioService.reset();
-        ioService.run();
+        ioContext.restart();
+        ioContext.run();
         BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
         BOOST_CHECK(callbackCalled);
 
@@ -1608,8 +1608,8 @@ BOOST_AUTO_TEST_CASE( detach_and_reattach )
                                               stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                           },
                                           false);
-        ioService.reset();
-        ioService.run();
+        ioContext.restart();
+        ioContext.run();
         BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
         BOOST_CHECK(callbackCalled);
 

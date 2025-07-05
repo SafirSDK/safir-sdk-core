@@ -43,7 +43,7 @@ namespace SP
     class StatePublisherRemoteBasic
     {
     public:
-        StatePublisherRemoteBasic(boost::asio::io_service& ioService,
+        StatePublisherRemoteBasic(boost::asio::io_context& ioContext,
                                   Communication& communication,
                                   const std::map<int64_t, NodeType>& nodeTypes,
                                   const char* const senderId,
@@ -55,7 +55,7 @@ namespace SP
             , m_coordinator(coordinator)
             , m_publishTimer()
         {
-            m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
+            m_publishTimer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioContext,
                                                                                    period,
                                                                                    [this](const boost::system::error_code& error)
                                                                                    {

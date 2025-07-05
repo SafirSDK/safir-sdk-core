@@ -49,8 +49,8 @@ void StartPoolDistributionCb()
 
 BOOST_AUTO_TEST_CASE( first_test )
 {
-    boost::asio::io_service ioService;
-    boost::asio::io_service::strand strand(ioService);
+    boost::asio::io_context ioContext;
+    boost::asio::io_context::strand strand(ioContext);
 
 
     Safir::Dob::Internal::ExternNodeCommunication ecom(strand, DataCb, StartPoolDistributionCb);

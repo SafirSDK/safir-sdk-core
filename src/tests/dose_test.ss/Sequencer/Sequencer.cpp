@@ -115,9 +115,9 @@ Sequencer::Sequencer(const int startTc,
                      const bool multinode,
                      const bool noTimeout,
                      const int contextId,
-                     boost::asio::io_service& ioService):
-    m_ioService(ioService),
-    m_actionSender(ioService),
+                     boost::asio::io_context& ioContext):
+    m_ioContext(ioContext),
+    m_actionSender(ioContext),
     m_partnerState(languages,contextId,m_actionSender, [this]{PostTick();}),
     m_currentCaseNo(startTc),
     m_currentActionNo(0),
@@ -376,7 +376,7 @@ void Sequencer::Tick()
             }
             else if (m_dumpRequestIds.empty())
             {
-                m_ioService.stop();
+                m_ioContext.stop();
             }
         }
         break;
@@ -454,5 +454,5 @@ Sequencer::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
 void Sequencer::PostTick()
 {
-    m_ioService.post([this]{Tick();});
+    m_ioContext.post([this]{Tick();});
 }

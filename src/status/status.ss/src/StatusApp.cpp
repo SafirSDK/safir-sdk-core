@@ -30,10 +30,11 @@ namespace Control
 {
 
 StatusApp::StatusApp()
-    : m_ioService()
-    , m_dispatcher(m_connection, m_ioService)
-    , m_statusEntityHandler(m_ioService)
-    , m_commandRequestHandler(m_ioService)
+    : m_ioContext()
+    , m_work(boost::asio::make_work_guard(m_ioContext))
+    , m_dispatcher(m_connection, m_ioContext)
+    , m_statusEntityHandler(m_ioContext)
+    , m_commandRequestHandler(m_ioContext)
     , m_connectionStatsHandler()
     , m_nodeInfoMirrorer()
 {
@@ -63,9 +64,7 @@ void StatusApp::OnStopOrder()
 
 void StatusApp::Run()
 {
-    m_work.reset(new boost::asio::io_service::work(m_ioService));
-
-    m_ioService.run();
+    m_ioContext.run();
 
     m_connection.Close();
 }

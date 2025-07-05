@@ -93,7 +93,7 @@ int main(int /*argc*/, char * /*argv*/[])
 
     boost::asio::signal_set signalSet(io);
 
-    // Make some work to stop io_service from exiting.
+    // Make some work to stop io_context from exiting.
     auto work = boost::asio::make_work_guard(io);
 
     // Map so that we can use the node name in printouts

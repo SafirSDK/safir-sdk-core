@@ -85,10 +85,10 @@ namespace
 
 }
 
-    RequestHandler::RequestHandler(boost::asio::io_service& ioService,
+    RequestHandler::RequestHandler(boost::asio::io_context& ioContext,
                                    Distribution&            distribution)
-        : m_ioService(ioService)
-        , m_strand(ioService)
+        : m_ioContext(ioContext)
+        , m_strand(ioContext)
         , m_stopped(false)
         , m_distribution(distribution)
         , m_communication(distribution.GetCommunication())
@@ -146,7 +146,7 @@ namespace
 
     void RequestHandler::HandleRequests(const ConnectionPtr& connection)
     {
-        m_strand.dispatch([this, connection] ()
+        boost::asio::dispatch(m_strand, [this, connection] ()
         {
             // First, try to distribute responses for this connection
             m_responseHandler->DistributeResponses(connection);
@@ -165,7 +165,7 @@ namespace
 
     void RequestHandler::HandleDisconnect(const ConnectionPtr& deletedConnection)
     {
-        m_strand.dispatch([this, deletedConnection] ()
+        boost::asio::dispatch(m_strand, [this, deletedConnection] ()
         {
             auto this_ = this; //fixes for vs 2010 issues with lambda
             auto& deletedConnection_ = deletedConnection;
@@ -202,7 +202,7 @@ namespace
         const bool was_stopped = m_stopped.exchange(true);
         if (!was_stopped)
         {
-            m_strand.post([this]()
+            boost::asio::post(m_strand, [this]()
             {
                 // Clear structures that hold timers
                 m_outReqTimers.clear();
@@ -470,9 +470,9 @@ namespace
             skipList.insert(receiver.connection->Id());
         }
 
-        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioService);
+        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioContext);
 
-        timer->expires_from_now(GetTimeout(request.GetTypeId()));
+        timer->expires_after(GetTimeout(request.GetTypeId()));
 
         StartOutReqTimer(sender, request, *timer);
 
@@ -816,7 +816,7 @@ namespace
                 return;
             }
 
-            timerIt->second->expires_from_now(std::chrono::milliseconds(500));
+            timerIt->second->expires_after(std::chrono::milliseconds(500));
 
             StartOutReqTimer(fromConnection, request, *timerIt->second);
         }
@@ -826,11 +826,11 @@ namespace
     {
         lllog(7) << "DOSE_MAIN: AddPendingRequest for app " << blockingConn <<std::endl;
 
-        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioService);
+        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioContext);
 
         auto reqId = request.GetRequestId();
 
-        timer->expires_from_now(GetTimeout(request.GetTypeId()));
+        timer->expires_after(GetTimeout(request.GetTypeId()));
 
         timer->async_wait(m_strand.wrap([this, blockingConn, reqId]
                                         (const boost::system::error_code& error)

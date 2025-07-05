@@ -39,12 +39,12 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        explicit MemoryMonitor(boost::asio::io_service& ioService):
+        explicit MemoryMonitor(boost::asio::io_context& ioContext):
             m_capacity(GetSharedMemory().get_size()),
             m_warningPercent(Safir::Dob::NodeParameters::SharedMemoryLevels(L"Warning"))
         {
 
-            m_timer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioService,
+            m_timer.reset(new Safir::Utilities::Internal::AsioPeriodicTimer(ioContext,
                                                                             std::chrono::seconds(30),
                                                                             [this](const boost::system::error_code& error)
                                                                             {

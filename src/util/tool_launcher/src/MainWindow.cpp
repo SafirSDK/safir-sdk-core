@@ -73,7 +73,7 @@ MainWindow::Process::~Process()
 MainWindow::MainWindow()
     : QMainWindow(nullptr)
     , m_ui(std::make_unique<Ui::MainWindow>())
-    , m_work(std::make_unique<boost::asio::io_service::work>(m_ioService))
+    , m_work(boost::asio::make_work_guard(m_ioContext))
 {
     m_ui->setupUi(this);
     //Note that a stylesheet is set on the dialog in qt designer.
@@ -105,7 +105,7 @@ MainWindow::MainWindow()
 
     auto* timer = new QTimer(this);
     timer->setInterval(100);
-    timer->callOnTimeout([this]{m_ioService.poll(); });
+    timer->callOnTimeout([this]{m_ioContext.poll(); });
     timer->start();
 }
 
@@ -122,7 +122,7 @@ void MainWindow::LaunchProgram(const std::string& program, const std::vector<std
 {
     std::error_code error;
 
-    auto process = std::make_shared<Process>(m_ioService);
+    auto process = std::make_shared<Process>(m_ioContext);
 
 #ifdef _MSC_VER
     auto environment = boost::this_process::wenvironment();
@@ -135,7 +135,7 @@ void MainWindow::LaunchProgram(const std::string& program, const std::vector<std
     process->proc = std::make_unique<boost::process::child>
         (boost::process::search_path(program),
          boost::process::args(args),
-         m_ioService,
+         m_ioContext,
          error,
          boost::process::on_exit=[this,process](int exitCode, const std::error_code& error){Exited(process, error, exitCode);},
          boost::process::std_out > process->outPipe,

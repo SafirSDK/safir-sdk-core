@@ -47,7 +47,7 @@
 #define BOOST_TEST_MODULE ElectionHandlerTest
 #include <boost/test/unit_test.hpp>
 
-//We need thread safe variants for some of the tests that use multiple threads in the ioService.
+//We need thread safe variants for some of the tests that use multiple threads in the ioContext.
 boost::mutex testMtx;
 #define SAFE_BOOST_CHECK(p) {boost::lock_guard<boost::mutex> lck123(testMtx); BOOST_CHECK(p);}
 #define SAFE_BOOST_FAIL(s) {boost::lock_guard<boost::mutex> lck123(testMtx); lllog(9) << s << std::endl; BOOST_FAIL(s);}
@@ -125,8 +125,8 @@ private:
 class Communication
 {
 public:
-    explicit Communication(boost::asio::io_service& ioService_, const int64_t id_)
-        : ioService(ioService_)
+    explicit Communication(boost::asio::io_context& ioContext_, const int64_t id_)
+        : ioContext(ioContext_)
         , id(id_)
     {
         Connector::Instance().Add(id,this);
@@ -182,7 +182,7 @@ public:
         }
     }
 
-    boost::asio::io_service& ioService;
+    boost::asio::io_context& ioContext;
     const int64_t id;
 
     ReceiveData receiveDataCb;
@@ -268,11 +268,11 @@ using namespace Safir::Dob::Internal::SP;
 
 struct Node
 {
-    Node(boost::asio::io_service& ioService, const int64_t id_, const int64_t nodeTypeId_)
+    Node(boost::asio::io_context& ioContext, const int64_t id_, const int64_t nodeTypeId_)
         : id(id_)
-        , strand(ioService)
+        , strand(ioContext)
         , nodeTypeId(nodeTypeId_)
-        , comm(ioService,id)
+        , comm(ioContext,id)
         , electedNode(0)
         , electionId(0)
         , incarnationId(0)
@@ -336,7 +336,7 @@ struct Node
     }
 
     const int64_t id;
-    boost::asio::io_service::strand strand;
+    boost::asio::io_context::strand strand;
 
     int64_t nodeTypeId;
     Communication comm;
@@ -376,7 +376,7 @@ struct Fixture
         }
 
 
-        nodes.push_back(Safir::make_unique<Node>(ioService,nextNodeId,ownNodeType));
+        nodes.push_back(Safir::make_unique<Node>(ioContext,nextNodeId,ownNodeType));
         ++nextNodeId;
 
         SAFE_BOOST_TEST_MESSAGE("Fixture setup complete");
@@ -421,13 +421,13 @@ struct Fixture
 
     void AddNode()
     {
-        nodes.push_back(Safir::make_unique<Node>(ioService,nextNodeId,10));
+        nodes.push_back(Safir::make_unique<Node>(ioContext,nextNodeId,10));
         ++nextNodeId;
     }
 
     void AddLightNode()
     {
-        nodes.push_back(Safir::make_unique<Node>(ioService,nextNodeId,15));
+        nodes.push_back(Safir::make_unique<Node>(ioContext,nextNodeId,15));
         ++nextNodeId;
     }
 
@@ -483,19 +483,19 @@ struct Fixture
 
     void RunIoService(int numThreads = 1)
     {
-        ioService.reset();
+        ioContext.restart();
 
         boost::thread_group threads;
         for (int i = 0; i < numThreads - 1; ++i)
         {
-            threads.create_thread([this]{ioService.run();});
+            threads.create_thread([this]{ioContext.run();});
         }
 
-        ioService.run();
+        ioContext.run();
         threads.join_all();
     }
 
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioContext;
 
     int nextNodeId;
     std::vector<std::unique_ptr<Node>> nodes;
@@ -784,7 +784,7 @@ BOOST_AUTO_TEST_CASE( remove_during_election )
     boost::thread_group threads;
     for (int i = 0; i < 6; ++i)
     {
-        threads.create_thread([this]{ioService.run();});
+        threads.create_thread([this]{ioContext.run();});
     }
 
     //will keep node 0 and 1
@@ -826,13 +826,13 @@ BOOST_AUTO_TEST_CASE( remove_during_election_some_light )
     {
         threads.create_thread([this, &barrier, i]
         {
-            ioService.run();
+            ioContext.run();
             SendNodesChanged(true);
             lllog(1) << "Thread " << i << " waiting at first barrier" << std::endl;
             barrier.wait();
             lllog(1) << "Thread " << i << " waiting at second barrier" << std::endl;
             barrier.wait();
-            ioService.run();
+            ioContext.run();
         });
     }
 
@@ -841,7 +841,7 @@ BOOST_AUTO_TEST_CASE( remove_during_election_some_light )
     AddNode();
     AddLightNode();
     SendNodesChanged(true);
-    ioService.reset();
+    ioContext.restart();
     lllog(1) << "Main thread waiting at second barrier" << std::endl;
     barrier.wait();
 

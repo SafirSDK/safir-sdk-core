@@ -48,7 +48,7 @@ public:
    #pragma warning(disable: 4355)
 #endif
     explicit App(std::wstring name):
-        m_dispatcher(connection,m_ioService),
+        m_dispatcher(connection,m_ioContext),
         m_sender(CommandLine::Instance().Count(), CommandLine::Instance().Timeout(),
                  [this]{FinishedCallback();})
     {
@@ -82,24 +82,24 @@ public:
 
     void Run()
     {
-        boost::asio::io_service::work keepRunning(m_ioService);
-        m_ioService.run();
+        auto keepRunning = boost::asio::make_work_guard(m_ioContext);
+        m_ioContext.run();
     }
 
 
     void FinishedCallback()
     {
-        m_ioService.stop();
+        m_ioContext.stop();
     }
 
 protected:
 
     void OnStopOrder() override
     {
-        m_ioService.stop();
+        m_ioContext.stop();
     }
 
-    boost::asio::io_service m_ioService;
+    boost::asio::io_context m_ioContext;
     Safir::Utilities::AsioDispatcher m_dispatcher;
     Safir::Dob::Connection connection;
     Sender m_sender;
