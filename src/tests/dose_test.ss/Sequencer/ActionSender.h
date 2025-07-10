@@ -128,7 +128,7 @@ private:
                 //Set up address
                 boost::system::error_code ec;
                 boost::asio::ip::address_v4 addr=boost::asio::ip::make_address_v4(address, ec);
-                if (!ec) //ip v4 address
+                if (ec) //ip v4 address
                 {
                     throw std::logic_error("strange address");
                 }
