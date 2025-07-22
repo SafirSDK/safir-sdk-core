@@ -162,6 +162,14 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
+        /// Override ContainerBase.
+        /// </summary>
+        public override bool HasVal()
+        {
+            return m_Object != null;
+        }
+
+        /// <summary>
         /// Override of inherited method. See comment for parent class.
         /// </summary>
         /// <returns></returns>

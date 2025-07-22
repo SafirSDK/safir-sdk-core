@@ -85,6 +85,14 @@ public class BinaryContainer
     }
 
     /**
+     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#hasVal()
+     */
+    @Override
+    public boolean hasVal() {
+        return !m_isNull;
+    }
+
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ContainerBase#setNull()
      */
     @Override

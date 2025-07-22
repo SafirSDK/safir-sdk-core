@@ -81,6 +81,13 @@ public interface EnumerationSequenceContainerBase {
     boolean isNull();
 
     /**
+     * Does the container have a value? The opposite to isNull.
+     *
+     * @return True if the container has a value, i.e is not set to null.
+     */
+    boolean hasVal();
+
+    /**
     * Is the change flag set on the container?
     *
     * @return True if the containers change flag is set.

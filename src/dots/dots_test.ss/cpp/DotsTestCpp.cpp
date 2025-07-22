@@ -543,10 +543,10 @@ void Test_Int32()
         (DotsTest::ParameterArrays::Int32ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::Int32MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::Int32MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->Int32Member().IsNull();
+    Null_Ok  = MT1->Int32Member().IsNull() && !MT1->Int32Member().HasVal();
     In_Req_Ok  = !MT1->Int32Member().IsChanged();
     MT1->Int32Member().SetVal(DotsTest::ParameterTypes::Int32Parameter());
-    Null_Ok  = Null_Ok && !MT1->Int32Member().IsNull();
+    Null_Ok  = Null_Ok && !MT1->Int32Member().IsNull() && MT1->Int32Member().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->Int32Member().IsChanged();
 
     //locals
@@ -628,10 +628,10 @@ void Test_Int32()
     for (int ix = 0; ix < DotsTest::ParameterArrays::Int32ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->Int32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->Int32Member()[ix].IsNull() && !MA1->Int32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->Int32Member()[ix].IsChanged();
         MA1->Int32Member()[ix].SetVal(DotsTest::ParameterArrays::Int32Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->Int32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->Int32Member()[ix].IsNull() && MA1->Int32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->Int32Member()[ix].IsChanged();
 
         // MemberArray
@@ -690,8 +690,8 @@ void Test_Int32()
     MA1->Int32Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullInt32Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->Int32Member().IsNull() && DotsTest::MemberTypesProperty::IsNullInt32Member (MT2) &&
-        MA1->Int32Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullInt32Member (MA2, 1);
+        MT1->Int32Member().IsNull() && !MT1->Int32Member().HasVal() && DotsTest::MemberTypesProperty::IsNullInt32Member (MT2) &&
+        MA1->Int32Member()[1].IsNull() && !MA1->Int32Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullInt32Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -721,10 +721,10 @@ void Test_Int64()
         (DotsTest::ParameterArrays::Int64ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::Int64MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::Int64MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->Int64Member().IsNull();
+    Null_Ok  = MT1->Int64Member().IsNull() && !MT1->Int64Member().HasVal();
     In_Req_Ok  = !MT1->Int64Member().IsChanged();
     MT1->Int64Member().SetVal(DotsTest::ParameterTypes::Int64Parameter());
-    Null_Ok  = Null_Ok && !MT1->Int64Member().IsNull();
+    Null_Ok  = Null_Ok && !MT1->Int64Member().IsNull() && MT1->Int64Member().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->Int64Member().IsChanged();
 
     //locals
@@ -804,10 +804,10 @@ void Test_Int64()
     for (int ix = 0; ix < DotsTest::ParameterArrays::Int64ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->Int64Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->Int64Member()[ix].IsNull() && !MA1->Int64Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->Int64Member()[ix].IsChanged();
         MA1->Int64Member()[ix].SetVal(DotsTest::ParameterArrays::Int64Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->Int64Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->Int64Member()[ix].IsNull()&& MA1->Int64Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->Int64Member()[ix].IsChanged();
 
         // MemberArray
@@ -859,8 +859,8 @@ void Test_Int64()
     MA1->Int64Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullInt64Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->Int64Member().IsNull() && DotsTest::MemberTypesProperty::IsNullInt64Member (MT2) &&
-        MA1->Int64Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullInt64Member (MA2, 1);
+        MT1->Int64Member().IsNull() && !MT1->Int64Member().HasVal() && DotsTest::MemberTypesProperty::IsNullInt64Member (MT2) &&
+        MA1->Int64Member()[1].IsNull() && !MA1->Int64Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullInt64Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -890,10 +890,10 @@ void Test_Float32()
         (DotsTest::ParameterArrays::Float32ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::Float32MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::Float32MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->Float32Member().IsNull();
+    Null_Ok  = MT1->Float32Member().IsNull() && !MT1->Float32Member().HasVal();
     In_Req_Ok  = !MT1->Float32Member().IsChanged();
     MT1->Float32Member().SetVal(DotsTest::ParameterTypes::Float32Parameter());
-    Null_Ok  = Null_Ok && !MT1->Float32Member().IsNull();
+    Null_Ok  = Null_Ok && !MT1->Float32Member().IsNull() && MT1->Float32Member().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->Float32Member().IsChanged();
 
     //locals
@@ -974,10 +974,10 @@ void Test_Float32()
     for (int ix = 0; ix < DotsTest::ParameterArrays::Float32ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->Float32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->Float32Member()[ix].IsNull() && !MA1->Float32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->Float32Member()[ix].IsChanged();
         MA1->Float32Member()[ix].SetVal(DotsTest::ParameterArrays::Float32Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->Float32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->Float32Member()[ix].IsNull() && MA1->Float32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->Float32Member()[ix].IsChanged();
 
         // MemberArray
@@ -1029,8 +1029,8 @@ void Test_Float32()
     MA1->Float32Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullFloat32Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->Float32Member().IsNull() && DotsTest::MemberTypesProperty::IsNullFloat32Member (MT2) &&
-        MA1->Float32Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullFloat32Member (MA2, 1);
+        MT1->Float32Member().IsNull() && !MT1->Float32Member().HasVal() && DotsTest::MemberTypesProperty::IsNullFloat32Member (MT2) &&
+        MA1->Float32Member()[1].IsNull() && !MA1->Float32Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullFloat32Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -1062,10 +1062,10 @@ void Test_Float64()
         (DotsTest::ParameterArrays::Float64ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::Float64MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::Float64MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->Float64Member().IsNull();
+    Null_Ok  = MT1->Float64Member().IsNull() && !MT1->Float64Member().HasVal();
     In_Req_Ok  = !MT1->Float64Member().IsChanged();
     MT1->Float64Member().SetVal(DotsTest::ParameterTypes::Float64Parameter());
-    Null_Ok  = Null_Ok && !MT1->Float64Member().IsNull();
+    Null_Ok  = Null_Ok && !MT1->Float64Member().IsNull() && MT1->Float64Member().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->Float64Member().IsChanged();
 
     //locals
@@ -1147,10 +1147,10 @@ std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Parameters::GetName(DotsTest::
     for (int ix = 0; ix < DotsTest::ParameterArrays::Float64ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->Float64Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->Float64Member()[ix].IsNull() && !MA1->Float64Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->Float64Member()[ix].IsChanged();
         MA1->Float64Member()[ix].SetVal(DotsTest::ParameterArrays::Float64Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->Float64Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->Float64Member()[ix].IsNull() && MA1->Float64Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->Float64Member()[ix].IsChanged();
 
         // MemberArray
@@ -1202,8 +1202,8 @@ std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Parameters::GetName(DotsTest::
     MA1->Float64Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullFloat64Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->Float64Member().IsNull() && DotsTest::MemberTypesProperty::IsNullFloat64Member (MT2) &&
-        MA1->Float64Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullFloat64Member (MA2, 1);
+        MT1->Float64Member().IsNull() && !MT1->Float64Member().HasVal() && DotsTest::MemberTypesProperty::IsNullFloat64Member (MT2) &&
+        MA1->Float64Member()[1].IsNull() && !MA1->Float64Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullFloat64Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -1233,10 +1233,10 @@ void Test_Boolean()
         (DotsTest::ParameterArrays::BooleanParameterArraySize() == 2 &&
          DotsTest::MemberArrays::BooleanMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::BooleanMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->BooleanMember().IsNull();
+    Null_Ok  = MT1->BooleanMember().IsNull() && !MT1->BooleanMember().HasVal();
     In_Req_Ok  = !MT1->BooleanMember().IsChanged();
     MT1->BooleanMember().SetVal(DotsTest::ParameterTypes::BooleanParameter());
-    Null_Ok  = Null_Ok && !MT1->BooleanMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->BooleanMember().IsNull() && MT1->BooleanMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->BooleanMember().IsChanged();
 
     //locals
@@ -1318,10 +1318,10 @@ void Test_Boolean()
     for (int ix = 0; ix < DotsTest::ParameterArrays::BooleanParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->BooleanMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->BooleanMember()[ix].IsNull() && !MA1->BooleanMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->BooleanMember()[ix].IsChanged();
         MA1->BooleanMember()[ix].SetVal(DotsTest::ParameterArrays::BooleanParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->BooleanMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->BooleanMember()[ix].IsNull() && MA1->BooleanMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->BooleanMember()[ix].IsChanged();
 
         // MemberArray
@@ -1376,8 +1376,8 @@ void Test_Boolean()
     MA1->BooleanMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullBooleanMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->BooleanMember().IsNull() && DotsTest::MemberTypesProperty::IsNullBooleanMember (MT2) &&
-        MA1->BooleanMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullBooleanMember (MA2, 1);
+        MT1->BooleanMember().IsNull() && !MT1->BooleanMember().HasVal() && DotsTest::MemberTypesProperty::IsNullBooleanMember (MT2) &&
+        MA1->BooleanMember()[1].IsNull() && !MA1->BooleanMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullBooleanMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -1408,10 +1408,10 @@ void Test_Enumeration()
         (DotsTest::ParameterArrays::EnumerationParameterArraySize() == 2 &&
          DotsTest::MemberArrays::EnumerationMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::EnumerationMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->EnumerationMember().IsNull();
+    Null_Ok  = MT1->EnumerationMember().IsNull() && !MT1->EnumerationMember().HasVal();
     In_Req_Ok  = !MT1->EnumerationMember().IsChanged();
     MT1->EnumerationMember().SetVal(DotsTest::ParameterTypes::EnumerationParameter());
-    Null_Ok  = Null_Ok && !MT1->EnumerationMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->EnumerationMember().IsNull() && MT1->EnumerationMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->EnumerationMember().IsChanged();
     std::wcout<<"First: "<<DotsTest::TestEnum::First()<<std::endl;
     std::wcout<<"Last: "<<DotsTest::TestEnum::Last()<<std::endl;
@@ -1512,10 +1512,10 @@ void Test_Enumeration()
     for (int ix = 0; ix < DotsTest::ParameterArrays::EnumerationParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->EnumerationMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->EnumerationMember()[ix].IsNull() && !MA1->EnumerationMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->EnumerationMember()[ix].IsChanged();
         MA1->EnumerationMember()[ix].SetVal(DotsTest::ParameterArrays::EnumerationParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->EnumerationMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->EnumerationMember()[ix].IsNull() && MA1->EnumerationMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->EnumerationMember()[ix].IsChanged();
 
         // MemberArray
@@ -1576,8 +1576,8 @@ void Test_Enumeration()
     MA1->EnumerationMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullEnumerationMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->EnumerationMember().IsNull() && DotsTest::MemberTypesProperty::IsNullEnumerationMember (MT2) &&
-        MA1->EnumerationMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullEnumerationMember (MA2, 1);
+        MT1->EnumerationMember().IsNull() && !MT1->EnumerationMember().HasVal() && DotsTest::MemberTypesProperty::IsNullEnumerationMember (MT2) &&
+        MA1->EnumerationMember()[1].IsNull() && !MA1->EnumerationMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullEnumerationMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -1641,10 +1641,10 @@ void Test_String()
     std::wcout<<"MaxStringLength Size Ok (10): "<<
         (DotsTest::MemberTypes::StringMemberMaxStringLength() == 10 &&
          DotsTest::MemberArrays::StringMemberMaxStringLength() == 10 )<<std::endl;
-    Null_Ok  = MT1->StringMember().IsNull();
+    Null_Ok  = MT1->StringMember().IsNull() && !MT1->StringMember().HasVal();
     In_Req_Ok  = !MT1->StringMember().IsChanged();
     MT1->StringMember().SetVal(DotsTest::ParameterTypes::StringParameter());
-    Null_Ok  = Null_Ok && !MT1->StringMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->StringMember().IsNull() && MT1->StringMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->StringMember().IsChanged();
 
 
@@ -1727,10 +1727,10 @@ void Test_String()
     for (int ix = 0; ix < DotsTest::ParameterArrays::StringParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->StringMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->StringMember()[ix].IsNull() && !MA1->StringMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->StringMember()[ix].IsChanged();
         MA1->StringMember()[ix].SetVal(DotsTest::ParameterArrays::StringParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->StringMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->StringMember()[ix].IsNull() && MA1->StringMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->StringMember()[ix].IsChanged();
 
         // MemberArray
@@ -1796,8 +1796,8 @@ void Test_String()
     MA1->StringMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullStringMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->StringMember().IsNull() && DotsTest::MemberTypesProperty::IsNullStringMember (MT2) &&
-        MA1->StringMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullStringMember (MA2, 1);
+        MT1->StringMember().IsNull() && !MT1->StringMember().HasVal() && DotsTest::MemberTypesProperty::IsNullStringMember (MT2) &&
+        MA1->StringMember()[1].IsNull() && !MA1->StringMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullStringMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -1828,10 +1828,10 @@ void Test_EntityId()
         (DotsTest::ParameterArrays::EntityIdParameterArraySize() == 2 &&
          DotsTest::MemberArrays::EntityIdMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::EntityIdMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->EntityIdMember().IsNull();
+    Null_Ok  = MT1->EntityIdMember().IsNull() && !MT1->EntityIdMember().HasVal();
     In_Req_Ok  = !MT1->EntityIdMember().IsChanged();
     MT1->EntityIdMember().SetVal(DotsTest::ParameterTypes::EntityIdParameter());
-    Null_Ok  = Null_Ok && !MT1->EntityIdMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->EntityIdMember().IsNull() && MT1->EntityIdMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->EntityIdMember().IsChanged();
 
     //locals
@@ -1914,10 +1914,10 @@ void Test_EntityId()
     for (int ix = 0; ix < DotsTest::ParameterArrays::EntityIdParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->EntityIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->EntityIdMember()[ix].IsNull() && !MA1->EntityIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->EntityIdMember()[ix].IsChanged();
         MA1->EntityIdMember()[ix].SetVal(DotsTest::ParameterArrays::EntityIdParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->EntityIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->EntityIdMember()[ix].IsNull() && MA1->EntityIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->EntityIdMember()[ix].IsChanged();
 
         // MemberArray
@@ -1969,8 +1969,8 @@ void Test_EntityId()
     MA1->EntityIdMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullEntityIdMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->EntityIdMember().IsNull() && DotsTest::MemberTypesProperty::IsNullEntityIdMember (MT2) &&
-        MA1->EntityIdMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullEntityIdMember (MA2, 1);
+        MT1->EntityIdMember().IsNull() && !MT1->EntityIdMember().HasVal() && DotsTest::MemberTypesProperty::IsNullEntityIdMember (MT2) &&
+        MA1->EntityIdMember()[1].IsNull() && !MA1->EntityIdMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullEntityIdMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -2000,10 +2000,10 @@ void Test_TypeId()
         (DotsTest::ParameterArrays::TypeIdParameterArraySize() == 2 &&
          DotsTest::MemberArrays::TypeIdMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::TypeIdMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->TypeIdMember().IsNull();
+    Null_Ok  = MT1->TypeIdMember().IsNull() && !MT1->TypeIdMember().HasVal();
     In_Req_Ok  = !MT1->TypeIdMember().IsChanged();
     MT1->TypeIdMember().SetVal(DotsTest::ParameterTypes::TypeIdParameter());
-    Null_Ok  = Null_Ok && !MT1->TypeIdMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->TypeIdMember().IsNull() && MT1->TypeIdMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->TypeIdMember().IsChanged();
 
     //locals
@@ -2090,10 +2090,10 @@ void Test_TypeId()
     for (int ix = 0; ix < DotsTest::ParameterArrays::TypeIdParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->TypeIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->TypeIdMember()[ix].IsNull() && !MA1->TypeIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->TypeIdMember()[ix].IsChanged();
         MA1->TypeIdMember()[ix].SetVal(DotsTest::ParameterArrays::TypeIdParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->TypeIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->TypeIdMember()[ix].IsNull() && MA1->TypeIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->TypeIdMember()[ix].IsChanged();
 
         // MemberArray
@@ -2150,8 +2150,8 @@ void Test_TypeId()
     MA1->TypeIdMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullTypeIdMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->TypeIdMember().IsNull() && DotsTest::MemberTypesProperty::IsNullTypeIdMember (MT2) &&
-        MA1->TypeIdMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullTypeIdMember (MA2, 1);
+        MT1->TypeIdMember().IsNull() && !MT1->TypeIdMember().HasVal() && DotsTest::MemberTypesProperty::IsNullTypeIdMember (MT2) &&
+        MA1->TypeIdMember()[1].IsNull() && !MA1->TypeIdMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullTypeIdMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -2183,10 +2183,10 @@ void Test_InstanceId()
         (DotsTest::ParameterArrays::InstanceIdParameterArraySize() == 2 &&
          DotsTest::MemberArrays::InstanceIdMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::InstanceIdMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->InstanceIdMember().IsNull();
+    Null_Ok  = MT1->InstanceIdMember().IsNull() && !MT1->InstanceIdMember().HasVal();
     In_Req_Ok  = !MT1->InstanceIdMember().IsChanged();
     MT1->InstanceIdMember().SetVal(DotsTest::ParameterTypes::InstanceIdParameter());
-    Null_Ok  = Null_Ok && !MT1->InstanceIdMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->InstanceIdMember().IsNull() && MT1->InstanceIdMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->InstanceIdMember().IsChanged();
 
     //locals
@@ -2269,10 +2269,10 @@ void Test_InstanceId()
     for (int ix = 0; ix < DotsTest::ParameterArrays::InstanceIdParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->InstanceIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->InstanceIdMember()[ix].IsNull() && !MA1->InstanceIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->InstanceIdMember()[ix].IsChanged();
         MA1->InstanceIdMember()[ix].SetVal(DotsTest::ParameterArrays::InstanceIdParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->InstanceIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->InstanceIdMember()[ix].IsNull() && MA1->InstanceIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->InstanceIdMember()[ix].IsChanged();
 
         // MemberArray
@@ -2324,8 +2324,8 @@ void Test_InstanceId()
     MA1->InstanceIdMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullInstanceIdMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->InstanceIdMember().IsNull() && DotsTest::MemberTypesProperty::IsNullInstanceIdMember (MT2) &&
-        MA1->InstanceIdMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullInstanceIdMember (MA2, 1);
+        MT1->InstanceIdMember().IsNull() && !MT1->InstanceIdMember().HasVal() && DotsTest::MemberTypesProperty::IsNullInstanceIdMember (MT2) &&
+        MA1->InstanceIdMember()[1].IsNull() && !MA1->InstanceIdMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullInstanceIdMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -2353,10 +2353,10 @@ void Test_ChannelId()
         (DotsTest::ParameterArrays::ChannelIdParameterArraySize() == 2 &&
          DotsTest::MemberArrays::ChannelIdMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::ChannelIdMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->ChannelIdMember().IsNull();
+    Null_Ok  = MT1->ChannelIdMember().IsNull() && !MT1->ChannelIdMember().HasVal();
     In_Req_Ok  = !MT1->ChannelIdMember().IsChanged();
     MT1->ChannelIdMember().SetVal(DotsTest::ParameterTypes::ChannelIdParameter());
-    Null_Ok  = Null_Ok && !MT1->ChannelIdMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->ChannelIdMember().IsNull() && MT1->ChannelIdMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->ChannelIdMember().IsChanged();
 
     //locals
@@ -2439,10 +2439,10 @@ void Test_ChannelId()
     for (int ix = 0; ix < DotsTest::ParameterArrays::ChannelIdParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->ChannelIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->ChannelIdMember()[ix].IsNull() && !MA1->ChannelIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->ChannelIdMember()[ix].IsChanged();
         MA1->ChannelIdMember()[ix].SetVal(DotsTest::ParameterArrays::ChannelIdParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->ChannelIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->ChannelIdMember()[ix].IsNull() && MA1->ChannelIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->ChannelIdMember()[ix].IsChanged();
 
         // MemberArray
@@ -2494,8 +2494,8 @@ void Test_ChannelId()
     MA1->ChannelIdMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullChannelIdMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->ChannelIdMember().IsNull() && DotsTest::MemberTypesProperty::IsNullChannelIdMember (MT2) &&
-        MA1->ChannelIdMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullChannelIdMember (MA2, 1);
+        MT1->ChannelIdMember().IsNull() && !MT1->ChannelIdMember().HasVal() && DotsTest::MemberTypesProperty::IsNullChannelIdMember (MT2) &&
+        MA1->ChannelIdMember()[1].IsNull() && !MA1->ChannelIdMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullChannelIdMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -2525,10 +2525,10 @@ void Test_HandlerId()
         (DotsTest::ParameterArrays::HandlerIdParameterArraySize() == 2 &&
          DotsTest::MemberArrays::HandlerIdMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::HandlerIdMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->HandlerIdMember().IsNull();
+    Null_Ok  = MT1->HandlerIdMember().IsNull() && !MT1->HandlerIdMember().HasVal();
     In_Req_Ok  = !MT1->HandlerIdMember().IsChanged();
     MT1->HandlerIdMember().SetVal(DotsTest::ParameterTypes::HandlerIdParameter());
-    Null_Ok  = Null_Ok && !MT1->HandlerIdMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->HandlerIdMember().IsNull() && MT1->HandlerIdMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->HandlerIdMember().IsChanged();
 
     //locals
@@ -2611,10 +2611,10 @@ void Test_HandlerId()
     for (int ix = 0; ix < DotsTest::ParameterArrays::HandlerIdParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->HandlerIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->HandlerIdMember()[ix].IsNull() && !MA1->HandlerIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->HandlerIdMember()[ix].IsChanged();
         MA1->HandlerIdMember()[ix].SetVal(DotsTest::ParameterArrays::HandlerIdParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->HandlerIdMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->HandlerIdMember()[ix].IsNull() && MA1->HandlerIdMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->HandlerIdMember()[ix].IsChanged();
 
         // MemberArray
@@ -2666,8 +2666,8 @@ void Test_HandlerId()
     MA1->HandlerIdMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullHandlerIdMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->HandlerIdMember().IsNull() && DotsTest::MemberTypesProperty::IsNullHandlerIdMember (MT2) &&
-        MA1->HandlerIdMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullHandlerIdMember (MA2, 1);
+        MT1->HandlerIdMember().IsNull() && !MT1->HandlerIdMember().HasVal() && DotsTest::MemberTypesProperty::IsNullHandlerIdMember (MT2) &&
+        MA1->HandlerIdMember()[1].IsNull() && !MA1->HandlerIdMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullHandlerIdMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -2696,13 +2696,13 @@ void Test_Object()
         (DotsTest::ParameterArrays::ObjectParameterArraySize() == 2 &&
          DotsTest::MemberArrays::ObjectMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::ObjectMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->ObjectMember().IsNull();
+    Null_Ok  = MT1->ObjectMember().IsNull() && !MT1->ObjectMember().HasVal();
     In_Req_Ok  = !MT1->ObjectMember().IsChanged();
 
     Safir::Dob::Typesystem::ObjectPtr op=DotsTest::ParameterTypes::ObjectParameter();
 
     MT1->ObjectMember().SetPtr(DotsTest::ParameterTypes::ObjectParameter());
-    Null_Ok  = Null_Ok && !MT1->ObjectMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->ObjectMember().IsNull() && MT1->ObjectMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->ObjectMember().IsChanged();
 
     //locals
@@ -2790,10 +2790,10 @@ void Test_Object()
     {
 
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->ObjectMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->ObjectMember()[ix].IsNull() && !MA1->ObjectMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->ObjectMember()[ix].IsChanged();
         MA1->ObjectMember()[ix].SetPtr(DotsTest::ParameterArrays::ObjectParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->ObjectMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->ObjectMember()[ix].IsNull() && MA1->ObjectMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->ObjectMember()[ix].IsChanged();
 
         // MemberArray
@@ -2850,8 +2850,8 @@ void Test_Object()
     MA1->ObjectMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullObjectMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->ObjectMember().IsNull() && DotsTest::MemberTypesProperty::IsNullObjectMember (MT2) &&
-        MA1->ObjectMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullObjectMember (MA2, 1);
+        MT1->ObjectMember().IsNull() && !MT1->ObjectMember().HasVal() && DotsTest::MemberTypesProperty::IsNullObjectMember (MT2) &&
+        MA1->ObjectMember()[1].IsNull() && !MA1->ObjectMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullObjectMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -2881,10 +2881,10 @@ void Test_Binary()
         (DotsTest::ParameterArrays::BinaryParameterArraySize() == 2 &&
          DotsTest::MemberArrays::BinaryMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::BinaryMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->BinaryMember().IsNull();
+    Null_Ok  = MT1->BinaryMember().IsNull() && !MT1->BinaryMember().HasVal();
     In_Req_Ok  = !MT1->BinaryMember().IsChanged();
     MT1->BinaryMember().SetVal(DotsTest::ParameterTypes::BinaryParameter());
-    Null_Ok  = Null_Ok && !MT1->BinaryMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->BinaryMember().IsNull() && MT1->BinaryMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->BinaryMember().IsChanged();
 
 
@@ -2967,10 +2967,10 @@ void Test_Binary()
     for (int ix = 0; ix < DotsTest::ParameterArrays::BinaryParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->BinaryMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->BinaryMember()[ix].IsNull() && !MA1->BinaryMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->BinaryMember()[ix].IsChanged();
         MA1->BinaryMember()[ix].SetVal(DotsTest::ParameterArrays::BinaryParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->BinaryMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->BinaryMember()[ix].IsNull() && MA1->BinaryMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->BinaryMember()[ix].IsChanged();
 
         // MemberArray
@@ -3020,8 +3020,8 @@ void Test_Binary()
     MA1->BinaryMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullBinaryMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->BinaryMember().IsNull() && DotsTest::MemberTypesProperty::IsNullBinaryMember (MT2) &&
-        MA1->BinaryMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullBinaryMember (MA2, 1);
+        MT1->BinaryMember().IsNull() && !MT1->BinaryMember().HasVal() && DotsTest::MemberTypesProperty::IsNullBinaryMember (MT2) &&
+        MA1->BinaryMember()[1].IsNull() && !MA1->BinaryMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullBinaryMember (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -3049,10 +3049,10 @@ void Test_TestClass()
         (DotsTest::ParameterArrays::TestClassParameterArraySize() == 2 &&
          DotsTest::MemberArrays::TestClassMemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::TestClassMemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->TestClassMember().IsNull();
+    Null_Ok  = MT1->TestClassMember().IsNull() && !MT1->TestClassMember().HasVal();
     In_Req_Ok  = !MT1->TestClassMember().IsChanged();
     MT1->TestClassMember().SetPtr(DotsTest::ParameterTypes::TestClassParameter());
-    Null_Ok  = Null_Ok && !MT1->TestClassMember().IsNull();
+    Null_Ok  = Null_Ok && !MT1->TestClassMember().IsNull() && MT1->TestClassMember().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->TestClassMember().IsChanged();
 
     //locals
@@ -3136,10 +3136,10 @@ void Test_TestClass()
     for (int ix = 0; ix < DotsTest::ParameterArrays::TestClassParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->TestClassMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->TestClassMember()[ix].IsNull() && !MA1->TestClassMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->TestClassMember()[ix].IsChanged();
         MA1->TestClassMember()[ix].SetPtr(DotsTest::ParameterArrays::TestClassParameter (ix));
-        Null_Ok  = Null_Ok && !MA1->TestClassMember()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->TestClassMember()[ix].IsNull() && MA1->TestClassMember()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->TestClassMember()[ix].IsChanged();
 
         // MemberArray
@@ -3196,8 +3196,8 @@ void Test_TestClass()
     MA1->TestClassMember()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullTestClassMember(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->TestClassMember().IsNull() && DotsTest::MemberTypesProperty::IsNullTestClassMember (MT2) &&
-        MA1->TestClassMember()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullTestClassMember (MA2, 1);
+        MT1->TestClassMember().IsNull() && !MT1->TestClassMember().HasVal() && DotsTest::MemberTypesProperty::IsNullTestClassMember (MT2) &&
+        MA1->TestClassMember()[1].IsNull() && !MA1->TestClassMember()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullTestClassMember (MA2, 1);
 
     // Makesome tests concerning Set/GetChangedHere
     MT1->TestClassMember().SetPtr(DotsTest::ParameterTypes::TestClassParameter());
@@ -3237,10 +3237,10 @@ void Test_Ampere32()
         (DotsTest::ParameterArrays::Ampere32ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::Ampere32MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::Ampere32MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->Ampere32Member().IsNull();
+    Null_Ok  = MT1->Ampere32Member().IsNull() && !MT1->Ampere32Member().HasVal();
     In_Req_Ok  = !MT1->Ampere32Member().IsChanged();
     MT1->Ampere32Member().SetVal(DotsTest::ParameterTypes::Ampere32Parameter());
-    Null_Ok  = Null_Ok && !MT1->Ampere32Member().IsNull();
+    Null_Ok  = Null_Ok && !MT1->Ampere32Member().IsNull() && MT1->Ampere32Member().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->Ampere32Member().IsChanged();
 
     //locals
@@ -3322,10 +3322,10 @@ void Test_Ampere32()
     for (int ix = 0; ix < DotsTest::ParameterArrays::Ampere32ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->Ampere32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->Ampere32Member()[ix].IsNull() && !MA1->Ampere32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->Ampere32Member()[ix].IsChanged();
         MA1->Ampere32Member()[ix].SetVal(DotsTest::ParameterArrays::Ampere32Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->Ampere32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->Ampere32Member()[ix].IsNull() && MA1->Ampere32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->Ampere32Member()[ix].IsChanged();
 
         // MemberArray
@@ -3377,8 +3377,8 @@ void Test_Ampere32()
     MA1->Ampere32Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullAmpere32Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->Ampere32Member().IsNull() && DotsTest::MemberTypesProperty::IsNullAmpere32Member (MT2) &&
-        MA1->Ampere32Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullAmpere32Member (MA2, 1);
+        MT1->Ampere32Member().IsNull() && !MT1->Ampere32Member().HasVal() && DotsTest::MemberTypesProperty::IsNullAmpere32Member (MT2) &&
+        MA1->Ampere32Member()[1].IsNull() && !MA1->Ampere32Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullAmpere32Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -3408,10 +3408,10 @@ void Test_CubicMeter32()
         (DotsTest::ParameterArrays::CubicMeter32ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::CubicMeter32MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::CubicMeter32MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->CubicMeter32Member().IsNull();
+    Null_Ok  = MT1->CubicMeter32Member().IsNull() && !MT1->CubicMeter32Member().HasVal();
     In_Req_Ok  = !MT1->CubicMeter32Member().IsChanged();
     MT1->CubicMeter32Member().SetVal(DotsTest::ParameterTypes::CubicMeter32Parameter());
-    Null_Ok  = Null_Ok && !MT1->CubicMeter32Member().IsNull();
+    Null_Ok  = Null_Ok && !MT1->CubicMeter32Member().IsNull() && MT1->CubicMeter32Member().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->CubicMeter32Member().IsChanged();
 
     //locals
@@ -3493,10 +3493,10 @@ void Test_CubicMeter32()
     for (int ix = 0; ix < DotsTest::ParameterArrays::CubicMeter32ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->CubicMeter32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->CubicMeter32Member()[ix].IsNull() && !MA1->CubicMeter32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->CubicMeter32Member()[ix].IsChanged();
         MA1->CubicMeter32Member()[ix].SetVal(DotsTest::ParameterArrays::CubicMeter32Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->CubicMeter32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->CubicMeter32Member()[ix].IsNull() && MA1->CubicMeter32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->CubicMeter32Member()[ix].IsChanged();
 
         // MemberArray
@@ -3548,8 +3548,8 @@ void Test_CubicMeter32()
     MA1->CubicMeter32Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullCubicMeter32Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->CubicMeter32Member().IsNull() && DotsTest::MemberTypesProperty::IsNullCubicMeter32Member (MT2) &&
-        MA1->CubicMeter32Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullCubicMeter32Member (MA2, 1);
+        MT1->CubicMeter32Member().IsNull() && !MT1->CubicMeter32Member().HasVal() && DotsTest::MemberTypesProperty::IsNullCubicMeter32Member (MT2) &&
+        MA1->CubicMeter32Member()[1].IsNull() && !MA1->CubicMeter32Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullCubicMeter32Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -3580,10 +3580,10 @@ void Test_Hertz32()
         (DotsTest::ParameterArrays::Hertz32ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::Hertz32MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::Hertz32MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->Hertz32Member().IsNull();
+    Null_Ok  = MT1->Hertz32Member().IsNull() && !MT1->Hertz32Member().HasVal();
     In_Req_Ok  = !MT1->Hertz32Member().IsChanged();
     MT1->Hertz32Member().SetVal(DotsTest::ParameterTypes::Hertz32Parameter());
-    Null_Ok  = Null_Ok && !MT1->Hertz32Member().IsNull();
+    Null_Ok  = Null_Ok && !MT1->Hertz32Member().IsNull() && MT1->Hertz32Member().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->Hertz32Member().IsChanged();
 
     //locals
@@ -3665,10 +3665,10 @@ void Test_Hertz32()
     for (int ix = 0; ix < DotsTest::ParameterArrays::Hertz32ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->Hertz32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->Hertz32Member()[ix].IsNull() && !MA1->Hertz32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->Hertz32Member()[ix].IsChanged();
         MA1->Hertz32Member()[ix].SetVal(DotsTest::ParameterArrays::Hertz32Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->Hertz32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->Hertz32Member()[ix].IsNull() && MA1->Hertz32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->Hertz32Member()[ix].IsChanged();
 
         // MemberArray
@@ -3720,8 +3720,8 @@ void Test_Hertz32()
     MA1->Hertz32Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullHertz32Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->Hertz32Member().IsNull() && DotsTest::MemberTypesProperty::IsNullHertz32Member (MT2) &&
-        MA1->Hertz32Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullHertz32Member (MA2, 1);
+        MT1->Hertz32Member().IsNull() && !MT1->Hertz32Member().HasVal() && DotsTest::MemberTypesProperty::IsNullHertz32Member (MT2) &&
+        MA1->Hertz32Member()[1].IsNull() && !MA1->Hertz32Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullHertz32Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -4093,7 +4093,7 @@ void Test_Kilogram32()
         (DotsTest::ParameterArrays::Kilogram32ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::Kilogram32MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::Kilogram32MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->Kilogram32Member().IsNull();
+    Null_Ok  = MT1->Kilogram32Member().IsNull() && !MT1->Kilogram32Member().HasVal();
     In_Req_Ok  = !MT1->Kilogram32Member().IsChanged();
     MT1->Kilogram32Member().SetVal(DotsTest::ParameterTypes::Kilogram32Parameter());
     Null_Ok  = Null_Ok && !MT1->Kilogram32Member().IsNull();
@@ -4178,10 +4178,10 @@ void Test_Kilogram32()
     for (int ix = 0; ix < DotsTest::ParameterArrays::Kilogram32ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->Kilogram32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->Kilogram32Member()[ix].IsNull() && !MA1->Kilogram32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->Kilogram32Member()[ix].IsChanged();
         MA1->Kilogram32Member()[ix].SetVal(DotsTest::ParameterArrays::Kilogram32Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->Kilogram32Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->Kilogram32Member()[ix].IsNull() && MA1->Kilogram32Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->Kilogram32Member()[ix].IsChanged();
 
         // MemberArray
@@ -4233,8 +4233,8 @@ void Test_Kilogram32()
     MA1->Kilogram32Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullKilogram32Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->Kilogram32Member().IsNull() && DotsTest::MemberTypesProperty::IsNullKilogram32Member (MT2) &&
-        MA1->Kilogram32Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullKilogram32Member (MA2, 1);
+        MT1->Kilogram32Member().IsNull() && !MT1->Kilogram32Member().HasVal() && DotsTest::MemberTypesProperty::IsNullKilogram32Member (MT2) &&
+        MA1->Kilogram32Member()[1].IsNull() && !MA1->Kilogram32Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullKilogram32Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -6486,10 +6486,10 @@ void Test_Ampere64()
         (DotsTest::ParameterArrays::Ampere64ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::Ampere64MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::Ampere64MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->Ampere64Member().IsNull();
+    Null_Ok  = MT1->Ampere64Member().IsNull() && !MT1->Ampere64Member().HasVal();
     In_Req_Ok  = !MT1->Ampere64Member().IsChanged();
     MT1->Ampere64Member().SetVal(DotsTest::ParameterTypes::Ampere64Parameter());
-    Null_Ok  = Null_Ok && !MT1->Ampere64Member().IsNull();
+    Null_Ok  = Null_Ok && !MT1->Ampere64Member().IsNull() && MT1->Ampere64Member().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->Ampere64Member().IsChanged();
 
     //locals
@@ -6571,10 +6571,10 @@ void Test_Ampere64()
     for (int ix = 0; ix < DotsTest::ParameterArrays::Ampere64ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->Ampere64Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->Ampere64Member()[ix].IsNull() && !MA1->Ampere64Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->Ampere64Member()[ix].IsChanged();
         MA1->Ampere64Member()[ix].SetVal(DotsTest::ParameterArrays::Ampere64Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->Ampere64Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->Ampere64Member()[ix].IsNull() && MA1->Ampere64Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->Ampere64Member()[ix].IsChanged();
 
         // MemberArray
@@ -6626,8 +6626,8 @@ void Test_Ampere64()
     MA1->Ampere64Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullAmpere64Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->Ampere64Member().IsNull() && DotsTest::MemberTypesProperty::IsNullAmpere64Member (MT2) &&
-        MA1->Ampere64Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullAmpere64Member (MA2, 1);
+        MT1->Ampere64Member().IsNull() && !MT1->Ampere64Member().HasVal() && DotsTest::MemberTypesProperty::IsNullAmpere64Member (MT2) &&
+        MA1->Ampere64Member()[1].IsNull() && !MA1->Ampere64Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullAmpere64Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -6657,10 +6657,10 @@ void Test_CubicMeter64()
         (DotsTest::ParameterArrays::CubicMeter64ParameterArraySize() == 2 &&
          DotsTest::MemberArrays::CubicMeter64MemberArraySize() == 2 &&
          DotsTest::MemberArraysProperty::CubicMeter64MemberArraySize(MA1) == 2)<<std::endl;
-    Null_Ok  = MT1->CubicMeter64Member().IsNull();
+    Null_Ok  = MT1->CubicMeter64Member().IsNull() && !MT1->CubicMeter64Member().HasVal();
     In_Req_Ok  = !MT1->CubicMeter64Member().IsChanged();
     MT1->CubicMeter64Member().SetVal(DotsTest::ParameterTypes::CubicMeter64Parameter());
-    Null_Ok  = Null_Ok && !MT1->CubicMeter64Member().IsNull();
+    Null_Ok  = Null_Ok && !MT1->CubicMeter64Member().IsNull() && MT1->CubicMeter64Member().HasVal();
     In_Req_Ok  = In_Req_Ok && MT1->CubicMeter64Member().IsChanged();
 
     //locals
@@ -6742,10 +6742,10 @@ void Test_CubicMeter64()
     for (int ix = 0; ix < DotsTest::ParameterArrays::CubicMeter64ParameterArraySize(); ix++)
     {
         //MemberArray
-        Null_Ok  = Null_Ok && MA1->CubicMeter64Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && MA1->CubicMeter64Member()[ix].IsNull() && !MA1->CubicMeter64Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && !MA1->CubicMeter64Member()[ix].IsChanged();
         MA1->CubicMeter64Member()[ix].SetVal(DotsTest::ParameterArrays::CubicMeter64Parameter (ix));
-        Null_Ok  = Null_Ok && !MA1->CubicMeter64Member()[ix].IsNull();
+        Null_Ok  = Null_Ok && !MA1->CubicMeter64Member()[ix].IsNull() && MA1->CubicMeter64Member()[ix].HasVal();
         In_Req_Ok  = In_Req_Ok && MA1->CubicMeter64Member()[ix].IsChanged();
 
         // MemberArray
@@ -6797,8 +6797,8 @@ void Test_CubicMeter64()
     MA1->CubicMeter64Member()[1].SetNull();
     DotsTest::MemberArraysProperty::SetNullCubicMeter64Member(MA2, 1);
     Null_Ok  = Null_Ok &&
-        MT1->CubicMeter64Member().IsNull() && DotsTest::MemberTypesProperty::IsNullCubicMeter64Member (MT2) &&
-        MA1->CubicMeter64Member()[1].IsNull() && DotsTest::MemberArraysProperty::IsNullCubicMeter64Member (MA2, 1);
+        MT1->CubicMeter64Member().IsNull() && !MT1->CubicMeter64Member().HasVal() && DotsTest::MemberTypesProperty::IsNullCubicMeter64Member (MT2) &&
+        MA1->CubicMeter64Member()[1].IsNull() && !MA1->CubicMeter64Member()[1].HasVal() && DotsTest::MemberArraysProperty::IsNullCubicMeter64Member (MA2, 1);
 
     std::wcout<<"Is_Null OK: "<<Null_Ok<<std::endl;
     std::wcout<<"Is_Changed OK: "<<In_Req_Ok<<std::endl;
@@ -9882,59 +9882,73 @@ void ContainerTest()
     {
         Int32Container intCont;
         Check(intCont.IsNull());
+        Check(!intCont.HasVal());
         Check(!intCont.IsChanged());
         intCont.SetVal(10);
         Check(intCont.GetVal() == 10);
         Check(!intCont.IsNull());
+        Check(intCont.HasVal());
         Check(intCont.IsChanged());
 
 
         BooleanContainer boolCont;
         Check(boolCont.IsNull());
+        Check(!boolCont.HasVal());
         Check(!boolCont.IsChanged());
         boolCont.SetVal(true);
         Check(boolCont.GetVal() == true);
         Check(!boolCont.IsNull());
+        Check(boolCont.HasVal());
         Check(boolCont.IsChanged());
 
         TestEnum::EnumerationContainer enumCont;
         Check(enumCont.IsNull());
+        Check(!enumCont.HasVal());
         Check(!enumCont.IsChanged());
         enumCont.SetVal(TestEnum::MyFirst);
         Check(enumCont.GetVal() == TestEnum::MyFirst);
         Check(!enumCont.IsNull());
+        Check(enumCont.HasVal());
         Check(enumCont.IsChanged());
 
         Float32Container floatCont;
         Check(floatCont.IsNull());
+        Check(!floatCont.HasVal());
         Check(!floatCont.IsChanged());
         floatCont.SetVal(10);
         Check(floatCont.GetVal() == 10);
         Check(!floatCont.IsNull());
+        Check(floatCont.HasVal());
         Check(floatCont.IsChanged());
 
         TypeIdContainer typeIdCont;
         Check(typeIdCont.IsNull());
+        Check(!typeIdCont.HasVal());
         Check(!typeIdCont.IsChanged());
         typeIdCont.SetVal(10);
         Check(typeIdCont.GetVal() == 10);
         Check(!typeIdCont.IsNull());
+        Check(typeIdCont.HasVal());
         Check(typeIdCont.IsChanged());
 
         InstanceIdContainer instanceIdCont;
         Check(instanceIdCont.IsNull());
+        Check(!instanceIdCont.HasVal());
         Check(!instanceIdCont.IsChanged());
         instanceIdCont.SetVal(InstanceId(10));
         Check(instanceIdCont.GetVal() == InstanceId(10));
         Check(!instanceIdCont.IsNull());
+        Check(instanceIdCont.HasVal());
         Check(instanceIdCont.IsChanged());
 
         StringContainer strCont;
         Check(strCont.IsNull());
+        Check(!strCont.HasVal());
         Check(!strCont.IsChanged());
         strCont.SetVal(L"Kalle");
         Check(strCont.GetVal() == L"Kalle");
         Check(!strCont.IsNull());
+        Check(strCont.HasVal());
         Check(strCont.IsChanged());
 
     }

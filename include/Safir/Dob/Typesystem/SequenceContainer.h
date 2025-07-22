@@ -32,7 +32,6 @@
 #include <deque>
 #include <stdexcept>
 #include <typeinfo>
-#include <vector>
 
 namespace Safir
 {
@@ -69,6 +68,9 @@ namespace Typesystem
         }
 
         bool IsNull() const override {return empty();}
+
+        bool HasVal() const override {return !empty();}
+
 
         void SetNull() override
         {
@@ -284,6 +286,8 @@ namespace Typesystem
         }
 
         bool IsNull() const override {return empty();}
+
+        bool HasVal() const override {return !empty();}
 
         void SetNull() override
         {

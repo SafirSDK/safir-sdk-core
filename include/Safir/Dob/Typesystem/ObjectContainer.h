@@ -302,6 +302,8 @@ namespace Typesystem
 
         bool IsNull() const override {return m_pObject == NULL;}
 
+        bool HasVal() const override {return m_pObject != NULL;}
+
         void SetNull() override
         {
             m_bIsChanged = true;
@@ -483,6 +485,8 @@ namespace Typesystem
         bool IsChanged() const override {return m_bIsChanged || (!IsNull() && m_pObject->IsChanged());}
 
         bool IsNull() const override {return m_pObject == NULL;}
+
+        bool HasVal() const override {return m_pObject != NULL;}
 
         void SetNull() override
         {

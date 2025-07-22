@@ -345,12 +345,19 @@ namespace Safir.Dob.Typesystem
         #region implemented abstract members of ContainerBase
 
         /// <summary>
-        /// Is the container set to null?
+        /// Override ContainerBase.
         /// </summary>
-        /// <returns>True if the container is set to null.</returns>
         public override bool IsNull ()
         {
             return Count == 0;
+        }
+
+        /// <summary>
+        /// Override ContainerBase.
+        /// </summary>
+        public override bool HasVal ()
+        {
+            return Count > 0;
         }
 
         /// <summary>

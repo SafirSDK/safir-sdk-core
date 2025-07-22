@@ -116,6 +116,14 @@ public class ObjectContainerImpl<T extends com.saabgroup.safir.dob.typesystem.Ob
     }
 
     /**
+     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#hasVal()
+     */
+    @Override
+    public boolean hasVal() {
+        return m_object != null;
+    }
+
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ContainerBase#setNull()
      */
     @Override

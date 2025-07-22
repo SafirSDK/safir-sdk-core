@@ -82,6 +82,9 @@ namespace Typesystem
         bool IsNull() const override {return m_bIsNull;}
 
         //implementation of pure virtual in ContainerBase.
+        bool HasVal() const override {return !m_bIsNull;}
+
+        //implementation of pure virtual in ContainerBase.
         void SetNull() override
         {
             m_bIsNull = true;

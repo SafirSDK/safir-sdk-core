@@ -22,7 +22,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 import com.saabgroup.dotstest.*;
 import com.saabgroup.safir.dob.typesystem.*;
 import com.saabgroup.safir.dob.typesystem.Object;
@@ -49,6 +48,9 @@ public class Test {
         test_GetNumberOfMembers();
         test_GetNumberOfParameters();
         test_Create_Routines();
+        test_hasVal();
+
+
         test_Int32();
         test_Int64();
         test_Float32();
@@ -367,6 +369,373 @@ public class Test {
 
     private static String toStringNoUnderscore(MemberType val) {
         return val.toString().replace("_", "");
+    }
+
+    private static void test_hasVal() {
+
+        com.saabgroup.dotstest.MemberTypes mt = new com.saabgroup.dotstest.MemberTypes();
+
+        //Int32
+        if (mt.int32Member().hasVal())
+        {
+            System.out.println("HasValue Int32 failed! 1");
+        }
+
+        mt.int32Member().setVal(123);
+        if (!mt.int32Member().hasVal())
+        {
+            System.out.println("HasValue Int32 failed! 2");
+        }
+
+        mt.int32Member().setNull();
+        if (mt.int32Member().hasVal())
+        {
+            System.out.println("HasValue Int32 failed! 3");
+        }
+
+        //Int64
+        if (mt.int64Member().hasVal())
+        {
+            System.out.println("HasValue Int64 failed! 1");
+        }
+
+        mt.int64Member().setVal((long) 123);
+        if (!mt.int64Member().hasVal())
+        {
+            System.out.println("HasValue Int64 failed! 2");
+        }
+
+        mt.int64Member().setNull();
+        if (mt.int64Member().hasVal())
+        {
+            System.out.println("HasValue Int64 failed! 3");
+        }
+
+        //Float32
+        if (mt.float32Member().hasVal())
+        {
+            System.out.println("HasValue Float32 failed! 1");
+        }
+
+        mt.float32Member().setVal(123.0f);
+        if (!mt.float32Member().hasVal())
+        {
+            System.out.println("HasValue Float32 failed! 2");
+        }
+
+        mt.float32Member().setNull();
+        if (mt.float32Member().hasVal())
+        {
+            System.out.println("HasValue Float32 failed! 3");
+        }
+
+        //Float64
+        if (mt.float64Member().hasVal())
+        {
+            System.out.println("HasValue Float64 failed! 1");
+        }
+    
+        mt.float64Member().setVal(123.0);
+        if (!mt.float64Member().hasVal())
+        {
+            System.out.println("HasValue Float64 failed! 2");
+        }
+    
+        mt.float64Member().setNull();
+        if (mt.float64Member().hasVal())
+        {
+            System.out.println("HasValue Float64 failed! 3");
+        }
+
+        //Boolean
+        if (mt.booleanMember().hasVal())
+        {
+            System.out.println("HasValue Boolean failed! 1");
+        }
+
+        mt.booleanMember().setVal(false);
+        if (!mt.booleanMember().hasVal())
+        {
+            System.out.println("HasValue Boolean failed! 2");
+        }
+
+        mt.booleanMember().setNull();
+        if (mt.booleanMember().hasVal())
+        {
+            System.out.println("HasValue Boolean failed! 3");
+        }
+
+        //Enumeration
+        if (mt.enumerationMember().hasVal())
+        {
+            System.out.println("HasValue Enumeration failed! 1");
+        }
+
+        mt.enumerationMember().setVal(com.saabgroup.dotstest.TestEnum.MY_SECOND);
+        if (!mt.enumerationMember().hasVal())
+        {
+            System.out.println("HasValue Enumeration failed! 2");
+        }
+
+        mt.enumerationMember().setNull();
+        if (mt.enumerationMember().hasVal())
+        {
+            System.out.println("HasValue Enumeration failed! 3");
+        }
+
+        //String
+        if (mt.stringMember().hasVal())
+        {
+            System.out.println("HasValue String failed! 1");
+        }
+
+        mt.stringMember().setVal("Test");
+        if (!mt.stringMember().hasVal())
+        {
+            System.out.println("HasValue String failed! 2");
+        }
+
+        mt.stringMember().setNull();
+        if (mt.stringMember().hasVal())
+        {
+            System.out.println("HasValue String failed! 3");
+        }
+
+        //EntityId
+        if (mt.entityIdMember().hasVal())
+        {
+            System.out.println("HasValue EntityId failed! 1");
+        }
+
+        mt.entityIdMember().setVal(new com.saabgroup.safir.dob.typesystem.EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new com.saabgroup.safir.dob.typesystem.InstanceId(3)));
+        if (!mt.entityIdMember().hasVal())
+        {
+            System.out.println("HasValue EntityId failed! 2");
+        }
+
+        mt.entityIdMember().setNull();
+        if (mt.entityIdMember().hasVal())
+        {
+            System.out.println("HasValue EntityId failed! 3");
+        }
+
+        //InstanceId
+        if (mt.instanceIdMember().hasVal())
+        {
+            System.out.println("HasValue InstanceId failed! 1");
+        }
+
+        mt.instanceIdMember().setVal(new com.saabgroup.safir.dob.typesystem.InstanceId(3));
+        if (!mt.instanceIdMember().hasVal())
+        {
+            System.out.println("HasValue InstanceId failed! 2");
+        }
+
+        mt.instanceIdMember().setNull();
+        if (mt.instanceIdMember().hasVal())
+        {
+            System.out.println("HasValue InstanceId failed! 3");
+        }
+
+        //ChannelId
+        if (mt.channelIdMember().hasVal())
+        {
+            System.out.println("HasValue ChannelId failed! 1");
+        }
+
+        mt.channelIdMember().setVal(new com.saabgroup.safir.dob.typesystem.ChannelId(3));
+        if (!mt.channelIdMember().hasVal())
+        {
+            System.out.println("HasValue ChannelId failed! 2");
+        }
+
+        mt.channelIdMember().setNull();
+        if (mt.channelIdMember().hasVal())
+        {
+            System.out.println("HasValue ChannelId failed! 3");
+        }
+
+
+        //HandlerId
+        if (mt.handlerIdMember().hasVal())
+        {
+            System.out.println("HasValue HandlerId failed! 1");
+        }
+
+        mt.handlerIdMember().setVal(new com.saabgroup.safir.dob.typesystem.HandlerId(3));
+        if (!mt.handlerIdMember().hasVal())
+        {
+            System.out.println("HasValue HandlerId failed! 2");
+        }
+
+        mt.handlerIdMember().setNull();
+        if (mt.handlerIdMember().hasVal())
+        {
+            System.out.println("HasValue HandlerId failed! 3");
+        }
+
+        //TypeId
+        if (mt.typeIdMember().hasVal())
+        {
+            System.out.println("HasValue TypeId failed! 1");
+        }
+
+        mt.typeIdMember().setVal((long)123);
+        if (!mt.typeIdMember().hasVal())
+        {
+            System.out.println("HasValue TypeId failed! 2");
+        }
+
+        mt.typeIdMember().setNull();
+        if (mt.typeIdMember().hasVal())
+        {
+            System.out.println("HasValue TypeId failed! 3");
+        }
+
+        //Binary
+        if (mt.binaryMember().hasVal())
+        {
+            System.out.println("HasValue Binary failed! 1");
+        }
+
+        mt.binaryMember().setVal(new byte[10]);
+        if (!mt.binaryMember().hasVal())
+        {
+            System.out.println("HasValue Binary failed! 2");
+        }
+
+        mt.binaryMember().setNull();
+        if (mt.binaryMember().hasVal())
+        {
+            System.out.println("HasValue Binary failed! 3");
+        }
+
+        //Object
+        if (mt.objectMember().hasVal())
+        {
+            System.out.println("HasValue Object failed! 1");
+        }
+
+        mt.objectMember().setObj(new com.saabgroup.safir.dob.Entity());
+        if (!mt.objectMember().hasVal())
+        {
+            System.out.println("HasValue Object failed! 2");
+        }
+
+        mt.objectMember().setNull();
+        if (mt.objectMember().hasVal())
+        {
+            System.out.println("HasValue Object failed! 3");
+        }
+
+        //TestClass
+        if (mt.testClassMember().hasVal())
+        {
+            System.out.println("HasValue TestClass failed! 1");
+        }
+
+        mt.testClassMember().setObj(new com.saabgroup.dotstest.TestItem());
+        if (!mt.testClassMember().hasVal())
+        {
+            System.out.println("HasValue TestClass failed! 2");
+        }
+
+        mt.testClassMember().setNull();
+        if (mt.testClassMember().hasVal())
+        {
+            System.out.println("HasValue TestClass failed! 3");
+        }
+
+        //Radian32
+        if (mt.radian32Member().hasVal())
+        {
+            System.out.println("HasValue Radian32 failed! 1");
+        }
+
+        mt.radian32Member().setVal(123.0f);
+        if (!mt.radian32Member().hasVal())
+        {
+            System.out.println("HasValue Radian32 failed! 2");
+        }
+
+        mt.radian32Member().setNull();
+        if (mt.radian32Member().hasVal())
+        {
+            System.out.println("HasValue Radian32 failed! 3");
+        }
+
+        //Radian64
+        if (mt.radian64Member().hasVal())
+        {
+            System.out.println("HasValue Radian64 failed! 1");
+        }
+
+        mt.radian64Member().setVal(123.0);
+        if (!mt.radian64Member().hasVal())
+        {
+            System.out.println("HasValue Radian64 failed! 2");
+        }
+
+        mt.radian64Member().setNull();
+        if (mt.radian64Member().hasVal())
+        {
+            System.out.println("HasValue Radian64 failed! 3");
+        }
+
+        // Sequence
+        MemberSequences ms = new MemberSequences();
+        if (ms.int32Member().hasVal())
+        {
+            System.out.println("HasValue Sequence failed! 1");
+        }
+
+        ms.int32Member().add(10);
+        ms.int32Member().add(20);
+
+        if (!ms.int32Member().hasVal())
+        {
+            System.out.println("HasValue Sequence failed! 2");
+        }
+        
+        ms.int32Member().remove(0);
+        if (!ms.int32Member().hasVal())
+        {
+            System.out.println("HasValue Sequence failed! 3");
+        }
+
+        ms.int32Member().remove(0);
+        if (ms.int32Member().hasVal())
+        {
+            System.out.println("HasValue Sequence failed! 4");
+        }
+
+        // Dictionary
+        MemberDictionaries md = new MemberDictionaries();
+        if (md.int32StringMember().hasVal())
+        {
+            System.out.println("HasValue Dictionary failed! 1");
+        }
+
+        md.int32StringMember().putVal(10, "Hello");
+        md.int32StringMember().putVal(20, "World");
+
+        if (!md.int32StringMember().hasVal())
+        {
+            System.out.println("HasValue Dictionary failed! 2");
+        }
+
+        md.int32StringMember().remove(10);
+        if (!md.int32StringMember().hasVal())
+        {
+            System.out.println("HasValue Dictionary failed! 3");
+        }
+
+        md.int32StringMember().remove(20);
+        if (md.int32StringMember().hasVal())
+        {
+            System.out.println("HasValue Dictionary failed! 4");
+        }
+
     }
 
     private static void test_Int32() {

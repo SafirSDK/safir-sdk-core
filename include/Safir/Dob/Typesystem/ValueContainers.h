@@ -90,6 +90,9 @@ namespace Typesystem
         bool IsNull() const override {return m_bIsNull;}
 
         //implementation of pure virtual in ContainerBase.
+        bool HasVal() const override {return !m_bIsNull;}
+
+        //implementation of pure virtual in ContainerBase.
         void SetNull() override
         {
             m_bIsNull = true;
@@ -153,6 +156,9 @@ namespace Typesystem
         const std::wstring & GetVal() const    {if (m_bIsNull) throw NullException(L"value is null",__WFILE__,__LINE__); return m_Value;}
 
         bool IsNull() const override {return m_bIsNull;}
+
+        //implementation of pure virtual in ContainerBase.
+        bool HasVal() const override {return !m_bIsNull;}
 
         //implementation of pure virtual in ContainerBase.
         void SetNull() override
@@ -283,6 +289,9 @@ namespace Typesystem
 
         //implementation of pure virtual in ContainerBase.
         bool IsNull() const override {return m_bIsNull;}
+
+        //implementation of pure virtual in ContainerBase.
+        bool HasVal() const override {return !m_bIsNull;}
 
         //implementation of pure virtual in ContainerBase.
         void SetNull() override

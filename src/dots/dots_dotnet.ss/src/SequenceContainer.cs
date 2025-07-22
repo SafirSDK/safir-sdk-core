@@ -196,6 +196,14 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
+        /// Override ContainerBase.
+        /// </summary>
+        public override bool HasVal ()
+        {
+            return Count > 0;
+        }
+
+        /// <summary>
         /// Set the container to null. Same as clearing the contents of the sequence.
         /// </summary>
         public override void SetNull ()

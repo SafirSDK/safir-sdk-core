@@ -43,6 +43,11 @@ implements java.util.Map<K, V> {
     }
 
     @Override
+    public boolean hasVal() {
+        return !isEmpty();
+    }
+
+    @Override
     public void setNull() {
         clear();
     }

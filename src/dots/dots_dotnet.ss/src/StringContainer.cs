@@ -67,6 +67,14 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
+        /// Override ContainerBase.
+        /// </summary>
+        public override bool HasVal()
+        {
+            return !m_bIsNull;
+        }
+
+        /// <summary>
         /// Set the container to null.
         /// </summary>
         public override void SetNull()

@@ -58,6 +58,13 @@ public abstract class ContainerBase
     public abstract boolean isNull();
 
     /**
+     * Does the container have a value? The opposite to isNull.
+     *
+     * @return True if the container has a value, i.e is not set to null.
+     */
+    public abstract boolean hasVal();
+
+    /**
      * Set the container to null.
      */
     public abstract void setNull();

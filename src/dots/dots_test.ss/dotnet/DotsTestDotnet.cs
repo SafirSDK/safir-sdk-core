@@ -46,6 +46,7 @@ class DotsTestDotnet
         Test_GetNumberOfMembers();
         Test_GetNumberOfParameters();
         Test_Create_Routines();
+        Test_HasValue();
         Test_Int32();
         Test_Int64();
         Test_Float32();
@@ -117,6 +118,373 @@ class DotsTestDotnet
 
         var merge = new Misc.MergeChangesTests();
         merge.Test_MergeChanges();
+
+    }
+
+    private static void Test_HasValue()
+    {
+        DotsTest.MemberTypes mt = new DotsTest.MemberTypes();
+
+        //Int32
+        if (mt.Int32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Int32 failed! 1");
+        }
+
+        mt.Int32Member.Val = 123;
+        if (!mt.Int32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Int32 failed! 2");
+        }
+
+        mt.Int32Member.SetNull();
+        if (mt.Int32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Int32 failed! 3");
+        }
+
+        //Int64
+        if (mt.Int64Member.HasVal())
+        {
+            Console.WriteLine("HasValue Int64 failed! 1");
+        }
+
+        mt.Int64Member.Val = 123;
+        if (!mt.Int64Member.HasVal())
+        {
+            Console.WriteLine("HasValue Int64 failed! 2");
+        }
+
+        mt.Int64Member.SetNull();
+        if (mt.Int64Member.HasVal())
+        {
+            Console.WriteLine("HasValue Int64 failed! 3");
+        }
+
+        //Float32
+        if (mt.Float32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Float32 failed! 1");
+        }
+
+        mt.Float32Member.Val = 123.0f;
+        if (!mt.Float32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Float32 failed! 2");
+        }
+
+        mt.Float32Member.SetNull();
+        if (mt.Float32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Float32 failed! 3");
+        }
+
+        //Float64
+        if (mt.Float64Member.HasVal())
+        {
+            Console.WriteLine("HasValue Float64 failed! 1");
+        }
+
+        mt.Float64Member.Val = 123.0;
+        if (!mt.Float64Member.HasVal())
+        {
+            Console.WriteLine("HasValue Float64 failed! 2");
+        }
+
+        mt.Float64Member.SetNull();
+        if (mt.Float64Member.HasVal())
+        {
+            Console.WriteLine("HasValue Float64 failed! 3");
+        }
+
+        //Boolean
+        if (mt.BooleanMember.HasVal())
+        {
+            Console.WriteLine("HasValue Boolean failed! 1");
+        }
+
+        mt.BooleanMember.Val = false;
+        if (!mt.BooleanMember.HasVal())
+        {
+            Console.WriteLine("HasValue Boolean failed! 2");
+        }
+
+        mt.BooleanMember.SetNull();
+        if (mt.BooleanMember.HasVal())
+        {
+            Console.WriteLine("HasValue Boolean failed! 3");
+        }
+
+        //Enumeration
+        if (mt.EnumerationMember.HasVal())
+        {
+            Console.WriteLine("HasValue Enumeration failed! 1");
+        }
+
+        mt.EnumerationMember.Val = DotsTest.TestEnum.Enumeration.MySecond;
+        if (!mt.EnumerationMember.HasVal())
+        {
+            Console.WriteLine("HasValue Enumeration failed! 2");
+        }
+
+        mt.EnumerationMember.SetNull();
+        if (mt.EnumerationMember.HasVal())
+        {
+            Console.WriteLine("HasValue Enumeration failed! 3");
+        }
+
+        //String
+        if (mt.StringMember.HasVal())
+        {
+            Console.WriteLine("HasValue String failed! 1");
+        }
+
+        mt.StringMember.Val = "Test";
+        if (!mt.StringMember.HasVal())
+        {
+            Console.WriteLine("HasValue String failed! 2");
+        }
+
+        mt.StringMember.SetNull();
+        if (mt.StringMember.HasVal())
+        {
+            Console.WriteLine("HasValue String failed! 3");
+        }
+
+        //EntityId
+        if (mt.EntityIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue EntityId failed! 1");
+        }
+
+        mt.EntityIdMember.Val = new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId(3));
+        if (!mt.EntityIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue EntityId failed! 2");
+        }
+
+        mt.EntityIdMember.SetNull();
+        if (mt.EntityIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue EntityId failed! 3");
+        }
+
+        //InstanceId
+        if (mt.InstanceIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue InstanceId failed! 1");
+        }
+
+        mt.InstanceIdMember.Val = new Safir.Dob.Typesystem.InstanceId(3);
+        if (!mt.InstanceIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue InstanceId failed! 2");
+        }
+
+        mt.InstanceIdMember.SetNull();
+        if (mt.InstanceIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue InstanceId failed! 3");
+        }
+
+        //ChannelId
+        if (mt.ChannelIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue ChannelId failed! 1");
+        }
+
+        mt.ChannelIdMember.Val = new Safir.Dob.Typesystem.ChannelId(3);
+        if (!mt.ChannelIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue ChannelId failed! 2");
+        }
+
+        mt.ChannelIdMember.SetNull();
+        if (mt.ChannelIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue ChannelId failed! 3");
+        }
+
+
+        //HandlerId
+        if (mt.HandlerIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue HandlerId failed! 1");
+        }
+
+        mt.HandlerIdMember.Val = new Safir.Dob.Typesystem.HandlerId(3);
+        if (!mt.HandlerIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue HandlerId failed! 2");
+        }
+
+        mt.HandlerIdMember.SetNull();
+        if (mt.HandlerIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue HandlerId failed! 3");
+        }
+
+        //TypeId
+        if (mt.TypeIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue TypeId failed! 1");
+        }
+
+        mt.TypeIdMember.Val = 123;
+        if (!mt.TypeIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue TypeId failed! 2");
+        }
+
+        mt.TypeIdMember.SetNull();
+        if (mt.TypeIdMember.HasVal())
+        {
+            Console.WriteLine("HasValue TypeId failed! 3");
+        }
+
+        //Binary
+        if (mt.BinaryMember.HasVal())
+        {
+            Console.WriteLine("HasValue Binary failed! 1");
+        }
+
+        mt.BinaryMember.Val = new byte[10];
+        if (!mt.BinaryMember.HasVal())
+        {
+            Console.WriteLine("HasValue Binary failed! 2");
+        }
+
+        mt.BinaryMember.SetNull();
+        if (mt.BinaryMember.HasVal())
+        {
+            Console.WriteLine("HasValue Binary failed! 3");
+        }
+
+        //Object
+        if (mt.ObjectMember.HasVal())
+        {
+            Console.WriteLine("HasValue Object failed! 1");
+        }
+
+        mt.ObjectMember.Obj = new Safir.Dob.Entity();
+        if (!mt.ObjectMember.HasVal())
+        {
+            Console.WriteLine("HasValue Object failed! 2");
+        }
+
+        mt.ObjectMember.SetNull();
+        if (mt.ObjectMember.HasVal())
+        {
+            Console.WriteLine("HasValue Object failed! 3");
+        }
+
+        //TestClass
+        if (mt.TestClassMember.HasVal())
+        {
+            Console.WriteLine("HasValue TestClass failed! 1");
+        }
+
+        mt.TestClassMember.Obj = new DotsTest.TestItem();
+        if (!mt.TestClassMember.HasVal())
+        {
+            Console.WriteLine("HasValue TestClass failed! 2");
+        }
+
+        mt.TestClassMember.SetNull();
+        if (mt.TestClassMember.HasVal())
+        {
+            Console.WriteLine("HasValue TestClass failed! 3");
+        }
+
+        //Radian32
+        if (mt.Radian32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Radian32 failed! 1");
+        }
+
+        mt.Radian32Member.Val = 123.0f;
+        if (!mt.Radian32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Radian32 failed! 2");
+        }
+
+        mt.Radian32Member.SetNull();
+        if (mt.Radian32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Radian32 failed! 3");
+        }
+
+        //Radian64
+        if (mt.Radian64Member.HasVal())
+        {
+            Console.WriteLine("HasValue Radian64 failed! 1");
+        }
+
+        mt.Radian64Member.Val = 123.0;
+        if (!mt.Radian64Member.HasVal())
+        {
+            Console.WriteLine("HasValue Radian64 failed! 2");
+        }
+
+        mt.Radian64Member.SetNull();
+        if (mt.Radian64Member.HasVal())
+        {
+            Console.WriteLine("HasValue Radian64 failed! 3");
+        }
+
+        // Sequence
+        DotsTest.MemberSequences ms = new DotsTest.MemberSequences();
+        if (ms.Int32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Sequence failed! 1");
+        }
+
+        ms.Int32Member.Add(10);
+        ms.Int32Member.Add(20);
+
+        if (!ms.Int32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Sequence failed! 2");
+        }
+        
+        ms.Int32Member.RemoveAt(0);
+        if (!ms.Int32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Sequence failed! 3");
+        }
+
+        ms.Int32Member.RemoveAt(0);
+        if (ms.Int32Member.HasVal())
+        {
+            Console.WriteLine("HasValue Sequence failed! 4");
+        }
+
+        // Dictionary
+        DotsTest.MemberDictionaries md = new DotsTest.MemberDictionaries();
+        if (md.Int32StringMember.HasVal())
+        {
+            Console.WriteLine("HasValue Dictionary failed! 1");
+        }
+
+        md.Int32StringMember.Add(10, "Hello");
+        md.Int32StringMember.Add(20, "World");
+
+        if (!md.Int32StringMember.HasVal())
+        {
+            Console.WriteLine("HasValue Dictionary failed! 2");
+        }
+        
+        md.Int32StringMember.Remove(10);
+        if (!md.Int32StringMember.HasVal())
+        {
+            Console.WriteLine("HasValue Dictionary failed! 3");
+        }
+
+        md.Int32StringMember.Remove(20);
+        if (md.Int32StringMember.HasVal())
+        {
+            Console.WriteLine("HasValue Dictionary failed! 4");
+        }
 
     }
 

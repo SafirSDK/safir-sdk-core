@@ -91,6 +91,14 @@ public abstract class ValueContainer<T> extends ContainerBase {
     }
 
     /**
+     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#hasVal()
+     */
+    @Override
+    public boolean hasVal() {
+        return !m_isNull;
+    }
+
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ContainerBase#setNull()
      */
     @Override

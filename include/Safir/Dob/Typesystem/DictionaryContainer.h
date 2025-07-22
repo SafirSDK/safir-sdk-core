@@ -203,6 +203,8 @@ namespace Typesystem
 
         bool IsNull() const override {return empty();}
 
+        bool HasVal() const override {return !empty();}
+
         void SetNull() override
         {
             clear();

@@ -62,6 +62,7 @@ namespace Typesystem
         operator const ContainedType() const {return m_container.GetVal();}
 
         bool IsNull() const {return m_container.IsNull();}
+        bool HasVal() const {return m_container.HasVal();}
         void SetNull() {m_container.SetNull();}
         bool IsChanged() const {return m_container.IsChanged();}
         void SetChanged(const bool changed) {m_container.SetChanged(changed);}
@@ -181,6 +182,7 @@ namespace Typesystem
         operator const ContainedType& () const {return m_container.GetVal();}
 
         bool IsNull() const {return m_container.IsNull();}
+        bool HasVal() const {return m_container.HasVal();}
         void SetNull() {m_container.SetNull();}
         bool IsChanged() const {return m_container.IsChanged();}
         void SetChanged(const bool changed) {m_container.SetChanged(changed);}
@@ -248,6 +250,7 @@ namespace Typesystem
         operator const ContainedType& () const {return m_container.GetVal();}
 
         bool IsNull() const {return m_container.IsNull();}
+        bool HasVal() const {return m_container.HasVal();}
         void SetNull() {m_container.SetNull();}
         bool IsChanged() const {return m_container.IsChanged();}
         void SetChanged(const bool changed) {m_container.SetChanged(changed);}
@@ -308,6 +311,7 @@ namespace Typesystem
         { return m_container.operator->(); }
 
         bool IsNull() const {return m_container.IsNull();}
+        bool HasVal() const {return m_container.HasVal();}
         void SetNull() {m_container.SetNull();}
         bool IsChanged() const {return m_container.IsChanged();}
         void SetChanged(const bool changed) {m_container.SetChanged(changed);}
@@ -357,6 +361,7 @@ namespace Typesystem
         { return m_container.operator->(); }
 
         bool IsNull() const {return m_container.IsNull();}
+        bool HasVal() const {return m_container.HasVal();}
         void SetNull() {m_container.SetNull();}
         bool IsChanged() const {return m_container.IsChanged();}
         void SetChanged(const bool changed) {m_container.SetChanged(changed);}

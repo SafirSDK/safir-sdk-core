@@ -54,6 +54,12 @@ namespace Safir.Dob.Typesystem
         abstract public bool IsNull();
 
         /// <summary>
+        /// Does the container have a value? The opposite to IsNull.
+        /// </summary>
+        /// <returns>True if the container has a value, i.e is not set to null.</returns>
+        abstract public bool HasVal();
+
+        /// <summary>
         /// Set the container to null.
         /// </summary>
         abstract public void SetNull();

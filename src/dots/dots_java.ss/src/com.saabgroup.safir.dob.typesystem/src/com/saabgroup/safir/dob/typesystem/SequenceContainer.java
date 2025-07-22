@@ -50,6 +50,11 @@ implements java.util.List<T>{
     }
 
     @Override
+    public boolean hasVal() {
+        return !isEmpty();
+    }
+
+    @Override
     public void setNull() {
         clear();
     }

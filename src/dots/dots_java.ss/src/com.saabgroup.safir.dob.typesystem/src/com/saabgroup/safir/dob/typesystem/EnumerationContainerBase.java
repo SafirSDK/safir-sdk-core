@@ -78,6 +78,14 @@ public abstract class EnumerationContainerBase<E extends Enum<E>>
     }
 
     /**
+     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#hasVal()
+     */
+    @Override
+    public boolean hasVal() {
+        return !m_bIsNull;
+    }
+
+    /**
      * Get the ordinal value of the enumeration container.
      *
      * @return The ordinal value of the container.

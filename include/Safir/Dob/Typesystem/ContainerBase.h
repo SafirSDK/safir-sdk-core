@@ -68,6 +68,13 @@ namespace Typesystem
         virtual bool IsNull() const = 0;
 
         /**
+         * Does the container have a value? The opposite to IsNull.
+         *
+         * @return True if the container has a value, False if the container is set to null.
+         */
+        virtual bool HasVal() const = 0;
+
+        /**
          * Set the container to null.
          */
         virtual void SetNull() = 0;
