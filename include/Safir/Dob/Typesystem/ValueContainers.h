@@ -86,6 +86,14 @@ namespace Typesystem
          */
         T GetVal() const    {if (m_bIsNull) throw NullException(L"value is null",__WFILE__,__LINE__); return m_Value;}
 
+        /**
+         * Get the value of the container if the container has a value. If the container is null, the the supplied default value is returned.
+         *
+         * @param defaultVal [in] - Default value that is returned if the container is null.
+         * @return The value of the container or the defaultValue if container is null.
+         */
+        const T GetValOrDefault(const T& defaultVal) const {return m_bIsNull ? defaultVal : m_Value;}
+
         //implementation of pure virtual in ContainerBase.
         bool IsNull() const override {return m_bIsNull;}
 
@@ -154,6 +162,14 @@ namespace Typesystem
          * @throws NullException The container is null.
          */
         const std::wstring & GetVal() const    {if (m_bIsNull) throw NullException(L"value is null",__WFILE__,__LINE__); return m_Value;}
+
+        /**
+         * Get the value of the container if the container has a value. If the container is null, the the supplied default value is returned.
+         *
+         * @param defaultVal [in] - Default value that is returned if the container is null.
+         * @return The value of the container or the defaultValue if container is null.
+         */
+        const std::wstring GetValOrDefault(const std::wstring& defaultVal = L"") const {if (m_bIsNull) return defaultVal; return m_Value;}
 
         bool IsNull() const override {return m_bIsNull;}
 

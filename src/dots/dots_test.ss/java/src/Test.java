@@ -48,8 +48,6 @@ public class Test {
         test_GetNumberOfMembers();
         test_GetNumberOfParameters();
         test_Create_Routines();
-        test_hasVal();
-
 
         test_Int32();
         test_Int64();
@@ -122,6 +120,8 @@ public class Test {
         misc_tests.test_Containers();
         misc_tests.Test_BlobChangeFlags();
         misc_tests.Test_Misc();
+        misc_tests.test_hasVal();
+        misc_tests.test_getValOrDefault();
         
         MergeChangesTests merge_tests = new MergeChangesTests();
         merge_tests.Test_MergeChanges();
@@ -369,373 +369,6 @@ public class Test {
 
     private static String toStringNoUnderscore(MemberType val) {
         return val.toString().replace("_", "");
-    }
-
-    private static void test_hasVal() {
-
-        com.saabgroup.dotstest.MemberTypes mt = new com.saabgroup.dotstest.MemberTypes();
-
-        //Int32
-        if (mt.int32Member().hasVal())
-        {
-            System.out.println("HasValue Int32 failed! 1");
-        }
-
-        mt.int32Member().setVal(123);
-        if (!mt.int32Member().hasVal())
-        {
-            System.out.println("HasValue Int32 failed! 2");
-        }
-
-        mt.int32Member().setNull();
-        if (mt.int32Member().hasVal())
-        {
-            System.out.println("HasValue Int32 failed! 3");
-        }
-
-        //Int64
-        if (mt.int64Member().hasVal())
-        {
-            System.out.println("HasValue Int64 failed! 1");
-        }
-
-        mt.int64Member().setVal((long) 123);
-        if (!mt.int64Member().hasVal())
-        {
-            System.out.println("HasValue Int64 failed! 2");
-        }
-
-        mt.int64Member().setNull();
-        if (mt.int64Member().hasVal())
-        {
-            System.out.println("HasValue Int64 failed! 3");
-        }
-
-        //Float32
-        if (mt.float32Member().hasVal())
-        {
-            System.out.println("HasValue Float32 failed! 1");
-        }
-
-        mt.float32Member().setVal(123.0f);
-        if (!mt.float32Member().hasVal())
-        {
-            System.out.println("HasValue Float32 failed! 2");
-        }
-
-        mt.float32Member().setNull();
-        if (mt.float32Member().hasVal())
-        {
-            System.out.println("HasValue Float32 failed! 3");
-        }
-
-        //Float64
-        if (mt.float64Member().hasVal())
-        {
-            System.out.println("HasValue Float64 failed! 1");
-        }
-    
-        mt.float64Member().setVal(123.0);
-        if (!mt.float64Member().hasVal())
-        {
-            System.out.println("HasValue Float64 failed! 2");
-        }
-    
-        mt.float64Member().setNull();
-        if (mt.float64Member().hasVal())
-        {
-            System.out.println("HasValue Float64 failed! 3");
-        }
-
-        //Boolean
-        if (mt.booleanMember().hasVal())
-        {
-            System.out.println("HasValue Boolean failed! 1");
-        }
-
-        mt.booleanMember().setVal(false);
-        if (!mt.booleanMember().hasVal())
-        {
-            System.out.println("HasValue Boolean failed! 2");
-        }
-
-        mt.booleanMember().setNull();
-        if (mt.booleanMember().hasVal())
-        {
-            System.out.println("HasValue Boolean failed! 3");
-        }
-
-        //Enumeration
-        if (mt.enumerationMember().hasVal())
-        {
-            System.out.println("HasValue Enumeration failed! 1");
-        }
-
-        mt.enumerationMember().setVal(com.saabgroup.dotstest.TestEnum.MY_SECOND);
-        if (!mt.enumerationMember().hasVal())
-        {
-            System.out.println("HasValue Enumeration failed! 2");
-        }
-
-        mt.enumerationMember().setNull();
-        if (mt.enumerationMember().hasVal())
-        {
-            System.out.println("HasValue Enumeration failed! 3");
-        }
-
-        //String
-        if (mt.stringMember().hasVal())
-        {
-            System.out.println("HasValue String failed! 1");
-        }
-
-        mt.stringMember().setVal("Test");
-        if (!mt.stringMember().hasVal())
-        {
-            System.out.println("HasValue String failed! 2");
-        }
-
-        mt.stringMember().setNull();
-        if (mt.stringMember().hasVal())
-        {
-            System.out.println("HasValue String failed! 3");
-        }
-
-        //EntityId
-        if (mt.entityIdMember().hasVal())
-        {
-            System.out.println("HasValue EntityId failed! 1");
-        }
-
-        mt.entityIdMember().setVal(new com.saabgroup.safir.dob.typesystem.EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new com.saabgroup.safir.dob.typesystem.InstanceId(3)));
-        if (!mt.entityIdMember().hasVal())
-        {
-            System.out.println("HasValue EntityId failed! 2");
-        }
-
-        mt.entityIdMember().setNull();
-        if (mt.entityIdMember().hasVal())
-        {
-            System.out.println("HasValue EntityId failed! 3");
-        }
-
-        //InstanceId
-        if (mt.instanceIdMember().hasVal())
-        {
-            System.out.println("HasValue InstanceId failed! 1");
-        }
-
-        mt.instanceIdMember().setVal(new com.saabgroup.safir.dob.typesystem.InstanceId(3));
-        if (!mt.instanceIdMember().hasVal())
-        {
-            System.out.println("HasValue InstanceId failed! 2");
-        }
-
-        mt.instanceIdMember().setNull();
-        if (mt.instanceIdMember().hasVal())
-        {
-            System.out.println("HasValue InstanceId failed! 3");
-        }
-
-        //ChannelId
-        if (mt.channelIdMember().hasVal())
-        {
-            System.out.println("HasValue ChannelId failed! 1");
-        }
-
-        mt.channelIdMember().setVal(new com.saabgroup.safir.dob.typesystem.ChannelId(3));
-        if (!mt.channelIdMember().hasVal())
-        {
-            System.out.println("HasValue ChannelId failed! 2");
-        }
-
-        mt.channelIdMember().setNull();
-        if (mt.channelIdMember().hasVal())
-        {
-            System.out.println("HasValue ChannelId failed! 3");
-        }
-
-
-        //HandlerId
-        if (mt.handlerIdMember().hasVal())
-        {
-            System.out.println("HasValue HandlerId failed! 1");
-        }
-
-        mt.handlerIdMember().setVal(new com.saabgroup.safir.dob.typesystem.HandlerId(3));
-        if (!mt.handlerIdMember().hasVal())
-        {
-            System.out.println("HasValue HandlerId failed! 2");
-        }
-
-        mt.handlerIdMember().setNull();
-        if (mt.handlerIdMember().hasVal())
-        {
-            System.out.println("HasValue HandlerId failed! 3");
-        }
-
-        //TypeId
-        if (mt.typeIdMember().hasVal())
-        {
-            System.out.println("HasValue TypeId failed! 1");
-        }
-
-        mt.typeIdMember().setVal((long)123);
-        if (!mt.typeIdMember().hasVal())
-        {
-            System.out.println("HasValue TypeId failed! 2");
-        }
-
-        mt.typeIdMember().setNull();
-        if (mt.typeIdMember().hasVal())
-        {
-            System.out.println("HasValue TypeId failed! 3");
-        }
-
-        //Binary
-        if (mt.binaryMember().hasVal())
-        {
-            System.out.println("HasValue Binary failed! 1");
-        }
-
-        mt.binaryMember().setVal(new byte[10]);
-        if (!mt.binaryMember().hasVal())
-        {
-            System.out.println("HasValue Binary failed! 2");
-        }
-
-        mt.binaryMember().setNull();
-        if (mt.binaryMember().hasVal())
-        {
-            System.out.println("HasValue Binary failed! 3");
-        }
-
-        //Object
-        if (mt.objectMember().hasVal())
-        {
-            System.out.println("HasValue Object failed! 1");
-        }
-
-        mt.objectMember().setObj(new com.saabgroup.safir.dob.Entity());
-        if (!mt.objectMember().hasVal())
-        {
-            System.out.println("HasValue Object failed! 2");
-        }
-
-        mt.objectMember().setNull();
-        if (mt.objectMember().hasVal())
-        {
-            System.out.println("HasValue Object failed! 3");
-        }
-
-        //TestClass
-        if (mt.testClassMember().hasVal())
-        {
-            System.out.println("HasValue TestClass failed! 1");
-        }
-
-        mt.testClassMember().setObj(new com.saabgroup.dotstest.TestItem());
-        if (!mt.testClassMember().hasVal())
-        {
-            System.out.println("HasValue TestClass failed! 2");
-        }
-
-        mt.testClassMember().setNull();
-        if (mt.testClassMember().hasVal())
-        {
-            System.out.println("HasValue TestClass failed! 3");
-        }
-
-        //Radian32
-        if (mt.radian32Member().hasVal())
-        {
-            System.out.println("HasValue Radian32 failed! 1");
-        }
-
-        mt.radian32Member().setVal(123.0f);
-        if (!mt.radian32Member().hasVal())
-        {
-            System.out.println("HasValue Radian32 failed! 2");
-        }
-
-        mt.radian32Member().setNull();
-        if (mt.radian32Member().hasVal())
-        {
-            System.out.println("HasValue Radian32 failed! 3");
-        }
-
-        //Radian64
-        if (mt.radian64Member().hasVal())
-        {
-            System.out.println("HasValue Radian64 failed! 1");
-        }
-
-        mt.radian64Member().setVal(123.0);
-        if (!mt.radian64Member().hasVal())
-        {
-            System.out.println("HasValue Radian64 failed! 2");
-        }
-
-        mt.radian64Member().setNull();
-        if (mt.radian64Member().hasVal())
-        {
-            System.out.println("HasValue Radian64 failed! 3");
-        }
-
-        // Sequence
-        MemberSequences ms = new MemberSequences();
-        if (ms.int32Member().hasVal())
-        {
-            System.out.println("HasValue Sequence failed! 1");
-        }
-
-        ms.int32Member().add(10);
-        ms.int32Member().add(20);
-
-        if (!ms.int32Member().hasVal())
-        {
-            System.out.println("HasValue Sequence failed! 2");
-        }
-        
-        ms.int32Member().remove(0);
-        if (!ms.int32Member().hasVal())
-        {
-            System.out.println("HasValue Sequence failed! 3");
-        }
-
-        ms.int32Member().remove(0);
-        if (ms.int32Member().hasVal())
-        {
-            System.out.println("HasValue Sequence failed! 4");
-        }
-
-        // Dictionary
-        MemberDictionaries md = new MemberDictionaries();
-        if (md.int32StringMember().hasVal())
-        {
-            System.out.println("HasValue Dictionary failed! 1");
-        }
-
-        md.int32StringMember().putVal(10, "Hello");
-        md.int32StringMember().putVal(20, "World");
-
-        if (!md.int32StringMember().hasVal())
-        {
-            System.out.println("HasValue Dictionary failed! 2");
-        }
-
-        md.int32StringMember().remove(10);
-        if (!md.int32StringMember().hasVal())
-        {
-            System.out.println("HasValue Dictionary failed! 3");
-        }
-
-        md.int32StringMember().remove(20);
-        if (md.int32StringMember().hasVal())
-        {
-            System.out.println("HasValue Dictionary failed! 4");
-        }
-
     }
 
     private static void test_Int32() {
@@ -8865,6 +8498,258 @@ public class Test {
                 ++failures;
                 System.out.println("Testcase " + tests + " (" + description + ") failed!");
             }
+        }
+
+        public void test_hasVal() {
+
+            com.saabgroup.dotstest.MemberTypes mt = new com.saabgroup.dotstest.MemberTypes();
+
+            //Int32
+            check(!mt.int32Member().hasVal());
+            
+            mt.int32Member().setVal(123);
+            check(mt.int32Member().hasVal());
+
+            mt.int32Member().setNull();
+            check(!mt.int32Member().hasVal());
+            
+
+            //Int64
+            check(!mt.int64Member().hasVal());
+            
+            mt.int64Member().setVal((long) 123);
+            check(mt.int64Member().hasVal());
+            
+            mt.int64Member().setNull();
+            check(!mt.int64Member().hasVal());
+            
+            //Float32
+            check(!mt.float32Member().hasVal());
+            
+            mt.float32Member().setVal(123.0f);
+            check(mt.float32Member().hasVal());
+            
+            mt.float32Member().setNull();
+            check(!mt.float32Member().hasVal());
+            
+            //Float64
+            check(!mt.float64Member().hasVal());
+            
+            mt.float64Member().setVal(123.0);
+            check(mt.float64Member().hasVal());
+            
+            mt.float64Member().setNull();
+            check(!mt.float64Member().hasVal());
+            
+            //Boolean
+            check(!mt.booleanMember().hasVal());
+            
+            mt.booleanMember().setVal(false);
+            check(mt.booleanMember().hasVal());
+            
+            mt.booleanMember().setNull();
+            check(!mt.booleanMember().hasVal());
+            
+            //Enumeration
+            check(!mt.enumerationMember().hasVal());
+            
+            mt.enumerationMember().setVal(com.saabgroup.dotstest.TestEnum.MY_SECOND);
+            check(mt.enumerationMember().hasVal());
+            
+            mt.enumerationMember().setNull();
+            check(!mt.enumerationMember().hasVal());
+            
+            //String
+            check(!mt.stringMember().hasVal());
+            
+            mt.stringMember().setVal("Test");
+            check(mt.stringMember().hasVal());
+            
+            mt.stringMember().setNull();
+            check(!mt.stringMember().hasVal());
+            
+            //EntityId
+            check(!mt.entityIdMember().hasVal());
+            
+            mt.entityIdMember().setVal(new com.saabgroup.safir.dob.typesystem.EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new com.saabgroup.safir.dob.typesystem.InstanceId(3)));
+            check(mt.entityIdMember().hasVal());
+            
+            mt.entityIdMember().setNull();
+            check(!mt.entityIdMember().hasVal());
+            
+            //InstanceId
+            check(!mt.instanceIdMember().hasVal());
+            
+            mt.instanceIdMember().setVal(new com.saabgroup.safir.dob.typesystem.InstanceId(3));
+            check(mt.instanceIdMember().hasVal());
+            
+            mt.instanceIdMember().setNull();
+            check(!mt.instanceIdMember().hasVal());
+            
+            //ChannelId
+            check(!mt.channelIdMember().hasVal());
+            
+            mt.channelIdMember().setVal(new com.saabgroup.safir.dob.typesystem.ChannelId(3));
+            check(mt.channelIdMember().hasVal());
+            
+            mt.channelIdMember().setNull();
+            check(!mt.channelIdMember().hasVal());
+
+            //HandlerId
+            check(!mt.handlerIdMember().hasVal());
+            
+            mt.handlerIdMember().setVal(new com.saabgroup.safir.dob.typesystem.HandlerId(3));
+            check(mt.handlerIdMember().hasVal());
+            
+            mt.handlerIdMember().setNull();
+            check(!mt.handlerIdMember().hasVal());
+            
+            //TypeId
+            check(!mt.typeIdMember().hasVal());
+            
+            mt.typeIdMember().setVal((long)123);
+            check(mt.typeIdMember().hasVal());
+            
+            mt.typeIdMember().setNull();
+            check(!mt.typeIdMember().hasVal());
+            
+            //Binary
+            check(!mt.binaryMember().hasVal());
+            
+            mt.binaryMember().setVal(new byte[10]);
+            check(mt.binaryMember().hasVal());
+            
+            mt.binaryMember().setNull();
+            check(!mt.binaryMember().hasVal());
+            
+            //Object
+            check(!mt.objectMember().hasVal());
+            
+            mt.objectMember().setObj(new com.saabgroup.safir.dob.Entity());
+            check(mt.objectMember().hasVal());
+            
+            mt.objectMember().setNull();
+            check(!mt.objectMember().hasVal());
+            
+            //TestClass
+            check(!mt.testClassMember().hasVal());
+            
+            mt.testClassMember().setObj(new com.saabgroup.dotstest.TestItem());
+            check(mt.testClassMember().hasVal());
+            
+            mt.testClassMember().setNull();
+            check(!mt.testClassMember().hasVal());
+            
+            //Radian32
+            check(!mt.radian32Member().hasVal());
+            
+            mt.radian32Member().setVal(123.0f);
+            check(mt.radian32Member().hasVal());
+            
+            mt.radian32Member().setNull();
+            check(!mt.radian32Member().hasVal());
+            
+            //Radian64
+            check(!mt.radian64Member().hasVal());
+            
+            mt.radian64Member().setVal(123.0);
+            check(mt.radian64Member().hasVal());
+            
+            mt.radian64Member().setNull();
+            check(!mt.radian64Member().hasVal());
+            
+            // Sequence
+            MemberSequences ms = new MemberSequences();
+            check(!ms.int32Member().hasVal());
+            
+            ms.int32Member().add(10);
+            ms.int32Member().add(20);
+
+            check(ms.int32Member().hasVal());
+            
+            ms.int32Member().remove(0);
+            check(ms.int32Member().hasVal());
+            
+            ms.int32Member().remove(0);
+            check(!ms.int32Member().hasVal());
+            
+            // Dictionary
+            MemberDictionaries md = new MemberDictionaries();
+            check(!md.int32StringMember().hasVal());
+            
+            md.int32StringMember().putVal(10, "Hello");
+            md.int32StringMember().putVal(20, "World");
+
+            check(md.int32StringMember().hasVal());
+            
+            md.int32StringMember().remove(10);
+            check(md.int32StringMember().hasVal());
+            
+            md.int32StringMember().remove(20);
+            check(!md.int32StringMember().hasVal());
+            
+        }
+
+        public void test_getValOrDefault() {
+            com.saabgroup.dotstest.MemberTypes mt = new com.saabgroup.dotstest.MemberTypes();
+
+            check(mt.int32Member().getValOrDefault(10) == 10);
+            check(mt.int64Member().getValOrDefault(20L) == 20L);
+            check(mt.float32Member().getValOrDefault(1.123f) - 1.123f < 0.1f);
+            check(mt.float64Member().getValOrDefault(2.123) - 2.123 < 0.1);
+            check(mt.booleanMember().getValOrDefault(true) == true);
+            check(mt.booleanMember().getValOrDefault(false) == false);
+            check(mt.stringMember().getValOrDefault("Test") == "Test");
+            check(mt.enumerationMember().getValOrDefault(TestEnum.MY_SECOND) == TestEnum.MY_SECOND);
+            check(mt.typeIdMember().getValOrDefault(300L) == 300L);
+            check(mt.entityIdMember().getValOrDefault(new EntityId(123, new InstanceId(1))).equals(new EntityId(123, new InstanceId(1))));
+            check(mt.entityIdMember().getValOrDefault(new EntityId()).equals(new EntityId()));            
+            check(mt.instanceIdMember().getValOrDefault(new InstanceId(123)).equals(new InstanceId(123)));
+            check(mt.channelIdMember().getValOrDefault(new ChannelId(123)).equals(new ChannelId(123)));
+            check(mt.handlerIdMember().getValOrDefault(new HandlerId(123)).equals(new HandlerId(123)));
+            check(mt.ampere32Member().getValOrDefault(1.123f) - 1.123f < 0.1f);
+            check(mt.ampere64Member().getValOrDefault(2.123) - 2.123 < 0.1);
+            check(mt.objectMember().getObjOrNull() == null);
+            check(mt.testClassMember().getObjOrNull() == null);
+            
+            mt.int32Member().setVal(100);
+            mt.int64Member().setVal(200L);
+            mt.float32Member().setVal(100.123f);
+            mt.float64Member().setVal(200.123);
+            mt.booleanMember().setVal(true);
+            mt.stringMember().setVal("Hello");
+            mt.enumerationMember().setVal(TestEnum.MY_THIRD);
+            mt.typeIdMember().setVal(12345L);
+            mt.entityIdMember().setVal(new EntityId(12345, new InstanceId(123)));
+            mt.instanceIdMember().setVal(new InstanceId(111));
+            mt.channelIdMember().setVal(new ChannelId(222));
+            mt.handlerIdMember().setVal(new HandlerId(333));
+            mt.ampere32Member().setVal(100.123f);
+            mt.ampere64Member().setVal(200.123);
+
+            var obj = new com.saabgroup.safir.dob.typesystem.Object();
+            mt.objectMember().setObj(obj);
+
+            var testItem = new com.saabgroup.dotstest.TestItem();
+            mt.testClassMember().setObj(testItem);
+
+            check(mt.int32Member().getValOrDefault(10) == 100);
+            check(mt.int64Member().getValOrDefault(20L) == 200L);
+            check(mt.float32Member().getValOrDefault(1.123f) - 100.123f < 0.1f);
+            check(mt.float64Member().getValOrDefault(2.123) - 200.123 < 0.1);
+            check(mt.booleanMember().getValOrDefault(false) == true);
+            check(mt.stringMember().getValOrDefault("Test") == "Hello");
+            check(mt.enumerationMember().getValOrDefault(TestEnum.MY_SECOND) == TestEnum.MY_THIRD);
+            check(mt.typeIdMember().getValOrDefault(300L) == 12345L);
+            check(mt.entityIdMember().getValOrDefault(new EntityId(11, new InstanceId(22))).equals(new EntityId(12345, new InstanceId(123))));
+            check(mt.instanceIdMember().getValOrDefault(new InstanceId(123)).equals(new InstanceId(111)));
+            check(mt.channelIdMember().getValOrDefault(new ChannelId(123)).equals(new ChannelId(222)));
+            check(mt.handlerIdMember().getValOrDefault(new HandlerId(123)).equals(new HandlerId(333)));
+            check(mt.ampere32Member().getValOrDefault(1.123f) - 100.123f < 0.1f);
+            check(mt.ampere64Member().getValOrDefault(2.123) - 200.123 < 0.1);
+            check(mt.objectMember().getObjOrNull() == obj);
+            check(mt.testClassMember().getObjOrNull() == testItem);
+
         }
 
         public void test_Containers() {

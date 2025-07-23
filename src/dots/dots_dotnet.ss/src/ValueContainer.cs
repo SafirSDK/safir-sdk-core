@@ -52,8 +52,6 @@ namespace Safir.Dob.Typesystem
             m_bIsNull = true;
         }
 
-
-
         /// <summary>
         /// The value of the container.
         /// Null and change flags are updated accordingly.
@@ -62,6 +60,14 @@ namespace Safir.Dob.Typesystem
         {
             get { if (m_bIsNull) throw new NullException("Value is null"); return m_Value; }
             set { m_Value = value; m_bIsNull = false; m_bIsChanged = true; }
+        }
+
+        /// <summary>
+        /// Get the value of the container if container has a value, if container is null the supplied default val is returned.
+        /// </summary>
+        public T GetValOrDefault(T defaultVal)
+        {
+            return m_bIsNull ? defaultVal : m_Value;
         }
 
         /// <summary>

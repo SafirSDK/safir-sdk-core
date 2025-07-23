@@ -72,6 +72,8 @@ namespace Typesystem
 
         const ContainedType GetVal() const {return m_container.GetVal();}
 
+        const ContainedType GetValOrDefault(const ContainedType& defaultVal) const {return m_container.GetValOrDefault(defaultVal);}
+
         void SetOrdinal(const EnumerationValue value){m_container.SetOrdinal(value);}
         EnumerationValue GetOrdinal() const {return m_container.GetOrdinal();}
 
@@ -191,6 +193,7 @@ namespace Typesystem
         void SetVal(const ContainedType& value)  {m_container.SetVal(value);}
 
         const ContainedType& GetVal() const {return m_container.GetVal();}
+        const ContainedType GetValOrDefault(const ContainedType& defaultVal) const {return m_container.GetValOrDefault(defaultVal);}
 
         Int32 Utf8StringLength() const {return m_container.Utf8StringLength();}
         const std::string & Utf8String() const {return m_container.Utf8String();}
@@ -259,6 +262,7 @@ namespace Typesystem
         void SetVal(const ContainedType& value)  {m_container.SetVal(value);}
 
         const ContainedType& GetVal() const {return m_container.GetVal();}
+
         void Copy (const ContainerProxy& that) {m_container.Copy(that.m_container);}
 
         bool operator== (const ContainedType& val) const
@@ -323,6 +327,8 @@ namespace Typesystem
         void SetPtr(const ObjectPtr& ptr)      {m_container.SetPtr(ptr);}
 
         const ContainedType& GetPtr() const {return m_container.GetPtr();}
+        const ContainedType GetPtrOrNull() const {return m_container.GetPtrOrNull();}
+
         void Copy (const ContainerProxy& that) {m_container.Copy(that.m_container);}
 
         const ObjectContainerImpl<U>& GetContainer() const {return m_container;}
@@ -372,6 +378,7 @@ namespace Typesystem
         void SetPtr(const ObjectPtr& ptr)      {m_container.SetPtr(ptr);}
 
         const ContainedType& GetPtr() const {return m_container.GetPtr();}
+        const ContainedType GetPtrOrNull() const {return m_container.GetPtrOrNull();}
 
         void Copy (const ContainerProxy& that) {m_container.Copy(that.m_container);}
 

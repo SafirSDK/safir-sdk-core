@@ -90,6 +90,22 @@ public class ObjectContainerImpl<T extends com.saabgroup.safir.dob.typesystem.Ob
     }
 
     /**
+     * Get the smart pointer from the container or a nullptr if container is null.
+     *
+     * This method will return the contained smart pointer unless the container is null, then
+     * a nullptr is returned.
+     *
+     * @return A smart pointer to the contained object.
+    */
+    public T getObjOrNull() {
+        if (isNull())
+            return null;
+        return m_object;
+    }
+
+    
+
+    /**
      * @see com.saabgroup.safir.dob.typesystem.ContainerBase#isChanged()
      */
     @Override

@@ -59,6 +59,7 @@
 
 #define BOOST_TEST_MODULE DotsTestCpp
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 
 
 #ifdef _MSC_VER
@@ -12514,3 +12515,77 @@ BOOST_AUTO_TEST_CASE(Base64Conversion3)
     BOOST_CHECK_EQUAL(back,binv);
     BOOST_CHECK_EQUAL(backv,binv);
 }
+
+BOOST_AUTO_TEST_CASE(GetValOrDefault_return_default)
+{
+    MemberTypesPtr mt = MemberTypes::Create();
+    BOOST_CHECK_EQUAL(mt->Int32Member().GetValOrDefault(10), 10);
+    BOOST_CHECK_EQUAL(mt->Int64Member().GetValOrDefault(20), 20);
+    BOOST_CHECK_SMALL(mt->Float32Member().GetValOrDefault(1.123f) - 1.123f, 0.1f);
+    BOOST_CHECK_SMALL(mt->Float64Member().GetValOrDefault(2.123) - 2.123, 0.1);
+    BOOST_CHECK_EQUAL(mt->BooleanMember().GetValOrDefault(true), true);
+    BOOST_CHECK_EQUAL(mt->BooleanMember().GetValOrDefault(false),false);
+    BOOST_CHECK_EQUAL(mt->StringMember().GetValOrDefault(L"Test"), L"Test");
+    BOOST_CHECK_EQUAL(mt->EnumerationMember().GetValOrDefault(DotsTest::TestEnum::MySecond), DotsTest::TestEnum::MySecond);
+    BOOST_CHECK_EQUAL(mt->TypeIdMember().GetValOrDefault(300), 300);
+    BOOST_CHECK(mt->EntityIdMember().GetValOrDefault({123, {L"inst"}}) == Safir::Dob::Typesystem::EntityId(123, {L"inst"}));
+    BOOST_CHECK(mt->EntityIdMember().GetValOrDefault({}) == Safir::Dob::Typesystem::EntityId());
+    BOOST_CHECK(mt->InstanceIdMember().GetValOrDefault(Safir::Dob::Typesystem::InstanceId(123)) == Safir::Dob::Typesystem::InstanceId(123));
+    BOOST_CHECK(mt->InstanceIdMember().GetValOrDefault({}) == Safir::Dob::Typesystem::InstanceId());
+    BOOST_CHECK(mt->ChannelIdMember().GetValOrDefault(Safir::Dob::Typesystem::ChannelId(123)) == Safir::Dob::Typesystem::ChannelId(123));
+    BOOST_CHECK(mt->ChannelIdMember().GetValOrDefault({}) == Safir::Dob::Typesystem::ChannelId());
+    BOOST_CHECK(mt->HandlerIdMember().GetValOrDefault(Safir::Dob::Typesystem::HandlerId(123)) == Safir::Dob::Typesystem::HandlerId(123));
+    BOOST_CHECK(mt->HandlerIdMember().GetValOrDefault({}) == Safir::Dob::Typesystem::HandlerId());
+    BOOST_CHECK_SMALL(mt->Ampere32Member().GetValOrDefault(1.123f) - 1.123f, 0.1f);
+    BOOST_CHECK_SMALL(mt->Ampere64Member().GetValOrDefault(2.123) - 2.123, 0.1);
+    BOOST_CHECK(mt->ObjectMember().GetPtrOrNull() == nullptr);
+    BOOST_CHECK(mt->TestClassMember().GetPtrOrNull() == nullptr);
+}
+
+BOOST_AUTO_TEST_CASE(GetValOrDefault_return_val)
+{
+    MemberTypesPtr mt = MemberTypes::Create();
+    mt->Int32Member() = 100;
+    mt->Int64Member() = 200;
+    mt->Float32Member() = 100.123f;
+    mt->Float64Member() = 200.123;
+    mt->BooleanMember() = true;
+    mt->StringMember() = L"Hello";
+    mt->EnumerationMember() = DotsTest::TestEnum::MyThird;
+    mt->TypeIdMember() = 12345;
+    mt->EntityIdMember() = EntityId(12345, InstanceId(123));
+    mt->InstanceIdMember() = InstanceId(111);
+    mt->ChannelIdMember() = ChannelId(222);
+    mt->HandlerIdMember() = HandlerId(333);
+    mt->Ampere32Member() = 100.123f;
+    mt->Ampere64Member() = 200.123;
+
+    auto obj = Safir::Dob::Typesystem::Object::Create();
+    mt->ObjectMember().SetPtr(obj);
+
+    auto testItem = DotsTest::TestItem::Create();
+    testItem->MyString() = L"TestItem";
+    mt->TestClassMember().SetPtr(testItem);
+
+    BOOST_CHECK_EQUAL(mt->Int32Member().GetValOrDefault(10), 100);
+    BOOST_CHECK_EQUAL(mt->Int64Member().GetValOrDefault(20), 200);
+    BOOST_CHECK_SMALL(mt->Float32Member().GetValOrDefault(1.123f) - 100.123f, 0.1f);
+    BOOST_CHECK_SMALL(mt->Float64Member().GetValOrDefault(2.123) - 200.123, 0.1);
+    BOOST_CHECK_EQUAL(mt->BooleanMember().GetValOrDefault(false), true);
+    BOOST_CHECK_EQUAL(mt->StringMember().GetValOrDefault(L"Test"), L"Hello");
+    BOOST_CHECK_EQUAL(mt->EnumerationMember().GetValOrDefault(DotsTest::TestEnum::MySecond), DotsTest::TestEnum::MyThird);
+    BOOST_CHECK_EQUAL(mt->TypeIdMember().GetValOrDefault(300), 12345);
+    BOOST_CHECK(mt->EntityIdMember().GetValOrDefault({123, {L"inst"}}) == EntityId(12345, InstanceId(123)));
+    BOOST_CHECK(mt->InstanceIdMember().GetValOrDefault(Safir::Dob::Typesystem::InstanceId(123)) == InstanceId(111));
+    BOOST_CHECK(mt->ChannelIdMember().GetValOrDefault(Safir::Dob::Typesystem::ChannelId(123)) == ChannelId(222));
+    BOOST_CHECK(mt->HandlerIdMember().GetValOrDefault(Safir::Dob::Typesystem::HandlerId(123)) == HandlerId(333));
+    BOOST_CHECK_SMALL(mt->Ampere32Member().GetValOrDefault(1.123f) - 100.123f, 0.1f);
+    BOOST_CHECK_SMALL(mt->Ampere64Member().GetValOrDefault(2.123) - 200.123, 0.1);
+    BOOST_CHECK(mt->ObjectMember().GetPtrOrNull() == obj);
+    BOOST_CHECK(mt->TestClassMember().GetPtrOrNull() == testItem);
+}
+
+// Test_Enumeration();
+// Test_Object();
+// Test_Binary();
+// Test_TestClass();

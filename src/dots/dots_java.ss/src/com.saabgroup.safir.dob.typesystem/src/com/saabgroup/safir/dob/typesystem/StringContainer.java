@@ -63,6 +63,18 @@ public class StringContainer extends ContainerBase {
     }
 
     /**
+     * Get the value of the container if the container has a value. If the container is null, the the supplied default value is returned.
+     *
+     * @param defaultVal [in] - Default value that is returned if the container is null.
+     * @return The value of the container or the defaultValue if container is null.
+     */
+    public String getValOrDefault(String defaultVal) {
+        if (m_isNull)
+            return defaultVal;
+        return m_value;
+    }
+
+    /**
      * Set the value of the container.
      *
      * Null and change flags are updated accordingly.

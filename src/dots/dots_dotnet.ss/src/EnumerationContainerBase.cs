@@ -173,5 +173,7 @@ namespace Safir.Dob.Typesystem
             get;
             set;
         }
+
+        abstract public EnumT GetValOrDefault(EnumT defaultVal);
     }
 }

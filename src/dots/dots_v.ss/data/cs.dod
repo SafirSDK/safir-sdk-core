@@ -1611,6 +1611,14 @@ namespace @_NAMESPACE_@
             }
 
             /// <summary>
+            /// Get the value of the container if container has a value, if container is null the supplied default val is returned.
+            /// </summary>
+            public override Enumeration GetValOrDefault(Enumeration defaultVal)
+            {
+                return IsNull() ? defaultVal : Val;
+            }
+
+            /// <summary>
             /// Equality operator.
             /// </summary>
             public static bool operator ==(EnumerationContainer first, Enumeration second)

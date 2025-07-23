@@ -131,6 +131,14 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
+        /// Get the value of the container if container has a value, if container is null the supplied default val is returned.
+        /// </summary>
+        public T GetObjOrNull()
+        {
+            return IsNull() ? null : m_Object;
+        }
+
+        /// <summary>
         /// Override of inherited method. See comment for parent class.
         /// </summary>
         /// <returns></returns>

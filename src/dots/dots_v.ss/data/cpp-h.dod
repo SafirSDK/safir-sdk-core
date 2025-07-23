@@ -748,6 +748,13 @@ namespace @_NAMESPACEV_@
                 return static_cast<Enumeration>(GetOrdinal());
             }
 
+            //Will get the value if container is not null, else the supplied default value is returned.
+            Enumeration GetValOrDefault(const Enumeration defaultVal) const
+            {
+                CheckForMismatch();
+                return IsNull() ? defaultVal : static_cast<Enumeration>(GetOrdinal());
+            }
+
             //compare an enumerationcontainer with a value, will return false if the container is null or the values are not equal
             bool operator==(const Enumeration other) const
             {CheckForMismatch(); return !IsNull() && m_Value == other;}

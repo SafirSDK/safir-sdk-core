@@ -58,6 +58,14 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
+        /// Get the value of the container if container has a value, if container is null the supplied default val is returned.
+        /// </summary>
+        public string GetValOrDefault(string defaultVal)
+        {
+            return m_bIsNull ? defaultVal : m_Value;
+        }
+
+        /// <summary>
         /// Is the container set to null?
         /// </summary>
         /// <returns>True if the container is set to null.</returns>

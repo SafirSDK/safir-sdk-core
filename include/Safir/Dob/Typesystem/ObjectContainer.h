@@ -283,6 +283,17 @@ namespace Typesystem
         const T_Ptr & GetPtr() const
         {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject;}
 
+
+        /**
+         * Get the smart pointer from the container or a nullptr if container is null.
+         *
+         * This method will return the contained smart pointer unless the container is null, then
+         * a nullptr is returned.
+         *
+         * @return A smart pointer to the contained object.
+        */
+        const T_Ptr GetPtrOrNull() const {return IsNull() ? T_Ptr() : m_pObject;}
+
         /**
          * Dereference the smart pointer in the container.
          *
@@ -454,6 +465,16 @@ namespace Typesystem
             }
             return m_pObject;
         }
+
+        /**
+         * Get the smart pointer from the container or a nullptr if container is null.
+         *
+         * This method will return the contained smart pointer unless the container is null, then
+         * a nullptr is returned.
+         *
+         * @return A smart pointer to the contained object.
+        */
+        const T_Ptr GetPtrOrNull() const {return IsNull() ? T_Ptr() : m_pObject;}
 
         /**
          * Dereference the smart pointer in the container.

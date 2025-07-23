@@ -134,6 +134,14 @@ public abstract class EnumerationContainerBase<E extends Enum<E>>
     abstract public E getVal();
 
     /**
+     * Get the value of the container if the container has a value. If the container is null, the the supplied default value is returned.
+     *
+     * @param defaultVal [in] - Default value that is returned if the container is null.
+     * @return The value of the container or the defaultValue if container is null.
+     */
+    abstract public E getValOrDefault(E defaultVal);
+
+    /**
      * Set the value of the container.
      *
      * Null and change flags are updated accordingly.

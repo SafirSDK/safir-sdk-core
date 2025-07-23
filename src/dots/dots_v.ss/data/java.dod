@@ -1611,6 +1611,13 @@ public enum @_CLASS_@
        public @_CLASS_@ getVal() {
            return @_UNIT_@.values()[getOrdinal()];
        }
+
+       @Override
+       public @_CLASS_@ getValOrDefault(@_CLASS_@ defaultVal) {
+            if (isNull())
+                return defaultVal;
+            return getVal();
+        }
     }
 
     /**
