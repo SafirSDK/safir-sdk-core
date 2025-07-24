@@ -21,6 +21,7 @@ set(sources
     typesystemwidget.cpp
     dobobjecteditwidget.cpp
     dobobjectmodel.cpp
+    dobobjecteditcontextmenuhandler.cpp
     typesysteminheritancemodel.cpp
     typesystemnamespacemodel.cpp
     typesystemrepository.cpp
@@ -57,6 +58,7 @@ set(widget_headers
     typesystemwidget.h
     dobobjecteditwidget.h
     dobobjectmodel.h
+    dobobjecteditcontextmenuhandler.h
     typesysteminheritancemodel.h
     typesystemnamespacemodel.h
     typesystemcontextmenuhandler.h

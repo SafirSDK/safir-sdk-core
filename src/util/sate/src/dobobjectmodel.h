@@ -60,6 +60,7 @@ public:
     const MemberTreeItem* InvisibleRoot() const;
     void LiveUpdateModel(const Safir::Dob::Typesystem::ObjectPtr& obj);
     void DisableLiveUpdate() { m_liveUpdate = false; }
+    void SetAllChangeFlags(bool changed, const QModelIndex &parent = QModelIndex());
 
 
 signals:

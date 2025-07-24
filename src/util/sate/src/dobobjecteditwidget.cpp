@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "dobobjecteditwidget.h"
+#include "qmessagebox.h"
 #include "ui_dobobjecteditwidget.h"
 #include "dobobjectmodel.h"
 #include "dobobjectdelegate.h"
@@ -34,6 +35,7 @@
 #include <QScrollBar>
 #include <QSortFilterProxyModel>
 #include <QDebug>
+#include <QMessageBox>
 #include <Safir/Dob/Typesystem/Serialization.h>
 
 struct ExpandedRow
@@ -281,6 +283,10 @@ void DobObjectEditWidget::Init()
         auto parent = proxyModel->mapFromSource(srcParent);
         ui->objectEditTreeView->expand(parent);
     });
+
+    // Setup context menu
+    m_contextMenuHandler = new DobObjectEditContextMenuHandler(ui->objectEditTreeView);
+    connect(m_contextMenuHandler, &DobObjectEditContextMenuHandler::SetAllChangeFlags, this, [this](bool changed){ m_sourceModel->SetAllChangeFlags(changed);});
 
     // Setup operation buttons
     auto dobBaseClass = TypesystemRepository::Instance().GetClass(m_typeId)->dobBaseClass;

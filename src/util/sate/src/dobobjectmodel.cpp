@@ -59,6 +59,17 @@ void DobObjectModel::LiveUpdateModel(const Safir::Dob::Typesystem::ObjectPtr& ob
     endResetModel();
 }
 
+void DobObjectModel::SetAllChangeFlags(bool changed, const QModelIndex &parent)
+{
+    auto rows = rowCount(parent);
+    for (int i = 0; i < rows; ++i)
+    {
+        auto ix = index(i, 3, parent);
+        setData(ix, QVariant{changed});
+        SetAllChangeFlags(changed, ix);
+    }
+}
+
 const MemberTreeItem* DobObjectModel::InvisibleRoot() const
 {
     return m_invisibleRootItem.get();
@@ -339,7 +350,7 @@ bool DobObjectModel::setData(const QModelIndex &index, const QVariant &value, in
     {
         auto childCount = item->NumberOfChildMembers();
 
-        // --- Handle delete iems, clear container or delete single item in a container. ---
+        // --- Handle delete items, clear container or delete single item in a container. ---
         if (role == MemberTreeItem::DeleteItemRole)
         {
             // If the item is a container root, clear all children.

@@ -26,6 +26,7 @@
 #include <QWidget>
 #include <Safir/Dob/Typesystem/Object.h>
 #include "dobhandler.h"
+#include "dobobjecteditcontextmenuhandler.h"
 
 class DobObjectModel;
 
@@ -55,6 +56,7 @@ private:
     DobHandler* m_dob;
     int64_t m_typeId;
     DobObjectModel* m_sourceModel = nullptr;
+    DobObjectEditContextMenuHandler* m_contextMenuHandler = nullptr;
 
     void Init();
     void EditValue(const QModelIndex& index);
