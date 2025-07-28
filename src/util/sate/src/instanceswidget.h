@@ -74,6 +74,7 @@ private slots:
     void OnCustomContextMenuRequestedHeader(const QPoint& pos);
     void OnCustomContextMenuRequestedTable(const QPoint& pos);
     void RunColumnContextMenu(const QPoint& globalPos, const int logicalIndex);
+    void RunEntityContextMenu();
     void PositionFilters();
 private:
     //common constructor

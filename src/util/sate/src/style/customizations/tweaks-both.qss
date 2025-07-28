@@ -33,5 +33,5 @@ Make the tool buttons in the output widget have no background when unchecked.
 Makes it easier to see what state is what.
 */
 OutputWidget > QToolButton {
-  background-color: none;
+    background-color: none;
 }

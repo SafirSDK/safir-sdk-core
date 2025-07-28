@@ -36,6 +36,7 @@
 #include <QSortFilterProxyModel>
 #include <QDebug>
 #include <QMessageBox>
+#include <QClipboard>
 #include <Safir/Dob/Typesystem/Serialization.h>
 
 struct ExpandedRow
@@ -308,8 +309,26 @@ void DobObjectEditWidget::Init()
         });
     }
 
+
+    ui->operationsWidget->nameLabel->setText(TypesystemRepository::Instance().GetClass(m_typeId)->name);
     ui->operationsWidget->typeIdLabel->setText(QString::number(m_typeId));
     ui->operationsWidget->SetConfiguration(dobBaseClass);
+
+    connect(ui->operationsWidget->copyNameBtn, &QToolButton::clicked, this, [this]
+    {
+        qApp->clipboard()->setText(ui->operationsWidget->nameLabel->text());
+    });
+    connect(ui->operationsWidget->copyTypeIdBtn, &QToolButton::clicked, this, [this]
+    {
+        qApp->clipboard()->setText(ui->operationsWidget->typeIdLabel->text());
+    });
+    connect(ui->operationsWidget->copyEntityIdBtn, &QToolButton::clicked, this, [this]
+    {
+        auto nameStr = ui->operationsWidget->nameLabel->text();
+        auto instanceStr = QString::number(ui->operationsWidget->Instance().GetRawValue());
+        qApp->clipboard()->setText(QString("%1 : %2").arg(nameStr, instanceStr));
+    });
+
     connect(ui->operationsWidget->setChangesBtn, &QPushButton::clicked, this, [this]
     {
         auto obj = BuildObject();

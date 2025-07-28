@@ -83,6 +83,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         instanceLabel->setVisible(false);
         instanceEdit->setVisible(false);
         liveUpdateCheckBox->setVisible(false);
+        copyEntityIdBtn->setVisible(false);
     }
     break;
 
@@ -102,6 +103,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         instanceLabel->setVisible(false);
         instanceEdit->setVisible(false);
         liveUpdateCheckBox->setVisible(false);
+        copyEntityIdBtn->setVisible(false);
     }
     break;
 
@@ -120,6 +122,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         instanceLabel->setVisible(false);
         instanceEdit->setVisible(false);
         liveUpdateCheckBox->setVisible(false);
+        copyEntityIdBtn->setVisible(false);
     }
     break;
 
@@ -141,6 +144,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         instanceLabel->setVisible(false);
         instanceEdit->setVisible(false);
         liveUpdateCheckBox->setVisible(false);
+        copyEntityIdBtn->setVisible(false);
     }
     break;
     }

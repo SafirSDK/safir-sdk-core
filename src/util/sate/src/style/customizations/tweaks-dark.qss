@@ -11,3 +11,19 @@ QFrame#StatusBarSeparator {
     border: 0px;
     width:1px;
 }
+
+/*
+Copy to clipboard buttons in OperationsWidget, no frame.
+*/
+OperationsWidget > QToolButton {
+    border: none;
+    background: none;
+    qproperty-icon: url(:/img/icons/copy-white.svg);
+}
+
+OperationsWidget > QToolButton > QToolTip {
+    background-color: #346792;
+    color: #DFE1E2;
+    border: none;
+    padding: 0px;
+}

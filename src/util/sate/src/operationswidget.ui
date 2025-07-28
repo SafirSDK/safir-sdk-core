@@ -6,14 +6,91 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>131</width>
-    <height>636</height>
+    <width>164</width>
+    <height>643</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="nameLabel">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Type name</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">margin: 2px;</string>
+       </property>
+       <property name="text">
+        <string>Safir.Dob.Object</string>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="copyNameBtn">
+       <property name="toolTip">
+        <string>Copy type name to clipboard.</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="typeIdLabel">
+       <property name="toolTip">
+        <string>Type id</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size: 12px;
+margin: 2px;</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="text">
+        <string>12345</string>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="copyTypeIdBtn">
+       <property name="toolTip">
+        <string>Copy type id to clipboard.</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QPushButton" name="setChangesBtn">
      <property name="text">
@@ -89,7 +166,7 @@
    <item>
     <widget class="QLabel" name="instanceLabel">
      <property name="styleSheet">
-      <string notr="true">margin-top: 10px;</string>
+      <string notr="true">margin-top: 8px;</string>
      </property>
      <property name="text">
       <string>Instance Id</string>
@@ -98,6 +175,16 @@
    </item>
    <item>
     <widget class="QLineEdit" name="instanceEdit"/>
+   </item>
+   <item>
+    <widget class="QToolButton" name="copyEntityIdBtn">
+     <property name="text">
+      <string>Copy entity id</string>
+     </property>
+     <property name="toolButtonStyle">
+      <enum>Qt::ToolButtonTextBesideIcon</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="liveUpdateCheckBox">
@@ -121,35 +208,6 @@
       </size>
      </property>
     </spacer>
-   </item>
-   <item>
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>TypeId:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="typeIdLabel">
-     <property name="styleSheet">
-      <string notr="true">font-size: 12px;
- margin-bottom:15px;</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="text">
-      <string>12345</string>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="QPushButton" name="toXmlBtn">

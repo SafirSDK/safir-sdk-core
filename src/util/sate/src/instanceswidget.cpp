@@ -36,6 +36,7 @@
 #include <QVBoxLayout>
 #include <QApplication>
 #include <QWidgetAction>
+#include <QClipboard>
 #include "entityinstancesmodel.h"
 #include "messageinstancesmodel.h"
 #include "typesystemrepository.h"
@@ -370,6 +371,33 @@ void InstancesWidget::OnCustomContextMenuRequestedTable(const QPoint& pos)
     {
         const auto globalPos = m_table->mapToGlobal(pos);
         RunColumnContextMenu(globalPos, -1);
+    }
+    else if (m_sourceModelEntities != nullptr)
+    {
+        RunEntityContextMenu();
+    }
+}
+
+void InstancesWidget::RunEntityContextMenu()
+{
+    auto ix = m_table->currentIndex();
+    if (ix.isValid())
+    {
+        QMenu menu(this);
+        auto* copyEntityId = new QAction(tr("Copy entity id to clipboard"));
+        connect(copyEntityId, &QAction::triggered, this, [this, ix]
+        {
+            const auto sourceIndex = m_proxyModel->mapToSource(ix);
+            if (sourceIndex.isValid())
+            {
+                auto info = m_sourceModelEntities->getRow(sourceIndex.row());
+                auto typeName = TypesystemRepository::Instance().GetClass(info.entityId.GetTypeId())->name;
+                auto instanceId = QString::number(info.entityId.GetInstanceId().GetRawValue());
+                qApp->clipboard()->setText(QString("%1 : %2").arg(typeName, instanceId));
+            }
+        });
+        menu.addAction(copyEntityId);
+        menu.exec(m_table->cursor().pos());
     }
 }
 
