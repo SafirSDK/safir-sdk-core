@@ -390,9 +390,15 @@ void TypesystemWidget::ApplyFilter(const QString& filterText)
     }
     else
     {
-
         m_inheritanceProxyModel->SetFilter("");
         m_namespaceProxyModel->SetFilter("");
+
+        // if a node was selected when filter was cleared, make sure to keep the selected node visible
+        auto ix = ui->treeView->currentIndex();
+        if (ix.isValid())
+        {
+            ui->treeView->scrollTo(ix);
+        }
     }
 }
 
@@ -405,6 +411,7 @@ void TypesystemWidget::LocateType(int64_t typeId)
         ui->filterLineEdit->clear();
         ui->treeView->collapseAll();
         ExpandTo(ix.constFirst());
+        ui->treeView->scrollTo(ix.constFirst()); // scroll to the located node
     }
 }
 
