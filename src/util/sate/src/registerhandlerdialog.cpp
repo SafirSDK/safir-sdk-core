@@ -45,8 +45,8 @@ void RegisterHandlerDialog::Show(int64_t typeId, bool allFieldsVisible)
 {
     m_typeId = typeId;
     ui->nameLabel->setText(QString::fromStdWString(Safir::Dob::Typesystem::Operations::GetName(typeId)));
-    ui->requestorRb->setChecked(false);
-    ui->handlerRb->setChecked(true);
+    ui->requestorRb->setChecked(true);
+    ui->handlerRb->setChecked(false);
     ui->pendingCb->setChecked(false);
     ui->injectionCb->setChecked(false);
     ui->handlerIdEdit->setText("DEFAULT_HANDLER");

@@ -279,7 +279,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "serviceRequest", "params": {"service": {"_DouType": "Test.MyService", "SomeValue": 100}}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "serviceRequest", "params": {"request": {"_DouType": "Test.MyService", "SomeValue": 100}}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": {"isSuccess": true, "response": {"_DouType": "Safir.Dob.SuccessResponse"}}, "id": 123}
 ----------------------------
 

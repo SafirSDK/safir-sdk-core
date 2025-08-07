@@ -50,6 +50,7 @@ set(sources
     enummodel.cpp
     typeaheadwidget.cpp
     utilities.cpp
+    dobcalltojson.cpp
     sate.rc
   )
 
@@ -91,6 +92,7 @@ set(headers
     dobobjectbuilder.h
     instancesmodelutils.h
     utilities.h
+    dobcalltojson.h
 )
 
 if (NOT TARGET Qt::Widgets)

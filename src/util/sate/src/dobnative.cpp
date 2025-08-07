@@ -42,6 +42,7 @@ namespace
     QString Str(const sdt::HandlerId& v) { return QString(", handler=%1").arg(Str(v.ToString())); }
     QString Str(const sdt::ChannelId& v) { return QString(", channel=%1").arg(Str(v.ToString())); }
     QString Str(const sdt::InstanceId& v) { return QString(", instance=%1").arg(Str(v.ToString())); }
+    QString Str(const Safir::Dob::InstanceIdPolicy::Enumeration v) { return QString(", %1").arg(Str(Safir::Dob::InstanceIdPolicy::ToString(v))); }
     QString Str(const sdt::EntityId& v) { return Str(v.ToString()); }
 }
 
@@ -206,17 +207,17 @@ void DobNative::RegisterEntityHandler(int64_t typeId, const Safir::Dob::Typesyst
         if (injection)
         {
             m_dobConnection.RegisterEntityHandlerInjection(typeId, handler, instanceIdPolicy, this);
-            emit DobInterface::Output("Register injection entity handler: " + Str(typeId) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Register injection entity handler: " + Str(typeId) + Str(handler) + Str(instanceIdPolicy), QtInfoMsg);
         }
         else if (pending)
         {
             m_dobConnection.RegisterEntityHandlerPending(typeId, handler, instanceIdPolicy, this);
-            emit DobInterface::Output("Register pending entity handler: " + Str(typeId) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Register pending entity handler: " + Str(typeId) + Str(handler) + Str(instanceIdPolicy), QtInfoMsg);
         }
         else
         {
             m_dobConnection.RegisterEntityHandler(typeId, handler, instanceIdPolicy, this);
-            emit DobInterface::Output("Register entity handler: " + Str(typeId) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Register entity handler: " + Str(typeId) + Str(handler) + Str(instanceIdPolicy), QtInfoMsg);
         }
 
         DobInterface::RegistrationInfo info{typeId, handler, pending, injection, instanceIdPolicy};
