@@ -42,6 +42,7 @@
 #include "typesystemrepository.h"
 #include "utilities.h"
 #include <map>
+#include <Safir/Dob/QueueParameters.h>
 
 class ColumnSortFilterProxyModel
     : public QSortFilterProxyModel
@@ -84,8 +85,9 @@ private:
     std::map<int, QRegularExpression> m_filters;
 };
 
-InstancesWidget::InstancesWidget(QWidget* parent)
+InstancesWidget::InstancesWidget(DobHandler* dob, QWidget* parent)
     : QWidget(parent)
+    , m_dob(dob)
     , m_table(new QTableView(this))
     , m_filterArea(new QFrame())
     , m_filterAreaLayout(new QHBoxLayout(m_filterArea))
@@ -149,7 +151,7 @@ InstancesWidget::InstancesWidget(DobHandler* dob,
                                  int64_t typeId,
                                  bool includeSubclasses,
                                  QWidget* parent)
-    : InstancesWidget(parent)
+    : InstancesWidget(dob, parent)
 {
     const auto* cls = TypesystemRepository::Instance().GetClass(typeId);
     if (cls != nullptr && cls->dobBaseClass == TypesystemRepository::Entity)
@@ -178,7 +180,7 @@ InstancesWidget::InstancesWidget(DobHandler* dob,
                                  const Safir::Dob::Typesystem::ChannelId& channel,
                                  bool includeSubclasses,
                                  QWidget* parent)
-    : InstancesWidget(parent)
+    : InstancesWidget(dob, parent)
 {
     const auto* cls = TypesystemRepository::Instance().GetClass(typeId);
     if (cls != nullptr && cls->dobBaseClass == TypesystemRepository::Message)
@@ -381,23 +383,70 @@ void InstancesWidget::OnCustomContextMenuRequestedTable(const QPoint& pos)
 void InstancesWidget::RunEntityContextMenu()
 {
     auto ix = m_table->currentIndex();
+
     if (ix.isValid())
     {
+        auto selection = m_table->selectionModel()->hasSelection() ? m_table->selectionModel()->selectedRows() : QModelIndexList();
+
         QMenu menu(this);
-        auto* copyEntityId = new QAction(tr("Copy entity id to clipboard"));
-        connect(copyEntityId, &QAction::triggered, this, [this, ix]
+
+        if (selection.size() < 2)
         {
-            const auto sourceIndex = m_proxyModel->mapToSource(ix);
-            if (sourceIndex.isValid())
-            {
-                auto info = m_sourceModelEntities->getRow(sourceIndex.row());
-                auto typeName = TypesystemRepository::Instance().GetClass(info.entityId.GetTypeId())->name;
-                auto instanceId = QString::number(info.entityId.GetInstanceId().GetRawValue());
-                qApp->clipboard()->setText(QString("%1 : %2").arg(typeName, instanceId));
-            }
-        });
-        menu.addAction(copyEntityId);
+            auto* copyEntityId = new QAction(tr("Copy entity id to clipboard"));
+            connect(copyEntityId, &QAction::triggered, this, [this, ix]
+                    {
+                        const auto sourceIndex = m_proxyModel->mapToSource(ix);
+                        if (sourceIndex.isValid())
+                        {
+                            auto info = m_sourceModelEntities->getRow(sourceIndex.row());
+                            auto typeName = TypesystemRepository::Instance().GetClass(info.entityId.GetTypeId())->name;
+                            auto instanceId = QString::number(info.entityId.GetInstanceId().GetRawValue());
+                            qApp->clipboard()->setText(QString("%1 : %2").arg(typeName, instanceId));
+                        }
+                    });
+            menu.addAction(copyEntityId);
+        }
+
+        if (!selection.empty())
+        {
+            auto* sendDeleteReq = new QAction(QString("Send delete request for %1 entities").arg(QString::number(selection.size())));
+            menu.addAction(sendDeleteReq);
+            connect(sendDeleteReq, &QAction::triggered, this, [this]
+                    {
+                        auto selection = m_table->selectionModel()->selectedRows();
+                        auto entityIds = std::make_shared<std::deque<Safir::Dob::Typesystem::EntityId>>();
+                        for (const auto index : selection)
+                        {
+                            auto info = m_sourceModelEntities->getRow(index.row());
+                            if (!info.deleted)
+                            {
+                                entityIds->push_back(info.entityId);
+                            }
+                        }
+                        SendDeleteRequests(entityIds);
+                        m_table->clearSelection(); // Clear selection to be able to see color changes in the table.
+                    });
+        }
+
         menu.exec(m_table->cursor().pos());
+    }
+}
+
+void InstancesWidget::SendDeleteRequests(std::shared_ptr<std::deque<Safir::Dob::Typesystem::EntityId>> entityIds)
+{
+    // We only send half the requestOutQueueSize in a batch. Then we start a timer an continue after a couple of millisecs.
+    // This is just a way to make it more likely that all requests are sent, but in no way any guarantee that we completely avoid Overflows.
+    auto batchSize = Safir::Dob::QueueParameters::QueueRules(0)->RequestOutQueueCapacity().GetValOrDefault(10) / 2;
+    auto sendCount = 0;
+    while (!entityIds->empty() && sendCount++ < batchSize)
+    {
+        m_dob->DeleteRequest(entityIds->front());
+        entityIds->pop_front();
+    }
+
+    if (!entityIds->empty())
+    {
+        QTimer::singleShot(100, [this, entityIds]{ SendDeleteRequests(entityIds); });
     }
 }
 

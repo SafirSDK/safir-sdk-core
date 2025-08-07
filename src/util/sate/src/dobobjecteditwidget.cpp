@@ -179,6 +179,7 @@ void DobObjectEditWidget::Init()
     ui->objectEditTreeView->setItemDelegateForColumn(1, new DobObjectDelegate());
     ui->objectEditTreeView->setItemDelegateForColumn(3, new CheckboxDelegate());
 
+    ui->objectEditTreeView->header()->setSectionsMovable(false);
     ui->objectEditTreeView->resizeColumnToContents(0);
     auto col0Width = ui->objectEditTreeView->columnWidth(0);
     ui->objectEditTreeView->setColumnWidth(0, col0Width > 200 ? col0Width : 200); // Min start width at least 200 to make it look better
@@ -309,9 +310,11 @@ void DobObjectEditWidget::Init()
         });
     }
 
-
-    ui->operationsWidget->nameLabel->setText(TypesystemRepository::Instance().GetClass(m_typeId)->name);
+    auto typeName = TypesystemRepository::Instance().GetClass(m_typeId)->name;
+    ui->operationsWidget->nameLabel->setText(typeName);
+    ui->operationsWidget->nameLabel->setToolTip(typeName);
     ui->operationsWidget->typeIdLabel->setText(QString::number(m_typeId));
+    ui->operationsWidget->typeIdLabel->setToolTip("Type id: " + QString::number(m_typeId));
     ui->operationsWidget->SetConfiguration(dobBaseClass);
 
     connect(ui->operationsWidget->copyNameBtn, &QToolButton::clicked, this, [this]
@@ -344,6 +347,10 @@ void DobObjectEditWidget::Init()
     connect(ui->operationsWidget->deleteBtn, &QPushButton::clicked, this, [this]
     {
         m_dob->Delete(sdt::EntityId(m_typeId, ui->operationsWidget->Instance()), ui->operationsWidget->Handler());
+    });
+    connect(ui->operationsWidget->deleteAllBtn, &QPushButton::clicked, this, [this]
+    {
+        m_dob->DeleteAll(m_typeId, ui->operationsWidget->Handler());
     });
     connect(ui->operationsWidget->createReqBtn, &QPushButton::clicked, this, [this]
     {

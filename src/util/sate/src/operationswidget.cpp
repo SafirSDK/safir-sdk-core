@@ -76,6 +76,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         setChangesBtn->setVisible(false);
         setAllBtn->setVisible(false);
         deleteBtn->setVisible(false);
+        deleteAllBtn->setVisible(false);
         createReqBtn->setVisible(false);
         updateReqBtn->setVisible(false);
         deleteReqBtn->setVisible(false);
@@ -96,6 +97,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         setChangesBtn->setVisible(false);
         setAllBtn->setVisible(false);
         deleteBtn->setVisible(false);
+        deleteAllBtn->setVisible(false);
         createReqBtn->setVisible(false);
         updateReqBtn->setVisible(false);
         deleteReqBtn->setVisible(false);
@@ -112,6 +114,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         setChangesBtn->setVisible(false);
         setAllBtn->setVisible(false);
         deleteBtn->setVisible(false);
+        deleteAllBtn->setVisible(false);
         createReqBtn->setVisible(false);
         updateReqBtn->setVisible(false);
         deleteReqBtn->setVisible(false);
@@ -134,6 +137,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         setChangesBtn->setVisible(false);
         setAllBtn->setVisible(false);
         deleteBtn->setVisible(false);
+        deleteAllBtn->setVisible(false);
         createReqBtn->setVisible(false);
         updateReqBtn->setVisible(false);
         deleteReqBtn->setVisible(false);

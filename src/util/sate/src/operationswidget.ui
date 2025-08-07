@@ -93,6 +93,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QPushButton" name="setChangesBtn">
+     <property name="toolTip">
+      <string>Set entity, but only members with the change flag set.</string>
+     </property>
      <property name="text">
       <string>Set changes</string>
      </property>
@@ -100,6 +103,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QPushButton" name="setAllBtn">
+     <property name="toolTip">
+      <string>Set object exactly as it looks in the editor no matter if change flags are set or not.</string>
+     </property>
      <property name="text">
       <string>Set all</string>
      </property>
@@ -107,13 +113,29 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QPushButton" name="deleteBtn">
+     <property name="toolTip">
+      <string>Delete this instance.</string>
+     </property>
      <property name="text">
       <string>Delete</string>
      </property>
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="deleteAllBtn">
+     <property name="toolTip">
+      <string>Delete all instances, not just this one.</string>
+     </property>
+     <property name="text">
+      <string>Delete all</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="createReqBtn">
+     <property name="toolTip">
+      <string>Send a create request.</string>
+     </property>
      <property name="text">
       <string>Create request</string>
      </property>
@@ -121,6 +143,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QPushButton" name="updateReqBtn">
+     <property name="toolTip">
+      <string>Send an update request.</string>
+     </property>
      <property name="text">
       <string>Update request</string>
      </property>
@@ -128,6 +153,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QPushButton" name="deleteReqBtn">
+     <property name="toolTip">
+      <string>Send a delete request.</string>
+     </property>
      <property name="text">
       <string>Delete request</string>
      </property>
@@ -135,6 +163,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QPushButton" name="sendMsgBtn">
+     <property name="toolTip">
+      <string>Send message.</string>
+     </property>
      <property name="text">
       <string>Send message</string>
      </property>
@@ -142,6 +173,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QPushButton" name="sendReqBtn">
+     <property name="toolTip">
+      <string>Send a service request.</string>
+     </property>
      <property name="text">
       <string>Send request</string>
      </property>
@@ -178,6 +212,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QToolButton" name="copyEntityIdBtn">
+     <property name="toolTip">
+      <string>Copy entity id to clipboard on the format that Sate accepts as input.</string>
+     </property>
      <property name="text">
       <string>Copy entity id</string>
      </property>
@@ -188,6 +225,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QCheckBox" name="liveUpdateCheckBox">
+     <property name="toolTip">
+      <string>Refresh editor with new data as soon as an update is received.</string>
+     </property>
      <property name="styleSheet">
       <string notr="true">margin-top: 10px;</string>
      </property>
@@ -211,6 +251,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QPushButton" name="toXmlBtn">
+     <property name="toolTip">
+      <string>Serialize object to XML.</string>
+     </property>
      <property name="text">
       <string>To XML</string>
      </property>
@@ -218,6 +261,9 @@ margin: 2px;</string>
    </item>
    <item>
     <widget class="QPushButton" name="toJsonBtn">
+     <property name="toolTip">
+      <string>Serialize object to Json.</string>
+     </property>
      <property name="text">
       <string>To Json</string>
      </property>

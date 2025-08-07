@@ -76,10 +76,13 @@ private slots:
     void RunColumnContextMenu(const QPoint& globalPos, const int logicalIndex);
     void RunEntityContextMenu();
     void PositionFilters();
+
 private:
     //common constructor
-    InstancesWidget(QWidget* parent);
+    InstancesWidget(DobHandler* dob, QWidget* parent);
+    void SendDeleteRequests(std::shared_ptr<std::deque<Safir::Dob::Typesystem::EntityId>> entityIds);
 
+    DobHandler* m_dob;
     QTableView* m_table;
     QWidget* m_filterArea;
     QHBoxLayout* m_filterAreaLayout;
