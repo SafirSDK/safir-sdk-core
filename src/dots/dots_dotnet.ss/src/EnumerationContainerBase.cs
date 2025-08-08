@@ -174,6 +174,9 @@ namespace Safir.Dob.Typesystem
             set;
         }
 
+        /// <summary>
+        /// Get the value of the container if container has a value, if container is null the supplied default val is returned.
+        /// </summary>
         abstract public EnumT GetValOrDefault(EnumT defaultVal);
     }
 }
