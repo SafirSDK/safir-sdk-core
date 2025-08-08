@@ -45,7 +45,7 @@ class DotsTestDotnet
         Test_GetName();
         Test_GetNumberOfMembers();
         Test_GetNumberOfParameters();
-        Test_Create_Routines();        
+        Test_Create_Routines();
         Test_Int32();
         Test_Int64();
         Test_Float32();
@@ -9883,7 +9883,7 @@ namespace Misc
                 Check(seq.EnumerationMember.Count == 0);
             }
         }
-        
+
         public void Test_ObjectSequenceReflection()
         {
             var seq = new MemberSequences();
@@ -10013,7 +10013,7 @@ namespace Misc
 
                 var testItem = new TestItem();
                 testItem.MyInt.Val = 30;
-                testItem.MyString.Val = "Three";                
+                testItem.MyString.Val = "Three";
                 objCont.InternalObj = testItem;
 
                 var container = new ObjectDictionaryContainer<global::System.Int64, DotsTest.TestItemContainer, DotsTest.TestItem>();
@@ -10038,7 +10038,7 @@ namespace Misc
                 objCont.InternalObj = testItem;
 
                 var container = new ObjectDictionaryContainer<DotsTest.TestEnum.Enumeration, DotsTest.TestItemContainer, DotsTest.TestItem>();
-                
+
                 container.Copy(b);
                 Check(container.Count == 1);
 
@@ -10057,11 +10057,11 @@ namespace Misc
                 var testItem = new TestItem();
                 testItem.MyInt.Val = 30;
                 testItem.MyString.Val = "Three";
-                
+
                 var md = new MemberDictionaries();
                 md.Int64ItemMember.Add(1, testItem);
                 objCont.InternalObj = md;
-                
+
                 var container = new Safir.Dob.Typesystem.ObjectDictionaryContainer<string, DotsTest.MemberDictionariesContainer, DotsTest.MemberDictionaries>();
 
                 container.Copy(b);
@@ -10086,7 +10086,7 @@ namespace Misc
                 var md = new MemberDictionaries();
                 md.Int64ItemMember.Add(1, testItem);
                 objCont.InternalObj = md;
-                
+
                 var container = new Safir.Dob.Typesystem.ObjectDictionaryContainer<Safir.Dob.Typesystem.InstanceId, DotsTest.MemberDictionariesContainer, DotsTest.MemberDictionaries>();
 
                 container.Copy(b);
@@ -10112,7 +10112,7 @@ namespace Misc
                 var md = new MemberDictionaries();
                 md.Int64ItemMember.Add(1, testItem);
                 objCont.InternalObj = md;
-                
+
                 var container = new Safir.Dob.Typesystem.ObjectDictionaryContainer<Safir.Dob.Typesystem.EntityId, DotsTest.MemberDictionariesContainer, DotsTest.MemberDictionaries>();
 
                 container.Copy(b);
@@ -10310,188 +10310,189 @@ namespace Misc
 
             //Int32
             Check(!mt.Int32Member.HasVal());
-            
+
             mt.Int32Member.Val = 123;
             Check(mt.Int32Member.HasVal());
-            
+
             mt.Int32Member.SetNull();
             Check(!mt.Int32Member.HasVal());
-            
+
             //Int64
             Check(!mt.Int64Member.HasVal());
-            
+
             mt.Int64Member.Val = 123;
             Check(mt.Int64Member.HasVal());
-            
+
             mt.Int64Member.SetNull();
             Check(!mt.Int64Member.HasVal());
-            
+
             //Float32
             Check(!mt.Float32Member.HasVal());
-            
+
             mt.Float32Member.Val = 123.0f;
             Check(mt.Float32Member.HasVal());
-            
+
             mt.Float32Member.SetNull();
             Check(!mt.Float32Member.HasVal());
-            
+
             //Float64
             Check(!mt.Float64Member.HasVal());
-            
+
             mt.Float64Member.Val = 123.0;
             Check(mt.Float64Member.HasVal());
-            
+
             mt.Float64Member.SetNull();
             Check(!mt.Float64Member.HasVal());
-            
+
             //Boolean
             Check(!mt.BooleanMember.HasVal());
-            
+
             mt.BooleanMember.Val = false;
             Check(mt.BooleanMember.HasVal());
-            
+
             mt.BooleanMember.SetNull();
             Check(!mt.BooleanMember.HasVal());
-            
+
             //Enumeration
             Check(!mt.EnumerationMember.HasVal());
-            
+
             mt.EnumerationMember.Val = DotsTest.TestEnum.Enumeration.MySecond;
             Check(mt.EnumerationMember.HasVal());
-            
+
             mt.EnumerationMember.SetNull();
             Check(!mt.EnumerationMember.HasVal());
-            
+
             //String
             Check(!mt.StringMember.HasVal());
-            
+
             mt.StringMember.Val = "Test";
             Check(mt.StringMember.HasVal());
-            
+
             mt.StringMember.SetNull();
             Check(!mt.StringMember.HasVal());
-            
+
             //EntityId
             Check(!mt.EntityIdMember.HasVal());
-            
+
             mt.EntityIdMember.Val = new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId(3));
             Check(mt.EntityIdMember.HasVal());
-            
+
             mt.EntityIdMember.SetNull();
             Check(!mt.EntityIdMember.HasVal());
-            
+
             //InstanceId
             Check(!mt.InstanceIdMember.HasVal());
-            
+
             mt.InstanceIdMember.Val = new Safir.Dob.Typesystem.InstanceId(3);
             Check(mt.InstanceIdMember.HasVal());
-            
+
             mt.InstanceIdMember.SetNull();
             Check(!mt.InstanceIdMember.HasVal());
-            
+
             //ChannelId
             Check(!mt.ChannelIdMember.HasVal());
-            
+
             mt.ChannelIdMember.Val = new Safir.Dob.Typesystem.ChannelId(3);
             Check(mt.ChannelIdMember.HasVal());
-            
+
             mt.ChannelIdMember.SetNull();
             Check(!mt.ChannelIdMember.HasVal());
 
             //HandlerId
             Check(!mt.HandlerIdMember.HasVal());
-            
+
             mt.HandlerIdMember.Val = new Safir.Dob.Typesystem.HandlerId(3);
             Check(mt.HandlerIdMember.HasVal());
-            
+
             mt.HandlerIdMember.SetNull();
             Check(!mt.HandlerIdMember.HasVal());
-            
+
             //TypeId
             Check(!mt.TypeIdMember.HasVal());
-            
+
             mt.TypeIdMember.Val = 123;
             Check(mt.TypeIdMember.HasVal());
-            
+
             mt.TypeIdMember.SetNull();
             Check(!mt.TypeIdMember.HasVal());
-            
+
             //Binary
             Check(!mt.BinaryMember.HasVal());
-            
+
             mt.BinaryMember.Val = new byte[10];
             Check(mt.BinaryMember.HasVal());
-            
+
             mt.BinaryMember.SetNull();
             Check(!mt.BinaryMember.HasVal());
-            
+
             //Object
             Check(!mt.ObjectMember.HasVal());
-            
+
             mt.ObjectMember.Obj = new Safir.Dob.Entity();
             Check(mt.ObjectMember.HasVal());
-            
+
             mt.ObjectMember.SetNull();
             Check(!mt.ObjectMember.HasVal());
-            
+
             //TestClass
             Check(!mt.TestClassMember.HasVal());
-            
+
             mt.TestClassMember.Obj = new DotsTest.TestItem();
             Check(mt.TestClassMember.HasVal());
-            
+
             mt.TestClassMember.SetNull();
             Check(!mt.TestClassMember.HasVal());
-            
+
             //Radian32
             Check(!mt.Radian32Member.HasVal());
-            
+
             mt.Radian32Member.Val = 123.0f;
             Check(mt.Radian32Member.HasVal());
-            
+
             mt.Radian32Member.SetNull();
             Check(!mt.Radian32Member.HasVal());
-            
+
             //Radian64
             Check(!mt.Radian64Member.HasVal());
-            
+
             mt.Radian64Member.Val = 123.0;
             Check(mt.Radian64Member.HasVal());
-            
+
             mt.Radian64Member.SetNull();
             Check(!mt.Radian64Member.HasVal());
-            
+
             // Sequence
             DotsTest.MemberSequences ms = new DotsTest.MemberSequences();
             Check(!ms.Int32Member.HasVal());
-            
+
             ms.Int32Member.Add(10);
             ms.Int32Member.Add(20);
 
             Check(ms.Int32Member.HasVal());
-            
+
             ms.Int32Member.RemoveAt(0);
             Check(ms.Int32Member.HasVal());
-            
+
             ms.Int32Member.RemoveAt(0);
             Check(!ms.Int32Member.HasVal());
-            
+
             // Dictionary
             DotsTest.MemberDictionaries md = new DotsTest.MemberDictionaries();
             Check(!md.Int32StringMember.HasVal());
-            
+
             md.Int32StringMember.Add(10, "Hello");
             md.Int32StringMember.Add(20, "World");
 
             Check(md.Int32StringMember.HasVal());
-            
+
             md.Int32StringMember.Remove(10);
             Check(md.Int32StringMember.HasVal());
-            
+
             md.Int32StringMember.Remove(20);
             Check(!md.Int32StringMember.HasVal());
-            
+
         }
+
 
         public void Test_GetValOrDefault()
         {
@@ -10516,7 +10517,7 @@ namespace Misc
             Check(mt.ObjectMember.GetObjOrNull() == null);
             Check(mt.TestClassMember.GetObjOrNull() == null);
 
-            
+
             mt.Int32Member.Val = 100;
             mt.Int64Member.Val = 200;
             mt.Float32Member.Val = 100.123f;
