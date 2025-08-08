@@ -251,10 +251,10 @@ namespace Safir.Dob.Typesystem
 
             if (m_CachedUtf8String == null)
             {
-                m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_instanceIdStr);
+                m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_instanceIdStr + char.MinValue);
             }
 
-            return m_CachedUtf8String.Length + 1;
+            return m_CachedUtf8String.Length;
         }
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace Safir.Dob.Typesystem
         {
             if (m_CachedUtf8String == null)
             {
-                m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_instanceIdStr);
+                m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_instanceIdStr + char.MinValue);
             }
 
             return m_CachedUtf8String;

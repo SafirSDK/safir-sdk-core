@@ -23,6 +23,7 @@
 ******************************************************************************/
 
 using System;
+using System.Linq;
 
 /// <summary>
 /// Summary description for DotsTestDotnet.
@@ -116,6 +117,7 @@ class DotsTestDotnet
         misc.Test_BlobChangeFlags();
         misc.Test_HasValue();
         misc.Test_GetValOrDefault();
+        misc.Test_Utf8String();
 
         var merge = new Misc.MergeChangesTests();
         merge.Test_MergeChanges();
@@ -10493,7 +10495,6 @@ namespace Misc
 
         }
 
-
         public void Test_GetValOrDefault()
         {
             DotsTest.MemberTypes mt = new DotsTest.MemberTypes();
@@ -10555,6 +10556,27 @@ namespace Misc
             Check(mt.Ampere64Member.GetValOrDefault(2.123) - 200.123 < 0.1);
             Check(mt.ObjectMember.GetObjOrNull() == obj);
             Check(mt.TestClassMember.GetObjOrNull() == testItem);
+
+        }
+
+        public void Test_Utf8String()
+        {
+            var ch = new Safir.Dob.Typesystem.ChannelId("foobar");
+            Check(ch.Utf8StringLength() == 7);
+            Check(ch.Utf8String().SequenceEqual(new byte[]{102, 111, 111, 98, 97, 114, 0}));
+
+            var hdlr = new Safir.Dob.Typesystem.HandlerId("foobar");
+            Check(hdlr.Utf8StringLength() == 7);
+            Check(hdlr.Utf8String().SequenceEqual(new byte[]{102, 111, 111, 98, 97, 114, 0}));
+
+            var inst = new Safir.Dob.Typesystem.InstanceId("foobar");
+            Check(inst.Utf8StringLength() == 7);
+            Check(inst.Utf8String().SequenceEqual(new byte[]{102, 111, 111, 98, 97, 114, 0}));
+
+            var cont = new Safir.Dob.Typesystem.StringContainer();
+            cont.Val= "foobar";
+            Check(cont.Utf8StringLength() == 7);
+            Check(cont.Utf8String().SequenceEqual(new byte[]{102, 111, 111, 98, 97, 114, 0}));
 
         }
     }

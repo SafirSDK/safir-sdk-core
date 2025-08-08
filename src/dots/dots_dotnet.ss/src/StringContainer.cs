@@ -110,17 +110,12 @@ namespace Safir.Dob.Typesystem
                 return 0;
             }
 
-            if (m_Value.Length == 0)
-            {
-                return 1;
-            }
-
             if (m_CachedUtf8String == null)
             {
-                m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_Value);
+                m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_Value + char.MinValue);
             }
 
-            return m_CachedUtf8String.Length + 1;
+            return m_CachedUtf8String.Length;
         }
 
         /// <summary>
@@ -139,14 +134,7 @@ namespace Safir.Dob.Typesystem
 
             if (m_CachedUtf8String == null)
             {
-                if (m_Value.Length != 0)
-                {
-                    m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_Value);
-                }
-                else
-                {
-                    m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes("");
-                }
+                m_CachedUtf8String = System.Text.Encoding.UTF8.GetBytes(m_Value + char.MinValue);
             }
 
             return m_CachedUtf8String;
