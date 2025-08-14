@@ -81,6 +81,33 @@ if syslog_output.count("This is an informational log") != 3:
 
 if syslog_output.count("This is a debug log") != 3:
     fail("Debug log")
+    
+if syslog_output.count("No c++20 format support") == 3:
+    pass
+else:
+    if syslog_output.count("This is another emergency log. Parameters: 10 and bertil") != 3:
+        fail("Brynas ar bast")
+
+    if syslog_output.count("This is another alert log. Parameters: 10 and bertil") != 3:
+        fail("Alert log")
+
+    if syslog_output.count("This is another critical log. Parameters: 10 and bertil") != 3:
+        fail("Critical log")
+
+    if syslog_output.count("This is another error log. Parameters: 10 and bertil") != 3:
+        fail("Error log")
+
+    if syslog_output.count("This is another warning log. Parameters: 10 and bertil") != 3:
+        fail("Warning log")
+
+    if syslog_output.count("This is another notice log. Parameters: 10 and bertil") != 3:
+        fail("Notice log")
+
+    if syslog_output.count("This is another informational log. Parameters: 10 and bertil") != 3:
+        fail("Informational log")
+
+    if syslog_output.count("This is another debug log. Parameters: 10 and bertil") != 3:
+        fail("Debug log")
 
 if len(stdout_output) != 0:
     fail("Unexpected output on stdout")

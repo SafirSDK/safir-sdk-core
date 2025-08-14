@@ -26,17 +26,31 @@
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <cstdint>
 
-namespace Safir 
-{ 
+namespace Safir
+{
 namespace Logging
 {
 
     using Safir::Utilities::Internal::ToUtf8;
+    using Safir::Utilities::Internal::ToUtf16;
 
     void SendSystemLog(const Severity       severity,
                        const std::wstring&  message)
     {
         LoggingC_SendSystemLog(static_cast<std::int32_t>(severity), ToUtf8(message).c_str());
+    }
+
+    namespace Internal
+    {
+        LOGGING_CPP_API void LogFormattingException(const Severity severity, const std::wstring& fmt, const std::exception& e)
+        {
+            SendSystemLog(severity,
+                          L"Exception while formatting the log message '"
+                          + fmt
+                          + L": "
+                          + ToUtf16(e.what()));
+
+        }
     }
 }
 }

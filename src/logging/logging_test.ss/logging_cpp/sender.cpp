@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013, 2025 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén <anders.widen@consoden.se>
 *
@@ -41,6 +41,19 @@ int main()
         Safir::Logging::SendSystemLog(Safir::Logging::Notice, L"This is a notice log");
         Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"This is an informational log");
         Safir::Logging::SendSystemLog(Safir::Logging::Debug, L"This is a debug log");
+
+#if __cpp_lib_format
+        Safir::Logging::SendEmergency(L"This is another emergency log. Parameters: {} and {}", 10, L"bertil");
+        Safir::Logging::SendAlert(L"This is another alert log. Parameters: {} and {}", 10, L"bertil");
+        Safir::Logging::SendCritical(L"This is another critical log. Parameters: {} and {}", 10, L"bertil");
+        Safir::Logging::SendError(L"This is another error log. Parameters: {} and {}", 10, L"bertil");
+        Safir::Logging::SendWarning(L"This is another warning log. Parameters: {} and {}", 10, L"bertil");
+        Safir::Logging::SendNotice(L"This is another notice log. Parameters: {} and {}", 10, L"bertil");
+        Safir::Logging::SendInformational(L"This is another informational log. Parameters: {} and {}", 10, L"bertil");
+        Safir::Logging::SendDebug(L"This is another debug log. Parameters: {} and {}", 10, L"bertil");
+#else
+        Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"No c++20 format support");
+#endif
     }
     catch (const std::exception& e)
     {

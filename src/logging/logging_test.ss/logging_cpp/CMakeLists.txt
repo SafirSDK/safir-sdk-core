@@ -1,3 +1,7 @@
+if (NOT MSVC OR MSVC_VERSION GREATER_EQUAL 1930)
+  set(CMAKE_CXX_STANDARD 20)
+endif()
+
 add_executable(log_sender sender.cpp)
 
 target_link_libraries(log_sender PRIVATE logging_cpp)
