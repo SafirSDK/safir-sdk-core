@@ -1,2 +1,2 @@
-conan>=2.5
+conan>=2.19.1
 websockets

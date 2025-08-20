@@ -138,17 +138,19 @@ class SafirSdkCoreConan(ConanFile):
         if self.settings.os == "Windows":
             #VS2015 does not build boost 1.85 for some reason, so we use an older version for that.
             if self.settings.compiler.version == 190:
-               self.requires("boost/1.83.0")
+                self.requires("boost/1.83.0")
             else:
                 self.requires("boost/1.86.0")
 
             #Visual Studio 2015 and 2017 does not have support for c++17, which is required
             #by qt6. So we go for qt5 instead there.
             #The conan recipe for qt6 does not work for x86 currently, so we fall back to qt5
+            #6.8.3 requires vs2022, so we go for 6.7.3 for older compilers
             if self.settings.arch == "x86" or \
                self.settings.compiler.version == 190 or \
                self.settings.compiler.version == 191:
                 self.requires("qt/5.15.16")
+            elif int(self.settings.compiler.version.value) < 193:
+                self.requires("qt/6.7.3")
             else:
                 self.requires("qt/6.8.3")
-
