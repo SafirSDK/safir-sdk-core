@@ -59,7 +59,6 @@ namespace Members
         const MemberIndex result = DotsC_GetMemberId(typeId, Utilities::ToUtf8(memberName).c_str());
         if (result == -1)
         {
-            std::cout << "No type " << typeId << std::endl;
             throw IllegalValueException(L"There is no such type or member defined", __WFILE__, __LINE__);
         }
         else
