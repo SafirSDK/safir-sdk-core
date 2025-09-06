@@ -289,7 +289,9 @@ namespace Internal
     void LowLevelLoggerBackend::Create()
     {
         boost::interprocess::shared_memory_object::remove("LLUF_LLL_SHM");
-        boost::interprocess::shared_memory_object shm(boost::interprocess::create_only,"LLUF_LLL_SHM", boost::interprocess::read_write);
+        boost::interprocess::permissions perms;
+        perms.set_unrestricted();
+        boost::interprocess::shared_memory_object shm(boost::interprocess::create_only,"LLUF_LLL_SHM", boost::interprocess::read_write,perms);
         shm.truncate(sizeof(bool));
         boost::interprocess::mapped_region shmRegion(shm,boost::interprocess::read_write);
         *static_cast<bool*>(shmRegion.get_address()) = IsLoggingOnByDefault();

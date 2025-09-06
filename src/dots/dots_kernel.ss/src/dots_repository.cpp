@@ -165,10 +165,16 @@ namespace Internal
         }
 
         boost::interprocess::shared_memory_object::remove(DOTS_SHMEM_NAME);
+
+        boost::interprocess::permissions perms;
+        perms.set_unrestricted();
+
         m_sharedMemory.reset(new boost::interprocess::managed_shared_memory
                              (boost::interprocess::create_only,
                               DOTS_SHMEM_NAME,
-                              GetSharedMemorySize(fp.ResultClasses())));
+                              GetSharedMemorySize(fp.ResultClasses()),
+                              0,
+                              perms));
 
         AllocationHelper allocHelper(m_sharedMemory.get());
 
