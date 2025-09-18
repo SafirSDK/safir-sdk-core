@@ -149,9 +149,11 @@ namespace Utilities
 
             //            std::wcerr << "Got exclusive lock, calling Create" << std::endl;
             m_synchronized->Create();
+            boost::interprocess::permissions perms;
+            perms.set_unrestricted();
 
             //            std::wcerr << "Creating semaphore." << std::endl;
-            boost::interprocess::named_semaphore sem(boost::interprocess::create_only,m_name.c_str(),1);
+            boost::interprocess::named_semaphore sem(boost::interprocess::create_only,m_name.c_str(),1,perms);
             //            std::wcerr << "Initialize complete" << std::endl;
             m_fileLock->unlock();
         }
