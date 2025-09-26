@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>icons/rotate.svg</file>
+        <file>icons/window_reset.png</file>
+        <file>icons/tracer_viewer.ico</file>
+        <file>icons/tracer_viewer.png</file>
+        <file>icons/arrow_down.svg</file>
+        <file>icons/clear.svg</file>
+        <file>icons/plus.svg</file>
+        <file>icons/minus.svg</file>
+        <file>icons/palette.svg</file>
+    </qresource>
+</RCC>
