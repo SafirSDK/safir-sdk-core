@@ -4,4 +4,5 @@ add_subdirectory(memory_allocator/src)
 add_subdirectory(tool_launcher/src)
 add_subdirectory(statistics_dump/src)
 add_subdirectory(sate)
+add_subdirectory(tracer_viewer)
 

@@ -88,6 +88,7 @@ MainWindow::MainWindow()
     connect(m_ui->launchDobExplorerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchDobExplorerPressed);
     connect(m_ui->launchSateLegacyButton, &QPushButton::pressed, this, &MainWindow::OnLaunchSateLegacyPressed);
     connect(m_ui->launchControlGuiButton, &QPushButton::pressed, this, &MainWindow::OnLaunchControlGuiPressed);
+    connect(m_ui->launchTracerViewerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchTracerViewerButton);
     connect(m_ui->launchBdGuiButton, &QPushButton::pressed, this, &MainWindow::OnLaunchBdGuiPressed);
     connect(m_ui->checkDouFilesButton, &QPushButton::pressed, this, &MainWindow::OnCheckDouFilesPressed);
     connect(m_ui->checkGeneratedButton, &QPushButton::pressed, this, &MainWindow::OnCheckGeneratedPressed);
@@ -263,6 +264,11 @@ void MainWindow::OnLaunchDobExplorerPressed()
 void MainWindow::OnLaunchControlGuiPressed()
 {
     LaunchProgram("safir_control_gui");
+}
+
+void MainWindow::OnLaunchTracerViewerButton()
+{
+    LaunchProgram("safir_tracer_viewer");
 }
 
 void MainWindow::OnLaunchBdGuiPressed()

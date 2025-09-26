@@ -141,7 +141,7 @@ public:
             ent->Info() = L"Some other info";
             ent->MoreInfo() = random_string(rand()%256);
 
-            //TODO: put some stuff in the members...
+            //IMPROVEMENT: put some stuff in the members...
 
             m_connection.SetChanges(ent,
                                     m_bigEntityIds.back().GetInstanceId(),
@@ -161,7 +161,7 @@ public:
             ent->MoreInfo() = random_string(rand()%256);
             ent->EntityIdMember() = m_bigEntityIds.at(rand() % m_bigEntityIds.size());
 
-            //TODO update more stuff
+            //IMPROVEMENT update more stuff
 
             m_connection.SetChanges(ent,
                                     randomEid.GetInstanceId(),
@@ -198,7 +198,7 @@ public:
 
                 msg->Info() = random_string(rand()%256);
 
-                //TODO: put some stuff in the members...
+                //IMPROVEMENT: put some stuff in the members...
 
                 m_connection.Send(msg,
                                   Safir::Dob::Typesystem::ChannelId(),
