@@ -35,6 +35,7 @@
 #include <unordered_map>
 #include <vector>
 #include <regex>
+#include <algorithm>
 
 #if _MSC_VER
 #   include <iphlpapi.h>
@@ -278,6 +279,12 @@ namespace {
             freeifaddrs(ifaddr);
         }
 #endif
+        // Always include loopback interface so we can receive packets even if
+        // the machine has no other suitable multicast-capable interfaces.
+        if (std::find(result.begin(), result.end(), "127.0.0.1") == result.end())
+        {
+            result.push_back("127.0.0.1");
+        }
         return result;
     }
 

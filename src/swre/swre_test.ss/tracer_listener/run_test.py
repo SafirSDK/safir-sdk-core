@@ -110,7 +110,7 @@ def _wait_for_pattern(stream,
             return buf
 
     log(f"_wait_for_pattern timeout for pattern {pattern!r}")
-    raise RuntimeError(f"Timed-out waiting for pattern {pattern!r}. Buffer:\n{buf}")
+    raise RuntimeError(f"Timed-out waiting for pattern {pattern!r}. Buffer:\n'{buf}'")
 
 
 def _start_listener(exe: str,
