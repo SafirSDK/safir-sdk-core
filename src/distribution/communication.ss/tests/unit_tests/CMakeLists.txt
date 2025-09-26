@@ -3,7 +3,7 @@ add_definitions(-DSAFIR_TEST)
 file(GLOB headers *.h)
 file(GLOB sources *.cpp)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ../../src/include)
 
 add_executable(communication_unit_tests ${sources} ${headers} ../../src/MessageQueue.h
                 ../../src/DeliveryHandler.h ../../src/DataSender.h

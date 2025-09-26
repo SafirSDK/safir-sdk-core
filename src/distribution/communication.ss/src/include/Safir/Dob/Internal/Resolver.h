@@ -221,22 +221,23 @@ namespace Com
             throw std::logic_error("COM: Failed to parse '"+address+"' as an udp endpoint.");
         }
 
-#ifndef SAFIR_TEST
-    private:
-#endif
-
-        struct AdapterInfo
-        {
-            std::string name;
-            std::string ipAddress;
-            int ipVersion;
-        };
-
-        mutable boost::asio::ip::udp::resolver m_resolver;
-        const bool m_verbose;
-
-
-        //Split address into ip and port. Indata on form "addr:port"
+        /**
+         * Split a combined address string into its host/address part and numeric
+         * port part.
+         *
+         * The expected input format is <tt>"address:port"</tt>.  The address portion
+         * may be:
+         *   - an IPv4 literal,  e.g. <tt>"192.168.0.10"</tt>
+         *   - an IPv6 literal,  e.g. <tt>"[fe80::1]"</tt>  (with or without brackets)
+         *   - a host name or network–interface name (the function does not validate
+         *     that the string actually is resolvable here).
+         *
+         * @param address Input string on the form <tt>"addr:port"</tt>.
+         * @param[out] ip   Receives the address/host part (untouched on failure).
+         * @param[out] port Receives the numeric port (undefined on failure).
+         *
+         * @return Whether extraction of both parts succeeded.
+         */
         static bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port)
         {
             size_t startPortSearch=address.find_last_of(']'); //if ip6, start search after address end
@@ -264,6 +265,22 @@ namespace Com
 
             return true;
         }
+        
+#ifndef SAFIR_TEST
+    private:
+#endif
+
+        struct AdapterInfo
+        {
+            std::string name;
+            std::string ipAddress;
+            int ipVersion;
+        };
+
+        mutable boost::asio::ip::udp::resolver m_resolver;
+        const bool m_verbose;
+
+
 
         //Match all addresses against pattern and return first match
         static std::string FindBestMatch(const std::string& pattern, const std::vector<std::string>& addresses, const bool verbose)

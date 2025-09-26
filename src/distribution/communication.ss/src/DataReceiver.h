@@ -31,7 +31,7 @@
 #include "Parameters.h"
 #include "Message.h"
 #include "Node.h"
-#include "Resolver.h"
+#include <Safir/Dob/Internal/Resolver.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)

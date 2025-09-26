@@ -34,7 +34,7 @@
 #include "Discoverer.h"
 #include "DataSender.h"
 #include "HeartbeatSender.h"
-#include "Resolver.h"
+#include <Safir/Dob/Internal/Resolver.h>
 #include "DebugCommandServer.h"
 
 #ifdef _MSC_VER

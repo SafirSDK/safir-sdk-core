@@ -28,7 +28,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Message.h"
-#include "Resolver.h"
+#include <Safir/Dob/Internal/Resolver.h>
 #include "Parameters.h"
 
 #ifdef _MSC_VER
@@ -321,7 +321,6 @@ namespace Com
                 m_multicastEndpoint=Resolver::StringToEndpoint(m_multicastAddress);
                 m_socket->set_option(boost::asio::ip::multicast::outbound_interface(Resolver::StringToEndpoint(m_localIf).address().to_v4()));
                 m_socket->set_option(boost::asio::ip::multicast::enable_loopback(true));
-                m_socket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address()));
             }
         }
     };

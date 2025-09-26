@@ -52,7 +52,7 @@
 #include "../../src/Writer.h"
 #include "../../src/Discoverer.h"
 #include "../../src/DataSender.h"
-#include "../../src/Resolver.h"
+#include <Safir/Dob/Internal/Resolver.h>
 
 
 #ifdef _MSC_VER

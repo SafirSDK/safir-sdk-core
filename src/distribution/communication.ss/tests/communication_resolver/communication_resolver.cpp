@@ -23,7 +23,7 @@
 ******************************************************************************/
 #include <iostream>
 #include <boost/program_options.hpp>
-#include "../../src/Resolver.h"
+#include "../../src/include/Safir/Dob/Internal/Resolver.h"
 
 std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
 {

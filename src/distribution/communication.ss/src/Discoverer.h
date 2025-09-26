@@ -35,7 +35,7 @@
 #include "Parameters.h"
 #include "Node.h"
 #include "Message.h"
-#include "Resolver.h"
+#include <Safir/Dob/Internal/Resolver.h>
 #include "Writer.h"
 
 #ifdef _MSC_VER

@@ -181,7 +181,7 @@ void Receiver::ReceiveData(int64_t fromNodeId, int64_t fromNodeType, const char*
     {
         std::ostringstream os;
         os<<m_com.Name()<<" - Got data from node that is not included yet. NodeId: "<<fromNodeId<<", nodeType "<<fromNodeType;
-        std::logic_error(os.str());
+        throw std::logic_error(os.str());
     }
 
     auto exp=it->second.second+1;
@@ -190,7 +190,7 @@ void Receiver::ReceiveData(int64_t fromNodeId, int64_t fromNodeType, const char*
     {
         std::ostringstream os;
         os<<m_com.Name()<<" - Bad CRC from "<<fromNodeId<<" nodeType "<<fromNodeType<<", data="<<val<<", expected="<<exp;
-        std::logic_error(os.str());
+        throw std::logic_error(os.str());
     }
 
     if (exp>1 && exp!=val)

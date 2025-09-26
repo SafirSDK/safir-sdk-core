@@ -24,7 +24,7 @@
 #pragma once
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include "Resolver.h"
+#include <Safir/Dob/Internal/Resolver.h>
 #include "Parameters.h"
 #include <iostream>
 #include <string>
