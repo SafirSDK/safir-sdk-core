@@ -23,10 +23,11 @@
 ******************************************************************************/
 #include "Library.h"
 #include <algorithm>
+#include <regex>
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Application/BackdoorCommand.h>
-
+#include <Safir/Application/TracerStatus.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/OverflowException.h>
@@ -37,205 +38,266 @@
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/CrashReporter.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <boost/tokenizer.hpp>
 #include <iomanip>
 #include <iostream>
+#include <memory>
+#include <Safir/Dob/Internal/ControlInfo.h>
 
 #ifdef _MSC_VER
   #pragma warning(push)
   #pragma warning(disable: 4702 4005)
 #endif
 
-#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
+#include <Safir/Control/Status.h>
 
 #ifdef _MSC_VER
   #pragma warning(pop)
 #endif
 
-
-
 #ifdef GetMessage
 #  undef GetMessage
 #endif
 
-namespace Safir
+using Safir::Dob::Typesystem::Utilities::ToUtf8;
+using Safir::Dob::Typesystem::Utilities::ToWstring;
+
+static const wchar_t* pingCmd = L"ping";
+static const wchar_t* helpCmd = L"help";
+
+typedef boost::tokenizer<boost::char_separator<wchar_t>,
+                         std::wstring::const_iterator,
+                         std::wstring> wtokenizer;
+
+const boost::char_separator<wchar_t> separator(L" ");
+
+std::once_flag Library::SingletonHelper::m_onceFlag;
+
+Library& Library::SingletonHelper::Instance()
 {
-namespace SwReports
+    static Library instance;
+    return instance;
+}
+
+Library & Library::Instance()
 {
-namespace Internal
+    std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
+    return SingletonHelper::Instance();
+}
+
+
+Library::Library()
+    : m_arguments()
+    , m_work(boost::asio::make_work_guard(m_ioContext))
+    , m_dispatcher(m_connection, m_ioContext)
+    , m_prefixes(m_connection, m_ioContext)
+    , m_traceBufferLock()
+    , m_prefixPending(true)
+    , m_windowsNativeLogging(false)
+    , m_tracerDataSender(m_ioContext, LlufId_GenerateRandom64())
 {
-    using Safir::Dob::Typesystem::Utilities::ToUtf8;
-    using Safir::Dob::Typesystem::Utilities::ToWstring;
-
-    static const wchar_t* pingCmd = L"ping";
-    static const wchar_t* helpCmd = L"help";
-
-    typedef boost::tokenizer<boost::char_separator<wchar_t>,
-                             std::wstring::const_iterator,
-                             std::wstring> wtokenizer;
-
-    const boost::char_separator<wchar_t> separator(L" ");
-
-    std::once_flag Library::SingletonHelper::m_onceFlag;
-
-    Library& Library::SingletonHelper::Instance()
+    Safir::Utilities::ProcessInfo proc(Safir::Utilities::ProcessInfo::GetPid());
+    m_programName = Safir::Dob::Typesystem::Utilities::ToWstring(proc.GetProcessName());
+    // Strip trailing ".exe" (case-insensitive) from program name
+    m_programName = std::regex_replace(m_programName, std::wregex(L"\\.[eE][xX][eE]$"), L"");
+    m_tracerDataSender.SetProgramName(ToUtf8(m_programName));
+    m_tracerDataSender.SetNodeName(ToUtf8(Safir::Dob::ThisNodeParameters::Name()));
+    std::wstring env;
     {
-        static Library instance;
-        return instance;
-    }
-
-    Library & Library::Instance()
-    {
-        std::call_once(SingletonHelper::m_onceFlag,[]{SingletonHelper::Instance();});
-        return SingletonHelper::Instance();
-    }
-
-
-    Library::Library():
-          m_arguments(),
-          m_prefixes(),
-          m_prefixSearchLock(),
-          m_backdoorConnection(),
-          m_traceBufferLock(),
-          m_prefixPending(true),
-          m_windowsNativeLogging(false)
-    {
-        std::wstring env;
+        char * cenv = getenv("FORCE_LOG");
+        if (cenv != NULL)
         {
-            char * cenv = getenv("FORCE_LOG");
-            if (cenv != NULL)
+            env = ToWstring(cenv);
+        }
+    }
+    try
+    {
+        for (std::wstring::iterator it = env.begin();
+            it != env.end(); ++it)
+        {
+            if (*it == '\"')
             {
-                env = ToWstring(cenv);
+                *it = ' ';
             }
         }
-        try
-        {
-            for (std::wstring::iterator it = env.begin();
-                it != env.end(); ++it)
-            {
-                if (*it == '\"')
-                {
-                    *it = ' ';
-                }
-            }
 
-            wtokenizer tokenizer(env,separator);
+        wtokenizer tokenizer(env,separator);
 
-            //Tokenize the environment variable.
+        //Tokenize the environment variable.
 
-            std::vector<std::wstring> arguments;
-            std::copy(tokenizer.begin(),tokenizer.end(),
-                std::back_inserter(arguments));
+        std::vector<std::wstring> arguments;
+        std::copy(tokenizer.begin(),tokenizer.end(),
+            std::back_inserter(arguments));
 
-            m_arguments = arguments;
-        }
-        catch (const std::exception & exc)
-        {
-            std::wostringstream ostr;
-            ostr << "Failed to parse FORCE_LOG env (" << env << "): "<< exc.what();
-            Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                          ostr.str());
-        }
+        m_arguments = arguments;
+    }
+    catch (const std::exception & exc)
+    {
+        std::wostringstream ostr;
+        ostr << "Failed to parse FORCE_LOG env (" << env << "): "<< exc.what();
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      ostr.str());
+    }
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
-        Safir::Utilities::Internal::ConfigReader configReader;
+    Safir::Utilities::Internal::ConfigReader configReader;
 
-        m_windowsNativeLogging = configReader.Logging().get<bool>("SystemLog.native_logging");
+    m_windowsNativeLogging = configReader.Logging().get<bool>("SystemLog.native_logging");
 #endif
+}
 
+Library::~Library()
+{
+
+}
+
+void
+Library::SetProgramName(const std::wstring& programName)
+{
+    m_programName = programName;
+    m_tracerDataSender.SetProgramName(ToUtf8(m_programName));
+}
+
+void
+Library::StartTraceBackdoor(const std::wstring& connectionNameCommonPart,
+                            const std::wstring& connectionNameInstancePart)
+{
+    //TODO: this is not good enough. The TracerDataSender requires the thread, so it will not work unless the backdoor is started
+    // should we handle that?
+
+    //Get the full connection name of the connection in the main app
+    {
+        Safir::Dob::SecondaryConnection mainConnection;
+        mainConnection.Attach(connectionNameCommonPart,
+                            connectionNameInstancePart);
+
+        Safir::Dob::ConnectionAspectMisc connectionAspectMisc(mainConnection);
+
+        m_mainConnectionName = connectionAspectMisc.GetConnectionName();
     }
 
-    Library::~Library()
+    m_thread = std::thread([this]
     {
-
-    }
-
-    void
-    Library::StartTraceBackdoor(const std::wstring& connectionNameCommonPart,
-                                const std::wstring& connectionNameInstancePart)
-    {
-        m_backdoorConnection.Attach(connectionNameCommonPart,
-                                    connectionNameInstancePart);
-
-        m_backdoorConnection.SubscribeMessage(Safir::Application::BackdoorCommand::ClassTypeId,
-                                              Safir::Dob::Typesystem::ChannelId(),
-                                              this);
-    }
-
-    void
-    Library::StopTraceBackdoor()
-    {
-        if (!m_backdoorConnection.IsOpen())
+        try
         {
-            // Connection has been closed.
-            return; // *** RETURN ***
+            const auto myPid = Safir::Utilities::ProcessInfo::GetPid();
+            m_connection.Open(m_programName, std::to_wstring(myPid), 0, NULL, &m_dispatcher);
+
+            Safir::Dob::ConnectionAspectMisc connectionAspectMisc(m_connection);
+            m_backdoorConnectionName = connectionAspectMisc.GetConnectionName();
+
+            m_connection.SubscribeMessage(Safir::Application::BackdoorCommand::ClassTypeId,
+                                          Safir::Dob::Typesystem::ChannelId(),
+                                          this);
+
+            m_prefixes.StartEntityHandling(m_programName);
+
+            // Start ControlInfoReceiver to obtain incarnationId and forward it to the tracer
+            m_controlInfoReceiver = std::make_shared<Safir::Dob::Internal::Control::ControlInfoReceiver>
+                (m_ioContext,
+                 [this](int64_t incarnationId, int64_t /*nodeId*/)
+                 {
+                     m_tracerDataSender.SetIncarnationId(incarnationId);
+                 });
+            m_controlInfoReceiver->Start();
+
+            m_ioContext.run();
+        }
+        catch (const Safir::Dob::LowMemoryException&)
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Severity::Error,
+                                          L"Low memory exception occurred while starting trace logging for " + m_programName +L".");
+        }
+        catch (const std::exception& exc)
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Severity::Critical,
+                                          L"An unexpected error occurred while starting trace logging for " +
+                                          m_programName +
+                                          L": " + Safir::Dob::Typesystem::Utilities::ToWstring(exc.what()));
+        }
+        m_connection.Close();
+    });
+}
+
+void
+Library::StopTraceBackdoor()
+{
+    boost::asio::post(m_ioContext,[this]{m_prefixes.StopEntityHandling();});
+    if (m_controlInfoReceiver)
+    {
+        m_controlInfoReceiver->Stop();
+    }
+
+    m_work.reset();
+    if (m_thread.get_id() != std::thread::id())
+    {
+        m_thread.join();
+    }
+}
+
+PrefixId
+Library::AddPrefix(const std::wstring & prefix)
+{
+    auto const prefixId = m_prefixes.Add(prefix);
+
+    if (find(m_arguments.begin(),m_arguments.end(),L"all") != m_arguments.end() ||
+        find(m_arguments.begin(),m_arguments.end(),prefix) != m_arguments.end())
+    {
+        m_prefixes.Enable(prefixId, true);
+    }
+    return prefixId;
+}
+
+volatile bool * Library::GetPrefixStatePointer(const PrefixId prefixId)
+{
+    return m_prefixes.GetStatePointer(prefixId);
+}
+
+
+bool Library::IsEnabledPrefix(const PrefixId prefixId) const
+{
+    return m_prefixes.IsEnabled(prefixId);
+}
+
+void Library::EnablePrefix(const PrefixId prefixId, const bool enabled)
+{
+    m_prefixes.Enable(prefixId, enabled);
+}
+
+// Private method that assumes the buffer lock is already taken.
+void
+Library::TraceInternal(const PrefixId prefixId,
+                       const wchar_t ch)
+{
+    if (m_prefixPending)
+    {
+        //no syslog when using windows native logging
+        if (m_prefixes.LogToSafirLogging() && !m_windowsNativeLogging)
+        {
+            m_traceSyslogBuffer.append(m_prefixes.GetPrefix(prefixId));
+            m_traceSyslogBuffer.append(L": ");
         }
 
-        m_backdoorConnection.UnsubscribeMessage(Safir::Application::BackdoorCommand::ClassTypeId,
-                                                Safir::Dob::Typesystem::ChannelId(),
-                                                this);
-    }
-
-    Library::PrefixId
-    Library::AddPrefix(const std::wstring & prefix)
-    {
-        boost::lock_guard<boost::recursive_mutex> lck(m_prefixSearchLock);
-        Prefixes::iterator findIt = std::find(m_prefixes.begin(), m_prefixes.end(), prefix);
-        if (findIt != m_prefixes.end())
+        if (m_prefixes.LogToStdout())
         {
-            return ToPrefixId(*findIt);
-        }
-        else
-        {
-            bool enabled = false;
-            //Check if FORCE_LOG contains all or <prefix>
-            if (find(m_arguments.begin(),m_arguments.end(),L"all") != m_arguments.end() ||
-                find(m_arguments.begin(),m_arguments.end(),prefix) != m_arguments.end())
-            {
-                enabled = true;
-            }
-            m_prefixes.push_back(PrefixState(prefix,enabled));
-            return ToPrefixId(m_prefixes.back());
-        }
-    }
-
-    volatile bool * Library::GetPrefixStatePointer(const PrefixId prefixId)
-    {
-        return &ToPrefix(prefixId).m_isEnabled;
-    }
-
-
-    bool Library::IsEnabledPrefix(const PrefixId prefixId) const
-    {
-        return ToPrefix(prefixId).m_isEnabled;
-    }
-
-    void Library::EnablePrefix(const PrefixId prefixId, const bool enabled)
-    {
-        ToPrefix(prefixId).m_isEnabled = enabled;
-    }
-
-    // Private method that assumes the buffer lock is already taken.
-    void
-    Library::TraceInternal(const PrefixId prefixId,
-                           const wchar_t ch)
-    {
-        if (m_prefixPending)
-        {
-            //no syslog when using windows native logging
-            if (!m_windowsNativeLogging)
-            {
-                m_traceSyslogBuffer.append(ToPrefix(prefixId).m_prefix);
-                m_traceSyslogBuffer.append(L": ");
-            }
-
-            m_traceStdoutBuffer.append(ToPrefix(prefixId).m_prefixAscii);
+            m_traceStdoutBuffer.append(m_prefixes.GetPrefixAscii(prefixId));
             m_traceStdoutBuffer.append(L": ");
-            m_prefixPending = false;
         }
 
+        if (m_prefixes.LogToTracer())
+        {
+            m_traceUdpBuffer.append(m_prefixes.GetPrefix(prefixId));
+            m_traceUdpBuffer.append(L": ");
+        }
+
+        m_prefixPending = false;
+    }
+
+    if (m_prefixes.LogToStdout())
+    {
         //since we dont know the locale of wcout we strip off all non-ascii chars
         if ((ch & ~0x7F) == 0)
         {
@@ -245,328 +307,312 @@ namespace Internal
         {
             m_traceStdoutBuffer.push_back('@');
         }
+    }
 
-        //no syslog when using windows native logging
-        if (!m_windowsNativeLogging)
+    //no syslog when using windows native logging
+    if (m_prefixes.LogToSafirLogging() && !m_windowsNativeLogging)
+    {
+        //Syslogs are flushed on newlines instead of flushes
+        if (ch == '\n')
         {
-            //Syslogs are flushed on newlines instead of flushes
-            if (ch == '\n')
+            Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                          m_traceSyslogBuffer);
+            m_traceSyslogBuffer.clear();
+        }
+        else
+        {
+            m_traceSyslogBuffer.push_back(ch);
+        }
+    }
+
+    if (m_prefixes.LogToTracer())
+    {
+        m_traceUdpBuffer.push_back(ch);
+    }
+
+    if (ch == '\n')
+    {
+        m_prefixPending = true;
+    }
+}
+
+void
+Library::TraceFlush()
+{
+    boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
+
+    if (m_prefixes.LogToStdout() && !m_traceStdoutBuffer.empty())
+    {
+        std::wcout << m_traceStdoutBuffer << std::flush;
+        m_traceStdoutBuffer.clear();
+    }
+
+    if (m_prefixes.LogToTracer() && !m_traceUdpBuffer.empty())
+    {
+        m_tracerDataSender.Send(ToUtf8(m_traceUdpBuffer));
+        m_traceUdpBuffer.clear();
+    }
+}
+
+void
+Library::TraceChar(const PrefixId prefixId,
+                   char ch)
+{
+    if ((ch & ~0x7F) != 0)
+    {
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                      L"TraceChar got non ascii character");
+        ch = '#';
+    }
+    TraceWChar(prefixId,ch);
+}
+
+void
+Library::TraceWChar(const PrefixId prefixId,
+                    const wchar_t ch)
+{
+    boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
+    TraceInternal(prefixId, ch);
+}
+
+void
+Library::TraceString(const PrefixId prefixId,
+                     const char* str)
+{
+    TraceString(prefixId, ToWstring(str));
+}
+
+void
+Library::TraceString(const PrefixId prefixId,
+                     const char* str,
+                     const size_t offset,
+                     const size_t length)
+{
+    TraceString(prefixId, ToWstring(std::string(str + offset, str + offset + length)));
+}
+
+void
+Library::TraceString(const PrefixId prefixId,
+                     const std::wstring& str)
+{
+    boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
+    std::for_each(str.begin(), str.end(), [this, prefixId](const wchar_t c){TraceInternal(prefixId,c);});
+}
+
+
+void Library::CrashFunc(const char* const dumpPath)
+{
+    std::wostringstream ostr;
+    ostr << "An application has crashed or is executing in an undefined state! A dump was generated to:\n"
+         << dumpPath;
+    Safir::Logging::SendSystemLog(Safir::Logging::Alert,
+                                  ostr.str());
+}
+
+void
+Library::StartCrashReporting()
+{
+    Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
+    Safir::Utilities::CrashReporter::Start();
+}
+
+void
+Library::StopCrashReporting()
+{
+    Safir::Utilities::CrashReporter::Stop();
+}
+
+void
+Library::OnMessage(const Safir::Dob::MessageProxy messageProxy)
+{
+    const Safir::Dob::MessagePtr message = messageProxy.GetMessage();
+    try
+    {
+        const std::regex_constants::syntax_option_type regExpFlags =
+            std::regex_constants::ECMAScript | std::regex_constants::icase;
+
+        const Safir::Application::BackdoorCommandConstPtr cmd =
+            std::static_pointer_cast<Safir::Application::BackdoorCommand>(message);
+
+        if (!cmd->NodeName().IsNull())
+        {
+            if (!std::regex_search(Safir::Dob::ThisNodeParameters::Name(),
+                                   std::wregex(cmd->NodeName().GetVal(), regExpFlags)))
             {
-                Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                              m_traceSyslogBuffer);
-                m_traceSyslogBuffer.clear();
+                // Node name doesn't match
+                return;
+            }
+        }
+
+        if (!cmd->ConnectionName().IsNull())
+        {
+            if (std::regex_search(m_mainConnectionName, std::wregex(cmd->ConnectionName().GetVal(), regExpFlags)) ||
+                (!m_backdoorConnectionName.empty() &&
+                 std::regex_search(m_backdoorConnectionName, std::wregex(cmd->ConnectionName().GetVal(), regExpFlags))))
+            {
+                //continue below if we matched either of the connection names
             }
             else
             {
-                m_traceSyslogBuffer.push_back(ch);
+                // Connection name doesn't match
+                return;
             }
         }
 
-        if (ch == '\n')
+        if (cmd->Command().IsNull())
         {
-            m_prefixPending = true;
-        }
-    }
-
-    void
-    Library::TraceFlush()
-    {
-        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-
-        if (!m_traceStdoutBuffer.empty())
-        {
-            std::wcout << m_traceStdoutBuffer << std::flush;
-            m_traceStdoutBuffer.clear();
-        }
-    }
-
-    void
-    Library::TraceChar(const PrefixId prefixId,
-                       char ch)
-    {
-        if ((ch & ~0x7F) != 0)
-        {
-            Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                          L"TraceChar got non ascii character");
-            ch = '#';
-        }
-        TraceWChar(prefixId,ch);
-    }
-
-    void
-    Library::TraceWChar(const PrefixId prefixId,
-                        const wchar_t ch)
-    {
-        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-        TraceInternal(prefixId, ch);
-    }
-
-    void
-    Library::TraceString(const PrefixId prefixId,
-                         const char* str)
-    {
-        TraceString(prefixId, ToWstring(str));
-    }
-
-    void
-    Library::TraceString(const PrefixId prefixId,
-                         const char* str,
-                         const size_t offset,
-                         const size_t length)
-    {
-        TraceString(prefixId, ToWstring(std::string(str + offset, str + offset + length)));
-    }
-
-    void
-    Library::TraceString(const PrefixId prefixId,
-                         const std::wstring& str)
-    {
-        boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-        std::for_each(str.begin(), str.end(), [this, prefixId](const wchar_t c){TraceInternal(prefixId,c);});
-    }
-
-
-    void Library::CrashFunc(const char* const dumpPath)
-    {
-        std::wostringstream ostr;
-        ostr << "An application has crashed or is executing in an undefined state! A dump was generated to:\n"
-             << dumpPath;
-        Safir::Logging::SendSystemLog(Safir::Logging::Alert,
-                                      ostr.str());
-    }
-
-    void
-    Library::StartCrashReporting()
-    {
-        Safir::Utilities::CrashReporter::RegisterCallback(CrashFunc);
-        Safir::Utilities::CrashReporter::Start();
-    }
-
-    void
-    Library::StopCrashReporting()
-    {
-        Safir::Utilities::CrashReporter::Stop();
-    }
-
-    void
-    Library::OnMessage(const Safir::Dob::MessageProxy messageProxy)
-    {
-        const Safir::Dob::MessagePtr message = messageProxy.GetMessage();
-        try
-        {
-            const boost::wregex::flag_type regExpFlags = boost::regex::perl | boost::regex::icase;
-
-            const Safir::Application::BackdoorCommandConstPtr cmd =
-                std::static_pointer_cast<Safir::Application::BackdoorCommand>(message);
-
-            if (!cmd->NodeName().IsNull())
-            {
-                if (!boost::regex_search(Safir::Dob::ThisNodeParameters::Name(),
-                                         boost::wregex(cmd->NodeName().GetVal(), regExpFlags)))
-                {
-                    // Node name doesn't match
-                    return;  // *** RETURN ***
-                }
-            }
-
-            if (!cmd->ConnectionName().IsNull())
-            {
-                Safir::Dob::SecondaryConnection conn;
-                conn.Attach();
-                Safir::Dob::ConnectionAspectMisc connectionAspectMisc(conn);
-                if (!boost::regex_search(connectionAspectMisc.GetConnectionName(), boost::wregex(cmd->ConnectionName().GetVal(), regExpFlags)))
-                {
-                    // Connection name doesn't match
-                    return;  // *** RETURN ***
-                }
-            }
-
-            if (cmd->Command().IsNull())
-            {
-                // No command given
-                return;  // *** RETURN ***
-            }
-
-            // Ok, it seems that this PI-command is for this application
-
-            wtokenizer tokenizer(cmd->Command().GetVal(),separator);
-
-
-            //copy the tokens into a vector
-
-            //Convert the strings to wstrings
-            std::vector<std::wstring> cmdTokens;
-            std::copy(tokenizer.begin(),tokenizer.end(),std::back_inserter(cmdTokens));
-
-            if (!cmdTokens.empty())
-            {
-                if (cmdTokens[0] == pingCmd)
-                {
-                    // It's a 'ping' command.
-
-                    Safir::Dob::SecondaryConnection conn;
-                    conn.Attach();
-                    Safir::Dob::ConnectionAspectMisc connectionAspectMisc(conn);
-
-                    std::wostringstream ostr;
-                    ostr << "Tracer Ping reply from "
-                         << connectionAspectMisc.GetConnectionName()
-                         <<  " on node "
-                         << Safir::Dob::ThisNodeParameters::Name();
-
-                    std::wcout << ostr.str() << std::endl;
-
-                    Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                                  ostr.str());
-
-                    return; // *** RETURN ***
-                }
-                else if (cmdTokens[0] == helpCmd)
-                {
-                    std::wstring help = GetHelpText();
-
-                    std::wcout << help << std::endl;
-
-                    Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                                  help);
-                    return; // *** RETURN ***
-                }
-            }
-
-            // Let the subclass handle the command
-            HandleCommand(cmdTokens);
-
-        }
-        catch (const boost::bad_expression& /* e*/ )
-        {
-            // An invalid regular expression was used, skip this command
-            return;  // *** RETURN ***
-        }
-    }
-
-    void
-    Library::HandleCommand(const std::vector<std::wstring>& cmdTokens)
-    {
-        if (cmdTokens.size() != 2)
-        {
+            // No command given
             return;
         }
 
-        boost::lock_guard<boost::recursive_mutex> lck(m_prefixSearchLock);
-        for (Prefixes::iterator it = m_prefixes.begin();
-             it != m_prefixes.end(); ++it)
+        // Ok, it seems that this PI-command is for this application
+
+        wtokenizer tokenizer(cmd->Command().GetVal(),separator);
+
+
+        //copy the tokens into a vector
+
+        //Convert the strings to wstrings
+        std::vector<std::wstring> cmdTokens;
+        std::copy(tokenizer.begin(),tokenizer.end(),std::back_inserter(cmdTokens));
+
+        if (!cmdTokens.empty())
         {
-            if (cmdTokens[0] == it->m_prefix || cmdTokens[0] == L"all")
+            if (cmdTokens[0] == pingCmd)
             {
-                if (cmdTokens[1] == L"on")
-                {
-                    TraceString(ToPrefixId(*it), L": Turning logging on\n");
-                    it->m_isEnabled = true;
-                }
-                else if (cmdTokens[1] == L"off")
-                {
-                    TraceString(ToPrefixId(*it), L": Turning logging off\n");
-                    it->m_isEnabled = false;
-                }
-                else
-                {
-                    TraceString(ToPrefixId(*it), std::wstring(L"Got unrecognized command '") + cmdTokens[1] + L"'\n");
-                }
+                // It's a 'ping' command.
+                std::wostringstream ostr;
+                ostr << "Tracer Ping reply from "
+                     << m_mainConnectionName
+                     <<  " on node "
+                     << Safir::Dob::ThisNodeParameters::Name();
+
+                std::wcout << ostr.str() << std::endl;
+
+                Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                              ostr.str());
+
+                m_tracerDataSender.Send(ToUtf8(ostr.str()));
+
+                return;
+            }
+            else if (cmdTokens[0] == helpCmd)
+            {
+                std::wstring help = GetHelpText();
+
+                std::wcout << help << std::endl;
+
+                Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                              help);
+
+                m_tracerDataSender.Send(ToUtf8(help));
+                return;
             }
         }
-        TraceFlush();
+
+        // Let the subclass handle the command
+        HandleCommand(cmdTokens);
+
+    }
+    catch (const std::regex_error& /* e*/ )
+    {
+        // An invalid regular expression was used, skip this command
+        return;
+    }
+}
+
+void
+Library::HandleCommand(const std::vector<std::wstring>& cmdTokens)
+{
+    if (cmdTokens.size() != 2)
+    {
+        return;
     }
 
-    std::wstring
-    Library::GetHelpText()
+    const auto prefix = cmdTokens[0];
+    const auto command = cmdTokens[1];
+
+    std::set<PrefixId> prefixIds;
+    if (prefix == L"all")
     {
-        std::wostringstream out;
-        out << "Trace logger supports the following commands: " << std::endl;
-        out << "  " << std::setw(10) << "all" << " on/off - Turn logging of all prefices on or off" << std::endl;
-        boost::lock_guard<boost::recursive_mutex> lck(m_prefixSearchLock);
-        for (Prefixes::iterator it = m_prefixes.begin();
-             it != m_prefixes.end(); ++it)
+        prefixIds = m_prefixes.GetAllPrefixIds();
+    }
+    else
+    {
+        const auto pf = m_prefixes.GetPrefixId(prefix);
+        if (pf != 0)
         {
-            out << "  " << std::setw (10) << it->m_prefix << " on/off - Turn logging of this prefix on or off. Currently "<<
-                (it->m_isEnabled?"on":"off") <<std::endl;
-        }
-
-        return out.str();
-    }
-
-
-    Library::PrefixState &
-    Library::ToPrefix(const PrefixId prefixId)
-    {
-        return *reinterpret_cast<PrefixState*>(prefixId);
-    }
-
-    Library::PrefixId
-    Library::ToPrefixId(PrefixState & prefix)
-    {
-        return reinterpret_cast<PrefixId>(&prefix);
-    }
-
-    Library::PrefixState::PrefixState(const std::wstring & prefix, const bool enabled)
-        : m_prefix(prefix)
-        , m_prefixAscii(prefix)
-        , m_isEnabled(enabled)
-    {
-        //replace non-ascii chars
-        for(std::wstring::iterator it = m_prefixAscii.begin();
-            it != m_prefixAscii.end(); ++it)
-        {
-            if ((*it & ~0x7F) != 0)
-            {
-                *it = '@';
-            }
+            prefixIds = {pf};
         }
     }
-
-    void
-    Library::SendFatalErrorReport(const std::wstring& errorCode,
-                                  const std::wstring& location,
-                                  const std::wstring& text)
+    for (const auto prefixId: prefixIds)
     {
-        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
-                         L"FatalError " + errorCode + L"|" + location + L"|" + text);
+        if (command != L"on" && command != L"off")
+        {
+            TraceString(prefixId, L"Got unrecognized command '" + command + L"'\n");
+            continue;
+        }
+        TraceString(prefixId, L"Turning logging " + command + L"\n");
+        m_prefixes.Enable(prefixId, command == L"on");
+
     }
 
-    void
-    Library::SendErrorReport(const std::wstring& errorCode,
-                             const std::wstring& location,
-                             const std::wstring& text)
-    {
-        Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                      L"Error " + errorCode + L"|" + location + L"|" + text);
-    }
-
-    void
-    Library::SendResourceReport(const std::wstring& resourceId,
-                                const bool          allocated,
-                                const std::wstring& text)
-    {
-        Safir::Logging::SendSystemLog(allocated ? Safir::Logging::Informational : Safir::Logging::Error,
-                                      L"Resource " + resourceId + L" is "
-                                      + ((allocated) ? L"" : L"not ")
-                                      + L"allocated" + L"|" + text);
-    }
-
-    void
-    Library::SendProgrammingErrorReport(const std::wstring & errorCode,
-                                        const std::wstring & location,
-                                        const std::wstring & text)
-    {
-        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
-                                      L"ProgrammingError " + errorCode + L"|" + location + L"|" + text);
-    }
-
-    void
-    Library::SendProgramInfoReport(const std::wstring & text)
-    {
-        Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                      text);
-    }
+    TraceFlush();
 }
+
+std::wstring
+Library::GetHelpText()
+{
+    std::wostringstream out;
+    out << "Trace logger supports the following commands: " << std::endl;
+    out << "  " << std::setw(m_prefixes.LongestPrefixLength()) << "all" << " on/off - Turn logging of all prefices on or off" << std::endl;
+    out << m_prefixes.GetHelpText();
+    return out.str();
 }
+
+
+void
+Library::SendFatalErrorReport(const std::wstring& errorCode,
+                              const std::wstring& location,
+                              const std::wstring& text)
+{
+    Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                  L"FatalError " + errorCode + L"|" + location + L"|" + text);
 }
+
+void
+Library::SendErrorReport(const std::wstring& errorCode,
+                         const std::wstring& location,
+                         const std::wstring& text)
+{
+    Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                  L"Error " + errorCode + L"|" + location + L"|" + text);
+}
+
+void
+Library::SendResourceReport(const std::wstring& resourceId,
+                            const bool          allocated,
+                            const std::wstring& text)
+{
+    Safir::Logging::SendSystemLog(allocated ? Safir::Logging::Informational : Safir::Logging::Error,
+                                  L"Resource " + resourceId + L" is "
+                                  + ((allocated) ? L"" : L"not ")
+                                  + L"allocated" + L"|" + text);
+}
+
+void
+Library::SendProgrammingErrorReport(const std::wstring & errorCode,
+                                    const std::wstring & location,
+                                    const std::wstring & text)
+{
+    Safir::Logging::SendSystemLog(Safir::Logging::Critical,
+                                  L"ProgrammingError " + errorCode + L"|" + location + L"|" + text);
+}
+
+void
+Library::SendProgramInfoReport(const std::wstring & text)
+{
+    Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                  text);
+}
+

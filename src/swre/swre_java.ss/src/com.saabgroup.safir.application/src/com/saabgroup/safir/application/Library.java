@@ -33,6 +33,9 @@ final class Library
     }
 
 
+    static native void SetProgramName(String programName,
+                                      boolean [] success);
+
     static native void StartTraceBackdoor(String connectionNameCommonPart,
                                           String connectionNameInstancePart,
                                           boolean [] success);

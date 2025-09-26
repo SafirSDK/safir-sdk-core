@@ -28,13 +28,21 @@
 #include "Library.h"
 #include <iostream>
 
-
-using namespace Safir::SwReports::Internal;
-
-
 std::wstring ToWstring(const char * const str)
 {
     return Safir::Dob::Typesystem::Utilities::ToWstring(str);
+}
+
+void SwreC_SetProgramName(const char * const programName,
+                          bool & success)
+{
+    success = false;
+    try
+    {
+        Library::Instance().SetProgramName(ToWstring(programName));
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
 }
 
 void SwreC_StartTraceBackdoor(const char * const connectionNameCommonPart,

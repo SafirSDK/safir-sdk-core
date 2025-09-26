@@ -37,6 +37,25 @@
 
 extern "C"
 {
+
+    /**
+     * Provide a better program name for the tracer than what it is able to work out for itself.
+     *
+     * By default the tracer will use Safir::Utilities::ProcessInfo::GetProcessName to get
+     * the name of the current executable. This is used for identifying the process
+     * in both BackdoorMessages and the TracerStatus entity.
+     * This function can be used to override the program name in cases where the automatically
+     * obtained name is not correct.
+     *
+     * This function must be called before the SwreC_StartTraceBackdoor function.
+     *
+     * @param programName [in] - The new name of the program.
+     * @param success [out] - True if an exception has occurred. Call LibraryExceptions.Throw if it was true!
+     */
+    SWRE_LIBRARY_API void SwreC_SetProgramName(const char * const programName,
+                                               bool & success);
+
+
     /**
      * Start reception of trace on/off commands
      *

@@ -29,6 +29,25 @@ public final class TracerBackdoor
 {
     private TracerBackdoor() {}
 
+    /**
+     * Override the automatically detected program name.
+     *
+     * Useful when the Tracer fails to get the correct name of the current jar file.
+     * Call before calling start().
+     *
+     * @param programName The new name.
+     */
+    static public void setProgramName(String programName)
+    {
+        boolean [] success = new boolean [1];
+
+        Library.SetProgramName(programName, success);
+        if (!success[0])
+        {
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
+        }
+    }
+
     public static void start(com.saabgroup.safir.dob.ConnectionBase connection)
     {
         com.saabgroup.safir.dob.ConnectionAspectMisc misc = new com.saabgroup.safir.dob.ConnectionAspectMisc(connection);

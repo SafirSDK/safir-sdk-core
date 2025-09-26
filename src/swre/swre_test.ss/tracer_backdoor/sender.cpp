@@ -53,7 +53,7 @@ public:
         {
             try
             {
-                m_connection.Open(L"sender",boost::lexical_cast<std::wstring>(i),0,this,&m_dispatcher);
+                m_connection.Open(L"sender_connection_name",boost::lexical_cast<std::wstring>(i),0,this,&m_dispatcher);
                 break; //connected, stop trying
             }
             catch (const Safir::Dob::NotOpenException&)
@@ -76,7 +76,7 @@ public:
         m_timer.expires_after(std::chrono::milliseconds(10));
         m_timer.async_wait([this](const auto& /*error*/){Timeout();});
         m_razor << "foo" << "bar" << 1234 << std::endl;
-        m_rb << "blahonga, " << "blahonga, " << "blahonga" << std::endl;
+        m_rb << L"\u00e5\u00e4\u00f6, blahonga, " << "blahonga, " << "blahonga" << std::endl;
         std::wcout << "Have logged " << i << " times." << std::endl;
 
         ++i;
