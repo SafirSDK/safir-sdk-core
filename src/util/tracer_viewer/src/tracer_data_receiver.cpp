@@ -496,6 +496,17 @@ void TracerDataReceiver::handlePacket(const QByteArray& datagram,
 
     QString payloadText = QString::fromUtf8(p, header->payloadLength);
 
+    // --------------------------------------------------------------
+    // Re-assemble payload with any trailing fragment kept from the
+    // previous packet belonging to this sender.
+    // --------------------------------------------------------------
+    QString& tail = m_lineTail[senderId];
+    if (!tail.isEmpty())
+    {
+        payloadText.prepend(tail);
+        tail.clear();
+    }
+
     QStringList lines;
     bool addOutOfOrderSuffix = false;
 
@@ -539,7 +550,21 @@ void TracerDataReceiver::handlePacket(const QByteArray& datagram,
     // Remember this sequence number for future duplicate detection
     state.recent.push_back(seq);
 
-    lines << payloadText.split('\n', Qt::SkipEmptyParts);
+    // --------------------------------------------------------------
+    // Split into individual lines while preserving a possible tail
+    // fragment that lacks the terminating newline.
+    // --------------------------------------------------------------
+    lines = payloadText.split(u'\n', Qt::KeepEmptyParts);
+
+    if (!payloadText.endsWith(u'\n') && !lines.isEmpty())
+    {
+        tail = lines.takeLast();          // keep unfinished part for next packet
+    }
+
+    // Remove empty elements that may have been introduced by KeepEmptyParts
+    lines.erase(std::remove_if(lines.begin(), lines.end(),
+                               [](const QString& s){ return s.isEmpty(); }),
+                lines.end());
 
     if (addOutOfOrderSuffix)
     {

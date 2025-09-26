@@ -41,8 +41,10 @@ public:
     App()
          : m_dispatcher(m_connection, m_ioContext)
          , m_timer(m_ioContext, std::chrono::milliseconds(10))
+         , m_timerLarge(m_ioContext, std::chrono::seconds(20))
          , m_razor(L"Razor")
          , m_rb(L"Rymd-B\u00f6rje") //ö
+         , m_large(L"")
     {}
 
     void OnStopOrder() override {m_ioContext.stop();}
@@ -64,6 +66,7 @@ public:
 
         Safir::Application::TracerBackdoor::Start(m_connection);
         m_timer.async_wait([this](const auto& /*error*/){Timeout();});
+        m_timerLarge.async_wait([this](const auto& /*error*/){TimeoutLarge();});
         m_ioContext.run();
 
         Safir::Application::TracerBackdoor::Stop();
@@ -82,15 +85,30 @@ public:
         ++i;
     }
 
+    void TimeoutLarge()
+    {
+        m_timerLarge.expires_after(std::chrono::minutes(1));
+        m_timerLarge.async_wait([this](const auto& /*error*/){TimeoutLarge();});
+        static const auto text =
+            L"123456789012345678901234567890123456789012345678901234567890";
+
+        for (int i = 0; i<30;++i) //should add up to more than 1472 bytes
+        {
+            m_large << text << std::endl;
+        }
+    }
+
 private:
     boost::asio::io_context m_ioContext;
     Safir::Dob::Connection m_connection;
     Safir::Utilities::AsioDispatcher m_dispatcher;
 
     boost::asio::steady_timer m_timer;
+    boost::asio::steady_timer m_timerLarge;
 
     Safir::Application::Tracer m_razor;
     Safir::Application::Tracer m_rb;
+    Safir::Application::Tracer m_large;
 };
 
 

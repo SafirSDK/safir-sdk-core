@@ -344,6 +344,7 @@ int main(int argc, char* argv[])
         if (args.csv)
             std::cout << "\"sendTime\",\"recvTime\",\"program\",\"node\",\"message\"\n";
         std::unordered_map<std::int64_t, std::uint32_t> lastSeq;
+        std::unordered_map<std::int64_t, std::string>  tailPerSender;
         std::vector<char> buffer(65535);
         bool startOfLine = true;   // remember if next character starts a new output line
 
@@ -424,6 +425,16 @@ int main(int argc, char* argv[])
             const char* payloadPtr = buffer.data() + headerAndNames;
             std::string payload(payloadPtr, payloadLen);
 
+            // -----------------------------------------------------------------
+            // Re-assemble split lines: prepend any stored tail fragment
+            // -----------------------------------------------------------------
+            auto& tail = tailPerSender[senderId];
+            if (!tail.empty())
+            {
+                payload.insert(0, tail);
+                tail.clear();
+            }
+
             std::vector<std::string> diagCsv;
             noteSequence(lastSeq, senderId, seqNo, programName, nodeName,
                          args.csv, &diagCsv, sendTimeCsv, recvTimeCsv);
@@ -439,6 +450,23 @@ int main(int argc, char* argv[])
             {
                 std::string sendTimeStr = sendTimeCsv;
                 std::string recvTimeStr = recvTimeCsv;
+
+                // Handle potential split line: keep unfinished fragment for next packet
+                bool payloadEndsWithNl = !payload.empty() && payload.back() == '\n';
+                if (!payloadEndsWithNl)
+                {
+                    std::size_t pos = payload.find_last_of('\n');
+                    if (pos == std::string::npos)
+                    {
+                        tail = payload;
+                        payload.clear();
+                    }
+                    else
+                    {
+                        tail = payload.substr(pos + 1);
+                        payload.resize(pos + 1);
+                    }
+                }
 
                 std::istringstream iss(payload);
                 std::string line;
@@ -480,6 +508,23 @@ int main(int argc, char* argv[])
                 if (!first)
                     ps << " ";
                 prefix = ps.str();
+            }
+
+            // Handle potential split line similarly to GUI receiver
+            bool payloadEndsWithNl = !payload.empty() && payload.back() == '\n';
+            if (!payloadEndsWithNl)
+            {
+                std::size_t pos = payload.find_last_of('\n');
+                if (pos == std::string::npos)
+                {
+                    tail = payload;
+                    payload.clear();
+                }
+                else
+                {
+                    tail = payload.substr(pos + 1);
+                    payload.resize(pos + 1);
+                }
             }
 
             if (!prefix.empty())

@@ -111,6 +111,9 @@ private:
     };
     std::unordered_map<std::int64_t, SenderState> m_senderState;
 
+    // Incomplete line fragments per sender, used to re-assemble lines
+    std::unordered_map<std::int64_t, QString> m_lineTail;
+
     // Total number of dropped payloads (queue overflow) or packets detected
     // missing via sequence-number gaps.  Read from GUI thread if needed.
     std::atomic<std::uint64_t> m_droppedCount{0};
