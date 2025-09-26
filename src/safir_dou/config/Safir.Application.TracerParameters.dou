@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit">
+  <summary>Configuration parameters for the tracer data multicast sender.</summary>
+  <name>Safir.Application.TracerParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+    <parameter>
+      <summary>Multicast IP address to which the Tracer data is sent.</summary>
+      <name>Address</name>
+      <type>String</type>
+      <value>224.11.11.12</value>
+    </parameter>
+    <parameter>
+      <summary>UDP port to which the Tracer data is sent.</summary>
+      <name>Port</name>
+      <type>Int32</type>
+      <value>49500</value>
+    </parameter>
+  </parameters>
+</class>

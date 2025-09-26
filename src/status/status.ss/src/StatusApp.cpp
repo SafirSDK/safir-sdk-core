@@ -37,6 +37,7 @@ StatusApp::StatusApp()
     , m_commandRequestHandler(m_ioContext)
     , m_connectionStatsHandler()
     , m_nodeInfoMirrorer()
+    , m_tracerStatusHandler()
 {
     m_connection.Open(L"safir_control_status",
                       L"main",
@@ -49,6 +50,7 @@ StatusApp::StatusApp()
     m_commandRequestHandler.Start();
     m_connectionStatsHandler.Start();
     m_nodeInfoMirrorer.Start();
+    m_tracerStatusHandler.Start();
 }
 
 void StatusApp::OnStopOrder()
@@ -57,6 +59,7 @@ void StatusApp::OnStopOrder()
     m_statusEntityHandler.Stop();
     m_connectionStatsHandler.Stop();
     m_nodeInfoMirrorer.Stop();
+    m_tracerStatusHandler.Stop();
 
     m_work.reset();
 }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Status of an application debug tracer.</summary>
+  <name>Safir.Application.TracerStatus</name>
+  <baseClass>Safir.Dob.Entity</baseClass>
+  <members>
+    <member>
+      <summary>Name of the program that is using the tracer. Most likely the name of the executable.</summary>
+      <name>ProgramName</name>
+      <type>String</type>
+    </member>
+    <member>
+      <summary>Name of the node on which the tracing program is running. As defined per ThisNodeParameters.</summary>
+      <name>NodeName</name>
+      <type>String</type>
+    </member>
+    <member>
+      <summary>All the prefixes in use by the program, and whether they are currently enabled or not.</summary>
+      <name>Prefixes</name>
+      <type>Boolean</type>
+      <dictionary keyType="String"/>
+    </member>
+    <member>
+      <summary>Should the tracer log to standard output?</summary>
+      <name>LogToStdout</name>
+      <type>Boolean</type>
+    </member>
+    <member>
+      <summary>Should the tracer log to Safir.Logging, i.e. syslog?</summary>
+      <name>LogToSafirLogging</name>
+      <type>Boolean</type>
+    </member>
+    <member>
+      <summary>Should the tracer log to the Tracer UDP protocol?</summary>
+      <name>LogToTracer</name>
+      <type>Boolean</type>
+    </member>
+  </members>
+</class>

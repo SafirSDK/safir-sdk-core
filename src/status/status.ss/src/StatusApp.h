@@ -29,6 +29,7 @@
 #include "CommandRequestHandler.h"
 #include "ConnectionStatisticsServiceHandler.h"
 #include "NodeInfoMirrorer.h"
+#include "TracerStatusHandler.h"
 
 #include <boost/asio.hpp>
 
@@ -60,6 +61,7 @@ private:
     CommandRequestHandler m_commandRequestHandler;
     ConnectionStatisticsServiceHandler m_connectionStatsHandler;
     NodeInfoMirrorer m_nodeInfoMirrorer;
+    TracerStatusHandler m_tracerStatusHandler;
 };
 }
 }

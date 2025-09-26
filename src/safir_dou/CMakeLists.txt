@@ -26,7 +26,9 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   config/Safir.Dob.ThisNodeParameters.dou
   config/Safir.Time.LibraryParameters.dou
   config/Safir.Websocket.Parameters.dou
+  config/Safir.Application.TracerParameters.dou
   data/Safir.Application.BackdoorCommand.dou
+  data/Safir.Application.TracerStatus.dou
   data/Safir.Control.Command.dou
   data/Safir.Control.ConnectionStatisticsAllNodesResponse.dou
   data/Safir.Control.ConnectionStatisticsItem.dou
@@ -107,6 +109,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Control.GetConnectionStatistics-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Control.Status-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.MirroredNodeInfo-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Application.TracerStatus-Safir.Dob.InjectionProperty.dom
   data/Safir.Dob.NodeInfo-Safir.Dob.DistributionScopeProperty.dom
   data/Safir.Dob.NodeInfo-Safir.Dob.LowMemoryOperationsAllowedProperty.dom
   data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionScopeProperty.dom

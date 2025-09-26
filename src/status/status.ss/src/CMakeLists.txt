@@ -1,12 +1,12 @@
 set(headers
   StatusApp.h StatusEntityHandler.h CommandRequestHandler.h
   ConnectionStatisticsServiceHandler.h ConnectionStatisticsCollector.h
-  NodeInfoMirrorer.h)
+  NodeInfoMirrorer.h TracerStatusHandler.h)
 
 set(sources
   StatusApp.cpp safir_status.cpp StatusEntityHandler.cpp CommandRequestHandler.cpp
   ConnectionStatisticsServiceHandler.cpp ConnectionStatisticsCollector.cpp
-  NodeInfoMirrorer.cpp)
+  NodeInfoMirrorer.cpp TracerStatusHandler.cpp)
 
 ADD_EXECUTABLE(safir_status ${sources} ${headers})
 
