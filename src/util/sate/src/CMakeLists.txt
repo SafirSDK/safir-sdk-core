@@ -104,9 +104,9 @@ QT_WRAP_UI(ui_headers ${ui})
 QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
 QT_ADD_RESOURCES(rcc_sources
   sate_resources.qrc
-  style/dark/darkstyle.qrc
-  style/light/lightstyle.qrc
-  style/customizations/customizations.qrc
+  ../../style/dark/darkstyle.qrc
+  ../../style/light/lightstyle.qrc
+  ../../style/customizations/customizations.qrc
 )
 
 ADD_EXECUTABLE(sate WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} ${rcc_sources})
