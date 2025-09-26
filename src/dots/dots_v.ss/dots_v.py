@@ -1257,7 +1257,7 @@ def process_at_str(gSession, at_string, dou, table_line, parent_table_line, stri
                 # now put the slashes back, unescaped
                 ptn = ptn.replace("\u00A4", "/")
                 repl = repl.replace("\u00A4", "/")
-                result = re.sub(ptn, repl, result, 1)
+                result = re.sub(ptn, repl, result, count=1)
 
             elif command.startswith("REPLACE_ALL("):
                 # ensure we only remove leading and last parentheses in case
