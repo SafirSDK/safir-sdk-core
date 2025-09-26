@@ -72,7 +72,7 @@ namespace Typesystem
 
         const ContainedType GetVal() const {return m_container.GetVal();}
 
-        const ContainedType GetValOrDefault(const ContainedType& defaultVal) const {return m_container.GetValOrDefault(defaultVal);}
+        const ContainedType GetValOrDefault(const ContainedType defaultVal) const {return m_container.GetValOrDefault(defaultVal);}
 
         void SetOrdinal(const EnumerationValue value){m_container.SetOrdinal(value);}
         EnumerationValue GetOrdinal() const {return m_container.GetOrdinal();}
