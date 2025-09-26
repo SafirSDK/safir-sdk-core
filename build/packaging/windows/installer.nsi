@@ -53,7 +53,7 @@ SetCompressor lzma
 ;;We want at least .NET framework 4:
 !define MIN_FRA_MAJOR "4"
 !define MIN_FRA_MINOR "0"
-!define MIN_FRA_BUILD "*"
+!define MIN_FRA_BUILD "0"
 
 !ifndef IPersistFile
 !define IPersistFile {0000010b-0000-0000-c000-000000000046}
@@ -73,6 +73,7 @@ SetCompressor lzma
 Function ShellLinkSetRunAs
 System::Store S
 pop $9
+StrCpy $4 0                ; initialise flag holder to a known value
 System::Call "ole32::CoCreateInstance(g'${CLSID_ShellLink}',i0,i1,g'${IID_IShellLink}',*i.r1)i.r0"
 ${If} $0 = 0
     System::Call "$1->0(g'${IPersistFile}',*i.r2)i.r0" ;QI
@@ -139,7 +140,7 @@ Function AbortIfBadFramework
   StrCpy $3 $1 "" 1 ;Remainder of string
 
   ;Loop if first character is not a 'v'
-  StrCmpS $2 "v" start_parse loop
+  StrCmp $2 "v" start_parse loop
 
   ;Parse the string
   start_parse:
@@ -198,7 +199,7 @@ Function AbortIfBadFramework
   goto loop
 
   this_minor_same:
-  IntCmp R3 $R7 loop loop this_build_more
+  IntCmp $R3 $R7 loop loop this_build_more
   this_build_more:
   StrCpy $R7 $R3
   StrCpy $R8 $R4
@@ -502,6 +503,9 @@ Section /o "Tools" SecTools
   CreateShortCut "${StartMenuDir}\ToolLauncher.lnk" \
                  "$INSTDIR\bin\safir_tool_launcher.exe" "" "" "" SW_SHOWNORMAL "" "Launch development tools on any SAFIR_INSTANCE"
 
+  CreateShortCut "${StartMenuDir}\TracerViewer.lnk" \
+                 "$INSTDIR\bin\safir_tracer_viewer.exe" "" "" "" SW_SHOWNORMAL "" "Control and view Trace logs from Safir applications"
+
   CreateShortCut "${StartMenuDir}\Sate.lnk" \
                  "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
 
@@ -649,6 +653,9 @@ Section "Uninstall"
   nsExec::Exec '"taskkill" "/f" "/im" "safir_tool_launcher.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_websocket.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "sate.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "sate_legacy.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_tracer_viewer.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_tracer_listener.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "system_picture_listener.exe"'
 
   ;remove from PATH

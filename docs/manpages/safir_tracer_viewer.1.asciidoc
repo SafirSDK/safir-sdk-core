@@ -1,0 +1,29 @@
+SAFIR_TRACER_VIEWER(1)
+======================
+:doctype: manpage
+
+
+NAME
+----
+safir_tracer_viewer - A tool for controlling and viewing Tracer logs from Safir applications.
+
+
+SYNOPSIS
+--------
+*safir_tracer_viewer*
+
+DESCRIPTION
+-----------
+See the user's guide for more information about the safir_tracer_viewer.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2025 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+
