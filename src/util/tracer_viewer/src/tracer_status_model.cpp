@@ -132,6 +132,12 @@ void TracerStatusModel::HandleEntity(const Safir::Dob::EntityProxy& entityProxy)
 {
     const auto tracerStatus = std::static_pointer_cast<const Safir::Application::TracerStatus>(entityProxy.GetEntity());
 
+    //ignore tracers that have not registered any prefixes
+    if (tracerStatus->Prefixes().empty())
+    {
+        return;
+    }
+
     // Extract program and node names (treat null as "<null>")
     const QString programName =
         tracerStatus->ProgramName().IsNull()
