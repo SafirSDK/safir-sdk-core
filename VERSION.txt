@@ -16,4 +16,6 @@ SUFFIX=~alpha1
 #Note: Keep to 7-bit ascii in this file, or everything will blow up...
 
 
-#Note: When you change this you also have to change multiple files inside build/packaging/debian
+#Note: When you change this you also have to change multiple installcligac
+#      files inside build/packaging/debian to reflect the updated Policy file
+#      names.
