@@ -239,8 +239,20 @@ Library::StopTraceBackdoor()
 }
 
 PrefixId
-Library::AddPrefix(const std::wstring & prefix)
+Library::AddPrefix(std::wstring prefix)
 {
+    if (prefix.empty())
+    {
+        Safir::Logging::SendSystemLog(Safir::Logging::Severity::Warning,
+                                      L"Application tried to register an empty prefix. This is deprecated behaviour, and will become illegal in a future version of Safir SDK Core. Please use an actual string.");
+
+        prefix = L"<empty>";
+    }
+
+    //Colons in the prefix will screw up things, since we use colons to separate
+    //prefixes from log data in the output. And this is used for parsing too.
+    std::replace(prefix.begin(), prefix.end(), ':', '#');
+
     auto const prefixId = m_prefixes.Add(prefix);
 
     if (find(m_arguments.begin(),m_arguments.end(),L"all") != m_arguments.end() ||

@@ -60,7 +60,7 @@ public:
     void StartCrashReporting();
     void StopCrashReporting();
 
-    PrefixId AddPrefix(const std::wstring & prefix);
+    PrefixId AddPrefix(std::wstring prefix);
     volatile bool * GetPrefixStatePointer(const PrefixId prefixId);
     bool IsEnabledPrefix(const PrefixId prefixId) const;
     void EnablePrefix(const PrefixId prefixId, const bool enabled);
