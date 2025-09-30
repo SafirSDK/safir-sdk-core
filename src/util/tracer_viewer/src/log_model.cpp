@@ -36,7 +36,7 @@ LogModel::LogModel(const std::shared_ptr<TracerDataReceiver>& dataReceiver, QObj
     : QAbstractTableModel(parent)
     , m_dataReceiver(dataReceiver)
 {
-    constexpr std::size_t kMaxRows = 1'000'000; // adjust as needed
+    constexpr std::size_t kMaxRows = 500'000; // adjust as needed
     m_entries.set_capacity(kMaxRows);
 
     // Register callback to receive ready batches
