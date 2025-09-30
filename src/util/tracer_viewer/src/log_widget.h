@@ -100,6 +100,7 @@ private:
     QHBoxLayout* m_filterAreaLayout;
     QScrollArea* m_filterScroller;
     QList<QWidget*> m_filters;
+    const QFont m_fixedFont;
     ColumnSortFilterProxyModel* m_proxyModel = nullptr;
     LogModel* const m_model;
 

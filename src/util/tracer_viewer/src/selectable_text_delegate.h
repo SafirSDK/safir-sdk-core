@@ -25,7 +25,7 @@ public:
         auto* le = new QLineEdit(parent);
         le->setReadOnly(true);
         le->setFrame(false);
-        le->setStyleSheet("border:0px; margin:0px; spacing:0px; padding:0px;");
+        le->setStyleSheet("border:0px; margin:0px; spacing:0px; padding:0px; border-radius:0px;");
         // QLineEdit already supports mouse/keyboard selection when read-only.
         // Enable drag so the user can highlight substrings.
         le->setDragEnabled(true);

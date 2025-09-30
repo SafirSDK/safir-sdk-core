@@ -32,7 +32,7 @@ ignore_directories = (".git", ".svn", ".hg", ".venv", "boost", "rapidjson",
                       "websocketpp", "RelWithDebInfo", "Release", "Debug", "bin")
 
 #glob patterns for files to not check for tabs
-ignore_files = ("*.xcf", "*.xsl", "*.bmp", "*.ico", "*.eap", "*.png", "Makefile", "rules", "*.snk", "*.dia", "*.resx")
+ignore_files = ("*.xcf", "*.xsl", "*.bmp", "*.ico", "*.eap", "*.png", "Makefile", "rules", "*.snk", "*.dia", "*.resx", "*.ttf")
 
 
 def log(*args, **kwargs):
