@@ -79,7 +79,7 @@ namespace Typesystem
          *
          * @param id [in] - The 64bit integer id of the instance.
          */
-        explicit InstanceId(const Dob::Typesystem::Int64 id):
+        InstanceId(const Dob::Typesystem::Int64 id):
             m_instanceId(id) {}
 
 
