@@ -494,7 +494,7 @@ Library::OnMessage(const Safir::Dob::MessageProxy messageProxy)
             {
                 // It's a 'ping' command.
                 std::wostringstream ostr;
-                ostr << "Tracer Ping reply from "
+                ostr << "<app>: Tracer Ping reply from "
                      << m_mainConnectionName
                      <<  " on node "
                      << Safir::Dob::ThisNodeParameters::Name();
@@ -504,7 +504,7 @@ Library::OnMessage(const Safir::Dob::MessageProxy messageProxy)
                 Safir::Logging::SendSystemLog(Safir::Logging::Debug,
                                               ostr.str());
 
-                m_tracerDataSender.Send(ToUtf8(ostr.str()));
+                m_tracerDataSender.Send(ToUtf8(ostr.str() + L"\n"));
 
                 return;
             }
@@ -517,7 +517,7 @@ Library::OnMessage(const Safir::Dob::MessageProxy messageProxy)
                 Safir::Logging::SendSystemLog(Safir::Logging::Debug,
                                               help);
 
-                m_tracerDataSender.Send(ToUtf8(help));
+                m_tracerDataSender.Send(ToUtf8(help + L"\n"));
                 return;
             }
         }
@@ -576,8 +576,8 @@ std::wstring
 Library::GetHelpText()
 {
     std::wostringstream out;
-    out << "Trace logger supports the following commands: " << std::endl;
-    out << "  " << std::setw(m_prefixes.LongestPrefixLength()) << "all" << " on/off - Turn logging of all prefices on or off" << std::endl;
+    out << "<app>: Trace logger supports the following commands: " << std::endl;
+    out << "<app>:   " << std::setw(m_prefixes.LongestPrefixLength()) << "all" << " on/off - Turn logging of all prefices on or off" << std::endl;
     out << m_prefixes.GetHelpText();
     return out.str();
 }

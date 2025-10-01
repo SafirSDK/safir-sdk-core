@@ -121,7 +121,7 @@ public:
         std::unique_lock<std::mutex> lck(m_prefixSearchLock);
         for (const auto& prefix: m_prefixes)
         {
-            out << "  " << std::setw (m_longestPrefix) << prefix.m_prefix << " on/off - Turn logging of this prefix on or off. Currently "<<
+            out << "<app>:   " << std::setw (m_longestPrefix) << prefix.m_prefix << " on/off - Turn logging of this prefix on or off. Currently "<<
                 (prefix.m_isEnabled?"on":"off") <<std::endl;
         }
         return out.str();
