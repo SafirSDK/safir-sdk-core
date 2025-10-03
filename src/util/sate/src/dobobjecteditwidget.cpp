@@ -300,7 +300,7 @@ void DobObjectEditWidget::Init()
             if (checked)
             {
                 connect(m_dob, &DobHandler::OnEntity, this, &DobObjectEditWidget::OnLiveUpdateEntity);
-
+                m_dob->SubscribeEntity(m_typeId, {}, false); // Restart subscription to get latest state
             }
             else
             {
