@@ -137,7 +137,6 @@ QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::C
     case MeterPerSecondSquared32MemberType:
     case Newton32MemberType:
     case Pascal32MemberType:
-    case Radian32MemberType:
     case RadianPerSecond32MemberType:
     case RadianPerSecondSquared32MemberType:
     case SquareMeter32MemberType:
@@ -145,9 +144,10 @@ QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::C
     case Volt32MemberType:
     case Watt32MemberType:
         return static_cast<const Float32Container&>(container).GetVal();
-
     case Second32MemberType:
-        return Second64ToVariant(static_cast<const Float64Container&>(container).GetVal(), role);
+        return Second64ToVariant(static_cast<Safir::Dob::Typesystem::Si64::Second>(static_cast<const Float32Container&>(container).GetVal()), role);
+    case Radian32MemberType:
+        return Radian64ToVariant(static_cast<Safir::Dob::Typesystem::Si64::Radian>(static_cast<const Float32Container&>(container).GetVal()), role);
 
     case Float64MemberType:
     case Ampere64MemberType:
@@ -161,7 +161,6 @@ QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::C
     case MeterPerSecondSquared64MemberType:
     case Newton64MemberType:
     case Pascal64MemberType:
-    case Radian64MemberType:
     case RadianPerSecond64MemberType:
     case RadianPerSecondSquared64MemberType:
     case SquareMeter64MemberType:
@@ -169,8 +168,10 @@ QVariant InstancesModelUtils::ContainerToVariant(const Safir::Dob::Typesystem::C
     case Volt64MemberType:
     case Watt64MemberType:
         return static_cast<const Float64Container&>(container).GetVal();
-    case Second64MemberType:
+    case Second64MemberType:        
         return Second64ToVariant(static_cast<const Float64Container&>(container).GetVal(), role);
+    case Radian64MemberType:
+        return Radian64ToVariant(static_cast<const Float64Container&>(container).GetVal(), role);
     }
     throw std::logic_error("Unhandled MemberType");
 }
@@ -352,25 +353,34 @@ QVariant InstancesModelUtils::Second64ToVariant(const Safir::Dob::Typesystem::Si
 {
     if (role == Qt::ToolTipRole)
     {
-        return QString("Seconds:\t%1\n"
-                       "UTC:\t%2\n"
-                       "Local:\t%3")
-            .arg(seconds)
-            .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToPtime(seconds))).replace("T", " "))
-            .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToLocalTime(seconds))).replace("T", " "));
+        return Utilities::SecondsToTooltipText(seconds);
     }
     else
     {
         const auto time = Safir::Time::TimeProvider::ToPtime(seconds);
         if (time.date().year() > 2015 && time.date().year() < 2100)
         {
-            return QString::fromStdString(boost::posix_time::to_iso_extended_string(time)).replace("T", " ");
+            try
+            {
+                return QString::fromStdString(boost::posix_time::to_iso_extended_string(time)).replace("T", " ");
+
+            } catch (const boost::gregorian::bad_year&) { return seconds; }
         }
         else
         {
             return seconds;
         }
     }
+}
+
+QVariant InstancesModelUtils::Radian64ToVariant(const Safir::Dob::Typesystem::Si64::Radian rad, const int role)
+{
+    if (role == Qt::ToolTipRole)
+    {
+        return { Utilities::RadiansToTooltipText(rad) };
+    }
+
+    return { rad };
 }
 
 

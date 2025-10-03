@@ -65,4 +65,7 @@ private:
 
     static QVariant Second64ToVariant(const Safir::Dob::Typesystem::Si64::Second seconds,
                                       const int role);
+
+    static QVariant Radian64ToVariant(const Safir::Dob::Typesystem::Si64::Radian rad,
+                                      const int role);
 };

@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include "utilities.h"
 #include <Safir/Dob/Typesystem/Operations.h>
-
 #include <QRegularExpression>
 
 namespace sdt = Safir::Dob::Typesystem;

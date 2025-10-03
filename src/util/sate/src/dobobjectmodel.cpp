@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "dobobjectmodel.h"
+#include "utilities.h"
 
 #include <QColor>
 #include <QFont>
@@ -29,9 +30,6 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QDebug>
-#include <qmath.h>
-
-#include <Safir/Time/TimeProvider.h>
 
 namespace {
 static const int NumberOfColumns = 5;
@@ -284,9 +282,7 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
                 auto seconds = item->GetValue().toDouble(&ok);
                 if (ok)
                 {
-                    return QString("GMT: %1\nLocal: %2")
-                        .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToPtime(seconds))).replace("T", " "))
-                        .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToLocalTime(seconds))).replace("T", " "));
+                    return Utilities::SecondsToTooltipText(seconds);
                 }
             }
             break;
@@ -298,7 +294,7 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
                 auto rad = item->GetValue().toDouble(&ok);
                 if (ok)
                 {
-                    return QString::number(qRadiansToDegrees(rad), 'f', 2) + " degrees";
+                    return Utilities::RadiansToTooltipText(rad);
                 }
             }
             break;

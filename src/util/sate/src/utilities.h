@@ -23,9 +23,10 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Time/TimeProvider.h>
 #include <Safir/Dob/Typesystem/EntityId.h>
-
 #include <QString>
+#include <qmath.h>
 
 class Utilities
 {
@@ -49,4 +50,25 @@ public:
         return ok ? T(num) : T(s.trimmed().toStdWString());
     }
 
+    template <class SecondsT>
+    static QString SecondsToTooltipText(SecondsT seconds)
+    {
+        try
+        {
+            return QString("Seconds:\t%1\n"
+                           "UTC:\t%2\n"
+                           "Local:\t%3")
+                .arg(seconds)
+                .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToPtime(seconds))).replace("T", " "))
+                .arg(QString::fromStdString(boost::posix_time::to_iso_extended_string(Safir::Time::TimeProvider::ToLocalTime(seconds))).replace("T", " "));
+        } catch (const boost::gregorian::bad_year&) {} // valid year range is year 1400 - 9999
+
+        return QString("Seconds:\t%1").arg(seconds);
+    }
+
+    template <class RadiansT>
+    static QString RadiansToTooltipText(RadiansT rad)
+    {
+        return QString("Radians:\t%1\nDegrees:\t%2").arg(rad).arg(QString::number(qRadiansToDegrees(rad), 'f', 2));
+    }
 };
