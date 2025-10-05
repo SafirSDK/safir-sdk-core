@@ -35,7 +35,6 @@ class QHBoxLayout;
 class QLineEdit;
 class QScrollArea;
 class QTableView;
-class ColumnSortFilterProxyModel;
 class TracerDataReceiver;
 
 class LogWidget
@@ -74,7 +73,8 @@ public slots:
      * Enable or disable follow mode.
      *
      * When follow mode is enabled the view will automatically scroll
-     * to the newest log entry when new rows are appended.
+     * to the newest log entry when new rows are appended, and any
+     * existing row selection will be cleared.
      */
     void SetFollowModeEnabled(bool enabled = true);
     /** Scroll view to the newest entry without toggling follow mode. */
@@ -101,7 +101,6 @@ private:
     QScrollArea* m_filterScroller;
     QList<QWidget*> m_filters;
     const QFont m_fixedFont;
-    ColumnSortFilterProxyModel* m_proxyModel = nullptr;
     LogModel* const m_model;
 
     // Debounce helpers
@@ -110,6 +109,10 @@ private:
 
     // Follow-mode flag: when true, the view keeps the latest row visible.
     bool                  m_followMode = true;
+    // Guard flag: when true the selectionChanged-handler will ignore the
+    // signal.  Used while we programmatically clear the selection when
+    // enabling follow-mode so that follow-mode is not disabled again.
+    bool                  m_ignoreSelectionChange = false;
 
     // View-stability helpers: remember which row is currently at the top
     // of the viewport and how many rows will be removed so we can keep

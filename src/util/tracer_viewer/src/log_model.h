@@ -28,8 +28,10 @@
 #include <boost/circular_buffer/space_optimized.hpp>
 #include <QString>
 #include <QDateTime>
+#include <QRegularExpression>
 #include <memory>
 #include <vector>
+#include <map>
 #include "log_entry.h"
 #include "highlight_rule.h"
 class TracerDataReceiver;
@@ -72,11 +74,17 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    // Convenience function to add a single log entry
+    // Convenience function to add a single log entry.
+    // Simply forwards to addEntries() to keep all logic in one place.
     void addEntry(const LogEntry& entry);
 
     // Efficient bulk-insert of many entries at once
     void addEntries(std::vector<LogEntry>&& entries);
+
+public slots:
+    /** Add / clear column filters (stub – real filtering in later steps). */
+    void setFilter(int column, const QRegularExpression& regex);
+    void clearFilter(int column);
 
     // ------------------------------------------------------------------
     //  Test-data helper
@@ -99,8 +107,22 @@ public:
     void SetHighlightRules(const std::vector<HighlightRule>& rules);
 
 private:
+    /* -- filtering helpers -------------------------------------------------- */
+    bool passesFilters(const LogEntry& entry) const;
+    void rebuildVisible();
+
     const std::shared_ptr<TracerDataReceiver> m_dataReceiver;
     boost::circular_buffer_space_optimized<LogEntry> m_entries;
+
+    /* visible rows after filtering (stores logical indices) */
+    std::vector<int> m_visibleRows;
+
+    /* logical index represented by m_entries.front() */
+    int m_frontIndex = 0;
+
+    /* step-migration: store active column filters */
+    std::map<int, QRegularExpression> m_filters;
+
     std::vector<HighlightRule> m_highlightRules;
 };
 

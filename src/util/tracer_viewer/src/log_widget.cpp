@@ -39,9 +39,13 @@
 #include <QStringList>
 #include <set>
 #include <QShortcut>
+#include <QRegularExpression>
+#include <QItemSelection>
 #include "selectable_text_delegate.h"
 #include <algorithm>
 #include <QDebug>
+
+//TODO multiselect when a lot of data is coming in is behaving strangely
 
 namespace
 {
@@ -84,35 +88,27 @@ public:
 
     void clearFilterRegularExpression(const int column)
     {
-        m_filters.erase(column);
+        if (auto* lm = qobject_cast<LogModel*>(sourceModel()))
+            lm->clearFilter(column);
         invalidateFilter();
     }
 
     void setFilterRegularExpression(const int column, const QRegularExpression& regex)
     {
-        m_filters[column] = regex;
+        if (auto* lm = qobject_cast<LogModel*>(sourceModel()))
+            lm->setFilter(column, regex);
         invalidateFilter();
     }
 
 protected:
-    bool filterAcceptsRow(int source_row, const QModelIndex&) const override
+    bool filterAcceptsRow(int, const QModelIndex&) const override
     {
-        for (const auto& filter: m_filters)
-        {
-            const auto column = filter.first;
-            const auto& regex = filter.second;
-            const auto& data = sourceModel()->data(sourceModel()->index(source_row, column), filterRole()).toString();
-            if (!regex.match(data).hasMatch())
-            {
-                return false;
-            }
-        }
+        /* filtering handled by LogModel – always accept here */
         return true;
     }
 
 
 private:
-    std::map<int, QRegularExpression> m_filters;
 };
 
 
@@ -196,6 +192,13 @@ LogWidget::LogWidget(LogModel* model, QWidget* parent)
                 }
                 m_pendingFilterColumns.clear();
             });
+    /* Handle modelReset emitted after bulk updates when filters are active */
+    connect(m_model, &QAbstractItemModel::modelReset, this,
+            [this]()
+            {
+                if (m_followMode)
+                    m_table->scrollToBottom();
+            });
     // Disable follow-mode when the user manually moves the vertical scroll-bar
     connect(m_table->verticalScrollBar(), &QAbstractSlider::actionTriggered, this,
             [this](int){ SetFollowModeEnabled(false); });
@@ -216,7 +219,7 @@ LogWidget::LogWidget(LogModel* model, QWidget* parent)
         {
             for (int i = 0; i < m_table->horizontalHeader()->count(); ++i)
             {
-                auto data = m_proxyModel->headerData(i,Qt::Horizontal, LogModel::HideColumnByDefaultRole);
+                auto data = m_model->headerData(i,Qt::Horizontal, LogModel::HideColumnByDefaultRole);
                 if (data.isValid() && data.toBool())
                 {
                     m_table->hideColumn(i);
@@ -225,10 +228,19 @@ LogWidget::LogWidget(LogModel* model, QWidget* parent)
         },
         Qt::QueuedConnection);
 
-    m_proxyModel = new ColumnSortFilterProxyModel(this);
-    m_proxyModel->setSourceModel(m_model);
+    m_table->setModel(m_model);
 
-    m_table->setModel(m_proxyModel);
+    // ------------------------------------------------------------------
+    //  Any user selection (mouse, keyboard, etc.) disables follow-mode
+    // ------------------------------------------------------------------
+    connect(m_table->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this,
+            [this](const QItemSelection&, const QItemSelection&)
+            {
+                if (m_ignoreSelectionChange)
+                    return;                     // internal change – ignore
+                SetFollowModeEnabled(false);    // user interaction → stop follow
+            });
 
 
     // ------------------------------------------------------------------
@@ -257,7 +269,7 @@ LogWidget::LogWidget(LogModel* model, QWidget* parent)
     }
 
     // Keep view at bottom when new rows are appended while follow mode is on.
-    connect(m_proxyModel, &QAbstractItemModel::rowsInserted, this,
+    connect(m_model, &QAbstractItemModel::rowsInserted, this,
             [this](const QModelIndex&, int, int)
             {
                 if (m_followMode)
@@ -271,7 +283,7 @@ LogWidget::LogWidget(LogModel* model, QWidget* parent)
     //  Keep current top row visible when follow-mode is OFF and old rows
     //  are evicted from the circular buffer.
     // ------------------------------------------------------------------
-    connect(m_proxyModel, &QAbstractItemModel::rowsAboutToBeRemoved, this,
+    connect(m_model, &QAbstractItemModel::rowsAboutToBeRemoved, this,
             [this](const QModelIndex&, int first, int last)
             {
                 Q_UNUSED(first);
@@ -282,14 +294,14 @@ LogWidget::LogWidget(LogModel* model, QWidget* parent)
                 }
             });
 
-    connect(m_proxyModel, &QAbstractItemModel::rowsRemoved, this,
+    connect(m_model, &QAbstractItemModel::rowsRemoved, this,
             [this](const QModelIndex&, int, int)
             {
                 if (!m_followMode && m_topRowBeforeRemoval >= 0)
                 {
                     const int newTop = std::max(0,
                         m_topRowBeforeRemoval - m_rowsAboutToBeRemoved);
-                    m_table->scrollTo(m_proxyModel->index(newTop, 0),
+                    m_table->scrollTo(m_model->index(newTop, 0),
                                       QAbstractItemView::PositionAtTop);
                     m_topRowBeforeRemoval  = -1;
                     m_rowsAboutToBeRemoved = 0;
@@ -342,14 +354,13 @@ void LogWidget::CopySelectionToClipboard()
     QStringList lines;
     lines.reserve(rows.count());
 
-    for (const QModelIndex& proxyRow : rows)
+    for (const QModelIndex& row : rows)
     {
-        const QModelIndex srcRow = m_proxyModel->mapToSource(proxyRow);
         QStringList cols;
         cols.reserve(LogModel::ColumnCount);
         for (int c = 0; c < LogModel::ColumnCount; ++c)
         {
-            cols << m_model->data(m_model->index(srcRow.row(), c)).toString();
+            cols << m_model->data(m_model->index(row.row(), c)).toString();
         }
         lines << cols.join(u'\t');
     }
@@ -365,7 +376,7 @@ void LogWidget::OnFilterTextChanged(const int column, const QString &text)
 
     if (text.isEmpty())
     {
-        m_proxyModel->clearFilterRegularExpression(column);
+        m_model->clearFilter(column);
     }
     else if (!regex.isValid())
     {
@@ -375,7 +386,7 @@ void LogWidget::OnFilterTextChanged(const int column, const QString &text)
     }
     else
     {
-        m_proxyModel->setFilterRegularExpression(column, regex);
+        m_model->setFilter(column, regex);
     }
 
     m_filters[column]->setStyleSheet("");
@@ -555,6 +566,13 @@ void LogWidget::SetFollowModeEnabled(bool enabled)
     {
         // Ensure current latest row is visible when enabling follow
         m_table->scrollToBottom();
+
+        // Clear any current selection so the view does not jump when new
+        // rows arrive while follow-mode is active.  Guard flag prevents the
+        // resulting selectionChanged signal from disabling follow-mode again.
+        m_ignoreSelectionChange = true;
+        m_table->clearSelection();
+        m_ignoreSelectionChange = false;
     }
 }
 

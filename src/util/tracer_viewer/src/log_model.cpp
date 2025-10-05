@@ -22,12 +22,13 @@
 *
 ******************************************************************************/
 #include "log_model.h"
-#include <QAbstractItemView>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <QRandomGenerator>
+#include <QRegularExpression>
 #include <cstddef>
+#include <algorithm>   // std::lower_bound
 #include <QFile>
 #include <QTextStream>
 #include "tracer_data_receiver.h"
@@ -36,8 +37,9 @@ LogModel::LogModel(const std::shared_ptr<TracerDataReceiver>& dataReceiver, QObj
     : QAbstractTableModel(parent)
     , m_dataReceiver(dataReceiver)
 {
-    constexpr std::size_t kMaxRows = 500'000; // adjust as needed
+    constexpr std::size_t kMaxRows = 2'000'000; // adjust as needed
     m_entries.set_capacity(kMaxRows);
+    rebuildVisible();                       // all rows (none yet) are visible
 
     // Register callback to receive ready batches
     if (m_dataReceiver)
@@ -51,6 +53,28 @@ LogModel::LogModel(const std::shared_ptr<TracerDataReceiver>& dataReceiver, QObj
                 addEntries(std::move(batch));
             });
     }
+}
+
+/* ------------------------------------------------------------------
+ *  Column filtering – initial stub implementation (step-migration)
+ * ----------------------------------------------------------------*/
+void LogModel::setFilter(int column, const QRegularExpression& regex)
+{
+    beginResetModel();
+    if (regex.isValid())
+        m_filters[column] = regex;
+    else
+        m_filters.erase(column);
+    rebuildVisible();
+    endResetModel();
+}
+
+void LogModel::clearFilter(int column)
+{
+    beginResetModel();
+    m_filters.erase(column);
+    rebuildVisible();
+    endResetModel();
 }
 
 /* ---------------------------------------------------------------------------------
@@ -125,6 +149,7 @@ LogModel::LogModel(const QString& csvFilePath, QObject* parent)
                                      QString::fromStdString(msgStr)});
     }
 
+    rebuildVisible();
     endResetModel();
 }
 
@@ -133,10 +158,8 @@ LogModel::~LogModel() = default;
 int LogModel::rowCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
-    {
         return 0;
-    }
-    return static_cast<int>(m_entries.size());
+    return static_cast<int>(m_visibleRows.size());
 }
 
 int LogModel::columnCount(const QModelIndex& parent) const
@@ -231,7 +254,8 @@ QVariant LogModel::data(const QModelIndex& index, int role) const
     // --------------------------------------------------------------
     if (role == Qt::BackgroundRole || role == Qt::ForegroundRole)
     {
-        const LogEntry& entry = m_entries.at(index.row());
+        const LogEntry& entry = m_entries.at(
+            m_visibleRows.at(index.row()) - m_frontIndex);
         for (const auto& rule : m_highlightRules)
         {
             if (rule.regex.isValid() &&
@@ -255,7 +279,8 @@ QVariant LogModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
-    const LogEntry& entry = m_entries.at(index.row());
+    const LogEntry& entry = m_entries.at(
+        m_visibleRows.at(index.row()) - m_frontIndex);
 
     switch (index.column())
     {
@@ -274,26 +299,6 @@ QVariant LogModel::data(const QModelIndex& index, int role) const
     default:
         return QVariant();
     }
-}
-
-void LogModel::addEntry(const LogEntry& entry)
-{
-    // If the circular buffer is already full the next push_back will
-    // silently drop the first element.  Tell the view that this row is
-    // going away and remove it explicitly so the model and view stay
-    // in sync.
-    if (m_entries.full())
-    {
-        beginRemoveRows(QModelIndex(), 0, 0);
-        m_entries.pop_front();
-        endRemoveRows();
-    }
-
-    const int newRow = static_cast<int>(m_entries.size());
-
-    beginInsertRows(QModelIndex(), newRow, newRow);
-    m_entries.push_back(entry);
-    endInsertRows();
 }
 
 void LogModel::GenerateTestData()
@@ -379,10 +384,10 @@ void LogModel::clear()
     if (m_entries.empty())
         return;
 
-    const int last = static_cast<int>(m_entries.size()) - 1;
-    beginRemoveRows(QModelIndex(), 0, last);
+    beginResetModel();
     m_entries.clear();
-    endRemoveRows();
+    m_visibleRows.clear();
+    endResetModel();
 }
 
 std::size_t LogModel::bufferSize() const
@@ -406,29 +411,168 @@ void LogModel::SetHighlightRules(const std::vector<HighlightRule>& rules)
     }
 }
 
+
+void LogModel::addEntry(const LogEntry& entry)
+{
+    // Delegate to bulk-insert implementation for single entry
+    addEntries(std::vector<LogEntry>{entry});
+}
+
+/**
+ * Insert a batch of log entries while emitting at most
+ * one contiguous remove-range and one contiguous insert-range
+ * to the Qt view.  This keeps UI updates fast even for very
+ * large batches.
+ *
+ *  – m_entries is a circular buffer with fixed capacity
+ *  – m_visibleRows holds *logical* indices (relative to
+ *    m_frontIndex) that pass the current filters.
+ *
+ * Algorithm
+ * ------------------------------------------------------------------
+ *   1. Work out how many oldest rows must be dropped to make room.
+ *   2. Remove the corresponding rows from both the circular buffer
+ *      and m_visibleRows, signalling the view once if any of the
+ *      removed rows were visible.
+ *   3. Append all new rows, collecting those that pass the filters.
+ *   4. Append the new visible indices to m_visibleRows and notify
+ *      the view with a single beginInsertRows / endInsertRows pair.
+ */
 void LogModel::addEntries(std::vector<LogEntry>&& entries)
 {
     if (entries.empty())
         return;
 
-    // Calculate how many existing rows must be removed to make room.
-    const int overflow =
-        static_cast<int>(m_entries.size() + entries.size() - m_entries.capacity());
+    /* --------------------------------------------------------------
+     * 1. How many existing rows must be removed from the buffer?
+     * ------------------------------------------------------------*/
+    const std::size_t curSize   = m_entries.size();
+    const std::size_t capacity  = m_entries.capacity();
+    const std::size_t incoming  = entries.size();
 
-    if (overflow > 0)
+    const std::size_t toRemove =
+        (curSize + incoming > capacity) ? (curSize + incoming - capacity) : 0;
+
+    /* --------------------------------------------------------------
+     * 1a. Remove corresponding *visible* rows, if any
+     * ------------------------------------------------------------*/
+    if (toRemove != 0)
     {
-        beginRemoveRows(QModelIndex(), 0, overflow - 1);
-        for (int i = 0; i < overflow; ++i)
-            m_entries.pop_front();
-        endRemoveRows();
+        const int newFrontIdx = m_frontIndex + static_cast<int>(toRemove);
+
+        // m_visibleRows is sorted – find first element >= newFrontIdx
+        auto eraseEnd = std::lower_bound(m_visibleRows.begin(),
+                                         m_visibleRows.end(),
+                                         newFrontIdx);
+
+        const int visibleRemoved =
+            static_cast<int>(eraseEnd - m_visibleRows.begin());
+
+        if (visibleRemoved > 0)
+        {
+            beginRemoveRows(QModelIndex(), 0, visibleRemoved - 1);
+
+            // ---- keep internal state consistent DURING Qt's remove signal ----
+            m_visibleRows.erase(m_visibleRows.begin(), eraseEnd);
+            for (std::size_t i = 0; i < toRemove; ++i)
+                m_entries.pop_front();
+            m_frontIndex += static_cast<int>(toRemove);
+
+            endRemoveRows();
+        }
+        else
+        {
+            // No visible rows removed – still drop from circular buffer
+            for (std::size_t i = 0; i < toRemove; ++i)
+                m_entries.pop_front();
+            m_frontIndex += static_cast<int>(toRemove);
+        }
     }
 
-    const int first = static_cast<int>(m_entries.size());
-    const int last  = first + static_cast<int>(entries.size()) - 1;
+    /* --------------------------------------------------------------
+     * 2. Append new rows, remembering those that are visible
+     * ------------------------------------------------------------*/
+    std::vector<int> newVisible;             // logical indices
+    newVisible.reserve(entries.size());
 
-    beginInsertRows(QModelIndex(), first, last);
     for (LogEntry& e : entries)
+    {
+        const int idx = m_frontIndex + static_cast<int>(m_entries.size());
+
+        if (passesFilters(e))
+            newVisible.push_back(idx);
+
         m_entries.push_back(std::move(e));
-    endInsertRows();
+    }
+
+    /* --------------------------------------------------------------
+     * 3. Notify view about newly visible rows (contiguous block)
+     * ------------------------------------------------------------*/
+    if (!newVisible.empty())
+    {
+        const int firstRow = static_cast<int>(m_visibleRows.size());
+        const int lastRow  = firstRow + static_cast<int>(newVisible.size()) - 1;
+
+        beginInsertRows(QModelIndex(), firstRow, lastRow);
+        m_visibleRows.insert(m_visibleRows.end(),
+                             newVisible.begin(), newVisible.end());
+        endInsertRows();
+    }
 }
 
+/* ------------------------------------------------------------------
+ *  Filtering helpers
+ * ----------------------------------------------------------------*/
+bool LogModel::passesFilters(const LogEntry& entry) const
+{
+    if (m_filters.empty())
+        return true;
+
+    for (const auto& kv : m_filters)
+    {
+        const int column = kv.first;
+        const QRegularExpression& rx = kv.second;
+        if (!rx.isValid())
+            continue;
+
+        QString value;
+        switch (column)
+        {
+        case SendTime:
+            value = entry.sendTime.toString(QStringLiteral("yyyy-MM-dd hh:mm:ss.zzz"));
+            break;
+        case ReceiveTime:
+            value = entry.receiveTime.toString(QStringLiteral("yyyy-MM-dd hh:mm:ss.zzz"));
+            break;
+        case ProgramName:
+            value = entry.programName;
+            break;
+        case NodeName:
+            value = entry.nodeName;
+            break;
+        case Prefix:
+            value = entry.prefix;
+            break;
+        case Message:
+            value = entry.message;
+            break;
+        default:
+            value.clear();
+        }
+
+        if (!rx.match(value).hasMatch())
+            return false;
+    }
+    return true;
+}
+
+void LogModel::rebuildVisible()
+{
+    m_visibleRows.clear();
+    m_visibleRows.reserve(m_entries.size());
+    for (int i = 0; i < static_cast<int>(m_entries.size()); ++i)
+    {
+        if (passesFilters(m_entries[i]))
+            m_visibleRows.push_back(m_frontIndex + i);
+    }
+}
