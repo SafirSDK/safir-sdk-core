@@ -482,6 +482,7 @@ void TracerDataReceiver::handlePacket(const QByteArray& datagram,
     auto& state = m_senderState[senderId];
     const std::uint32_t seq         = header->sequenceNumber;
     const std::uint32_t expectedSeq = state.nextExpected;
+    const bool firstPacket = (state.recent.empty() && expectedSeq == 0);
 
     // --------------------------------------------------------------
     // Parse variable-length strings
@@ -517,16 +518,24 @@ void TracerDataReceiver::handlePacket(const QByteArray& datagram,
     }
     else if (seq > expectedSeq)
     {
-        // Gap – packets missing before this one
-        const std::uint32_t missing = seq - expectedSeq;
-        lines << QStringLiteral("### %1 packet(s) missing before sequence %2 from %3@%4 ###")
-                     .arg(missing)
-                     .arg(seq)
-                     .arg(programName)
-                     .arg(nodeName);
+        if (firstPacket)
+        {
+            // First packet from this sender: initialise sequence tracking
+            state.nextExpected = seq + 1;
+        }
+        else
+        {
+            // Gap – packets missing before this one
+            const std::uint32_t missing = seq - expectedSeq;
+            lines << QStringLiteral("### %1 packet(s) missing before sequence %2 from %3@%4 ###")
+                         .arg(missing)
+                         .arg(seq)
+                         .arg(programName)
+                         .arg(nodeName);
 
-        m_droppedCount.fetch_add(missing, std::memory_order_relaxed);
-        state.nextExpected = seq + 1;
+            m_droppedCount.fetch_add(missing, std::memory_order_relaxed);
+            state.nextExpected = seq + 1;
+        }
     }
     else // seq < expectedSeq  => duplicate *or* late
     {
