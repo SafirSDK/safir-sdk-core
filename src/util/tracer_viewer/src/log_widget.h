@@ -36,6 +36,7 @@ class QLineEdit;
 class QScrollArea;
 class QTableView;
 class TracerDataReceiver;
+class SettingsManager;
 
 class LogWidget
     : public QWidget
@@ -43,7 +44,8 @@ class LogWidget
     Q_OBJECT
 
 public:
-    LogWidget(const std::shared_ptr<TracerDataReceiver>& dataReceiver, QWidget* parent);
+
+    LogWidget(const std::shared_ptr<SettingsManager>& settingsManager, const std::shared_ptr<TracerDataReceiver>& dataReceiver, QWidget* parent);
     LogWidget(const QString& file, QWidget* parent);
     ~LogWidget();
 
@@ -93,8 +95,8 @@ signals:
     void FollowModeChanged(bool enabled);
 
 private:
-    LogWidget(LogModel* model, QWidget* parent);
-    
+    LogWidget(const std::shared_ptr<SettingsManager>& settingsManager, LogModel* model, QWidget* parent);
+
     QTableView* m_table;
     QWidget* m_filterArea;
     QHBoxLayout* m_filterAreaLayout;
@@ -102,6 +104,10 @@ private:
     QList<QWidget*> m_filters;
     const QFont m_fixedFont;
     LogModel* const m_model;
+    std::shared_ptr<SettingsManager> m_settingsManager;
+
+    void  SaveColumnState() const;
+    void  LoadColumnState();
 
     // Debounce helpers
     QTimer*               m_filterDebounceTimer = nullptr;
@@ -120,4 +126,3 @@ private:
     int                   m_topRowBeforeRemoval = -1;
     int                   m_rowsAboutToBeRemoved = 0;
 };
-

@@ -1,0 +1,72 @@
+/******************************************************************************
+*
+* Copyright Saab AB, 2025 (http://safirsdkcore.com)
+*
+* Created by: Lars Hagström
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
+
+#pragma once
+
+#include <QSettings>
+#include <vector>
+#include "highlight_rule.h"
+#include <QObject>
+
+/**
+ * Centralised application-wide settings access.
+ *
+ * Uses an INI file for storage.
+ */
+class SettingsManager
+{
+public:
+    explicit SettingsManager();
+
+    void   clearAll();
+
+    // ------------------------------------------------------------------
+    // Highlights
+    // ------------------------------------------------------------------
+    void saveHighlightRules(const std::vector<HighlightRule>&);
+    std::vector<HighlightRule> loadHighlightRules() const;
+
+    // ------------------------------------------------------------------
+    // UI theme handling
+    // ------------------------------------------------------------------
+    enum class Theme { Light = 0, Dark = 1 };
+    void   saveTheme(Theme);
+    Theme  loadTheme() const;
+
+    void saveTouchMode(bool touchMode);
+    bool loadTouchMode() const;
+    
+    // ------------------------------------------------------------------
+    // Column state (sizes + visibility) for LogWidget -------------------
+    // ------------------------------------------------------------------
+    void   saveColumnState(const QString& id,
+                           const QList<int>& sizes,
+                           const QList<bool>& visibility);
+    bool   loadColumnState(const QString& id,
+                           QList<int>& sizes,
+                           QList<bool>& visibility) const;
+
+private:
+    QSettings m_settings;                                       // INI backend
+};

@@ -29,14 +29,14 @@
 #include <QStatusBar>
 
 // Utility helper to show a message in the application status bar for a
-// limited amount of time (default 5 s).  No-op if no active main window.
-inline void ShowStatusBarMessage(const QString& msg, int timeoutMs = 5000)
+// limited amount of time
+inline void ShowStatusBarMessage(const QString& msg)
 {
     if (auto *mw = qobject_cast<QMainWindow*>(QApplication::activeWindow()))
     {
         if (mw->statusBar())
         {
-            mw->statusBar()->showMessage(msg, timeoutMs);
+            mw->statusBar()->showMessage(msg, 10000);
         }
     }
 }

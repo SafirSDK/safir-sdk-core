@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "log_widget.h"
 #include "log_model.h"
+#include "settings_manager.h"
 #include "highlight_rule.h"
 #include <QTableView>
 #include <QScrollArea>
@@ -112,7 +113,7 @@ private:
 };
 
 
-LogWidget::LogWidget(LogModel* model, QWidget* parent)
+LogWidget::LogWidget(const std::shared_ptr<SettingsManager>& settingsManager, LogModel* model, QWidget* parent)
     : QWidget(parent)
     , m_table(new QTableView(this))
     , m_filterArea(new QFrame())
@@ -120,6 +121,7 @@ LogWidget::LogWidget(LogModel* model, QWidget* parent)
     , m_filterScroller(new QScrollArea(this))
     , m_fixedFont(fixedFont())
     , m_model(model)
+    , m_settingsManager(settingsManager)
     , m_filterDebounceTimer(new QTimer(this))
     , m_followMode(true)
 {
@@ -230,6 +232,11 @@ LogWidget::LogWidget(LogModel* model, QWidget* parent)
 
     m_table->setModel(m_model);
 
+    // restore any saved column sizes / visibility
+    LoadColumnState();
+    // save once when the widget is being destroyed
+    /* removed unsafe destroyed()-connection */
+
     // ------------------------------------------------------------------
     //  Any user selection (mouse, keyboard, etc.) disables follow-mode
     // ------------------------------------------------------------------
@@ -316,14 +323,16 @@ LogWidget::LogWidget(LogModel* model, QWidget* parent)
             this, &LogWidget::CopySelectionToClipboard);
 }
 
-LogWidget::LogWidget(const std::shared_ptr<TracerDataReceiver>& dataReceiver, QWidget* parent)
-    : LogWidget(new LogModel(dataReceiver, nullptr), parent)
+LogWidget::LogWidget(const std::shared_ptr<SettingsManager>& settingsManager,
+                     const std::shared_ptr<TracerDataReceiver>& dataReceiver,
+                     QWidget* parent)
+    : LogWidget(settingsManager, new LogModel(dataReceiver, nullptr), parent)
 {
     m_model->setParent(this);
 }
 
 LogWidget::LogWidget(const QString& file, QWidget* parent)
-    : LogWidget(new LogModel(file, nullptr), parent)
+    : LogWidget(nullptr, new LogModel(file, nullptr), parent)
 {
     m_model->setParent(this);
 }
@@ -368,7 +377,10 @@ void LogWidget::CopySelectionToClipboard()
     QGuiApplication::clipboard()->setText(lines.join(u'\n'));
 }
 
-LogWidget::~LogWidget() = default;
+LogWidget::~LogWidget()
+{
+    SaveColumnState();          // safe: runs before sub-objects are destroyed
+}
 
 void LogWidget::OnFilterTextChanged(const int column, const QString &text)
 {
@@ -405,6 +417,7 @@ void LogWidget::OnSectionResized(const int logicalIndex, const int /*oldSize*/, 
     }
 
     PositionFilters();
+    SaveColumnState();
 }
 
 void LogWidget::OnSectionCountChanged(const int /*oldCount*/, const int newCount)
@@ -522,6 +535,7 @@ void LogWidget::RunColumnContextMenu(const QPoint& globalPos, const int logicalI
         auto column = chosenAction->property("columnNumber").toInt();
         m_table->setColumnHidden(column, !chosenAction->isChecked());
     }
+    SaveColumnState();
 }
 
 void LogWidget::PositionFilters()
@@ -597,4 +611,46 @@ void LogWidget::GenerateTestData()
 {
     if (m_model)
         m_model->GenerateTestData();
+}
+
+/* --------------------------------------------------------------------
+ *  Persist and restore column sizes + visibility
+ * ------------------------------------------------------------------*/
+void LogWidget::SaveColumnState() const
+{
+    if (!m_settingsManager)
+        return;
+
+    QList<int>   sizes;
+    QList<bool>  visible;
+    const int cols = m_table->horizontalHeader()->count();
+    sizes.reserve(cols);
+    visible.reserve(cols);
+
+    for (int c = 0; c < cols; ++c)
+    {
+        sizes   << m_table->columnWidth(c);
+        visible << !m_table->isColumnHidden(c);
+    }
+    m_settingsManager->saveColumnState(QStringLiteral("LogWidget"), sizes, visible);
+}
+
+void LogWidget::LoadColumnState()
+{
+    if (!m_settingsManager)
+        return;
+
+    QList<int>   sizes;
+    QList<bool>  visible;
+    if (!m_settingsManager->loadColumnState(QStringLiteral("LogWidget"), sizes, visible))
+        return;
+
+    const int cols = m_table->horizontalHeader()->count();
+    const int n    = std::min(cols, static_cast<int>(sizes.size()));
+
+    for (int c = 0; c < n; ++c)
+    {
+        m_table->setColumnWidth(c, sizes[c]);
+        m_table->setColumnHidden(c, !visible[c]);
+    }
 }

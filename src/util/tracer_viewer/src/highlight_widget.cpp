@@ -24,6 +24,7 @@
 #include "highlight_widget.h"
 #include "ui_highlight_widget.h"
 #include "edit_button_delegate.h"
+#include "settings_manager.h"
 
 #include <QTableWidget>
 #include <QHeaderView>
@@ -45,8 +46,9 @@ static constexpr int kCategoryPaletteCount = sizeof(kCategoryPalette) / sizeof(k
 static constexpr int kMinDist2 = 100 * 100;
 }
 
-HighlightWidget::HighlightWidget(QWidget* parent)
+HighlightWidget::HighlightWidget(const std::shared_ptr<SettingsManager>& settingsManager, QWidget* parent)
     : QWidget(parent)
+    , m_settingsManager(settingsManager)
 {
     auto* ui = new Ui::HighlightWidget;
     ui->setupUi(this);
@@ -98,6 +100,29 @@ HighlightWidget::HighlightWidget(QWidget* parent)
     OnAddRow();                                         // row 1
     if (auto* item1 = m_table->item(1, 0))
         item1->setText("warning");
+
+    // ------------------------------------------------------------------
+    // Replace defaults with any user-saved rules
+    // ------------------------------------------------------------------
+    const auto saved = m_settingsManager->loadHighlightRules();
+    if (!saved.empty())
+    {
+        m_table->setRowCount(0);
+        for (const auto& r : saved)
+        {
+            OnAddRow();
+            const int row = m_table->rowCount() - 1;
+            if (auto* patItem = m_table->item(row, 0))
+                patItem->setText(r.regex.pattern());
+            if (auto* colItem = m_table->item(row, 1))
+                colItem->setBackground(r.color);
+        }
+    }
+
+    // Persist whenever the user edits the table
+    connect(this, &HighlightWidget::rulesChanged, this, [this] {
+        m_settingsManager->saveHighlightRules(rules());
+    });
 }
 
 // ------------------------------------------------------------------

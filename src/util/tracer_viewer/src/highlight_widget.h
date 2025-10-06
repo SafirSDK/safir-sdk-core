@@ -24,7 +24,10 @@
 #pragma once
 
 #include <QWidget>
+#include <vector>
+#include <memory>
 #include "highlight_rule.h"
+#include "settings_manager.h"
 
 class QTableWidget;
 class QPushButton;
@@ -34,7 +37,7 @@ class HighlightWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit HighlightWidget(QWidget* parent = nullptr);
+    explicit HighlightWidget(const std::shared_ptr<SettingsManager>& settingsManager, QWidget* parent = nullptr);
     std::vector<HighlightRule> rules() const;
 
 signals:
@@ -53,4 +56,5 @@ private:
     QTableWidget* m_table        = nullptr;
     QPushButton*  m_addButton    = nullptr;
     QPushButton*  m_removeButton = nullptr;
+    std::shared_ptr<SettingsManager> m_settingsManager;
 };

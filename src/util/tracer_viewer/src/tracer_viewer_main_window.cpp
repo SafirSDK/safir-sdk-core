@@ -29,6 +29,7 @@
 #include "tracer_data_receiver.h"
 #include "highlight_widget.h"
 #include "highlight_rule.h"
+#include "settings_manager.h"
 
 #include <QFileInfo>
 #include <QCloseEvent>
@@ -52,6 +53,7 @@
 #include <QToolButton>
 #include <QFileDialog>
 #include <QThreadPool>
+#include <QTimer>
 #include <boost/asio/io_context.hpp>
 
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
@@ -61,6 +63,7 @@
 #include <Safir/Dob/ConnectionAspectMisc.h>
 
 #include <Safir/Utilities/Internal/Expansion.h>
+#include <QApplication>
 
 TracerViewerMainWindow::TracerViewerMainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -72,10 +75,12 @@ TracerViewerMainWindow::TracerViewerMainWindow(QWidget *parent)
     , m_bufferLabel(new QLabel(tr("Live buffer: 0%")))
     , m_socketStatusLabel(new QLabel(tr("Tracer: --")))
     , m_isDispatchSignalled()
+    , m_settingsManager(std::make_shared<SettingsManager>())
     , m_dataReceiver(std::make_shared<TracerDataReceiver>())
     , m_ioWork(boost::asio::make_work_guard(m_io))
 {
     ui->setupUi(this);
+
     m_isDispatchSignalled.clear();
 
     // keep constructor readable – delegate real work to helpers
@@ -105,6 +110,13 @@ void TracerViewerMainWindow::BuildUi()
 
     m_dockManager = new ads::CDockManager(this);
     m_dockManager->setStyleSheet("");
+
+    if (m_settingsManager->loadTheme() == SettingsManager::Theme::Dark)
+        ui->actionDarkMode->setChecked(true);
+    else
+        ui->actionLightMode->setChecked(true);
+    ui->actionTouchMode->setChecked(m_settingsManager->loadTouchMode());
+    
     OnThemeChanged();
 
     // central welcome text
@@ -134,14 +146,14 @@ void TracerViewerMainWindow::BuildUi()
     m_editDock->closeDockWidget();
 
     // live-log dock (centre)
-    m_liveLog = new LogWidget(m_dataReceiver, this);
+    m_liveLog = new LogWidget(m_settingsManager, m_dataReceiver, this);
     auto* liveDock = new ads::CDockWidget(m_dockManager, "Live Log");
     liveDock->setWidget(m_liveLog, ads::CDockWidget::ForceNoScrollArea);
     m_dockManager->addDockWidget(ads::CenterDockWidgetArea, liveDock, m_centralDockArea);
     liveDock->toggleViewAction()->setShortcut(QKeySequence(tr("Ctrl+L")));
 
     // highlight rules editor
-    m_highlight = new HighlightWidget;
+    m_highlight = new HighlightWidget(m_settingsManager);
     auto* highlightDock = new ads::CDockWidget(m_dockManager, "Highlight Rules");
     highlightDock->setWidget(m_highlight, ads::CDockWidget::ForceNoScrollArea);
     m_dockManager->addDockWidget(ads::RightDockWidgetArea, highlightDock, m_centralDockArea);
@@ -278,11 +290,14 @@ void TracerViewerMainWindow::WireSignals()
     connect(ui->actionGenerateTestData, &QAction::triggered,
             this, &TracerViewerMainWindow::OnGenerateTestData);
 
+    connect(ui->actionClearAndQuit, &QAction::triggered,
+            this, &TracerViewerMainWindow::OnClearSettingsAndQuit);
+
+
     auto* themeGroup = new QActionGroup(this);
     themeGroup->addAction(ui->actionDarkMode);
     themeGroup->addAction(ui->actionLightMode);
     themeGroup->setExclusive(true);
-
     connect(themeGroup, &QActionGroup::triggered,
             this, &TracerViewerMainWindow::OnThemeChanged);
     connect(ui->actionTouchMode, &QAction::triggered,
@@ -475,6 +490,7 @@ void TracerViewerMainWindow::OnThemeChanged()
 
     if (ui->actionDarkMode->isChecked())
     {
+        qDebug() << "OnThemeChanged dark";
         mainStyleSheet.append(readStyleSheet(":qdarkstyle/dark/darkstyle.qss"));
         mainStyleSheet.append(readStyleSheet(":customizations/tweaks-both.qss"));
         mainStyleSheet.append(readStyleSheet(":customizations/tweaks-dark.qss"));
@@ -483,6 +499,7 @@ void TracerViewerMainWindow::OnThemeChanged()
     }
     else
     {
+        qDebug() << "OnThemeChanged light";
         mainStyleSheet.append(readStyleSheet(":qdarkstyle/light/lightstyle.qss"));
         mainStyleSheet.append(readStyleSheet(":customizations/tweaks-both.qss"));
         mainStyleSheet.append(readStyleSheet(":customizations/tweaks-light.qss"));
@@ -492,6 +509,12 @@ void TracerViewerMainWindow::OnThemeChanged()
 
     qApp->setStyleSheet(mainStyleSheet.join("\n"));
     m_dockManager->setStyleSheet(adsStyleSheet.join("\n"));
+
+    // Persist the new theme selection
+    m_settingsManager->saveTheme(ui->actionDarkMode->isChecked()
+                                ? SettingsManager::Theme::Dark
+                                : SettingsManager::Theme::Light);
+    m_settingsManager->saveTouchMode(ui->actionTouchMode->isChecked());
 }
 
 void TracerViewerMainWindow::OnEditTracer(const std::int64_t instanceId)
@@ -634,5 +657,22 @@ void TracerViewerMainWindow::OnGenerateTestData()
 {
     if (m_liveLog)
         m_liveLog->GenerateTestData();
+}
+
+void TracerViewerMainWindow::OnClearSettingsAndQuit()
+{
+    const auto reply = QMessageBox::question(
+        this,
+        tr("Confirm"),
+        tr("This will clear ALL Tracer Viewer settings and quit the application.\n\n"
+           "Do you want to continue?"),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        m_settingsManager->clearAll();
+        QApplication::quit();
+    }
 }
 

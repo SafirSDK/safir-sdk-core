@@ -47,6 +47,7 @@
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="separator"/>
+    <addaction name="actionClearAndQuit"/>
     <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -58,7 +59,7 @@
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Dark Mode</string>
@@ -156,6 +157,11 @@
    </property>
    <property name="toolTip">
     <string>Fill the live log with randomly generated data. Meant for testing the performance of filtering, etc.</string>
+   </property>
+  </action>
+  <action name="actionClearAndQuit">
+   <property name="text">
+    <string>Clear settings and quit...</string>
    </property>
   </action>
  </widget>

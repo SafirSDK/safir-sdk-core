@@ -236,6 +236,15 @@ namespace Internal
         return deps;
     }
 
+    std::string ConfigHelper::GetToolsConfigDirectory()
+    {
+#ifdef LLUF_CONFIG_READER_USE_WINDOWS
+        typedef WindowsPathFinder PathFinder;
+#else
+        typedef LinuxPathFinder PathFinder;
+#endif
+        return (PathFinder::UserConfigDirectory() / "tools").str();
+    }
 }
 }
 }

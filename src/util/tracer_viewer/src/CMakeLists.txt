@@ -17,6 +17,7 @@ set(sources
   log_widget.cpp
   log_model.cpp
   highlight_widget.cpp
+  settings_manager.cpp
   tracer_viewer.rc
 )
 
@@ -37,6 +38,7 @@ set(widget_headers
 set(headers
   common.h
   highlight_rule.h
+  settings_manager.h
 )
 
 if (NOT TARGET Qt::Widgets)

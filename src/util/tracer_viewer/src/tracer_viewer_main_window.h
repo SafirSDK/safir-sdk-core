@@ -33,6 +33,7 @@
 
 #include <Safir/Dob/Connection.h>
 #include "highlight_rule.h"
+#include "settings_manager.h"
 
 #ifdef _MSC_VER
 #  pragma warning(push)
@@ -90,6 +91,7 @@ private slots:
     void OnGenerateTestData();
     void OnSaveFile();
     void ApplyHighlightRulesToAllLogs();
+    void OnClearSettingsAndQuit();
 
 private:
     void ConfigureDockManager();
@@ -127,6 +129,7 @@ private:
     bool m_connected = false;
     std::atomic_flag m_isDispatchSignalled;
 
+    std::shared_ptr<SettingsManager>  m_settingsManager;
     AppsWidget* m_apps;
     LogWidget* m_liveLog;
     HighlightWidget* m_highlight;

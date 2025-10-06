@@ -115,6 +115,14 @@ namespace Internal
          */
         static std::set<std::string> GetDouDependencies(const ConfigReader& reader,
                                                         const std::string& moduleName);
+
+
+        /**
+         * Returns the directory in which Safir SDK Tools should store their settings.
+         *
+         * @return Full path to tools settings directory.
+         */
+        static std::string GetToolsConfigDirectory();
     };
 }
 }
