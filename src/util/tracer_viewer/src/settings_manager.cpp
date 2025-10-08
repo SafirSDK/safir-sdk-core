@@ -127,8 +127,11 @@ bool SettingsManager::loadTouchMode() const
 
 void SettingsManager::clearAll()
 {
+    // Remove all key-value pairs held in memory …
     m_settings.clear();
     m_settings.sync();
+
+    // …and also delete the backing INI file to ensure a clean slate
     QFile::remove(m_settings.fileName());
 }
 

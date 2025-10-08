@@ -30,6 +30,7 @@
 #endif
 
 #include <QDialog>
+#include "settings_manager.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -82,6 +83,8 @@ private slots:
     void BuildComplete(const bool result);
 
     void on_showLog_toggled(bool checked);
+    void on_disableUnityBuild_toggled(bool checked);
+    void on_clearSettingsButton_clicked();
 
 private:
     void UpdateInstallButton();
@@ -94,4 +97,5 @@ private:
     bool m_buildRunning;
 
     Ui::Dobmake* ui;
+    SettingsManager m_settingsManager;
 };

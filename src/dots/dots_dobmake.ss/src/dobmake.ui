@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
+    <width>529</width>
     <height>291</height>
    </rect>
   </property>
@@ -285,6 +285,13 @@ If you enable this, you may have to run a Clean before building again.</string>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QPushButton" name="clearSettingsButton">
+       <property name="text">
+        <string>Clear settings...</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">

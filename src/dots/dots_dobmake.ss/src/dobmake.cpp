@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2014-2015,2025 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -38,6 +38,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QApplication>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -78,6 +79,7 @@ Dobmake::Dobmake(QWidget *parent)
     : QDialog(parent)
     , m_buildRunning(false)
     , ui(new Ui::Dobmake)
+    , m_settingsManager()
 {
     ui->setupUi(this);
     ui->douDirectory->setText("");
@@ -94,6 +96,34 @@ Dobmake::Dobmake(QWidget *parent)
 #else
 #  error Dobmake does not know how to handle this platform
 #endif
+
+    //------------------------------------------------------------------
+    // Restore persisted settings --------------------------------------
+    //------------------------------------------------------------------
+    const QString savedDou = m_settingsManager.loadDouDirectory();
+    if (!savedDou.isEmpty()) {
+        ui->douDirectory->setText(savedDou);
+    }
+
+    m_debug   = m_settingsManager.loadDebug();
+    m_release = m_settingsManager.loadRelease();
+
+#if defined(linux) || defined(__linux) || defined(__linux__)
+    ui->debugRadioButton->setChecked(m_debug);
+    ui->releaseRadioButton->setChecked(m_release);
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    ui->debugCheckButton->setChecked(m_debug);
+    ui->releaseCheckButton->setChecked(m_release);
+#endif
+
+    ui->relativeInstall->setChecked(m_settingsManager.loadRelativeInstall());
+    ui->absoluteInstall->setChecked(m_settingsManager.loadAbsoluteInstall());
+    ui->showLog->setChecked(m_settingsManager.loadShowLog());
+    ui->disableUnityBuild->setChecked(m_settingsManager.loadDisableUnityBuild());
+
+    UpdateBuildButton();
+    UpdateInstallButton();
+    UpdateCleanButton();
 }
 
 Dobmake::~Dobmake()
@@ -183,6 +213,8 @@ void Dobmake::on_douDirectory_textChanged(const QString &path)
     UpdateBuildButton();
     UpdateInstallButton();
     UpdateCleanButton();
+
+    m_settingsManager.saveDouDirectory(path);
 }
 
 void Dobmake::on_installDirectory_textChanged(const QString &path)
@@ -226,11 +258,15 @@ void Dobmake::on_installDirectoryBrowse_clicked()
 void Dobmake::on_relativeInstall_clicked()
 {
     UpdateInstallButton();
+    m_settingsManager.saveRelativeInstall(true);
+    m_settingsManager.saveAbsoluteInstall(false);
 }
 
 void Dobmake::on_absoluteInstall_clicked()
 {
     UpdateInstallButton();
+    m_settingsManager.saveRelativeInstall(false);
+    m_settingsManager.saveAbsoluteInstall(true);
 }
 
 void Dobmake::UpdateInstallButton()
@@ -397,30 +433,61 @@ void Dobmake::on_debugRadioButton_clicked(bool checked)
 {
     m_debug = checked;
     m_release = !checked;
+
+    m_settingsManager.saveDebug(m_debug);
+    m_settingsManager.saveRelease(m_release);
 }
 
 void Dobmake::on_releaseRadioButton_clicked(bool checked)
 {
     m_debug = !checked;
     m_release = checked;
+
+    m_settingsManager.saveDebug(m_debug);
+    m_settingsManager.saveRelease(m_release);
 }
 
 void Dobmake::on_debugCheckButton_clicked(bool checked)
 {
     m_debug = checked;
+    m_settingsManager.saveDebug(m_debug);
 }
 
 void Dobmake::on_releaseCheckButton_clicked(bool checked)
 {
     m_release = checked;
+    m_settingsManager.saveRelease(m_release);
 }
 
 void Dobmake::on_showLog_toggled(const bool checked)
 {
+    m_settingsManager.saveShowLog(checked);
+
     //This allows the user to check the box while the build is running
     //which will open the log.
     if (m_buildRunning && checked)
     {
         OpenLog();
+    }
+}
+
+void Dobmake::on_disableUnityBuild_toggled(const bool checked)
+{
+    m_settingsManager.saveDisableUnityBuild(checked);
+}
+
+void Dobmake::on_clearSettingsButton_clicked()
+{
+    const QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        tr("Clear settings"),
+        tr("Are you sure you want to clear all settings?\nThe application will exit."),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        m_settingsManager.clearAll();
+        qApp->quit();
     }
 }
