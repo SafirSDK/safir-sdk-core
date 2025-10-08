@@ -42,8 +42,8 @@ const char* kDisableUnityBuildKey = "Dobmake/disableUnityBuild";
 } // namespace
 
 SettingsManager::SettingsManager()
-    : m_settings(QString::fromUtf8(Safir::Utilities::Internal::ConfigHelper::GetToolsConfigDirectory()
-                                   + "/dobmake.ini"),
+    : m_settings(QString::fromUtf8(Safir::Utilities::Internal::ConfigHelper::GetToolsConfigDirectory())
+                 + "/dobmake.ini",
                  QSettings::IniFormat)
 {
     // Make sure the directory exists
