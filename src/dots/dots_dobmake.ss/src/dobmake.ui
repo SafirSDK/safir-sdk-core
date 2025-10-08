@@ -349,6 +349,25 @@ If you enable this, you may have to run a Clean before building again.</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>douDirectory</tabstop>
+  <tabstop>douDirectoryBrowse</tabstop>
+  <tabstop>debugCheckButton</tabstop>
+  <tabstop>releaseCheckButton</tabstop>
+  <tabstop>debugRadioButton</tabstop>
+  <tabstop>releaseRadioButton</tabstop>
+  <tabstop>relativeInstall</tabstop>
+  <tabstop>absoluteInstall</tabstop>
+  <tabstop>installDirectory</tabstop>
+  <tabstop>installDirectoryBrowse</tabstop>
+  <tabstop>showLog</tabstop>
+  <tabstop>disableUnityBuild</tabstop>
+  <tabstop>buildAndInstall</tabstop>
+  <tabstop>cancel</tabstop>
+  <tabstop>clearSettingsButton</tabstop>
+  <tabstop>clean</tabstop>
+  <tabstop>build</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
