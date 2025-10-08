@@ -37,6 +37,9 @@
 #  pragma warning (disable: 4127)
 #  pragma warning (disable: 4701)
 #  pragma warning (disable: 4100)
+#  pragma warning (disable: 4141)
+#  pragma warning (disable: 4267)
+#  pragma warning (disable: 4189)
 #endif
 
 #include <boost/crc.hpp>

@@ -6,7 +6,7 @@ ADD_LIBRARY(communication SHARED ${sources} ${headers} CommunicationMessage.prot
 PROTOBUF_GENERATE(TARGET communication OUT_VAR generated_files)
 
 if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4100 /wd4702")
+  SET_SOURCE_FILES_PROPERTIES(${generated_files} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4100 /wd4702 /wd4141 /wd4189")
 endif()
 
 #Make our INTERNAL headers available to other parts of Core.
