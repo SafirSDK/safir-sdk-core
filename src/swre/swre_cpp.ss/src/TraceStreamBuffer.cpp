@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2025 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -37,7 +37,7 @@ namespace Internal
         m_prefix(prefix),
         m_prefixId(0)
     {
-        AddPrefix();
+
     }
 
     //-------------------------------------------------------
@@ -47,24 +47,27 @@ namespace Internal
     }
 
     //-------------------------------------------------------
-    TraceStreamBuffer::_Tr::int_type 
+    TraceStreamBuffer::_Tr::int_type
     TraceStreamBuffer::uflow()
     {
         return _Tr::eof();
     }
 
     //-------------------------------------------------------
-    TraceStreamBuffer::_Tr::int_type 
+    TraceStreamBuffer::_Tr::int_type
     TraceStreamBuffer::underflow()
     {
         return _Tr::eof();
     }
 
     //-------------------------------------------------------
-    TraceStreamBuffer::_Tr::int_type 
+    TraceStreamBuffer::_Tr::int_type
     TraceStreamBuffer::overflow(_Tr::int_type c)
     {
-        bool success;        
+        bool success;
+
+        Init();
+
         SwreC_TraceAppendWChar(m_prefixId,
                                _Tr::to_char_type(c),
                                success);
@@ -83,6 +86,8 @@ namespace Internal
     {
         using Safir::Dob::Typesystem::Utilities::ToUtf8;
 
+        Init();
+
         bool success;
         SwreC_TraceAppendString(m_prefixId, ToUtf8(std::wstring(s, static_cast<size_t>(num))).c_str(), success);
         if (!success)
@@ -93,9 +98,11 @@ namespace Internal
     }
 
     //-------------------------------------------------------
-    int 
+    int
     TraceStreamBuffer::sync()
     {
+        Init();
+
         bool success;
         SwreC_TraceFlush(success);
         if (!success)
@@ -107,19 +114,19 @@ namespace Internal
     }
 
     //-------------------------------------------------------
-    Safir::Dob::Typesystem::Int64 TraceStreamBuffer::GetPrefixId() const 
+    Safir::Dob::Typesystem::Int64 TraceStreamBuffer::GetPrefixId() const
     {
         return m_prefixId;
     }
 
     //-------------------------------------------------------
     void
-    TraceStreamBuffer::AddPrefix() const
+    TraceStreamBuffer::Init() const
     {
         using Safir::Dob::Typesystem::Utilities::ToUtf8;
 
         if (m_prefixId == 0)
-        { 
+        {
             bool success;
             SwreC_TracePrefixAdd(ToUtf8(m_prefix).c_str(), m_prefixId, success);
             if (!success)
@@ -131,5 +138,3 @@ namespace Internal
 }
 }
 }
-
-

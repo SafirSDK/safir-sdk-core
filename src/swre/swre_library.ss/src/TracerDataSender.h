@@ -110,6 +110,14 @@ public:
 
         {
             std::lock_guard<std::mutex> lock(m_inboxMutex);
+            if (m_inbox.size() > TracerMaxPacketSize*16)
+            {
+                if (m_inbox.back() != "\n### OVERFLOW ###\n")
+                {
+                    m_inbox.emplace_back("\n### OVERFLOW ###\n");
+                }
+                return;
+            }
             m_inbox.emplace_back(utf8Payload);
         }
 

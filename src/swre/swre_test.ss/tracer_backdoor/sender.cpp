@@ -34,6 +34,8 @@
 #pragma warning (disable : 4428)
 #endif
 
+Safir::Application::Tracer g_global(L"Global");
+
 class App
     : public Safir::Dob::StopHandler
 {
@@ -51,6 +53,11 @@ public:
 
     void Run()
     {
+        g_global << "hello" << std::endl;
+        m_razor << "hello" << std::endl;
+        m_rb << "hello" << std::endl;
+        m_large << "HELLO" << std::endl;
+
         for (int i = 0; i < 1000; ++i) //allow max 1000 instances
         {
             try

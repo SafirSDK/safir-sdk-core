@@ -43,16 +43,11 @@ namespace Application
          * Start reception of trace on/off commands
          *
          * The given connection must be opened before this method is called.
-         * If the connection is closed the reception of backdoor commands is
-         * stopped. If a new connection is opened this method needs to be called
-         * in order to start reception of backdoor commands.
+         * The connection name is just used for listening to the appropriate
+         * backdoor commands. The tracer will open its own connection in a
+         * background thread.
          *
-         * In situations when a connection is regularly closed and reopened,
-         * for instance in the case of context switches, you should consider
-         * using a dedicated connection as parameter.
-         *
-         * @param connection [in] The connection used for setting up a subscription for
-         *                        backdoor commands.
+         * @param connection [in] Connecion whose name to listen to.
          */
         static void Start(const Safir::Dob::ConnectionBase& connection);
 

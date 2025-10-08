@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2025 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -165,9 +165,6 @@ void
 Library::StartTraceBackdoor(const std::wstring& connectionNameCommonPart,
                             const std::wstring& connectionNameInstancePart)
 {
-    //TODO: this is not good enough. The TracerDataSender requires the thread, so it will not work unless the backdoor is started
-    // should we handle that?
-
     //Get the full connection name of the connection in the main app
     {
         Safir::Dob::SecondaryConnection mainConnection;

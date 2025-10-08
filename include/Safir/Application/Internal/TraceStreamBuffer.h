@@ -48,6 +48,8 @@ namespace Internal
         explicit TraceStreamBuffer(const std::wstring & prefix);
         virtual ~TraceStreamBuffer();
 
+        void Init() const;
+
         Safir::Dob::Typesystem::Int64 GetPrefixId() const;
     private:
         _Tr::int_type uflow() override;
@@ -57,8 +59,6 @@ namespace Internal
         // Take care of character sequences
         std::streamsize xsputn(const wchar_t* s, std::streamsize num) override;
         int sync() override;
-
-        void AddPrefix() const;
 
         std::wstring m_prefix;
         mutable Safir::Dob::Typesystem::Int64 m_prefixId;

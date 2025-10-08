@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2025 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -71,6 +71,7 @@ void Tracer::InitializeEnabledHandling() const
 {
     if (m_isEnabled == NULL)
     {
+        m_buf.Init();
         m_isEnabled = SwreC_TracePrefixGetIsEnabledPointer(m_buf.GetPrefixId());
     }
 }
