@@ -145,7 +145,7 @@ void HighlightWidget::OnAddRow()
     else
     {
         // Collect colours that are already in use
-        QVector<QColor> used;
+        std::vector<QColor> used;
         for (int r = 0; r < newRow; ++r)
             if (auto* item = m_table->item(r, 1))
                 used.push_back(item->background().color());

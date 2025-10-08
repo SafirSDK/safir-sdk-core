@@ -40,8 +40,8 @@ const char* kColumnRoot = "LiveLog/columns";
 } // namespace
 
 SettingsManager::SettingsManager()
-    : m_settings(QString::fromUtf8(Safir::Utilities::Internal::ConfigHelper::GetToolsConfigDirectory()
-                                   + "/tracer_viewer.ini"),
+    : m_settings(QString::fromStdString(Safir::Utilities::Internal::ConfigHelper::GetToolsConfigDirectory()
+                                        + "/tracer_viewer.ini"),
                  QSettings::IniFormat)
 {
     // Make sure the directory exists
