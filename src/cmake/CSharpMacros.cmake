@@ -85,6 +85,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       add_custom_command (
         OUTPUT ${_cs_policy_assembly_file}
         COMMAND ${CSHARP_LINKER}
+                   -nologo
                    -link:${_cs_policy_filename}
                    -out:${_cs_policy_assembly_name}
                    -keyfile:${_cs_SIGN}
