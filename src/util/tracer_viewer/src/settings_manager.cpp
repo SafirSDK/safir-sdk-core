@@ -106,7 +106,7 @@ void SettingsManager::saveTheme(Theme t)
 SettingsManager::Theme SettingsManager::loadTheme() const
 {
     const int val = m_settings.value(QString::fromLatin1(kThemeKey),
-                                     static_cast<int>(Theme::Light)).toInt();
+                                     static_cast<int>(Theme::Dark)).toInt();
     return static_cast<Theme>(val);
 }
 
