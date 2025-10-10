@@ -383,7 +383,7 @@ the matching type name(s) are looked up.</string>
             </size>
            </property>
            <property name="toolTip">
-            <string>Launch safirf-control_gui</string>
+            <string>Launch safir_control_gui</string>
            </property>
            <property name="text">
             <string>ControlGui...</string>
