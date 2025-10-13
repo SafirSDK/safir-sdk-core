@@ -462,37 +462,42 @@ QVariant InstancesModelUtils::MemberToQVariant(const Safir::Dob::Typesystem::Obj
 
     case SequenceCollectionType:
         {
+            const auto& container = object->GetMember(columnInfo->MemberIndex(),0);
+            if (container.IsNull())
+            {
+                return QVariant();
+            }
             if (role == Qt::DisplayRole)
             {
                 return "<sequence>";
             }
-            const auto& container = object->GetMember(columnInfo->MemberIndex(),0);
-            if (container.IsNull())
+            else
             {
-                return QVariant();
+                return "[" + SequenceToStrings(container,
+                                               columnInfo->MemberType(),
+                                               columnInfo->MemberTypeId()).join(", ") + "]";
             }
-            return "[" + SequenceToStrings(container,
-                                           columnInfo->MemberType(),
-                                           columnInfo->MemberTypeId()).join(", ") + "]";
         }
 
     case DictionaryCollectionType:
         {
-            if (role == Qt::DisplayRole)
-            {
-                return "<dictionary>";
-            }
-
             const auto& container = object->GetMember(columnInfo->MemberIndex(),0);
             if (container.IsNull())
             {
                 return QVariant();
             }
-            return "{" + DictionaryToStrings(static_cast<const DictionaryContainerBase&>(container),
-                                             columnInfo->KeyType(),
-                                             columnInfo->MemberType(),
-                                             columnInfo->MemberTypeId(),
-                                             columnInfo->KeyTypeId()).join(", ") + "}";
+            if (role == Qt::DisplayRole)
+            {
+                return "<dictionary>";
+            }
+            else
+            {
+                return "{" + DictionaryToStrings(static_cast<const DictionaryContainerBase&>(container),
+                                                 columnInfo->KeyType(),
+                                                 columnInfo->MemberType(),
+                                                 columnInfo->MemberTypeId(),
+                                                 columnInfo->KeyTypeId()).join(", ") + "}";
+            }
         }
 
     }
