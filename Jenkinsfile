@@ -199,7 +199,7 @@ def build_examples(){
 pipeline {
     parameters {
         choice(name: 'PLATFORM_FILTER',
-               choices: ['all', 'ubuntu-noble', 'debian-bookworm', 'vs2015', 'vs2019', 'vs2022'],
+               choices: ['all', 'ubuntu-noble', 'debian-bookworm', debian-trixie, 'vs2015', 'vs2019', 'vs2022'],
                description: "Run on specific platform. Note that multicomputer tests will only run if 'all' or 'debian-bookworm' is selected.")
 
         booleanParam(name: 'SKIP_SLOW_TESTS',
@@ -232,7 +232,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-noble', 'debian-bookworm', 'vs2015', 'vs2019', 'vs2022'
+                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2015', 'vs2019', 'vs2022'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -303,7 +303,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-noble', 'debian-bookworm', 'vs2015', 'vs2019', 'vs2022'
+                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2015', 'vs2019', 'vs2022'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -392,7 +392,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-noble', 'debian-bookworm', 'vs2015', 'vs2019', 'vs2022'
+                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2015', 'vs2019', 'vs2022'
                     }
                     axis {
                         name 'BUILD_ARCH'
