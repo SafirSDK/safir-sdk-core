@@ -94,6 +94,10 @@ signals:
     /** Emitted whenever the follow-mode flag changes. */
     void FollowModeChanged(bool enabled);
 
+protected:
+    /** Re-compute row height when the widget’s style or font changes. */
+    void changeEvent(QEvent* e) override;
+
 private:
     LogWidget(const std::shared_ptr<SettingsManager>& settingsManager, LogModel* model, QWidget* parent);
 
@@ -102,12 +106,12 @@ private:
     QHBoxLayout* m_filterAreaLayout;
     QScrollArea* m_filterScroller;
     QList<QWidget*> m_filters;
-    const QFont m_fixedFont;
     LogModel* const m_model;
     std::shared_ptr<SettingsManager> m_settingsManager;
 
     void  SaveColumnState() const;
     void  LoadColumnState();
+    void  RecomputeRowHeight();
 
     // Debounce helpers
     QTimer*               m_filterDebounceTimer = nullptr;

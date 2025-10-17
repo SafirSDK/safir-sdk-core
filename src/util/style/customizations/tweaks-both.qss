@@ -35,3 +35,12 @@ Makes it easier to see what state is what.
 OutputWidget > QToolButton {
     background-color: none;
 }
+
+/* ------------------------------------------------------------------
+ *  LogWidget default font (non-touch mode)
+ * ------------------------------------------------------------------*/
+QWidget#LogWidget {
+    font-family: "JetBrains Mono";
+    font-size  : 8pt;
+    font-weight: 300;   /* Light */
+}

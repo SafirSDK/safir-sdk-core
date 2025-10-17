@@ -54,6 +54,7 @@
 #include <QFileDialog>
 #include <QThreadPool>
 #include <QTimer>
+#include <QFontDatabase>
 #include <boost/asio/io_context.hpp>
 
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
@@ -64,6 +65,22 @@
 
 #include <Safir/Utilities/Internal/Expansion.h>
 #include <QApplication>
+
+namespace
+{
+    QString readStyleSheet(const QString& path)
+    {
+        QFile f(path);
+        if (!f.exists())
+        {
+            throw std::logic_error(QString("Stylesheet %1 could not be found").arg(path).toStdString());
+        }
+
+        f.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts(&f);
+        return ts.readAll();
+    }
+}
 
 TracerViewerMainWindow::TracerViewerMainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -116,7 +133,18 @@ void TracerViewerMainWindow::BuildUi()
     else
         ui->actionLightMode->setChecked(true);
     ui->actionTouchMode->setChecked(m_settingsManager->loadTouchMode());
-    
+
+    const int fontId = QFontDatabase::addApplicationFont(":/fonts/JetBrainsMono-Light.ttf");
+    if (fontId == -1)
+    {
+        qWarning() << "JetBrains Mono font could NOT be loaded from resources";
+    }
+    else
+    {
+        qDebug() << "JetBrains Mono font registered, families ="
+                 << QFontDatabase::applicationFontFamilies(fontId);
+    }
+
     OnThemeChanged();
 
     // central welcome text
@@ -462,21 +490,7 @@ void TracerViewerMainWindow::OnConnectionClosed()
     style()->polish(m_connectedLabel);
 
 }
-namespace
-{
-    QString readStyleSheet(const QString& path)
-    {
-        QFile f(path);
-        if (!f.exists())
-        {
-            throw std::logic_error(QString("Stylesheet %1 could not be found").arg(path).toStdString());
-        }
 
-        f.open(QFile::ReadOnly | QFile::Text);
-        QTextStream ts(&f);
-        return ts.readAll();
-    }
-}
 
 void TracerViewerMainWindow::OnThemeChanged()
 {
@@ -505,6 +519,11 @@ void TracerViewerMainWindow::OnThemeChanged()
         mainStyleSheet.append(readStyleSheet(":customizations/tweaks-light.qss"));
 
         adsStyleSheet.append(readStyleSheet(":customizations/ads-light.qss"));
+    }
+
+    if (ui->actionTouchMode->isChecked())
+    {
+        mainStyleSheet.append("QWidget#LogWidget {font-size : 12pt;}");
     }
 
     qApp->setStyleSheet(mainStyleSheet.join("\n"));

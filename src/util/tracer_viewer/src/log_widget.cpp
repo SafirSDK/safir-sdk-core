@@ -44,37 +44,7 @@
 #include <QItemSelection>
 #include "selectable_text_delegate.h"
 #include <algorithm>
-#include <QDebug>
-
-namespace
-{
-    //Load our preferred log widget font
-    inline QFont fixedFont()
-    {
-        const int id = QFontDatabase::addApplicationFont(":/fonts/JetBrainsMono-Light.ttf");
-        const QString family = (id >= 0)
-                             ? QFontDatabase::applicationFontFamilies(id).first()
-                             : QString();
-
-        QFont f = family.isEmpty()
-                ? QFontDatabase::systemFont(QFontDatabase::FixedFont)
-                : QFont(family);
-        f.setStyleHint(QFont::Monospace);
-        f.setWeight(QFont::Light);
-
-        // make the font smaller for a more compact view
-        f.setPointSize(8);
-
-        qDebug() << "fixedFont():"
-                 << "fontResourceId =" << id
-                 << "loadedFamily ="   << family
-                 << "usingFallback ="  << family.isEmpty()
-                 << "finalFamily ="    << f.family()
-                 << "pointSize ="      << f.pointSize()
-                 << "weight ="         << f.weight();
-        return f;
-    }
-}
+#include <QEvent>
 
 class ColumnSortFilterProxyModel
     : public QSortFilterProxyModel
@@ -117,13 +87,11 @@ LogWidget::LogWidget(const std::shared_ptr<SettingsManager>& settingsManager, Lo
     , m_filterArea(new QFrame())
     , m_filterAreaLayout(new QHBoxLayout(m_filterArea))
     , m_filterScroller(new QScrollArea(this))
-    , m_fixedFont(fixedFont())
     , m_model(model)
     , m_settingsManager(settingsManager)
     , m_filterDebounceTimer(new QTimer(this))
     , m_followMode(true)
 {
-
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(m_table,10000);
 
@@ -153,24 +121,10 @@ LogWidget::LogWidget(const std::shared_ptr<SettingsManager>& settingsManager, Lo
     m_table->setShowGrid(false);                      // remove cell grid lines
     m_table->setSortingEnabled(false);        // disable column sorting
     m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-    m_table->setFont(m_fixedFont);
+    m_table->setObjectName("LogWidget");
 
-    // ------------------------------------------------------------------
-    // Compute tight single-line row height for the current font.
-    // ------------------------------------------------------------------
-    {
-        const QFontMetrics fm(m_table->font());
-        const int rowH     = fm.lineSpacing() + 1; // ascent + descent + leading + a little more
-
-        qDebug() << "LogWidget:" << "row height =" << rowH;
-
-        auto* vh = m_table->verticalHeader();
-        vh->setSectionResizeMode(QHeaderView::Fixed);
-        vh->setMinimumSectionSize(rowH);
-        vh->setMaximumSectionSize(rowH);
-        vh->setDefaultSectionSize(rowH);
-    }
-
+    RecomputeRowHeight();
+    
     // allow in-cell substring selection with a read-only delegate
     m_table->setItemDelegate(new SelectableTextDelegate(m_table));
     // Single-click continues to select entire rows; the read-only editor that
@@ -210,8 +164,6 @@ LogWidget::LogWidget(const std::shared_ptr<SettingsManager>& settingsManager, Lo
     m_table->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     m_table->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    //connect(m_table, &QTableView::clicked, this, &LogWidget::OnClicked);
-    //connect(m_table, &QTableView::doubleClicked, this, &LogWidget::OnDoubleClicked);
     connect(m_table->horizontalHeader(), &QWidget::customContextMenuRequested, this, &LogWidget::OnCustomContextMenuRequestedHeader);
     connect(m_table, &QWidget::customContextMenuRequested, this, &LogWidget::OnCustomContextMenuRequestedTable);
 
@@ -439,7 +391,7 @@ void LogWidget::OnSectionCountChanged(const int /*oldCount*/, const int newCount
 
         le->setPlaceholderText(placeholder);
         le->setClearButtonEnabled(true);
-        le->setFont(m_fixedFont);
+        le->setObjectName("LogWidget");
         le->setFixedWidth(m_table->columnWidth(i)-2);
         le->setToolTip(tr("Accepts regular expression."));
         connect(le, &QLineEdit::textChanged, this,
@@ -651,4 +603,31 @@ void LogWidget::LoadColumnState()
         m_table->setColumnWidth(c, sizes[c]);
         m_table->setColumnHidden(c, !visible[c]);
     }
+}
+
+/* ------------------------------------------------------------------
+ *  React to style / font changes coming from application stylesheet
+ * ------------------------------------------------------------------*/
+void LogWidget::RecomputeRowHeight()
+{
+    const int rowH = QFontMetrics(m_table->font()).lineSpacing() + 1;
+    auto* vh = m_table->verticalHeader();
+    vh->setSectionResizeMode(QHeaderView::Fixed);
+    vh->setDefaultSectionSize(rowH);
+    vh->setMinimumSectionSize(rowH);
+    vh->setDefaultSectionSize(rowH);
+}
+
+void LogWidget::changeEvent(QEvent* e)
+{
+    const bool styleOrFont =
+        (e->type() == QEvent::StyleChange) ||
+        (e->type() == QEvent::FontChange);
+
+    // Let Qt finish applying the new style / font first
+    QWidget::changeEvent(e);
+
+    // Then recompute row height so we use the *new* font metrics
+    if (styleOrFont)
+        RecomputeRowHeight();
 }
