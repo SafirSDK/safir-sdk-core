@@ -245,9 +245,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu no longer support 32 bit builds
+                        axis { //ubuntu and newer debian no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble'
+                            values 'ubuntu-noble', 'debian-trixie'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -322,9 +322,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu no longer support 32 bit builds
+                        axis { //ubuntu and newer debian no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble'
+                            values 'ubuntu-noble', 'debian-trixie'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -405,9 +405,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu no longer support 32 bit builds
+                        axis { //ubuntu and newer debian no longer support 32 bit builds
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble'
+                            values 'ubuntu-noble', 'debian-trixie'
                         }
                         axis {
                             name 'BUILD_ARCH'
