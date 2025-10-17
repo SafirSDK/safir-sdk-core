@@ -46,8 +46,6 @@
 #include <algorithm>
 #include <QDebug>
 
-//TODO multiselect when a lot of data is coming in is behaving strangely
-
 namespace
 {
     //Load our preferred log widget font

@@ -68,8 +68,8 @@ HighlightWidget::HighlightWidget(const std::shared_ptr<SettingsManager>& setting
     m_table->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     // Hide the vertical header (row numbers)
     m_table->verticalHeader()->setVisible(false);
-    // Only allow selection of whole rows
-    m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    // Allow selection of individual cells; we will disable selection on non-pattern cells
+    m_table->setSelectionBehavior(QAbstractItemView::SelectItems);
 
     m_table->setWordWrap(false);
     m_table->setShowGrid(false);
@@ -173,6 +173,7 @@ void HighlightWidget::OnAddRow()
 
     // Create the colour cell
     auto* colourItem = new QTableWidgetItem();
+    colourItem->setFlags(colourItem->flags() & ~Qt::ItemIsSelectable);   // colour column not selectable
     colourItem->setBackground(colour);
     m_table->setItem(newRow, 1, colourItem);
     m_table->setItem(newRow, 0, new QTableWidgetItem());
@@ -212,6 +213,7 @@ void HighlightWidget::UpdateColorCell(int row)
     if (!item)
     {
         item = new QTableWidgetItem();
+        item->setFlags(item->flags() & ~Qt::ItemIsSelectable);   // colour column not selectable
         m_table->setItem(row, 1, item);
     }
 
@@ -245,6 +247,7 @@ void HighlightWidget::OnColorCellClicked(int row, int column)
     if (!item)
     {
         item = new QTableWidgetItem();
+        item->setFlags(item->flags() & ~Qt::ItemIsSelectable);   // colour column not selectable
         m_table->setItem(row, 1, item);
     }
 
