@@ -477,13 +477,6 @@ namespace SerializationUtils
                 os<<"The parameter '"<<parameterName<<"' is a dictionary but no key is provided. Use attribute valueRefIndex to specify the key. Specified as valueRef in member "<<md->GetName();
                 throw ParseError("Serialization error", os.str(), "", 1200);
             }
-            /*
-            TODO:
-            Hantera keyTypes
-            Testfall för alla keyTypes
-            Testa genererad kod med olika typer
-            Hantera när GetIndexByUnifiedKey ej hittar nyckel
-            */
 
             const auto keyType = param->GetKeyType();
             DotsC_Int64 unifiedKey = -1;
