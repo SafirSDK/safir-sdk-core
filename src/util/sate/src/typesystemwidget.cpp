@@ -138,41 +138,48 @@ void TypesystemWidget::Initialize(DobHandler* dob)
                 const bool ctrlKey = qApp->keyboardModifiers().testFlag(Qt::ControlModifier);
                 const bool shiftKey = qApp->keyboardModifiers().testFlag(Qt::ShiftModifier);
 
-                if (baseClass == TypesystemRepository::Parametrization)
+                switch (baseClass)
                 {
-                    emit OpenParameterViewer(typeIdVal.toLongLong(), QString());
-                }
-                else if (ctrlKey && !shiftKey)
-                {
-                    emit OpenObjectEdit(typeIdVal.toLongLong());
-                }
-                else if (shiftKey && !ctrlKey)
-                {
-                    if (baseClass == TypesystemRepository::Entity)
-                    {
-                        emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), true);
-                        m_dob->SubscribeEntity(typeIdVal.toLongLong(), sdt::InstanceId(), true);
-                        m_dob->SubscribeRegistrations(typeIdVal.toLongLong(), sdt::HandlerId::ALL_HANDLERS, true);
-                    }
-                    else if (baseClass == TypesystemRepository::Message)
-                    {
-                        emit OpenMessageInstanceViewer(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, true);
-                        m_dob->SubscribeMessage(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, true);
-                    }
-                }
-                else if (!shiftKey && !ctrlKey)
-                {
-                    if (baseClass == TypesystemRepository::Entity)
-                    {
-                        emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), false);
-                        m_dob->SubscribeEntity(typeIdVal.toLongLong(), sdt::InstanceId(), false);
-                        m_dob->SubscribeRegistrations(typeIdVal.toLongLong(), sdt::HandlerId::ALL_HANDLERS, false);
-                    }
-                    else if (baseClass == TypesystemRepository::Message)
-                    {
-                        emit OpenMessageInstanceViewer(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, false);
-                        m_dob->SubscribeMessage(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, false);
-                    }
+                    case TypesystemRepository::Parametrization:
+                        emit OpenParameterViewer(typeIdVal.toLongLong(), QString());
+                        break;
+                    case TypesystemRepository::Entity:
+                        if (!ctrlKey)
+                        {
+                            emit OpenObjectEdit(typeIdVal.toLongLong());
+                        }
+                        else if (ctrlKey && shiftKey)
+                        {
+                            emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), true);
+                            m_dob->SubscribeEntity(typeIdVal.toLongLong(), sdt::InstanceId(), true);
+                            m_dob->SubscribeRegistrations(typeIdVal.toLongLong(), sdt::HandlerId::ALL_HANDLERS, true);
+                        }
+                        else if (ctrlKey && !shiftKey)
+                        {
+                            emit OpenEntityInstanceViewer(typeIdVal.toLongLong(), false);
+                            m_dob->SubscribeEntity(typeIdVal.toLongLong(), sdt::InstanceId(), false);
+                            m_dob->SubscribeRegistrations(typeIdVal.toLongLong(), sdt::HandlerId::ALL_HANDLERS, false);
+                        }
+                        break;
+                    case TypesystemRepository::Message:
+                        if (!ctrlKey)
+                        {
+                            emit OpenObjectEdit(typeIdVal.toLongLong());
+                        }
+                        else if (shiftKey && ctrlKey)
+                        {
+                            emit OpenMessageInstanceViewer(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, true);
+                            m_dob->SubscribeMessage(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, true);
+                        }
+                        else if (!shiftKey && ctrlKey)
+                        {
+                            emit OpenMessageInstanceViewer(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, false);
+                            m_dob->SubscribeMessage(typeIdVal.toLongLong(), Safir::Dob::Typesystem::ChannelId::ALL_CHANNELS, false);
+                        }
+                        break;
+                    default:
+                        emit OpenObjectEdit(typeIdVal.toLongLong());
+                        break;
                 }
             }
             else

@@ -417,7 +417,8 @@ void InstancesWidget::RunEntityContextMenu()
                         auto entityIds = std::make_shared<std::deque<Safir::Dob::Typesystem::EntityId>>();
                         for (const auto index : selection)
                         {
-                            auto info = m_sourceModelEntities->getRow(index.row());
+                            const auto sourceIndex = m_proxyModel->mapToSource(index);
+                            auto info = m_sourceModelEntities->getRow(sourceIndex.row());
                             if (!info.deleted)
                             {
                                 entityIds->push_back(info.entityId);
