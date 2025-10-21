@@ -56,6 +56,8 @@ HighlightWidget::HighlightWidget(const std::shared_ptr<SettingsManager>& setting
     m_table        = ui->tableWidget;
     m_addButton    = ui->addButton;
     m_removeButton = ui->removeButton;
+    m_moveUpButton = ui->moveUpButton;
+    m_moveDownButton = ui->moveDownButton;
 
     m_table->setColumnCount(2);
     m_table->setHorizontalHeaderLabels({tr("Pattern"),
@@ -85,10 +87,22 @@ HighlightWidget::HighlightWidget(const std::shared_ptr<SettingsManager>& setting
             this,           &HighlightWidget::OnAddRow);
     connect(m_removeButton, &QPushButton::clicked,
             this,           &HighlightWidget::OnRemoveSelected);
+    connect(m_moveUpButton, &QPushButton::clicked,
+            this,           &HighlightWidget::OnMoveUp);
+    connect(m_moveDownButton, &QPushButton::clicked,
+            this,           &HighlightWidget::OnMoveDown);
+
     connect(m_table, &QTableWidget::cellChanged,
             this,     &HighlightWidget::OnCellChanged);
     connect(m_table, &QTableWidget::cellClicked,
             this,     &HighlightWidget::OnColorCellClicked);
+    connect(m_table, &QTableWidget::itemSelectionChanged,
+            this,     &HighlightWidget::OnSelectionChanged);
+
+    // Initially, nothing is selected
+    m_moveUpButton->setEnabled(false);
+    m_moveDownButton->setEnabled(false);
+    m_removeButton->setEnabled(false);
 
     // ------------------------------------------------------------------
     // Add two default rows: "error" and "warning"
@@ -278,4 +292,65 @@ std::vector<HighlightRule> HighlightWidget::rules() const
         list.push_back(rule);
     }
     return list;
+}
+
+void HighlightWidget::OnMoveUp()
+{
+    const auto ranges = m_table->selectedRanges();
+    if (ranges.isEmpty())
+        return;
+
+    int row = ranges.first().topRow();
+    if (row <= 0)
+        return;
+
+    for (int col = 0; col < m_table->columnCount(); ++col)
+    {
+        QTableWidgetItem* upper   = m_table->takeItem(row - 1, col);
+        QTableWidgetItem* current = m_table->takeItem(row,     col);
+        m_table->setItem(row - 1, col, current);
+        m_table->setItem(row,     col, upper);
+    }
+
+    m_table->selectRow(row - 1);
+    EmitRulesChanged();
+}
+
+void HighlightWidget::OnMoveDown()
+{
+    const auto ranges = m_table->selectedRanges();
+    if (ranges.isEmpty())
+        return;
+
+    int row = ranges.first().topRow();
+    if (row >= m_table->rowCount() - 1)
+        return;
+
+    for (int col = 0; col < m_table->columnCount(); ++col)
+    {
+        QTableWidgetItem* current = m_table->takeItem(row,     col);
+        QTableWidgetItem* lower   = m_table->takeItem(row + 1, col);
+        m_table->setItem(row,     col, lower);
+        m_table->setItem(row + 1, col, current);
+    }
+
+    m_table->selectRow(row + 1);
+    EmitRulesChanged();
+}
+
+void HighlightWidget::OnSelectionChanged()
+{
+    const bool hasSelection = !m_table->selectedRanges().isEmpty();
+    m_removeButton->setEnabled(hasSelection);
+
+    if (!hasSelection)
+    {
+        m_moveUpButton->setEnabled(false);
+        m_moveDownButton->setEnabled(false);
+        return;
+    }
+
+    const int row = m_table->selectedRanges().first().topRow();
+    m_moveUpButton->setEnabled(row > 0);
+    m_moveDownButton->setEnabled(row < m_table->rowCount() - 1);
 }

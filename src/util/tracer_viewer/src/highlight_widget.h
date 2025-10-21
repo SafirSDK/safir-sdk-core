@@ -48,6 +48,9 @@ private slots:
     void OnRemoveSelected();
     void OnCellChanged(int, int);
     void OnColorCellClicked(int, int);
+    void OnMoveUp();
+    void OnMoveDown();
+    void OnSelectionChanged();
 
 private:
     void EmitRulesChanged();
@@ -56,5 +59,7 @@ private:
     QTableWidget* m_table        = nullptr;
     QPushButton*  m_addButton    = nullptr;
     QPushButton*  m_removeButton = nullptr;
+    QPushButton*  m_moveUpButton = nullptr;
+    QPushButton*  m_moveDownButton = nullptr;
     std::shared_ptr<SettingsManager> m_settingsManager;
 };
