@@ -56,6 +56,7 @@ class QTextBrowser;
 class InstancesWidget;
 class ConnectDialog;
 class OutputWidget;
+class SettingsManager;
 
 namespace Ui { class SateMainWindow; }
 
@@ -89,6 +90,7 @@ private slots:
     void OnCloseCurrentTab();
     void OnCloseAllTabs();
     void OnFindType();
+    void OnClearSettingsAndQuit();
 private:
     void OpenInstanceViewer(const int64_t typeId,
                             const bool includeSubclasses,
@@ -120,6 +122,8 @@ private:
     DobHandler m_dob;
     bool m_connected = false;
     ConnectDialog* m_connectDialog;
+
+    std::shared_ptr<SettingsManager>  m_settingsManager;
 
     TypesystemWidget* m_typesystem;
     OutputWidget* m_output;

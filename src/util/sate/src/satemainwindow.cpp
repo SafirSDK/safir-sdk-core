@@ -32,6 +32,7 @@
 #include "connectdialog.h"
 #include "parameterswidget.h"
 #include "enumwidget.h"
+#include "settings_manager.h"
 
 #include <QCloseEvent>
 #include <QActionGroup>
@@ -65,6 +66,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     , m_connectedLabel(new QLabel())
     , m_dob()
     , m_connectDialog(new ConnectDialog(this))
+    , m_settingsManager(std::make_shared<SettingsManager>())
 {
     ui->setupUi(this);
     setAcceptDrops(true);
@@ -85,6 +87,13 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     //now we have everything we need to set the initial stylesheets
     m_dockManager->setStyleSheet("");
+
+    if (m_settingsManager->loadTheme() == SettingsManager::Theme::Dark)
+        ui->actionDarkMode->setChecked(true);
+    else
+        ui->actionLightMode->setChecked(true);
+    ui->actionTouchMode->setChecked(m_settingsManager->loadTouchMode());
+
     OnThemeChanged();
 
     //Set up the central area as always present
@@ -138,6 +147,8 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     connect(ui->actionOpenObject, &QAction::triggered, this, [this]{
         OpenSerializedObject(QFileDialog::getOpenFileName(this, "Deserialize Object", "", "XML/JSON files (*.xml *.json);;Any file (*.*)"));
     });
+    connect(ui->actionClearAndQuit, &QAction::triggered,
+            this, &SateMainWindow::OnClearSettingsAndQuit);
     connect(ui->actionQuit, &QAction::triggered, this, []{QApplication::quit();});
     connect(m_connectDialog, &QDialog::accepted, this, [this]
     {
@@ -499,6 +510,12 @@ void SateMainWindow::OnThemeChanged()
 
     qApp->setStyleSheet(mainStyleSheet.join("\n"));
     m_dockManager->setStyleSheet(adsStyleSheet.join("\n"));
+
+    // Persist the new theme selection
+    m_settingsManager->saveTheme(ui->actionDarkMode->isChecked()
+                                ? SettingsManager::Theme::Dark
+                                : SettingsManager::Theme::Light);
+    m_settingsManager->saveTouchMode(ui->actionTouchMode->isChecked());
 }
 
 void SateMainWindow::OnFocusedDockWidgetChanged(ads::CDockWidget* /*old*/, ads::CDockWidget* now)
@@ -721,3 +738,21 @@ void SateMainWindow::OpenSerializedObject(const QString& file)
         m_output->Output(QString("Deserialize object failed. File doesn't exist: %1").arg(file), QtFatalMsg);
     }
 }
+
+void SateMainWindow::OnClearSettingsAndQuit()
+{
+    const auto reply = QMessageBox::question(
+        this,
+        tr("Confirm"),
+        tr("This will clear ALL Sate settings and quit the application.\n\n"
+           "Do you want to continue?"),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        m_settingsManager->clearAll();
+        QApplication::quit();
+    }
+}
+

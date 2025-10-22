@@ -51,6 +51,7 @@ set(sources
     typeaheadwidget.cpp
     utilities.cpp
     dobcalltojson.cpp
+    settings_manager.cpp
     sate.rc
   )
 
@@ -93,6 +94,7 @@ set(headers
     instancesmodelutils.h
     utilities.h
     dobcalltojson.h
+    settings_manager.h
 )
 
 if (NOT TARGET Qt::Widgets)
