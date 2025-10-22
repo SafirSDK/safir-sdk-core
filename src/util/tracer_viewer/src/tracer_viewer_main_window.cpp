@@ -686,7 +686,7 @@ void TracerViewerMainWindow::OnClearSettingsAndQuit()
         tr("This will clear ALL Tracer Viewer settings and quit the application.\n\n"
            "Do you want to continue?"),
         QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No);
+        QMessageBox::Yes);
 
     if (reply == QMessageBox::Yes)
     {

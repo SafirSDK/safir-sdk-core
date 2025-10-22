@@ -27,14 +27,16 @@
 #include <QSettings>
 #include <vector>
 #include <QObject>
+#include <QTimer>
 
 /**
  * Centralised application-wide settings access.
  *
  * Uses an INI file for storage.
  */
-class SettingsManager
+class SettingsManager : public QObject
 {
+    Q_OBJECT
 public:
     explicit SettingsManager();
 
@@ -51,5 +53,12 @@ public:
     bool loadTouchMode() const;
 
 private:
+    void scheduleFlush();
+
+private slots:
+    void flush();
+
+private:
     QSettings m_settings;                                       // INI backend
+    QTimer    m_flushTimer;
 };

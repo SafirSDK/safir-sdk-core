@@ -31,6 +31,7 @@
 #include <QMainWindow>
 #include <QApplication>
 #include <QStatusBar>
+#include <QTimer>
 
 #include <Safir/Utilities/Internal/ConfigReader.h>
 
@@ -53,7 +54,8 @@ namespace
 } // namespace
 
 SettingsManager::SettingsManager()
-    : m_settings(QString::fromStdString(Safir::Utilities::Internal::ConfigHelper::GetToolsConfigDirectory()
+    : QObject()
+    , m_settings(QString::fromStdString(Safir::Utilities::Internal::ConfigHelper::GetToolsConfigDirectory()
                                         + "/sate.ini"),
                  QSettings::IniFormat)
 {
@@ -64,17 +66,18 @@ SettingsManager::SettingsManager()
     if (m_settings.status() != QSettings::NoError)
         ShowStatusBarMessage(QObject::tr("Cannot read settings file: %1")
                              .arg(m_settings.fileName()));
+
+    // 500-ms single-shot timer to debounce disk writes
+    m_flushTimer.setSingleShot(true);
+    m_flushTimer.setInterval(500);
+    connect(&m_flushTimer, &QTimer::timeout, this, &SettingsManager::flush);
 }
 
 
 void SettingsManager::saveTheme(Theme t)
 {
     m_settings.setValue(QString::fromLatin1(kThemeKey), static_cast<int>(t));
-    m_settings.sync();
-
-    if (m_settings.status() == QSettings::AccessError)
-        ShowStatusBarMessage(QObject::tr("Cannot write settings file: %1")
-                             .arg(m_settings.fileName()));
+    scheduleFlush();
 }
 
 SettingsManager::Theme SettingsManager::loadTheme() const
@@ -87,11 +90,7 @@ SettingsManager::Theme SettingsManager::loadTheme() const
 void SettingsManager::saveTouchMode(bool touchMode)
 {
     m_settings.setValue(QString::fromLatin1(kTouchModeKey), touchMode);
-    m_settings.sync();
-
-    if (m_settings.status() == QSettings::AccessError)
-        ShowStatusBarMessage(QObject::tr("Cannot write settings file: %1")
-                             .arg(m_settings.fileName()));
+    scheduleFlush();
 }
 
 bool SettingsManager::loadTouchMode() const
@@ -99,8 +98,23 @@ bool SettingsManager::loadTouchMode() const
     return m_settings.value(QString::fromLatin1(kTouchModeKey), false).toBool();
 }
 
+void SettingsManager::scheduleFlush()
+{
+    m_flushTimer.start();   // restart 500-ms single-shot timer
+}
+
+void SettingsManager::flush()
+{
+    m_settings.sync();
+    if (m_settings.status() == QSettings::AccessError)
+        ShowStatusBarMessage(QObject::tr("Cannot write settings file: %1")
+                             .arg(m_settings.fileName()));
+}
+
 void SettingsManager::clearAll()
 {
+    m_flushTimer.stop();          // cancel any pending flush
+
     // Remove all key-value pairs held in memory …
     m_settings.clear();
     m_settings.sync();

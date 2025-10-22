@@ -84,6 +84,7 @@ set(widget_headers
     enumwidget.h
     enummodel.h
     typeaheadwidget.h
+    settings_manager.h
   )
 
 set(headers
@@ -94,7 +95,6 @@ set(headers
     instancesmodelutils.h
     utilities.h
     dobcalltojson.h
-    settings_manager.h
 )
 
 if (NOT TARGET Qt::Widgets)
