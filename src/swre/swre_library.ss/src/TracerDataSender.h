@@ -61,7 +61,6 @@ public:
         , m_nextSequence(0)
         , m_ioContext(ioContext)
         , m_socket(ioContext)
-        , m_timer(ioContext)
         , m_timerActive(false)
         , m_enabled(false)
         , m_programName()
@@ -186,7 +185,7 @@ private:
     std::uint32_t                m_nextSequence;
     boost::asio::io_context&     m_ioContext;
     boost::asio::ip::udp::socket m_socket;
-    boost::asio::steady_timer    m_timer;
+    std::unique_ptr<boost::asio::steady_timer> m_timer;
     bool                         m_timerActive;
     std::atomic_bool             m_enabled;
     std::string                  m_pendingPayload;
@@ -220,9 +219,13 @@ private:
         // (Re)start aggregation timer if not already running
         if (!m_timerActive)
         {
+            if (m_timer == nullptr)
+            {
+                m_timer = std::make_unique<boost::asio::steady_timer>(m_ioContext);
+            }
             m_timerActive = true;
-            m_timer.expires_after(std::chrono::milliseconds(50));
-            m_timer.async_wait([this](const boost::system::error_code& ec)
+            m_timer->expires_after(std::chrono::milliseconds(50));
+            m_timer->async_wait([this](const boost::system::error_code& ec)
             {
                 if (ec)
                 {

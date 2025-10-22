@@ -53,7 +53,6 @@ public:
              boost::asio::io_context& ioContext)
         : m_connection(connection)
         , m_ioContext(ioContext)
-        , m_timer(ioContext)
         , m_stop(false)
     {
     }
@@ -74,7 +73,10 @@ public:
     void StopEntityHandling()
     {
         m_stop = true;
-        m_timer.cancel();
+        if (m_timer != nullptr)
+        {
+            m_timer->cancel();
+        }
     }
 
     bool LogToStdout() const {return m_logToStdout;}
@@ -171,9 +173,14 @@ public:
             return;
         }
 
-        m_timer.cancel();
-        m_timer.expires_after(std::chrono::milliseconds(40));
-        m_timer.async_wait([this](const boost::system::error_code& error)
+        if (m_timer == nullptr)
+        {
+            m_timer = std::make_unique<boost::asio::steady_timer>(m_ioContext);
+        }
+
+        m_timer->cancel();
+        m_timer->expires_after(std::chrono::milliseconds(40));
+        m_timer->async_wait([this](const boost::system::error_code& error)
         {
             if (error || m_stop)
             {
@@ -351,7 +358,7 @@ private:
     int m_longestPrefix = 0;
     mutable std::mutex m_prefixSearchLock; //lock for anyone that loops through the prefixes or adds elements to it.
 
-    boost::asio::steady_timer m_timer;
+    std::unique_ptr<boost::asio::steady_timer> m_timer;
     std::atomic<bool> m_stop;
 
     volatile bool m_logToStdout = true;

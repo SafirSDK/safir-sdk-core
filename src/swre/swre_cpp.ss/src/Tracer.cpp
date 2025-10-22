@@ -36,7 +36,7 @@ namespace Application
 Tracer::Tracer(const std::wstring & prefix):
     m_ostream(&m_buf),
     m_buf(prefix),
-    m_isEnabled(NULL)
+    m_isEnabled(nullptr)
 {
 
 }
@@ -69,9 +69,8 @@ void TracerBackdoor::Stop()
 
 void Tracer::InitializeEnabledHandling() const
 {
-    if (m_isEnabled == NULL)
+    if (m_isEnabled == nullptr)
     {
-        m_buf.Init();
         m_isEnabled = SwreC_TracePrefixGetIsEnabledPointer(m_buf.GetPrefixId());
     }
 }

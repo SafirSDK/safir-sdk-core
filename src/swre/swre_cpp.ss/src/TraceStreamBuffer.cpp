@@ -37,7 +37,14 @@ namespace Internal
         m_prefix(prefix),
         m_prefixId(0)
     {
+        using Safir::Dob::Typesystem::Utilities::ToUtf8;
 
+        bool success;
+        SwreC_TracePrefixAdd(ToUtf8(m_prefix).c_str(), m_prefixId, success);
+        if (!success)
+        {
+            Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
+        }
     }
 
     //-------------------------------------------------------
@@ -66,8 +73,6 @@ namespace Internal
     {
         bool success;
 
-        Init();
-
         SwreC_TraceAppendWChar(m_prefixId,
                                _Tr::to_char_type(c),
                                success);
@@ -86,8 +91,6 @@ namespace Internal
     {
         using Safir::Dob::Typesystem::Utilities::ToUtf8;
 
-        Init();
-
         bool success;
         SwreC_TraceAppendString(m_prefixId, ToUtf8(std::wstring(s, static_cast<size_t>(num))).c_str(), success);
         if (!success)
@@ -101,8 +104,6 @@ namespace Internal
     int
     TraceStreamBuffer::sync()
     {
-        Init();
-
         bool success;
         SwreC_TraceFlush(success);
         if (!success)
@@ -119,22 +120,6 @@ namespace Internal
         return m_prefixId;
     }
 
-    //-------------------------------------------------------
-    void
-    TraceStreamBuffer::Init() const
-    {
-        using Safir::Dob::Typesystem::Utilities::ToUtf8;
-
-        if (m_prefixId == 0)
-        {
-            bool success;
-            SwreC_TracePrefixAdd(ToUtf8(m_prefix).c_str(), m_prefixId, success);
-            if (!success)
-            {
-                Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
-            }
-        }
-    }
 }
 }
 }
