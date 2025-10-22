@@ -38,7 +38,9 @@
 namespace
 {
     const char* kThemeKey   = "Ui/theme";
-    const char* kTouchModeKey = "Ui/touchMode";
+    const char* kTouchModeKey        = "Ui/touchMode";
+    const char* kMainWindowGeometryKey = "Ui/mainWindowGeometry";
+    const char* kDockLayoutKey         = "Ui/dockLayout";
 
     inline void ShowStatusBarMessage(const QString& msg)
     {
@@ -76,6 +78,9 @@ SettingsManager::SettingsManager()
 
 void SettingsManager::saveTheme(Theme t)
 {
+    if (!m_savingEnabled)
+        return;
+
     m_settings.setValue(QString::fromLatin1(kThemeKey), static_cast<int>(t));
     scheduleFlush();
 }
@@ -89,6 +94,9 @@ SettingsManager::Theme SettingsManager::loadTheme() const
 
 void SettingsManager::saveTouchMode(bool touchMode)
 {
+    if (!m_savingEnabled)
+        return;
+
     m_settings.setValue(QString::fromLatin1(kTouchModeKey), touchMode);
     scheduleFlush();
 }
@@ -98,13 +106,53 @@ bool SettingsManager::loadTouchMode() const
     return m_settings.value(QString::fromLatin1(kTouchModeKey), false).toBool();
 }
 
+/* ----------  geometry / dock layout persistence ----------------- */
+void SettingsManager::saveMainWindowGeometry(const QByteArray& geometry)
+{
+    if (!m_savingEnabled)
+        return;
+
+    m_settings.setValue(QString::fromLatin1(kMainWindowGeometryKey),
+                        geometry);
+    scheduleFlush();
+}
+
+QByteArray SettingsManager::loadMainWindowGeometry() const
+{
+    return m_settings
+            .value(QString::fromLatin1(kMainWindowGeometryKey), QByteArray{})
+            .toByteArray();
+}
+
+void SettingsManager::saveDockLayout(const QByteArray& layout)
+{
+    if (!m_savingEnabled)
+        return;
+
+    m_settings.setValue(QString::fromLatin1(kDockLayoutKey), layout);
+    scheduleFlush();
+}
+
+QByteArray SettingsManager::loadDockLayout() const
+{
+    return m_settings
+            .value(QString::fromLatin1(kDockLayoutKey), QByteArray{})
+            .toByteArray();
+}
+
 void SettingsManager::scheduleFlush()
 {
+    if (!m_savingEnabled)
+        return;
+
     m_flushTimer.start();   // restart 500-ms single-shot timer
 }
 
 void SettingsManager::flush()
 {
+    if (!m_savingEnabled)
+        return;
+
     m_settings.sync();
     if (m_settings.status() == QSettings::AccessError)
         ShowStatusBarMessage(QObject::tr("Cannot write settings file: %1")
@@ -121,5 +169,8 @@ void SettingsManager::clearAll()
 
     // …and also delete the backing INI file to ensure a clean slate
     QFile::remove(m_settings.fileName());
+
+    // Disable any further saving during this session
+    m_savingEnabled = false;
 }
 

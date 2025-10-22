@@ -85,6 +85,9 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     m_dockManager = new ads::CDockManager(this);
 
+    // restore geometry before adding dock widgets
+    restoreGeometry(m_settingsManager->loadMainWindowGeometry());
+
     //now we have everything we need to set the initial stylesheets
     m_dockManager->setStyleSheet("");
 
@@ -108,7 +111,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     centralDockWidget->setWidget(label);
     centralDockWidget->setFeature(ads::CDockWidget::NoTab, true);
     centralDockWidget->setFeature(ads::CDockWidget::DockWidgetFocusable, false);
-    m_centralDockArea = m_dockManager->setCentralWidget(centralDockWidget);
+    m_dockManager->setCentralWidget(centralDockWidget);
 
     m_typesystem = new TypesystemWidget(this);
     m_typesystem->Initialize(&m_dob);
@@ -212,6 +215,20 @@ SateMainWindow::SateMainWindow(QWidget *parent)
 
     ui->menuView->addAction(m_midnightCommanderModeAction);
     ui->menuView->addAction(m_resetWindowsAction);
+
+    // restore dock layout after all core widgets exist
+    const QByteArray layoutData = m_settingsManager->loadDockLayout();
+    if (!layoutData.isEmpty())
+    {
+        if (!m_dockManager->restoreState(layoutData))
+        {
+            qWarning() << "Saved dock layout is invalid – using default";
+        }
+    }
+
+    //the central dock area needs to be found after we have restored from save
+    m_centralDockArea = m_dockManager->findDockWidget("CentralWidget")->dockAreaWidget();
+
     ui->menuView->addAction(showTypeInTreeAction);
     ui->menuView->addAction(closeCurrentTabAction);
     ui->menuView->addAction(closeAllTabsAction);
@@ -220,6 +237,19 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->menuView->addAction(outputDock->toggleViewAction());
 
     m_typesystem->SetSearchFocus();
+}
+
+/* ---------------------------------------------------------------
+ * Persist UI state when application closes
+ * -------------------------------------------------------------*/
+void SateMainWindow::closeEvent(QCloseEvent* event)
+{
+    m_settingsManager->saveMainWindowGeometry(saveGeometry());
+    if (m_dockManager)
+    {
+        m_settingsManager->saveDockLayout(m_dockManager->saveState());
+    }
+    QMainWindow::closeEvent(event);
 }
 
 SateMainWindow::~SateMainWindow()

@@ -40,6 +40,7 @@ class SettingsManager : public QObject
 public:
     explicit SettingsManager();
 
+    //Will also stop saving settings after a call to this. App is expected to exit.
     void   clearAll();
 
     // ------------------------------------------------------------------
@@ -52,6 +53,15 @@ public:
     void saveTouchMode(bool touchMode);
     bool loadTouchMode() const;
 
+    // --------------------------------------------------
+    // Window / layout persistence
+    // --------------------------------------------------
+    void   saveMainWindowGeometry(const QByteArray& geometry);
+    QByteArray loadMainWindowGeometry() const;
+
+    void   saveDockLayout(const QByteArray& layout);
+    QByteArray loadDockLayout() const;
+
 private:
     void scheduleFlush();
 
@@ -61,4 +71,6 @@ private slots:
 private:
     QSettings m_settings;                                       // INI backend
     QTimer    m_flushTimer;
+
+    bool      m_savingEnabled { true };
 };

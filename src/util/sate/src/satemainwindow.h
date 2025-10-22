@@ -91,6 +91,9 @@ private slots:
     void OnCloseAllTabs();
     void OnFindType();
     void OnClearSettingsAndQuit();
+
+protected:
+    void closeEvent(QCloseEvent* event) override;
 private:
     void OpenInstanceViewer(const int64_t typeId,
                             const bool includeSubclasses,
