@@ -151,7 +151,7 @@ Library::Library()
 
 Library::~Library()
 {
-
+    StopTraceBackdoor();
 }
 
 void
@@ -222,15 +222,15 @@ Library::StartTraceBackdoor(const std::wstring& connectionNameCommonPart,
 void
 Library::StopTraceBackdoor()
 {
-    boost::asio::post(m_ioContext,[this]{m_prefixes.StopEntityHandling();});
-    if (m_controlInfoReceiver)
+    if (m_thread.joinable())
     {
-        m_controlInfoReceiver->Stop();
-    }
+        boost::asio::post(m_ioContext,[this]{m_prefixes.StopEntityHandling();});
+        if (m_controlInfoReceiver)
+        {
+            m_controlInfoReceiver->Stop();
+        }
 
-    m_work.reset();
-    if (m_thread.get_id() != std::thread::id())
-    {
+        m_work.reset();
         m_thread.join();
     }
 }
