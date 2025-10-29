@@ -127,7 +127,7 @@ def archive_and_analyze(platform, arch, buildType){
         issueList.add(lintian)
     }
     else {
-        msbuild = scanForIssues (
+        def msbuild = scanForIssues (
             tool: msBuild(pattern:"**/buildlog.html",
                           id:"msbuild_${buildIdentifier}",
                           name:"MSBuild ${buildIdentifier}"),
