@@ -130,7 +130,7 @@ private:
 
     std::wstring m_backdoorConnectionName;
 
-    //This is the name of the program, as fetched from the OS or set programattically
+    // This is the name of the program, as fetched from the OS or set programmatically
     std::wstring m_programName;
 
     void TraceInternal(const PrefixId prefixId,

@@ -2,18 +2,37 @@
 This file is included into the main SUG document, and is located under header level "==="
 ///////
 
-The Tracer is intended to be used for developer/integration logging inside applications. It should never be used as the sole target for logging errors, since the output can only be viewed by developers. A common way to use trace logging is to log "significant events" or other points of interest, so that the developer can find out what his component is doing when running on a test system or when running in a situation when it is not desirable or possible to halt execution with a debugger.
+The Tracer is intended to be used for developer/integration logging inside
+applications. It should never be used as the sole target for logging errors, since the
+output can be turned on and off, which means that you might not see logged errors. A
+common way to use trace logging is to log "significant events" or other points of
+interest, so that the developer can find out what his component is doing when running on
+a test system or when running in a situation when it is not desirable or possible to halt
+execution with a debugger.
 
-The interface to the trace logging functionality is a class named +Safir.Application.Tracer+ and a class named +Safir.Application.TracerBackdoor+.
+The interface to the trace logging functionality is a class named
++Safir.Application.Tracer+ and a class named +Safir.Application.TracerBackdoor+.
 
-Tracer objects are used to send logs to the Safir Log, and the TracerBackdoor is used to turn the different Tracers on and off. The Tracer class has no Dob dependencies itself, but the TracerBackdoor uses the Backdoor functionality, as described above.
+Tracer objects are used to send logs to various log outputs, and the TracerBackdoor is
+used to turn the different Tracers on and off.
 
-==== How to use
+==== Getting started
 
-The main goal of the Tracer class is for it to be as easy to use as possible, and that its usage should be as close to the languages own text input/output-syntax as possible. 
+First a little terminology:
 
-1. Instantiate the Tracer class in each of the classes/packages where you want to use trace logging. Each instantiation requires a "prefix" which is used to enable and disable the logging from each tracer instantiation (described below). Several Tracer instances can use the same prefix, and will then all be enabled/disabled by the same command.
-2. Log to the tracer-instance (in this example the instance is called "debug"):
+Tracer:: an instance of `Safir.Application.Tracer` that your code writes log lines to.
+
+Prefix:: the name string you pass to the Tracer constructor.  It is prepended to every
+         log line from that Tracer and is the key that all enable/disable commands
+         operate on.  Several Tracer objects can share the same prefix.
+
+The Tracer functionality is designed to be easy to use and to resemble each language's
+native input/output syntax.
+
+1. Call +Safir::Application::TracerBackdoor::Start(connection)+ just after your program has opened its main Dob connection.
+2. Call +Safir::Application::TracerBackdoor::Stop()+ when your application is shutting down.
+3. Instantiate the Tracer class in each of the classes/packages where you want to use trace logging. Pass a prefix to the constructor.
+4. Log to the Tracer instance (in this example the instance is called "debug"):
  - *{cpp}*
 +
 [source,c++]
@@ -35,19 +54,106 @@ debug.WriteLine("Testing logging {0}, {1}", myFloat, myInt);
 debug.println("Testing logging " + myFloat + ", " + myInt);
 ----------------------------
 
-3. Call +Safir::Application::TracerBackdoor::Start(connection)+ just after your program has opened its main Dob connection.
-4. Call +Safir::Application::TracerBackdoor::Stop()+ when your application is shutting down.
-5. Enable and disable the logging by using the "bd" command. Send "<prefix> on" to turn on the logging of a prefix (also try "help" to see what prefixes are registered and what their current states are). To do this, type "bd -c myconnection myprefix on" in a command line window (if you skip the "-c myconnection" bit all applications in the system will receive the command, which may have undesired consequences).
- - It is possible to turn on/off all prefixes by sending "all on" to your application.
- - It is possible to turn on/off prefixes immediately from the start of an application by setting the environment variable FORCE_LOG to one or several "<prefix>" or "all". This is useful to be able to have logging on by default or for logging the startup behaviour of an application. See <<force_log>> for a few hints on how this feature can be used.
- - Trace log output will be sent to the Safir Log.
- - Log output is also sent to the applications standard output (its console).
+Use the *Safir Tracer Viewer* application for convenient manipulation and viewing of
+tracer logs. <<tracer_viewer_overview>> shows a screen shot of this program. On the left
+hand side you have two panels. The top panel contains all the applications that have
+tracers, and there is a check box for each, which allows for enabling or disabling all
+tracers in that application. The button with three dots opens the bottom panel which
+allows for turning specific prefixes (i.e. individual Tracers) on and off. It also lets
+you choose where the application's trace output is sent (stdout, Safir Logging, or Tracer
+UDP). Destination settings apply to the whole application, not to each individual tracer.
+
+In the middle you have the logs as received by the application, with filtering
+capabilities at the bottom. Note that it is possible to show/hide columns by
+right-clicking in the table header.  Copy-paste should also work as expected.
+
+On the right hand side you have highlighting functionality, for colouring lines that
+contain specific regular expressions.
+
+[[tracer_viewer_overview]]
+.Safir Tracer Viewer screen shot
+ifdef::backend-docbook5[]
+image::images/tracer_viewer_overview.png["Safir Tracer Viewer Screen shot", width="50%"]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
+image::images/tracer_viewer_overview.png["Safir Tracer Viewer Screen shot", link="images/tracer_viewer_overview.png"]
+endif::backend-docbook5[]
+
+For the controls on the left hand side to work, the application +safir_status+ needs to
+be running.
+
+==== Details and more functionality
+
+The Tracer has quite a few details to its implementation, that are good to understand to
+get the full benefit from all the functionality.
+
+===== Output protocols
+
+The Tracer is able to output to three different logging destinations, controllable per
+application (see the bottom panel in <<tracer_viewer_overview>>):
+
+ - Standard output - As if logged using iostreams/printf/etc
+ - Safir Logging - At the Debug level of Safir Logging (<<safir_logging>>)
+ - Tracer UDP protocol - A UDP Multicast protocol suited for high throughput logging
+
+The first is really just there since it is easy to use when combined with FORCE_LOG (more
+below) and a terminal or a debugger. The second is there since it was the main tracer
+logging destination in previous Safir SDK Core releases, and is still useful since it
+gets combined with the error logs.
+
+The third output option is new from Safir SDK Core 7.4 and is much more suitable for high
+throughput logging than the Safir Logging facility, and since it is separate from that it
+also makes it easier to not drown out any error logs when using the trace logging
+functionality for debugging.
+
+There are two ways of accessing the Tracer UDP data, either using the Safir Tracer Viewer
+as shown above, or using a command line program +safir_tracer_listener+. The Safir Tracer
+Viewer will try to listen to whatever ports and multicast groups that are defined in
++Safir.Application.TracerParameters.dou+, to make it "just work". The
++safir_tracer_listener+ does not read those parameters (it has no run time dependencies
+to either the Dob or the Typesystem), instead you have to specify ports and groups on the
+command line, if the defaults are changed.
+
+===== Controlling
+
+There are a few ways to control the Tracer logging:
+
+ - +bd+ command - legacy command-line tool.
+ - Safir Tracer Viewer - GUI tool.
+ - +FORCE_LOG+ - environment variable.
+
+The first option, the "bd" (for backdoor) tool has been part of Safir SDK Core for a long
+time. It sends a +Safir.Application.BackdoorCommand+ message with information about what
+prefix to enable or disable. This message is also used for controlling generic Backdoor
+functionality, that is not part of the Tracer interface. (see <<debugging_support>>).  To
+use "bd" to turn on a particular prefix, type "bd -c <connection> <prefix> on" in a
+command line window (if you skip the "-c <connection>" bit all applications in the system
+will receive the command, which may have undesired consequences). It is possible to turn
+on/off all prefixes by sending "all on" to your application. Also try "bd help" to see
+what prefixes are registered and what their current states are).
+
+The second, the Safir Tracer Viewer GUI, was introduced in Safir SDK Core 7.4, and uses a
+new entity-based facility for enabling and disabling trace logging. This requires that
+you also run the +safir_status+ program, which will own instances of the entity
++Safir.Application.TracerStatus+. How it actually works on the inside is that each
+application that uses Tracers will ask safir_status to maintain an entity instance
+containing the status of all its prefixes, along with the destinations to log to. The
+tracer viewer will send requests to safir_status to turn prefixes on and off, and the
+application will react to this.  By default the entity is marked for persistence, meaning
+that the logging state is persisted through application or system restarts.
+
+The third way to control logging is to use an environment variable +FORCE_LOG+, which
+allows you to turn logs on by default from the very start of the application. Set the
+variable to one or several "<prefix>" or "all". See <<force_log_uses>> for a few hints on how
+this feature can be used.
 
 ===== Expression expansion
 
-The checking of whether a prefix is enabled happens in slightly different ways in the different languages, which means that depending on how you use the logger you may pay for string expansion or you may not.
+The checking of whether a prefix is enabled happens in slightly different ways in the
+different languages, which means that depending on how you use the logger you may pay for
+string expansion or you may not.
 
-- In {cpp} the check is made once for every "<<", but since the check is inlined it can be considered cheap. Floats and suchlike are not expanded into strings until after the check has "been successful", so it is ok to log most stuff using lines like 
+- In {cpp} the check is made once for every "<<", but since the check is inlined it can be considered cheap. Floats and suchlike are not expanded into strings until after the check has "been successful", so it is ok to log most stuff using lines like
 +
 [source,c++]
 ----------------------------
@@ -72,7 +178,7 @@ since the string expansion will not be performed until the check has passed.
 
 - In Java the check is made for every +print+ or +println+ call that is made. The tracer supports the +printf(...)+ functions that will give the similar functionality as C# described above. Check out the documentation for javas +PrintWriter+ to find out how to use this syntax.
 
-Sometimes you might have something that is expensive to calculate in your logs, for example something like 
+Sometimes you might have something that is expensive to calculate in your logs, for example something like
 
 [source,c++]
 ----------------------------
@@ -82,7 +188,7 @@ where the expensive function will be called every time the statement executed wh
 
 [source,c++]
 ----------------------------
-if (debug.IsEnabled()) 
+if (debug.IsEnabled())
 {
     debug << "Average: " << ExpensiveAverageCalculation() << std::endl;
 }
@@ -90,43 +196,64 @@ if (debug.IsEnabled())
 
 This applies to all languages, even if this example was in {cpp}.
 
-[[force_log]]
-==== The FORCE_LOG environment variable
-There are a few different ways that the FORCE_LOG environment variable can be used.
+[[force_log_uses]]
+===== Uses for FORCE_LOG
 
-The first is, naturally, to set the environment variable in the System Properties -> Environment Variables dialog (in Windows), or in your .bashrc file (for Unix bash shell users). This has the sometimes unfortunate side effect of turning on the selected prefixes for all applications, which can be a problem if several applications use the same prefix, or if you set FORCE_LOG to "all" which will mean that all applications will log everything.
+There are a few different ways that the +FORCE_LOG+ environment variable can be used. The
+need for this is less since the introduction of the persisted
++Safir.Application.TracerStatus+ entity way of controlling the prefixes, but it is still
+here for backwards compatibility, and might still be useful in some cases. Here are some
+ways to use it:
 
-The second way is to start your program from the command line: First run +set FORCE_LOG="something somethingelse"+ (Windows again, unix bash shell users do +export FORCE_LOG=...+), and then run your application from the command line. Now only your application will be run with those settings. This same way can of course be used in a script.
+The first is, naturally, to set the environment variable in the System Properties ->
+Environment Variables dialog (in Windows), or in your .bashrc file (for Unix bash shell
+users). This has the sometimes unfortunate side effect of turning on the selected
+prefixes for all applications, which can be a problem if several applications use the
+same prefix, or if you set FORCE_LOG to "all" which will mean that all applications will
+log everything.
 
-Lastly, if you want to run your program from the Visual Studio debugger with trace logging on by default, there is support for that too. Under Project Settings -> Debugging -> Environment it is possible to set environment variables. So set FORCE_LOG="all" there to get your program to start with all logging enabled. Also make sure that "Merge Environment" is set to Yes, or your program (and the libraries it depends on) will not be able to read other environment variables.
+The second way is to start your program from the command line: First run +set
+FORCE_LOG="something somethingelse"+ (Windows again, unix bash shell users do +export
+FORCE_LOG=...+), and then run your application from the command line. Now only your
+application will be run with those settings. This same way can of course be used in a
+script.
 
-==== Using the Tracer without a Dob connection
+Lastly, if you want to run your program from the Visual Studio debugger with trace
+logging on by default, there is support for that too. Under Project Settings -> Debugging
+-> Environment it is possible to set environment variables. So set FORCE_LOG="all" there
+to get your program to start with all logging enabled. Also make sure that "Merge
+Environment" is set to Yes, or your program (and the libraries it depends on) will not be
+able to read other environment variables.
 
-The Tracer class itself does not use the Dob in any way, it is only the TracerBackdoor that uses the Dob, which means that it is possible to use the Tracer functionality in an application that does not have a Dob connection, or to use it when the connection is not open. Of course, since this means that the TracerBackdoor cannot be used, it is not possible to use the backdoor command to control the logging. But it is still possible to use the FORCE_LOG functionality to enable logging.
+===== Using the Tracer without a Dob connection
+
+It is possible to use the Tracer functionality in an application that does not have a Dob
+connection, or to use it when the connection is not open. This, however, means that it is
+not possible to turn on and off tracers while the application is running. Instead you
+would have to use the FORCE_LOG functionality to enable logging. The
+output will only be sent to standard output and to Safir Logging, and not to the Tracer
+UDP protocol.
 
 ==== Tracer FAQ
 
 How does flushing work?::
-  The Tracer logs to both standard output and to Safir Logging. Flushing is handled differently in these two mechanisms, which means that they will behave slightly differently. Standard output is flushed as it is normally done in each language, e.g. on ++std::flush++ and ++std::endl++ in {cpp}, and Safir Logging is flushed on each newline.
+  Flushing is handled differently in the three output mechanisms, which means that they will behave slightly differently. Standard output is flushed as it is normally done in each language, e.g. on ++std::flush++ and ++std::endl++ in {cpp}, and Safir Logging is flushed on each newline. Tracer UDP output does not really have flushing at all, but instead the logging lines are batched and sent "within 50ms" of the log line being flushed (i.e. after std::endl/std::flush/WriteLine/println). Note that in C++ just ending a line with "\n" will not cause a flush. You have to use std::endl or std::flush.
 
 How does the Tracer use Windows Native Logging?::
-  When Native logging is enabled on Windows systems (see <<windows_native_logging>>) the Tracer will _only_ log to standard output, and not to Safir Logging. This is by design, since the Windows Event Log is not suited for tracer-style logs.
+  When Native logging is enabled on Windows systems (see <<windows_native_logging>>) the Tracer will not log to Safir Logging. This is by design, since the Windows Event Log is not suited for tracer-style logs.
 
-==== Changes from previous Tracer versions
+How does the Tracer connect to the Dob?::
+  Since version 7.4 the Tracer has its own connection to the Dob, and a dedicated background thread to manage it. The connection name will be the name of the current executable file. But for backwards compatibility we also react to bd messages to the connection name of the application.
 
-The way that the Tracer works changed quite a lot with the introduction of the Safir Logging mechanism in Safir SDK Core version 4.5. The interface has only minor changes, but the behaviour behind the scenes has changed significantly.
+Do I need to do anything new with this thread thing?::
+  No, the thread is started on calls to +TracerBackdoor::Start+ and stopped on +TracerBackdoor::Stop+. If you are stopping in some uncontrolled way there may be issues with stopping the thread, but we make an effort to shut it down properly even in these situations.
 
-Starting the TracerBackdoor::
-  Previously the TracerBackdoor was started automatically with a separate thread and connection, but now the TracerBackdoor has to be started explicitly, and on an existing connection. This means that you have to add Start and Stop calls in your applications.
+What is the difference between a *Tracer* and a *prefix*?::
+  A Tracer is the logger object you create in code, whereas the prefix is the
+  label you supply to that Tracer. The prefix is inserted at the start of every
+  log line and is the token that back-door tools and the Tracer Viewer use when
+  enabling or disabling logging. Several Tracer objects can share the same
+  prefix.
 
-Setting Program Name::
-  Previously it has been necessary to tell the Tracer what the name of the program is for it to be able to use a sensible connection name. Since the Tracer no longer has a connection of its own this is no longer necessary. Hence the +SetProgramName(...)+ function has been removed. If your applications used this function you have to remove those calls. This also means that you now cannot address your application using "bd -c <executable name>", but instead have to use the connection name that the TracerBackdoor was started with.
-
-Buffering and flushing::
-  Previously logged data was flushed to the old logging mechanism after 0.5 seconds. The new flushing behaviour is described above. You don't have to change your application in any way, just expect the new behaviour when using the Tracer.
-
-Prefixes and when to start logging::
-  Previously there were some rules on how and when to instantiate and use Tracers and prefixes. This is now much more straightforward: Instantiate the Tracers when and where you want to, and use them when and where you want to.
-
-Extra threads and connections::
-  Old versions of the Tracer would start a background thread and open a connection in that thread. This led to some sometimes unwanted side-effects. The Tracer no longer has this background thread (instead you have to start the TracerBackdoor on one of your connections). No changes are needed to your applications.
+I am using Java and the Tracer uses a weird connection name?::
+  The Tracer tries to work out the name of the current executable to use as its connection name, but with Java this is not always easy. Use +TracerBackdoor.setProgramName+ to override the auto detected name.

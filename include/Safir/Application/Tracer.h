@@ -47,7 +47,8 @@ namespace Application
          * backdoor commands. The tracer will open its own connection in a
          * background thread.
          *
-         * @param connection [in] Connecion whose name to listen to.
+         * @param connection [in] Connection whose name determines which backdoor commands to observe.
+         *                        The connection must already be open when this function is called.
          */
         static void Start(const Safir::Dob::ConnectionBase& connection);
 

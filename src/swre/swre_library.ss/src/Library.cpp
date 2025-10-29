@@ -574,7 +574,7 @@ Library::GetHelpText()
 {
     std::wostringstream out;
     out << "<app>: Trace logger supports the following commands: " << std::endl;
-    out << "<app>:   " << std::setw(m_prefixes.LongestPrefixLength()) << "all" << " on/off - Turn logging of all prefices on or off" << std::endl;
+    out << "<app>:   " << std::setw(m_prefixes.LongestPrefixLength()) << "all" << " on/off - Turn logging of all prefixes on or off" << std::endl;
     out << m_prefixes.GetHelpText();
     return out.str();
 }

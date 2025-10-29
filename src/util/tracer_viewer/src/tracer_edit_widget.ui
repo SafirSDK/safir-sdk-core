@@ -47,10 +47,10 @@
       <item>
        <widget class="QCheckBox" name="logToStdout">
         <property name="toolTip">
-         <string>Log Tracer output from this application to the processes Standard Output.</string>
+         <string>Log Tracer output from this application to the process's Standard Output.</string>
         </property>
         <property name="text">
-         <string>StdOut</string>
+         <string>stdout</string>
         </property>
        </widget>
       </item>
@@ -58,10 +58,10 @@
        <widget class="QCheckBox" name="logToSafirLogging">
         <property name="toolTip">
          <string>Log Tracer output from this application
-to Safir.Logging as Debug level logs.</string>
+to Safir Logging as Debug level logs.</string>
         </property>
         <property name="text">
-         <string>Safir.Logging</string>
+         <string>Safir Logging</string>
         </property>
        </widget>
       </item>
@@ -72,7 +72,7 @@ to Safir.Logging as Debug level logs.</string>
 protocol, meaning it will show up in this application.</string>
         </property>
         <property name="text">
-         <string>Tracer</string>
+         <string>Tracer UDP</string>
         </property>
        </widget>
       </item>
