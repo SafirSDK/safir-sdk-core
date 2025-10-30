@@ -405,6 +405,10 @@ function(INSTALL_CSHARP_ASSEMBLY)
     install(FILES ${_cs_DOC_FILE}
       DESTINATION ${_cs_DESTINATION}
       COMPONENT ${_cs_COMPONENT_DEVELOPMENT})
+
+    install(FILES ${_cs_ASSEMBLY_FILE} ${_cs_PUBLISHER_POLICY_FILE} ${_cs_DOC_FILE}
+      DESTINATION lib/netstandard2.0/
+      COMPONENT NuGet EXCLUDE_FROM_ALL)
   else()
     install(PROGRAMS ${_cs_ASSEMBLY_FILE}
       DESTINATION ${_cs_DESTINATION}
