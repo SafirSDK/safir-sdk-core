@@ -54,31 +54,109 @@ IF (NOT CSHARP_FOUND)
 ENDIF ()
 
 
-# On Windows we want to ensure that we target version 4.8 of the .NET framework, falling back on 4.6.1 for
-# vs2015 compatibility, so we point it out specifically. On Linux it doesnt matter so much, since we
-# target whateveris in  the distro repos.
-if (WIN32)
-  set (_DOTNET_FRAMEWORK_VERSIONS v4.8 v4.6.1)
-  foreach (ver ${_DOTNET_FRAMEWORK_VERSIONS})
-    set (DOTNET_FRAMEWORK_LIBPATH "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/${ver}/")
-    if (NOT IS_DIRECTORY "${DOTNET_FRAMEWORK_LIBPATH}")
-      set (DOTNET_FRAMEWORK_LIBPATH "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/${ver}/")
-    endif()
-    if (IS_DIRECTORY "${DOTNET_FRAMEWORK_LIBPATH}")
-      message(STATUS "Using .NET Framework assemblies in ${DOTNET_FRAMEWORK_LIBPATH}")
-      break()
-    else()
-      unset(DOTNET_FRAMEWORK_LIBPATH)
-    endif()
-  endforeach()
-  unset(ver)
-  unset(_DOTNET_FRAMEWORK_VERSIONS)
-
-  if (NOT DOTNET_FRAMEWORK_LIBPATH)
-    message(FATAL_ERROR "Could not find the .NET assemblies")
+# ---------------------------------------------------------------------------
+# Translate a framework version (e.g. 4.8 or 4.6.1) to the corresponding
+# NuGet Target Framework Moniker (TFM).  Input is assumed to be only the
+# numeric version, without any leading 'v' or trailing '-api'.
+#
+#   dotnet_version_to_tfm(<VER> <OUT_VAR>)
+#
+# Rule:
+#   – Any version >= 4.8 maps to net481 (NuGet’s preferred moniker).
+#   – Otherwise:  <major>.<minor>[.<patch>] → net<major><minor>[patch]
+# ---------------------------------------------------------------------------
+function(dotnet_version_to_tfm VER OUT_VAR)
+  string(REPLACE "." ";" _parts "${VER}")
+  list(LENGTH _parts _len)
+  if(_len LESS 2)
+    message(FATAL_ERROR "dotnet_version_to_tfm expects at least <major>.<minor>")
   endif()
 
-  SET(CSHARP_COMPILER_FRAMEWORK_ARGUMENTS "-nostdlib
+  list(GET _parts 0 _major)
+  list(GET _parts 1 _minor)
+
+  if(_major EQUAL 4 AND _minor GREATER_EQUAL 8)
+    set(_tfm "net481")
+  else()
+    set(_tfm "net${_major}${_minor}")
+    if(_len GREATER 2)
+      list(GET _parts 2 _patch)
+      if(NOT _patch STREQUAL "0")
+        set(_tfm "${_tfm}${_patch}")
+      endif()
+    endif()
+  endif()
+
+  set(${OUT_VAR} "${_tfm}" PARENT_SCOPE)
+endfunction()
+
+# ---------------------------------------------------------------------------
+# Helper that resolves the location of reference assemblies for a sequence of
+# requested framework versions.  The first version that exists on the local
+# computer wins and its directory is returned in the caller-scope variable
+# passed as the first argument.
+#
+#   find_dotnet_framework_libpath(<OUT_VAR> ver1 ver2 …)
+#
+# Works on both Windows (.NET reference assemblies) and Linux/Mono.
+# ---------------------------------------------------------------------------
+function(find_dotnet_framework_libpath OUT_VAR)
+  set(_versions ${ARGN})
+
+  foreach(_ver ${_versions})
+    if (WIN32)
+      # On Windows the framework directories are prefixed with 'v' (e.g. v4.8.1).
+      # Add the prefix automatically so callers can pass plain version numbers
+      set(_ver_dir "v${_ver}")
+      set(_candidate_paths
+          "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/${_ver_dir}/"
+          "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/${_ver_dir}/")
+    else()
+      # Try pkg-config to locate Mono’s libdir
+      execute_process(
+        COMMAND pkg-config --variable=libdir mono
+        OUTPUT_VARIABLE _mono_libdir
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET)
+      if (_mono_libdir)
+        list(APPEND _candidate_paths
+            "${_mono_libdir}/mono/${_ver}/"
+            "${_mono_libdir}/mono/${_ver}/api/"
+            "${_mono_libdir}/mono/${_ver}-api/")
+      endif()
+      # Fallback standard locations
+      list(APPEND _candidate_paths
+          "/usr/lib/mono/${_ver}/"
+          "/usr/lib/mono/${_ver}/api/"
+          "/usr/lib/mono/${_ver}-api/")
+    endif()
+
+    foreach(_p ${_candidate_paths})
+      if (IS_DIRECTORY "${_p}")
+        set(${OUT_VAR} "${_p}" PARENT_SCOPE)
+
+        # Derive and expose the NuGet TFM
+        dotnet_version_to_tfm("${_ver}" _derived_tfm)
+        set(DOTNET_FRAMEWORK_TFM "${_derived_tfm}" CACHE STRING
+            "NuGet Target Framework Moniker derived by FindCSharp")
+
+        return()
+      endif()
+    endforeach()
+    unset(_candidate_paths)
+  endforeach()
+endfunction()
+
+find_dotnet_framework_libpath(DOTNET_FRAMEWORK_LIBPATH 4.8 4.6.1)
+
+if (DOTNET_FRAMEWORK_LIBPATH)
+  message(STATUS "Using .NET Framework assemblies in ${DOTNET_FRAMEWORK_LIBPATH}")
+  message(STATUS "Using TFM ${DOTNET_FRAMEWORK_TFM}")
+else()
+  message(FATAL_ERROR "Could not find the .NET assemblies")
+endif()
+
+SET(CSHARP_COMPILER_FRAMEWORK_ARGUMENTS "-nostdlib
                               -lib:\"${DOTNET_FRAMEWORK_LIBPATH}\"
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}mscorlib.dll\"
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}System.dll\"
@@ -87,6 +165,6 @@ if (WIN32)
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}System.Core.dll\"
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}System.Xml.dll\"
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}System.EnterpriseServices.dll\"")
-endif()
 
-MARK_AS_ADVANCED(CSHARP_COMPILER CSHARP_LINKER GACUTIL_EXECUTABLE RESGEN_EXECUTABLE DOTNET_FRAMEWORK_LIBPATH CSHARP_COMPILER_FRAMEWORK_ARGUMENTS)
+
+MARK_AS_ADVANCED(CSHARP_COMPILER CSHARP_LINKER GACUTIL_EXECUTABLE RESGEN_EXECUTABLE DOTNET_FRAMEWORK_LIBPATH CSHARP_COMPILER_FRAMEWORK_ARGUMENTS DOTNET_FRAMEWORK_TFM)

@@ -405,6 +405,17 @@ function(INSTALL_CSHARP_ASSEMBLY)
     install(FILES ${_cs_DOC_FILE}
       DESTINATION ${_cs_DESTINATION}
       COMPONENT ${_cs_COMPONENT_DEVELOPMENT})
+
+    if (NOT DOTNET_FRAMEWORK_TFM)
+      message(FATAL_ERROR "DOTNET_FRAMEWORK_TFM not set, assuming net481")
+      set (DOTNET_FRAMEWORK_TFM "net481")
+    endif()
+
+    if (_cs_COMPONENT STREQUAL "Runtime" OR _cs_COMPONENT STREQUAL "Development" OR _cs_COMPONENT STREQUAL "")
+        install(FILES ${_cs_ASSEMBLY_FILE} ${_cs_PUBLISHER_POLICY_FILE} ${_cs_DOC_FILE}
+          DESTINATION lib/${DOTNET_FRAMEWORK_TFM}/
+          COMPONENT NuGet EXCLUDE_FROM_ALL)
+    endif()
   else()
     install(PROGRAMS ${_cs_ASSEMBLY_FILE}
       DESTINATION ${_cs_DESTINATION}

@@ -10,6 +10,7 @@
 *.pdb
 *.gch
 *.pch
+*.nupkg
 
 #misc generated files
 SafirSdkCoreVersion.h
@@ -26,6 +27,8 @@ CMakeSettings.json
 CMakeCache.txt
 Makefile
 compile_commands.json
+CPackConfig.cmake
+CPackSourceConfig.cmake
 gen
 .ninja_*
 *.ninja
@@ -60,7 +63,7 @@ ipch/
 **/.vscode/
 **/.vs/
 *.VC.*
-
+_CPack_Packages/
 
 #CTest / Unit test stuff
 DartConfiguration.tcl

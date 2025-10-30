@@ -1,5 +1,6 @@
 include(SafirCompilerSettings)
 include(SafirLoadBoost)
+include(NuGetPackaging)
 
 if (MSVC)
   SET(CMAKE_DEBUG_POSTFIX "d")

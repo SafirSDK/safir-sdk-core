@@ -39,18 +39,7 @@ if (MSVC AND NOT SAFIR_CSHARP_IS_CMAKE_NATIVE)
   endif()
 
   SET(CSHARP_COMPILER_FLAGS "-warn:4 -nowarn:1607")
-  #if we're in an IDE we get the platform from the generator
-  if (CMAKE_CONFIGURATION_TYPES)
-    if (CMAKE_GENERATOR MATCHES "Win64")
-      set(PLATFORM "x64")
-    endif()
-  else()
-    #Get platform and convert it to lowercase (vs2010 has it as X64 and vs2013 express as x64!)
-    string(TOLOWER "$ENV{Platform}" PLATFORM)
-  endif()
-
-  #make sure we set the arch of dotnet assemblies to be the same as the native code we build.
-  if (PLATFORM STREQUAL "x64")
+  if (CMAKE_SIZEOF_VOID_P MATCHES "8")
     SET(CSHARP_PLATFORM_FLAG "-platform:x64")
   else()
     SET(CSHARP_PLATFORM_FLAG "-platform:x86")
