@@ -227,29 +227,3 @@ set(ignore_me
   )
 
 
-set(CPACK_GENERATOR NuGet)
-# Set up package metadata
-set(CPACK_COMPONENTS_ALL NuGet)
-set(CPACK_NUGET_COMPONENT_INSTALL True)
-set(CPACK_PACKAGE_NAME SafirSDKCore-dotnet-dev)
-set(CPACK_NUGET_NUGET_PACKAGE_NAME ${CPACK_PACKAGE_NAME})
-set(CPACK_PACKAGE_VERSION "7.4.0")
-set(CPACK_PACKAGE_VENDOR "Saab AB")
-set(CPACK_NUGET_PACKAGE_AUTHORS "Saab AB")
-set(CPACK_PACKAGE_DESCRIPTION "Blablabla")
-set(CPACK_PACKAGE_HOMEPAGE_URL "https://www.safirsdkcore.com")
-set(CPACK_NUGET_PACKAGE_REPOSITORY_URL "https://github.com/SafirSDK/safir-sdk-core.git")
-set(CPACK_NUGET_PACKAGE_REPOSITORY_TYPE git)
-set(CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION "LGPL-3.0-only")
-# Set up dependencies
-set(CPACK_NUGET_PACKAGE_TFMS "netstandard2.0")
-#set(CPACK_NUGET_PACKAGE_DEPENDENCIES_net4 "Foo;Bar")
-# NB: If a version number is omitted, the dependency will not be created
-#set(CPACK_NUGET_PACKAGE_DEPENDENCIES_net4_Foo_VERSION "1.23")
-#set(CPACK_NUGET_PACKAGE_DEPENDENCIES_net4_Bar_VERSION "4.3.2")
-# NB: General dependencies (not framework-specific) go in this variable
-#set(CPACK_NUGET_PACKAGE_DEPENDENCIES "Baz")
-#set(CPACK_NUGET_PACKAGE_DEPENDENCIES_Baz_VERSION "9.8.6")
-# NB: Since "net6.0" was listed but no dependencies have been specified, an empty group
-# will be added to the nuspec file for this framework. This can be used to address warning NU5128.
-include(CPack)

@@ -19,3 +19,9 @@ endif()
 
 add_subdirectory(users_guide)
 add_subdirectory(requirements)
+
+install(FILES nuget-readme.md
+  DESTINATION docs
+  COMPONENT NuGet EXCLUDE_FROM_ALL
+  RENAME readme.md
+)
