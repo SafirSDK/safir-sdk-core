@@ -54,31 +54,71 @@ IF (NOT CSHARP_FOUND)
 ENDIF ()
 
 
-# On Windows we want to ensure that we target version 4.8 of the .NET framework, falling back on 4.6.1 for
-# vs2015 compatibility, so we point it out specifically. On Linux it doesnt matter so much, since we
-# target whateveris in  the distro repos.
-if (WIN32)
-  set (_DOTNET_FRAMEWORK_VERSIONS v4.8 v4.6.1)
-  foreach (ver ${_DOTNET_FRAMEWORK_VERSIONS})
-    set (DOTNET_FRAMEWORK_LIBPATH "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/${ver}/")
-    if (NOT IS_DIRECTORY "${DOTNET_FRAMEWORK_LIBPATH}")
-      set (DOTNET_FRAMEWORK_LIBPATH "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/${ver}/")
-    endif()
-    if (IS_DIRECTORY "${DOTNET_FRAMEWORK_LIBPATH}")
-      message(STATUS "Using .NET Framework assemblies in ${DOTNET_FRAMEWORK_LIBPATH}")
-      break()
+# ---------------------------------------------------------------------------
+# Helper that resolves the location of reference assemblies for a sequence of
+# requested framework versions.  The first version that exists on the local
+# computer wins and its directory is returned in the caller-scope variable
+# passed as the first argument.
+#
+#   find_dotnet_framework_libpath(<OUT_VAR> ver1 ver2 …)
+#
+# Works on both Windows (.NET reference assemblies) and Linux/Mono.
+# ---------------------------------------------------------------------------
+function(find_dotnet_framework_libpath OUT_VAR)
+  set(_versions ${ARGN})
+
+  foreach(_ver ${_versions})
+    if (WIN32)
+      set(_candidate_paths
+          "C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/${_ver}/"
+          "C:/Program Files/Reference Assemblies/Microsoft/Framework/.NETFramework/${_ver}/")
     else()
-      unset(DOTNET_FRAMEWORK_LIBPATH)
+      # Try pkg-config to locate Mono’s libdir
+      execute_process(
+        COMMAND pkg-config --variable=libdir mono
+        OUTPUT_VARIABLE _mono_libdir
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET)
+      if (_mono_libdir)
+        list(APPEND _candidate_paths
+            "${_mono_libdir}/mono/${_ver}/"
+            "${_mono_libdir}/mono/${_ver}/api/"
+            "${_mono_libdir}/mono/${_ver}-api/")
+      endif()
+      # Fallback standard locations
+      list(APPEND _candidate_paths
+          "/usr/lib/mono/${_ver}/"
+          "/usr/lib/mono/${_ver}/api/"
+          "/usr/lib/mono/${_ver}-api/")
     endif()
+
+    foreach(_p ${_candidate_paths})
+      if (IS_DIRECTORY "${_p}")
+        set(${OUT_VAR} "${_p}" PARENT_SCOPE)
+        return()
+      endif()
+    endforeach()
+    unset(_candidate_paths)
   endforeach()
-  unset(ver)
-  unset(_DOTNET_FRAMEWORK_VERSIONS)
+endfunction()
 
-  if (NOT DOTNET_FRAMEWORK_LIBPATH)
-    message(FATAL_ERROR "Could not find the .NET assemblies")
-  endif()
+# Preferred framework versions (newest first)
+if (WIN32)
+  set(_DOTNET_FRAMEWORK_VERSIONS v4.8.1 v4.6.1)
+else()
+  # Mono uses bare version numbers
+  set(_DOTNET_FRAMEWORK_VERSIONS 4.8.1 4.6.1 4.5)
+endif()
 
-  SET(CSHARP_COMPILER_FRAMEWORK_ARGUMENTS "-nostdlib
+find_dotnet_framework_libpath(DOTNET_FRAMEWORK_LIBPATH ${_DOTNET_FRAMEWORK_VERSIONS})
+
+if (DOTNET_FRAMEWORK_LIBPATH)
+  message(STATUS "Using .NET Framework assemblies in ${DOTNET_FRAMEWORK_LIBPATH}")
+else()
+  message(FATAL_ERROR "Could not find the .NET assemblies")
+endif()
+
+SET(CSHARP_COMPILER_FRAMEWORK_ARGUMENTS "-nostdlib
                               -lib:\"${DOTNET_FRAMEWORK_LIBPATH}\"
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}mscorlib.dll\"
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}System.dll\"
@@ -87,6 +127,6 @@ if (WIN32)
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}System.Core.dll\"
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}System.Xml.dll\"
                               -reference:\"${DOTNET_FRAMEWORK_LIBPATH}System.EnterpriseServices.dll\"")
-endif()
+
 
 MARK_AS_ADVANCED(CSHARP_COMPILER CSHARP_LINKER GACUTIL_EXECUTABLE RESGEN_EXECUTABLE DOTNET_FRAMEWORK_LIBPATH CSHARP_COMPILER_FRAMEWORK_ARGUMENTS)

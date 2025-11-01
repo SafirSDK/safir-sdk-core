@@ -408,7 +408,7 @@ function(INSTALL_CSHARP_ASSEMBLY)
 
     if (_cs_COMPONENT STREQUAL "Runtime" OR _cs_COMPONENT STREQUAL "Development" OR _cs_COMPONENT STREQUAL "")
         install(FILES ${_cs_ASSEMBLY_FILE} ${_cs_PUBLISHER_POLICY_FILE} ${_cs_DOC_FILE}
-          DESTINATION lib/netstandard2.0/
+          DESTINATION lib/net481/
           COMPONENT NuGet EXCLUDE_FROM_ALL)
     endif()
   else()
