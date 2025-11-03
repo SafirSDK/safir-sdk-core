@@ -117,7 +117,7 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("websocketpp/0.8.2")
         self.requires("rapidjson/cci.20230929")
         self.requires("ninja/1.13.0")
-        self.requires("qt-advanced-docking-system/4.4.0")
+        self.requires("qt-advanced-docking-system/4.4.1")
         #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support).
         #0.5.3 appears to be the last one that doesn't need that. Even 0.5.4 wants it.
         if self.settings.os == "Windows" and self.settings.compiler.version == 190:

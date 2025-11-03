@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, patch
+from conan.tools.files import get
 import os
 
 class qt_advanced_docking_systemRecipe(ConanFile):
     name = "qt-advanced-docking-system"
-    version = "4.4.0"
+    version = "4.4.1"
     package_type = "library"
 
     # Optional metadata
@@ -30,7 +30,6 @@ class qt_advanced_docking_systemRecipe(ConanFile):
                        "fPIC": True,
                        "qt_from_conan": False,
                        "qt_major_version": 6}
-    exports_sources = "*.patch"
 
     def requirements(self):
         if self.options.qt_from_conan and self.options.qt_major_version == 5:
@@ -40,8 +39,6 @@ class qt_advanced_docking_systemRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        patch_file = os.path.join(self.export_sources_folder, "qt69-build.patch")
-        patch(self, patch_file=patch_file)
 
     def config_options(self):
         if self.settings.os == "Windows":

@@ -539,6 +539,7 @@ void SateMainWindow::OnThemeChanged()
     }
 
     qApp->setStyleSheet(mainStyleSheet.join("\n"));
+    QApplication::processEvents();
     m_dockManager->setStyleSheet(adsStyleSheet.join("\n"));
 
     // Persist the new theme selection
