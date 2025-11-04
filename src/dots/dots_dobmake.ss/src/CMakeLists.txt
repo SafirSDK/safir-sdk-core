@@ -1,6 +1,7 @@
 set(ui dobmake.ui)
 set(sources dobmake.cpp main.cpp settings_manager.cpp dobmake.rc)
-set(headers dobmake.h BuildThread.h settings_manager.h)
+set(widget_headers dobmake.h BuildThread.h)
+set(headers settings_manager.h)
 
 if (NOT TARGET Qt::Widgets)
   message(STATUS "Could not find Qt, will not build dobmake")
@@ -8,9 +9,9 @@ if (NOT TARGET Qt::Widgets)
 endif()
 
 QT_WRAP_UI(ui_headers ${ui})
-QT_WRAP_CPP(moc_sources ${headers} ${QT_WRAP_CPP_OPTIONS})
+QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
 
-ADD_EXECUTABLE(dobmake WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers})
+ADD_EXECUTABLE(dobmake WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers})
 
 TARGET_LINK_LIBRARIES(dobmake PRIVATE lluf_config Qt::Widgets)
 
