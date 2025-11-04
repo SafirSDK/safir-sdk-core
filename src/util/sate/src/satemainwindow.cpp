@@ -538,6 +538,10 @@ void SateMainWindow::OnThemeChanged()
         adsStyleSheet.append(readStyleSheet(":customizations/ads-light.qss"));
     }
 
+    //These processEvents calls appear to be necessary because ADS restoreState(...) leaves
+    //some stuff around that we need to process before we can load the style sheet.
+    //We really ought to understand this better, but these two calls make it work...
+    QApplication::processEvents();
     qApp->setStyleSheet(mainStyleSheet.join("\n"));
     QApplication::processEvents();
     m_dockManager->setStyleSheet(adsStyleSheet.join("\n"));
