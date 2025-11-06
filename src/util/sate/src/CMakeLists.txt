@@ -13,6 +13,10 @@ set(ui
     parameterswidget.ui
     subscribedialog.ui
     enumwidget.ui
+    scriptwidget.ui
+    settingsdialog.ui
+    fileinfowidget.ui
+    textwidget.ui
 )
 
 set(sources
@@ -48,10 +52,18 @@ set(sources
     subscribedialog.cpp
     enumwidget.cpp
     enummodel.cpp
+    scriptengine.cpp
+    scriptwidget.cpp
+    scriptmodel.cpp
+    scriptcli.cpp
     typeaheadwidget.cpp
+    dobcalltojson.cpp
     utilities.cpp
     dobcalltojson.cpp
     settings_manager.cpp
+    settingsdialog.cpp
+    fileinfowidget.cpp
+    textwidget.cpp
     sate.rc
   )
 
@@ -83,8 +95,16 @@ set(widget_headers
     subscribedialog.h
     enumwidget.h
     enummodel.h
+    scriptengine.h
+    scriptwidget.h
+    scriptmodel.h
+    scriptcli.h
     typeaheadwidget.h
     settings_manager.h
+    dobcalltojson.h
+    settingsdialog.h
+    fileinfowidget.h
+    textwidget.h
   )
 
 set(headers

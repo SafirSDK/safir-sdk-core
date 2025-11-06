@@ -29,6 +29,7 @@
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Response.h>
+#include <Safir/Dob/SuccessResponse.h>
 #include <Safir/Dob/Service.h>
 #include <Safir/Dob/InstanceIdPolicy.h>
 #include <vector>
@@ -61,6 +62,15 @@ public:
         bool includeSubclasses;
     };
 
+    struct BehaviorOptions
+    {
+        bool dispatch = true;
+        bool sendResponse = true;
+        bool createEntities = true;
+        bool updateEntities = true;
+        bool deleteEntities = true;
+    };
+
     virtual bool IsOpen() const = 0;
     virtual void Open(const QString& name, int context) = 0;
     virtual void Close() = 0;
@@ -78,12 +88,12 @@ public:
     virtual void RegisterServiceHandler(int64_t typeId, const sdt::HandlerId& handler, bool pending) = 0;
     virtual void Unregister(int64_t typeId) = 0;
 
-    virtual void SendMessage(const Safir::Dob::MessagePtr& message, const sdt::ChannelId& channel) = 0;
-    virtual void SendServiceRequest(const Safir::Dob::ServicePtr& request, const sdt::HandlerId& handler) = 0;
+    virtual bool SendMessage(const Safir::Dob::MessagePtr& message, const sdt::ChannelId& channel) = 0;
+    virtual bool SendServiceRequest(const Safir::Dob::ServicePtr& request, const sdt::HandlerId& handler) = 0;
 
-    virtual void CreateRequest(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler) = 0;
-    virtual void UpdateRequest(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance) = 0;
-    virtual void DeleteRequest(const sdt::EntityId& entityId) = 0;
+    virtual bool CreateRequest(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler) = 0;
+    virtual bool UpdateRequest(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance) = 0;
+    virtual bool DeleteRequest(const sdt::EntityId& entityId) = 0;
 
     virtual void SetChanges(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler) = 0;
     virtual void SetAll(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler) = 0;
@@ -91,6 +101,8 @@ public:
     virtual void DeleteAll(int64_t typeId, const sdt::HandlerId& handler) = 0;
 
     virtual void ReadEntity(const sdt::EntityId& entityId) = 0;
+
+    virtual void Dispatch(){}
 
     RegistrationInfo* GetRegistration(int64_t typeId)
     {
@@ -146,6 +158,16 @@ public:
         return -1; //no subscription
     }
 
+    void SetBehaviorOptions(const BehaviorOptions& options)
+    {
+        m_behaviorOptions = options;
+    }
+
+    void SetResponse(const Safir::Dob::ResponsePtr& response)
+    {
+        m_response = response;
+    }
+
 signals:
     void ConnectedToDob(const QString& connectionName);
     void ConnectionClosed();
@@ -164,6 +186,9 @@ signals:
 
     void OnRegistered(const DobInterface::RegistrationInfo& info);
     void OnUnregistered(int64_t typeId);
+
+    void OnNotRequestOverflow();
+    void OnNotMessageOverflow();
 
     void OnReadEntity(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance);
 
@@ -253,6 +278,17 @@ protected:
         fun(cls);
     }
 
+    Safir::Dob::ResponsePtr GetResponse() const
+    {
+        if (!m_response)
+        {
+            return Safir::Dob::SuccessResponse::Create();
+        }
+        return m_response;
+    }
+
+    BehaviorOptions m_behaviorOptions;
+    Safir::Dob::ResponsePtr m_response;
     std::vector<DobInterface::RegistrationInfo> m_registrations;
     std::vector<DobInterface::SubscriptionInfo> m_subscriptions;
 

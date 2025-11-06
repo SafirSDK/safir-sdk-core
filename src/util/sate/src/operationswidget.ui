@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>164</width>
-    <height>643</height>
+    <height>740</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -182,9 +182,24 @@ margin: 2px;</string>
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="setResponseBtn">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use this as response to create, update, delete and service requests.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Use as response</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QLabel" name="idLabel">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
      <property name="styleSheet">
-      <string notr="true">margin-top: 20px;</string>
+      <string notr="true">margin-top: 2px;</string>
      </property>
      <property name="text">
       <string>Handler Id</string>
@@ -198,14 +213,31 @@ margin: 2px;</string>
     <widget class="QLineEdit" name="idEdit"/>
    </item>
    <item>
-    <widget class="QLabel" name="instanceLabel">
-     <property name="styleSheet">
-      <string notr="true">margin-top: 8px;</string>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <property name="spacing">
+      <number>6</number>
      </property>
-     <property name="text">
-      <string>Instance Id</string>
-     </property>
-    </widget>
+     <item>
+      <widget class="QLabel" name="instanceLabel">
+       <property name="styleSheet">
+        <string notr="true">margin-top: 8px;</string>
+       </property>
+       <property name="text">
+        <string>Instance Id</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="randomInstanceBtn">
+       <property name="toolTip">
+        <string>Generate random</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QLineEdit" name="instanceEdit"/>

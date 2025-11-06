@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2025 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson
 *
@@ -63,6 +63,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         }
         sendMsgBtn->setVisible(false);
         sendReqBtn->setVisible(false);
+        setResponseBtn->setVisible(false);
     }
     break;
 
@@ -85,6 +86,8 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         instanceEdit->setVisible(false);
         liveUpdateCheckBox->setVisible(false);
         copyEntityIdBtn->setVisible(false);
+        randomInstanceBtn->setVisible(false);
+        setResponseBtn->setVisible(false);
     }
     break;
 
@@ -106,6 +109,8 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         instanceEdit->setVisible(false);
         liveUpdateCheckBox->setVisible(false);
         copyEntityIdBtn->setVisible(false);
+        randomInstanceBtn->setVisible(false);
+        setResponseBtn->setVisible(false);
     }
     break;
 
@@ -126,6 +131,7 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         instanceEdit->setVisible(false);
         liveUpdateCheckBox->setVisible(false);
         copyEntityIdBtn->setVisible(false);
+        randomInstanceBtn->setVisible(false);
     }
     break;
 
@@ -149,6 +155,8 @@ void OperationsWidget::SetConfiguration(TypesystemRepository::DobBaseClass bc)
         instanceEdit->setVisible(false);
         liveUpdateCheckBox->setVisible(false);
         copyEntityIdBtn->setVisible(false);
+        randomInstanceBtn->setVisible(false);
+        setResponseBtn->setVisible(false);
     }
     break;
     }
@@ -168,7 +176,7 @@ Safir::Dob::Typesystem::InstanceId OperationsWidget::Instance() const
 {
     if (instanceEdit->text().isEmpty())
     {
-        instanceEdit->setText(QString::fromStdWString(Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString()));
+        return {};
     }
     return ToHashType<Safir::Dob::Typesystem::InstanceId>(instanceEdit->text());
 }

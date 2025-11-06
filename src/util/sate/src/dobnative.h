@@ -65,12 +65,12 @@ public:
     void RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool pending) override;
     void Unregister(int64_t typeId) override;
 
-    void SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel) override;
-    void SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler) override;
+    bool SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel) override;
+    bool SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler) override;
 
-    void CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler) override;
-    void UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance) override;
-    void DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId) override;
+    bool CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler) override;
+    bool UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance) override;
+    bool DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId) override;
 
     void SetChanges(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler) override;
     void SetAll(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler) override;
@@ -78,6 +78,8 @@ public:
     void DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler) override;
 
     void ReadEntity(const sdt::EntityId& entityId) override;
+
+    void Dispatch() override;
 
 signals:
     // For internal use only. Signals can't be declared private. All public signals are declared in DobInterface.

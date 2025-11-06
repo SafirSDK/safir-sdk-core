@@ -24,34 +24,19 @@
 #pragma once
 
 #include <QWidget>
-#include <QLineEdit>
-#include <QListView>
-#include <QSortFilterProxyModel>
 
+namespace Ui {
+class TextWidget;
+}
 
-class TypeAheadWidget : public QLineEdit
+class TextWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit TypeAheadWidget(QWidget *parent);
-    ~TypeAheadWidget();
-
-    void SetModel(QSortFilterProxyModel* model);
-    QSortFilterProxyModel* Model() const;
-
-signals:
-    void ItemSelected(const QModelIndex& selectedIndex);
-
-protected:
-    bool eventFilter(QObject *obj, QEvent *event) override;
+    TextWidget(const QString& info, const QString& text, const QString& filePath, QWidget *parent = nullptr);
+    ~TextWidget();
 
 private:
-    QListView* m_listView;
-    QSortFilterProxyModel* m_model = nullptr;
-
-    int m_dropdownRowWidth = 0;
-    int m_dropdownRowHeight = 0;
-
-    void OnTextEdited(const QString& text);
+    Ui::TextWidget *ui;
 };

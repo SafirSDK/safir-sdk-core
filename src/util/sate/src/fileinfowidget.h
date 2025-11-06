@@ -24,34 +24,25 @@
 #pragma once
 
 #include <QWidget>
-#include <QLineEdit>
-#include <QListView>
-#include <QSortFilterProxyModel>
 
+namespace Ui {
+class FileInfoWidget;
+}
 
-class TypeAheadWidget : public QLineEdit
+class FileInfoWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit TypeAheadWidget(QWidget *parent);
-    ~TypeAheadWidget();
+    explicit FileInfoWidget(QWidget *parent = nullptr);
+    ~FileInfoWidget();
 
-    void SetModel(QSortFilterProxyModel* model);
-    QSortFilterProxyModel* Model() const;
+    void setInfo(const QString& info);
+    void setFilePath(const QString& filePath);
 
-signals:
-    void ItemSelected(const QModelIndex& selectedIndex);
-
-protected:
-    bool eventFilter(QObject *obj, QEvent *event) override;
+private slots:
+    void onOpenContainingFolderClicked();
 
 private:
-    QListView* m_listView;
-    QSortFilterProxyModel* m_model = nullptr;
-
-    int m_dropdownRowWidth = 0;
-    int m_dropdownRowHeight = 0;
-
-    void OnTextEdited(const QString& text);
+    Ui::FileInfoWidget *ui;
 };

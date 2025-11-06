@@ -51,6 +51,7 @@
 
 class QLabel;
 class QTableView;
+class QIcon;
 class TypesystemWidget;
 class QTextBrowser;
 class InstancesWidget;
@@ -99,17 +100,20 @@ private:
                             const bool includeSubclasses,
                             const std::function<InstancesWidget* ()>& factory);
 
-    void AddXmlPage(const QString& title, const QString& text);
-    void AddJsonPage(const QString& title, const QString& text);
+    void AddXmlPage(const QString& title, const QString& text, const QString& filePath = QString());
+    void AddJsonPage(const QString& title, const QString& text, const QString& filePath = QString());
+    void SetResponseObject(const Safir::Dob::ResponsePtr& response);
+    Safir::Dob::ResponsePtr GetResponseObjectFromSettings() const;
 
     void AddTab(const QString& title,
                 const QString& tabType, //a prefix string to uniquely identify the type of tab this is
                 QWidget* widget,
-                const bool openInRightHandPanel);
+                const bool openInRightHandPanel,
+                const QIcon& icon = QIcon());
 
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *e) override;
-    void OpenSerializedObject(const QString& file);
+    void OpenSerializedObject(const QString& file, bool autoRunIfScript = false);
 
     Ui::SateMainWindow *ui;
     QToolBar* const m_toolBar;
@@ -122,6 +126,7 @@ private:
 
     QAction* m_midnightCommanderModeAction = nullptr;
     QAction* m_resetWindowsAction = nullptr;
+    QAction* m_dispatchAction = nullptr;
     DobHandler m_dob;
     bool m_connected = false;
     ConnectDialog* m_connectDialog;

@@ -271,7 +271,7 @@ Example::
 Send a service request to a handler.
 
 Parameters::
- * `service` - Service object.
+ * `request` - Service object.
  * `handlerId` - Id of the handler to send the request to. _([small]*Default:* DEFAULT_HANDLER)_
 Returns::
  * `isSuccess` - Indicates if the request was successful or not, can be _true_ or _false_.

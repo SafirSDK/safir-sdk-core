@@ -99,6 +99,11 @@ QIcon IconFactory::GetSearchIcon()
     return QIcon(":/img/icons/magnifying-glass-search.svg");
 }
 
+QIcon IconFactory::GetScriptIcon()
+{
+    return QIcon(":/img/icons/script-orange.svg");
+}
+
 QIcon IconFactory::GetIcon(TypesystemRepository::DobBaseClass baseClass, IconFactory::Modifier modifier)
 {
     auto pixmap = GetIconPixmap(baseClass, modifier);

@@ -32,7 +32,8 @@ QToolBar > QToolButton {
 Make the tool buttons in the output widget have no background when unchecked.
 Makes it easier to see what state is what.
 */
-OutputWidget > QToolButton {
+OutputWidget > QToolButton,
+FileInfoWidget > QToolButton {
     background-color: none;
 }
 

@@ -24,11 +24,19 @@
 #include "utilities.h"
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <QRegularExpression>
+#include <random>
 
 namespace sdt = Safir::Dob::Typesystem;
 namespace
 {
     QString Str(const std::wstring& s) { return QString::fromStdWString(s); }
+    
+    std::mt19937& GetRandomEngine()
+    {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        return gen;
+    }
 }
 
 QString Utilities::EntityIdToString(const Safir::Dob::Typesystem::EntityId& entityId)
@@ -70,4 +78,47 @@ sdt::TypeId Utilities::StringToTypeId(const QString& s)
     bool ok;
     sdt::TypeId typeId = s.trimmed().toLongLong(&ok, 10);
     return ok ? typeId : sdt::Operations::GetTypeId(s.trimmed().toStdWString());
+}
+
+int Utilities::RandomInt32(int low, int high)
+{
+    std::uniform_int_distribution<int> dist(low, high);
+    return dist(GetRandomEngine());
+}
+
+int64_t Utilities::RandomInt64(int64_t low, int64_t high)
+{
+    std::uniform_int_distribution<int64_t> dist(low, high);
+    return dist(GetRandomEngine());
+}
+
+float Utilities::RandomFloat(float low, float high)
+{
+    std::uniform_real_distribution<float> dist(low, high);
+    return dist(GetRandomEngine());
+}
+
+double Utilities::RandomDouble(double low, double high)
+{
+    std::uniform_real_distribution<double> dist(low, high);
+    return dist(GetRandomEngine());
+}
+
+QString Utilities::RandomString(int length)
+{
+    static const char charset[] = 
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    static const int charsetSize = sizeof(charset) - 1;
+    
+    std::uniform_int_distribution<int> dist(0, charsetSize - 1);
+    
+    QString result;
+    result.reserve(length);
+    for (int i = 0; i < length; ++i)
+    {
+        result.append(charset[dist(GetRandomEngine())]);
+    }
+    return result;
 }

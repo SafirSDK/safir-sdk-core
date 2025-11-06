@@ -41,6 +41,13 @@ namespace
     const char* kTouchModeKey        = "Ui/touchMode";
     const char* kMainWindowGeometryKey = "Ui/mainWindowGeometry";
     const char* kDockLayoutKey         = "Ui/dockLayout";
+    const char* kDispatchKey           = "DobHandler/dispatch";
+    const char* kSendResponseKey       = "DobHandler/sendResponse";
+    const char* kCreateEntitiesKey     = "DobHandler/createEntities";
+    const char* kUpdateEntitiesKey     = "DobHandler/updateEntities";
+    const char* kDeleteEntitiesKey     = "DobHandler/deleteEntities";
+    const char* kResponseKey           = "DobHandler/response";
+    const char* kStartupScriptKey      = "Script/startupScript";
 
     inline void ShowStatusBarMessage(const QString& msg)
     {
@@ -138,6 +145,104 @@ QByteArray SettingsManager::loadDockLayout() const
     return m_settings
             .value(QString::fromLatin1(kDockLayoutKey), QByteArray{})
             .toByteArray();
+}
+
+void SettingsManager::saveDispatch(bool dispatch)
+{
+    if (!m_savingEnabled)
+        return;
+
+    m_settings.setValue(QString::fromLatin1(kDispatchKey), dispatch);
+    scheduleFlush();
+}
+
+bool SettingsManager::loadDispatch() const
+{
+    return m_settings.value(QString::fromLatin1(kDispatchKey), true).toBool();
+}
+
+void SettingsManager::saveSendResponse(bool sendResponse)
+{
+    if (!m_savingEnabled)
+        return;
+
+    m_settings.setValue(QString::fromLatin1(kSendResponseKey), sendResponse);
+    scheduleFlush();
+}
+
+bool SettingsManager::loadSendResponse() const
+{
+    return m_settings.value(QString::fromLatin1(kSendResponseKey), true).toBool();
+}
+
+void SettingsManager::saveCreateEntities(bool createEntities)
+{
+    if (!m_savingEnabled)
+        return;
+
+    m_settings.setValue(QString::fromLatin1(kCreateEntitiesKey), createEntities);
+    scheduleFlush();
+}
+
+bool SettingsManager::loadCreateEntities() const
+{
+    return m_settings.value(QString::fromLatin1(kCreateEntitiesKey), true).toBool();
+}
+
+void SettingsManager::saveUpdateEntities(bool updateEntities)
+{
+    if (!m_savingEnabled)
+        return;
+
+    m_settings.setValue(QString::fromLatin1(kUpdateEntitiesKey), updateEntities);
+    scheduleFlush();
+}
+
+bool SettingsManager::loadUpdateEntities() const
+{
+    return m_settings.value(QString::fromLatin1(kUpdateEntitiesKey), true).toBool();
+}
+
+void SettingsManager::saveDeleteEntities(bool deleteEntities)
+{
+    if (!m_savingEnabled)
+        return;
+
+    m_settings.setValue(QString::fromLatin1(kDeleteEntitiesKey), deleteEntities);
+    scheduleFlush();
+}
+
+bool SettingsManager::loadDeleteEntities() const
+{
+    return m_settings.value(QString::fromLatin1(kDeleteEntitiesKey), true).toBool();
+}
+
+void SettingsManager::saveResponse(const QString& response)
+{
+    if (!m_savingEnabled)
+        return;
+
+    m_settings.setValue(QString::fromLatin1(kResponseKey), response);
+    scheduleFlush();
+}
+
+QString SettingsManager::loadResponse() const
+{
+    return m_settings.value(QString::fromLatin1(kResponseKey), QString{}).toString();
+}
+
+void SettingsManager::saveStartupScript(const QString& script)
+{
+    if (!m_savingEnabled)
+        return;
+
+    m_settings.setValue(QString::fromLatin1(kStartupScriptKey), script);
+    scheduleFlush();
+}
+
+QString SettingsManager::loadStartupScript() const
+{
+    return m_settings.value(QString::fromLatin1(kStartupScriptKey), QString{}).toString();
 }
 
 void SettingsManager::scheduleFlush()

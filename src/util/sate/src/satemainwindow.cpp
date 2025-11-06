@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2025 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson
 *
@@ -33,6 +33,12 @@
 #include "parameterswidget.h"
 #include "enumwidget.h"
 #include "settings_manager.h"
+#include "scriptengine.h"
+#include "scriptwidget.h"
+#include "iconfactory.h"
+#include "settingsdialog.h"
+#include "fileinfowidget.h"
+#include "textwidget.h"
 
 #include <QCloseEvent>
 #include <QActionGroup>
@@ -53,6 +59,7 @@
 #include <QToolButton>
 #include <QFileDialog>
 #include <QtConcurrent/QtConcurrent>
+#include <QVBoxLayout>
 
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
@@ -177,9 +184,38 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     connect(&m_dob, &DobHandler::ConnectedToDob, this, &SateMainWindow::OnConnectedToDob);
     connect(&m_dob, &DobHandler::ConnectionClosed, this, &SateMainWindow::OnConnectionClosed);
     connect(&m_dob, &DobHandler::OnReadEntity, this, [this](const auto& entity, const auto& inst){ OnOpenObjectEditWithInstance("", inst.GetRawValue(), entity); });
+    
+    m_dob.SetBehaviorOptions({
+        m_settingsManager->loadDispatch(),
+        m_settingsManager->loadSendResponse(),
+        m_settingsManager->loadCreateEntities(),
+        m_settingsManager->loadUpdateEntities(),
+        m_settingsManager->loadDeleteEntities()});
+
+    auto response = GetResponseObjectFromSettings();
+    if (response)
+    {
+        m_dob.SetResponse(response);
+    }
+    else
+    {
+        SetResponseObject(nullptr);
+    }
+    
     m_dob.OpenNativeConnection("SATE", 0);
 
     connect(m_dockManager,&ads::CDockManager::focusedDockWidgetChanged,this,&SateMainWindow::OnFocusedDockWidgetChanged);
+
+    m_dispatchAction = new QAction("Dispatch");
+    m_dispatchAction->setToolTip("Run DOB dispatcher a single time. Normal dispatching is currently disabled in settings.");
+    connect(m_dispatchAction, &QAction::triggered, this, [this]{ m_dob.Dispatch(); });
+    m_dispatchAction->setVisible(m_settingsManager->loadDispatch() == false);
+    m_toolBar->addAction(m_dispatchAction);
+    if (auto* dispatchButton = qobject_cast<QToolButton*>(m_toolBar->widgetForAction(m_dispatchAction)))
+    {
+        dispatchButton->setMinimumWidth(80); // Make the dispatch button wider to show full text
+        dispatchButton->setObjectName("DispatchButton"); // Set object name for styling
+    }
 
     auto* closeCurrentTabAction = new QAction("Close current tab");
     closeCurrentTabAction->setShortcut(QKeySequence(tr("Ctrl+W")));;
@@ -209,9 +245,12 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     m_resetWindowsAction->setToolTip("Move all tabs back to default positions");
     connect(m_resetWindowsAction, &QAction::triggered, this, &SateMainWindow::OnResetWindows);
 
+    
+    
     m_toolBar->addAction(showTypeInTreeAction);
     m_toolBar->addAction(m_midnightCommanderModeAction);
     m_toolBar->addAction(m_resetWindowsAction);
+    
 
     ui->menuView->addAction(m_midnightCommanderModeAction);
     ui->menuView->addAction(m_resetWindowsAction);
@@ -235,6 +274,62 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     ui->menuView->addSeparator();
     ui->menuView->addAction(typesystemDock->toggleViewAction());
     ui->menuView->addAction(outputDock->toggleViewAction());
+    ui->menuView->addSeparator();
+
+    auto* scriptRecorderAction = new QAction("Script recorder");
+    scriptRecorderAction->setToolTip("Open a new script recorder");
+    connect(scriptRecorderAction, &QAction::triggered, this, [this]{
+        auto script = new ScriptWidget("", "", &m_dob, this);
+        AddTab("New Script", "Script", script, false, IconFactory::GetScriptIcon());
+    });
+    ui->menuView->addAction(scriptRecorderAction);
+
+    auto* settingsAction = new QAction("Settings...");
+    settingsAction->setToolTip("Open settings dialog");
+    connect(settingsAction, &QAction::triggered, this, [this]{
+        Settings currentSettings;
+        currentSettings.dispatch = m_settingsManager->loadDispatch();
+        currentSettings.sendResponse = m_settingsManager->loadSendResponse();
+        currentSettings.createEntities = m_settingsManager->loadCreateEntities();
+        currentSettings.updateEntities = m_settingsManager->loadUpdateEntities();
+        currentSettings.deleteEntities = m_settingsManager->loadDeleteEntities();
+        currentSettings.startupScriptPath = m_settingsManager->loadStartupScript();
+        
+        SettingsDialog dialog(currentSettings, [this](bool reset){
+            if (reset)
+            {
+                SetResponseObject(nullptr);
+            }
+            else
+            {
+                auto resp = GetResponseObjectFromSettings();
+                if (!resp)
+                {
+                    resp = Safir::Dob::SuccessResponse::Create();
+                }
+                OnOpenObjectEditWithInstance({}, -1, resp);
+            }
+        }, this);
+
+        if (dialog.exec() == QDialog::Accepted)
+        {
+            Settings newSettings = dialog.getCheckboxStates();
+            m_settingsManager->saveDispatch(newSettings.dispatch);
+            m_settingsManager->saveSendResponse(newSettings.sendResponse);
+            m_settingsManager->saveCreateEntities(newSettings.createEntities);
+            m_settingsManager->saveUpdateEntities(newSettings.updateEntities);
+            m_settingsManager->saveDeleteEntities(newSettings.deleteEntities);
+            m_dob.SetBehaviorOptions({
+                newSettings.dispatch,
+                newSettings.sendResponse,
+                newSettings.createEntities,
+                newSettings.updateEntities,
+                newSettings.deleteEntities });
+
+            m_dispatchAction->setVisible(newSettings.dispatch == false && m_dob.IsNativeConnection());
+        }
+    });
+    ui->menuView->addAction(settingsAction);
 
     m_typesystem->SetSearchFocus();
 }
@@ -363,6 +458,12 @@ void SateMainWindow::OnConnectedToDob(const QString& connectionName)
 
     style()->unpolish(m_connectedLabel);
     style()->polish(m_connectedLabel);
+
+    auto filePath = m_settingsManager->loadStartupScript();
+    if (!filePath.isEmpty())
+    {
+        OpenSerializedObject(filePath, true);
+    }
 }
 
 void SateMainWindow::OnConnectionClosed()
@@ -379,32 +480,47 @@ void SateMainWindow::OnConnectionClosed()
 
 void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
 {
+    auto baseClass = TypesystemRepository::Instance().GetClass(typeId)->dobBaseClass;
+    auto icon = IconFactory::GetIcon(baseClass);
     auto oe = new DobObjectEditWidget(&m_dob, typeId, this);
-    connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
-    connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name,"OE", oe, false);
+
+    connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, [this](auto title, auto text){ AddXmlPage(title, text); });
+    connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, [this](auto title, auto text){ AddJsonPage(title, text); });
+    
+    if (baseClass == TypesystemRepository::Response)
+    {
+        connect(oe, &DobObjectEditWidget::SetResponseObject, this, &SateMainWindow::SetResponseObject);
+    }
+    
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name,"OE", oe, false, icon);
 }
 
 void SateMainWindow::OnOpenParameterViewer(const int64_t typeId, const QString& currentItem)
 {
     auto paramWidget = new ParametersWidget(typeId, currentItem, this);
-    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, "PV", paramWidget, false);
+    AddTab(TypesystemRepository::Instance().GetClass(typeId)->name, "PV", paramWidget, false, IconFactory::GetIcon(TypesystemRepository::Parametrization));
 }
 
 void SateMainWindow::OnOpenEnumViewer(const int64_t typeId, const QString& currentItem)
 {
     auto enumWidget = new EnumWidget(typeId, currentItem, this);
-    AddTab(TypesystemRepository::Instance().GetEnum(typeId)->name, "EN", enumWidget, false);
+    AddTab(TypesystemRepository::Instance().GetEnum(typeId)->name, "EN", enumWidget, false, IconFactory::GetEnumIcon());
 }
 
 void SateMainWindow::OnOpenObjectEditWithInstance(QString channelHandler,
                                                   int64_t instance,
                                                   const Safir::Dob::Typesystem::ObjectPtr& object)
 {
+    auto baseClass = TypesystemRepository::Instance().GetClass(object->GetTypeId())->dobBaseClass;
+    auto icon = IconFactory::GetIcon(baseClass);
     auto oe = new DobObjectEditWidget(&m_dob, channelHandler, instance, object, this);
-    connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, &SateMainWindow::AddXmlPage);
-    connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, &SateMainWindow::AddJsonPage);
-    AddTab(TypesystemRepository::Instance().GetClass(object->GetTypeId())->name, "OE", oe, m_midnightCommanderModeAction->isChecked());
+    connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, [this](auto title, auto text){ AddXmlPage(title, text); });
+    connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, [this](auto title, auto text){ AddJsonPage(title, text); });
+    if (baseClass == TypesystemRepository::Response)
+    {
+        connect(oe, &DobObjectEditWidget::SetResponseObject, this, &SateMainWindow::SetResponseObject);
+    }
+    AddTab(TypesystemRepository::Instance().GetClass(object->GetTypeId())->name, "OE", oe, m_midnightCommanderModeAction->isChecked(), icon);
 }
 
 void SateMainWindow::OnOpenDouFile(const int64_t typeId)
@@ -420,10 +536,11 @@ void SateMainWindow::OnOpenDouFile(const int64_t typeId)
     }
     QTextStream in(&f);
     auto text = in.readAll();
-    AddXmlPage(path, text);
+    QFileInfo fi(f);
+    AddXmlPage(fi.fileName(), text, fi.absoluteFilePath());
 }
 
-void SateMainWindow::AddXmlPage(const QString& title, const QString& text)
+void SateMainWindow::AddXmlPage(const QString& title, const QString& text, const QString& filePath)
 {
     QString xmlFormatted;
     QXmlStreamReader reader(text);
@@ -440,24 +557,68 @@ void SateMainWindow::AddXmlPage(const QString& title, const QString& text)
         }
     }
 
-    auto textBrowser = new  QTextBrowser();
-    textBrowser->setPlainText(xmlFormatted);
-    AddTab(title, "XML", textBrowser, false);
+    auto textWidget = new TextWidget(title, xmlFormatted, filePath);
+    AddTab(title, "XML", textWidget, false);
 }
 
-void SateMainWindow::AddJsonPage(const QString& title, const QString& text)
+void SateMainWindow::AddJsonPage(const QString& title, const QString& text, const QString& filePath)
 {
     QJsonDocument doc = QJsonDocument::fromJson(text.toUtf8());
     QString formattedJsonString = doc.toJson(QJsonDocument::Indented);
-    auto textBrowser = new  QTextBrowser();
-    textBrowser->setPlainText(formattedJsonString);
-    AddTab(title,"JSON", textBrowser, false);
+    auto textWidget = new TextWidget(title, formattedJsonString, filePath);
+    AddTab(title,"JSON", textWidget, false);
+}
+
+void SateMainWindow::SetResponseObject(const Safir::Dob::ResponsePtr& response)
+{
+    if (!response)
+    {
+        m_settingsManager->saveResponse("");          
+        m_dob.SetResponse(Safir::Dob::SuccessResponse::Create());
+        m_output->Output("Response object has been reset to default.", QtInfoMsg);
+        return;
+    }
+
+    try
+    {
+        auto jsonString = Safir::Dob::Typesystem::Serialization::ToJson(response);
+        m_settingsManager->saveResponse(QString::fromStdWString(jsonString));
+        m_dob.SetResponse(response);
+        m_output->Output("Response object has been changed.", QtInfoMsg);
+    }
+    catch (const std::exception& ex)
+    {
+        m_output->Output(QString("Failed to serialize response object: %1").arg(ex.what()), QtWarningMsg);
+    }
+}
+
+Safir::Dob::ResponsePtr SateMainWindow::GetResponseObjectFromSettings() const
+{
+    try
+    {
+        auto json = m_settingsManager->loadResponse().toStdWString();
+        if (!json.empty())
+        {          
+            auto obj = Safir::Dob::Typesystem::Serialization::ToObjectFromJson(json);
+            auto response = std::dynamic_pointer_cast<Safir::Dob::Response>(obj);
+            if (response)
+            {
+                return response;
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+    }
+
+    return nullptr;
 }
 
 void SateMainWindow::AddTab(const QString& title,
                             const QString& tabType,
                             QWidget* widget,
-                            const bool openInRightHandPanel)
+                            const bool openInRightHandPanel,
+                            const QIcon& icon)
 {
     auto tabNameBeginning = tabType + title + " ";
 
@@ -477,6 +638,12 @@ void SateMainWindow::AddTab(const QString& title,
     widget->setParent(dock);
     dock->setWidget(widget, ads::CDockWidget::ForceNoScrollArea);
     dock->setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
+
+    if (!icon.isNull())
+    {
+        dock->setIcon(icon);
+    }
+
     if (openInRightHandPanel)
     {
         if (m_rightDockArea == nullptr)
@@ -741,7 +908,7 @@ void SateMainWindow::dropEvent(QDropEvent *e)
     }
 }
 
-void SateMainWindow::OpenSerializedObject(const QString& file)
+void SateMainWindow::OpenSerializedObject(const QString& file, bool autoRunIfScript)
 {
     if (file.isNull())
     {
@@ -752,7 +919,18 @@ void SateMainWindow::OpenSerializedObject(const QString& file)
     {
         f.open(QFile::ReadOnly | QFile::Text);
         QTextStream ts(&f);
-        QString text = ts.readAll();
+        QString text = ts.readAll().trimmed();
+        auto probablyScript = !file.endsWith(".xml", Qt::CaseInsensitive) && text.startsWith('[') && text.endsWith(']') && text.contains("\"method\":");
+
+        if (probablyScript)
+        {
+            auto script = new ScriptWidget(file, text, &m_dob, autoRunIfScript, this);
+            AddTab(QFileInfo(file).fileName(), "Script", script, false, IconFactory::GetScriptIcon());
+            return;
+        }
+
+        // Probably serialize object if we get here
+
         auto probablyXml = file.endsWith(".xml", Qt::CaseInsensitive) ||
                            !( file.endsWith(".json", Qt::CaseInsensitive) || text.contains("_DouType"));
 

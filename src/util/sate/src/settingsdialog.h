@@ -23,35 +23,40 @@
 ******************************************************************************/
 #pragma once
 
-#include <QWidget>
-#include <QLineEdit>
-#include <QListView>
-#include <QSortFilterProxyModel>
+#include <QDialog>
 
+namespace Ui {
+class SettingsDialog;
+}
 
-class TypeAheadWidget : public QLineEdit
+struct Settings
+{
+    bool dispatch = true;
+    bool sendResponse = true;
+    bool createEntities = true;
+    bool updateEntities = true;
+    bool deleteEntities = true;
+    QString startupScriptPath;
+};
+
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
-public:
-    explicit TypeAheadWidget(QWidget *parent);
-    ~TypeAheadWidget();
+public:    
 
-    void SetModel(QSortFilterProxyModel* model);
-    QSortFilterProxyModel* Model() const;
+    explicit SettingsDialog(const Settings& states, const std::function<void(bool /*reset*/)>& editResonse, QWidget *parent = nullptr);
+    ~SettingsDialog();
 
-signals:
-    void ItemSelected(const QModelIndex& selectedIndex);
+    Settings getCheckboxStates() const;
 
-protected:
-    bool eventFilter(QObject *obj, QEvent *event) override;
+private slots:
+    void onOpenResponseClicked();
+    void onRestoreResponseClicked();
+    void onSelectStartupScriptClicked();
+    void onClearStartupScriptClicked();
 
 private:
-    QListView* m_listView;
-    QSortFilterProxyModel* m_model = nullptr;
-
-    int m_dropdownRowWidth = 0;
-    int m_dropdownRowHeight = 0;
-
-    void OnTextEdited(const QString& text);
+    Ui::SettingsDialog *ui;
+    std::function<void(bool /*reset*/)> m_editResonse;
 };

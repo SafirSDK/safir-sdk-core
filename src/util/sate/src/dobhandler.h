@@ -24,6 +24,7 @@
 #pragma once
 
 #include <QObject>
+#include <QJsonObject>
 #include "dobinterface.h"
 
 class DobHandler : public QObject
@@ -54,12 +55,12 @@ public:
     void RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool pending);
     void Unregister(int64_t typeId);
 
-    void SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel);
-    void SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler);
+    bool SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel);
+    bool SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler);
 
-    void CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler);
-    void UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance);
-    void DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId);
+    bool CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler);
+    bool UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance);
+    bool DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId);
 
     void SetChanges(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler);
     void SetAll(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler);
@@ -68,11 +69,23 @@ public:
 
     void ReadEntity(const sdt::EntityId& entityId);
 
+    // Manual dispatch call
+    void Dispatch();
+
     const DobInterface::RegistrationInfo* GetMyRegistration(int64_t typeId) const;
     const DobInterface::SubscriptionInfo* GetMySubscription(int64_t typeId) const;
 
     int64_t NumberOfInstances(const int64_t typeId) const;
     size_t NumberOfSubscriptions() const;
+
+    void InterfaceListenerAdded() { m_numberOfInterfaceListeners++; }
+    void InterfaceListenerRemoved() { m_numberOfInterfaceListeners--; }
+
+    // Set dispatching and response behavior
+    void SetBehaviorOptions(const DobInterface::BehaviorOptions& options);
+    
+    // Set response object used for incoming requests
+    void SetResponse(const Safir::Dob::ResponsePtr& response);
 
 signals:
     void ConnectedToDob(const QString& connectionName);
@@ -93,14 +106,22 @@ signals:
     void OnRegistered(const DobInterface::RegistrationInfo& info);
     void OnUnregistered(int64_t typeId);
 
+    void OnNotRequestOverflow();
+    void OnNotMessageOverflow();
+
     void OnReadEntity(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance);
 
     void NumberOfInstancesChanged(const int64_t typeId);
 
     void Output(const QString& msg, const QtMsgType msgType);
 
+    void InterfaceListener(const QJsonObject& dobCall);
+
 private:
     std::unique_ptr<DobInterface> m_dob;
+    int m_numberOfInterfaceListeners = 0;
+    DobInterface::BehaviorOptions m_behaviorOptions{};
+    Safir::Dob::ResponsePtr m_response = nullptr;
 
     bool IsInitiated();
     void SetupSignalSlots();

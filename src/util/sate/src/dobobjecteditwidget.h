@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2025 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson
 *
@@ -46,6 +46,7 @@ public:
 signals:
     void XmlSerializedObject(const QString& title, const QString& text);
     void JsonSerializedObject(const QString& title, const QString& text);
+    void SetResponseObject(const Safir::Dob::ResponsePtr& response);
 
 private slots:
     void PositionFilters();

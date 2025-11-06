@@ -434,7 +434,7 @@ void MemberTreeItem::SetupObject(const Safir::Dob::Typesystem::ObjectConstPtr& o
             for (int arrIx = 0; arrIx < member.arrayLength; ++arrIx)
             {
                 const Safir::Dob::Typesystem::ContainerBase& cb = object->GetMember(memberIndex, arrIx);
-                auto arrayItem = std::make_unique<MemberTreeItem>(arrayRoot.get(), &member, cb);
+                auto arrayItem = cb.IsNull() ? std::make_unique<MemberTreeItem>(arrayRoot.get(), &member) : std::make_unique<MemberTreeItem>(arrayRoot.get(), &member, cb);
                 arrayItem->SetKey(QString::number(arrIx));
                 arrayRoot->m_children.emplace_back(std::move(arrayItem));
             }

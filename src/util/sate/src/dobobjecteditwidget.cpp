@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2025 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson
 *
@@ -331,6 +331,10 @@ void DobObjectEditWidget::Init()
         auto instanceStr = QString::number(ui->operationsWidget->Instance().GetRawValue());
         qApp->clipboard()->setText(QString("%1 : %2").arg(nameStr, instanceStr));
     });
+    connect(ui->operationsWidget->randomInstanceBtn, &QToolButton::clicked, this, [this]
+    {
+        ui->operationsWidget->instanceEdit->setText(QString::fromStdWString(Safir::Dob::Typesystem::InstanceId::GenerateRandom().ToString()));
+    });
 
     connect(ui->operationsWidget->setChangesBtn, &QPushButton::clicked, this, [this]
     {
@@ -391,6 +395,15 @@ void DobObjectEditWidget::Init()
         auto obj = BuildObject();
         auto json = QString::fromStdWString(Safir::Dob::Typesystem::Serialization::ToJson(obj));
         emit JsonSerializedObject(QString::fromStdWString(sdt::Operations::GetName(m_typeId)), json);
+    });
+    connect(ui->operationsWidget->setResponseBtn, &QPushButton::clicked, this, [this]
+    {
+        auto obj = BuildObject();
+        auto resp = std::dynamic_pointer_cast<Safir::Dob::Response>(obj);
+        if (resp)
+        {
+            emit SetResponseObject(resp);
+        }
     });
 }
 

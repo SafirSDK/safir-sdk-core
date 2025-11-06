@@ -250,9 +250,18 @@ void OutputWidget::OnCreateRequest(const Safir::Dob::EntityPtr& request, const s
 
     auto link = AddLink(request, Str(handler.ToString()), instance.GetRawValue());
     QStringList line;
-    line << Timestamp()
-         << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
-         << QString("OnCreateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+    if (instance == sdt::InstanceId())
+    {
+        line << Timestamp()
+             << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
+             << QString("OnCreateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, handler: %3").arg(link, Str(request->GetTypeId()), Str(handler.ToString()));
+    }
+    else
+    {
+        line << Timestamp()
+             << "&nbsp;<img src=':/img/icons/gear_orange' width='12' height='12'/>&nbsp;"
+             << QString("OnCreateEntityRequest <a href='%1' style='color:#78c4fc'>%2</a>, inst: %3 handler: %4").arg(link, Str(request->GetTypeId()), Str(instance.ToString()), Str(handler.ToString()));
+    }
 
     m_pendingOutput << line.join("");
 

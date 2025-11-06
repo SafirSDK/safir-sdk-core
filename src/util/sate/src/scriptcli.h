@@ -23,35 +23,32 @@
 ******************************************************************************/
 #pragma once
 
-#include <QWidget>
-#include <QLineEdit>
-#include <QListView>
-#include <QSortFilterProxyModel>
+#include <QObject>
+#include <QString>
 
+class QCoreApplication;
+class DobHandler;
+class ScriptEngine;
 
-class TypeAheadWidget : public QLineEdit
+class ScriptCli : public QObject
 {
     Q_OBJECT
-
 public:
-    explicit TypeAheadWidget(QWidget *parent);
-    ~TypeAheadWidget();
+    explicit ScriptCli(QCoreApplication* app, const QString& scriptFile, const QString& connectionName, const QString& websocketUrl, QObject* parent = nullptr);
+    ~ScriptCli();
 
-    void SetModel(QSortFilterProxyModel* model);
-    QSortFilterProxyModel* Model() const;
+    // Execute the script and return exit code
+    int Execute();
 
-signals:
-    void ItemSelected(const QModelIndex& selectedIndex);
-
-protected:
-    bool eventFilter(QObject *obj, QEvent *event) override;
+private slots:
+    void OnIndexFinished(int index);
 
 private:
-    QListView* m_listView;
-    QSortFilterProxyModel* m_model = nullptr;
-
-    int m_dropdownRowWidth = 0;
-    int m_dropdownRowHeight = 0;
-
-    void OnTextEdited(const QString& text);
+    QCoreApplication* m_app;
+    QString m_scriptFile;
+    QString m_connectionName;
+    QString m_websocketUrl;
+    DobHandler* m_dobHandler;
+    ScriptEngine* m_scriptEngine;
+    int m_currentIndex;
 };

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2025 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson
 *
@@ -36,6 +36,7 @@ public:
     static QIcon GetNamespaceIcon();
     static QIcon GetEnumIcon();
     static QIcon GetSearchIcon();
+    static QIcon GetScriptIcon();
     static QIcon GetIcon(TypesystemRepository::DobBaseClass baseClass, Modifier modifier = IconFactory::None);
 
 private:

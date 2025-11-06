@@ -62,6 +62,36 @@ public:
     void   saveDockLayout(const QByteArray& layout);
     QByteArray loadDockLayout() const;
 
+    // --------------------------------------------------
+    // Checkbox states
+    // --------------------------------------------------
+    void saveDispatch(bool dispatch);
+    bool loadDispatch() const;
+
+    void saveSendResponse(bool sendResponse);
+    bool loadSendResponse() const;
+
+    void saveCreateEntities(bool createEntities);
+    bool loadCreateEntities() const;
+
+    void saveUpdateEntities(bool updateEntities);
+    bool loadUpdateEntities() const;
+
+    void saveDeleteEntities(bool deleteEntities);
+    bool loadDeleteEntities() const;
+
+    // --------------------------------------------------
+    // Response object persistence
+    // --------------------------------------------------
+    void saveResponse(const QString& response);
+    QString loadResponse() const;
+
+    // --------------------------------------------------
+    // Startup script persistence
+    // --------------------------------------------------
+    void saveStartupScript(const QString& script);
+    QString loadStartupScript() const;
+
 private:
     void scheduleFlush();
 

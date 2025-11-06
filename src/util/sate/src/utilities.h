@@ -42,6 +42,13 @@ public:
 
     static Safir::Dob::Typesystem::TypeId StringToTypeId(const QString& s);
 
+    // Random values
+    static int RandomInt32(int low, int high);
+    static int64_t RandomInt64(int64_t low, int64_t high);
+    static float RandomFloat(float low, float high);
+    static double RandomDouble(double low, double high);
+    static QString RandomString(int length);
+
     template <class T>
     static T StringToHashType(const QString& s)
     {

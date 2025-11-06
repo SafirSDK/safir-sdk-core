@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2025 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson
 *
@@ -29,6 +29,7 @@
 #endif
 
 #include <QApplication>
+#include <QCoreApplication>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -46,20 +47,73 @@ Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin);
 #  endif
 #endif
 
-#include <QFile>
-#include <QTextStream>
-
 #include "satemainwindow.h"
+#include "scriptcli.h"
+#include <QCommandLineParser>
 
 int main(int argc, char *argv[])
 {
     //Set a default-english locale so we do not have to worry about decimal separators etc
     QLocale::setDefault(QLocale::c());
 
-    QApplication a(argc, argv);
-    SateMainWindow w;
-    w.show();
+    // Parse command line arguments first to determine mode
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Safir Application Testing Environment (SATE)");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addOption({{"s", "script"}, "Run in script mode without GUI", "file"});
+    parser.addOption({{"c", "connect"}, "Automatically open DOB connection before script execution. If no name is provided, defaults to 'SATE_CLI'", "name"});
+    parser.addOption({{"w", "websocket"}, "WebSocket connection string", "url"});
+    
+    // We need to parse before creating the application to determine which app type to create
+    // Use a temporary parser for early detection
+    QStringList args;
+    for (int i = 0; i < argc; ++i)
+    {
+        args.append(QString::fromLocal8Bit(argv[i]));
+    }
+    
+    bool scriptMode = args.contains("--script") || args.contains("-s");
 
-
-    return a.exec();
+    if (scriptMode)
+    {
+        // Use QCoreApplication for non-GUI mode
+        QCoreApplication app(argc, argv);
+        parser.process(app);
+        
+        QString scriptFile = parser.value("script");
+        QString connectionName;
+        QString websocketUrl;
+        
+        // Check if --connect option is set
+        if (parser.isSet("connect"))
+        {
+            connectionName = parser.value("connect");
+            // If --connect is provided without a value (empty string), use default
+            if (connectionName.isEmpty())
+            {
+                connectionName = "SATE_CLI";
+            }
+        }
+        
+        // Check if --websocket option is set
+        if (parser.isSet("websocket"))
+        {
+            websocketUrl = parser.value("websocket");
+        }
+        
+        // Create and execute script CLI
+        ScriptCli scriptCli(&app, scriptFile, connectionName, websocketUrl);
+        return scriptCli.Execute();
+    }
+    else
+    {
+        // Use QApplication for GUI mode
+        QApplication app(argc, argv);
+        parser.process(app);
+        
+        SateMainWindow w;
+        w.show();
+        return app.exec();
+    }
 }

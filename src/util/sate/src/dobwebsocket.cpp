@@ -36,7 +36,6 @@
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Service.h>
-#include <Safir/Dob/SuccessResponse.h>
 
 namespace
 {
@@ -319,64 +318,69 @@ void DobWebSocket::Unregister(int64_t typeId)
     Send(j);
 }
 
-void DobWebSocket::SendMessage(const Safir::Dob::MessagePtr& message, const Safir::Dob::Typesystem::ChannelId& channel)
+bool DobWebSocket::SendMessage(const Safir::Dob::MessagePtr& message, const Safir::Dob::Typesystem::ChannelId& channel)
 {
     if (!m_isConnected)
     {
         LogError("Not connected!");
-        return;
+        return false;
     }
 
     QJsonObject j = DobCallToJson::SendMessage(message, channel);
     Send(j);
+    return true;
 }
 
-void DobWebSocket::SendServiceRequest(const Safir::Dob::ServicePtr& request, const Safir::Dob::Typesystem::HandlerId& handler)
+bool DobWebSocket::SendServiceRequest(const Safir::Dob::ServicePtr& request, const Safir::Dob::Typesystem::HandlerId& handler)
 {
     if (!m_isConnected)
     {
         LogError("Not connected!");
-        return;
+        return false;
     }
 
     QJsonObject j = DobCallToJson::SendServiceRequest(request, handler);
     Send(j);
+    return true;
 }
 
-void DobWebSocket::CreateRequest(const Safir::Dob::EntityPtr& entity, const Safir::Dob::Typesystem::InstanceId& instance, const Safir::Dob::Typesystem::HandlerId& handler)
+bool DobWebSocket::CreateRequest(const Safir::Dob::EntityPtr& entity, const Safir::Dob::Typesystem::InstanceId& instance, const Safir::Dob::Typesystem::HandlerId& handler)
 {
     if (!m_isConnected)
     {
         LogError("Not connected!");
-        return;
+        return false;
     }
 
     QJsonObject j = DobCallToJson::CreateRequest(entity, instance, handler);
     Send(j);
+    return true;
 }
 
-void DobWebSocket::UpdateRequest(const Safir::Dob::EntityPtr& entity, const Safir::Dob::Typesystem::InstanceId& instance)
+bool DobWebSocket::UpdateRequest(const Safir::Dob::EntityPtr& entity, const Safir::Dob::Typesystem::InstanceId& instance)
 {
     if (!m_isConnected)
     {
         LogError("Not connected!");
-        return;
+        return false;
     }
 
     QJsonObject j = DobCallToJson::UpdateRequest(entity, instance);
     Send(j);
+    return true;
 }
 
-void DobWebSocket::DeleteRequest(const Safir::Dob::Typesystem::EntityId& entityId)
+bool DobWebSocket::DeleteRequest(const Safir::Dob::Typesystem::EntityId& entityId)
 {
     if (!m_isConnected)
     {
         LogError("Not connected!");
-        return;
+        return false;
     }
 
     QJsonObject j = DobCallToJson::DeleteRequest(entityId);
     Send(j);
+    return true;
 }
 
 void DobWebSocket::SetChanges(const Safir::Dob::EntityPtr& entity, const Safir::Dob::Typesystem::InstanceId& instance, const Safir::Dob::Typesystem::HandlerId& handler)
@@ -794,14 +798,27 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
 
         emit DobInterface::OnUpdateRequest(entity, handler, instance);
 
-        SetChanges(entity, instance, handler);
+        if (m_behaviorOptions.updateEntities)
+        {
+            SetChanges(entity, instance, handler);
+        }
+        else
+        {
+            emit DobInterface::Output("Update request received but entity updating is disabled in settings.", QtWarningMsg);
+        }
 
-        // Create response
-        auto success = Safir::Dob::SuccessResponse::Create();
-        QJsonObject response;
-        response["id"] = j["id"];
-        response["result"] = ToJsonObject(success);
-        Send(response);
+        if (m_behaviorOptions.sendResponse)
+        {
+            // Create response
+            QJsonObject response;
+            response["id"] = j["id"];
+            response["result"] = ToJsonObject(GetResponse());
+            Send(response);
+        }
+        else
+        {
+            DobInterface::Output("No response sent for update request as per settings.", QtInfoMsg);
+        }
     }
     else if (method == "onCreateRequest")
     {
@@ -811,14 +828,27 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
 
         emit DobInterface::OnCreateRequest(entity, handler, instance);
 
-        SetAll(entity, instance, handler);
+        if (m_behaviorOptions.createEntities)
+        {
+            SetAll(entity, instance, handler);
+        }
+        else
+        {
+            emit DobInterface::Output("Create request received but entity creation is disabled in settings.", QtWarningMsg);
+        }
 
-        // Create response
-        auto success = Safir::Dob::SuccessResponse::Create();
-        QJsonObject response;
-        response["id"] = j["id"];
-        response["result"] = ToJsonObject(success);
-        Send(response);
+        if (m_behaviorOptions.sendResponse)
+        {
+            // Create response
+            QJsonObject response;
+            response["id"] = j["id"];
+            response["result"] = ToJsonObject(GetResponse());
+            Send(response);
+        }
+        else
+        {
+            DobInterface::Output("No response sent for create request as per settings.", QtInfoMsg);
+        }
     }
     else if (method == "onDeleteRequest")
     {
@@ -829,14 +859,27 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
 
         emit DobInterface::OnDeleteRequest(eid, handler);
 
-        Delete(eid, handler);
+        if (m_behaviorOptions.deleteEntities)
+        {
+            Delete(eid, handler);
+        }
+        else
+        {
+            emit DobInterface::Output("Delete request received but entity deletion is disabled in settings.", QtWarningMsg);
+        }
 
-        // Create response
-        auto success = Safir::Dob::SuccessResponse::Create();
-        QJsonObject response;
-        response["id"] = j["id"];
-        response["result"] = ToJsonObject(success);
-        Send(response);
+        if (m_behaviorOptions.sendResponse)
+        {
+            // Create response
+            QJsonObject response;
+            response["id"] = j["id"];
+            response["result"] = ToJsonObject(GetResponse());
+            Send(response);
+        }
+        else
+        {
+            DobInterface::Output("No response sent for delete request as per settings.", QtInfoMsg);
+        }
     }
     else if (method == "onServiceRequest")
     {
@@ -845,12 +888,19 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
 
         emit DobInterface::OnServiceRequest(request, handler);
 
-        // Create response
-        auto success = Safir::Dob::SuccessResponse::Create();
-        QJsonObject response;
-        response["id"] = j["id"];
-        response["result"] = ToJsonObject(success);
-        Send(response);
+        if (m_behaviorOptions.sendResponse)
+        {
+            // Create response
+            QJsonObject response;
+            response["id"] = j["id"];
+            response["result"] = ToJsonObject(GetResponse());
+            Send(response);
+        }
+        else
+        {
+            DobInterface::Output("No response sent for service request as per settings.", QtInfoMsg);
+        }
+        
     }
     else if (method == "onRegistered")
     {
@@ -931,10 +981,12 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
     }
     else if (method == "onNotMessageOverflow")
     {
+        emit DobInterface::OnNotMessageOverflow();
         emit DobInterface::Output("OnNotMessageOverflow", QtInfoMsg);
     }
     else if (method == "onNotRequestOverflow")
     {
+        emit DobInterface::OnNotRequestOverflow();
         emit DobInterface::Output("OnNotRequestOverflow", QtInfoMsg);
     }
 }

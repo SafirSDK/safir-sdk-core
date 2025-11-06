@@ -105,7 +105,7 @@
   </action>
   <action name="actionOpenObject">
    <property name="text">
-    <string>Open Object...</string>
+    <string>Open file...</string>
    </property>
    <property name="toolTip">
     <string>Deserialize object from XML or JSON file.</string>

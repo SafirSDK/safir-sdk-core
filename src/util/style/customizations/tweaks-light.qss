@@ -21,9 +21,21 @@ OperationsWidget > QToolButton {
     qproperty-icon: url(:/img/icons/copy-black.svg);
 }
 
+OperationsWidget > QToolButton#randomInstanceBtn {
+    qproperty-icon: url(:/img/icons/dice-black.svg);
+}
+
 OperationsWidget > QToolButton > QToolTip {
     background-color: #9FCBFF;
     color: #19232D;
     border: none;
     padding: 0px;
+}
+
+QToolButton#DispatchButton {
+    color: #373532;
+}
+
+FileInfoWidget > QToolButton#openContainingFolderButton {
+    qproperty-icon: url(:/img/icons/folderopen-black.svg);
 }

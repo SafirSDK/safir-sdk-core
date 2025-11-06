@@ -38,5 +38,10 @@
         <file>icons/magnifying-glass-search.svg</file>
         <file>icons/copy-white.svg</file>
         <file>icons/copy-black.svg</file>
+        <file>icons/dice-black.svg</file>
+        <file>icons/dice-white.svg</file>
+        <file>icons/folderopen-black.svg</file>
+        <file>icons/folderopen-white.svg</file>
+        <file>icons/script-orange.svg</file>
     </qresource>
 </RCC>

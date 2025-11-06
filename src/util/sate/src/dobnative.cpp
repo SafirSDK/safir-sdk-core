@@ -28,7 +28,6 @@
 #include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 
-#include <Safir/Dob/SuccessResponse.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
@@ -51,12 +50,32 @@ DobNative::DobNative()
     , m_isDispatchSignalled()
 {
     // DOB signal handling
-    connect(this, &DobNative::DispatchSignal, this, [this]{ m_isDispatchSignalled.clear(); m_dobConnection.Dispatch(); });
+    connect(this, &DobNative::DispatchSignal, this, [this]{
+        m_isDispatchSignalled.clear();
+        if (m_behaviorOptions.dispatch)
+        {
+            m_dobConnection.Dispatch();
+        }
+    });
 }
 
 bool DobNative::IsOpen() const
 {
     return m_dobConnection.IsOpen();
+}
+
+void DobNative::Dispatch()
+{
+    try
+    {
+        if (m_dobConnection.IsOpen())
+        {
+            m_dobConnection.Dispatch();
+        }
+    }
+    catch(const std::exception& e)
+    {
+    }
 }
 
 void DobNative::Open(const QString& name, int context)
@@ -258,7 +277,7 @@ void DobNative::RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesys
 void DobNative::Unregister(int64_t typeId)
 {
     try
-    {
+    {        
         m_dobConnection.UnregisterHandler(typeId, Safir::Dob::Typesystem::HandlerId::ALL_HANDLERS);
         RemoveRegistrations(typeId);
         emit DobInterface::OnUnregistered(typeId);
@@ -270,77 +289,92 @@ void DobNative::Unregister(int64_t typeId)
     }
 }
 
-void DobNative::SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel)
+bool DobNative::SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel)
 {
     try
     {
         m_dobConnection.Send(message, channel, this);
         emit DobInterface::Output("Send message: " + Str(message->GetTypeId()) + Str(channel), QtInfoMsg);
+        return true;
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
         emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        return false;
     }
 }
 
-void DobNative::SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler)
+bool DobNative::SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler)
 {
     try
     {
         m_dobConnection.ServiceRequest(request, handler, this);
         emit DobInterface::Output("Send service request: " + Str(request->GetTypeId()) + Str(handler), QtInfoMsg);
+        return true;
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
         emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
-    }
+        return false;
+    }    
 }
 
-void DobNative::CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler)
+bool DobNative::CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler)
 {
     try
     {
-        auto policy = m_dobConnection.GetInstanceIdPolicy(entity->GetTypeId(), handler);
-        if (policy == Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId)
+        // It is possible to check in advance if instance should be sent, but it is not that easy in websocket connection so we try
+        // keep the behaviour similair.
+        //auto policy = m_dobConnection.GetInstanceIdPolicy(entity->GetTypeId(), handler);
+
+        if (instance == Safir::Dob::Typesystem::InstanceId())
         {
+            // No valid instance, suppose afir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId
             m_dobConnection.CreateRequest(entity, handler, this);
-            emit DobInterface::Output("Send create request (HandlerDecidesInstanceId): " + Str(entity->GetTypeId()) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Send create request: " + Str(entity->GetTypeId()) + Str(handler), QtInfoMsg);
+
         }
-        else
+        else // Hopefully RequestorDecidesInstanceId
         {
             m_dobConnection.CreateRequest(entity, instance, handler, this);
-            emit DobInterface::Output("Send create request (RequestorDecidesInstanceId): " + Str(entity->GetTypeId()) + Str(handler), QtInfoMsg);
+            emit DobInterface::Output("Send create request: " + Str(entity->GetTypeId()) + Str(instance) + Str(handler), QtInfoMsg);
         }
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
         emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        return false;
     }
+    return true;
 }
 
-void DobNative::UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance)
+bool DobNative::UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance)
 {
     try
     {
         m_dobConnection.UpdateRequest(entity, instance, this);
         emit DobInterface::Output("Send update request: " + Str(entity->GetTypeId()) + Str(instance), QtInfoMsg);
+        return true;
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
         emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        return false;
     }
 }
 
-void DobNative::DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId)
+bool DobNative::DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId)
 {
     try
     {
         m_dobConnection.DeleteRequest(entityId, this);
         emit DobInterface::Output("Send delete request: " + Str(entityId), QtInfoMsg);
+        return true;
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
         emit DobInterface::Output(QString::fromStdWString(e.GetMessage()), QtCriticalMsg);
+        return false;
     }
 }
 
@@ -448,12 +482,30 @@ void DobNative::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityReque
     auto typeId = entityRequestProxy.GetTypeId();
     auto handlerId = entityRequestProxy.GetReceivingHandlerId();
     auto it = std::find_if(m_registrations.begin(), m_registrations.end(), [typeId, handlerId](const auto& ri){return ri.typeId == typeId && ri.handler.GetRawValue() == handlerId.GetRawValue();});
+
+    emit DobInterface::OnCreateRequest(entityRequestProxy.GetRequest(), handlerId, entityRequestProxy.GetInstanceId());
+
     auto instance = (it != m_registrations.end() && it->instanceIdPolicy == Safir::Dob::InstanceIdPolicy::RequestorDecidesInstanceId) ?
                         entityRequestProxy.GetInstanceId() : sdt::InstanceId::GenerateRandom();
 
-    emit DobInterface::OnCreateRequest(entityRequestProxy.GetRequest(), handlerId, instance);
-    m_dobConnection.SetAll(entityRequestProxy.GetRequest(), instance, handlerId);
-    responseSender->Send(Safir::Dob::SuccessResponse::Create());
+    if (m_behaviorOptions.createEntities)
+    {
+        m_dobConnection.SetAll(entityRequestProxy.GetRequest(), instance, handlerId);
+    }
+    else
+    {
+        emit DobInterface::Output("Create request received but entity creation is disabled in settings.", QtWarningMsg);
+    }
+
+    if (m_behaviorOptions.sendResponse)
+    {
+        responseSender->Send(GetResponse());
+        emit DobInterface::Output("Respnse sent and entity created: " + Str(typeId) + Str(instance) + Str(handlerId), QtInfoMsg);
+    }
+    else
+    {
+        DobInterface::Output("No response sent for create request as per settings.", QtInfoMsg);
+    }
 }
 
 void DobNative::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
@@ -461,15 +513,47 @@ void DobNative::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityReque
     auto handlerId = entityRequestProxy.GetReceivingHandlerId();
     auto instanceId = entityRequestProxy.GetEntityId().GetInstanceId();
     emit DobInterface::OnUpdateRequest(entityRequestProxy.GetRequest(), handlerId, instanceId);
-    m_dobConnection.SetChanges(entityRequestProxy.GetRequest(), entityRequestProxy.GetInstanceId(), entityRequestProxy.GetReceivingHandlerId());
-    responseSender->Send(Safir::Dob::SuccessResponse::Create());
+
+    if (m_behaviorOptions.updateEntities)
+    {
+        m_dobConnection.SetChanges(entityRequestProxy.GetRequest(), entityRequestProxy.GetInstanceId(), entityRequestProxy.GetReceivingHandlerId());
+    }
+    else
+    {
+        emit DobInterface::Output("Update request received but entity updating is disabled in settings.", QtWarningMsg);
+    }
+
+    if (m_behaviorOptions.sendResponse)
+    {
+        responseSender->Send(GetResponse());
+    }
+    else
+    {
+        DobInterface::Output("No response sent for update request as per settings.", QtInfoMsg);
+    }
 }
 
 void DobNative::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
 {
     emit DobInterface::OnDeleteRequest(entityRequestProxy.GetEntityId(), entityRequestProxy.GetReceivingHandlerId());
-    m_dobConnection.Delete(entityRequestProxy.GetEntityId(), entityRequestProxy.GetReceivingHandlerId());
-    responseSender->Send(Safir::Dob::SuccessResponse::Create());
+
+    if (m_behaviorOptions.deleteEntities)
+    {
+        m_dobConnection.Delete(entityRequestProxy.GetEntityId(), entityRequestProxy.GetReceivingHandlerId());
+    }
+    else
+    {
+        emit DobInterface::Output("Delete request received but entity deletion is disabled in settings.", QtWarningMsg);
+    }
+
+    if (m_behaviorOptions.sendResponse)
+    {
+        responseSender->Send(GetResponse());
+    }
+    else
+    {
+        DobInterface::Output("No response sent for delete request as per settings.", QtInfoMsg);
+    }
 }
 
 // RevokedRegistrationBase interface
@@ -523,7 +607,14 @@ void DobNative::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId typ
 void DobNative::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
 {
     emit DobInterface::OnServiceRequest(serviceRequestProxy.GetRequest(), serviceRequestProxy.GetReceivingHandlerId());
-    responseSender->Send(Safir::Dob::SuccessResponse::Create());
+    if (m_behaviorOptions.sendResponse)
+    {
+        responseSender->Send(GetResponse());
+    }
+    else
+    {
+        DobInterface::Output("No response sent for service request as per settings.", QtInfoMsg);
+    }
 }
 
 // Requestor interface
@@ -534,12 +625,14 @@ void DobNative::OnResponse(const Safir::Dob::ResponseProxy responseProxy)
 
 void DobNative::OnNotRequestOverflow()
 {
+    emit DobInterface::OnNotRequestOverflow();
     emit DobInterface::Output("OnNotRequestOverflow", QtInfoMsg);
 }
 
 // MessageSender interface
 void DobNative::OnNotMessageOverflow()
 {
+    emit DobInterface::OnNotMessageOverflow();
     emit DobInterface::Output("OnNotMessageOverflow", QtInfoMsg);
 }
 

@@ -28,6 +28,10 @@
 #include <QKeyEvent>
 #include <QFocusEvent>
 #include <QAbstractItemView>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QString>
 
 // ---------- TEXT --------------
 TextValueInput::TextValueInput(bool showNullButton, const QString& deleteButtonText, QWidget* parent)

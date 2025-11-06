@@ -21,37 +21,21 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#pragma once
+#include "textwidget.h"
+#include "ui_textwidget.h"
 
-#include <QWidget>
-#include <QLineEdit>
-#include <QListView>
-#include <QSortFilterProxyModel>
-
-
-class TypeAheadWidget : public QLineEdit
+TextWidget::TextWidget(const QString& info, const QString& text, const QString& filePath, QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::TextWidget)
 {
-    Q_OBJECT
+    ui->setupUi(this);
 
-public:
-    explicit TypeAheadWidget(QWidget *parent);
-    ~TypeAheadWidget();
+    ui->fileInfoWidget->setInfo(info);
+    ui->textBrowser->setPlainText(text);
+    ui->fileInfoWidget->setFilePath(filePath);
+}
 
-    void SetModel(QSortFilterProxyModel* model);
-    QSortFilterProxyModel* Model() const;
-
-signals:
-    void ItemSelected(const QModelIndex& selectedIndex);
-
-protected:
-    bool eventFilter(QObject *obj, QEvent *event) override;
-
-private:
-    QListView* m_listView;
-    QSortFilterProxyModel* m_model = nullptr;
-
-    int m_dropdownRowWidth = 0;
-    int m_dropdownRowHeight = 0;
-
-    void OnTextEdited(const QString& text);
-};
+TextWidget::~TextWidget()
+{
+    delete ui;
+}
