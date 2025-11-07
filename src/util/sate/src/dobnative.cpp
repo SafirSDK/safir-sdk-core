@@ -64,6 +64,7 @@ bool DobNative::IsOpen() const
     return m_dobConnection.IsOpen();
 }
 
+// Only used for manual calls to dispatch
 void DobNative::Dispatch()
 {
     try
@@ -73,9 +74,7 @@ void DobNative::Dispatch()
             m_dobConnection.Dispatch();
         }
     }
-    catch(const std::exception& e)
-    {
-    }
+    catch(const std::exception&) {}
 }
 
 void DobNative::Open(const QString& name, int context)
