@@ -291,7 +291,7 @@ void TracerViewerMainWindow::WireSignals()
     connect(m_dockManager, &ads::CDockManager::focusedDockWidgetChanged,
             this, [this](ads::CDockWidget* /*oldDock*/, ads::CDockWidget* nowDock)
             {
-                const bool liveFocused = nowDock && nowDock->widget() == m_liveLog;
+                const bool liveFocused = (!nowDock) || (nowDock->widget() == m_liveLog);
                 m_clearAction->setEnabled(liveFocused);
                 ui->actionSave->setEnabled(liveFocused);
 
@@ -335,7 +335,7 @@ void TracerViewerMainWindow::WireSignals()
 
     // Initialise toolbar button states based on current focus
     {
-        const bool liveFocused = (m_dockManager->focusedDockWidget() &&
+        const bool liveFocused = (!m_dockManager->focusedDockWidget() ||
                                   m_dockManager->focusedDockWidget()->widget() == m_liveLog);
         m_clearAction->setEnabled(liveFocused);
         ui->actionSave->setEnabled(liveFocused);
