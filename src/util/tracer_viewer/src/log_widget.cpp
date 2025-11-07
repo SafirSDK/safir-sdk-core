@@ -153,9 +153,16 @@ LogWidget::LogWidget(const std::shared_ptr<SettingsManager>& settingsManager, Lo
                 if (m_followMode)
                     m_table->scrollToBottom();
             });
-    // Disable follow-mode when the user manually moves the vertical scroll-bar
-    connect(m_table->verticalScrollBar(), &QAbstractSlider::actionTriggered, this,
-            [this](int){ SetFollowModeEnabled(false); });
+    // Disable follow-mode only when the user scrolls *up* (i.e. leaves the
+    // bottom).  When already at the bottom (value == maximum) keep follow-mode
+    // enabled so that programmatic updates can still auto-scroll.
+    connect(m_table->verticalScrollBar(), &QScrollBar::valueChanged, this,
+            [this](int value)
+            {
+                const QScrollBar* sb = m_table->verticalScrollBar();
+                if (value < sb->maximum())      // user scrolled up
+                    SetFollowModeEnabled(false);
+            });
     m_table->setSelectionBehavior(QTableView::SelectRows);
     m_table->horizontalHeader()->setHighlightSections(false);
     m_table->horizontalHeader()->setStretchLastSection(true);
