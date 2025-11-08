@@ -575,7 +575,6 @@ void SateMainWindow::SetResponseObject(const Safir::Dob::ResponsePtr& response)
     {
         m_settingsManager->saveResponse("");          
         m_dob.SetResponse(Safir::Dob::SuccessResponse::Create());
-        m_output->Output("Response object has been reset to default.", QtInfoMsg);
         return;
     }
 

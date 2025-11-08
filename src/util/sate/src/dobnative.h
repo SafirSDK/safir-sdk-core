@@ -79,11 +79,8 @@ public:
 
     void ReadEntity(const sdt::EntityId& entityId) override;
 
+	// Manual dispatch call
     void Dispatch() override;
-
-signals:
-    // For internal use only. Signals can't be declared private. All public signals are declared in DobInterface.
-    void DispatchSignal();
 
 private:
     Safir::Dob::InstanceIdPolicy::Enumeration GetInstanceIdPolicy(int64_t typeId, const sdt::HandlerId& handler) const;

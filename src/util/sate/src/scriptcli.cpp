@@ -44,27 +44,25 @@ ScriptCli::ScriptCli(QCoreApplication* app, const QString& scriptFile, const QSt
 
 ScriptCli::~ScriptCli()
 {
-    if (m_scriptEngine)
-    {
-        delete m_scriptEngine;
-        m_scriptEngine = nullptr;
-    }
-    
-    if (m_dobHandler)
-    {
-        delete m_dobHandler;
-        m_dobHandler = nullptr;
-    }
 }
 
 int ScriptCli::Execute()
+{
+    QMetaObject::invokeMethod(this, [this]() { 
+        ExecuteInternal();
+    }, Qt::QueuedConnection);
+    
+    return m_app->exec();
+}
+
+bool ScriptCli::ExecuteInternal()
 {
     // Load script file
     QFile file(m_scriptFile);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         fprintf(stderr, "Error: Failed to open script file: %s\n", m_scriptFile.toUtf8().constData());
-        return 1;
+        return false;
     }
     
     QTextStream in(&file);
@@ -74,17 +72,41 @@ int ScriptCli::Execute()
     if (scriptContent.isEmpty())
     {
         fprintf(stderr, "Error: Script file is empty: %s\n", m_scriptFile.toUtf8().constData());
-        return 1;
+        return false;
     }
     
     printf("Running script file: %s\n", m_scriptFile.toUtf8().constData());
     
     // Create DobHandler
-    m_dobHandler = new DobHandler();
+	m_dobHandler = std::make_unique<DobHandler>();
+
+    // Create ScriptEngine
+	m_scriptEngine = std::make_unique<ScriptEngine>(m_dobHandler.get());
+    m_scriptEngine->LoadScript(scriptContent);
+
+    // Check if script is valid
+    if (!m_scriptEngine->IsValid())
+    {
+        fprintf(stderr, "Error: Script validation failed:\n");
+        for (const auto& error : m_scriptEngine->Errors())
+        {
+            fprintf(stderr, "  %s\n", error.toUtf8().constData());
+        }
+        return false;
+    }
+
+    // Connect signal to track execution
+    connect(m_scriptEngine.get(), &ScriptEngine::IndexFinished, this, &ScriptCli::OnIndexFinished);
     
     // Auto-connect if connection name is provided
     if (!m_connectionName.isEmpty())
     {
+        connect(m_dobHandler.get(), &DobHandler::ConnectedToDob, this, [this](const QString& name) {
+			// Start script execution once connected
+            printf("Starting script execution...\n");
+            m_scriptEngine->Execute();
+        });
+
         if (!m_websocketUrl.isEmpty())
         {
             // Split websocket URL into address and port
@@ -92,7 +114,7 @@ int ScriptCli::Execute()
             if (parts.size() != 2)
             {
                 fprintf(stderr, "Error: Invalid websocket URL format. Expected 'address:port', got: %s\n", m_websocketUrl.toUtf8().constData());
-                return 1;
+                return false;
             }
             
             QString address = parts[0];
@@ -101,7 +123,7 @@ int ScriptCli::Execute()
             if (!ok)
             {
                 fprintf(stderr, "Error: Invalid port number in websocket URL: %s\n", parts[1].toUtf8().constData());
-                return 1;
+                return false;
             }
             
             printf("Opening DOB websocket connection: %s (address: %s, port: %d)\n", 
@@ -116,32 +138,13 @@ int ScriptCli::Execute()
             m_dobHandler->OpenNativeConnection(m_connectionName, 0);
         }
     }
-    
-    // Create ScriptEngine
-    m_scriptEngine = new ScriptEngine(m_dobHandler);
-    m_scriptEngine->LoadScript(scriptContent);
-    
-    // Check if script is valid
-    if (!m_scriptEngine->IsValid())
+    else
     {
-        fprintf(stderr, "Error: Script validation failed:\n");
-        for (const auto& error : m_scriptEngine->Errors())
-        {
-            fprintf(stderr, "  %s\n", error.toUtf8().constData());
-        }
-        return 1;
+		// No auto-connect, start script execution directly
+        m_scriptEngine->Execute();
     }
     
-    printf("Script validated successfully. Executing %d steps...\n", m_scriptEngine->Size());
-    
-    // Connect signal to track execution
-    connect(m_scriptEngine, &ScriptEngine::IndexFinished, this, &ScriptCli::OnIndexFinished);
-    
-    // Start script execution
-    m_scriptEngine->Execute();
-    
-    // Run the event loop
-    return m_app->exec();
+    return true;
 }
 
 void ScriptCli::OnIndexFinished(int index)

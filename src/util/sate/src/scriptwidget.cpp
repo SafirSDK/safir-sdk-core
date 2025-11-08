@@ -79,7 +79,7 @@ ScriptWidget::ScriptWidget(const QString& filePath, const QString& scriptText, D
     saveButton->setDisabled(true);
     scriptTableView->setDisabled(true);
 
-    m_scriptEngine = new ScriptEngine(dobHandler);
+	m_scriptEngine = std::make_unique<ScriptEngine>(dobHandler);
 
     // Load script in separate thread
     connect(this, &ScriptWidget::ScriptEngineLoaded, this, &ScriptWidget::OnScriptEngineReady, Qt::QueuedConnection);
@@ -91,6 +91,11 @@ ScriptWidget::ScriptWidget(const QString& filePath, const QString& scriptText, D
 
 ScriptWidget::~ScriptWidget()
 {
+    if (m_scriptEngine)
+    {
+		// If we were recording, this will disable recording in the DobHandler
+		m_scriptEngine->Reset();
+    }
 }
 
 void ScriptWidget::UpdateTitle()
@@ -395,8 +400,8 @@ void ScriptWidget::InitializeUI()
     connect(saveButton, &QPushButton::clicked, this, &ScriptWidget::OnSaveClicked);
     
     // Connect script engine signals
-    connect(m_scriptEngine, &ScriptEngine::IndexFinished, this, &ScriptWidget::OnIndexFinished);
-    connect(m_scriptEngine, &ScriptEngine::ItemRecorded, this, &ScriptWidget::OnItemRecorded);
+    connect(m_scriptEngine.get(), &ScriptEngine::IndexFinished, this, &ScriptWidget::OnIndexFinished);
+    connect(m_scriptEngine.get(), &ScriptEngine::ItemRecorded, this, &ScriptWidget::OnItemRecorded);
     
     // Connect context menu
     connect(scriptTableView, &QTableView::customContextMenuRequested, this, &ScriptWidget::OnContextMenu);

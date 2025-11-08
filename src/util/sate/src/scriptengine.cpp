@@ -187,17 +187,11 @@ namespace
         }
     }
 
-    void ValidateScript(QJsonDocument &doc, QStringList &errors)
+    void ValidateScript(QJsonArray &items, QStringList &errors)
     {
-        if (!doc.isArray())
-        {
-            errors.append("The root of the script must be an array.");
-            return;
-        }
-
         QVector<int> commentRows;
         int i = 0;
-        for (const auto &item : doc.array())
+        for (const auto &item : items)
         {
             if (!item.isObject())
             {
@@ -356,12 +350,10 @@ namespace
         }
 
         // Remove comment rows
-        auto arr = doc.array();
         for (int j = commentRows.size() - 1; j >= 0; --j)
         {
-            arr.removeAt(commentRows[j]);
+            items.removeAt(commentRows[j]);
         }
-        doc.setArray(arr);
     }
 
     QString HandleInstanceIdMacro(const QString &text)
@@ -466,15 +458,15 @@ namespace
 
 ScriptEngine::ScriptEngine(DobHandler* dobHandler)
     : m_dobHandler(dobHandler)
+    , m_items()
 {
     if (m_dobHandler == nullptr)
     {
         m_errors.append("No DobHandler provided to ScriptEngine.");
         return;
     }
-    m_doc.setArray(QJsonArray());
-    connect(m_dobHandler, &DobHandler::OnNotRequestOverflow, this, &ScriptEngine::OnNotOverflow);
-    connect(m_dobHandler, &DobHandler::OnNotMessageOverflow, this, &ScriptEngine::OnNotOverflow);
+    connect(m_dobHandler, &DobHandler::OnNotRequestOverflow, this, &ScriptEngine::ExecuteNext);
+    connect(m_dobHandler, &DobHandler::OnNotMessageOverflow, this, &ScriptEngine::ExecuteNext);
 }
 
 void ScriptEngine::LoadScript(const QString& json)
@@ -488,14 +480,28 @@ void ScriptEngine::LoadScript(const QString& json)
     auto text = HandleMacros(json);
 
     QJsonParseError err;
-    m_doc = QJsonDocument::fromJson(text.toUtf8(), &err);
+    auto doc = QJsonDocument::fromJson(text.toUtf8(), &err);
     if (err.error != QJsonParseError::NoError)
     {
         m_errors.append(err.errorString());
         return;
     }
 
-    ValidateScript(m_doc, m_errors);
+    if (doc.isNull())
+    {
+        m_errors.append("Failed to parse script.");
+        return;
+	}
+
+    if (!doc.isArray())
+    {
+        m_errors.append("The root of the script must be an array.");
+        return;
+    }
+
+	m_items = doc.array();
+
+    ValidateScript(m_items, m_errors);
 }
 
 void ScriptEngine::Record()
@@ -544,12 +550,12 @@ void ScriptEngine::ExecuteNext()
 // Execute specific index without modifying currentIndex
 int ScriptEngine::ExecuteIndex(int index)
 {
-    if (index < 0 || index >= m_doc.array().size())
+    if (index < 0 || index >= m_items.size())
     {
         return 0;
     }
 
-    const auto item = m_doc.array().at(index).toObject();
+    const auto item = m_items.at(index).toObject();
     const auto ms = item[QString("method")].toString();
 
     // Handle methods with no parameters first, then we can safely get the params object.
@@ -566,9 +572,17 @@ int ScriptEngine::ExecuteIndex(int index)
     {
         if (!m_dobHandler->IsOpen())
         {
+            connect(m_dobHandler, &DobHandler::ConnectedToDob, this, [this](const QString& name) {
+                // Connected, proceed to next step
+                m_currentIndex++;
+                ExecuteNext();
+			});
+            
+
             const auto connectionName = par["connectionName"].toString();
             const auto context = par["context"].toInt(0);
             m_dobHandler->OpenNativeConnection(connectionName, context);
+			return -1; // Dont conintue until connected
         }
     }
     else if (ms == "subscribeMessage")
@@ -746,25 +760,23 @@ const QStringList &ScriptEngine::Errors() const
 
 int ScriptEngine::Size() const
 {
-    return m_doc.isArray() ? m_doc.array().size() : 0;
+    return m_items.size();
 }
 
 QJsonObject ScriptEngine::GetIndexObject(int index) const
 {
-    if (m_doc.isArray() && index >= 0 && index < m_doc.array().size())
+    if (index >= 0 && index < m_items.size())
     {
-        return m_doc.array().at(index).toObject();
+        return m_items.at(index).toObject();
     }
     return QJsonObject();
 }
 
 void ScriptEngine::DeleteIndex(int index)
 {
-    if (m_doc.isArray() && index >= 0 && index < m_doc.array().size())
+    if (index >= 0 && index < m_items.size())
     {
-        auto arr = m_doc.array();
-        arr.removeAt(index);
-        m_doc.setArray(arr);
+        m_items.removeAt(index);
         
         // If current index is beyond the deleted index, adjust it
         if (m_currentIndex > index)
@@ -772,7 +784,7 @@ void ScriptEngine::DeleteIndex(int index)
             m_currentIndex--;
         }
         // If we deleted the current index and it's at or past the end, stop execution
-        else if (m_currentIndex == index && m_currentIndex >= arr.size())
+        else if (m_currentIndex == index && m_currentIndex >= m_items.size())
         {
             Reset();
         }
@@ -781,31 +793,18 @@ void ScriptEngine::DeleteIndex(int index)
 
 QString ScriptEngine::GetScript() const
 {
-    return QString::fromUtf8(m_doc.toJson(QJsonDocument::Indented));
+    QJsonDocument doc;
+	doc.setArray(m_items);
+    return QString::fromUtf8(doc.toJson(QJsonDocument::Indented));
 }
 
 void ScriptEngine::AppendScriptItem(const QJsonObject& item)
-{
-    if (!m_doc.isArray())
-    {
-        m_doc.setArray(QJsonArray());
-    }
-    
-    auto arr = m_doc.array();
-    arr.append(item);
-    m_doc.setArray(arr);
+{    
+    m_items.append(item);
     emit ItemRecorded(item);
 }
 
 bool ScriptEngine::IsFinished() const
 {
     return m_currentIndex >= Size();
-}
-
-void ScriptEngine::OnNotOverflow()
-{
-    if (m_state == Executing)
-    {
-        ExecuteNext();
-    }
 }

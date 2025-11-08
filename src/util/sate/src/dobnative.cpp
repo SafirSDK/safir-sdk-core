@@ -49,14 +49,6 @@ DobNative::DobNative()
     : m_dobConnection()
     , m_isDispatchSignalled()
 {
-    // DOB signal handling
-    connect(this, &DobNative::DispatchSignal, this, [this]{
-        m_isDispatchSignalled.clear();
-        if (m_behaviorOptions.dispatch)
-        {
-            m_dobConnection.Dispatch();
-        }
-    });
 }
 
 bool DobNative::IsOpen() const
@@ -94,8 +86,7 @@ void DobNative::Open(const QString& name, int context)
                                            {
                                                ++instancePart;
                                            }
-                                       }
-
+                                       }                                       
                                        emit DobInterface::ConnectedToDob(Str(Safir::Dob::ConnectionAspectMisc(this->m_dobConnection).GetConnectionName()));
                                        emit DobInterface::Output("Connected to DOB!", QtWarningMsg);
                                    });
@@ -464,7 +455,13 @@ void DobNative::OnDoDispatch()
 {
     if (!m_isDispatchSignalled.test_and_set())
     {
-        emit DispatchSignal();
+        QMetaObject::invokeMethod(this, [this]() {
+            m_isDispatchSignalled.clear();
+            if (m_behaviorOptions.dispatch)
+            {
+                m_dobConnection.Dispatch();
+            }
+        }, Qt::QueuedConnection);
     }
 }
 

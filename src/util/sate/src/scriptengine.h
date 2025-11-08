@@ -89,10 +89,9 @@ private:
     State m_state = Stopped;
     int m_currentIndex = 0;
     QStringList m_errors;
-    QJsonDocument m_doc;
+    QJsonArray m_items;
     DobHandler* m_dobHandler = nullptr;
 
     void ExecuteNext();
     bool IsFinished() const;
-    void OnNotOverflow();
 };
