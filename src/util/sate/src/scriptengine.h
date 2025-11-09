@@ -86,11 +86,11 @@ signals:
     void ItemRecorded(const QJsonObject& item);
 
 private:
+    DobHandler* m_dobHandler;
+    QJsonArray m_items;    
     State m_state = Stopped;
     int m_currentIndex = 0;
-    QStringList m_errors;
-    QJsonArray m_items;
-    DobHandler* m_dobHandler = nullptr;
+    QStringList m_errors{};
 
     void ExecuteNext();
     bool IsFinished() const;

@@ -42,33 +42,33 @@ namespace sdt = Safir::Dob::Typesystem;
 class DobCallToJson
 {
 public:
-    static QJsonObject Open(const QString& name, int context);
-    static QJsonObject Close();
+    static QJsonObject Open(const QString& name, int context, bool skipId = false);
+    static QJsonObject Close(bool skipId = false);
 
     // Subscriptions
-    static QJsonObject SubscribeMessage(int64_t typeId, const sdt::ChannelId& channel, bool includeSubclasses);
-    static QJsonObject UnsubscribeMessage(int64_t typeId);
-    static QJsonObject SubscribeEntity(int64_t typeId, const sdt::InstanceId& instance, bool includeSubclasses);
-    static QJsonObject UnsubscribeEntity(int64_t typeId);
-    static QJsonObject SubscribeRegistrations(int64_t typeId, const sdt::HandlerId& handler, bool includeSubclasses);
-    static QJsonObject UnsubscribeRegistrations(int64_t typeId);
+    static QJsonObject SubscribeMessage(int64_t typeId, const sdt::ChannelId& channel, bool includeSubclasses, bool skipId = false);
+    static QJsonObject UnsubscribeMessage(int64_t typeId, bool skipId = false);
+    static QJsonObject SubscribeEntity(int64_t typeId, const sdt::InstanceId& instance, bool includeSubclasses, bool skipId = false);
+    static QJsonObject UnsubscribeEntity(int64_t typeId, bool skipId = false);
+    static QJsonObject SubscribeRegistrations(int64_t typeId, const sdt::HandlerId& handler, bool includeSubclasses, bool skipId = false);
+    static QJsonObject UnsubscribeRegistrations(int64_t typeId, bool skipId = false);
 
     // Registrations
-    static QJsonObject RegisterEntityHandler(int64_t typeId, const sdt::HandlerId& handler, Safir::Dob::InstanceIdPolicy::Enumeration instanceIdPolicy, bool pending, bool injection);
-    static QJsonObject RegisterServiceHandler(int64_t typeId, const sdt::HandlerId& handler, bool pending);
-    static QJsonObject Unregister(int64_t typeId);
+    static QJsonObject RegisterEntityHandler(int64_t typeId, const sdt::HandlerId& handler, Safir::Dob::InstanceIdPolicy::Enumeration instanceIdPolicy, bool pending, bool injection, bool skipId = false);
+    static QJsonObject RegisterServiceHandler(int64_t typeId, const sdt::HandlerId& handler, bool pending, bool skipId = false);
+    static QJsonObject Unregister(int64_t typeId, bool skipId = false);
 
-    static QJsonObject SendMessage(const Safir::Dob::MessagePtr& message, const sdt::ChannelId& channel);
-    static QJsonObject SendServiceRequest(const Safir::Dob::ServicePtr& request, const sdt::HandlerId& handler);
+    static QJsonObject SendMessage(const Safir::Dob::MessagePtr& message, const sdt::ChannelId& channel, bool skipId = false);
+    static QJsonObject SendServiceRequest(const Safir::Dob::ServicePtr& request, const sdt::HandlerId& handler, bool skipId = false);
 
-    static QJsonObject CreateRequest(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler);
-    static QJsonObject UpdateRequest(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance);
-    static QJsonObject DeleteRequest(const sdt::EntityId& entityId);
+    static QJsonObject CreateRequest(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler, bool skipId = false);
+    static QJsonObject UpdateRequest(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, bool skipId = false);
+    static QJsonObject DeleteRequest(const sdt::EntityId& entityId, bool skipId = false);
 
-    static QJsonObject SetChanges(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler);
-    static QJsonObject SetAll(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler);
-    static QJsonObject Delete(const sdt::EntityId& entityId, const sdt::HandlerId& handler);
-    static QJsonObject DeleteAll(int64_t typeId, const sdt::HandlerId& handler);
+    static QJsonObject SetChanges(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler, bool skipId = false);
+    static QJsonObject SetAll(const Safir::Dob::EntityPtr& entity, const sdt::InstanceId& instance, const sdt::HandlerId& handler, bool skipId = false);
+    static QJsonObject Delete(const sdt::EntityId& entityId, const sdt::HandlerId& handler, bool skipId = false);
+    static QJsonObject DeleteAll(int64_t typeId, const sdt::HandlerId& handler, bool skipId = false);
 
-    static QJsonObject ReadEntity(const sdt::EntityId& entityId);
+    static QJsonObject ReadEntity(const sdt::EntityId& entityId, bool skipId = false);
 };

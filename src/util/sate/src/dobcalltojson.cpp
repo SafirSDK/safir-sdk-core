@@ -74,11 +74,14 @@ QJsonObject ToJsonObject(const Safir::Dob::Typesystem::ObjectPtr& ptr)
 
 }
 
-QJsonObject DobCallToJson::Open(const QString &name, int context)
+QJsonObject DobCallToJson::Open(const QString &name, int context, bool skipId)
 {
     QJsonObject j;
     j["method"] = "open";
-    j["id"] = "open";
+    if (!skipId)
+    {
+        j["id"] = "open";
+    }
 
     QJsonObject p;
     p["connectionName"] = name;
@@ -88,15 +91,18 @@ QJsonObject DobCallToJson::Open(const QString &name, int context)
     return j;
 }
 
-QJsonObject DobCallToJson::Close()
+QJsonObject DobCallToJson::Close(bool skipId)
 {
     QJsonObject j;
     j["method"] = "close";
-    j["id"] = "close";
+    if (!skipId)
+    {
+        j["id"] = "close";
+    }
     return j;
 }
 
-QJsonObject DobCallToJson::SubscribeMessage(int64_t typeId, const Safir::Dob::Typesystem::ChannelId &channel, bool includeSubclasses)
+QJsonObject DobCallToJson::SubscribeMessage(int64_t typeId, const Safir::Dob::Typesystem::ChannelId &channel, bool includeSubclasses, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -107,13 +113,16 @@ QJsonObject DobCallToJson::SubscribeMessage(int64_t typeId, const Safir::Dob::Ty
     // Method object
     QJsonObject j;
     j["method"] = "subscribeMessage";
-    j["id"] = QString("subscribeMessage;%1;%2;%3").arg(Str(typeId), Str(channel.ToString()), (includeSubclasses ? "1" : "0"));
+    if (!skipId)
+    {
+        j["id"] = QString("subscribeMessage;%1;%2;%3").arg(Str(typeId), Str(channel.ToString()), (includeSubclasses ? "1" : "0"));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::UnsubscribeMessage(int64_t typeId)
+QJsonObject DobCallToJson::UnsubscribeMessage(int64_t typeId, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -122,13 +131,16 @@ QJsonObject DobCallToJson::UnsubscribeMessage(int64_t typeId)
     // Method object
     QJsonObject j;
     j["method"] = "unsubscribeMessage";
-    j["id"] = QString("unsubscribeMessage;%1;").arg(Str(typeId));
+    if (!skipId)
+    {
+        j["id"] = QString("unsubscribeMessage;%1;").arg(Str(typeId));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::InstanceId &instance, bool includeSubclasses)
+QJsonObject DobCallToJson::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::InstanceId &instance, bool includeSubclasses, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -147,13 +159,16 @@ QJsonObject DobCallToJson::SubscribeEntity(int64_t typeId, const Safir::Dob::Typ
     // Method object
     QJsonObject j;
     j["method"] = "subscribeEntity";
-    j["id"] = QString("subscribeEntity;%1;%2").arg(Str(typeId), (includeSubclasses ? "1" : "0"));
+    if (!skipId)
+    {
+        j["id"] = QString("subscribeEntity;%1;%2").arg(Str(typeId), (includeSubclasses ? "1" : "0"));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::UnsubscribeEntity(int64_t typeId)
+QJsonObject DobCallToJson::UnsubscribeEntity(int64_t typeId, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -162,13 +177,16 @@ QJsonObject DobCallToJson::UnsubscribeEntity(int64_t typeId)
     // Method object
     QJsonObject j;
     j["method"] = "unsubscribeEntity";
-    j["id"] = QString("unsubscribeEntity;%1;").arg(Str(typeId));
+    if (!skipId)
+    {
+        j["id"] = QString("unsubscribeEntity;%1;").arg(Str(typeId));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::SubscribeRegistrations(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool includeSubclasses)
+QJsonObject DobCallToJson::SubscribeRegistrations(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool includeSubclasses, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -179,13 +197,16 @@ QJsonObject DobCallToJson::SubscribeRegistrations(int64_t typeId, const Safir::D
     // Method object
     QJsonObject j;
     j["method"] = "subscribeRegistration";
-    j["id"] = QString("subscribeRegistration;%1;%2").arg(Str(typeId), (includeSubclasses ? "1" : "0"));
+    if (!skipId)
+    {
+        j["id"] = QString("subscribeRegistration;%1;%2").arg(Str(typeId), (includeSubclasses ? "1" : "0"));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::UnsubscribeRegistrations(int64_t typeId)
+QJsonObject DobCallToJson::UnsubscribeRegistrations(int64_t typeId, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -194,13 +215,16 @@ QJsonObject DobCallToJson::UnsubscribeRegistrations(int64_t typeId)
     // Method object
     QJsonObject j;
     j["method"] = "unsubscribeRegistration";
-    j["id"] = QString("unsubscribeRegistration;%1;").arg(Str(typeId));
+    if (!skipId)
+    {
+        j["id"] = QString("unsubscribeRegistration;%1;").arg(Str(typeId));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::RegisterEntityHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, Safir::Dob::InstanceIdPolicy::Enumeration instanceIdPolicy, bool pending, bool injection)
+QJsonObject DobCallToJson::RegisterEntityHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, Safir::Dob::InstanceIdPolicy::Enumeration instanceIdPolicy, bool pending, bool injection, bool skipId)
 {
     // Params
     auto instPolicy = instanceIdPolicy == Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId ? "HandlerDecidesInstanceId" : "RequestorDecidesInstanceId";
@@ -214,13 +238,16 @@ QJsonObject DobCallToJson::RegisterEntityHandler(int64_t typeId, const Safir::Do
     // Method object
     QJsonObject j;
     j["method"] = "registerEntityHandler";
-    j["id"] = QString("registerEntityHandler;%1;%2;%3;%4;%5").arg(Str(typeId), Str(handler.ToString()), instPolicy, (pending ? "1" : "0"), (injection ? "1" : "0"));
+    if (!skipId)
+    {
+        j["id"] = QString("registerEntityHandler;%1;%2;%3;%4;%5").arg(Str(typeId), Str(handler.ToString()), instPolicy, (pending ? "1" : "0"), (injection ? "1" : "0"));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool pending)
+QJsonObject DobCallToJson::RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool pending, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -231,13 +258,16 @@ QJsonObject DobCallToJson::RegisterServiceHandler(int64_t typeId, const Safir::D
     // Method object
     QJsonObject j;
     j["method"] = "registerServiceHandler";
-    j["id"] = QString("registerServiceHandler;%1;%2;%3").arg(Str(typeId), Str(handler.ToString()), (pending ? "1" : "0"));
+    if (!skipId)
+    {
+        j["id"] = QString("registerServiceHandler;%1;%2;%3").arg(Str(typeId), Str(handler.ToString()), (pending ? "1" : "0"));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::Unregister(int64_t typeId)
+QJsonObject DobCallToJson::Unregister(int64_t typeId, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -246,13 +276,16 @@ QJsonObject DobCallToJson::Unregister(int64_t typeId)
     // Method object
     QJsonObject j;
     j["method"] = "unregisterHandler";
-    j["id"] = QString("unregisterHandler;%1").arg(Str(typeId));
+    if (!skipId)
+    {
+        j["id"] = QString("unregisterHandler;%1").arg(Str(typeId));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel)
+QJsonObject DobCallToJson::SendMessage(const Safir::Dob::MessagePtr &message, const Safir::Dob::Typesystem::ChannelId &channel, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -262,13 +295,16 @@ QJsonObject DobCallToJson::SendMessage(const Safir::Dob::MessagePtr &message, co
     // Method object
     QJsonObject j;
     j["method"] = "sendMessage";
-    j["id"] = QString("sendMessage;%1;%2").arg(Str(message->GetTypeId()), Str(channel.ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("sendMessage;%1;%2").arg(Str(message->GetTypeId()), Str(channel.ToString()));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler)
+QJsonObject DobCallToJson::SendServiceRequest(const Safir::Dob::ServicePtr &request, const Safir::Dob::Typesystem::HandlerId &handler, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -278,13 +314,16 @@ QJsonObject DobCallToJson::SendServiceRequest(const Safir::Dob::ServicePtr &requ
     // Method object
     QJsonObject j;
     j["method"] = "serviceRequest";
-    j["id"] = QString("serviceRequest;%1").arg(Str(handler.ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("serviceRequest;%1").arg(Str(handler.ToString()));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler)
+QJsonObject DobCallToJson::CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -298,13 +337,16 @@ QJsonObject DobCallToJson::CreateRequest(const Safir::Dob::EntityPtr &entity, co
     // Method object
     QJsonObject j;
     j["method"] = "createRequest";
-    j["id"] = QString("createRequest;%1").arg(Str(handler.ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("createRequest;%1").arg(Str(handler.ToString()));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance)
+QJsonObject DobCallToJson::UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -314,13 +356,16 @@ QJsonObject DobCallToJson::UpdateRequest(const Safir::Dob::EntityPtr &entity, co
     // Method object
     QJsonObject j;
     j["method"] = "updateRequest";
-    j["id"] = QString("updateRequest;%1").arg(Str(instance.ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("updateRequest;%1").arg(Str(instance.ToString()));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId)
+QJsonObject DobCallToJson::DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -330,13 +375,16 @@ QJsonObject DobCallToJson::DeleteRequest(const Safir::Dob::Typesystem::EntityId 
     // Method object
     QJsonObject j;
     j["method"] = "deleteRequest";
-    j["id"] = QString("deleteRequest;%1;%2").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId().ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("deleteRequest;%1;%2").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId().ToString()));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::SetChanges(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler)
+QJsonObject DobCallToJson::SetChanges(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -347,13 +395,16 @@ QJsonObject DobCallToJson::SetChanges(const Safir::Dob::EntityPtr &entity, const
     // Method object
     QJsonObject j;
     j["method"] = "setEntityChanges";
-    j["id"] = QString("setEntityChanges;%1;%2;%3").arg(Str(entity->GetTypeId()), Str(instance.ToString()), Str(handler.ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("setEntityChanges;%1;%2;%3").arg(Str(entity->GetTypeId()), Str(instance.ToString()), Str(handler.ToString()));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::SetAll(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler)
+QJsonObject DobCallToJson::SetAll(const Safir::Dob::EntityPtr &entity, const Safir::Dob::Typesystem::InstanceId &instance, const Safir::Dob::Typesystem::HandlerId &handler, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -364,13 +415,16 @@ QJsonObject DobCallToJson::SetAll(const Safir::Dob::EntityPtr &entity, const Saf
     // Method object
     QJsonObject j;
     j["method"] = "setEntity";
-    j["id"] = QString("setEntity;%1;%2;%3").arg(Str(entity->GetTypeId()), Str(instance.ToString()), Str(handler.ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("setEntity;%1;%2;%3").arg(Str(entity->GetTypeId()), Str(instance.ToString()), Str(handler.ToString()));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::Delete(const Safir::Dob::Typesystem::EntityId &entityId, const Safir::Dob::Typesystem::HandlerId &handler)
+QJsonObject DobCallToJson::Delete(const Safir::Dob::Typesystem::EntityId &entityId, const Safir::Dob::Typesystem::HandlerId &handler, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -381,13 +435,16 @@ QJsonObject DobCallToJson::Delete(const Safir::Dob::Typesystem::EntityId &entity
     // Method object
     QJsonObject j;
     j["method"] = "deleteEntity";
-    j["id"] = QString("deleteEntity;%1;%2;%3").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId().ToString()), Str(handler.ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("deleteEntity;%1;%2;%3").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId().ToString()), Str(handler.ToString()));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler)
+QJsonObject DobCallToJson::DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::HandlerId &handler, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -397,13 +454,16 @@ QJsonObject DobCallToJson::DeleteAll(int64_t typeId, const Safir::Dob::Typesyste
     // Method object
     QJsonObject j;
     j["method"] = "deleteAllInstances";
-    j["id"] = QString("deleteAllInstances;%1;%2;%3").arg(Str(typeId), Str(handler.ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("deleteAllInstances;%1;%2;%3").arg(Str(typeId), Str(handler.ToString()));
+    }
     j["params"] = p;
 
     return j;
 }
 
-QJsonObject DobCallToJson::ReadEntity(const Safir::Dob::Typesystem::EntityId &entityId)
+QJsonObject DobCallToJson::ReadEntity(const Safir::Dob::Typesystem::EntityId &entityId, bool skipId)
 {
     // Params
     QJsonObject p;
@@ -413,7 +473,10 @@ QJsonObject DobCallToJson::ReadEntity(const Safir::Dob::Typesystem::EntityId &en
     // Method object
     QJsonObject j;
     j["method"] = "readEntity";
-    j["id"] = QString("readEntity;%1;%2").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId().ToString()));
+    if (!skipId)
+    {
+        j["id"] = QString("readEntity;%1;%2").arg(Str(entityId.GetTypeId()), Str(entityId.GetInstanceId().ToString()));
+    }
     j["params"] = p;
 
     return j;

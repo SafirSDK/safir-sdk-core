@@ -101,7 +101,7 @@ bool ScriptCli::ExecuteInternal()
     // Auto-connect if connection name is provided
     if (!m_connectionName.isEmpty())
     {
-        connect(m_dobHandler.get(), &DobHandler::ConnectedToDob, this, [this](const QString& name) {
+        connect(m_dobHandler.get(), &DobHandler::ConnectedToDob, this, [this](const QString&) {
 			// Start script execution once connected
             printf("Starting script execution...\n");
             m_scriptEngine->Execute();

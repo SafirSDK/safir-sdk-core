@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2025 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson
 *
@@ -108,7 +108,7 @@ void DobHandler::OpenNativeConnection(const QString& name, int context)
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::Open(name, context));
+        emit InterfaceListener(DobCallToJson::Open(name, context, true));
     }
 
     m_dob->Open(name, context);
@@ -128,7 +128,7 @@ void DobHandler::OpenWebsocketConnection(const QString& address, int port, const
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::Open(name, context));
+        emit InterfaceListener(DobCallToJson::Open(name, context, true));
     }
 
     m_dob->Open(name, context);
@@ -143,7 +143,7 @@ void DobHandler::Close()
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::Close());
+        emit InterfaceListener(DobCallToJson::Close(true));
     }
 
     m_dob->Close();
@@ -159,7 +159,7 @@ void DobHandler::SubscribeMessage(int64_t typeId, const sdt::ChannelId& channel,
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::SubscribeMessage(typeId, channel, includeSubclasses));
+        emit InterfaceListener(DobCallToJson::SubscribeMessage(typeId, channel, includeSubclasses, true));
     }
 
     m_dob->SubscribeMessage(typeId, channel, includeSubclasses);
@@ -174,7 +174,7 @@ void DobHandler::UnsubscribeMessage(int64_t typeId)
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::UnsubscribeMessage(typeId));
+        emit InterfaceListener(DobCallToJson::UnsubscribeMessage(typeId, true));
     }
 
     m_dob->UnsubscribeMessage(typeId);
@@ -190,7 +190,7 @@ void DobHandler::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::I
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::SubscribeEntity(typeId, instance, includeSubclasses));
+        emit InterfaceListener(DobCallToJson::SubscribeEntity(typeId, instance, includeSubclasses, true));
     }
 
     m_dob->SubscribeEntity(typeId, instance, includeSubclasses);
@@ -205,7 +205,7 @@ void DobHandler::UnsubscribeEntity(int64_t typeId)
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::UnsubscribeEntity(typeId));
+        emit InterfaceListener(DobCallToJson::UnsubscribeEntity(typeId, true));
     }
 
     m_dob->UnsubscribeEntity(typeId);
@@ -221,7 +221,7 @@ void DobHandler::SubscribeRegistrations(int64_t typeId, const Safir::Dob::Typesy
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::SubscribeRegistrations(typeId, handler, includeSubclasses));
+        emit InterfaceListener(DobCallToJson::SubscribeRegistrations(typeId, handler, includeSubclasses, true));
     }
 
     m_dob->SubscribeRegistrations(typeId, handler, includeSubclasses);
@@ -231,7 +231,7 @@ void DobHandler::UnsubscribeRegistrations(int64_t typeId)
 {
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::UnsubscribeRegistrations(typeId));
+        emit InterfaceListener(DobCallToJson::UnsubscribeRegistrations(typeId, true));
     }
 
     m_dob->UnsubscribeRegistrations(typeId);
@@ -247,7 +247,7 @@ void DobHandler::RegisterEntityHandler(int64_t typeId, const Safir::Dob::Typesys
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::RegisterEntityHandler(typeId, handler, instanceIdPolicy, pending, injection));
+        emit InterfaceListener(DobCallToJson::RegisterEntityHandler(typeId, handler, instanceIdPolicy, pending, injection, true));
     }
 
     m_dob->RegisterEntityHandler(typeId, handler, instanceIdPolicy, pending, injection);
@@ -262,7 +262,7 @@ void DobHandler::RegisterServiceHandler(int64_t typeId, const Safir::Dob::Typesy
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::RegisterServiceHandler(typeId, handler, pending));
+        emit InterfaceListener(DobCallToJson::RegisterServiceHandler(typeId, handler, pending, true));
     }
 
     m_dob->RegisterServiceHandler(typeId, handler, pending);
@@ -277,7 +277,7 @@ void DobHandler::Unregister(int64_t typeId)
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::Unregister(typeId));
+        emit InterfaceListener(DobCallToJson::Unregister(typeId, true));
     }
 
     m_dob->Unregister(typeId);
@@ -293,7 +293,7 @@ bool DobHandler::SendMessage(const Safir::Dob::MessagePtr &message, const Safir:
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::SendMessage(message, channel));
+        emit InterfaceListener(DobCallToJson::SendMessage(message, channel, true));
     }
 
     return m_dob->SendMessage(message, channel);
@@ -308,7 +308,7 @@ bool DobHandler::SendServiceRequest(const Safir::Dob::ServicePtr &request, const
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::SendServiceRequest(request, handler));
+        emit InterfaceListener(DobCallToJson::SendServiceRequest(request, handler, true));
     }
 
     return m_dob->SendServiceRequest(request, handler);
@@ -324,7 +324,7 @@ bool DobHandler::CreateRequest(const Safir::Dob::EntityPtr &entity, const Safir:
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::CreateRequest(entity, instance, handler));
+        emit InterfaceListener(DobCallToJson::CreateRequest(entity, instance, handler, true));
     }
 
     return m_dob->CreateRequest(entity, instance, handler);
@@ -339,7 +339,7 @@ bool DobHandler::UpdateRequest(const Safir::Dob::EntityPtr &entity, const Safir:
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::UpdateRequest(entity, instance));
+        emit InterfaceListener(DobCallToJson::UpdateRequest(entity, instance, true));
     }
 
     return m_dob->UpdateRequest(entity, instance);
@@ -354,7 +354,7 @@ bool DobHandler::DeleteRequest(const Safir::Dob::Typesystem::EntityId &entityId)
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::DeleteRequest(entityId));
+        emit InterfaceListener(DobCallToJson::DeleteRequest(entityId, true));
     }
 
     return m_dob->DeleteRequest(entityId);
@@ -370,7 +370,7 @@ void DobHandler::SetChanges(const Safir::Dob::EntityPtr &entity, const Safir::Do
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::SetChanges(entity, instance, handler));
+        emit InterfaceListener(DobCallToJson::SetChanges(entity, instance, handler, true));
     }
 
     m_dob->SetChanges(entity, instance, handler);
@@ -385,7 +385,7 @@ void DobHandler::SetAll(const Safir::Dob::EntityPtr& entity, const sdt::Instance
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::SetAll(entity, instance, handler));
+        emit InterfaceListener(DobCallToJson::SetAll(entity, instance, handler, true));
     }
 
     m_dob->SetAll(entity, instance, handler);
@@ -400,7 +400,7 @@ void DobHandler::Delete(const Safir::Dob::Typesystem::EntityId &entityId, const 
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::Delete(entityId, handler));
+        emit InterfaceListener(DobCallToJson::Delete(entityId, handler, true));
     }
 
     m_dob->Delete(entityId, handler);
@@ -415,7 +415,7 @@ void DobHandler::DeleteAll(int64_t typeId, const Safir::Dob::Typesystem::Handler
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::DeleteAll(typeId, handler));
+        emit InterfaceListener(DobCallToJson::DeleteAll(typeId, handler, true));
     }
 
     m_dob->DeleteAll(typeId, handler);
@@ -430,7 +430,7 @@ void DobHandler::ReadEntity(const sdt::EntityId& entityId)
 
     if (m_numberOfInterfaceListeners > 0) //optimize: only create JSON if there are listeners
     {
-        emit InterfaceListener(DobCallToJson::ReadEntity(entityId));
+        emit InterfaceListener(DobCallToJson::ReadEntity(entityId, true));
     }
 
     m_dob->ReadEntity(entityId);
