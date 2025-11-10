@@ -47,14 +47,14 @@ ScriptWidget::ScriptWidget(const QString& filePath, const QString& scriptText, D
     , m_scriptEngine(nullptr)
     , m_model(nullptr)
     , m_isModified(false)
-    , m_errorModel(nullptr)    
+    , m_errorModel(nullptr)
 {
     setupUi(this);
 
     // Create and setup FileInfoWidget
     m_fileInfoWidget = new FileInfoWidget(this);
     fileInfoLayout->addWidget(m_fileInfoWidget);
-    
+
     if (m_filePath.isEmpty())
     {
         m_fileInfoWidget->setInfo("New Script");
@@ -79,7 +79,7 @@ ScriptWidget::ScriptWidget(const QString& filePath, const QString& scriptText, D
     saveButton->setDisabled(true);
     scriptTableView->setDisabled(true);
 
-	m_scriptEngine = std::make_unique<ScriptEngine>(dobHandler);
+    m_scriptEngine = std::make_unique<ScriptEngine>(dobHandler);
 
     // Load script in separate thread
     connect(this, &ScriptWidget::ScriptEngineLoaded, this, &ScriptWidget::OnScriptEngineReady, Qt::QueuedConnection);
@@ -93,8 +93,8 @@ ScriptWidget::~ScriptWidget()
 {
     if (m_scriptEngine)
     {
-		// If we were recording, this will disable recording in the DobHandler
-		m_scriptEngine->Reset();
+        // If we were recording, this will disable recording in the DobHandler
+        m_scriptEngine->Reset();
     }
 }
 
@@ -102,7 +102,7 @@ void ScriptWidget::UpdateTitle()
 {
     if (!m_fileInfoWidget)
         return;
-        
+
     QString info;
     if (m_filePath.isEmpty())
     {
@@ -112,12 +112,12 @@ void ScriptWidget::UpdateTitle()
     {
         info = QString("Script");
     }
-    
+
     if (m_isModified)
     {
         info += " *";
     }
-    
+
     m_fileInfoWidget->setInfo(info);
     m_fileInfoWidget->setFilePath(m_filePath);
 }
@@ -228,7 +228,7 @@ void ScriptWidget::OnItemRecorded(const QJsonObject& item)
         row.details = QString::fromUtf8(QJsonDocument(item["params"].toObject()).toJson(QJsonDocument::Compact));
         row.run = false;
         m_model->addRow(row);
-        
+
         if (!m_isModified)
         {
             m_isModified = true;
@@ -246,10 +246,10 @@ void ScriptWidget::OnContextMenu(const QPoint& pos)
     QMenu contextMenu(tr("Context menu"), this);
     QAction* executeAction = contextMenu.addAction(tr("Execute Row"));
     QAction* deleteAction = contextMenu.addAction(tr("Delete Row"));
-    
+
     connect(executeAction, &QAction::triggered, this, &ScriptWidget::OnExecuteRow);
     connect(deleteAction, &QAction::triggered, this, &ScriptWidget::OnDeleteRow);
-    
+
     contextMenu.exec(scriptTableView->viewport()->mapToGlobal(pos));
 }
 
@@ -280,7 +280,7 @@ void ScriptWidget::OnDeleteRow()
         {
             m_scriptEngine->DeleteIndex(row);
         }
-        
+
         if (!m_isModified)
         {
             m_isModified = true;
@@ -320,7 +320,7 @@ void ScriptWidget::OnSaveClicked()
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        QMessageBox::critical(this, tr("Save Error"), 
+        QMessageBox::critical(this, tr("Save Error"),
             tr("Could not open file for writing: %1").arg(file.errorString()));
         return;
     }
@@ -332,7 +332,7 @@ void ScriptWidget::OnSaveClicked()
 
     m_filePath = fileName;
     m_isModified = false;
-    UpdateTitle();    
+    UpdateTitle();
 }
 
 void ScriptWidget::OnScriptEngineReady()
@@ -362,7 +362,7 @@ void ScriptWidget::InitializeUI()
     scriptTableView->setSelectionMode(QAbstractItemView::SingleSelection);
     scriptTableView->verticalHeader()->setVisible(false);
     scriptTableView->setContextMenuPolicy(Qt::CustomContextMenu);
-    
+
     // Build vector of ScriptRow from script engine
     QVector<ScriptModel::ScriptRow> rows;
     for (int i = 0; i < m_scriptEngine->Size(); ++i)
@@ -374,35 +374,35 @@ void ScriptWidget::InitializeUI()
         row.run = false;
         rows.append(row);
     }
-    
+
     m_model = new ScriptModel(rows, this);
     scriptTableView->setModel(m_model);
-    
+
     // Set row number column width to fit number of rows.
     QFontMetrics fm(scriptTableView->font());
     int width = fm.horizontalAdvance(QString::number(m_scriptEngine->Size())) + 20;
     scriptTableView->setColumnWidth(ScriptModel::RowNumber, width);
     scriptTableView->setColumnWidth(ScriptModel::Method, 250);
-    
+
     // Set Run column to minimal width
     int runWidth = fm.horizontalAdvance(tr("Run")) + 30;
     scriptTableView->setColumnWidth(ScriptModel::Run, runWidth);
-    
+
     // Make Details column take remaining space
     scriptTableView->horizontalHeader()->setStretchLastSection(false);
     scriptTableView->horizontalHeader()->setSectionResizeMode(ScriptModel::Details, QHeaderView::Stretch);
-    
+
     // Connect button signals
     connect(recordButton, &QPushButton::clicked, this, &ScriptWidget::OnRecordClicked);
     connect(runScriptButton, &QPushButton::clicked, this, &ScriptWidget::OnRunClicked);
     connect(pauseButton, &QPushButton::clicked, this, &ScriptWidget::OnPauseClicked);
     connect(resetButton, &QPushButton::clicked, this, &ScriptWidget::OnResetClicked);
     connect(saveButton, &QPushButton::clicked, this, &ScriptWidget::OnSaveClicked);
-    
+
     // Connect script engine signals
     connect(m_scriptEngine.get(), &ScriptEngine::IndexFinished, this, &ScriptWidget::OnIndexFinished);
     connect(m_scriptEngine.get(), &ScriptEngine::ItemRecorded, this, &ScriptWidget::OnItemRecorded);
-    
+
     // Connect context menu
     connect(scriptTableView, &QTableView::customContextMenuRequested, this, &ScriptWidget::OnContextMenu);
 
@@ -431,19 +431,18 @@ void ScriptWidget::ShowErrors(const QStringList& errors)
         m_errorModel = new QStringListModel(this);
         errorListView->setModel(m_errorModel);
     }
-    
+
     if (!m_errorFileInfoWidget)
     {
         m_errorFileInfoWidget = new FileInfoWidget(this);
         errorFileInfoLayout->addWidget(m_errorFileInfoWidget);
     }
-    
+
     m_errorModel->setStringList(errors);
-    
+
     // Update error file info widget
     m_errorFileInfoWidget->setInfo("Script Errors");
     m_errorFileInfoWidget->setFilePath(m_filePath);
-    
+
     stackedWidget->setCurrentWidget(errorPage);
 }
-

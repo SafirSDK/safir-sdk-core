@@ -79,7 +79,7 @@ public:
 
     void ReadEntity(const sdt::EntityId& entityId) override;
 
-	// Manual dispatch call
+    // Manual dispatch call
     void Dispatch() override;
 
 private:

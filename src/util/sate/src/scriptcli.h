@@ -48,8 +48,8 @@ private:
     QString m_scriptFile;
     QString m_connectionName;
     QString m_websocketUrl;
-	std::unique_ptr<DobHandler> m_dobHandler;
-	std::unique_ptr<ScriptEngine> m_scriptEngine;
+    std::unique_ptr<DobHandler> m_dobHandler;
+    std::unique_ptr<ScriptEngine> m_scriptEngine;
     int m_currentIndex;
 
     bool ExecuteInternal();

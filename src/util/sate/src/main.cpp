@@ -62,7 +62,7 @@ int CommandLineApplication(int argc, char* argv[])
     bool hasParentConsole = AttachConsole(ATTACH_PARENT_PROCESS);
     if (!hasParentConsole)
     {
-        // No parent console — create a new one so output is visible when double-clicked.
+        // No parent console: create a new one so output is visible when double-clicked.
         AllocConsole();
     }
 
@@ -88,11 +88,11 @@ int CommandLineApplication(int argc, char* argv[])
     }
 #endif
 
-	int returnCode = 0;
+    int returnCode = 0;
 
     // Use QCoreApplication for console mode
     QCoreApplication app(argc, argv);
-    
+
     // Parse command line arguments
     QCommandLineParser parser;
     parser.setApplicationDescription("Safir Application Testing Environment (SATE)");
@@ -171,7 +171,7 @@ int CommandLineApplication(int argc, char* argv[])
 
     FreeConsole();
 #endif
-    
+
     return returnCode;
 }
 
@@ -193,10 +193,10 @@ int main(int argc, char *argv[])
     {
         // Run command line application
         return CommandLineApplication(argc, argv);
-	}
-    else 
+    }
+    else
     {
         // Run GUI application
         return GuiApplication(argc, argv);
-	}
+    }
 }

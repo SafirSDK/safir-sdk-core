@@ -430,7 +430,7 @@ namespace
                 int length = (minLength == maxLength) ? minLength : Utilities::RandomInt64(minLength, maxLength);
                 QString randomString;
                 randomString.reserve(length);
-                
+
                 // Generate random alphanumeric string
                 static const QString chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
                 for (int i = 0; i < length; ++i)
@@ -438,7 +438,7 @@ namespace
                     int index = Utilities::RandomInt64(0, chars.length() - 1);
                     randomString.append(chars[index]);
                 }
-                
+
                 result.replace(match.capturedStart(), match.capturedLength(), randomString);
             }
         }
@@ -490,7 +490,7 @@ void ScriptEngine::LoadScript(const QString& json)
     {
         m_errors.append("Failed to parse script.");
         return;
-	}
+    }
 
     if (!doc.isArray())
     {
@@ -498,7 +498,7 @@ void ScriptEngine::LoadScript(const QString& json)
         return;
     }
 
-	m_items = doc.array();
+    m_items = doc.array();
 
     ValidateScript(m_items, m_errors);
 }
@@ -508,7 +508,7 @@ void ScriptEngine::Record()
     m_state = Recording;
     m_dobHandler->InterfaceListenerAdded();
     connect(m_dobHandler, &DobHandler::InterfaceListener, this, [this](const auto& jobj){ AppendScriptItem(jobj); });
-}   
+}
 
 void ScriptEngine::Execute()
 {
@@ -531,7 +531,7 @@ void ScriptEngine::ExecuteNext()
             // time < 0 indicates overflow, so we stop execution here and wait for OnNotOverflow
             return;
         }
-        
+
         m_currentIndex++;
         if (!IsFinished())
         {
@@ -575,13 +575,13 @@ int ScriptEngine::ExecuteIndex(int index)
                 // Connected, proceed to next step
                 m_currentIndex++;
                 ExecuteNext();
-			});
-            
+            });
+
 
             const auto connectionName = par["connectionName"].toString();
             const auto context = par["context"].toInt(0);
             m_dobHandler->OpenNativeConnection(connectionName, context);
-			return -1; // Dont continue until connected
+            return -1; // Dont continue until connected
         }
     }
     else if (ms == "subscribeMessage")
@@ -776,7 +776,7 @@ void ScriptEngine::DeleteIndex(int index)
     if (index >= 0 && index < m_items.size())
     {
         m_items.removeAt(index);
-        
+
         // If current index is beyond the deleted index, adjust it
         if (m_currentIndex > index)
         {
@@ -793,12 +793,12 @@ void ScriptEngine::DeleteIndex(int index)
 QString ScriptEngine::GetScript() const
 {
     QJsonDocument doc;
-	doc.setArray(m_items);
+    doc.setArray(m_items);
     return QString::fromUtf8(doc.toJson(QJsonDocument::Indented));
 }
 
 void ScriptEngine::AppendScriptItem(const QJsonObject& item)
-{    
+{
     m_items.append(item);
     emit ItemRecorded(item);
 }

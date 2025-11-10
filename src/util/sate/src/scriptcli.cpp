@@ -48,10 +48,10 @@ ScriptCli::~ScriptCli()
 
 int ScriptCli::Execute()
 {
-    QMetaObject::invokeMethod(this, [this]() { 
+    QMetaObject::invokeMethod(this, [this]() {
         ExecuteInternal();
     }, Qt::QueuedConnection);
-    
+
     return m_app->exec();
 }
 
@@ -64,24 +64,24 @@ bool ScriptCli::ExecuteInternal()
         fprintf(stderr, "Error: Failed to open script file: %s\n", m_scriptFile.toUtf8().constData());
         return false;
     }
-    
+
     QTextStream in(&file);
     QString scriptContent = in.readAll();
     file.close();
-    
+
     if (scriptContent.isEmpty())
     {
         fprintf(stderr, "Error: Script file is empty: %s\n", m_scriptFile.toUtf8().constData());
         return false;
     }
-    
+
     printf("Running script file: %s\n", m_scriptFile.toUtf8().constData());
-    
+
     // Create DobHandler
-	m_dobHandler = std::make_unique<DobHandler>();
+    m_dobHandler = std::make_unique<DobHandler>();
 
     // Create ScriptEngine
-	m_scriptEngine = std::make_unique<ScriptEngine>(m_dobHandler.get());
+    m_scriptEngine = std::make_unique<ScriptEngine>(m_dobHandler.get());
     m_scriptEngine->LoadScript(scriptContent);
 
     // Check if script is valid
@@ -97,12 +97,12 @@ bool ScriptCli::ExecuteInternal()
 
     // Connect signal to track execution
     connect(m_scriptEngine.get(), &ScriptEngine::IndexFinished, this, &ScriptCli::OnIndexFinished);
-    
+
     // Auto-connect if connection name is provided
     if (!m_connectionName.isEmpty())
     {
         connect(m_dobHandler.get(), &DobHandler::ConnectedToDob, this, [this](const QString&) {
-			// Start script execution once connected
+            // Start script execution once connected
             printf("Starting script execution...\n");
             m_scriptEngine->Execute();
         });
@@ -116,7 +116,7 @@ bool ScriptCli::ExecuteInternal()
                 fprintf(stderr, "Error: Invalid websocket URL format. Expected 'address:port', got: %s\n", m_websocketUrl.toUtf8().constData());
                 return false;
             }
-            
+
             QString address = parts[0];
             bool ok;
             int port = parts[1].toInt(&ok);
@@ -125,10 +125,10 @@ bool ScriptCli::ExecuteInternal()
                 fprintf(stderr, "Error: Invalid port number in websocket URL: %s\n", parts[1].toUtf8().constData());
                 return false;
             }
-            
-            printf("Opening DOB websocket connection: %s (address: %s, port: %d)\n", 
-                   m_connectionName.toUtf8().constData(), 
-                   address.toUtf8().constData(), 
+
+            printf("Opening DOB websocket connection: %s (address: %s, port: %d)\n",
+                   m_connectionName.toUtf8().constData(),
+                   address.toUtf8().constData(),
                    port);
             m_dobHandler->OpenWebsocketConnection(address, port, m_connectionName, 0);
         }
@@ -140,10 +140,10 @@ bool ScriptCli::ExecuteInternal()
     }
     else
     {
-		// No auto-connect, start script execution directly
+        // No auto-connect, start script execution directly
         m_scriptEngine->Execute();
     }
-    
+
     return true;
 }
 
@@ -151,14 +151,14 @@ void ScriptCli::OnIndexFinished(int index)
 {
     m_currentIndex = index + 1;
     printf("Completed step %d/%d\n", m_currentIndex, m_scriptEngine->Size());
-    
+
     if (m_currentIndex >= m_scriptEngine->Size())
     {
         printf("Script execution completed successfully.\n");
-        
+
         // Close DOB connection before quitting
         m_dobHandler->Close();
-        
+
         // Give some time for cleanup, then quit
         QTimer::singleShot(100, this, [this]() {
             m_app->quit();

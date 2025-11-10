@@ -45,8 +45,8 @@ public:
 
 signals:
     // For internal use to know when to enable gui.
-    void ScriptEngineLoaded(); 
-    
+    void ScriptEngineLoaded();
+
 private slots:
     void OnRunClicked();
     void OnPauseClicked();
@@ -64,7 +64,7 @@ private slots:
 private:
     QString m_filePath;
     bool m_autoRun;
-	std::unique_ptr<ScriptEngine> m_scriptEngine;
+    std::unique_ptr<ScriptEngine> m_scriptEngine;
     ScriptModel* m_model;
     bool m_isModified = false;
     QStringListModel* m_errorModel = nullptr;
