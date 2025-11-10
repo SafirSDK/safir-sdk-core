@@ -72,14 +72,8 @@ int CommandLineApplication(int argc, char* argv[])
     freopen_s(&fDummy, "CONOUT$", "w", stderr);
     freopen_s(&fDummy, "CONIN$", "r", stdin);
 
-    // Ensure UTF-8 output and enable ANSI VT processing for colors/cursor control
+    // Ensure UTF-8 output
     SetConsoleOutputCP(CP_UTF8);
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD dwMode = 0;
-    if (hOut != INVALID_HANDLE_VALUE && GetConsoleMode(hOut, &dwMode))
-    {
-        SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN);
-    }
 
     // If we attached to parent console, print a newline to move past the prompt
     if (hasParentConsole)
