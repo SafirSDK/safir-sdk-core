@@ -153,7 +153,7 @@ int CommandLineApplication(int argc, char* argv[])
             ir.Event.KeyEvent.uChar.UnicodeChar = '\r';
             ir.Event.KeyEvent.wRepeatCount = 1;
             ir.Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
-            ir.Event.KeyEvent.wVirtualScanCode = MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC);
+            ir.Event.KeyEvent.wVirtualScanCode = static_cast<WORD>(MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC));
 
             DWORD written;
             WriteConsoleInput(hStdIn, &ir, 1, &written);
