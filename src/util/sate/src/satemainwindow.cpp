@@ -606,7 +606,7 @@ Safir::Dob::ResponsePtr SateMainWindow::GetResponseObjectFromSettings() const
             }
         }
     }
-    catch(const std::exception& e)
+    catch(const std::exception&)
     {
     }
 

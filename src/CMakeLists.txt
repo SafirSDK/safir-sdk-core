@@ -21,11 +21,6 @@ FIND_PACKAGE(ODBC)
 # to always look for includes there:
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# Conan does not generate the versionless targets, so we
-# need to do that ourselves. First we disable them for when
-# do not run using conan.
-set(QT_NO_CREATE_VERSIONLESS_TARGETS True)
-
 set(NEEDED_QT_MODULES Core Widgets Network WebSockets Svg)
 
 find_package(Qt6 COMPONENTS ${NEEDED_QT_MODULES} QUIET)
@@ -85,23 +80,28 @@ if (MSVC)
   add_definitions(-DSAFIR_LINK_QT_STATICALLY)
 endif()
 
-# And then we need to define the versionless targets
-if (Qt6_FOUND)
-  add_library (Qt::Core ALIAS Qt6::Core)
-  add_library (Qt::Widgets ALIAS Qt6::Widgets)
-  add_library (Qt::WebSockets ALIAS Qt6::WebSockets)
-  add_library (Qt::Network ALIAS Qt6::Network)
-  add_library (Qt::Svg ALIAS Qt6::Svg)
-  add_library (Qt::Gui ALIAS Qt6::Gui)
-elseif(Qt5_FOUND)
-  add_library (Qt::Core ALIAS Qt5::Core)
-  add_library (Qt::Widgets ALIAS Qt5::Widgets)
-  add_library (Qt::WebSockets ALIAS Qt5::WebSockets)
-  add_library (Qt::Network ALIAS Qt5::Network)
-  add_library (Qt::Svg ALIAS Qt5::Svg)
-  add_library (Qt::Gui ALIAS Qt5::Gui)
-else()
+if (NOT Qt6_FOUND AND NOT Qt5_FOUND)
   message(FATAL_ERROR "Appropriate version of Qt with the needed modules (${NEEDED_QT_MODULES}) was not found.")
+endif()
+
+# Old Conan recipes do not generate the versionless targets, so we
+# need to do that ourselves. 
+if (NOT TARGET Qt::Core)
+  if (Qt6_FOUND)
+    add_library (Qt::Core ALIAS Qt6::Core)
+    add_library (Qt::Widgets ALIAS Qt6::Widgets)
+    add_library (Qt::WebSockets ALIAS Qt6::WebSockets)
+    add_library (Qt::Network ALIAS Qt6::Network)
+    add_library (Qt::Svg ALIAS Qt6::Svg)
+    add_library (Qt::Gui ALIAS Qt6::Gui)
+  elseif(Qt5_FOUND)
+    add_library (Qt::Core ALIAS Qt5::Core)
+    add_library (Qt::Widgets ALIAS Qt5::Widgets)
+    add_library (Qt::WebSockets ALIAS Qt5::WebSockets)
+    add_library (Qt::Network ALIAS Qt5::Network)
+    add_library (Qt::Svg ALIAS Qt5::Svg)
+    add_library (Qt::Gui ALIAS Qt5::Gui)
+  endif()
 endif()
 
 #

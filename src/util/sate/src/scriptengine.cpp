@@ -29,7 +29,6 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonValueRef>
-#include <QJsonValueConstRef>
 #include <QTimer>
 #include <QRandomGenerator>
 #include <QRegularExpression>
@@ -195,11 +194,11 @@ namespace
         {
             if (!item.isObject())
             {
-                errors.append(QString("Script item number %1 is not valid. All script items must be  Json objects.").arg(QString::number(i)));
+                errors.append(QString("Script item number %1 is not valid. All script items must be Json objects.").arg(QString::number(i)));
                 continue;
             }
 
-            const auto method = item[QString("method")];
+            const auto method = item.toObject().value(QString("method"));
             if (method.isUndefined() || !method.isString())
             {
                 errors.append(QString("Script item number %1. Json value 'method' is missing or is not a string value.").arg(QString::number(i)));
@@ -572,7 +571,7 @@ int ScriptEngine::ExecuteIndex(int index)
     {
         if (!m_dobHandler->IsOpen())
         {
-            connect(m_dobHandler, &DobHandler::ConnectedToDob, this, [this](const QString& name) {
+            connect(m_dobHandler, &DobHandler::ConnectedToDob, this, [this](const QString& /*name*/) {
                 // Connected, proceed to next step
                 m_currentIndex++;
                 ExecuteNext();
@@ -582,7 +581,7 @@ int ScriptEngine::ExecuteIndex(int index)
             const auto connectionName = par["connectionName"].toString();
             const auto context = par["context"].toInt(0);
             m_dobHandler->OpenNativeConnection(connectionName, context);
-			return -1; // Dont conintue until connected
+			return -1; // Dont continue until connected
         }
     }
     else if (ms == "subscribeMessage")
