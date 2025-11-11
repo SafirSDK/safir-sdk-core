@@ -185,12 +185,12 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     connect(&m_dob, &DobHandler::ConnectionClosed, this, &SateMainWindow::OnConnectionClosed);
     connect(&m_dob, &DobHandler::OnReadEntity, this, [this](const auto& entity, const auto& inst){ OnOpenObjectEditWithInstance("", inst.GetRawValue(), entity); });
     
-    m_dob.SetBehaviorOptions({
+    m_dob.SetBehaviorOptions(DobInterface::BehaviorOptions(
         m_settingsManager->loadDispatch(),
         m_settingsManager->loadSendResponse(),
         m_settingsManager->loadCreateEntities(),
         m_settingsManager->loadUpdateEntities(),
-        m_settingsManager->loadDeleteEntities()});
+        m_settingsManager->loadDeleteEntities()));
 
     auto response = GetResponseObjectFromSettings();
     if (response)
@@ -319,12 +319,12 @@ SateMainWindow::SateMainWindow(QWidget *parent)
             m_settingsManager->saveCreateEntities(newSettings.createEntities);
             m_settingsManager->saveUpdateEntities(newSettings.updateEntities);
             m_settingsManager->saveDeleteEntities(newSettings.deleteEntities);
-            m_dob.SetBehaviorOptions({
+            m_dob.SetBehaviorOptions(DobInterface::BehaviorOptions(
                 newSettings.dispatch,
                 newSettings.sendResponse,
                 newSettings.createEntities,
                 newSettings.updateEntities,
-                newSettings.deleteEntities });
+                newSettings.deleteEntities ));
 
             m_dispatchAction->setVisible(newSettings.dispatch == false && m_dob.IsNativeConnection());
         }

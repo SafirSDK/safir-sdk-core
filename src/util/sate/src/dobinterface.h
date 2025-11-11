@@ -64,6 +64,21 @@ public:
 
     struct BehaviorOptions
     {
+        BehaviorOptions() = default;
+
+        BehaviorOptions(bool dispatch_,
+                        bool sendResponse_,
+                        bool createEntities_,
+                        bool updateEntities_,
+                        bool deleteEntities_)
+            : dispatch(dispatch_)
+            , sendResponse(sendResponse_)
+            , createEntities(createEntities_)
+            , updateEntities(updateEntities_)
+            , deleteEntities(deleteEntities_)
+        {
+        }
+
         bool dispatch = true;
         bool sendResponse = true;
         bool createEntities = true;
