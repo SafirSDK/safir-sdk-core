@@ -22,13 +22,11 @@
 *
 ******************************************************************************/
 #include "scriptwidget.h"
-#include "scriptengine.h"
-#include "scriptmodel.h"
-#include "fileinfowidget.h"
 
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4127)
+#pragma warning (disable: 4244)
 #endif
 
 #include <QMessageBox>
@@ -44,6 +42,10 @@
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+
+#include "scriptengine.h"
+#include "scriptmodel.h"
+#include "fileinfowidget.h"
 
 ScriptWidget::ScriptWidget(const QString& filePath, const QString& scriptText, DobHandler* dobHandler, QWidget *parent)
     : ScriptWidget(filePath, scriptText, dobHandler, false, parent)

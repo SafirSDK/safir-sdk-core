@@ -22,7 +22,18 @@
 *
 ******************************************************************************/
 #include "scriptmodel.h"
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#pragma warning (disable: 4244)
+#endif
+
 #include <QColor>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 ScriptModel::ScriptModel(const QVector<ScriptRow>& rows, QObject *parent)
     : QAbstractTableModel(parent)
