@@ -21,6 +21,7 @@ set (USERS_GUIDE_PNGS
   images/dobexplorer_memory.png
   images/injection_sequence_diagram.png
   images/sate_overview.png
+  images/sate_script.png
   images/vehicledb_class_diagram.png
   images/vehiclemmi_create.png
   images/dobexplorer_nodes.png

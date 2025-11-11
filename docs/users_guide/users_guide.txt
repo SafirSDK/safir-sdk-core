@@ -4647,6 +4647,78 @@ been successfully sent, etc. There are buttons to toggle what type of events are
 the log. By default the more verbose types of logs are disabled, so as not to spam the
 log window with uninteresting information.
 
+==== Scripts in Sate
+As of version 7.4 Sate has the ability to automatically run a sequence of commands stored in a script file. The script is a JSON array of Dob operations.
+Each operatin is a JSON object with the same syntax as the websocket api (see <<websocket_api_reference>>). For readability the fields _jsonrpc_ and _id_ can be omitted in scripts.
+In addition to all the operations defined by the websocket api, scripts support one extra object for inserting delays between operations, and a few macros to generate
+random values. The delay object specifies a delay in milliseconds like this:
+
+----------------------------
+{"method": "delay", "params": {"time": 1000}}
+----------------------------
+
+The macros that are currently supported are::
+* `_INSTANCEID_` - Generate a random InstanceId.
+* `_NUMBER_<min>_<max>_` - Generate a random number between MIN and MAX. Boundaries included.
+* `_STRING_<minLen>_<maxLen>_` - Generate a random string with length between minLen and maxLen.
+
+All macros must be inserted as strings even when the result will generate a number. This is because the script file should always contain valid JSON.
+
+Here is an example of a script that registers an entity handler, starts a subscription, and set two entities with some random values:
+
+----------------------------
+[
+  {
+    "method": "registerEntityHandler",
+    "params": {
+      "typeId": "Test.MyEntity"
+    }
+  },
+  {
+    "method": "subscribeEntity",
+    "params": {
+      "typeId": "Test.MyEntity"
+    }
+  },
+  {
+    "method": "setEntity",
+    "params": {
+      "entity": {
+        "MyNumber": 1,
+        "MyString": "Hello world",
+        "_DouType": "Test.MyEntity"
+      },
+      "instanceId": 123
+    }
+  },
+  {
+    "method": "setEntity",
+    "params": {
+      "entity": {
+        "MyNumber": "_NUMBER_-10_10_",
+        "MyString": "_STRING_3_10_",
+        "_DouType": "Test.MyEntity"
+      },
+      "instanceId": "_INSTANCEID_"
+    }
+  }
+]
+----------------------------
+
+It is possible to record all Dob operations as a script from Sate. This is done by opening the <<sate_script_widget, Script Recorder>> from the menu _View -> Script Recorder_.
+In the Settings menu _View->Settings_ it is also possible to make Sate automatically run a script at startup.
+
+[[sate_script_widget]]
+.Sate script widget is used to execute and record scripts.
+ifdef::backend-docbook5[]
+image::images/sate_script.png["Sate script player/recorder", width="50%"]
+endif::backend-docbook5[]
+ifndef::backend-docbook5[]
+image::images/sate_script.png["Sate script player/recorder", link="images/sate_script.png"]
+endif::backend-docbook5[]
+
+Finally, Sate supports script execution from the command line. This feature can be useful in test environments. The syntax to run a script from the command line is +sate --script <script-path>+. For a complete list of the command line options use the _help_ option.
+
 [[dobexplorer]]
 === Dobexplorer
 Dobexplorer is a tool that is primarily meant for the developers of the Dob, but it has some features that are useful for users of the Safir SDK Core too. New features are added to dobexplorer as they are needed by the Dob developers.
