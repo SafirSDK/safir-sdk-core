@@ -38,7 +38,7 @@ int ScriptModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
-    return m_rows.size();
+    return static_cast<int>(m_rows.size());
 }
 
 int ScriptModel::columnCount(const QModelIndex &parent) const
@@ -134,7 +134,7 @@ void ScriptModel::deleteRow(int row)
 
 void ScriptModel::addRow(const ScriptRow& row)
 {
-    int newRow = m_rows.size();
+    int newRow = static_cast<int>(m_rows.size());
     beginInsertRows(QModelIndex(), newRow, newRow);
     m_rows.append(row);
     endInsertRows();

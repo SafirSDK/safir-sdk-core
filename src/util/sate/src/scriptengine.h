@@ -23,6 +23,11 @@
 ******************************************************************************/
 #pragma once
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#endif
+
 #include <QObject>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -30,6 +35,11 @@
 #include <QJsonValue>
 #include <QJsonValueRef>
 #include <QTimer>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <Safir/Dob/Typesystem/Serialization.h>
 
 class DobHandler; // Forward declaration

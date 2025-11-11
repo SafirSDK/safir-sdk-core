@@ -23,7 +23,18 @@
  ******************************************************************************/
 #pragma once
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#endif
+
 #include <QAbstractTableModel>
+#include <QVector>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include "scriptengine.h"
 
 class ScriptModel : public QAbstractTableModel

@@ -349,7 +349,7 @@ namespace
         }
 
         // Remove comment rows
-        for (int j = commentRows.size() - 1; j >= 0; --j)
+        for (int j = static_cast<int>(commentRows.size()) - 1; j >= 0; --j)
         {
             items.removeAt(commentRows[j]);
         }
@@ -427,7 +427,7 @@ namespace
 
             if (ok1 && ok2 && minLength >= 0 && minLength <= maxLength)
             {
-                int length = (minLength == maxLength) ? minLength : Utilities::RandomInt64(minLength, maxLength);
+                int length = static_cast<int>((minLength == maxLength) ? minLength : Utilities::RandomInt64(minLength, maxLength));
                 QString randomString;
                 randomString.reserve(length);
 
@@ -435,7 +435,7 @@ namespace
                 static const QString chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
                 for (int i = 0; i < length; ++i)
                 {
-                    int index = Utilities::RandomInt64(0, chars.length() - 1);
+                    int index = static_cast<int>(Utilities::RandomInt64(0, chars.length() - 1));
                     randomString.append(chars[index]);
                 }
 
@@ -759,7 +759,7 @@ const QStringList &ScriptEngine::Errors() const
 
 int ScriptEngine::Size() const
 {
-    return m_items.size();
+    return static_cast<int>(m_items.size());
 }
 
 QJsonObject ScriptEngine::GetIndexObject(int index) const
