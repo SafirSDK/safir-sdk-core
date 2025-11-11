@@ -5,7 +5,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2025-10-29
+2025-11-11
 :source-highlighter: rouge
 :doctype: book
 :toc:
@@ -4648,11 +4648,19 @@ the log. By default the more verbose types of logs are disabled, so as not to sp
 log window with uninteresting information.
 
 ==== Scripts in Sate
-As of version 7.4 Sate has the ability to automatically run a sequence of commands stored in a script file. The script is a JSON array of Dob operations.
-Each operatin is a JSON object with the same syntax as the websocket api (see <<websocket_api_reference>>). For readability the fields _jsonrpc_ and _id_ can be omitted in scripts.
-In addition to all the operations defined by the websocket api, scripts support one extra object for inserting delays between operations, and a few macros to generate
-random values. The delay object specifies a delay in milliseconds like this:
 
+As of version 7.4 Sate has the ability to automatically run a sequence of commands stored
+in a script file. This is useful for tests or for quickly performing complex and often
+repeated tasks.
+
+The script is a JSON array of Dob operations.  Each operation is a JSON object with the
+same syntax as the websocket api (see <<websocket_api_reference>>). For readability the
+fields +jsonrpc+ and +id+ can be omitted in scripts.  In addition to all the operations
+defined by the websocket api, scripts support one extra object for inserting delays
+between operations, and a few macros to generate random values. The delay object
+specifies a delay in milliseconds like this:
+
+[source,json]
 ----------------------------
 {"method": "delay", "params": {"time": 1000}}
 ----------------------------
@@ -4662,10 +4670,14 @@ The macros that are currently supported are::
 * `_NUMBER_<min>_<max>_` - Generate a random number between MIN and MAX. Boundaries included.
 * `_STRING_<minLen>_<maxLen>_` - Generate a random string with length between minLen and maxLen.
 
-All macros must be inserted as strings even when the result will generate a number. This is because the script file should always contain valid JSON.
+All macros must be inserted as strings even when the result will generate a number. This
+is because the script file should always contain valid JSON.
 
 Here is an example of a script that registers an entity handler, starts a subscription, and set two entities with some random values:
 
+[[sate-script-example]]
+.An example Sate script.
+[source,json]
 ----------------------------
 [
   {
@@ -4717,7 +4729,10 @@ ifndef::backend-docbook5[]
 image::images/sate_script.png["Sate script player/recorder", link="images/sate_script.png"]
 endif::backend-docbook5[]
 
-Finally, Sate supports script execution from the command line. This feature can be useful in test environments. The syntax to run a script from the command line is +sate --script <script-path>+. For a complete list of the command line options use the _help_ option.
+Finally, Sate supports script execution from the command line. This feature can be useful
+in test environments. The syntax to run a script from the command line is +sate --script
+<script-path>+. For a complete list of the command line options use the +--help+ command
+line option.
 
 [[dobexplorer]]
 === Dobexplorer
