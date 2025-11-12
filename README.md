@@ -29,8 +29,8 @@ Installation
 The easiest way to install Safir SDK Core is to download one of the prebuilt packages
 from http://safirsdkcore.com.
 
-Currently there are installation packages for Windows, Ubuntu 24.04 and Debian 12. Upon
-request we will build for more Linux distributions/versions.
+Currently there are installation packages for Windows, Ubuntu 24.04 and Debian 12
+and 13. Upon request we will build for more Linux distributions/versions.
 
 Building
 --------

@@ -1,4 +1,66 @@
 -----------------------------------------------------------------------------------------------------------------------
+2025-11-12 version 7.4
+-----------------------------------------------------------------------------------------------------------------------
+
+This release aims to deliver an improved developer experience, with the highlights being
+major updates and bugfixes to Sate, and a refactored Tracer with a new GUI tool for
+smoother interaction with Tracer logs. There are also a number of other improvements and
+a few bug fixes.
+
+The biggest change to Sate is that it now has "scripting support", which can be used to
+automate repetitive tasks and as a test tool. There is also a facility for recording
+scripts from actions within Sate. There are also a bunch of user requested improvements
+and some bugfixes.
+
+The Tracer functionality has been given a major overhaul, to make it more powerful and
+more accessible. The API from the applications is unchanged, but there is now a new tool
+safir_tracer_viewer (or TracerViewer in the Windows Start Menu), which allows turning on
+and off logging for applications and for viewing and searching logs. Under the surface a
+lot of changes have been made, so make sure to check out the updated User's Guide for
+more info on that, if you are interested.
+
+We have also added some new utility functions to the Core APIs that are meant to help you
+write code that is easier to read:
+ * Added HasVal() to containers, which is just the inverse of IsNull()
+ * Added GetValOrDefault(...) and GetPtrOrNull() functions to containers
+ * Aliases Str(...) and Wstr(...) for utf-8 to wstring conversion (Safir/Dob/Typesystem/Convenience.h)
+ * New logging functions that use std::format for more compact logs with parameters. Example
+       Safir::Logging::SendWarning(L"This is a Warning log with a parameter {}", 123);
+
+Below is the full list of issues solved in this release (see http://safirsdkcore.com for details):
+
+Enhancements:
+#524 Add HasVal to containers
+#525 Add GetValOrDefault to containers
+#531 Add a Members::GetInfo variant that returns the values in a structure
+#533 Use unity builds to speed up dobmake builds
+#534 Allow DynamicLibraryLoader to set unloadOnDestruction after Load
+#536 Add some utility functions for string handling and logging
+#547 Dobmake save settings between runs
+
+Tracer/Backdoor:
+#544 Refactor the Tracer functionality and add GUI
+#530 Add a way to use bd from the tool launcher
+
+Sate:
+#538 Sate typesystem treeview does not scroll selected item into view
+#539 Sate websocket crashes on response
+#542 SATE crashes when converting big Second64 to readable time string
+#548 Sate instance view is inconsistent wrt null objects and sequences
+#522 Sate clear/delete doesn't work for combobox input
+#529 Sate copy EntityId to clipboard#
+b545 Make Live button in Sate resubscribe to the entity
+#532 Add way to clear all change flags in SATE object view
+#537 Sate delete all instances
+#551 Sate: delete instance from instanceview deletes wrong instance
+#527 Make Sate save some useful settings
+#553 Add scripting support to Sate
+
+Bugfixes:
+#541 C# Utf8String and Utf8StringLength give incorrect results
+#543 Spurious output when calling Members::GetIndex with a nonexistent member name
+
+-----------------------------------------------------------------------------------------------------------------------
 2025-03-18 version 7.3.4
 -----------------------------------------------------------------------------------------------------------------------
 This release fixes the following issues (see http://safirsdkcore.com for details):
@@ -26,7 +88,7 @@ This release fixes the following issues (see http://safirsdkcore.com for details
 #504 Starting multiple safir_control using the same SAFIR_INSTANCE crashes system.
 #484 Set assembly version compatibility
 #515 Sate, open ObjectEditor from EntityId members
-#512 Sate, time in readable formatenhancement
+#512 Sate, time in readable format
 #502 Logging to syslog truncates messages
 
 -----------------------------------------------------------------------------------------------------------------------
