@@ -186,9 +186,9 @@ private:
                 throw std::logic_error("Got unexpected reply!");
             }
         }
-        catch (const boost::system::system_error&)
+        catch (const boost::system::system_error& e)
         {
-            std::wcout << "reading failed" << std::endl;
+            std::wcout << "Reading reply failed:" << e.code().message().c_str() << std::endl;
         }
 
         timeout.interrupt();

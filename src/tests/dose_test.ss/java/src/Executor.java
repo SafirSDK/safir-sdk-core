@@ -77,8 +77,9 @@ class Executor implements
         // a GC here.
         runGC();
 
+        System.out.println("Opening control connection");
         m_controlConnection.open(m_controlConnectionName, m_instanceString, 0, this, m_controlDispatcher);
-
+        System.out.println("Control connection opened successfully");
         m_controlConnection.subscribeEntity(com.saabgroup.dosetest.Sequencer.ClassTypeId,this);
 
         System.out.println(m_identifier + ":" + m_instance + " Started");
@@ -761,6 +762,7 @@ class Executor implements
                 catch (IOException ex) {
                     if (!isInterrupted()) {
                         System.out.println("ActionReader: Got an IOException, ActionReceiver will stop running: " + ex.toString());
+                        ex.printStackTrace();
                     }
                 }
                 catch (InterruptedException ex) {
