@@ -75,7 +75,7 @@ public final class Connection
      * @param connectionNameCommonPart Name that identifies the program but not any particular
      *                                        program instance.
      * @param connectionNameInstancePart Name that identifies a particular program instance.
-     * @param context Context functionality not implemented yet!
+     * @param context Context of the connection
      * @param stopHandler Object that implements the StopHandler interface.
      * @param dispatcher Object that implements the Dispatcher interface.
      *
