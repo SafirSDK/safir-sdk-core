@@ -245,9 +245,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu and newer debian no longer support 32 bit builds
+                        axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit bookworm
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble', 'debian-trixie'
+                            values 'ubuntu-noble', 'debian-bookworm'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -322,9 +322,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu and newer debian no longer support 32 bit builds
+                        axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit bookworm
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble', 'debian-trixie'
+                            values 'ubuntu-noble', 'debian-bookworm'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -405,9 +405,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu and newer debian no longer support 32 bit builds
+                        axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit bookworm
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble', 'debian-trixie'
+                            values 'ubuntu-noble', 'debian-bookworm'
                         }
                         axis {
                             name 'BUILD_ARCH'
