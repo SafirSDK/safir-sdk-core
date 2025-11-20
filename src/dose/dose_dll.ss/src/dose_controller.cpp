@@ -1643,6 +1643,7 @@ namespace Internal
     //---------------------------------------
     void Controller::Dispatch()
     {
+        m_dispatcher.ResetStatistics(); //start a new statistics collection
         lllog(9) << "Entering Dispatch" << std::endl;
         m_exitDispatch=false;
 
@@ -1722,7 +1723,31 @@ namespace Internal
                 m_connection->SetStopOrderHandled();
             }
         }
-        lllog(9) << "Leaving Dispatch. m_exitDispatch = " << std::boolalpha << m_exitDispatch << std::endl;
+
+        const auto stats = m_dispatcher.GetStatistics();
+        const auto totalMs = std::chrono::duration_cast<std::chrono::milliseconds>(stats.totalDuration).count();
+
+        if (totalMs > 500)
+        {
+            const auto longestMs = std::chrono::duration_cast<std::chrono::milliseconds>(stats.longestDuration).count();
+
+            SEND_SYSTEM_LOG(Warning, << "Dob Dispatching to connection '" << m_connection->NameWithoutCounter()
+                            << "' took a long time: Dispatching of " << stats.numCallbacks
+                            << " callbacks took a total of " << totalMs << " ms. "
+                            << "The longest running callback was an "
+                            << CallbackId::ToString(stats.longestCallback)
+                            << ", which took " << longestMs << " ms.");
+        }
+
+        lllog(9) << "Leaving Dispatch. m_exitDispatch = " << std::boolalpha << m_exitDispatch
+                 << ". Dispatching of " << stats.numCallbacks
+                 << " callbacks took a total of " << totalMs << " ms. "
+                 << "The longest running callback was an "
+                 << CallbackId::ToString(stats.longestCallback)
+                 << ", which took "
+                 << std::chrono::duration_cast<std::chrono::milliseconds>(stats.longestDuration).count()
+                 << " ms." << std::endl;
+
     }
 
     void Controller::ExitDispatch()

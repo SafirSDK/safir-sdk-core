@@ -123,7 +123,7 @@ namespace Internal
         const ConsumerId consumer = findIt->second;
 
         //dispatch the response
-        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnResponse);
+        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnResponse,m_statistics);
         bool success;
 
 
@@ -198,7 +198,7 @@ namespace Internal
 
     void Dispatcher::InvokeOnMessageCb(const ConsumerId& consumer, const DistributionData& message)
     {
-        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnMessage);
+        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnMessage,m_statistics);
         bool success;
 
         boost::shared_ptr<const char> refHolder (message.GetReference(), &DistributionData::DropReference);
@@ -227,7 +227,7 @@ namespace Internal
                                             const Safir::Dob::Typesystem::TypeId&       typeId,
                                             const Safir::Dob::Typesystem::HandlerId&    handlerId)
     {
-        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnRegistered);
+        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnRegistered,m_statistics);
         bool success;
 
         CheckLocks();
@@ -254,7 +254,7 @@ namespace Internal
                                               const Safir::Dob::Typesystem::TypeId&       typeId,
                                               const Safir::Dob::Typesystem::HandlerId&    handlerId)
     {
-        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnUnregistered);
+        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnUnregistered,m_statistics);
         bool success;
 
         CheckLocks();
@@ -281,7 +281,7 @@ namespace Internal
                                                      const Safir::Dob::Typesystem::TypeId&       typeId,
                                                      const Safir::Dob::Typesystem::HandlerId&    handlerId)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnRevokedRegistration);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnRevokedRegistration,m_statistics);
         bool success;
 
         CheckLocks();
@@ -309,7 +309,7 @@ namespace Internal
                                                      const Safir::Dob::Typesystem::TypeId&       typeId,
                                                      const Safir::Dob::Typesystem::HandlerId&    handlerId)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnCompletedRegistration);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnCompletedRegistration,m_statistics);
         bool success;
 
         CheckLocks();
@@ -339,7 +339,7 @@ namespace Internal
                                               const DistributionData& request,
                                               const long ctrl)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnServiceRequest);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnServiceRequest,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> refHolder (request.GetReference(), &DistributionData::DropReference);
@@ -370,7 +370,7 @@ namespace Internal
                                              const DistributionData& request,
                                              const long ctrl)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnCreateRequest);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnCreateRequest,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> refHolder (request.GetReference(), &DistributionData::DropReference);
@@ -401,7 +401,7 @@ namespace Internal
                                              const DistributionData& request,
                                              const long ctrl)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnUpdateRequest);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnUpdateRequest,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> refHolder (request.GetReference(), &DistributionData::DropReference);
@@ -432,7 +432,7 @@ namespace Internal
                                              const DistributionData& request,
                                              const long ctrl)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnDeleteRequest);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnDeleteRequest,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> refHolder (request.GetReference(), &DistributionData::DropReference);
@@ -463,7 +463,7 @@ namespace Internal
                                          const DistributionData& currentState,
                                          const bool timestampChangeInfo)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnNewEntity);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnNewEntity,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> refHolder (currentState.GetReference(), &DistributionData::DropReference);
@@ -496,7 +496,7 @@ namespace Internal
                                              const DistributionData& lastState,
                                              const bool timestampChangeInfo)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnUpdatedEntity);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnUpdatedEntity,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> currentHolder (currentState.GetReference(), &DistributionData::DropReference);
@@ -531,7 +531,7 @@ namespace Internal
                                              const bool explicitlyDeleted,
                                              const bool timestampChangeInfo)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnDeletedEntity);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnDeletedEntity,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> currentHolder (currentState.GetReference(), &DistributionData::DropReference);
@@ -563,7 +563,7 @@ namespace Internal
     void Dispatcher::InvokeOnInjectedNewEntityCb(const ConsumerId& consumer,
                                                  const DistributionData& injectionState)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnInjectedNewEntity);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnInjectedNewEntity,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> refHolder (injectionState.GetReference(), &DistributionData::DropReference);
@@ -596,7 +596,7 @@ namespace Internal
                                                      const DistributionData& injectionState,
                                                      const DistributionData& currentState)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnInjectedUpdatedEntity);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnInjectedUpdatedEntity,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> injectionHolder (injectionState.GetReference(), &DistributionData::DropReference);
@@ -628,7 +628,7 @@ namespace Internal
                                                      const DistributionData& injectionState,
                                                      const DistributionData& currentState)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnInjectedDeletedEntity);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnInjectedDeletedEntity,m_statistics);
 
         bool success;
         boost::shared_ptr<const char> injectionHolder (injectionState.GetReference(), &DistributionData::DropReference);
@@ -659,7 +659,7 @@ namespace Internal
                                                      const Safir::Dob::Typesystem::TypeId&      typeId,
                                                      const Safir::Dob::Typesystem::HandlerId&   handlerId)
     {
-        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnInitialInjectionsDone);
+        DispatcherIsInCallback push(m_callbackStack, CallbackId::OnInitialInjectionsDone,m_statistics);
 
         bool success;
 
@@ -715,7 +715,7 @@ namespace Internal
 
     void Dispatcher::NotRequestOverflowCb(const ConsumerId & consumer)
     {
-        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnNotRequestOverflow);
+        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnNotRequestOverflow,m_statistics);
         bool success;
 
         CheckLocks();
@@ -735,7 +735,7 @@ namespace Internal
 
     void Dispatcher::NotMessageOverflowCb(const ConsumerId & consumer)
     {
-        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnNotMessageOverflow);
+        DispatcherIsInCallback push(m_callbackStack,CallbackId::OnNotMessageOverflow,m_statistics);
         bool success;
 
         CheckLocks();
@@ -767,21 +767,32 @@ namespace Internal
     }
 
     DispatcherIsInCallback::DispatcherIsInCallback(CallbackStack & callbackStack,
-                                                   const CallbackId::Enumeration callback):
+                                                   const CallbackId::Enumeration callback,
+                                                   Dispatcher::Statistics& stats):
         m_callbackStack(callbackStack),
-        m_callback(callback)
+        m_callback(callback),
+        m_statistics(stats),
+        m_start(std::chrono::high_resolution_clock::now())
     {
         m_callbackStack.push(CallbackData(callback));
     }
 
     DispatcherIsInCallback::~DispatcherIsInCallback()
     {
-        (void)m_callback; //unused variable in release
+        auto duration = std::chrono::high_resolution_clock::now() - m_start;
+
+        ++m_statistics.numCallbacks;
+        if (duration > m_statistics.longestDuration)
+        {
+            m_statistics.longestDuration = duration;
+            m_statistics.longestCallback = m_callback;
+        }
 
         //Can't use ENSURE in destructor, since throwing exceptions inside a destructor is no good idea.
         assert(m_callbackStack.top().m_callbackId == m_callback);
         m_callbackStack.pop();
     }
+
 }
 }
 }

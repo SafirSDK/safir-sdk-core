@@ -34,6 +34,8 @@
 #include <Safir/Dob/Typesystem/Object.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <boost/noncopyable.hpp>
+#include <chrono>
+#include <cstdint>
 
 #include <vector>
 #include <stack>
@@ -185,6 +187,35 @@ namespace Internal
 
         void Clear();
 
+        // ------------------------------------------------------------------
+        // Statistics
+        // ------------------------------------------------------------------
+        struct Statistics
+        {
+        public:
+            std::uint64_t                     numCallbacks     = 0;               // total number of callbacks
+            std::chrono::nanoseconds          totalDuration    {};                // wall-clock time between ResetStatistics and GetStatistics
+            std::chrono::nanoseconds          longestDuration  {};                // longest single callback
+            CallbackId::Enumeration           longestCallback  = CallbackId::None;// id of longest callback
+
+            void Start()
+            {
+                numCallbacks    = 0;
+                longestDuration = std::chrono::nanoseconds(0);
+                longestCallback = CallbackId::None;
+                startTime       = std::chrono::high_resolution_clock::now();
+            }
+            void Stop()
+            {
+                totalDuration = std::chrono::high_resolution_clock::now() - startTime;
+            }
+        private:
+            std::chrono::high_resolution_clock::time_point     startTime;         // reset timestamp
+        };
+
+        void ResetStatistics()               { m_statistics.Start(); }
+        Statistics GetStatistics()           { m_statistics.Stop();  return m_statistics; }
+
     private:
         //----------------------------
         // Internal types
@@ -266,6 +297,7 @@ namespace Internal
         ConsumerId       m_connectionOwner;
 
         CallbackStack m_callbackStack;
+        Statistics    m_statistics;
 
         /**
          * Check that no locks are taken when calling into user code.
@@ -284,12 +316,15 @@ namespace Internal
     {
     public:
         DispatcherIsInCallback(CallbackStack & callbackStack,
-                               const CallbackId::Enumeration callback);
+                               const CallbackId::Enumeration callback,
+                               Dispatcher::Statistics& stats);
 
         ~DispatcherIsInCallback();
     private:
-        CallbackStack & m_callbackStack;
-        const CallbackId::Enumeration m_callback;
+        CallbackStack &                                m_callbackStack;
+        const CallbackId::Enumeration                  m_callback;
+        Dispatcher::Statistics &                       m_statistics;
+        std::chrono::high_resolution_clock::time_point m_start;
     };
 }
 }
