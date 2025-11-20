@@ -57,7 +57,6 @@ set(sources
     scriptmodel.cpp
     scriptcli.cpp
     typeaheadwidget.cpp
-    dobcalltojson.cpp
     utilities.cpp
     dobcalltojson.cpp
     settings_manager.cpp
@@ -101,7 +100,6 @@ set(widget_headers
     scriptcli.h
     typeaheadwidget.h
     settings_manager.h
-    dobcalltojson.h
     settingsdialog.h
     fileinfowidget.h
     textwidget.h
