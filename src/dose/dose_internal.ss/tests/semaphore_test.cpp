@@ -28,8 +28,8 @@ using namespace Safir::Dob::Internal;
 
 int main(int, char**)
 {
-    NamedSemaphore sem("TEST_SEMAPHORE");
-    if (sem.try_wait()) 
+    NamedSemaphore sem("SAFIR_TEST_SEMAPHORE");
+    if (sem.try_wait())
     {
         std::wcout << "try_wait on semaphore with count 0 succeeded, erroneously" << std::endl;
         return 1;
@@ -37,7 +37,7 @@ int main(int, char**)
 
     sem.post();
 
-    if (!sem.try_wait()) 
+    if (!sem.try_wait())
     {
         std::wcout << "failed to wait on semaphore with count 1" << std::endl;
         return 1;
@@ -48,23 +48,23 @@ int main(int, char**)
 
 
     //open the same semaphore again
-    NamedSemaphore sem2("TEST_SEMAPHORE");
+    NamedSemaphore sem2("SAFIR_TEST_SEMAPHORE");
     sem2.post();
 
-    if (!sem.try_wait()) 
+    if (!sem.try_wait())
     {
         std::wcout << "failed to wait on semaphore with count 1, take 2" << std::endl;
         return 1;
     }
-    
-    if (sem2.try_wait()) 
+
+    if (sem2.try_wait())
     {
         std::wcout << "try_wait on semaphore with count 0 succeeded, erroneously, take 2" << std::endl;
         return 1;
     }
 
     sem.post();
-    if (!sem2.try_wait()) 
+    if (!sem2.try_wait())
     {
         std::wcout << "failed to wait on semaphore with count 1, take 3" << std::endl;
         return 1;
