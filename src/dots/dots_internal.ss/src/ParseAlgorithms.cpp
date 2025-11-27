@@ -848,7 +848,7 @@ namespace ToolSupport
                 {
                     //Enum type does not exist
                     std::ostringstream os;
-                    os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
+                    os<<"The keyType specified for the dictionary parameter '"<<pd->typeName<<"' does not exist";
                     throw ParseError("Key type does not exist", os.str(), state.currentPath, 194);
                 }
 
