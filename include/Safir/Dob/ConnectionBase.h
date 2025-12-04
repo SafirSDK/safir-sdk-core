@@ -778,6 +778,8 @@ namespace Dob
         Dob::EntityIterator GetEntityIterator(const Dob::Typesystem::TypeId  typeId,
                                               const bool                     includeSubclasses) const;
 
+        /** @} */
+
         /**
          * @name Read operations
          */
