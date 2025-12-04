@@ -384,6 +384,7 @@ namespace Internal
         //---------------------------------
         void HandlePendingRegistrations();
 
+        void AutoExitDispatch();
         //----------------------------------
         // Identifiers
         //----------------------------------

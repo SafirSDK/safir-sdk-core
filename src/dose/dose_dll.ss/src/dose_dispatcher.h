@@ -209,13 +209,17 @@ namespace Internal
             {
                 totalDuration = std::chrono::high_resolution_clock::now() - startTime;
             }
+            int ElapsedMilliseconds() const
+            {
+                return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime).count();
+            }
         private:
             std::chrono::high_resolution_clock::time_point     startTime;         // reset timestamp
         };
 
         void ResetStatistics()               { m_statistics.Start(); }
         Statistics GetStatistics()           { m_statistics.Stop();  return m_statistics; }
-
+        int ElapsedMilliseconds() const      { return m_statistics.ElapsedMilliseconds();}
     private:
         //----------------------------
         // Internal types

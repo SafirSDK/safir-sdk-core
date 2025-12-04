@@ -1686,12 +1686,15 @@ namespace Internal
         DispatchRequestInQueues();
         DispatchMessageInQueues();
 
+        AutoExitDispatch();
+
         // Check subscriptions
         if (!m_exitDispatch)
         {
             DispatchSubscriptions();
         }
 
+        AutoExitDispatch();
         // Dispatch OnInitialInjectionsDone for injection handlers where the registration didn't
         // created any injection subscriptions (because there where no instances)
         if (!m_exitDispatch)
@@ -1699,6 +1702,7 @@ namespace Internal
             DispatchEmptyInitialInjections();
         }
 
+        AutoExitDispatch();
         //Check pending ownerships
         if (!m_exitDispatch)
         {
@@ -1706,12 +1710,14 @@ namespace Internal
             HandlePendingRegistrations();
         }
 
+        AutoExitDispatch();
         // Check revoked registrations
         if (!m_exitDispatch)
         {
             HandleRevokedRegistrations();
         }
 
+        AutoExitDispatch();
         //Stop order
         if (m_connection->StopOrderPending() && !m_exitDispatch)
         {
@@ -1756,6 +1762,13 @@ namespace Internal
         m_connection->SignalIn();
     }
 
+    void Controller::AutoExitDispatch()
+    {
+        if (m_dispatcher.ElapsedMilliseconds() > 250)
+        {
+            ExitDispatch();
+        }
+    }
 
     Safir::Dob::CallbackId::Enumeration
     Controller::CurrentCallback() const
@@ -1935,6 +1948,7 @@ namespace Internal
         {
             dontRemove = true;
         }
+        AutoExitDispatch();
         exitDispatch = m_exitDispatch;
     }
 
@@ -1959,6 +1973,7 @@ namespace Internal
                                       bool & exitDispatch)
     {
         m_dispatcher.InvokeOnResponseCb(response,request);
+        AutoExitDispatch();
         exitDispatch = m_exitDispatch;
     }
 
@@ -1995,6 +2010,7 @@ namespace Internal
                 dontRemove = true;
             }
         }
+        AutoExitDispatch();
         exitDispatch = m_exitDispatch;
     }
 
@@ -2074,6 +2090,7 @@ namespace Internal
 
         lllout << "Controller::ProcessRegistrationSubscription unreg:" << unreg << "reg:" << reg << std::endl;
 
+        AutoExitDispatch();
         exitDispatch = m_exitDispatch;
         return true;
     }
@@ -2375,6 +2392,7 @@ namespace Internal
             }
         }
 
+        AutoExitDispatch();
         exitDispatch = m_exitDispatch;
         if (!dontRemove)
         {
@@ -2807,6 +2825,7 @@ namespace Internal
                                     entityId.GetInstanceId());
         }
 
+        AutoExitDispatch();
         exitDispatch = m_exitDispatch;
 
         m_dispatchedInjection = Dob::Typesystem::EntityId();
@@ -2863,6 +2882,7 @@ namespace Internal
 
             it = emptyInitialInjections.erase(it);
 
+            AutoExitDispatch();
             if (m_exitDispatch)
             {
                 break;
