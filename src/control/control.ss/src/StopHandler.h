@@ -127,7 +127,7 @@ namespace Control
                                                                   {
                                                                       // An local order to stop a specific node
 
-                                                                      if (nodeId == m_communication.Id())
+                                                                      if (nodeId == m_communication.Id() || nodeId == -1)
                                                                       {
                                                                           HandleLocalNodeStop(cmdAction);
                                                                       }
