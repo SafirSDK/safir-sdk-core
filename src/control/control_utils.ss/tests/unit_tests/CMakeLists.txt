@@ -41,7 +41,7 @@ TARGET_LINK_LIBRARIES(ControlInfo_test PRIVATE
 ADD_TEST(NAME DoseMainCmd_test COMMAND DoseMainCmd_test)
 SET_SAFIR_TEST_PROPERTIES(TEST DoseMainCmd_test TIMEOUT 240)
 
-ADD_TEST(NAME ControlCmd_test COMMAND ControlCmd_test)
+ADD_TEST(NAME ControlCmd_test COMMAND ControlCmd_test -l all)
 SET_SAFIR_TEST_PROPERTIES(TEST ControlCmd_test TIMEOUT 240)
 
 ADD_TEST(NAME ControlInfo_test COMMAND ControlInfo_test)

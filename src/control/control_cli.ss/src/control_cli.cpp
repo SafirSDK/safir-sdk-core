@@ -33,7 +33,6 @@
 #endif
 
 #include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -124,48 +123,43 @@ int main(int argc, char * argv[])
     boost::asio::io_context io;
     auto work = boost::asio::make_work_guard(io);
 
-    boost::asio::steady_timer timeOutTimer(io);
-    timeOutTimer.expires_after(std::chrono::seconds(cmd.timeOut));
+    // Construct a sender using the new async SendCmd API.
+    Safir::Dob::Internal::Control::ControlCmdSender sender(io);
 
-    // We start the sender and a timeout timer. If the sender is connected to the subscriber we send our action and cancel
-    // the timer. Thus the timer will always expire, so in the callback for the timer we stop our worker and thus lets
-    // the ioContext finish. If the timer is not canceled we take it as a failure since we have then timedout.
-
-    std::unique_ptr<Safir::Dob::Internal::Control::ControlCmdSender> senderPtr;
-
-    senderPtr.reset(new Safir::Dob::Internal::Control::ControlCmdSender(io,
-                                                           [&cmd, &senderPtr, &timeOutTimer]()
-                                                           {
-                                                                if (cmd.nodeCmd)
-                                                                {
-                                                                    senderPtr->SendCmd(cmd.cmdAction,
-                                                                                       cmd.nodeId);
-                                                                }
-                                                                else
-                                                                {
-                                                                    senderPtr->SendCmd(cmd.cmdAction,0);
-                                                                }
-
-                                                                timeOutTimer.cancel();
-                                                            }));
-
-
+    // Result flag that will be set from the completion callback.
     bool success = false;
-    timeOutTimer.async_wait([&senderPtr, &work, &success]
-                                  (const boost::system::error_code& error)
-                                  {
-                                      if (error == boost::asio::error::operation_aborted)
-                                      {
-                                            success = true; //timer was canceled meaning we sent our command
-                                      }
 
-                                      senderPtr->Stop();
-                                      work.reset();
-                                  });
+    // Compute timeout duration from CLI argument (seconds).
+    const std::chrono::milliseconds timeoutMs(
+        static_cast<std::chrono::milliseconds::rep>(cmd.timeOut) * 1000);
 
-    senderPtr->Start();
+    // Issue the command.
+    if (cmd.nodeCmd)
+    {
+        sender.SendCmd(cmd.cmdAction,
+                       cmd.nodeId,
+                       timeoutMs,
+                       [&success, &work](const std::error_code& err)
+                       {
+                           // Success is signaled by an empty error_code.
+                           success = !err;
+                           work.reset();
+                       });
+    }
+    else
+    {
+        sender.SendCmd(cmd.cmdAction,
+                       0,
+                       timeoutMs,
+                       [&success, &work](const std::error_code& err)
+                       {
+                           success = !err;
+                           work.reset();
+                       });
+    }
+
+    // Run the io_context until the completion callback resets the work guard.
     io.run();
 
     return success ? 0 : 1;
 }
-

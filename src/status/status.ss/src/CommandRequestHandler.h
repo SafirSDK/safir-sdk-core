@@ -58,7 +58,6 @@ namespace Control
         Safir::Dob::Internal::Control::CommandAction GetCommandActionFromOperation(
                 Safir::Control::Operation::Enumeration operation);
 
-        bool m_connectedToIPC;
         Safir::Dob::SecondaryConnection m_dobConnection;
         std::unique_ptr<Safir::Dob::Internal::Control::ControlCmdSender> m_controlCommandSender;
     };

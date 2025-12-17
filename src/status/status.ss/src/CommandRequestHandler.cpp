@@ -26,6 +26,7 @@
 #include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/SuccessResponse.h>
+#include <Safir/Dob/Typesystem/Convenience.h>
 #include <Safir/Logging/Log.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
@@ -34,12 +35,8 @@ namespace Safir
 namespace Control
 {
     CommandRequestHandler::CommandRequestHandler(boost::asio::io_context& ioContext)
-        : m_connectedToIPC(false)
     {
-        m_controlCommandSender.reset(new Safir::Dob::Internal::Control::ControlCmdSender(ioContext,
-                                                                                         [this]
-                                                                                         {m_connectedToIPC = true;}));
-
+        m_controlCommandSender.reset(new Safir::Dob::Internal::Control::ControlCmdSender(ioContext));
     }
 
     void CommandRequestHandler::Start()
@@ -49,14 +46,11 @@ namespace Control
         m_dobConnection.RegisterServiceHandler(Command::ClassTypeId,
                                                Safir::Dob::Typesystem::HandlerId(),
                                                this);
-
-        m_controlCommandSender->Start();
-
     }
 
     void CommandRequestHandler::Stop()
     {
-        m_controlCommandSender->Stop();
+
     }
 
     void CommandRequestHandler::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
@@ -67,13 +61,45 @@ namespace Control
         Safir::Control::CommandPtr command
                 = std::dynamic_pointer_cast<Safir::Control::Command>(serviceRequestProxy.GetRequest());
 
-        if (m_connectedToIPC == false)
+        const auto completionHandler = [responseSender](const std::error_code& err)
         {
-            response = Safir::Dob::ErrorResponse::CreateErrorResponse(
-                                    L"Error",
-                                    L"Safir_status is not connected to control via IPC yet");
-        }
-        else if (command->Operation().IsNull())
+            Safir::Dob::ResponsePtr response;
+            if (err)
+            {
+                if (err == std::make_error_code(std::errc::timed_out))
+                {
+                    response = Safir::Dob::ErrorResponse::CreateErrorResponse(
+                        Safir::Dob::ResponseGeneralErrorCodes::SafirTimeout(),
+                        L"Underlying IPC request timed out, try again.");
+                }
+                else
+                {
+                    response = Safir::Dob::ErrorResponse::CreateErrorResponse(
+                        Safir::Dob::ResponseGeneralErrorCodes::SafirInternalErr(),
+                        L"Failed to send IPC request to safir_control. Internal error: " + Wstr(err.message()));
+                }
+            }
+            else
+            {
+                response = Safir::Dob::SuccessResponse::Create();
+            }
+
+            try
+            {
+                if (response != nullptr)
+                {
+                    responseSender->Send(response);
+                }
+            }
+            catch (const Safir::Dob::LowMemoryException&)
+            {
+                Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                              L"Failed to send response due to low shared memory. Skipping.");
+                responseSender->Discard();
+            }
+        };
+
+        if (command->Operation().IsNull())
         {
             response = Safir::Dob::ErrorResponse::CreateErrorResponse(
                         Safir::Dob::ResponseGeneralErrorCodes::SafirMissingMember(),
@@ -82,21 +108,26 @@ namespace Control
         else if (command->NodeId().IsNull())
         {
             //NodeId is null, send "system wide" command
-            response = Safir::Dob::SuccessResponse::Create();
             m_controlCommandSender->SendCmd(GetCommandActionFromOperation(command->Operation().GetVal()),
-                                                                          0);
+                                            0,
+                                            std::chrono::seconds(5),
+                                            completionHandler);
         }
         else
         {
             //Send node command
-            response = Safir::Dob::SuccessResponse::Create();
             m_controlCommandSender->SendCmd(GetCommandActionFromOperation(command->Operation().GetVal()),
-                                                                         command->NodeId().GetVal());
+                                            command->NodeId().GetVal(),
+                                            std::chrono::seconds(5),
+                                            completionHandler);
         }
 
         try
         {
-            responseSender->Send(response);
+            if (response != nullptr)
+            {
+                responseSender->Send(response);
+            }
         }
         catch (const Safir::Dob::LowMemoryException&)
         {
