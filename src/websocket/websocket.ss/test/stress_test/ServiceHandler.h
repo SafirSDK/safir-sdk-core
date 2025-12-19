@@ -67,10 +67,10 @@ public:
         std::string uri = "ws://localhost:10000";
         m_client.set_access_channels(websocketpp::log::alevel::none);
         m_client.init_asio();
-        m_client.set_open_handler([=](websocketpp::connection_hdl hdl){OnOpen(hdl);});
-        m_client.set_close_handler([=](websocketpp::connection_hdl hdl){OnClose(hdl);});
-        m_client.set_fail_handler([=](websocketpp::connection_hdl hdl){OnError(hdl);});
-        m_client.set_message_handler([=](websocketpp::connection_hdl hdl, message_ptr msg){OnMessage(hdl, msg);});
+        m_client.set_open_handler([this](websocketpp::connection_hdl hdl){OnOpen(hdl);});
+        m_client.set_close_handler([this](websocketpp::connection_hdl hdl){OnClose(hdl);});
+        m_client.set_fail_handler([this](websocketpp::connection_hdl hdl){OnError(hdl);});
+        m_client.set_message_handler([this](websocketpp::connection_hdl hdl, message_ptr msg){OnMessage(hdl, msg);});
         websocketpp::lib::error_code ec;
         m_con = m_client.get_connection(uri, ec);
         if (ec) {
@@ -79,7 +79,7 @@ public:
         }
         m_client.connect(m_con);
 
-        m_runner=std::make_shared<boost::thread>([=]{m_client.run();});
+        m_runner=std::make_shared<boost::thread>([this]{m_client.run();});
     }
 
     void Stop()

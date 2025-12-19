@@ -54,7 +54,7 @@ public:
     Test(int numUsers, int numSimultanousUsers, int requestsPerUser)
         :m_ioContext()
         ,m_work(new boost::asio::io_context::work(m_ioContext))
-        ,m_handler([=]{HandlerSetupReady();})
+        ,m_handler([this]{HandlerSetupReady();})
         ,m_users()
         ,m_numUsers(numUsers)
         ,m_numSimultanousUsers(numSimultanousUsers)
@@ -66,7 +66,7 @@ public:
 
     void Run()
     {
-        m_ioContext.post([=]{m_handler.Run();});
+        m_ioContext.post([this]{m_handler.Run();});
         m_ioContext.run();
     }
 
@@ -86,7 +86,7 @@ private:
 
     void HandlerSetupReady()
     {
-        m_ioContext.post([=]
+        m_ioContext.post([this]
         {
             while (m_userCount<m_numSimultanousUsers)
             {
@@ -97,11 +97,11 @@ private:
 
     void UserDone(int id, bool fail)
     {
-        m_ioContext.post([=]
+        m_ioContext.post([this, id, fail]
         {
             if (fail)
             {
-                m_users[id]=std::make_shared<ServiceUser>(id, m_requestsPerUser, [=](int id, bool fail){UserDone(id, fail);});
+                m_users[id]=std::make_shared<ServiceUser>(id, m_requestsPerUser, [this](int id, bool fail){UserDone(id, fail);});
                 m_users[id]->Run();
                 return;
             }
@@ -138,7 +138,7 @@ private:
         {
             std::cout<<"TestManager: Start user number "<<m_userCount<<std::endl;
         }
-         m_users[m_userCount]=std::make_shared<ServiceUser>(m_userCount, m_requestsPerUser, [=](int id, bool fail){UserDone(id, fail);});
+         m_users[m_userCount]=std::make_shared<ServiceUser>(m_userCount, m_requestsPerUser, [this](int id, bool fail){UserDone(id, fail);});
          m_users[m_userCount]->Run();
     }
 
