@@ -24,8 +24,10 @@
 #include <Safir/Application/Tracer.h>
 #include <Safir/SwReports/Internal/Interface.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
+#include <Safir/Dob/Typesystem/Convenience.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
+#include <Safir/Logging/Log.h>
 
 namespace Safir
 {
@@ -72,6 +74,20 @@ void Tracer::InitializeEnabledHandling() const
     if (m_isEnabled == nullptr)
     {
         m_isEnabled = SwreC_TracePrefixGetIsEnabledPointer(m_buf.GetPrefixId());
+    }
+}
+
+void Tracer::LogFormattingException(const std::wstring& fmt, const std::exception& e)
+{
+    std::wostringstream out;
+    out << L"Exception while formatting the Tracer message '"
+        << fmt
+        << L": "
+        << Wstr(e.what());
+    SendSystemLog(Safir::Logging::Informational,out.str());
+    if (m_isEnabled == nullptr)
+    {
+        m_ostream << out.str() << std::endl;
     }
 }
 

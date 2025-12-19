@@ -29,6 +29,19 @@
 #include <Safir/Dob/ConnectionBase.h>
 #include <iostream>
 
+/* For C++20 or later we add utility functions with formatting.
+ * Visual Studio does not update the __cplusplus macro unless the
+ * `/Zc:__cplusplus` compiler switch is supplied, but it always sets
+ * _MSVC_LANG to the correct value.  Check both to detect C++20.
+ */
+#if ((__cplusplus >= 202002L) || (defined(_MSVC_LANG) && (_MSVC_LANG >= 202002L)))
+#  if defined(__has_include)
+#    if __has_include(<format>)
+#      include <format>
+#    endif
+#  endif
+#endif
+
 namespace Safir
 {
 namespace Application
@@ -94,6 +107,72 @@ namespace Application
          * @return True if logging of this prefix is enabled.
          */
         inline bool IsEnabled() const {if (m_isEnabled == NULL) {InitializeEnabledHandling();} return *m_isEnabled;}
+
+        // For C++20 or later we add utility functions with formatting
+#if __cpp_lib_format
+        /**
+         * Format a message and write it to the underlying trace stream.
+         *
+         * Note that this function does not flush the stream.
+         *
+         * The message is formatted using std::format and written to the tracer. Nothing
+         * is written if the tracer prefix is currently disabled.
+         *
+         * If std::format throws (for example due to an invalid format string or
+         * mismatched arguments), the error is reported to the tracer and to
+         * Safir::Logging.
+         *
+         * @param  message  Format string compatible with std::format.
+         * @param  args     Values that will be formatted into the message.
+         */
+        template<typename... Args>
+        void print(std::wformat_string<Args...> message,
+                   Args&&... args)
+        {
+            if (IsEnabled())
+            {
+                try
+                {
+                    m_ostream << std::format(message, std::forward<Args>(args)...);
+                }
+                catch (const std::exception& e)
+                {
+                    LogFormattingException(std::wstring(message.get()),e);
+                }
+            }
+        }
+
+        /**
+         * Format a message, write it to the underlying trace stream,
+         * and append a newline and flush.
+         *
+         * The message is formatted using std::format and written to the tracer. Nothing
+         * is written if the tracer prefix is currently disabled.
+         *
+         * If std::format throws (for example due to an invalid format string or
+         * mismatched arguments), the error is reported to the tracer and to
+         * Safir::Logging.
+         *
+         * @param  message  Format string compatible with std::format.
+         * @param  args     Values that will be formatted into the message.
+         */
+        template<typename... Args>
+        void println(std::wformat_string<Args...> message,
+                     Args&&... args)
+        {
+            if (IsEnabled())
+            {
+                try
+                {
+                    m_ostream << std::format(message, std::forward<Args>(args)...) << std::endl;
+                }
+                catch (const std::exception& e)
+                {
+                    LogFormattingException(std::wstring(message.get()),e);
+                }
+            }
+        }
+#endif
 
         /**
          * Output operator for io manipulators.
@@ -163,6 +242,10 @@ namespace Application
         stream_type & stream() const {return m_ostream;}
     private:
         void InitializeEnabledHandling() const;
+
+        //declare an internal helper function for logging std::format errors
+        void LogFormattingException(const std::wstring& fmt,
+                                    const std::exception& e);
 
         mutable stream_type m_ostream;
         mutable Internal::TraceStreamBuffer m_buf;

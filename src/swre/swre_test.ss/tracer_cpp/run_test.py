@@ -54,7 +54,7 @@ def fail(message):
     sys.exit(1)
 
 
-if stdout_output.count("\n") != 36 or syslog_output.count("\n") != 36:
+if stdout_output.count("\n") != 39 or syslog_output.count("\n") != 39:
     fail("lines")
 
 if stdout_output.count(u"Rymd-B@rje: blahonga") != 6 or syslog_output.count(u"Rymd-Börje: blahonga") != 6:
@@ -98,6 +98,12 @@ if stdout_output.count(u"interrobang: @\n") != 3 or syslog_output.count(u"interr
 if stdout_output.count(u"@reversed\n") != 3 or syslog_output.count(u"\u202ereversed\n") != 3:
     fail("reversed")
 
+if stdout_output.count("No c++20 format support") == 3:
+    pass
+else:
+    if stdout_output.count("I l0ve the smell of std::format in the morning, it smells like v1ct0ry.") != 3:
+        fail("Napalm")
+
 #check that there is no output when we don't "enable"
 stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r", "")
 syslog_output = syslog.get_data(1)
@@ -110,7 +116,7 @@ os.environ["FORCE_LOG"] = "all"
 stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r", "")
 syslog_output = syslog.get_data(1)
 
-if stdout_output.count("\n") != 12 or syslog_output.count("\n") != 12:
+if stdout_output.count("\n") != 13 or syslog_output.count("\n") != 13:
     fail("all lines")
 
 #check that FORCE_LOG works
@@ -119,10 +125,10 @@ os.environ["FORCE_LOG"] = "Razor"
 stdout_output = subprocess.check_output(sender_path).decode("utf-8").replace("\r", "")
 syslog_output = syslog.get_data(1)
 
-if stdout_output.count("\n") != 6 or syslog_output.count("\n") != 6:
+if stdout_output.count("\n") != 7 or syslog_output.count("\n") != 7:
     fail("Razor lines")
 
-if stdout_output.count(u"Razor: ") != 6 or syslog_output.count(u"Razor: ") != 6:
+if stdout_output.count(u"Razor: ") != 7 or syslog_output.count(u"Razor: ") != 7:
     fail("Razor")
 
 if stdout_output.count(u"Rymd-B@rje: ") != 0 or syslog_output.count(u"Rymd-Börje: ") != 0:

@@ -81,7 +81,7 @@ if syslog_output.count("This is an informational log") != 3:
 
 if syslog_output.count("This is a debug log") != 3:
     fail("Debug log")
-    
+
 if syslog_output.count("No c++20 format support") == 3:
     pass
 else:

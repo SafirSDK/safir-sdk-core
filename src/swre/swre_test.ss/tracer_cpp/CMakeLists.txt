@@ -1,3 +1,7 @@
+if (NOT MSVC OR MSVC_VERSION GREATER_EQUAL 1930)
+  set(CMAKE_CXX_STANDARD 20)
+endif()
+
 add_executable(tracer_sender_cpp sender.cpp)
 
 target_link_libraries(tracer_sender_cpp PRIVATE

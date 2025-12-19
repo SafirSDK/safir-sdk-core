@@ -241,7 +241,7 @@ Library::AddPrefix(std::wstring prefix)
     if (prefix.empty())
     {
         Safir::Logging::SendSystemLog(Safir::Logging::Severity::Warning,
-                                      L"Application tried to register an empty prefix. This is deprecated behaviour, and will become illegal in a future version of Safir SDK Core. Please use an actual string.");
+                                      L"Application tried to register an empty Tracer prefix. This is deprecated behaviour, and will become illegal in a future version of Safir SDK Core. Please use an actual string.");
 
         prefix = L"<empty>";
     }

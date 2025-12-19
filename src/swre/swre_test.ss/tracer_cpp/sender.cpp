@@ -54,6 +54,12 @@ int main(int argc, char ** argv)
     razor << "foo" << std::flush << "bar" << std::endl;
     razor << "this is the end\nmy only friend, the end" << std::endl;
     rb << "of our elaborate plans" << std::endl;
+#if __cpp_lib_format
+    razor.print(L"I l{}ve the smell of {} in the morning, ", 0, L"std::format");
+    razor.println(L"it smells like v{}ct{}ry.", 1, 0);
+#else
+    razor << L"No c++20 format support" << std::endl;
+#endif
     return 0;
 }
 
