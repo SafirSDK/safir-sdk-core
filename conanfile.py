@@ -93,11 +93,6 @@ class SafirSdkCoreConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows":
             self.options["qt-advanced-docking-system"].qt_from_conan = True
-            if self.settings.arch == "x86" or \
-               self.settings.compiler.version == 190 or \
-               self.settings.compiler.version == 191:
-                self.options["qt-advanced-docking-system"].qt_major_version = 5
-
 
     def generate(self):
         for dep in self.dependencies.values():
@@ -118,39 +113,14 @@ class SafirSdkCoreConan(ConanFile):
         self.requires("rapidjson/cci.20230929")
         self.requires("ninja/1.13.0")
         self.requires("qt-advanced-docking-system/4.4.1")
-        #Visual Studio 2015 does not compile the latest sentry-breakpad (lacks c++17 support).
-        #0.5.3 appears to be the last one that doesn't need that. Even 0.5.4 wants it.
-        if self.settings.os == "Windows" and self.settings.compiler.version == 190:
-            self.requires("sentry-breakpad/0.5.3")
-        else:
-            self.requires("sentry-breakpad/0.6.5")
+        self.requires("sentry-breakpad/0.6.5")
 
-        #VS2015 has to use older protobuf due to missing c++14 support
-        if self.settings.os == "Windows" and self.settings.compiler.version == 190:
-            self.requires("protobuf/3.21.12")
-        else:
-            #newer protobufs require newer abseils than what we can use (see below).
-            self.requires("protobuf/5.29.3")
-            #newer abseils require cmake from conan, which is not available on
-            #for example x86 platforms. So we use an older one for now.
-            self.requires("abseil/20240116.2")
+        #newer protobufs require newer abseils than what we can use (see below).
+        self.requires("protobuf/5.29.3")
+        #newer abseils require cmake from conan, which is not invokable
+        #from nixos which is one of our dev platforms. Use an older abseil
+        self.requires("abseil/20240116.2")
 
         if self.settings.os == "Windows":
-            #VS2015 does not build boost 1.85 for some reason, so we use an older version for that.
-            if self.settings.compiler.version == 190:
-                self.requires("boost/1.83.0")
-            else:
-                self.requires("boost/1.86.0")
-
-            #Visual Studio 2015 and 2017 does not have support for c++17, which is required
-            #by qt6. So we go for qt5 instead there.
-            #The conan recipe for qt6 does not work for x86 currently, so we fall back to qt5
-            #6.8.3 requires vs2022, so we go for 6.7.3 for older compilers
-            if self.settings.arch == "x86" or \
-               self.settings.compiler.version == 190 or \
-               self.settings.compiler.version == 191:
-                self.requires("qt/5.15.16")
-            elif int(self.settings.compiler.version.value) < 193:
-                self.requires("qt/6.7.3")
-            else:
-                self.requires("qt/6.8.3")
+            self.requires("boost/1.86.0")
+            self.requires("qt/6.10.1")
