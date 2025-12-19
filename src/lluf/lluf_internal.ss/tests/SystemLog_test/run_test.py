@@ -77,8 +77,7 @@ if proc.returncode != 0:
     print(stdout)
     sys.exit(1)
 
-
-log_common_part = r"\D{3} [ |\d]\d \d{2}:\d{2}:\d{2} \S* " + args.test_exe_name + r"\[\d*\]: "
+log_common_part = r"1 \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z \S* " + args.test_exe_name + r" \d+ - - "
 for test in range(12):
     data, addr = sock.recvfrom(10 * 1024)  # buffer size is 10 k
     print("Received data:", data)
@@ -128,6 +127,7 @@ for test in range(12):
     data = data.decode("utf-8")
     if p.match(data) == None:
         print("Unexpected syslog message:", data)
+        print("Expected a match of:", pri + log_common_part + inst_str + text)
         sys.exit(1)
 
 print("Success!")

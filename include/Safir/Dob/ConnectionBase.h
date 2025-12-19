@@ -796,6 +796,8 @@ namespace Dob
          *
          * @throws Safir::Dob::NotFoundException The specified instance of the entity does not exist.
          *
+         * @throws Safir::Dob::IllegalValueException The type specified in the entityId does not exist.
+         * 
          * @throws Safir::Dob::LowMemoryException Not enough shared memory available to complete this operation.
          */
         const Dob::EntityProxy Read(const Dob::Typesystem::EntityId & entityId) const;

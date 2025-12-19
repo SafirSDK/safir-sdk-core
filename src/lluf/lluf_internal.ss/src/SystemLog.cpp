@@ -72,14 +72,18 @@ namespace
 // Syslog facility used for all Safir logs
 const int SAFIR_FACILITY = (1 << 3); // 1 => user-level messages
 
-std::string GetSyslogTimestamp()
+std::string GetISO8601Timestamp()
 {
     using namespace boost::posix_time;
 
     std::stringstream ss;
 
-    ss.imbue(std::locale(ss.getloc(), new time_facet("%b %d %H:%M:%S")));
-    ss << second_clock::local_time();
+    // ISO 8601 format: YYYY-MM-DDTHH:MM:SS.ssssssZ (UTC)
+    ss.imbue(std::locale(ss.getloc(), new time_facet("%Y-%m-%dT%H:%M:%S.%fZ")));
+    
+    auto now = microsec_clock::universal_time();
+    ss << now;
+    
     return ss.str();
 }
 
@@ -235,7 +239,7 @@ public:
         if (m_sendToSyslogServer)
         {
             // Utf-8 is used when sending to a syslog server
-            SendToSyslogServer(severity, ToUtf8(ReplaceNewlines(logText)));
+            SendToSyslogServerRFC5424(severity, ToUtf8(ReplaceNewlines(logText)));
         }
     }
 
@@ -288,20 +292,21 @@ private:
     }
 
     //-------------------------------------------------------------------------
-    void SendToSyslogServer(const Severity severity,
+    void SendToSyslogServerRFC5424(const Severity severity,
                             const std::string& text)
     {
         std::ostringstream log;
-        log << "<" << (SAFIR_FACILITY | severity) << ">"
-            << GetSyslogTimestamp() << ' '
+        // RFC 5424 format: <PRI>VERSION TIMESTAMP HOSTNAME APP-NAME PROCID MSGID STRUCTURED-DATA MSG
+        log << "<" << (SAFIR_FACILITY | severity) << ">1 "
+            << GetISO8601Timestamp() << ' '
             << boost::asio::ip::host_name() << ' '
-            << m_processName << "[" << m_pid << "]: " << text;
+            << m_processName << ' '
+            << m_pid << " - - " << text;
 
         std::string logStr = log.str();
 
-        // RFC 3164 says that we must not send messages larger that 1024 bytes,
-        // but we parameterize this, so that users can change this according to
-        // what their syslog server supports.
+        // RFC 5424 doesn't have a strict size limit like RFC 3164,
+        // but we still apply truncation if configured
         if (logStr.size() > m_syslogLineLength)
         {
             // truncate string ...
