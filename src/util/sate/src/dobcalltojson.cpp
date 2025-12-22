@@ -199,7 +199,7 @@ QJsonObject DobCallToJson::SubscribeRegistrations(int64_t typeId, const Safir::D
     j["method"] = "subscribeRegistration";
     if (!skipId)
     {
-        j["id"] = QString("subscribeRegistration;%1;%2").arg(Str(typeId), (includeSubclasses ? "1" : "0"));
+        j["id"] = QString("subscribeRegistration;%1;%2;%3").arg(Str(typeId), Str(handler.ToString()), (includeSubclasses ? "1" : "0"));
     }
     j["params"] = p;
 

@@ -34,7 +34,7 @@ class ScriptCli : public QObject
 {
     Q_OBJECT
 public:
-    explicit ScriptCli(QCoreApplication* app, const QString& scriptFile, const QString& connectionName, const QString& websocketUrl, QObject* parent = nullptr);
+    explicit ScriptCli(QCoreApplication* app, const QString& scriptFile, const QString& connectionName, const QString& websocketUrl, bool verbose = false, QObject* parent = nullptr);
     ~ScriptCli();
 
     // Execute the script and return exit code
@@ -48,6 +48,7 @@ private:
     QString m_scriptFile;
     QString m_connectionName;
     QString m_websocketUrl;
+    bool m_verbose;
     std::unique_ptr<DobHandler> m_dobHandler;
     std::unique_ptr<ScriptEngine> m_scriptEngine;
     int m_currentIndex;

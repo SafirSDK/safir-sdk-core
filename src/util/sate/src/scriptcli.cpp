@@ -28,14 +28,18 @@
 #include <QFile>
 #include <QTextStream>
 #include <QTimer>
-#include <cstdio>
+#include <iostream>
+#include <Safir/Dob/Typesystem/Operations.h>
+#include <Safir/Dob/Typesystem/Convenience.h>
 
-ScriptCli::ScriptCli(QCoreApplication* app, const QString& scriptFile, const QString& connectionName, const QString& websocketUrl, QObject* parent)
+
+ScriptCli::ScriptCli(QCoreApplication* app, const QString& scriptFile, const QString& connectionName, const QString& websocketUrl, bool verbose, QObject* parent)
     : QObject(parent)
     , m_app(app)
     , m_scriptFile(scriptFile)
     , m_connectionName(connectionName)
     , m_websocketUrl(websocketUrl)
+    , m_verbose(verbose)
     , m_dobHandler(nullptr)
     , m_scriptEngine(nullptr)
     , m_currentIndex(0)
@@ -61,7 +65,7 @@ bool ScriptCli::ExecuteInternal()
     QFile file(m_scriptFile);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        fprintf(stderr, "Error: Failed to open script file: %s\n", m_scriptFile.toUtf8().constData());
+        std::cerr << "Error: Failed to open script file: " << m_scriptFile.toUtf8().constData() << std::endl;
         return false;
     }
 
@@ -71,14 +75,73 @@ bool ScriptCli::ExecuteInternal()
 
     if (scriptContent.isEmpty())
     {
-        fprintf(stderr, "Error: Script file is empty: %s\n", m_scriptFile.toUtf8().constData());
+        std::cerr << "Error: Script file is empty: " << m_scriptFile.toUtf8().constData() << std::endl;
         return false;
     }
 
-    printf("Running script file: %s\n", m_scriptFile.toUtf8().constData());
+    if (m_verbose)
+    {
+        std::cout << "Running script file: " << m_scriptFile.toUtf8().constData() << std::endl;
+    }
 
     // Create DobHandler
     m_dobHandler = std::make_unique<DobHandler>();
+
+    if (m_verbose)
+    {
+        // Connect to output messages
+        connect(m_dobHandler.get(), &DobHandler::Output, this, [this](const QString& message, QtMsgType) {
+            std::cout << message.toUtf8().constData() << std::endl;
+        });
+
+        // Connect to OnMessage signal
+        connect(m_dobHandler.get(), &DobHandler::OnMessage, this, [this](const sdt::ChannelId& channel, const Safir::Dob::MessagePtr& message) {
+            std::cout << "OnMessage: " << Str(Safir::Dob::Typesystem::Operations::GetName(message->GetTypeId()))
+                      << " on channel " << channel.GetRawValue() << std::endl;
+        });
+
+        // Connect to OnEntity signal
+        connect(m_dobHandler.get(), &DobHandler::OnEntity, this, [this](const sdt::EntityId& entityId, const sdt::HandlerId&, const Safir::Dob::EntityPtr&, DobInterface::EntityOperation operation) {
+            std::string opStr;
+            switch(operation) {
+                case DobInterface::NewEntity: opStr = "New"; break;
+                case DobInterface::UpdatedEntity: opStr = "Update"; break;
+                case DobInterface::DeletedEntity: opStr = "Delete"; break;
+                default: opStr = "Unknown"; break;
+            }
+            std::cout << "OnEntity: " << opStr << " "
+                      << Str(Safir::Dob::Typesystem::Operations::GetName(entityId.GetTypeId()))
+                      << ", instance=" << entityId.GetInstanceId().GetRawValue() << std::endl;
+        });
+
+        // Connect to OnResponse signal
+        connect(m_dobHandler.get(), &DobHandler::OnResponse, this, [this](const Safir::Dob::ResponsePtr& response) {
+            std::cout << "OnResponse: " << Str(Safir::Dob::Typesystem::Operations::GetName(response->GetTypeId())) << std::endl;
+        });
+
+        // Connect to OnCreateRequest signal
+        connect(m_dobHandler.get(), &DobHandler::OnCreateRequest, this, [this](const Safir::Dob::EntityPtr& request, const sdt::HandlerId&, const sdt::InstanceId& instance) {
+            std::cout << "OnCreateRequest: " << Str(Safir::Dob::Typesystem::Operations::GetName(request->GetTypeId()))
+                      << ", instance=" << instance.GetRawValue() << std::endl;
+        });
+
+        // Connect to OnUpdateRequest signal
+        connect(m_dobHandler.get(), &DobHandler::OnUpdateRequest, this, [this](const Safir::Dob::EntityPtr& request, const sdt::HandlerId&, const sdt::InstanceId& instance) {
+            std::cout << "OnUpdateRequest: " << Str(Safir::Dob::Typesystem::Operations::GetName(request->GetTypeId()))
+                      << ", instance=" << instance.GetRawValue() << std::endl;
+        });
+
+        // Connect to OnDeleteRequest signal
+        connect(m_dobHandler.get(), &DobHandler::OnDeleteRequest, this, [this](const Safir::Dob::Typesystem::EntityId& entityId, const sdt::HandlerId&) {
+            std::cout << "OnDeleteRequest: " << Str(Safir::Dob::Typesystem::Operations::GetName(entityId.GetTypeId()))
+                      << ", instance=" << entityId.GetInstanceId().GetRawValue() << std::endl;
+        });
+
+        // Connect to OnServiceRequest signal
+        connect(m_dobHandler.get(), &DobHandler::OnServiceRequest, this, [this](const Safir::Dob::ServicePtr& request, const sdt::HandlerId&) {
+            std::cout << "OnServiceRequest: " << Str(Safir::Dob::Typesystem::Operations::GetName(request->GetTypeId())) << std::endl;
+        });
+    }
 
     // Create ScriptEngine
     m_scriptEngine = std::make_unique<ScriptEngine>(m_dobHandler.get());
@@ -87,10 +150,10 @@ bool ScriptCli::ExecuteInternal()
     // Check if script is valid
     if (!m_scriptEngine->IsValid())
     {
-        fprintf(stderr, "Error: Script validation failed:\n");
+        std::cerr << "Error: Script validation failed:" << std::endl;
         for (const auto& error : m_scriptEngine->Errors())
         {
-            fprintf(stderr, "  %s\n", error.toUtf8().constData());
+            std::cerr << "  " << error.toUtf8().constData() << std::endl;
         }
         return false;
     }
@@ -103,7 +166,10 @@ bool ScriptCli::ExecuteInternal()
     {
         connect(m_dobHandler.get(), &DobHandler::ConnectedToDob, this, [this](const QString&) {
             // Start script execution once connected
-            printf("Starting script execution...\n");
+            if (m_verbose)
+            {
+                std::cout << "Starting script execution..." << std::endl;
+            }
             m_scriptEngine->Execute();
         });
 
@@ -113,7 +179,7 @@ bool ScriptCli::ExecuteInternal()
             QStringList parts = m_websocketUrl.split(':');
             if (parts.size() != 2)
             {
-                fprintf(stderr, "Error: Invalid websocket URL format. Expected 'address:port', got: %s\n", m_websocketUrl.toUtf8().constData());
+                std::cerr << "Error: Invalid websocket URL format. Expected 'address:port', got: " << m_websocketUrl.toUtf8().constData() << std::endl;
                 return false;
             }
 
@@ -122,19 +188,23 @@ bool ScriptCli::ExecuteInternal()
             int port = parts[1].toInt(&ok);
             if (!ok)
             {
-                fprintf(stderr, "Error: Invalid port number in websocket URL: %s\n", parts[1].toUtf8().constData());
+                std::cerr << "Error: Invalid port number in websocket URL: " << parts[1].toUtf8().constData() << std::endl;
                 return false;
             }
 
-            printf("Opening DOB websocket connection: %s (address: %s, port: %d)\n",
-                   m_connectionName.toUtf8().constData(),
-                   address.toUtf8().constData(),
-                   port);
+            if (m_verbose)
+            {
+                std::cout << "Opening DOB websocket connection: " << m_connectionName.toUtf8().constData()
+                          << " (address: " << address.toUtf8().constData() << ", port: " << port << ")" << std::endl;
+            }
             m_dobHandler->OpenWebsocketConnection(address, port, m_connectionName, 0);
         }
         else
         {
-            printf("Opening DOB connection: %s\n", m_connectionName.toUtf8().constData());
+            if (m_verbose)
+            {
+                std::cout << "Opening DOB connection: " << m_connectionName.toUtf8().constData() << std::endl;
+            }
             m_dobHandler->OpenNativeConnection(m_connectionName, 0);
         }
     }
@@ -150,11 +220,13 @@ bool ScriptCli::ExecuteInternal()
 void ScriptCli::OnIndexFinished(int index)
 {
     m_currentIndex = index + 1;
-    printf("Completed step %d/%d\n", m_currentIndex, m_scriptEngine->Size());
 
     if (m_currentIndex >= m_scriptEngine->Size())
     {
-        printf("Script execution completed successfully.\n");
+        if (m_verbose)
+        {
+            std::cout << "Script execution completed successfully." << std::endl;
+        }
 
         // Close DOB connection before quitting
         m_dobHandler->Close();

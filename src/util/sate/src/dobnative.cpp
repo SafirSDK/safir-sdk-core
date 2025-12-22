@@ -43,6 +43,7 @@ namespace
     QString Str(const sdt::InstanceId& v) { return QString(", instance=%1").arg(Str(v.ToString())); }
     QString Str(const Safir::Dob::InstanceIdPolicy::Enumeration v) { return QString(", %1").arg(Str(Safir::Dob::InstanceIdPolicy::ToString(v))); }
     QString Str(const sdt::EntityId& v) { return Str(v.ToString()); }
+    QString StrRecursive(bool r) { return QString(", recursive=%1").arg(r ? "1" : "0"); }
 }
 
 DobNative::DobNative()
@@ -115,7 +116,7 @@ void DobNative::SubscribeMessage(int64_t typeId, const sdt::ChannelId& channel, 
         DobInterface::SubscriptionInfo info{typeId, channel, includeSubclasses};
         m_subscriptions.push_back(info);
         emit DobInterface::SubscriptionStarted(info);
-        emit DobInterface::Output("Subscribe message: " + Str(typeId) + Str(channel), QtInfoMsg);
+        emit DobInterface::Output("Subscribe message: " + Str(typeId) + Str(channel) + StrRecursive(includeSubclasses), QtInfoMsg);
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
     {
@@ -146,7 +147,7 @@ void DobNative::SubscribeEntity(int64_t typeId, const Safir::Dob::Typesystem::In
         {
             m_dobConnection.SubscribeEntity(typeId, true, includeSubclasses, true, this);
             AddInstanceCounter(typeId, includeSubclasses);
-            emit DobInterface::Output("Subscribe entity: " + Str(typeId), QtInfoMsg);
+            emit DobInterface::Output("Subscribe entity: " + Str(typeId) + StrRecursive(includeSubclasses), QtInfoMsg);
         }
         else
         {
@@ -187,7 +188,7 @@ void DobNative::SubscribeRegistrations(int64_t typeId, const Safir::Dob::Typesys
     try
     {
         m_dobConnection.SubscribeRegistration(typeId, handler, includeSubclasses, true, this);
-        emit DobInterface::Output("Subscribe for registrations: " + Str(typeId) + Str(handler), QtInfoMsg);
+        emit DobInterface::Output("Subscribe registrations: " + Str(typeId) + Str(handler) + StrRecursive(includeSubclasses), QtInfoMsg);
 
     }
     catch (const Safir::Dob::Typesystem::Internal::CommonExceptionBase& e)
@@ -496,7 +497,6 @@ void DobNative::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityReque
     if (m_behaviorOptions.sendResponse)
     {
         responseSender->Send(GetResponse());
-        emit DobInterface::Output("Respnse sent and entity created: " + Str(typeId) + Str(instance) + Str(handlerId), QtInfoMsg);
     }
     else
     {

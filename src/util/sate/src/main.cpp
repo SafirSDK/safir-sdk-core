@@ -94,6 +94,7 @@ int CommandLineApplication(int argc, char* argv[])
     parser.addOption({ {"s", "script"}, "Run in script mode without GUI", "file" });
     parser.addOption({ {"c", "connection"}, "Set Sate connection name. If no name is provided, defaults to 'SATE_CLI'", "name" });
     parser.addOption({ {"w", "websocket"}, "WebSocket connection string", "url" });
+    parser.addOption({ {"v", "verbose"}, "Enable verbose output" });
 
     // Parse arguments (doesn't exit on help like process() does)
     if (!parser.parse(QCoreApplication::arguments()))
@@ -112,6 +113,7 @@ int CommandLineApplication(int argc, char* argv[])
         QString scriptFile = parser.value("script");
         QString connectionName = "SATE_CLI";
         QString websocketUrl;
+        bool verbose = false;
 
         // Check if --connection option is set
         if (parser.isSet("connection"))
@@ -125,8 +127,14 @@ int CommandLineApplication(int argc, char* argv[])
             websocketUrl = parser.value("websocket");
         }
 
+        // Check if --verbose option is set
+        if (parser.isSet("verbose"))
+        {
+            verbose = true;
+        }
+
         // Create and execute script CLI
-        ScriptCli scriptCli(&app, scriptFile, connectionName, websocketUrl);
+        ScriptCli scriptCli(&app, scriptFile, connectionName, websocketUrl, verbose);
         returnCode = scriptCli.Execute();
     }
     else

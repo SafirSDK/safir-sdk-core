@@ -1,0 +1,9 @@
+
+[
+    {"method": "subscribeEntity", "params": {"typeId": "Safir.Control.Status"}},
+    {"method": "subscribeMessage", "params": {"typeId": "Safir.Application.BackdoorCommand", "channelId": 123}},
+    {"method": "delay", "params": {"time": 500}},
+    {"method": "serviceRequest", "params": {"request":  {"_DouType": "Safir.Control.Command"}, "handlerId": 321}},
+    {"method": "delay", "params": {"time": 5000}}
+]
+

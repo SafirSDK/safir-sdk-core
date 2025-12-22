@@ -1,0 +1,10 @@
+
+[
+    {"method": "registerEntityHandler", "params": {"typeId": "Safir.Control.Status"}},
+    {"method": "registerServiceHandler", "params": {"typeId": "Safir.Control.Command", "handlerId": 321}},
+    {"method": "setEntity", "params": {"entity": {"NodeId": 1000,"_DouType": "Safir.Control.Status"}, "instanceId": 1}},
+    {"method": "setEntity", "params": {"entity": {"NodeId": 2000,"_DouType": "Safir.Control.Status"}, "instanceId": 2}},
+    {"method": "setEntity", "params": {"entity": {"NodeId": 3000,"_DouType": "Safir.Control.Status"}, "instanceId": 3}},
+    {"method": "sendMessage", "params": {"message": {"Command": "Test","_DouType": "Safir.Application.BackdoorCommand"}, "channelId": 123}},
+    {"method": "delay", "params": {"time": 3000}}
+]

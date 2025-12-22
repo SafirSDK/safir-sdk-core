@@ -595,7 +595,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             DobInterface::SubscriptionInfo info{typeId, channel, includeSubclasses};
             m_subscriptions.push_back(info);
             emit DobInterface::SubscriptionStarted(info);
-            emit DobInterface::Output(QString("Subscribe message OK: %1, channel=%2, recursive=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
+            emit DobInterface::Output(QString("Subscribe message: %1, channel=%2, recursive=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
         }
         else
         {
@@ -609,7 +609,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             auto typeId = sdt::Operations::GetTypeId(idList[1].toStdWString());
             RemoveSubscriptions(typeId);
             emit DobInterface::SubscriptionStopped(typeId);
-            emit DobInterface::Output(QString("Unsubscribe message OK: %1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Unsubscribe message: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -626,7 +626,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             m_subscriptions.push_back(info);
             emit DobInterface::SubscriptionStarted(info);
             AddInstanceCounter(typeId,includeSubclasses);
-            emit DobInterface::Output(QString("Subscribe entity OK: %1, recursvie=%2").arg(idList[1], idList[2]), QtInfoMsg);
+            emit DobInterface::Output(QString("Subscribe entity: %1, recursive=%2").arg(idList[1], idList[2]), QtInfoMsg);
         }
         else
         {
@@ -641,7 +641,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
             RemoveSubscriptions(typeId);
             RemoveInstanceCounterRecursively(typeId);
             emit DobInterface::SubscriptionStopped(typeId);
-            emit DobInterface::Output(QString("Unsubscribe entity OK: %1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Unsubscribe entity: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
@@ -652,7 +652,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Output(QString("Subscribe registrations OK: %1, recursvie=%2").arg(idList[1], idList[2]), QtInfoMsg);
+            emit DobInterface::Output(QString("Subscribe registrations: %1, handler=%2, recursive=%3").arg(idList[1], idList[2], idList[3]), QtInfoMsg);
         }
         else
         {
@@ -663,7 +663,7 @@ void DobWebSocket::HandleResult(const QJsonObject& j)
     {
         if (result.isString() && result.toString() == "OK")
         {
-            emit DobInterface::Output(QString("Unsubscribe registration OK: %1").arg(idList[1]), QtInfoMsg);
+            emit DobInterface::Output(QString("Unsubscribe registrations: %1").arg(idList[1]), QtInfoMsg);
         }
         else
         {
