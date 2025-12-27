@@ -76,7 +76,10 @@ namespace
             throw std::logic_error(QString("Stylesheet %1 could not be found").arg(path).toStdString());
         }
 
-        f.open(QFile::ReadOnly | QFile::Text);
+        if (!f.open(QFile::ReadOnly | QFile::Text))
+        {
+            throw std::logic_error(QString("Stylesheet %1 could not be opened").arg(path).toStdString());
+        }
         QTextStream ts(&f);
         return ts.readAll();
     }

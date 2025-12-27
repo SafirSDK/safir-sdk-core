@@ -671,7 +671,10 @@ namespace
             throw std::logic_error(QString("Stylesheet %1 could not be found").arg(path).toStdString());
         }
 
-        f.open(QFile::ReadOnly | QFile::Text);
+        if (!f.open(QFile::ReadOnly | QFile::Text))
+        {
+            throw std::logic_error(QString("Stylesheet %1 could not be opened").arg(path).toStdString());
+        }
         QTextStream ts(&f);
         return ts.readAll();
     }
@@ -916,7 +919,11 @@ void SateMainWindow::OpenSerializedObject(const QString& file, bool autoRunIfScr
     QFile f(file);
     if (f.exists())
     {
-        f.open(QFile::ReadOnly | QFile::Text);
+        if (!f.open(QFile::ReadOnly | QFile::Text))
+        {
+            m_output->Output(QString("Failed to open file %1.").arg(file), QtFatalMsg);
+            return;
+        }
         QTextStream ts(&f);
         QString text = ts.readAll().trimmed();
         auto probablyScript = !file.endsWith(".xml", Qt::CaseInsensitive) && text.startsWith('[') && text.endsWith(']') && text.contains("\"method\":");
