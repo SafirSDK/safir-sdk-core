@@ -58,27 +58,41 @@ Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin);
 int CommandLineApplication(int argc, char* argv[])
 {
 #ifdef _WIN32
-    // Try to attach to the parent console first (if started from command prompt)
-    bool hasParentConsole = AttachConsole(ATTACH_PARENT_PROCESS);
-    if (!hasParentConsole)
+    // Detect if stdout is already redirected (PIPE / DISK).  When it is,
+    // we are most likely running under an automated test and must not
+    // re-route the std streams away from the pipe – doing so would hide
+    // all output from the parent process.
+    const HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    const bool stdoutIsConsole = (hStdOut != INVALID_HANDLE_VALUE) &&
+                                 (GetFileType(hStdOut) == FILE_TYPE_CHAR);
+
+    bool hasParentConsole = false;
+
+    if (stdoutIsConsole)
     {
-        // No parent console: create a new one so output is visible when double-clicked.
-        AllocConsole();
-    }
+        // Try to attach to the parent console first (if started from command prompt)
+        hasParentConsole = AttachConsole(ATTACH_PARENT_PROCESS);
+        if (!hasParentConsole)
+        {
+            // No parent console: create a new one so output is visible when double-clicked.
+            AllocConsole();
+        }
 
-    // Redirect C/C++ std streams to the console
-    FILE* fDummy = nullptr;
-    freopen_s(&fDummy, "CONOUT$", "w", stdout);
-    freopen_s(&fDummy, "CONOUT$", "w", stderr);
-    freopen_s(&fDummy, "CONIN$", "r", stdin);
+        // Redirect C/C++ std streams to the console
+        FILE* fDummy = nullptr;
+        freopen_s(&fDummy, "CONOUT$", "w", stdout);
+        freopen_s(&fDummy, "CONOUT$", "w", stderr);
+        freopen_s(&fDummy, "CONIN$",  "r", stdin);
+        std::ios::sync_with_stdio(true);
 
-    // Ensure UTF-8 output
-    SetConsoleOutputCP(CP_UTF8);
+        // Ensure UTF-8 output
+        SetConsoleOutputCP(CP_UTF8);
 
-    // If we attached to parent console, print a newline to move past the prompt
-    if (hasParentConsole)
-    {
-        printf("\n");
+        // If we attached to parent console, print a newline to move past the prompt
+        if (hasParentConsole)
+        {
+            printf("\n");
+        }
     }
 #endif
 
@@ -144,34 +158,37 @@ int CommandLineApplication(int argc, char* argv[])
     }
 
 #ifdef _WIN32
-    printf("\n");
-    fflush(stdout);
-
-    // If we attached to parent console, we need to send input to restore prompt
-    if (hasParentConsole)
+    if (stdoutIsConsole)
     {
-        // Send a newline to the console input buffer to trigger the prompt
-        HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
-        if (hStdIn != INVALID_HANDLE_VALUE)
+        printf("\n");
+        fflush(stdout);
+
+        // If we attached to parent console, we need to send input to restore prompt
+        if (hasParentConsole)
         {
-            INPUT_RECORD ir;
-            ir.EventType = KEY_EVENT;
-            ir.Event.KeyEvent.bKeyDown = TRUE;
-            ir.Event.KeyEvent.dwControlKeyState = 0;
-            ir.Event.KeyEvent.uChar.UnicodeChar = '\r';
-            ir.Event.KeyEvent.wRepeatCount = 1;
-            ir.Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
-            ir.Event.KeyEvent.wVirtualScanCode = static_cast<WORD>(MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC));
+            // Send a newline to the console input buffer to trigger the prompt
+            HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
+            if (hStdIn != INVALID_HANDLE_VALUE)
+            {
+                INPUT_RECORD ir;
+                ir.EventType = KEY_EVENT;
+                ir.Event.KeyEvent.bKeyDown = TRUE;
+                ir.Event.KeyEvent.dwControlKeyState = 0;
+                ir.Event.KeyEvent.uChar.UnicodeChar = '\r';
+                ir.Event.KeyEvent.wRepeatCount = 1;
+                ir.Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+                ir.Event.KeyEvent.wVirtualScanCode = static_cast<WORD>(MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC));
 
-            DWORD written;
-            WriteConsoleInput(hStdIn, &ir, 1, &written);
+                DWORD written;
+                WriteConsoleInput(hStdIn, &ir, 1, &written);
 
-            ir.Event.KeyEvent.bKeyDown = FALSE;
-            WriteConsoleInput(hStdIn, &ir, 1, &written);
+                ir.Event.KeyEvent.bKeyDown = FALSE;
+                WriteConsoleInput(hStdIn, &ir, 1, &written);
+            }
         }
-    }
 
-    FreeConsole();
+        FreeConsole();
+    }
 #endif
 
     return returnCode;
