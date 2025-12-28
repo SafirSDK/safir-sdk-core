@@ -1,4 +1,23 @@
 -----------------------------------------------------------------------------------------------------------------------
+2025-12-29 version 7.4.1
+-----------------------------------------------------------------------------------------------------------------------
+
+The most noteable change in this release is that we have changed the logging format of
+Safir.Logging from RFC 3164 to RFC 5424. You will likely notice that the timestamp format
+has changed.
+Also we no longer provide builds for older Visual Studio versions, or 32 bit Windows
+builds. There are also some minor new features and bug fixes.
+
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#557 Adapt Safir.Logging to RFC 5424
+#560 Drop support for visual studios older than 2022
+#559 safir_control_cli does not work if safir_status is running
+#558 Add "stop current node" to safir_control_cli
+#556 Running out of memory when creating the dose shared memory gives bad error message
+#555 Add a formatted output to the tracers that use std::format syntax
+
+-----------------------------------------------------------------------------------------------------------------------
 2025-11-12 version 7.4
 -----------------------------------------------------------------------------------------------------------------------
 
