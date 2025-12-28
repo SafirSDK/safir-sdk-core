@@ -25,5 +25,6 @@ if ((DEFINED ENV{SAFIR_SKIP_SLOW_TESTS}) AND ($ENV{SAFIR_SKIP_SLOW_TESTS}))
     light_nodes_smart_sync
     low_memory
     lowmem_basic_operations
+    sate_script
     )
 endif()
