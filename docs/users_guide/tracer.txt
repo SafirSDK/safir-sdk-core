@@ -38,6 +38,7 @@ native input/output syntax.
 [source,c++]
 ----------------------------
 debug << "Testing logging " << myFloat << ", " << myInt << std::endl;
+debug.println("Also supports std::format syntax {}, {}", myFloat, myInt);
 ----------------------------
 
  - *C#*
