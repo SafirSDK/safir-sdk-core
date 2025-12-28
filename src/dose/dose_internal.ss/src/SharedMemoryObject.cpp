@@ -25,6 +25,7 @@
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/Expansion.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/NodeParameters.h>
 
 namespace //anonymous namespace for internal stuff
@@ -73,19 +74,28 @@ namespace Internal
 
     void SharedMemoryObject::SharedMemoryHolder::Create()
     {
-        lllout << "Creating dose shared memory" << std::endl;
-        boost::interprocess::shared_memory_object::remove(SHARED_MEMORY_NAME);
+        try
+        {
+            lllout << "Creating dose shared memory" << std::endl;
+            boost::interprocess::shared_memory_object::remove(SHARED_MEMORY_NAME);
 
-        boost::interprocess::permissions perms;
-        perms.set_unrestricted();
+            boost::interprocess::permissions perms;
+            perms.set_unrestricted();
 
-        std::shared_ptr<boost::interprocess::managed_shared_memory> shmem
-            (new boost::interprocess::managed_shared_memory
-             (boost::interprocess::create_only,
-              SHARED_MEMORY_NAME,
-              Safir::Dob::NodeParameters::SharedMemorySize() * 1024 * 1024,
-              0,
-              perms));
+            std::shared_ptr<boost::interprocess::managed_shared_memory> shmem
+                (new boost::interprocess::managed_shared_memory
+                 (boost::interprocess::create_only,
+                  SHARED_MEMORY_NAME,
+                  Safir::Dob::NodeParameters::SharedMemorySize() * 1024 * 1024,
+                  0,
+                  perms));
+        }
+        catch (const boost::interprocess::interprocess_exception& exc)
+        {
+            SEND_SYSTEM_LOG(Critical,
+                            << "Failed to create DOSE shared memory: " << exc.what());
+            std::quick_exit(1);
+        }
     }
 
     void SharedMemoryObject::SharedMemoryHolder::Use()
