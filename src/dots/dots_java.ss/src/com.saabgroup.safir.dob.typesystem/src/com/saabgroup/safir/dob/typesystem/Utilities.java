@@ -39,6 +39,8 @@ public class Utilities {
      * take all the members that have a change flag set and copy them into the "into"
      * object.
      *
+     * "into" must be of the same type or a subclass of "from".
+     *
      * Note that this uses shallow copying, so the two objects may end up
      * using the same objects internally.
      *
@@ -52,17 +54,17 @@ public class Utilities {
             throw new SoftwareViolationException("Objects must not be null in call to MergeChanges");
         }
 
-        if (from.getTypeId() != into.getTypeId())
+        if (!Operations.isOfType(into.getTypeId(), from.getTypeId()))
         {
-            throw new SoftwareViolationException("Objects must have same TypeId for MergeChanges");
+            throw new SoftwareViolationException("TypeId for 'into' must be the same as or a subclass of 'from' in call to MergeChanges");
         }
 
         try
         {
-            int numMembers = Members.getNumberOfMembers(into.getTypeId());
+            int numMembers = Members.getNumberOfMembers(from.getTypeId());
             for (int member = 0; member < numMembers; ++member)
             {
-                int arraySize = Members.getArraySize(into.getTypeId(), member);
+                int arraySize = Members.getArraySize(from.getTypeId(), member);
                 for (int index = 0; index < arraySize; ++index)
                 {
                     ContainerBase fromContainerB = from.getMember(member,index);

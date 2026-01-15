@@ -11185,6 +11185,28 @@ BOOST_AUTO_TEST_CASE(MergeChanges_Simple)
     BOOST_CHECK_EQUAL(into->EnumerationMember(), TestEnum::MyFirst);
 }
 
+BOOST_AUTO_TEST_CASE(MergeChanges_Simple_Derived)
+{
+    auto from = MemberTypesBase::Create();
+    auto into = MemberTypes::Create();
+
+    from->Int32Member() = 10;
+    from->Int64Member() = 20;
+    from->Int64Member().SetChanged(false);
+
+    from->StringMember() = L"asdf";
+    from->EnumerationMember() = TestEnum::MyFirst;
+
+    ts::Utilities::MergeChanges(into,from);
+
+    BOOST_CHECK(into->Int32Member().IsChanged());
+    BOOST_CHECK_EQUAL(into->Int32Member(),10);
+    BOOST_CHECK(!into->Int64Member().IsChanged());
+    BOOST_CHECK(into->Int64Member().IsNull());
+    BOOST_CHECK(into->StringMember() == L"asdf");
+    BOOST_CHECK_EQUAL(into->EnumerationMember(), TestEnum::MyFirst);
+}
+
 BOOST_AUTO_TEST_CASE(MergeChanges_Arrays)
 {
     auto from = MemberArrays::Create();

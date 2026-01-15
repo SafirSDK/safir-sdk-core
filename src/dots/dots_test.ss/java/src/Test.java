@@ -10774,6 +10774,28 @@ public class Test {
             CheckEqual(into.enumerationMember().getVal(), TestEnum.MY_FIRST);
         }
 
+        private void SimpleDerived()
+        {
+            MemberTypesBase from = new MemberTypesBase();
+            MemberTypes into = new MemberTypes();
+
+            from.int32Member().setVal(10);
+            from.int64Member().setVal(20L);
+            from.int64Member().setChanged(false);
+
+            from.stringMember().setVal("asdf");
+            from.enumerationMember().setVal(TestEnum.MY_FIRST);
+
+            Utilities.mergeChanges(into,from);
+
+            Check(into.int32Member().isChanged());
+            CheckEqual(into.int32Member().getVal(),10);
+            Check(!into.int64Member().isChanged());
+            Check(into.int64Member().isNull());
+            Check(into.stringMember().getVal() == "asdf");
+            CheckEqual(into.enumerationMember().getVal(), TestEnum.MY_FIRST);
+        }
+
 
         private void Arrays()
         {
@@ -11628,6 +11650,7 @@ public class Test {
         public void Test_MergeChanges()
         {
             Simple();
+            SimpleDerived();
             Arrays();
             Objects();
             Objects_BothHaveData();

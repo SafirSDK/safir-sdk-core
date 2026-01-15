@@ -40,6 +40,8 @@ public class Utilities
     /// This function will recurse through the members of the "from" object and
     /// take all the members that have a change flag set and copy them into the "into"
     /// object.
+    /// <para/>
+    /// "into" must be of the same type or a subclass of "from".
     /// </summary>
     /// <remarks>
     ///   <para>
@@ -56,17 +58,17 @@ public class Utilities
             throw new SoftwareViolationException("Objects must not be null in call to MergeChanges");
         }
 
-        if (from.GetTypeId() != into.GetTypeId())
+        if (!Operations.IsOfType(into.GetTypeId(), from.GetTypeId()))
         {
-            throw new SoftwareViolationException("Objects must have same TypeId for MergeChanges");
+            throw new SoftwareViolationException("TypeId for 'into' must be the same as or a subclass of 'from' in call to MergeChanges");
         }
 
         try
         {
-            System.Int32 numMembers = Members.GetNumberOfMembers(into.GetTypeId());
+            System.Int32 numMembers = Members.GetNumberOfMembers(from.GetTypeId());
             for (System.Int32 member = 0; member < numMembers; ++member)
             {
-                System.Int32 arraySize = Members.GetArraySize(into.GetTypeId(), member);
+                System.Int32 arraySize = Members.GetArraySize(from.GetTypeId(), member);
                 for (System.Int32 index = 0; index < arraySize; ++index)
                 {
                     ContainerBase fromContainerB = from.GetMember(member,index);

@@ -72,6 +72,8 @@ namespace Utilities
      * take all the members that have a change flag set and copy them into the "into"
      * object.
      *
+     * "into" must be of the same type or a subclass of "from".
+     *
      * @param into [in] - Object to merge into.
      * @param from [in,out] - Object whose changes shall be merged into "into".
      */

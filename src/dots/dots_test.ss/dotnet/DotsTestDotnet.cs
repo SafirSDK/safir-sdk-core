@@ -10674,6 +10674,28 @@ namespace Misc
             CheckEqual(into.EnumerationMember.Val, TestEnum.Enumeration.MyFirst);
         }
 
+        private void Simple_Derived()
+        {
+            var from = new MemberTypesBase();
+            var into = new MemberTypes();
+
+            from.Int32Member.Val = 10;
+            from.Int64Member.Val = 20;
+            from.Int64Member.SetChanged(false);
+
+            from.StringMember.Val = "asdf";
+            from.EnumerationMember.Val = TestEnum.Enumeration.MyFirst;
+
+            Utilities.MergeChanges(into,from);
+
+            Check(into.Int32Member.IsChanged());
+            CheckEqual(into.Int32Member.Val,10);
+            Check(!into.Int64Member.IsChanged());
+            Check(into.Int64Member.IsNull());
+            Check(into.StringMember.Val == "asdf");
+            CheckEqual(into.EnumerationMember.Val, TestEnum.Enumeration.MyFirst);
+        }
+
 
         private void Arrays()
         {
@@ -11503,6 +11525,7 @@ namespace Misc
         public void Test_MergeChanges()
         {
             Simple();
+            Simple_Derived();
             Arrays();
             Objects();
             Objects_BothHaveData();

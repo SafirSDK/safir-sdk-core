@@ -79,17 +79,17 @@ namespace Utilities
             throw SoftwareViolationException(L"Objects must not be null in call to MergeChanges",__WFILE__,__LINE__);
         }
 
-        if (from->GetTypeId() != into->GetTypeId())
+        if (!Operations::IsOfType(into->GetTypeId(), from->GetTypeId()))
         {
-            throw SoftwareViolationException(L"Objects must have same TypeId for MergeChanges",__WFILE__,__LINE__);
+            throw SoftwareViolationException(L"TypeId for 'into' must be the same as or a subclass of 'from' in call to MergeChanges",__WFILE__,__LINE__);
         }
 
         try
         {
-            const MemberIndex numMembers = Members::GetNumberOfMembers(into->GetTypeId());
+            const MemberIndex numMembers = Members::GetNumberOfMembers(from->GetTypeId());
             for (MemberIndex member = 0; member < numMembers; ++member)
             {
-                const ArrayIndex arraySize = Members::GetArraySize(into->GetTypeId(),member);
+                const ArrayIndex arraySize = Members::GetArraySize(from->GetTypeId(),member);
                 for (ArrayIndex index = 0; index < arraySize; ++index)
                 {
                     const ContainerBase & fromContainerB = from->GetMember(member,index);
