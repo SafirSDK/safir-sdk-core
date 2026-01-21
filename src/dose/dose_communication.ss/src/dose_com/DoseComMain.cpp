@@ -115,7 +115,7 @@ int DoseCom_FreeBuff(char *pBuf)
 void WakeUp_Reader(int PrioChannel)
 {
     //PrintDbg("WakeUp_Reader(%d)\n", PrioChannel);
-    if(*pDbg)
+    if(*pDbg>=6)
         PrintDbg("WakeUp_Reader(%d)\n", PrioChannel);
     g_pNotificationHandler->NotifyIncomingData(PrioChannel);
 }
