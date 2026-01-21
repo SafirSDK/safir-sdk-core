@@ -2652,7 +2652,7 @@ Send_The_Message:
             bThereMightBeMore = TRUE;
 
             // Allowed to send max this many before processing next queue
-            // ### för test kan man lägga en PrintDbg() här för att kolla om/när det inträffar
+            // ### For testing purposes you can a PrintDbg() here to check if/when this happens
             if(++TxQ[qIx].LapCount >= g_MaxLapCount[qIx])
                qIx++;
 
