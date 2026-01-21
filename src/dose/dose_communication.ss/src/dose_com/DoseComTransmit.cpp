@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2005-2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Engdahl / stlsen
 *
@@ -216,7 +216,7 @@ volatile static struct
 //  N+1     N+1         N+1     Last fragment or non-fragmented acked = Idle
 //
 // PutIx-Max       = GetIxToAck + MAX_XMIT_QUEUE - 1
-// GetIxToSend-Max = GetIxToAck +�MAX_AHEAD_NF
+// GetIxToSend-Max = GetIxToAck + MAX_AHEAD_NF
 //============================================================================
 
 #define NUM_TX_QUEUES   MAX_NUM_PRIO_CHANNELS
@@ -831,6 +831,7 @@ static bool HandleCompletedFragment(dcom_ushort16 fragmentNum,
 
                 isMsgCompleted = true;
 
+                CleanUp_After_Msg_Completed(qIx);
                 break;
             }
 
@@ -1025,12 +1026,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     goto Continue_WithNext;
                 }
 
-                bool msgCompleted = HandleCompletedFragment(FragmentNum, qIx, TxMsgArr_Ix, Ahead_Ix);
-
-                if (msgCompleted)
-                {
-                    CleanUp_After_Msg_Completed(qIx);
-                }
+                HandleCompletedFragment(FragmentNum, qIx, TxMsgArr_Ix, Ahead_Ix);
 
                 goto Continue_WithNext;
             }   // end fragmented message
@@ -1208,12 +1204,49 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
             //================================================================
             if(FragmentNum != 0) // if a fragmented msg
             {
-                if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
+                // Check if this node considers the nacked fragment to have been
+                // sent but not acked
+
+                bool expectedFragmentNbrIsWithinWindow = false;
+                dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
+
+                if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].SequenceNumber)
                 {
-                    TxQ[qIx].StartSendTime = DoseOs::Get_TickCount() - 500; //force timeout
-                    if(*pDbg>2)
-                        PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
+                    // The sequence number is within the sliding window. Now check if the expected fragment is
+                    // within the sliding window at fragment level.
+                    dcom_ushort16 expectedFragment = g_Ack_Queue[g_Ack_Get_ix].Info;
+
+                    if (expectedFragment >= TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment &&
+                        expectedFragment <= TxQ[qIx].TxMsgArr[ixToAck].SentFragment)
+                    {                        
+                        expectedFragmentNbrIsWithinWindow = true;     
+                    }
                 }
+
+                if (expectedFragmentNbrIsWithinWindow)
+                {
+                    if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
+                    {
+                        TxQ[qIx].StartSendTime = DoseOs::Get_TickCount() - 500; //force timeout
+                        if(*pDbg>2)
+                            PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
+                    }
+                }
+                else
+                {
+                    // We got a NACK for a fragment but the fragment that are expected by the receiver is not within our
+                    // fragment sliding window.
+                    // This is an "impossible" case probably caused by a bug. The solution for now is to inhibit all outgoing
+                    // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
+                    // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
+                    // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
+                    PrintErr(0, "TxThread[%d] Fatal error: Got a NACK for a fragmented message with an expected fragment nbr that is already acked!\n"
+                                "Outgoing traffic from this node is temporarily stopped to force a resync.\n");
+                    g_pShm->InhibitOutgoingTraffic = true;
+                    DoseOs::Sleep(4000);
+                    g_pShm->InhibitOutgoingTraffic = false;
+                }
+
                 goto Continue_WithNext;
             }
             //===============================================================
@@ -1232,11 +1265,50 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 PrintDbg("#-  IS IMPLEMENTED Got an Nack Seq=%d Info=%d\n",
                         SequenceNum, g_Ack_Queue[g_Ack_Get_ix].Info );
 
-                if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
+
+                // Check if this node considers the nacked message to have been
+                // sent but not acked
+
+                bool expectedSeqNbrIsWithinWindow = false;
+                dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
+                while (ixToAck != TxQ[qIx].GetIxToSend)
                 {
-                    TxQ[qIx].StartSendTime = DoseOs::Get_TickCount() - 500; //force timeout
-                    if(*pDbg>1)
-                        PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
+                    if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].Info)
+                    {
+                        expectedSeqNbrIsWithinWindow = true;
+                        break;
+                    }
+                    if((ixToAck + 1) >= MAX_XMIT_QUEUE)
+                    {
+                        ixToAck = 0;
+                    }
+                    else
+                    {
+                        ++ixToAck;
+                    }
+                }
+
+                if (expectedSeqNbrIsWithinWindow)
+                {
+                    if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
+                    {
+                        TxQ[qIx].StartSendTime = DoseOs::Get_TickCount() - 500; //force timeout
+                        if(*pDbg>1)
+                            PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
+                    }
+                }
+                else
+                {
+                    // We got a NACK but the message that are expected by the receiver is not within our sliding window.
+                    // This is an "impossible" case probably caused by a bug. The solution for now is to inhibit all outgoing
+                    // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
+                    // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
+                    // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
+                    PrintErr(0, "TxThread[%d] Fatal error: Got a NACK for an unfragmented message with an expected sequence nbr that is already acked!\n"
+                                "Outgoing traffic from this node is temporarily stopped to force a resync.\n");
+                    g_pShm->InhibitOutgoingTraffic = true;
+                    DoseOs::Sleep(4000);
+                    g_pShm->InhibitOutgoingTraffic = false;                
                 }
 
                 goto Continue_WithNext;
@@ -1859,6 +1931,8 @@ static THREAD_API TxThread(void *)
                             TxQ[qIx].TxMsgArr[UseToSendIx].TransmitComplete |= FragBit;
                             TxQ[qIx].TxMsgArr[UseToSendIx].IsTransmitting   &= ~FragBit;
 
+                            // HandleCompletedFragment will call CleanUp_After_Msg_Completed if
+                            // all fragments have been received.
                             bool msgCompleted = HandleCompletedFragment(FragNum, qIx, UseToSendIx, Ahead_Ix);
 
                             if (msgCompleted)
@@ -1868,7 +1942,6 @@ static THREAD_API TxThread(void *)
                                 {
                                     IncreaseIndexToSend(qIx);
                                 }
-                                CleanUp_After_Msg_Completed(qIx);
                             }
                             else
                             {
@@ -2579,7 +2652,7 @@ Send_The_Message:
             bThereMightBeMore = TRUE;
 
             // Allowed to send max this many before processing next queue
-            // ### f�r test kan man l�gga en PrintDbg() h�r f�r att kolla om/n�r det intr�ffar
+            // ### för test kan man lägga en PrintDbg() här för att kolla om/när det inträffar
             if(++TxQ[qIx].LapCount >= g_MaxLapCount[qIx])
                qIx++;
 
