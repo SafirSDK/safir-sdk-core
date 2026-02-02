@@ -60,7 +60,6 @@ public:
 
 private slots:
     void OnLaunchSatePressed();
-    void OnLaunchSateLegacyPressed();
     void OnLaunchDobExplorerPressed();
     void OnLaunchControlGuiPressed();
     void OnLaunchTracerViewerButton();

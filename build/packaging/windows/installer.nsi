@@ -509,9 +509,6 @@ Section /o "Tools" SecTools
   CreateShortCut "${StartMenuDir}\Sate.lnk" \
                  "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
 
-  CreateShortCut "${StartMenuDir}\SateLegacy.lnk" \
-                 "$INSTDIR\bin\sate_legacy.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester - legacy version"
-
   CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
                  "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
 
@@ -653,7 +650,6 @@ Section "Uninstall"
   nsExec::Exec '"taskkill" "/f" "/im" "safir_tool_launcher.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_websocket.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "sate.exe"'
-  nsExec::Exec '"taskkill" "/f" "/im" "sate_legacy.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_tracer_viewer.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_tracer_listener.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "system_picture_listener.exe"'

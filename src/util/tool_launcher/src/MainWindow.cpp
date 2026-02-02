@@ -86,7 +86,6 @@ MainWindow::MainWindow()
 
     connect(m_ui->launchSateButton, &QPushButton::pressed, this, &MainWindow::OnLaunchSatePressed);
     connect(m_ui->launchDobExplorerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchDobExplorerPressed);
-    connect(m_ui->launchSateLegacyButton, &QPushButton::pressed, this, &MainWindow::OnLaunchSateLegacyPressed);
     connect(m_ui->launchControlGuiButton, &QPushButton::pressed, this, &MainWindow::OnLaunchControlGuiPressed);
     connect(m_ui->launchTracerViewerButton, &QPushButton::pressed, this, &MainWindow::OnLaunchTracerViewerButton);
     connect(m_ui->launchBdGuiButton, &QPushButton::pressed, this, &MainWindow::OnLaunchBdGuiPressed);
@@ -249,11 +248,6 @@ void MainWindow::Exited(const std::shared_ptr<Process>& process,
 void MainWindow::OnLaunchSatePressed()
 {
     LaunchProgram("sate");
-}
-
-void MainWindow::OnLaunchSateLegacyPressed()
-{
-    LaunchProgram("sate_legacy");
 }
 
 void MainWindow::OnLaunchDobExplorerPressed()

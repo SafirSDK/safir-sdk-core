@@ -111,8 +111,7 @@ SateMainWindow::SateMainWindow(QWidget *parent)
     label->setText("Welcome to the next generation Sate, rewritten in Qt.\n"
                    "Please report any bugs you find, so we can make this the best Sate ever!\n\n"
                    "If you have good ideas about appropriate features that will make Sate better\n"
-                   "to use for systems debugging, please pass them on to us!\n\n"
-                   "The old Sate is still available, now renamed to sate_legacy.");
+                   "to use for systems debugging, please pass them on to us!");
     label->setAlignment(Qt::AlignCenter);
     auto* centralDockWidget = new ads::CDockWidget(m_dockManager, "CentralWidget");
     centralDockWidget->setWidget(label);

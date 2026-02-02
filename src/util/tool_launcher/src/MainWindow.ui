@@ -412,28 +412,6 @@ the matching type name(s) are looked up.</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
-          <widget class="QPushButton" name="launchSateLegacyButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>140</width>
-             <height>36</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Launch sate_legacy</string>
-           </property>
-           <property name="text">
-            <string>SATE legacy...</string>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="1">
           <widget class="QPushButton" name="launchBdGuiButton">
            <property name="sizePolicy">
