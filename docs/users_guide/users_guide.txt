@@ -2904,9 +2904,10 @@ replace_newline_with_space::
 Controls whether or not a newline in the log message is replaced with a space.
 
 truncate_syslog_to_bytes::
-Truncate syslog messages after this many bytes. RFC 3164 states that 1024 is the limit,
-but many syslog servers allow for longer messages. Make sure to verify that changing
-this works with your server. This only applies to syslog messages, not to native logging.
+Truncate syslog messages after this many bytes. RFC 5426 states that 1024 is smallest
+mandatory length, but many syslog servers allow for longer messages. Make sure to verify
+that changing this works with your server. This only applies to syslog messages, not to
+native logging.
 
 show_safir_instance::
 Show the current SAFIR_INSTANCE in syslog reports. Useful when running multiple nodes on
@@ -3707,11 +3708,21 @@ Run +safir_memory_allocator --help+ for more information.
 
 [[safir_logging]]
 == Safir Logging
-Safir SDK Core has a mechanism, Safir Log, designed to make it simpler for applications to generate and send log messages according to the widely adopted _Syslog_ protocol http://www.ietf.org/rfc/rfc3164.txt[RFC 3164].
+Safir SDK Core has a mechanism, Safir Log, designed to make it simpler for applications
+to generate and send log messages according to the widely adopted _Syslog_ protocol
+http://www.ietf.org/rfc/rfc5424.txt[RFC 5424].
 
-Safir Log provides an easy-to-use interface that allows an application to create and send logs by a simple function call, specifying a severity and a message. The framework will do the neccessary formatting and transmission over UDP as is specified in RFC 3164.
+Safir Log provides an easy-to-use interface that allows an application to create and send
+logs by a simple function call, specifying a severity and a message. The framework will
+do the neccessary formatting and transmission over UDP as is specified in
+http://www.ietf.org/rfc/rfc5425.txt[RFC 5425]. There is currently no way to send logs
+over TCP (RFC 5426), and there is no support for structured data transmission as
+specified in RFC 5424.
 
-It is also possible to configure Safir Log so that the logs are sent to a native, platform specific, logging mechanism. In practice, this could be of use on the Windows platform to send logs to the Windows Event Log and on Linux to send the logs directly to the +syslog(...)+ interface instead of using UDP messages.
+It is possible to configure Safir Log so that the logs are sent to a native, platform
+specific, logging mechanism. In practice, this could be of use on the Windows platform to
+send logs to the Windows Event Log and on Linux to send the logs directly to the
++syslog(...)+ interface instead of using UDP messages.
 
 .Example, sending a log message using {cpp}
 [source,c++]
@@ -3735,14 +3746,14 @@ A syslog message has a Priority value (PRI) that is a representation of both the
 
 The Safir Log mechanism uses facility code 1 (user-level messages) for all syslog messages and it is not a parameter visible in the interface.
 
-The severity level must be set by the application. RFC 3164 has a brief description of the interpretation of the severity level but doesn't really give any detailed advice. To summarize: higher severity levels imply that action from support/tech staff is more urgent, than for lower levels. In practice it isn't always obvious what severity level to use. This is especially true for code in libraries/platforms where there usually is no knowledge of the characteristics of the calling application. One could argue that libraries should refrain from generating logs at all and instead inform the using application that an error has occurred, so that it can take appropriate action. Since Safir SDK Core does not adhere to this rule itself we leave this as something to consider during library design.
+The severity level must be set by the application. RFC 5424 has a brief description of the interpretation of the severity level but doesn't really give any detailed advice. To summarize: higher severity levels imply that action from support/tech staff is more urgent, than for lower levels. In practice it isn't always obvious what severity level to use. This is especially true for code in libraries/platforms where there usually is no knowledge of the characteristics of the calling application. One could argue that libraries should refrain from generating logs at all and instead inform the using application that an error has occurred, so that it can take appropriate action. Since Safir SDK Core does not adhere to this rule itself we leave this as something to consider during library design.
 
 The system design in terms of redundancy might also affect the choosen severity level. For example, it might be appropriate for a system built and configured so that there is a standby application/node "taking over" in case of failure, to use severity level Error instead of Emergency for a given event.
 
 .Syslog severity levels
 [width="70%", cols="50%,50%",options="header",frame="topbot",grid="none"]
 |=========================================================================
-|RFC 3164 Severity Level |RFC 3164 Description
+|RFC 5424 Severity Level |RFC 5424 Description
 
 |Emergency               |System is unusable.
 |Alert                   |Action must be taken immediately.
@@ -3789,7 +3800,7 @@ For native logging the event source will be set to "Safir" and the severity leve
 .Mapping severity level to Windows event type
 [width="70%", cols="50%,50%",options="header",frame="topbot",grid="none"]
 |=========================================================================
-|RFC 3164 Severity Level           |Windows Event Log Type
+|RFC 5424 Severity Level           |Windows Event Log Type
 
 |Emergency, Alert, Critical, Error |Error
 |Warning                           |Warning
