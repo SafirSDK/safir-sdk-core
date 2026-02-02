@@ -58,15 +58,21 @@ public:
     void clearFilterRegularExpression(const int column)
     {
         if (auto* lm = qobject_cast<LogModel*>(sourceModel()))
+        {
+            beginFilterChange();
             lm->clearFilter(column);
-        invalidateFilter();
+            endFilterChange(QSortFilterProxyModel::Direction::Rows);
+        }
     }
 
     void setFilterRegularExpression(const int column, const QRegularExpression& regex)
     {
         if (auto* lm = qobject_cast<LogModel*>(sourceModel()))
+        {
+            beginFilterChange();
             lm->setFilter(column, regex);
-        invalidateFilter();
+            endFilterChange(QSortFilterProxyModel::Direction::Rows);
+        }
     }
 
 protected:

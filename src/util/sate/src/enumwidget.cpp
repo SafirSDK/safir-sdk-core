@@ -37,8 +37,9 @@ public:
 
     void setFilterRegularExpression(const int column, QRegularExpression&& regex)
     {
+        beginFilterChange();
         m_filters[column] = std::move(regex);
-        invalidateFilter();
+        endFilterChange(QSortFilterProxyModel::Direction::Rows);
     }
 
 protected:
