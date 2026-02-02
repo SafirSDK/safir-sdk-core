@@ -5,7 +5,7 @@
 Safir SDK Core User's Guide
 ==========================
 Lars Hagström, Anders Widén and Joel Ottosson
-2025-11-11
+2026-02-02
 :source-highlighter: rouge
 :doctype: book
 :toc:
@@ -2224,7 +2224,7 @@ void VehicleHandler::OnUpdateRequest
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 }
 ----------------------------
-Note the use of +SetChanges+ instead of +SetAll+ above. +SetChanges+ will take the members that have its change flag set in the passed object and merge them into the existing entity that is stored in the Dob shared memory.
+Note the use of +SetChanges+ instead of +SetAll+ above. +SetChanges+ will take the members that have its change flag set in the passed object and merge them into the existing entity that is stored in the Dob shared memory. See <<owning_entities>> for more info on SetAll vs SetChanges.
 
 ===== Handling Delete Requests
 The method +OnDeleteRequest+ is used by the Dob to notify the entity handler of a delete request on an entity owned by that handler. The arguments to the method is an EntityRequestProxy which contains the request data and metadata, and a ResponseSender which must be used to send the mandatory response to the request.
@@ -2247,7 +2247,7 @@ void VehicleHandler::OnDeleteRequest
 ----------------------------
 Note that it is also possible to delete all entity instances owned by a handler by calling +DeleteAllInstances+ (but obviously this is not something that should be done as a result of a DeleteRequest, which is something that should operate on only one object).
 
-
+[[owning_entities]]
 ===== Owning entity instances - SetAll and SetChanges
 Apart from handling requests on entities the entity handler is of course allowed to
 change an entity whenever it wants to. There are two calls that can be used to do this,
@@ -2262,7 +2262,11 @@ to update those members that have their change flags set in the request, which i
 what SetChanges does.
 
 SetChanges does in fact do a Read of the instance, and then it recursively iterates
-through all members to find changes to merge. And then it calls SetAll.
+through all members to find changes to merge. And then it calls SetAll. This saves many
+applications from implementing hard merge logic. But be aware that you need to ensure
+that the resulting entity still is in a valid state, depending on the application
+logic. E.g. if two members have some kind of relationship where only some combinations
+are valid you need to make sure that a SetChanges will result in a valid combination.
 
 There are legacy/deprecated reasons for using SetChanges too, that are described in
 <<timestamp_merge>>, but if you are not using that feature you can ignore those reasons.
