@@ -2248,8 +2248,24 @@ void VehicleHandler::OnDeleteRequest
 Note that it is also possible to delete all entity instances owned by a handler by calling +DeleteAllInstances+ (but obviously this is not something that should be done as a result of a DeleteRequest, which is something that should operate on only one object).
 
 
-===== Owning entity instances
-Apart from handling requests on entities the entity handler is of course allowed to change an entity whenever it wants to. Generally this should be done using calls to +SetChanges+, rather than +SetAll+. The reason for this is the _injection timestamps_ as described in <<timestamp_merge>>
+===== Owning entity instances - SetAll and SetChanges
+Apart from handling requests on entities the entity handler is of course allowed to
+change an entity whenever it wants to. There are two calls that can be used to do this,
++SetAll+ and +SetChanges+. +SetAll+ will take your local object instance (i.e. the one you
+have created in your code) and set the shared memory instance to be exactly
+that. +SetChanges+ will only those members that you have changed (as signalled by the
+<<change_flags>>) and merge them into the instance that is already in shared memory. If
+the requested instance is not already in shared memory the object will just be set as if
+SetAll was called. Most applications should use SetChanges for most of their
+calls. Especially when reacting to an UpdateRequest it is likely that you will just want
+to update those members that have their change flags set in the request, which is exactly
+what SetChanges does.
+
+SetChanges does in fact do a Read of the instance, and then it recursively iterates
+through all members to find changes to merge. And then it calls SetAll.
+
+There are legacy/deprecated reasons for using SetChanges too, that are described in
+<<timestamp_merge>>, but if you are not using that feature you can ignore those reasons.
 
 ===== Subscribing to entities
 Once more there is a consumer interface to be implemented to subscribe to entities, +EntitySubscriber+, which provides callbacks when an entity is created, updated or deleted.
