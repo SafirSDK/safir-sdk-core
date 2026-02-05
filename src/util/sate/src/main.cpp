@@ -47,53 +47,17 @@ Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin);
 #  endif
 #endif
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #include "satemainwindow.h"
 #include "scriptcli.h"
 #include <QCommandLineParser>
+#include "windows_console_helper.h"
 
 int CommandLineApplication(int argc, char* argv[])
 {
 #ifdef _WIN32
-    // Detect if stdout is already redirected (PIPE / DISK).  When it is,
-    // we are most likely running under an automated test and must not
-    // re-route the std streams away from the pipe – doing so would hide
-    // all output from the parent process.
-    const HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    const bool stdoutIsConsole = (hStdOut != INVALID_HANDLE_VALUE) &&
-                                 (GetFileType(hStdOut) == FILE_TYPE_CHAR);
-
-    bool hasParentConsole = false;
-
-    if (stdoutIsConsole)
-    {
-        // Try to attach to the parent console first (if started from command prompt)
-        hasParentConsole = AttachConsole(ATTACH_PARENT_PROCESS);
-        if (!hasParentConsole)
-        {
-            // No parent console: create a new one so output is visible when double-clicked.
-            AllocConsole();
-        }
-
-        // Redirect C/C++ std streams to the console
-        FILE* fDummy = nullptr;
-        freopen_s(&fDummy, "CONOUT$", "w", stdout);
-        freopen_s(&fDummy, "CONOUT$", "w", stderr);
-        freopen_s(&fDummy, "CONIN$",  "r", stdin);
-        std::ios::sync_with_stdio(true);
-
-        // Ensure UTF-8 output
-        SetConsoleOutputCP(CP_UTF8);
-
-        // If we attached to parent console, print a newline to move past the prompt
-        if (hasParentConsole)
-        {
-            printf("\n");
-        }
-    }
+    //set up the console to work properly if the program is launched from
+    //script or from a command prompt
+    WindowsConsoleHelper consoleHelperGuard; 
 #endif
 
     int returnCode = 0;
@@ -156,40 +120,6 @@ int CommandLineApplication(int argc, char* argv[])
         fprintf(stderr, "Error: No action specified. Use --help for usage information.\n");
         returnCode = 1;
     }
-
-#ifdef _WIN32
-    if (stdoutIsConsole)
-    {
-        printf("\n");
-        fflush(stdout);
-
-        // If we attached to parent console, we need to send input to restore prompt
-        if (hasParentConsole)
-        {
-            // Send a newline to the console input buffer to trigger the prompt
-            HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
-            if (hStdIn != INVALID_HANDLE_VALUE)
-            {
-                INPUT_RECORD ir;
-                ir.EventType = KEY_EVENT;
-                ir.Event.KeyEvent.bKeyDown = TRUE;
-                ir.Event.KeyEvent.dwControlKeyState = 0;
-                ir.Event.KeyEvent.uChar.UnicodeChar = '\r';
-                ir.Event.KeyEvent.wRepeatCount = 1;
-                ir.Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
-                ir.Event.KeyEvent.wVirtualScanCode = static_cast<WORD>(MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC));
-
-                DWORD written;
-                WriteConsoleInput(hStdIn, &ir, 1, &written);
-
-                ir.Event.KeyEvent.bKeyDown = FALSE;
-                WriteConsoleInput(hStdIn, &ir, 1, &written);
-            }
-        }
-
-        FreeConsole();
-    }
-#endif
 
     return returnCode;
 }

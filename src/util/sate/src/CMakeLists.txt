@@ -63,6 +63,7 @@ set(sources
     settingsdialog.cpp
     fileinfowidget.cpp
     textwidget.cpp
+    windows_console_helper.cpp
     sate.rc
   )
 
@@ -113,6 +114,7 @@ set(headers
     instancesmodelutils.h
     utilities.h
     dobcalltojson.h
+    windows_console_helper.h
 )
 
 if (NOT TARGET Qt::Widgets)
