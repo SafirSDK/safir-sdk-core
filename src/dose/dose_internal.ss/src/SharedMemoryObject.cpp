@@ -94,6 +94,9 @@ namespace Internal
         {
             SEND_SYSTEM_LOG(Critical,
                             << "Failed to create DOSE shared memory: " << exc.what());
+            SEND_SYSTEM_LOG(Critical,
+                            << "It might be a problem with parameter Safir.Dob.NodeParameters.SharedMemorySize "
+                            << "that currently has value " << Safir::Dob::NodeParameters::SharedMemorySize() << " megabyte");
             std::quick_exit(1);
         }
     }
