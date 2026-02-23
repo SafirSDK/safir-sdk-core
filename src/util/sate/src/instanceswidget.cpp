@@ -55,16 +55,14 @@ public:
 
     void clearFilterRegularExpression(const int column)
     {
-        beginFilterChange();
         m_filters.erase(column);
-        endFilterChange(QSortFilterProxyModel::Direction::Rows);
+        invalidateFilter();
     }
 
     void setFilterRegularExpression(const int column, const QRegularExpression& regex)
     {
-        beginFilterChange();
         m_filters[column] = regex;
-        endFilterChange(QSortFilterProxyModel::Direction::Rows);
+        invalidateFilter();
     }
 
 protected:

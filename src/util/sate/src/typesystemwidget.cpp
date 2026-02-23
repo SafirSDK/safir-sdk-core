@@ -53,9 +53,8 @@ public:
 
     void SetFilter(const QString& filter)
     {
-        beginFilterChange();
         m_filter = filter;
-        endFilterChange(QSortFilterProxyModel::Direction::Rows);
+        invalidateFilter();
     }
 
 protected:
