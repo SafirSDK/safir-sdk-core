@@ -28,3 +28,4 @@ build.ninja
 ui_*
 moc_*
 *.so
+.aider*
