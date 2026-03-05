@@ -1152,34 +1152,29 @@ static THREAD_API RxThread(void *pChNum)
                     goto A_Valid_Msg_Is_Received;
                 }
 
-                // Case 3 - retransmission
-                if(
-                    (MsgHdr.SequenceNumber == LatestSequenceNumber)
-                    ||
-                    (MsgHdr.SequenceNumber == (dcom_ushort16)(LatestSequenceNumber-1))
-                    ||
-                    (MsgHdr.SequenceNumber == (dcom_ushort16)(LatestSequenceNumber-2))
-                  )
+                // Case 3 - retransmission (handle arbitrary older seq numbers with 16-bit wrap)
+                const dcom_ushort16 diff = (dcom_ushort16)(LatestSequenceNumber - MsgHdr.SequenceNumber);
+                if (diff < 0x8000) // received is older-or-equal to LatestSequenceNumber within half-range -> retransmit/duplicate
                 {
                     if((MsgHdr.Info & 7) == 0) // If not retransmit indication
                     {
                         // This should never happen
                         if(*pDbg>=2)
-                        PrintDbg("*   RxThread[%d] Rx duplicate from node %d. SeqN=%u"
-                                 " But retransmit NOT indicated.\n",
-                                 MyIx, DoseId, MsgHdr.SequenceNumber);
+                            PrintDbg("*   RxThread[%d] Rx duplicate from node %d. SeqN=%u"
+                                     " But retransmit NOT indicated. Latest=%u Diff=%u\n",
+                                     MyIx, DoseId, MsgHdr.SequenceNumber, LatestSequenceNumber, diff);
                     }
                     else
                     {
                         if(*pDbg>=2)
-                        PrintDbg("*   RxThread[%d] Rx duplicate from node %d. SeqN=%u\n",
-                                MyIx, DoseId, MsgHdr.SequenceNumber);
+                            PrintDbg("*   RxThread[%d] Rx duplicate from node %d. SeqN=%u Latest=%u Diff=%u\n",
+                                     MyIx, DoseId, MsgHdr.SequenceNumber, LatestSequenceNumber, diff);
                     }
 
                     if(MsgHdr.bWantAck)
                         Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
-                               MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
-                                 MsgHdr.FragmentNumber, (dcom_ushort16)(0x100 | MsgHdr.Info));
+                                    MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
+                                    MsgHdr.FragmentNumber, (dcom_ushort16)(0x100 | MsgHdr.Info));
                     continue;
                 }
 
