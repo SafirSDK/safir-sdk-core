@@ -336,12 +336,18 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
         entityPtr = std::dynamic_pointer_cast<Safir::Dob::Entity>
             (Safir::Dob::Typesystem::Serialization::ToObject(xml));
     }
-    catch(const Safir::Dob::Typesystem::IllegalValueException &)
+    catch(const std::exception & exc)
     {
+        m_debug << "Could not restore entity from file "
+                << Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                << ", removing it and any corresponding bin file. Exception: "
+                << Safir::Dob::Typesystem::Utilities::ToWstring(exc.what()) << std::endl;
+
         Safir::Logging::SendSystemLog(Safir::Logging::Error,
                                       L"Could not restore entity from file "
                                       + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
-                                      + L", removing it and any corresponding bin file");
+                                      + L", removing it and any corresponding bin file. Exception: "
+                                      + Safir::Dob::Typesystem::Utilities::ToWstring(exc.what()));
 
         RemoveFile(path);
 
@@ -426,14 +432,6 @@ FilePersistor::RestoreAll()
                 m_debug << "InitialSet successful"<<std::endl;
             }
         }
-        catch(const Safir::Dob::Typesystem::IllegalValueException &)
-        {
-            Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                          L"Could not restore persistent entity from file "
-                                          + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
-                                          + L", removing it.");
-            RemoveFile(path);
-        }
         catch (const Safir::Dob::LowMemoryException&)
         {
             Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
@@ -447,6 +445,15 @@ FilePersistor::RestoreAll()
                                           + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
                                           + L". Exception: "
                                           + Safir::Dob::Typesystem::Utilities::ToWstring(e.what()));
+        }
+        catch(const std::exception & exc)
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Could not restore persistent entity from file "
+                                          + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                          + L", removing it. Exception: "
+                                          + Safir::Dob::Typesystem::Utilities::ToWstring(exc.what()));
+            RemoveFile(path);
         }
     }
 }

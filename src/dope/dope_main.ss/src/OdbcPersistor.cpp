@@ -837,7 +837,13 @@ void OdbcPersistor::RestoreAll()
                     //we were in case the db goes down during restore
                     restoredObjects.insert(entityId);
                 }
-                catch(const Safir::Dob::Typesystem::IllegalValueException & e)
+                catch (const Safir::Dob::LowMemoryException&)
+                {
+                    Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
+                                                  L"Failed to inject persisted entities into system due to lack of shared memory. Exiting.");
+                    m_ioContext.stop();
+                }
+                catch(const std::exception & e)
                 {
                     m_debug << "Could not restore "
                             << entityId.ToString()
@@ -854,12 +860,7 @@ void OdbcPersistor::RestoreAll()
                     Remove(entityId);
                     //since we did not remove the objectid from persistentObjects an empty row will be inserted below.
                 }
-                catch (const Safir::Dob::LowMemoryException&)
-                {
-                    Safir::Logging::SendSystemLog(Safir::Logging::Emergency,
-                                                  L"Failed to inject persisted entities into system due to lack of shared memory. Exiting.");
-                    m_ioContext.stop();
-                }
+
             }
         }
         catch(const OdbcException& e)
