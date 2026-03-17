@@ -229,6 +229,9 @@ namespace Internal
         {return m_queueCapacities[queue];}
 
         void PrepareSmartSync(SmartSyncState& syncState) const;
+
+        //For debug
+        void SimulateOverflows(const bool inQueues, const bool outQueues);
     private:
 
         const ShmString m_nameWithoutCounter;

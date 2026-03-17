@@ -7,6 +7,7 @@ set(ui
     numberOfEntities.ui
     RawStatisticsPage.ui
     SystemPicturePage.ui
+    SimulateOverflows.ui
     registrations.ui
     connectionstatsaggregated.ui)
 
@@ -22,6 +23,7 @@ set(sources
     numberofentities.cpp
     RawStatisticsPage.cpp
     SystemPicturePage.cpp
+    SimulateOverflows.cpp
     registrations.cpp
     connectionstatsaggregated.cpp
     ConnectionStatisticsCollector.cpp)
@@ -36,6 +38,7 @@ set(widget_headers
     numberofentities.h
     RawStatisticsPage.h
     SystemPicturePage.h
+    SimulateOverflows.h
     registrations.h
     connectionstatsaggregated.h)
 

@@ -31,6 +31,7 @@
 #include "connectionstats.h"
 #include "connectionstatsaggregated.h"
 #include "SystemPicturePage.h"
+#include "SimulateOverflows.h"
 #include "numberofentities.h"
 #include "RawStatisticsPage.h"
 #include "registrations.h"
@@ -163,7 +164,7 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
         newTab = tabWidget->addTab(new About(this),"About");
         tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
     }
-    if (item->text(0) == "Memory")
+    else if (item->text(0) == "Memory")
     {
         newTab = tabWidget->addTab(new MemGraph(this),"Memory");
         tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
@@ -186,6 +187,10 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
         {
             QMessageBox::information(this,"Not initialized","dose_internal not yet initialized, cannot open.");
         }
+    }
+    else if (item->text(0) == "Simulate Overflows")
+    {
+        newTab = tabWidget->addTab(new SimulateOverflows(this),"Simulate Overflows");
     }
     else if (item->text(0) == "Registrations")
     {

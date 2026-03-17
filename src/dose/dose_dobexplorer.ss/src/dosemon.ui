@@ -84,6 +84,11 @@
          </item>
          <item>
           <property name="text">
+           <string>Simulate Overflows</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>Registrations</string>
           </property>
          </item>

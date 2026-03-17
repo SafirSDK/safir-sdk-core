@@ -3078,19 +3078,7 @@ namespace Internal
 
     void Controller::SimulateOverflows(const bool inQueues, const bool outQueues)
     {
-        m_connection->ForEachMessageInQueue([inQueues](const auto& /*consumer*/, auto& queue)
-                                            {queue.SimulateFull(inQueues);});
-        m_connection->ForEachRequestInQueue([inQueues](const auto& /*consumer*/, auto& queue)
-                                            {queue.SimulateFull(inQueues);});
-
-        m_connection->GetMessageOutQueue().SimulateFull(outQueues);
-        m_connection->GetRequestOutQueue().SimulateFull(outQueues);
-
-        //Kick ourselves so that we dispatch the correct Overflow calls, if needed.
-        m_connection->SignalIn();
-
-        //Kick dose_main so that we stop blocking if we had an overflow-in.
-        m_connection->SignalOut();
+        m_connection->SimulateOverflows(inQueues,outQueues);
     }
 
 }

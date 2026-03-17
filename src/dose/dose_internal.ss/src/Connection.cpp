@@ -801,6 +801,24 @@ namespace Internal
 
         return capacities;
     }
+
+    void Connection::SimulateOverflows(const bool inQueues, const bool outQueues)
+    {
+        ForEachMessageInQueue([inQueues](const auto& /*consumer*/, auto& queue)
+                                            {queue.SimulateFull(inQueues);});
+        ForEachRequestInQueue([inQueues](const auto& /*consumer*/, auto& queue)
+                                            {queue.SimulateFull(inQueues);});
+
+        GetMessageOutQueue().SimulateFull(outQueues);
+        GetRequestOutQueue().SimulateFull(outQueues);
+
+        //Kick ourselves so that we dispatch the correct Overflow calls, if needed.
+        SignalIn();
+
+        //Kick dose_main so that we stop blocking if we had an overflow-in.
+        SignalOut();
+    }
+
 }
 }
 }
