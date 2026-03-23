@@ -30,7 +30,6 @@ import hashlib
 import subprocess
 
 import xml.etree.ElementTree as ET
-import codecs
 import argparse
 
 class VException(Exception):
@@ -179,7 +178,7 @@ def dou_uniform_lookup(gSession, typename):
 
 
 def parse_namespace_file(namespace_prefixes, path, file, file_suffix):
-    prefix_file = codecs.open(os.path.join(path, file), "r", encoding="utf-8")
+    prefix_file = open(os.path.join(path, file), "r", encoding="utf-8")
     found = False
     line = prefix_file.readline()
     while len(line) > 0 and not found:
@@ -1518,16 +1517,13 @@ def parse_if_clause(gSession, current_line, file, dou, process_if_content, table
 
 def write_to_file(gSession, s):
     if gSession.current_generated_file is None:
-        gSession.current_generated_file = codecs.open(gSession.current_generated_filename, "w", encoding="utf-8")
+        gSession.current_generated_file = open(gSession.current_generated_filename, "w", encoding="utf-8")
         if gSession.current_generated_file is None:
             print("** ERROR - could not open output file!", gSession.current_generated_filename, file=sys.stderr)
             raise VException("Could not open output file")
 
     # wierd way that the original parses the .dod:
     if s != "\n" and s.strip() == "": return
-
-    # Make the line endings native
-    s = s.replace("\n", os.linesep)
 
     gSession.current_generated_file.write(s)
     if loglevel >= 4: print(s, end='', file=sys.stderr)
@@ -1640,7 +1636,7 @@ def resolve_typesystem_dependencies(unresolved_dependencies):
 # Faster file reader, buffers all in memory (good since we loop through same file multiple times)
 class FileReader():
     def __init__(self, filename, preprocess):
-        file = codecs.open(filename, "r", encoding="utf-8")
+        file = open(filename, "r", encoding="utf-8")
         self.index = 0
         # reads up all the lines of the file in memory
         self.lines = file.readlines()
@@ -1650,18 +1646,6 @@ class FileReader():
         if preprocess:
             eol_string = ""
             for i in range(len(self.lines)):
-                # Replace the files EOL with plain \n. This is converted to native EOL style when we write the output files
-                if i == 0:
-                    if self.lines[0].endswith("\r\n"): eol_string = "\r\n"
-                    elif self.lines[0].endswith("\n"): eol_string = "\n"
-                    elif self.lines[0].endswith("\r"): eol_string = "\r"
-                    else:
-                        print("** ERROR, file", filename, "has unknown EOL characters", file=sys.stderr)
-                        raise VException("Unknown EOL characters")
-
-                if eol_string != "\n":
-                    self.lines[i] = self.lines[i].replace(eol_string, "\n")
-
                 if preprocess:
                     # wierd way that the original parses the .dod
                     # All lines with spaces before the newline marker are skipped in the output by the old parser...
@@ -1747,7 +1731,7 @@ def generator_main(gSession, dod_file, dou_filename, gen_src_output_path):
                 dod_file.seek(0)
                 if gSession.current_generated_file is not None:
                     # Write final newline and close
-                    gSession.current_generated_file.write(os.linesep)
+                    gSession.current_generated_file.write("\n")
                     gSession.current_generated_file.close()
                     gSession.current_generated_file = None
 
@@ -1776,7 +1760,7 @@ def generator_main(gSession, dod_file, dou_filename, gen_src_output_path):
             parse_dod(gSession, dod_file, dou)
             if gSession.current_generated_file is not None:
                 # Write final newline and close
-                gSession.current_generated_file.write(os.linesep)
+                gSession.current_generated_file.write("\n")
                 gSession.current_generated_file.close()
                 gSession.current_generated_file = None
 

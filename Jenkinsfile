@@ -199,7 +199,7 @@ def build_examples(){
 pipeline {
     parameters {
         choice(name: 'PLATFORM_FILTER',
-               choices: ['all', 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022'],
+               choices: ['all', 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022', 'vs2026'],
                description: "Run on specific platform. Note that multicomputer tests will only run if 'all' or 'debian-bookworm' is selected.")
 
         booleanParam(name: 'SKIP_SLOW_TESTS',
@@ -232,7 +232,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022'
+                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022', 'vs2026'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -247,7 +247,7 @@ pipeline {
                     exclude {
                         axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit bookworm and visual studio
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble', 'debian-bookworm', 'vs2022'
+                            values 'ubuntu-noble', 'debian-bookworm', 'vs2022', 'vs2026'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -303,7 +303,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022'
+                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022', 'vs2026'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -324,7 +324,7 @@ pipeline {
                     exclude {
                         axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit bookworm and visual studio
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble', 'debian-bookworm', 'vs2022'
+                            values 'ubuntu-noble', 'debian-bookworm', 'vs2022', 'vs2026'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -392,7 +392,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022'
+                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022', 'vs2026'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -407,7 +407,7 @@ pipeline {
                     exclude {
                         axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit bookworm and visual studio
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble', 'debian-bookworm', 'vs2022'
+                            values 'ubuntu-noble', 'debian-bookworm', 'vs2022', 'vs2026'
                         }
                         axis {
                             name 'BUILD_ARCH'

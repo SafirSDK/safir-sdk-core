@@ -369,7 +369,7 @@ def suppress(help_string):
 def add_win32_options(parser):
     """add windows options to the parser"""
     parser.add_argument("--use-studio",
-                        help="The visual studio to use for building (vs2015, vs2017, vs2019, vs2022)",
+                        help="The visual studio to use for building (vs2015, vs2017, vs2019, vs2022, vs2026)",
                         action="store")
     parser.add_argument("--arch",
                         default="amd64" if is_64_bit() else "x86",
@@ -458,7 +458,7 @@ def parse_command_line():
 
         if arguments.use_studio == "2015":
             arguments.use_studio = "vs" + arguments.use_studio
-        if arguments.use_studio not in ["vs2015", "vs2017", "vs2019", "vs2022"]:
+        if arguments.use_studio not in ["vs2015", "vs2017", "vs2019", "vs2022", "vs2026"]:
             die("Unknown studio version")
 
     global LOGGER
@@ -706,6 +706,8 @@ class VisualStudioBuilder(BuilderBase):
                 vcver = "14.2"
             elif self.arguments.use_studio == "vs2022":
                 vcver = "14.4" #vc 17.10.4 or later
+            elif self.arguments.use_studio == "vs2026":
+                vcver = "14.50"
             cmd = '"{}" {} -vcvars_ver={} & set'.format(vcvarsall, self.arguments.arch, vcver)
 
         LOGGER.log("Running '" + cmd + "' to extract environment")
@@ -796,6 +798,8 @@ class VisualStudioBuilder(BuilderBase):
             ide_version = 16
         elif "2022" in vcvarsall and vcvarsall_kind == "new":
             ide_version = 17
+        elif "18" in vcvarsall and vcvarsall_kind == "new":
+            ide_version = 18
         else:
             die("Unsupported Visual Studio version")
         arg = f"--conf:all tools.microsoft.msbuild:vs_version={ide_version}"
