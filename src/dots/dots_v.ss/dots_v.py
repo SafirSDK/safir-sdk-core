@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2005-2014 (http://safirsdkcore.com)
+# Copyright Saab AB, 2005-2026 (http://safirsdkcore.com)
 #
 # Created by: Björn Weström
 #
@@ -517,7 +517,12 @@ def parse_dou(gSession, dou_xmlfile):
             m_type = readTextPropery(p, "type")
             is_array = readTextPropery(p, "arrayElements") is not None or readTextPropery(p, "array") is not None
             is_dict = p.find("{urn:safir-dots-unit}dictionary")
+            is_sequence = readTextPropery(p, "sequence") is not None
             dict_type = None
+
+            if is_sequence:
+                raise VException("Sequence parameters are not supported. Use array instead.")
+            
             if is_dict is not None:
                 dict_type = is_dict.attrib["keyType"]
 
@@ -1942,7 +1947,8 @@ def main():
                 dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files,
                                 dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths,
                                 namespace_prefix_files, arguments.library_name)
-        except VException:
+        except VException as exc:
+            print("Error during code generation: " + str(exc))
             return 1
     return 0
 
