@@ -240,10 +240,7 @@ Library::AddPrefix(std::wstring prefix)
 {
     if (prefix.empty())
     {
-        Safir::Logging::SendSystemLog(Safir::Logging::Severity::Warning,
-                                      L"Application tried to register an empty Tracer prefix. This is deprecated behaviour, and will become illegal in a future version of Safir SDK Core. Please use an actual string.");
-
-        prefix = L"<empty>";
+        throw Safir::Dob::Typesystem::IllegalValueException(L"Application tried to register an empty Tracer prefix. Please use an actual string.", __WFILE__, __LINE__);
     }
 
     //Colons in the prefix will screw up things, since we use colons to separate
