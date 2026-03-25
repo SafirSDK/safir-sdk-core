@@ -67,7 +67,7 @@ def launch_node(args, safir_instance, node_id, start_dope=False):
                     wait_for_persistence = safir_instance < 3 or safir_instance >= 9,
                     force_node_id = node_id)
         env.session_id = session_id
-        env.launchProcess("safir_websocket", args.safir_websocket)
+        env.launchProcess("safir_web", args.safir_web)
 
         #if node_id == 5:
             #env.launchProcess("dobexplorer", args.dobexplorer)
@@ -93,7 +93,7 @@ def parse_arguments():
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
     parser.add_argument("--dobexplorer", required=False)
-    parser.add_argument("--safir_websocket", required=True)
+    parser.add_argument("--safir_web", required=True)
     arguments = parser.parse_args()
     return arguments
 
@@ -295,10 +295,10 @@ class SafirApp:
                     result_id = msg["id"] if "id" in msg else "None"
                     # log("--- node_" + str(self.node_id) + " received result " + msg["result"] + " with id=" + str(result_id))
                 elif "error" in msg:
-                    log("*** node_ " + str(self.node_id) + " received error response from safir_websocket:", message)
+                    log("*** node_ " + str(self.node_id) + " received error response from safir_web:", message)
                     continue
             except json.JSONDecodeError:
-                log("JSONDecodeError", message) # indicates error in safir_websocket
+                log("JSONDecodeError", message) # indicates error in safir_web
                 raise
 
     async def _sender(self):
@@ -742,11 +742,11 @@ async def lightnode_attaches_to_new_system_after_detached(args):
             log("--- node5 is now attached to a new system")
             await check_pool(app2, initialRegApp2 + initialRegApp5, initialEntApp2 + initialEntApp5)
             await check_pool(app5, initialRegApp2 + initialRegApp5, initialEntApp2 + initialEntApp5)
-            # Turn off network, since we cannot control the order TestEnv will kill the processes. If safir_websocket is killed before dose_main node5 might get an unregistration before it is detached
+            # Turn off network, since we cannot control the order TestEnv will kill the processes. If safir_web is killed before dose_main node5 might get an unregistration before it is detached
             await set_network_state(False, node5.session_id)
 
         # node5 should now be detached again
-        await set_network_state(True, node5.session_id) # turn on networkl again. Actually I'm not sure if this will fix all timing issues. The correct way would be to force TestEnv to kill dose_main and safir_control before safir_websocket.
+        await set_network_state(True, node5.session_id) # turn on networkl again. Actually I'm not sure if this will fix all timing issues. The correct way would be to force TestEnv to kill dose_main and safir_control before safir_web.
         log("--- Killed node2, wait for node5 to be detached again")
         await app5.wait_for_node_state("Detached")
         await check_pool(app5, initialRegApp2 + initialRegApp5, initialEntApp2 + initialEntApp5)

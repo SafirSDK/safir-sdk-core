@@ -67,7 +67,7 @@ def launch_node(args, safir_instance, node_id, first_node):
                     force_node_id = node_id)
         env.session_id = session_id
         # if first_node:
-        #     env.launchProcess("safir_websocket", args.safir_websocket)
+        #     env.launchProcess("safir_web", args.safir_web)
         yield env
     finally:
         log("--- kill node" + str(node_id))
@@ -79,7 +79,7 @@ def parse_arguments():
     parser.add_argument("--dose_main", required=True)
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
-    parser.add_argument("--safir_websocket", required=True)
+    parser.add_argument("--safir_web", required=True)
     arguments = parser.parse_args()
     return arguments
 

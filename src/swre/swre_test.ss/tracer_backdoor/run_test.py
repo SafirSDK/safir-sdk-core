@@ -39,7 +39,7 @@ def parse_arguments():
     parser.add_argument("--dose-main", required=True)
     parser.add_argument("--dope-main", required=True)
     parser.add_argument("--safir-show-config", required=True)
-    parser.add_argument("--safir-websocket", required=True)
+    parser.add_argument("--safir-web", required=True)
     parser.add_argument("--safir-status", required=True)
     parser.add_argument("--dobexplorer", required=True)
     return parser.parse_args()
@@ -55,7 +55,7 @@ def test_case(name, args):
                       args.dose_main,
                       args.dope_main,
                       args.safir_show_config)
-        env.launchProcess("safir_websocket", args.safir_websocket)
+        env.launchProcess("safir_web", args.safir_web)
         #env.launchProcess("dobexplorer", args.dobexplorer)
         yield env
 
@@ -224,10 +224,10 @@ class SafirApp:
                     result_id = msg["id"] if "id" in msg else "None"
                     log("--- received result " + str(msg["result"]) + " with id=" + str(result_id))
                 elif "error" in msg:
-                    log("*** received error response from safir_websocket:", message)
+                    log("*** received error response from safir_web:", message)
                     continue
             except json.JSONDecodeError:
-                log("JSONDecodeError", message) # indicates error in safir_websocket
+                log("JSONDecodeError", message) # indicates error in safir_web
                 raise
 
     async def _sender(self):

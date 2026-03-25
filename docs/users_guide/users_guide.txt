@@ -2828,11 +2828,11 @@ Upon receiving a stop order the application shall shut down gracefully.
 
 When an application has several connections to the Dob, only one of them should supply a StopHandler. It is the handler of this connections responsibility to tell the other parts of the application to shut down gracefully. If several connections have stop handlers there may be race conditions, since there is no guaranteed order between which stop handler gets called first.
 
-[[safir_websocket]]
-== Safir WebSocket/JSON-RPC and REST interfaces
+[[safir_web]]
+== Safir web interface
 Safir SDK Core provides two HTTP-based interfaces as alternatives to the traditional language interfaces: a JSON-RPC interface over WebSockets and a REST API over plain HTTP. Both interfaces expose most of the common Dob features and require no runtime libraries to be installed, making Safir accessible from virtually any language or platform, including web browsers and mobile apps.
 
-Both interfaces are provided by the same executable, _safir_websocket_. The WebSocket server endpoint and the REST server endpoint are configured separately in _Safir.Websocket.Parameters.dou_.
+Both interfaces are provided by the same executable, _safir_web_. The WebSocket server endpoint and the REST server endpoint are configured separately in _Safir.Web.Parameters.dou_.
 
 === WebSocket/JSON-RPC interface
 From version 6.3 of Safir SDK Core, a JSON-RPC interface over WebSockets is provided as an alternative to the traditional language interfaces. The interface is an implementation of the JSON-RPC specification 2.0 (http://www.jsonrpc.org/specification) and uses WebSockets https://tools.ietf.org/html/rfc6455[(RFC 6455)] as carrier.
@@ -2850,7 +2850,7 @@ The pros of using the WebSocket/JSON-RPC interface is that no runtime libraries 
 The cons are worse performance and that you don’t get access to the most advanced features. The programming model may also be a bit awkward in some situations.
 
 === REST interface
-From version 6.4 of Safir SDK Core, a REST API is provided alongside the WebSocket/JSON-RPC interface. The REST API is a stateless HTTP interface that maps Dob operations onto conventional HTTP verbs and URL paths. All request and response bodies are JSON.
+From version 7.4.2 of Safir SDK Core, a REST API is provided alongside the WebSocket/JSON-RPC interface. The REST API is a stateless HTTP interface that maps Dob operations onto conventional HTTP verbs and URL paths. All request and response bodies are JSON.
 
 The REST API covers the same core set of Dob operations as the WebSocket interface — reading, setting and deleting entities, sending messages, issuing requests, registering handlers, and managing subscriptions — but does not support server-push notifications. Clients that need to receive events (such as entity change notifications or messages) must still use the WebSocket/JSON-RPC interface.
 

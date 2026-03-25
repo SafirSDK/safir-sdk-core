@@ -4,7 +4,7 @@ ADD_TEST(NAME same_safir_instance
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir_websocket $<TARGET_FILE:safir_websocket>)
+  --safir_web $<TARGET_FILE:safir_web>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST same_safir_instance
   TIMEOUT 3000

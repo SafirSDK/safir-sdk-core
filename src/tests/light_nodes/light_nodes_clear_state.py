@@ -66,7 +66,7 @@ def launch_node(args, safir_instance, node_id):
                     wait_for_persistence = safir_instance < 3,
                     force_node_id = node_id)
         env.session_id = session_id
-        env.launchProcess("safir_websocket", args.safir_websocket)
+        env.launchProcess("safir_web", args.safir_web)
         yield env
     finally:
         log("--- kill node" + str(node_id))
@@ -88,7 +88,7 @@ def parse_arguments():
     parser.add_argument("--dose_main", required=True)
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
-    parser.add_argument("--safir_websocket", required=True)
+    parser.add_argument("--safir_web", required=True)
     arguments = parser.parse_args()
     return arguments
 
@@ -347,10 +347,10 @@ class SafirApp:
                     result_id = msg["id"] if "id" in msg else "None"
                     log("--- node_" + str(self.node_id) + " received result " + msg["result"] + " with id=" + str(result_id))
                 elif "error" in msg:
-                    log("*** node_ " + str(self.node_id) + " received error response from safir_websocket:", message)
+                    log("*** node_ " + str(self.node_id) + " received error response from safir_web:", message)
                     continue
             except json.JSONDecodeError:
-                log("JSONDecodeError", message) # indicates error in safir_websocket
+                log("JSONDecodeError", message) # indicates error in safir_web
                 raise
 
     async def _sender(self):

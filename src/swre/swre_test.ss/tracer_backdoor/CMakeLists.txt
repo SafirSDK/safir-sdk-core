@@ -11,7 +11,7 @@ ADD_TEST(NAME tracer_backdoor
   --dose-main $<TARGET_FILE:dose_main>
   --dope-main $<TARGET_FILE:signal_persistence_ready>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir-websocket $<TARGET_FILE:safir_websocket>
+  --safir-web $<TARGET_FILE:safir_web>
   --safir-status $<TARGET_FILE:safir_status>
   --dobexplorer $<TARGET_FILE:dobexplorer>)
 

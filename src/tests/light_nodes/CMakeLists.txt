@@ -4,7 +4,7 @@ ADD_TEST(NAME light_nodes_clear_state
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir_websocket $<TARGET_FILE:safir_websocket>)
+  --safir_web $<TARGET_FILE:safir_web>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_clear_state
   TIMEOUT 3000
@@ -17,7 +17,7 @@ ADD_TEST(NAME light_nodes_keep_state
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir_websocket $<TARGET_FILE:safir_websocket>)
+  --safir_web $<TARGET_FILE:safir_web>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_keep_state
   TIMEOUT 3000
@@ -30,7 +30,7 @@ ADD_TEST(NAME light_nodes_smart_sync
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
   #--dobexplorer $<TARGET_FILE:dobexplorer>
-  --safir_websocket $<TARGET_FILE:safir_websocket>)
+  --safir_web $<TARGET_FILE:safir_web>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_smart_sync
   TIMEOUT 3000
