@@ -339,6 +339,15 @@ Library::TraceInternal(const PrefixId prefixId,
     if (ch == '\n')
     {
         m_prefixPending = true;
+
+        //For the peeps who forget to flush their tracers...
+        if (m_traceStdoutBuffer.size() > 50000 || m_traceUdpBuffer.size() > 50000)
+        {
+            Safir::Logging::SendSystemLog(Safir::Logging::Error,
+                                          L"Application is not flushing its tracers. Buffers cleared. Read the Tracer FAQ in the User's Guide for more info.");
+            m_traceStdoutBuffer.clear();
+            m_traceUdpBuffer.clear();
+        }
     }
 }
 

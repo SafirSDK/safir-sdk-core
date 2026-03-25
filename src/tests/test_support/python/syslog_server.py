@@ -27,6 +27,7 @@ import subprocess
 from io import StringIO
 import socketserver
 import configparser
+import time
 
 
 class SyslogServer(socketserver.UDPServer):
@@ -67,35 +68,52 @@ class SyslogServer(socketserver.UDPServer):
 
         self.syslog_server_address = config.get('SystemLog', 'syslog_server_address')
         self.syslog_server_port = config.getint('SystemLog', 'syslog_server_port')
-        self.timeout = None
         self.allow_reuse_address = True
 
         socketserver.UDPServer.__init__(self, (self.syslog_server_address, self.syslog_server_port),
                                         SyslogServer._Handler)
 
-        #set up some variables that the handler can use
-        self.is_timed_out = False
         self.buf = None
         self.stopped = False
 
-    def handle_timeout(self):
-        self.is_timed_out = True
-
     def get_data(self, timeout):
-        """get data"""
+        """Collect syslog data for `timeout` seconds and return it.
+
+        Uses wall-clock time - returns after `timeout` seconds have elapsed,
+        regardless of whether data is still arriving. If timeout is 0, does
+        a single non-blocking check for any pending data.
+        """
         self.buf = str()
 
-        if not self.stopped:
-            self.timeout = timeout
-            self.is_timed_out = False
-            while not self.is_timed_out:
-                self.handle_request()
+        if self.stopped:
+            return self.buf
+
+        start_time = time.monotonic()
+        poll_interval = 0.1
+
+        # Always do at least one poll (for timeout=0 case)
+        first_poll = True
+
+        while True:
+            elapsed = time.monotonic() - start_time
+            remaining = timeout - elapsed
+
+            if remaining <= 0 and not first_poll:
+                break
+
+            # Use shorter of poll_interval or remaining time (min 0 for non-blocking)
+            self.timeout = max(0, min(poll_interval, remaining))
+            self.handle_request()
+            first_poll = False
 
         return self.buf
 
     def stop(self, timeout=0.5):
-        """timeout can be used to collect data for a while before stopping the
-        syslog server. Uncollected data will be returned"""
+        """Stop the syslog server.
+
+        timeout: collect data for this many seconds before stopping.
+        Returns any collected data.
+        """
         data = self.get_data(timeout)
         self.server_close()
         self.stopped = True

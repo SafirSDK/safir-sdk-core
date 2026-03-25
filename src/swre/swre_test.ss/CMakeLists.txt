@@ -1,4 +1,5 @@
 add_subdirectory(tracer_cpp)
+add_subdirectory(tracer_cpp_no_flush)
 
 add_subdirectory(tracer_backdoor)
 
