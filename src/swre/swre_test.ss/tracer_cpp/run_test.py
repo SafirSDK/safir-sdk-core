@@ -25,7 +25,7 @@
 ###############################################################################
 import subprocess, os, time, sys, signal, re, argparse
 import syslog_server
-from safe_print import *
+from output import out
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--binary", required=True)
@@ -46,11 +46,11 @@ syslog_output = syslog.get_data(1)
 
 
 def fail(message):
-    print("Failed! Wrong number of", message)
-    print("STDOUT OUTPUT:")
-    safe_print(stdout_output)
-    print("SYSLOG OUTPUT:")
-    safe_print(syslog_output)
+    out("Failed! Wrong number of", message)
+    out("STDOUT OUTPUT:")
+    out(stdout_output)
+    out("SYSLOG OUTPUT:")
+    out(syslog_output)
     sys.exit(1)
 
 
@@ -134,5 +134,5 @@ if stdout_output.count(u"Razor: ") != 7 or syslog_output.count(u"Razor: ") != 7:
 if stdout_output.count(u"Rymd-B@rje: ") != 0 or syslog_output.count(u"Rymd-Börje: ") != 0:
     fail("Rymd-Borje")
 
-print("success")
+out("success")
 sys.exit(0)

@@ -24,7 +24,6 @@
 #
 ###############################################################################
 import subprocess, os, time, sys, signal, re, argparse, logging, socket, struct
-from safe_print import *
 from testenv import TestEnv, TestEnvStopper, log
 import asyncio, json, websockets
 from contextlib import contextmanager, aclosing
@@ -171,13 +170,13 @@ class SafirApp:
             await asyncio.sleep(1)
 
     def dump_pool(self):
-        print("=== Pool dump ===")
-        print("  Registrations:")
+        log("=== Pool dump ===")
+        log("  Registrations:")
         for val in dict_to_sorted_list(self.registrations):
-            print("    " + val)
-        print("  Entities:")
+            log("    " + val)
+        log("  Entities:")
         for val in dict_to_sorted_list(self.entities):
-            print("    " + val)
+            log("    " + val)
         log("--------------")
 
     async def _run(self):

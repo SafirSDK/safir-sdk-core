@@ -24,15 +24,10 @@
 #
 ###############################################################################
 import subprocess, os, time, sys, shutil, glob, argparse, re
-from testenv import TestEnv, TestEnvStopper
+from testenv import TestEnv, TestEnvStopper, log
 
 import configparser
 from io import StringIO
-
-
-def log(data):
-    print(data)
-    sys.stdout.flush()
 
 
 def remove(filename):

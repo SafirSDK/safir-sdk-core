@@ -27,21 +27,17 @@ import subprocess, sys, time, signal
 import syslog_server
 from threading import Thread
 from queue import Queue, Empty
-import datetime
+from output import log, out
 
 
-def enqueue_output(out, queue):
+def enqueue_output(_out, queue):
     while True:
-        line = out.readline()
+        line = _out.readline()
         if not line:
             break
         queue.put(line.rstrip("\n\r"))
-    out.close()
+    _out.close()
 
-
-def log(*args, **kwargs):
-    print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)
-    sys.stdout.flush()
 
 class TestEnvStopper:
     def __init__(self, env):

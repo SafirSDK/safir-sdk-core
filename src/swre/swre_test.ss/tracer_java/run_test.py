@@ -25,7 +25,7 @@
 ###############################################################################
 import subprocess, os, time, sys, signal, re, argparse, shutil, platform
 import syslog_server
-from safe_print import *
+from output import out
 
 parser = argparse.ArgumentParser("test script for logging")
 parser.add_argument("--jar", required=True)
@@ -52,11 +52,11 @@ syslog_output = syslog.get_data(1)
 
 
 def fail(message):
-    print("Failed! Wrong number of", message)
-    print("STDOUT OUTPUT:")
-    safe_print(stdout_output)
-    print("SYSLOG OUTPUT:")
-    safe_print(syslog_output)
+    out("Failed! Wrong number of", message)
+    out("STDOUT OUTPUT:")
+    out(stdout_output)
+    out("SYSLOG OUTPUT:")
+    out(syslog_output)
     sys.exit(1)
 
 
@@ -104,5 +104,5 @@ if stdout_output.count(u"interrobang: @\n") != 3 or syslog_output.count(u"interr
 if stdout_output.count(u"@reversed\n") != 3 or syslog_output.count(u"\u202ereversed\n") != 3:
     fail("reversed")
 
-print("success")
+out("success")
 sys.exit(0)

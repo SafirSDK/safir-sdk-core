@@ -24,7 +24,7 @@
 #
 ###############################################################################
 import os, time, sys, argparse
-from testenv import TestEnv, TestEnvStopper
+from testenv import TestEnv, TestEnvStopper, log
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--stoppee", required=True)
@@ -45,11 +45,11 @@ with TestEnvStopper(env):
     for i in range(50):
         env.launchProcess("stoppee_" + str(i), stoppee_path)
     while True:
-        print("checking if all have started yet")
+        log("checking if all have started yet")
         done = True
         for i in range(50):
             if env.Output("stoppee_" + str(i)).find("Connected") == -1:
-                print("Found one that has not started yet (" + str(i) + "), will keep checking")
+                log("Found one that has not started yet (" + str(i) + "), will keep checking")
                 done = False
                 break
         if done:
@@ -57,7 +57,7 @@ with TestEnvStopper(env):
         time.sleep(1)
 
 if not env.ReturnCodesOk():
-    print("Some process exited with an unexpected value")
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 sys.exit(0)

@@ -56,7 +56,7 @@ def launch_node(args, safir_instance, node_id):
         session_id = str(uuid.uuid4())
         os.environ["SAFIR_COM_NETWORK_SIMULATION"] = session_id # Enable network simulation
         os.environ["SAFIR_INSTANCE"] = str(safir_instance)
-        print("--- Launching node", str(node_id))
+        log("--- Launching node", str(node_id))
         env = TestEnv(args.safir_control,
                     args.dose_main,
                     args.dope_main if safir_instance == 1 else None,
@@ -158,13 +158,13 @@ async def check_pool_detached_node(app):
     if not ok:
         log("*** ERROR: Incorrect pool on light node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
         app.dump_pool()
-        print("  Expected registrations:")
-        for i in expected_reg: print("    " + i)
-        print("  Expected entities:")
+        log("  Expected registrations:")
+        for i in expected_reg: log("    " + i)
+        log("  Expected entities:")
         if len(expected_ent) < 500:
-            for i in expected_ent: print("    " + i)
+            for i in expected_ent: log("    " + i)
         else:
-            print("Number of expected entities: " + str(len(expected_ent)))
+            log("Number of expected entities: " + str(len(expected_ent)))
 
     if not ok:
         raise AssertionError("Incorrect pool")    
@@ -216,13 +216,13 @@ async def check_pools_connected_nodes(*apps):
                 if print_on_failure:
                     log("*** ERROR: Incorrect pool on node " + str(app.node_id) + ", safir_instance: " + str(app.safir_instance))
                     app.dump_pool()
-                    print("  Expected registrations:")
-                    for i in expected_reg: print("    " + i)
-                    print("  Expected entities:")
+                    log("  Expected registrations:")
+                    for i in expected_reg: log("    " + i)
+                    log("  Expected entities:")
                     if len(expected_ent) < 500:
-                        for i in expected_ent: print("    " + i)
+                        for i in expected_ent: log("    " + i)
                     else:
-                        print("Number of expected entities: " + str(len(expected_ent)))
+                        log("Number of expected entities: " + str(len(expected_ent)))
 
         return apps_ok
 
@@ -281,7 +281,7 @@ class SafirApp:
             await asyncio.sleep(3)
             nodeInfo = self.entities.get(nodeInfoEntityId)
             if nodeInfo is not None and state in nodeInfo:
-                print(f"Node state received after {t} seconds")
+                log(f"Node state received after {t} seconds")
                 return
 
         log("*** wait_for_node_state timed out, dump pool")
@@ -289,13 +289,13 @@ class SafirApp:
         raise AssertionError("app" + str(self.node_id) +" did not get NodeInfo.State='" + state +"' within " + str(timeout) + " seconds.")
 
     def dump_pool(self):
-        print("=== Node: " + str(self.node_id) + ", safir_instance: " + str(self.safir_instance) + " ===")
-        print("  Registrations:")
+        log("=== Node: " + str(self.node_id) + ", safir_instance: " + str(self.safir_instance) + " ===")
+        log("  Registrations:")
         for val in dict_to_sorted_list(self.registrations):
-            print("    " + val)            
-        print("  Entities:")
+            log("    " + val)
+        log("  Entities:")
         for val in dict_to_sorted_list(self.entities):
-            print("    " + val)
+            log("    " + val)
         log("--------------")
 
     async def _run(self):

@@ -26,7 +26,7 @@
 import time
 import sys
 import argparse
-from testenv import TestEnv, TestEnvStopper
+from testenv import TestEnv, TestEnvStopper, log
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--unreg_reg_with_many_ghosts", required=True)
@@ -53,7 +53,7 @@ with TestEnvStopper(env):
     env.WaitForOutput("unreg_reg_with_many_ghosts", "Done")
 
 if not env.ReturnCodesOk():
-    print("Some process exited with an unexpected value")
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 sys.exit(0)

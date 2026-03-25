@@ -28,10 +28,8 @@ from threading import Thread
 import argparse
 from queue import Queue, Empty
 
-
-def log(*args, **kwargs):
-    print(*args, **kwargs)
-    sys.stdout.flush()
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "..", "..", "tests", "test_support", "python"))
+from output import out as log
 
 
 def rmdir(directory):

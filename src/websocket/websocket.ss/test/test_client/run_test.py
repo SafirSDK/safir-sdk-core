@@ -26,13 +26,7 @@
 import os
 import sys
 import argparse
-from testenv import TestEnv, TestEnvStopper
-
-
-def log(*args, **kwargs):
-    """Logging to stdout with flushing"""
-    print(*args, **kwargs)
-    sys.stdout.flush()
+from testenv import TestEnv, TestEnvStopper, log
 
 
 parser = argparse.ArgumentParser("test script")

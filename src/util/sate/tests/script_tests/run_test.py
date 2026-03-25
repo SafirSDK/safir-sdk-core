@@ -24,12 +24,7 @@
 #
 ###############################################################################
 import os, sys, argparse, socket, glob, logging, uuid, time
-from testenv import TestEnv, TestEnvStopper
-
-def log(*args, **kwargs):
-    """Logging to stdout with flushing"""
-    print(*args, **kwargs)
-    sys.stdout.flush()
+from testenv import TestEnv, TestEnvStopper, log
 
 log_dir = os.path.normpath(os.path.join(os.getcwd(), "sate_output"))
 for f in glob.glob(os.path.join(log_dir, "*")): os.remove(f)

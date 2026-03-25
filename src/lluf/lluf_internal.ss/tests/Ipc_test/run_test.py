@@ -27,6 +27,9 @@ from inspect import currentframe
 import subprocess, os, time, sys, datetime
 import argparse
 
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "..", "..", "tests", "test_support", "python"))
+from output import log
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='unit test script')
     parser.add_argument("--subscriber-exe", required=True)
@@ -34,10 +37,6 @@ def parse_arguments():
     return parser.parse_args()
 
 args = parse_arguments()
-
-def log(*args, **kwargs):
-    print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)
-    sys.stdout.flush()
 
 
 def kill(proc):

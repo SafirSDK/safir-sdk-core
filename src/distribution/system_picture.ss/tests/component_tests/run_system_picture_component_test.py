@@ -39,6 +39,10 @@ import json
 import logging
 import uuid
 import itertools
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "..", "tests", "test_support", "python"))
+from output import log
+
 FORMATTER = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
 class Failure(Exception):
@@ -96,11 +100,6 @@ def enqueue_output(out, logger, ctrl_queue, main_queue):
     if main_queue is not None:
         main_queue.put(None)
     out.close()
-
-
-def log(*args, **kwargs):
-    print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)
-    sys.stdout.flush()
 
 
 def rmdir(directory):

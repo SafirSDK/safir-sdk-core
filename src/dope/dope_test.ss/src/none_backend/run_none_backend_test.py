@@ -24,12 +24,7 @@
 #
 ###############################################################################
 import subprocess, os, time, sys, shutil, glob, argparse, re
-from testenv import TestEnv, TestEnvStopper
-
-
-def log(data):
-    print(data)
-    sys.stdout.flush()
+from testenv import TestEnv, TestEnvStopper, log
 
 
 env = None

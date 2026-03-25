@@ -29,12 +29,7 @@ import asyncio
 import json
 from urllib import request, error
 import websockets
-from testenv import TestEnv, TestEnvStopper
-
-
-def log(*args, **kwargs):
-    print(*args, **kwargs)
-    sys.stdout.flush()
+from testenv import TestEnv, TestEnvStopper, log
 
 
 def parse_arguments():

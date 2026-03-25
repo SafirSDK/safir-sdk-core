@@ -25,10 +25,8 @@
 ###############################################################################
 import subprocess, os, time, sys, signal, argparse, re
 
-
-def log(*args, **kwargs):
-    print(*args, **kwargs)
-    sys.stdout.flush()
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "..", "tests", "test_support", "python"))
+from output import out as log
 
 
 def string_in_output(string, output):

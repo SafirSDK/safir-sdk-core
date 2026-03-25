@@ -25,7 +25,7 @@
 ###############################################################################
 import subprocess, os, time, sys, signal, re, argparse
 import syslog_server
-from safe_print import *
+from output import out
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--binary", required=True)
@@ -46,11 +46,11 @@ syslog_output = syslog.get_data(1)
 
 
 def fail(message):
-    print("Failed! Wrong number of", message)
-    print("STDOUT OUTPUT:")
-    safe_print(stdout_output)
-    print("SYSLOG OUTPUT:")
-    safe_print(syslog_output)
+    out("Failed! Wrong number of", message)
+    out("STDOUT OUTPUT:")
+    out(stdout_output)
+    out("SYSLOG OUTPUT:")
+    out(syslog_output)
     sys.exit(1)
 
 
@@ -84,5 +84,5 @@ if syslog_output.count(u"brynanuppafjässasponken|Don't know\u203d|Testing funny
 if len(stdout_output) != 0:
     fail("Unexpected output on stdout")
 
-print("success")
+out("success")
 sys.exit(0)

@@ -56,7 +56,7 @@ def launch_node(args, safir_instance, node_id, first_node):
         session_id = str(uuid.uuid4())
         # os.environ["SAFIR_COM_NETWORK_SIMULATION"] = session_id # Enable network simulation
         os.environ["SAFIR_INSTANCE"] = str(safir_instance)
-        print("--- Launching node", str(node_id))
+        log("--- Launching node", str(node_id))
         env = TestEnv(args.safir_control,
                     args.dose_main,
                     args.dope_main if first_node else None,
@@ -89,16 +89,16 @@ def parse_arguments():
 async def start_two_nodes_as_same_instance(args):
     with test_case("start_two_nodes_as_same_instance"),\
         launch_node(args, safir_instance=1, node_id=1, first_node=True) as node1:
-        print(" node1 is started")
+        log(" node1 is started")
         
         with launch_node(args, safir_instance=1, node_id=2, first_node=False) as node2:
-            print(" node2 is started with the same SAFIR_INSTANCE as node1")
+            log(" node2 is started with the same SAFIR_INSTANCE as node1")
             await asyncio.sleep(5)
             if node2.SafirControlRunning():
-                print("  node2 is still alive but was expected to terminate")
+                log("  node2 is still alive but was expected to terminate")
                 raise AssertionError("node2 is still alive but was expected to terminate, test failed!")
             else:
-                print("  node2 has terminated just as expected, test succeeded!")
+                log("  node2 has terminated just as expected, test succeeded!")
 
 # ===========================================
 # main

@@ -25,12 +25,7 @@
 ###############################################################################
 import os, sys, argparse, time
 #pylint: disable=E0401
-from testenv import TestEnv, TestEnvStopper
-
-
-def log(*args, **kwargs):
-    print(*args, **kwargs)
-    sys.stdout.flush()
+from testenv import TestEnv, TestEnvStopper, log
 
 
 parser = argparse.ArgumentParser("test script")

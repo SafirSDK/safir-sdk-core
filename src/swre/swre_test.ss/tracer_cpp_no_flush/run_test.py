@@ -28,7 +28,7 @@ import sys
 import argparse
 import syslog_server
 import time
-from safe_print import *
+from output import out
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--binary", required=True)
@@ -44,9 +44,9 @@ sender = subprocess.Popen((arguments.binary, "enable"))
 # Poll syslog for expected string
 while True:
     data = syslog.get_data(0.1)
-    safe_print(f"Got {len(data)} bytes of data from syslog")
+    out(f"Got {len(data)} bytes of data from syslog")
     if "Application is not flushing its tracers" in data:
         sender.kill()
         sender.wait()
-        safe_print("success")
+        out("success")
         sys.exit(0)

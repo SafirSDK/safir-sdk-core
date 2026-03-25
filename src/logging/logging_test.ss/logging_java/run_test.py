@@ -30,7 +30,7 @@ import argparse
 import shutil
 import re
 import syslog_server
-from safe_print import safe_print
+from output import out
 
 parser = argparse.ArgumentParser("test script for logging")
 parser.add_argument("--safir-show-config", required=True)
@@ -55,11 +55,11 @@ stdout_output = re.sub(r"Picked up _JAVA_OPTIONS: .*\n", "", stdout_output)
 
 def fail(message):
     """Utility function for printing errors and then exiting"""
-    print("Failed! Wrong number of ", message)
-    print("STDOUT OUTPUT:")
-    safe_print(stdout_output)
-    print("SYSLOG OUTPUT:")
-    safe_print(syslog_output)
+    out("Failed! Wrong number of ", message)
+    out("STDOUT OUTPUT:")
+    out(stdout_output)
+    out("SYSLOG OUTPUT:")
+    out(syslog_output)
     sys.exit(1)
 
 
@@ -90,5 +90,5 @@ if syslog_output.count("This is a debug log") != 3:
 if len(stdout_output) != 0:
     fail("Unexpected output on stdout")
 
-print("Found all expected output!")
+out("Found all expected output!")
 sys.exit(0)

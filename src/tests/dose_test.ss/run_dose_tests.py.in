@@ -39,14 +39,13 @@ import argparse
 import urllib.request
 import tempfile
 
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "test_support", "python"))
+from output import log
+
 NODE_IDS = {"server-0" : "999999",
             "server-1" : "888888",
             "client-0" : "77777",
             "client-1" : "66666"}
-
-def log(*args, **kwargs):
-    print(*args, **kwargs)
-    sys.stdout.flush()
 
 
 def rmdir(directory):
