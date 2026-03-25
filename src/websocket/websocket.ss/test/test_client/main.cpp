@@ -316,7 +316,7 @@ int main() {
             if (ec == websocket::error::closed)
             {
                 connectionClosed=true;
-                closeReason=ws.reason().reason;
+                closeReason = std::string(ws.reason().reason.data(), ws.reason().reason.size());
                 std::cout<<"OnClose "<<closeReason<<std::endl;
                 break;
             }

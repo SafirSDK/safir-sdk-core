@@ -31,8 +31,6 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Websocket/Typesystem/TypeHierarchy.h>
 
-#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
-
 #include "Typesystem.h"
 
 namespace sd = Safir::Dob;

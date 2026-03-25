@@ -26,7 +26,6 @@
 #include <boost/beast/websocket/error.hpp>
 #include <boost/beast/http.hpp>
 #include <Safir/Dob/Typesystem/Serialization.h>
-#include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 #include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/Typesystem/Convenience.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
