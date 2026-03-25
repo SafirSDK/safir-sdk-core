@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -38,8 +38,7 @@ DobConnection::DobConnection(boost::asio::io_context::strand& strand, std::funct
     :m_con()
     ,m_dispatcher(m_con, strand)
     ,m_wsSend(send)
-    ,m_responseSenderStore(static_cast<size_t>(sd::QueueParameters::QueueRules(0)->RequestInQueueCapacity().IsNull() ? 10
-                                               : sd::QueueParameters::QueueRules(0)->RequestInQueueCapacity().GetVal()))
+    ,m_responseSenderStore(static_cast<size_t>(sd::QueueParameters::QueueRules(0)->RequestInQueueCapacity().GetValOrDefault(10)))
     ,m_proxyToJson([this](ts::TypeId t){return GetName(t);},
                    [this](ts::TypeId t, const ts::HandlerId& h){return m_con.GetInstanceIdPolicy(t,h);})
 {
@@ -58,7 +57,7 @@ DobConnection::DobConnection(boost::asio::io_context::strand& strand, std::funct
 void DobConnection::OnCreateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
     lllog(5)<<"WS: OnCreateRequest"<<std::endl;
-    auto id=m_responseSenderStore.Add(responseSender);
+    auto id=m_responseSenderStore.Add(responseSender, entityRequestProxy.GetTypeId(), entityRequestProxy.GetReceivingHandlerId());
     auto req=JsonRpcRequest::Json(Methods::OnCreateRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::CreateReqType), JsonRpcId(id));
     m_wsSend(req);
 }
@@ -66,14 +65,14 @@ void DobConnection::OnCreateRequest(const sd::EntityRequestProxy entityRequestPr
 void DobConnection::OnUpdateRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
     lllog(5)<<"WS: OnUpdateRequest"<<std::endl;
-    auto id=m_responseSenderStore.Add(responseSender);
+    auto id=m_responseSenderStore.Add(responseSender, entityRequestProxy.GetTypeId(), entityRequestProxy.GetReceivingHandlerId());
     auto req=JsonRpcRequest::Json(Methods::OnUpdateRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::UpdateReqType), JsonRpcId(id));
     m_wsSend(req);
 }
 void DobConnection::OnDeleteRequest(const sd::EntityRequestProxy entityRequestProxy, sd::ResponseSenderPtr responseSender)
 {
     lllog(5)<<"WS: OnDeleteRequest"<<std::endl;
-    auto id=m_responseSenderStore.Add(responseSender);
+    auto id=m_responseSenderStore.Add(responseSender, entityRequestProxy.GetTypeId(), entityRequestProxy.GetReceivingHandlerId());
     auto req=JsonRpcRequest::Json(Methods::OnDeleteRequest, m_proxyToJson.ToJson(entityRequestProxy, ProxyToJson::DeleteReqType), JsonRpcId(id));
     m_wsSend(req);
 }
@@ -81,7 +80,7 @@ void DobConnection::OnDeleteRequest(const sd::EntityRequestProxy entityRequestPr
 void DobConnection::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
 {
     lllog(5)<<"WS: OnServiceRequest"<<std::endl;
-    auto id=m_responseSenderStore.Add(responseSender);
+    auto id=m_responseSenderStore.Add(responseSender, serviceRequestProxy.GetTypeId(), serviceRequestProxy.GetReceivingHandlerId());
     auto req=JsonRpcRequest::Json(Methods::OnServiceRequest, m_proxyToJson.ToJson(serviceRequestProxy), JsonRpcId(id));
     m_wsSend(req);
 }

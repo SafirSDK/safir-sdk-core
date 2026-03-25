@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -39,18 +39,19 @@
 
 namespace ws = Safir::Websocket;
 
-WebsocketServer::WebsocketServer(boost::asio::io_context& io)
-    :m_server()
-    ,m_io(io)
-    ,m_connectionsStrand(m_io)
-    ,m_work(boost::asio::make_work_guard(m_io))
-    ,m_connections()
-    ,m_signals(m_io)
-    ,m_dobConnection()
-    ,m_dobDispatcher(m_dobConnection, m_io)
+WebsocketServer::WebsocketServer(boost::asio::io_context& io,
+                                 const std::shared_ptr<DobConnectionRegistry>& dobConnectionRegistry)
+    : m_acceptor(io)
+    , m_io(io)
+    , m_dobConnectionRegistry(dobConnectionRegistry)
+    , m_connectionsStrand(m_io)
+    , m_work(boost::asio::make_work_guard(m_io))
+    , m_connections()
+    , m_signals(m_io)
+    , m_isTerminating(false)
+    , m_dobConnection()
+    , m_dobDispatcher(m_dobConnection, m_io)
 {
-    m_server.clear_access_channels(websocketpp::log::alevel::all);
-    m_server.clear_error_channels(websocketpp::log::alevel::all);
 #if defined (_WIN32)
     m_signals.add(SIGABRT);
     m_signals.add(SIGBREAK);
@@ -65,28 +66,14 @@ WebsocketServer::WebsocketServer(boost::asio::io_context& io)
 
 void WebsocketServer::Run()
 {
-    m_signals.async_wait([this](const boost::system::error_code&, int /*signal*/){Terminate();});
+    m_signals.async_wait([this](const boost::system::error_code&, int /*signal*/) { Terminate(); });
 
     lllog(5)<<"WS: Wait for DOB to let us open a connection..."<<std::endl;
     m_dobConnection.Open(L"safir_websocket", L"", 0, this, &m_dobDispatcher);
 
-    // Initialize ASIO
-    m_server.init_asio(&m_io);
-
-    //try to disable all logging from websocketpp, seems like info is still logging
-    m_server.set_access_channels(websocketpp::log::alevel::none);
-    m_server.set_reuse_addr(true);
-
-    m_server.set_open_handler([this](websocketpp::connection_hdl hdl)
-    {
-        auto con=std::make_shared<RemoteClient>(m_server, m_io, hdl, [this](const RemoteClient* con){OnConnectionClosed(con);});
-        OnConnectionOpen(con);
-        lllog(5)<<"WS: Server: new connection added: "<<con->ToString().c_str()<<std::endl;
-    });
-
     std::string ip="";
     unsigned short port=0;
-    if (!IpAddressHelper::SplitAddress(ts::Utilities::ToUtf8(ws::Parameters::ServerEndpoint()), ip, port))
+    if (!IpAddressHelper::SplitAddress(ts::Utilities::ToUtf8(ws::Parameters::WebsocketServerEndpoint()), ip, port))
     {
         lllog(5)<<"WS: ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl;
         SEND_SYSTEM_LOG(Error, <<"ServerEndpoint from configuration could not be parsed as a valid ip address and port. Expected format is <ip>:<port>"<<std::endl);
@@ -107,10 +94,40 @@ void WebsocketServer::Run()
         return;
     }
 
-    m_server.listen(serverTcpEndpoint);
+    boost::system::error_code ec;
+    m_acceptor.open(serverTcpEndpoint.protocol(), ec);
+    if (ec)
+    {
+        lllog(5) << "WS: Could not open server acceptor. " << ec << std::endl;
+        SEND_SYSTEM_LOG(Error, << "Could not open server acceptor. " << ec << std::endl);
+        return;
+    }
 
-    // Start the server accept loop
-    m_server.start_accept();
+    m_acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), ec);
+    if (ec)
+    {
+        lllog(5) << "WS: Could not set reuse_address on server acceptor. " << ec << std::endl;
+        SEND_SYSTEM_LOG(Error, << "Could not set reuse_address on server acceptor. " << ec << std::endl);
+        return;
+    }
+
+    m_acceptor.bind(serverTcpEndpoint, ec);
+    if (ec)
+    {
+        lllog(5) << "WS: Could not bind server acceptor. " << ec << std::endl;
+        SEND_SYSTEM_LOG(Error, << "Could not bind server acceptor. " << ec << std::endl);
+        return;
+    }
+
+    m_acceptor.listen(boost::asio::socket_base::max_listen_connections, ec);
+    if (ec)
+    {
+        lllog(5) << "WS: Could not listen on server acceptor. " << ec << std::endl;
+        SEND_SYSTEM_LOG(Error, << "Could not listen on server acceptor. " << ec << std::endl);
+        return;
+    }
+
+    StartAccept();
 
     lllog(5)<<"WS: Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<":"<<serverTcpEndpoint.port()<<std::endl;
     std::wcout<<L"Running ws server on "<<serverTcpEndpoint.address().to_string().c_str()<<L":"<<serverTcpEndpoint.port()<<std::endl;
@@ -118,9 +135,20 @@ void WebsocketServer::Run()
 
 void WebsocketServer::Terminate()
 {
+    if (m_isTerminating)
+    {
+        return;
+    }
+
+    m_isTerminating = true;
     lllog(5)<<"WS: safir_websocket is starting to shut down..."<<std::endl;
-    //stop accepting new connections
-    m_server.stop_listening();
+
+    boost::system::error_code signalsEc;
+    m_signals.cancel(signalsEc);
+
+    boost::system::error_code ec;
+    m_acceptor.cancel(ec);
+    m_acceptor.close(ec);
 
     //close this dob connection
     if (m_dobConnection.IsOpen())
@@ -144,10 +172,51 @@ void WebsocketServer::Terminate()
     shutDownTimer->expires_after(std::chrono::milliseconds(500));
     shutDownTimer->async_wait([this, shutDownTimer](const boost::system::error_code&)
     {
-        boost::asio::post(m_connectionsStrand, [this]{m_server.stop();});
+        boost::asio::post(m_connectionsStrand, [this]
+        {
+            boost::system::error_code localEc;
+            m_acceptor.cancel(localEc);
+            m_acceptor.close(localEc);
+        });
+
+        m_io.stop();
     });
 
     lllog(5)<<"WS: all connections closed..."<<std::endl;
+}
+
+void WebsocketServer::StartAccept()
+{
+    m_acceptor.async_accept([this](const boost::system::error_code& ec, boost::asio::ip::tcp::socket socket)
+    {
+        if (m_isTerminating)
+        {
+            return;
+        }
+
+        if (ec)
+        {
+            if (ec != boost::asio::error::operation_aborted)
+            {
+                lllog(5) << "WS: Error while accepting websocket connection: " << ec << std::endl;
+                SEND_SYSTEM_LOG(Error, << "Error while accepting websocket connection: " << ec << std::endl);
+            }
+        }
+        else
+        {
+            auto con = std::make_shared<RemoteClient>(m_io, std::move(socket), m_dobConnectionRegistry, [this](const RemoteClient* client) { OnConnectionClosed(client); });
+            con->Start([this, con](bool started)
+            {
+                if (started)
+                {
+                    OnConnectionOpen(con);
+                    lllog(5) << "WS: Server: new connection added: " << con->ToString().c_str() << std::endl;
+                }
+            });
+        }
+
+        StartAccept();
+    });
 }
 
 void WebsocketServer::OnConnectionOpen(const std::shared_ptr<RemoteClient>& con)

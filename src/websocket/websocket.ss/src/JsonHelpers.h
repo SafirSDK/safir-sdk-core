@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -44,6 +44,26 @@ namespace ts = Safir::Dob::Typesystem;
 
 namespace JsonHelpers
 {
+    template <class T>
+    std::shared_ptr<T> ToObject(const std::string& json)
+    {
+        try
+        {
+            auto obj = ts::Internal::ToObjectFromJson(json);
+            auto ptr = std::dynamic_pointer_cast<T>(obj);
+            if (ptr)
+            {
+                return ptr;
+            }
+        }
+        catch (...)
+        {
+            throw std::invalid_argument("The JSON serialized Safir.Dob.Object (Entity/Message/Service/Response) could not be parsed.");
+        }
+
+        throw std::invalid_argument("The JSON serialized Safir.Dob.Object is not of correct type (Entity/Message/Service/Response).");
+    }
+
     template <class T>
     std::ostream& AddHashedVal(std::ostream& os, const T& hash)
     {

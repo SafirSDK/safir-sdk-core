@@ -2829,12 +2829,17 @@ Upon receiving a stop order the application shall shut down gracefully.
 When an application has several connections to the Dob, only one of them should supply a StopHandler. It is the handler of this connections responsibility to tell the other parts of the application to shut down gracefully. If several connections have stop handlers there may be race conditions, since there is no guaranteed order between which stop handler gets called first.
 
 [[safir_websocket]]
-== Safir WebSocket/JSON-RPC interface
+== Safir WebSocket/JSON-RPC and REST interfaces
+Safir SDK Core provides two HTTP-based interfaces as alternatives to the traditional language interfaces: a JSON-RPC interface over WebSockets and a REST API over plain HTTP. Both interfaces expose most of the common Dob features and require no runtime libraries to be installed, making Safir accessible from virtually any language or platform, including web browsers and mobile apps.
+
+Both interfaces are provided by the same executable, _safir_websocket_. The WebSocket server endpoint and the REST server endpoint are configured separately in _Safir.Websocket.Parameters.dou_.
+
+=== WebSocket/JSON-RPC interface
 From version 6.3 of Safir SDK Core, a JSON-RPC interface over WebSockets is provided as an alternative to the traditional language interfaces. The interface is an implementation of the JSON-RPC specification 2.0 (http://www.jsonrpc.org/specification) and uses WebSockets https://tools.ietf.org/html/rfc6455[(RFC 6455)] as carrier.
 Most of the common Dob features are available such as subscribing to entities and messages, sending messages, sending and handling requests, registering as a handler of entities, and some typesystem operations.
 If you are not familiair with JSON-RPC, It is strongly recomended to read the JSON-RPC 2.0 Specification. Its a simple protocol and the specification is short and easy to read, it won’t take more than about 10 minutes to read it.
 
-The API is explained in full detail in <<websocket_api_reference>>, but basically the API consists of 3 types of messages:
+The WebSocket API is explained in full detail in <<websocket_api_reference>>, but basically the API consists of 3 types of messages:
 
 * Requests - sent from client to server.
 * Responses - sent from server to client as a response to a request.
@@ -2842,9 +2847,20 @@ The API is explained in full detail in <<websocket_api_reference>>, but basicall
 
 The pros of using the WebSocket/JSON-RPC interface is that no runtime libraries has to be installed, and the interface is accessible from any language or platform that supports WebSockets. That makes Safir available almost everywhere including web browsers and mobile apps.
 
-The cons are worse performance and that you don't get access to the most advanced features. The programming model may also be a bit awkward in some situations.
+The cons are worse performance and that you don’t get access to the most advanced features. The programming model may also be a bit awkward in some situations.
 
-The functioality described above is provided by the executable _safir_websocket_. It has a configuration file Safir.Websocket.Parameters.dou where the ip address and port for the server is set.
+=== REST interface
+From version 6.4 of Safir SDK Core, a REST API is provided alongside the WebSocket/JSON-RPC interface. The REST API is a stateless HTTP interface that maps Dob operations onto conventional HTTP verbs and URL paths. All request and response bodies are JSON.
+
+The REST API covers the same core set of Dob operations as the WebSocket interface — reading, setting and deleting entities, sending messages, issuing requests, registering handlers, and managing subscriptions — but does not support server-push notifications. Clients that need to receive events (such as entity change notifications or messages) must still use the WebSocket/JSON-RPC interface.
+
+The two interfaces share the same underlying Dob connections: a Dob connection that has been opened via the WebSocket `open` method is identified by its `connectionName`, which becomes the `{connectionId}` path segment in every REST request targeting that connection.
+
+The REST API is explained in full detail in <<rest_api_reference>>.
+
+The pros of the REST interface are that it is simple and familiar to any developer who has worked with HTTP APIs, and that it integrates easily with standard HTTP tools and libraries.
+
+The cons are that push notifications are not available, and performance is lower than the native language interfaces.
 
 [[configuration]]
 == Configuration
@@ -4857,6 +4873,16 @@ WebSocket/JSON-RPC Api reference is located in a separate file, websocket_api_re
 ////
 
 include::websocket_api_reference.txt[]
+
+[[rest_api_reference]]
+[appendix]
+== Dob REST API reference
+
+////
+REST API reference is located in a separate file, rest_api_reference.txt
+////
+
+include::rest_api_reference.txt[]
 
 [[faq]]
 [appendix]

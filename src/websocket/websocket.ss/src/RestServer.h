@@ -23,37 +23,32 @@
 ******************************************************************************/
 #pragma once
 
-#include <iostream>
+#include <memory>
 #include <string>
-#include <cstdint>
+#include <utility>
+#include <boost/asio.hpp>
+#include <boost/asio/ip/tcp.hpp>
 
-class JsonRpcId
+class DobConnectionRegistry;
+class DobConnection;
+
+class RestServer
 {
 public:
-    JsonRpcId() : m_type(0) {}
-    JsonRpcId(std::int64_t id) : m_type(1), m_i(id) {}
-    JsonRpcId(const std::string& id) : m_type(2), m_s(id) {}
+    RestServer(boost::asio::io_context& io,
+               const std::shared_ptr<DobConnectionRegistry>& dobConnectionRegistry);
 
-    bool IsNull() const {return m_type==0;}
-    bool HasInt() const {return m_type==1;}
-    bool HasStr() const {return m_type==2;}
-
-    std::int64_t Int() const {return m_i;}
-    const std::string& String() const {return m_s;}
+    void Run();
+    void Terminate();
 
 private:
-    int m_type; //0=null, 1=int, 2=str
-    std::int64_t m_i;
-    std::string m_s;
-};
+    std::shared_ptr<DobConnectionRegistry> m_dobConnectionRegistry;
+    boost::asio::ip::tcp::acceptor m_acceptor;
+    bool m_isRunning;
+    bool m_isTerminating;
 
-inline std::ostream& operator<<(std::ostream& os, const JsonRpcId& id)
-{
-    if (id.HasStr())
-        os<<"\"id\":\""<<id.String()<<"\"";
-    else if (id.HasInt())
-        os<<"\"id\":"<<id.Int();
-    else
-        os<<"\"id\":null";
-    return os;
-}
+    void StartAccept();
+
+    RestServer(const RestServer&) = delete;
+    RestServer& operator=(const RestServer&) = delete;
+};

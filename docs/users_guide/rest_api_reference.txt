@@ -1,0 +1,618 @@
+This section contains an API reference describing the Safir REST interface.
+
+The REST API is a stateless HTTP/1.1 interface. All response bodies are JSON objects. Request bodies, where required,
+must be valid JSON and the `Content-Type` header should be set to `application/json`.
+
+The server responds with HTTP 200 on success and HTTP 400 on application-level errors. Error responses have the form:
+
+----------------------------
+{"error": "<human-readable message>"}
+----------------------------
+
+=== Connection management
+
+The REST API is stateless and does not provide its own `open` or `close` operations. Dob connections must be created
+via the WebSocket/JSON-RPC interface (using the `open` method). Once a connection has been opened its
+`connectionName` is used as the `{connectionId}` path segment in all REST requests that target that connection.
+
+=== Typesystem
+
+==== GET /typeHierarchy
+Get the entire DOU type hierarchy. This endpoint is only available when _EnableTypesystemCommands_ is set to
+_true_ in the WebSocket server configuration.
+
+Returns::
+ * `result` - An instance of Safir.Websocket.Typesystem.TypeHierarchy serialised as a JSON object.
+
+Example::
+----------------------------
+GET /typeHierarchy HTTP/1.1
+
+HTTP/1.1 200 OK
+{"result": {"_DouType": "Safir.Websocket.Typesystem.TypeHierarchy", "RootClass": {...}}}
+----------------------------
+
+=== Connection status
+
+==== GET /connections/{connectionId}/ping
+Test that the server is reachable and that the named connection exists.
+
+Returns::
+ * `result` - The string _"pong"_ on success.
+
+Example::
+----------------------------
+GET /connections/myApp/ping HTTP/1.1
+
+HTTP/1.1 200 OK
+{"result": "pong"}
+----------------------------
+
+==== GET /connections/{connectionId}/isOpen
+Check whether the named Dob connection is currently open.
+
+Returns::
+ * `isOpen` - _true_ or _false_.
+
+Example::
+----------------------------
+GET /connections/myApp/isOpen HTTP/1.1
+
+HTTP/1.1 200 OK
+{"isOpen": true}
+----------------------------
+
+=== Entities
+
+==== GET /connections/{connectionId}/entities/{typeId}/{instanceId}
+Read the current state of an entity instance from the Dob.
+
+Path parameters::
+ * `typeId` - Fully qualified type name or numeric type id of the entity type.
+ * `instanceId` - Instance id. May be a 64-bit integer or a string (hashed automatically).
+
+Returns::
+ * `entity` - The entity as a JSON object.
+
+Example::
+----------------------------
+GET /connections/myApp/entities/Test.MyEntity/1 HTTP/1.1
+
+HTTP/1.1 200 OK
+{"entity": {"_DouType": "Test.MyEntity", "Val1": "foo"}}
+----------------------------
+
+==== GET /connections/{connectionId}/entities/{typeId}/{instanceId}/isCreated
+Check whether a specific entity instance exists in the Dob.
+
+Path parameters::
+ * `typeId` - Type name or numeric type id.
+ * `instanceId` - Instance id.
+
+Returns::
+ * `result` - _true_ or _false_.
+
+Example::
+----------------------------
+GET /connections/myApp/entities/Test.MyEntity/1/isCreated HTTP/1.1
+
+HTTP/1.1 200 OK
+{"result": true}
+----------------------------
+
+==== GET /connections/{connectionId}/entities/{typeId}/instances
+Get a list of all existing instance ids of an entity type.
+
+Path parameters::
+ * `typeId` - Type name or numeric type id.
+
+Returns::
+ * `result` - A JSON array of instance ids.
+
+Example::
+----------------------------
+GET /connections/myApp/entities/Test.MyEntity/instances HTTP/1.1
+
+HTTP/1.1 200 OK
+{"result": [1, 2, 3]}
+----------------------------
+
+==== GET /connections/{connectionId}/entities/{typeId}/instanceIdPolicy
+Get the instance id policy for a type and handler.
+
+Path parameters::
+ * `typeId` - Type name or numeric type id.
+
+Query parameters::
+ * `handler` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
+
+Returns::
+ * `result` - A string that is either _RequestorDecidesInstanceId_ or _HandlerDecidesInstanceId_.
+
+Example::
+----------------------------
+GET /connections/myApp/entities/Test.MyEntity/instanceIdPolicy HTTP/1.1
+
+HTTP/1.1 200 OK
+{"result": "RequestorDecidesInstanceId"}
+----------------------------
+
+==== GET /connections/{connectionId}/entities/{typeId}/count
+Get the number of existing instances of an entity type.
+
+Path parameters::
+ * `typeId` - Type name or numeric type id.
+
+Query parameters::
+ * `handler` - Only count instances owned by this handler. _([small]*Default:* ALL_HANDLERS)_
+ * `includeSubclasses` - Also count instances of subclasses. _([small]*Default:* true)_
+
+Returns::
+ * `result` - Number of instances as an integer.
+
+Example::
+----------------------------
+GET /connections/myApp/entities/Test.MyEntity/count HTTP/1.1
+
+HTTP/1.1 200 OK
+{"result": 42}
+----------------------------
+
+==== PUT /connections/{connectionId}/entities/{typeId}/{instanceId}
+Create or fully replace an entity instance in the Dob. No merge is performed; members not present in the body
+will be set to null.
+
+Path parameters::
+ * `typeId` - Type name or numeric type id.
+ * `instanceId` - Instance id.
+
+Query parameters::
+ * `handler` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
+
+Request body::
+ * Entity JSON object.
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+PUT /connections/myApp/entities/Test.MyEntity/1 HTTP/1.1
+Content-Type: application/json
+
+{"_DouType": "Test.MyEntity", "Val1": "foo", "Val2": "bar"}
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== PATCH /connections/{connectionId}/entities/{typeId}/{instanceId}
+Merge changes into an existing entity instance. Only the members present in the request body are updated;
+absent members are left unchanged. To explicitly set a member to null, include it in the body with a null value.
+Note that for arrays the entire array must be specified since JSON arrays do not have indices.
+
+Path parameters::
+ * `typeId` - Type name or numeric type id.
+ * `instanceId` - Instance id.
+
+Query parameters::
+ * `handler` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
+
+Request body::
+ * Partial entity JSON object containing only the members to change.
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+PATCH /connections/myApp/entities/Test.MyEntity/1 HTTP/1.1
+Content-Type: application/json
+
+{"_DouType": "Test.MyEntity", "Val1": "updated"}
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== DELETE /connections/{connectionId}/entities/{typeId}/{instanceId}
+Delete a single entity instance from the Dob.
+
+Path parameters::
+ * `typeId` - Type name or numeric type id.
+ * `instanceId` - Instance id.
+
+Query parameters::
+ * `handler` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+DELETE /connections/myApp/entities/Test.MyEntity/1 HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== DELETE /connections/{connectionId}/entities/{typeId}
+Delete all owned instances of an entity type.
+
+Path parameters::
+ * `typeId` - Type name or numeric type id.
+
+Query parameters::
+ * `handler` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+DELETE /connections/myApp/entities/Test.MyEntity HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+=== Handlers
+
+==== PUT /connections/{connectionId}/handlers/entities/{typeId}
+Register an entity handler.
+
+Path parameters::
+ * `typeId` - Entity type name or numeric type id.
+
+Query parameters::
+ * `handler` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
+ * `instanceIdPolicy` - Who decides instance ids. Either _RequestorDecidesInstanceId_ or _HandlerDecidesInstanceId_. _([small]*Default:* RequestorDecidesInstanceId)_
+ * `injectionHandler` - Whether the handler handles injections. _([small]*Default:* false)_
+ * `pending` - Whether this is a pending registration. _([small]*Default:* false)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+PUT /connections/myApp/handlers/entities/Test.MyEntity HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== PUT /connections/{connectionId}/handlers/services/{typeId}
+Register a service handler.
+
+Path parameters::
+ * `typeId` - Service type name or numeric type id.
+
+Query parameters::
+ * `handler` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
+ * `pending` - Whether this is a pending registration. _([small]*Default:* false)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+PUT /connections/myApp/handlers/services/Test.MyService HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== DELETE /connections/{connectionId}/handlers/{typeId}
+Unregister an entity or service handler.
+
+Path parameters::
+ * `typeId` - Type name or numeric type id.
+
+Query parameters::
+ * `handler` - Id of the handler to unregister. _([small]*Default:* ALL_HANDLERS)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+DELETE /connections/myApp/handlers/Test.MyEntity HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+=== Subscriptions
+
+==== PUT /connections/{connectionId}/subscriptions/entities/{typeId}
+Subscribe for entity state changes.
+
+Path parameters::
+ * `typeId` - Entity type name or numeric type id.
+
+Query parameters::
+ * `instanceId` - Subscribe for a specific instance only. Not allowed together with `includeSubclasses`. _([small]*Default:* ALL_INSTANCES)_
+ * `includeUpdates` - Receive notifications when an entity is updated. _([small]*Default:* true)_
+ * `restartSubscription` - Trigger an initial `onNewEntity` for all already existing instances. _([small]*Default:* true)_
+ * `includeSubclasses` - Also subscribe for subclasses of the specified type. Not allowed together with `instanceId`. _([small]*Default:* true)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+PUT /connections/myApp/subscriptions/entities/Test.MyEntity HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+NOTE: Entity change notifications are delivered as WebSocket notifications (`onNewEntity`, `onUpdatedEntity`,
+`onDeletedEntity`) on the WebSocket connection that owns the Dob connection. The REST API itself does not push
+notifications.
+
+==== DELETE /connections/{connectionId}/subscriptions/entities/{typeId}
+Unsubscribe from entity state changes.
+
+Path parameters::
+ * `typeId` - Entity type name or numeric type id.
+
+Query parameters::
+ * `instanceId` - Unsubscribe for a specific instance only. Not allowed together with `includeSubclasses`. _([small]*Default:* ALL_INSTANCES)_
+ * `includeSubclasses` - Also unsubscribe for subclasses of the specified type. Not allowed together with `instanceId`. _([small]*Default:* true)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+DELETE /connections/myApp/subscriptions/entities/Test.MyEntity HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== PUT /connections/{connectionId}/subscriptions/messages/{typeId}
+Subscribe for messages.
+
+Path parameters::
+ * `typeId` - Message type name or numeric type id.
+
+Query parameters::
+ * `channel` - Channel to subscribe on. _([small]*Default:* ALL_CHANNELS)_
+ * `includeSubclasses` - Also subscribe for subclasses of the specified type. _([small]*Default:* true)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+PUT /connections/myApp/subscriptions/messages/Test.MyMessage HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+NOTE: Messages are delivered as WebSocket notifications (`onMessage`) on the WebSocket connection that owns
+the Dob connection.
+
+==== DELETE /connections/{connectionId}/subscriptions/messages/{typeId}
+Unsubscribe from messages.
+
+Path parameters::
+ * `typeId` - Message type name or numeric type id.
+
+Query parameters::
+ * `channel` - Channel to unsubscribe from. _([small]*Default:* ALL_CHANNELS)_
+ * `includeSubclasses` - Also unsubscribe for subclasses of the specified type. _([small]*Default:* true)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+DELETE /connections/myApp/subscriptions/messages/Test.MyMessage HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== PUT /connections/{connectionId}/subscriptions/registrations/{typeId}
+Subscribe for handler registrations of entities and services.
+
+Path parameters::
+ * `typeId` - Entity or service type name or numeric type id.
+
+Query parameters::
+ * `handler` - Handler of interest. _([small]*Default:* ALL_HANDLERS)_
+ * `includeSubclasses` - Also subscribe for subclasses of the specified type. _([small]*Default:* true)_
+ * `restartSubscription` - Trigger an initial `onRegistered` for all already registered handlers. _([small]*Default:* true)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+PUT /connections/myApp/subscriptions/registrations/Test.MyService HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+NOTE: Registration change notifications are delivered as WebSocket notifications (`onRegistered`,
+`onUnregistered`) on the WebSocket connection that owns the Dob connection.
+
+==== DELETE /connections/{connectionId}/subscriptions/registrations/{typeId}
+Unsubscribe from handler registrations.
+
+Path parameters::
+ * `typeId` - Entity or service type name or numeric type id.
+
+Query parameters::
+ * `handler` - Handler of interest. _([small]*Default:* ALL_HANDLERS)_
+ * `includeSubclasses` - Also unsubscribe for subclasses of the specified type. _([small]*Default:* true)_
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+DELETE /connections/myApp/subscriptions/registrations/Test.MyService HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+=== Messages
+
+==== POST /connections/{connectionId}/messages/{typeId}
+Send a message on a channel.
+
+Path parameters::
+ * `typeId` - Message type name or numeric type id.
+
+Query parameters::
+ * `channel` - Channel to send on. _([small]*Default:* DEFAULT_CHANNEL)_
+
+Request body::
+ * Message JSON object.
+
+Returns::
+ * `status` - The string _"OK"_ on success.
+
+Example::
+----------------------------
+POST /connections/myApp/messages/Test.MyMessage HTTP/1.1
+Content-Type: application/json
+
+{"_DouType": "Test.MyMessage", "Text": "Hello"}
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+=== Requests
+
+NOTE: The REST interface sends requests fire-and-forget; the response from the handler is not returned to the
+HTTP caller. The HTTP response only confirms that the request was accepted by the Dob. If the request result is
+needed, use the WebSocket/JSON-RPC interface instead.
+
+==== POST /connections/{connectionId}/requests/entities/{typeId}
+Send an entity create request to a handler.
+
+Path parameters::
+ * `typeId` - Entity type name or numeric type id.
+
+Query parameters::
+ * `handler` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
+ * `instanceId` - Requested instance id. Only allowed when the `instanceIdPolicy` is _RequestorDecidesInstanceId_.
+
+Request body::
+ * Entity JSON object to create.
+
+Returns::
+ * `status` - The string _"OK"_ when the request was accepted.
+
+Example::
+----------------------------
+POST /connections/myApp/requests/entities/Test.MyEntity HTTP/1.1
+Content-Type: application/json
+
+{"_DouType": "Test.MyEntity", "Val1": "foo"}
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== POST /connections/{connectionId}/requests/entities/{typeId}/{instanceId}/update
+Send an entity update request to the registered handler.
+
+Path parameters::
+ * `typeId` - Entity type name or numeric type id.
+ * `instanceId` - Instance id of the entity to update.
+
+Request body::
+ * Partial entity JSON object. Only the members present are considered part of the update. For arrays the
+   entire array must be specified.
+
+Returns::
+ * `status` - The string _"OK"_ when the request was accepted.
+
+Example::
+----------------------------
+POST /connections/myApp/requests/entities/Test.MyEntity/1/update HTTP/1.1
+Content-Type: application/json
+
+{"_DouType": "Test.MyEntity", "Val1": "changed"}
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== POST /connections/{connectionId}/requests/entities/{typeId}/{instanceId}/delete
+Send an entity delete request to the registered handler.
+
+Path parameters::
+ * `typeId` - Entity type name or numeric type id.
+ * `instanceId` - Instance id of the entity to delete.
+
+Returns::
+ * `status` - The string _"OK"_ when the request was accepted.
+
+Example::
+----------------------------
+POST /connections/myApp/requests/entities/Test.MyEntity/1/delete HTTP/1.1
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+==== POST /connections/{connectionId}/requests/services/{typeId}
+Send a service request to a handler.
+
+Path parameters::
+ * `typeId` - Service type name or numeric type id.
+
+Query parameters::
+ * `handler` - Id of the handler. _([small]*Default:* DEFAULT_HANDLER)_
+
+Request body::
+ * Service request JSON object.
+
+Returns::
+ * `status` - The string _"OK"_ when the request was accepted.
+
+Example::
+----------------------------
+POST /connections/myApp/requests/services/Test.MyService HTTP/1.1
+Content-Type: application/json
+
+{"_DouType": "Test.MyService", "SomeValue": 100}
+
+HTTP/1.1 200 OK
+{"status": "OK"}
+----------------------------
+
+=== Errors
+When an application-level error occurs the server responds with HTTP 400 and a JSON body containing an `error`
+field with a human-readable description:
+
+----------------------------
+HTTP/1.1 400 Bad Request
+{"error": "typeId must refer to a subtype of Safir.Dob.Entity"}
+----------------------------
+
+An HTTP 404 is returned when the requested endpoint path is not recognized, or when an unknown `connectionId`
+is used:
+
+----------------------------
+HTTP/1.1 404 Not Found
+{"error": "Unknown connectionId"}
+----------------------------
+
+An HTTP 405 is returned when the HTTP verb used is not supported for the targeted endpoint:
+
+----------------------------
+HTTP/1.1 405 Method Not Allowed
+{"error": "Method not allowed for this endpoint"}
+----------------------------

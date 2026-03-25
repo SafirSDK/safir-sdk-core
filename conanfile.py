@@ -7,11 +7,7 @@ class SafirSdkCoreConan(ConanFile):
     """ Conan stuff for Safir SDK Core """
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps"
-    default_options = {"websocketpp/*:asio": False,
-                       "websocketpp/*:with_openssl": False,
-                       "websocketpp/*:with_zlib":False,
-
-                       "protobuf/*:lite":True,
+    default_options = {"protobuf/*:lite":True,
                        "protobuf/*:shared":False,
                        "protobuf/*:with_zlib":False,
 
@@ -109,7 +105,6 @@ class SafirSdkCoreConan(ConanFile):
                 copy(self, "ninja.exe", src=dep.cpp_info.bindirs[0], dst=os.path.join(self.build_folder, "bin"))
 
     def requirements(self):
-        self.requires("websocketpp/0.8.2")
         self.requires("rapidjson/cci.20230929")
         self.requires("ninja/1.13.0")
         self.requires("qt-advanced-docking-system/4.4.1")

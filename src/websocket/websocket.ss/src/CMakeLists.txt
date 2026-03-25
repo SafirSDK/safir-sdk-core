@@ -1,6 +1,11 @@
 file(GLOB headers *.h)
 file(GLOB sources *.cpp)
 
+list(APPEND headers DobConnectionRegistry.h)
+list(APPEND sources DobConnectionRegistry.cpp)
+list(APPEND headers RestServer.h)
+list(APPEND sources RestServer.cpp)
+
 add_executable(safir_websocket ${sources} ${headers})
 
 target_link_libraries(safir_websocket PRIVATE
@@ -10,6 +15,6 @@ target_link_libraries(safir_websocket PRIVATE
   dots_internal
   lluf_internal
   rapidjson
-  websocketpp::websocketpp)
+  Boost::boost)
 
 SAFIR_INSTALL(TARGETS safir_websocket)

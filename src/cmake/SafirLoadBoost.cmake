@@ -34,7 +34,6 @@ endif()
 #Boost Asio strands can share the same implementation instance which means that hanging or long running operations can potentially block
 #other strands. This symbol will make the first 193 strands unique and therefor in practice avoid any shared instances.
 ADD_DEFINITIONS(-DBOOST_ASIO_ENABLE_SEQUENTIAL_STRAND_ALLOCATION)
-#ADD_DEFINITIONS(-DBOOST_ASIO_NO_DEPRECATED) # We cant use this until websocketpp have upgraded to newer boost asio
 ADD_DEFINITIONS(-DBOOST_ALLOW_DEPRECATED_HEADERS) #system picture still has some old asio stuff
 
 #dont use autolinking with boost

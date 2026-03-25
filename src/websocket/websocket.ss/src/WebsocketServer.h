@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -27,33 +27,36 @@
 #include <set>
 #include <boost/asio.hpp>
 #include <boost/asio/signal_set.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include "RemoteClient.h"
 
-//websocketpp stuff is already included in RemoteClient.h, and to avoid duplicating
-//all the msvc warning stuff we depend on that.
+class DobConnectionRegistry;
 
 class WebsocketServer : public sd::StopHandler
 {
 public:
-    WebsocketServer(boost::asio::io_context& io);
+    WebsocketServer(boost::asio::io_context& io,
+                    const std::shared_ptr<DobConnectionRegistry>& dobConnectionRegistry);
 
     void Run();
     void Terminate();
 
 private:
-    typedef websocketpp::server<websocketpp::config::asio> WsServer;
-    typedef WsServer::connection_ptr WsConnection;
-    WsServer m_server;
+    typedef boost::asio::ip::tcp::acceptor TcpAcceptor;
+    TcpAcceptor m_acceptor;
     boost::asio::io_context& m_io;
+    std::shared_ptr<DobConnectionRegistry> m_dobConnectionRegistry;
     boost::asio::io_context::strand m_connectionsStrand;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     std::set<std::shared_ptr<RemoteClient> > m_connections;
     boost::asio::signal_set m_signals;
+    bool m_isTerminating;
 
     //own DOB connection
     sd::Connection m_dobConnection;
     Safir::Utilities::AsioDispatcher m_dobDispatcher;
 
+    void StartAccept();
     void OnConnectionOpen(const std::shared_ptr<RemoteClient>& con);
     void OnConnectionClosed(const RemoteClient* con);
 

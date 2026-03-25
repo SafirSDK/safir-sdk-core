@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -86,6 +86,7 @@ private:
 
     void HandlerSetupReady()
     {
+        std::cout << ""<<"Handler setup is ready, starting users..."<<std::endl;
         m_ioContext.post([this]
         {
             while (m_userCount<m_numSimultanousUsers)
@@ -99,15 +100,26 @@ private:
     {
         m_ioContext.post([this, id, fail]
         {
-            if (fail)
-            {
-                m_users[id]=std::make_shared<ServiceUser>(id, m_requestsPerUser, [this](int id, bool fail){UserDone(id, fail);});
-                m_users[id]->Run();
-                return;
-            }
-
             m_totalNumRequests+=m_requestsPerUser;
-            m_users.erase(id);
+
+            auto it =m_users.find(id);
+
+            if (it==m_users.end())
+            {
+                std::cout<<"Could not find user "<<id<<" in user map!"<<std::endl;
+                exit(1);
+            }
+            
+            it->second->Stop();
+            m_users.erase(it);
+
+             if (fail)
+             {
+                 std::cout<<"User "<<id<<" failed, stopping test."<<std::endl;
+                 m_handler.Stop();
+                 m_work.reset();
+                 return;
+             }
             if (m_userCount<m_numUsers)
             {
                 StartUser();
@@ -115,26 +127,26 @@ private:
             else if (m_users.empty())
             {
                 //all users are finished, close down
-                std::cout<<"All users are finished"<<std::endl;
+                std::cout<<"All users are finished! Total number of requests: "<<m_totalNumRequests<<std::endl;
                 m_handler.Stop();
                 m_work.reset();
             }
-            else
-            {
-                std::cout<<"****** Running Users *********"<<std::endl;
-                for (auto it=m_users.begin(); it!=m_users.end(); ++it)
-                {
-                    std::cout<<"USER_"<<it->first<<std::endl;
-                }
-                std::cout<<"*******************************"<<std::endl;
-            }
+            // else
+            // {
+            //     std::cout<<"****** Running Users *********"<<std::endl;
+            //     for (auto it=m_users.begin(); it!=m_users.end(); ++it)
+            //     {
+            //         std::cout<<"USER_"<<it->first<<std::endl;
+            //     }
+            //     std::cout<<"*******************************"<<std::endl;
+            // }
         });
     }
 
     void StartUser()
     {
         ++m_userCount;
-        if (m_userCount%100==0)
+        if (m_userCount%10==0)
         {
             std::cout<<"TestManager: Start user number "<<m_userCount<<std::endl;
         }

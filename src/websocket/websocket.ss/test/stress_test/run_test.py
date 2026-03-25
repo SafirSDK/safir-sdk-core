@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2011-2013 (http://safirsdkcore.com)
+# Copyright Saab AB, 2026-2013 (http://safirsdkcore.com)
 #
-# Created by: Lars Hagstrom (lars@foldspace.nu)
+# Created by: Joel Ottosson
 #
 ###############################################################################
 #
@@ -51,6 +51,8 @@ with TestEnvStopper(env):
     env.launchProcess("safir_websocket", arguments.safir_websocket)
     log("Waiting for safir_websocket to start")
     env.WaitForOutput("safir_websocket", "Running ws server on")
+
+    # safir_websocket_stresstest <total_num_users> <simultaneous_users> <requests_per_user> 100, 10, 25
     client = env.launchProcess("safir_websocket_stresstest",
                                (arguments.websocket_stresstest, str(100), str(10), str(25)),
                                collect_output=False)

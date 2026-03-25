@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -62,7 +62,14 @@ public:
     sd::Connection& Connection() {return m_con;}
 
     void Open(const std::wstring& name, int context) {m_con.Open(name, L"-ws", context, nullptr, &m_dispatcher);}
-    void Close() {if (m_con.IsOpen()) m_con.Close();}
+    void Close()
+    {
+        if (m_con.IsOpen())
+        {
+            m_responseSenderStore.DiscardAll();
+            m_con.Close();
+        }
+    }
     bool IsOpen() const {return m_con.IsOpen();}
     void SubscribeMessage(ts::TypeId typeId, const ts::ChannelId& ch, bool includeSubclasses) {m_con.SubscribeMessage(typeId, ch, includeSubclasses, this);}
     void UnsubscribeMessage(ts::TypeId typeId, const ts::ChannelId& ch, bool includeSubclasses) {m_con.UnsubscribeMessage(typeId, ch, includeSubclasses, this);}
@@ -91,7 +98,11 @@ public:
             m_con.RegisterServiceHandler(typeId, handler, this);
     }
 
-    void UnregisterHandler(ts::TypeId typeId, const ts::HandlerId& handler) {m_con.UnregisterHandler(typeId, handler);}
+    void UnregisterHandler(ts::TypeId typeId, const ts::HandlerId& handler)
+    {
+        m_responseSenderStore.DiscardForHandler(typeId, handler);
+        m_con.UnregisterHandler(typeId, handler);
+    }
 
     void SubscribeRegistration(ts::TypeId typeId, const ts::HandlerId& handler, bool inclSub, bool restart) {m_con.SubscribeRegistration(typeId, handler, inclSub, restart, this);}
 

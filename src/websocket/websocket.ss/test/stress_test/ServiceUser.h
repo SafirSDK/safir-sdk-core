@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -23,7 +23,9 @@
 ******************************************************************************/
 #include <iostream>
 #include <queue>
+#include <sstream>
 #include <rapidjson/document.h>
+#include <thread>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -38,17 +40,24 @@
 
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
-#include <websocketpp/config/asio_no_tls_client.hpp>
-#include <websocketpp/client.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/core/flat_buffer.hpp>
+#include <boost/beast/core/buffers_to_string.hpp>
+#include <boost/beast/websocket.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
-typedef websocketpp::client<websocketpp::config::asio_client> client;
-typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
+namespace beast = boost::beast;         // from <boost/beast.hpp>
+namespace http = beast::http;           // from <boost/beast/http.hpp>
+namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
+namespace net = boost::asio;            // from <boost/asio.hpp>
+using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
-class ServiceUser
+class ServiceUser : public std::enable_shared_from_this<ServiceUser>
 {
 public:
     ServiceUser(int id, int numToSend, boost::function<void(int,bool)> done)
@@ -56,100 +65,215 @@ public:
         ,m_numToSend(numToSend)
         ,m_done(done)
         ,m_lastSentId(0)
+        ,m_io()
+        ,m_resolver(m_io)
+        ,m_ws(m_io)
+        ,m_buffer()
     {
-
     }
 
     virtual ~ServiceUser()
     {
-        m_runner->join();
+    }
+
+    void Stop()
+    {
+        m_io.stop();
+        if (m_thread.joinable())
+        {
+            m_thread.join();
+        }
     }
 
     void Run()
     {
-        std::string uri = "ws://localhost:10000";
-        m_client.set_access_channels(websocketpp::log::alevel::none);
-        m_client.init_asio();
-        m_client.set_open_handler([this](websocketpp::connection_hdl hdl){OnOpen(hdl);});
-        m_client.set_close_handler([this](websocketpp::connection_hdl hdl){OnClose(hdl);});
-        m_client.set_fail_handler([this](websocketpp::connection_hdl hdl){OnError(hdl);});
-        m_client.set_message_handler([this](websocketpp::connection_hdl hdl, message_ptr msg){OnMessage(hdl, msg);});
-        websocketpp::lib::error_code ec;
-        m_con = m_client.get_connection(uri, ec);
-        if (ec) {
-            std::cout << "could not create connection because: " << ec.message() << std::endl;
+        auto self=shared_from_this();
+        m_io.post([this, self]{ m_resolver.async_resolve("localhost", "10000", beast::bind_front_handler(&ServiceUser::OnResolve, shared_from_this()));});
+        m_thread = std::thread([this]{m_io.run();});
+    }
+
+    void OnResolve(beast::error_code ec, tcp::resolver::results_type results)
+    {
+        if(ec)
+        {
+            std::cout<<"USER_"<<m_id<<" *** OnResolve Error ***"<<std::endl;
             exit(1);
         }
 
-        m_client.connect(m_con);
-        m_runner=std::make_shared<boost::thread>([this]{m_client.run();});
+        // Set the timeout for the operation
+        beast::get_lowest_layer(m_ws).expires_after(std::chrono::seconds(30));
+
+        // Make the connection on the IP address we get from a lookup
+        beast::get_lowest_layer(m_ws).async_connect(
+            results,
+            beast::bind_front_handler(&ServiceUser::OnConnect, shared_from_this()));
     }
 
+    void OnConnect(beast::error_code ec, tcp::resolver::results_type::endpoint_type)
+    {
+        if(ec)
+        {
+            std::cout<<"USER_"<<m_id<<" *** OnConnect Error ***"<<std::endl;
+            exit(1);
+        }
+
+        // Turn off the timeout on the tcp_stream, because
+        // the websocket stream has its own timeout system.
+        beast::get_lowest_layer(m_ws).expires_never();
+
+        // Set suggested timeout settings for the websocket
+        m_ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
+
+        // Set a decorator to change the User-Agent of the handshake
+        m_ws.set_option(websocket::stream_base::decorator(
+            [](websocket::request_type& req)
+            {
+                req.set(http::field::user_agent,
+                    std::string(BOOST_BEAST_VERSION_STRING) +
+                        " websocket-client-async");
+            }));
+
+        // Update the host_ string. This will provide the value of the
+        // Host HTTP header during the WebSocket handshake.
+        // See https://tools.ietf.org/html/rfc7230#section-5.4
+        std::string host = "localhost:10000";
+        
+        // Perform the websocket handshake
+        m_ws.async_handshake(host, "/",
+            beast::bind_front_handler(
+                &ServiceUser::OnHandshake,
+                shared_from_this()));
+    }
+
+    void OnHandshake(beast::error_code ec)
+    {
+        if (ec)
+        {
+            std::cout<<"USER_"<<m_id<<" *** OnHandshake Error ***"<<std::endl;
+            exit(1);
+        }
+        
+        // Send the message open message to Dob
+        std::ostringstream os;
+        os<<"{\"jsonrpc\":\"2.0\", \"method\":\"open\", \"params\":{\"connectionName\":\"testUser_"<<m_id<<"\"}, \"id\":-123}";
+        m_ws.async_write(
+            net::buffer(os.str()),
+            beast::bind_front_handler(
+                &ServiceUser::OnWrite,
+                shared_from_this()));
+    }
+
+    void OnWrite(
+        beast::error_code ec,
+        std::size_t bytes_transferred)
+    {
+        boost::ignore_unused(bytes_transferred);
+
+        if(ec)
+        {
+            std::cout<<"USER_"<<m_id<<" *** OnWrite Error ***"<<std::endl;
+            std::cout << ec.message() << std::endl;
+            exit(1);
+        }
+        
+        // Read a message into our buffer
+        m_ws.async_read(
+            m_buffer,
+            beast::bind_front_handler(
+                &ServiceUser::OnRead,
+                shared_from_this()));
+    }
+
+    void OnRead(
+        beast::error_code ec,
+        std::size_t bytes_transferred)
+    {
+        boost::ignore_unused(bytes_transferred);
+
+        if(ec)
+        {
+            std::cout<<"USER_"<<m_id<<" *** OnRead Error ***"<<std::endl;
+            std::cout << ec.message() << std::endl;
+            exit(1);
+        }
+
+        auto payload = boost::beast::buffers_to_string(m_buffer.data());
+        m_buffer.consume(m_buffer.size());
+
+        if (OnMessage(payload))
+        {
+            m_done(m_id, false);
+
+            // Close the WebSocket connection
+            m_ws.async_close(websocket::close_code::normal,
+            beast::bind_front_handler(
+                &ServiceUser::OnClose,
+                shared_from_this()));
+        }
+    }
+
+    void OnClose(beast::error_code ec)
+    {
+        if(ec)
+        {
+            std::cout<<"USER_"<<m_id<<" *** OnClose Error ***"<<std::endl;
+            std::cout << ec.message() << std::endl;
+            exit(1);
+        }
+    }
+    
 private:
     int m_id;
     int m_numToSend;
     boost::function<void(int, bool)> m_done;
     int m_lastSentId;
-    client m_client;
-    client::connection_ptr m_con;
-    std::shared_ptr<boost::thread> m_runner;
-
+    boost::asio::io_context m_io;
+    tcp::resolver m_resolver;
+    websocket::stream<beast::tcp_stream> m_ws;
+    beast::flat_buffer m_buffer;
+    std::thread m_thread;
 
     void SendReq()
     {
         ++m_lastSentId;
         std::ostringstream os;
         os<<"{\"jsonrpc\":\"2.0\", \"method\":\"serviceRequest\", \"params\":{\"handlerId\":1,\"request\":{\"_DouType\":\"Safir.Control.Command\",\"NodeId\":"<<m_id<<"}}, \"id\":"<<m_lastSentId<<"}";
-        m_con->send(os.str());
+        m_ws.async_write(
+            net::buffer(os.str()),
+            beast::bind_front_handler(
+                &ServiceUser::OnWrite,
+                shared_from_this()));
     }
 
-    void OnOpen(websocketpp::connection_hdl /*hdl*/)
+    // Returns true if the user is done and connection can be closed, false if more messages are expected
+    bool OnMessage(const std::string& data)
     {
-        //std::cout<<"USER_"<<m_id<<" OnOpen"<<std::endl;
-        std::ostringstream os;
-        os<<"{\"jsonrpc\":\"2.0\", \"method\":\"open\", \"params\":{\"connectionName\":\"testUser_"<<m_id<<"\"}, \"id\":-123}";
-        m_con->send(os.str());
-        SendReq();
-    }
-
-    void OnClose(websocketpp::connection_hdl /*hdl*/)
-    {
-    }
-
-    void OnError(websocketpp::connection_hdl hdl)
-    {
-        if (m_con->get_state()==websocketpp::session::state::closed)
-        {
-            std::cout<<"USER_"<<m_id<<" Retry to connect..."<<std::endl;
-            m_done(m_id, true);
-            return;
-        }
-
-        client::connection_ptr con = m_client.get_con_from_hdl(hdl);
-        std::ostringstream os;
-        os<<"USER_"<<m_id<<" *** OnError ***"<<std::endl;
-        os << "Fail handler" << std::endl;
-        os << con->get_state() << std::endl;
-        os << con->get_local_close_code() << std::endl;
-        os << con->get_local_close_reason() << std::endl;
-        os << con->get_remote_close_code() << std::endl;
-        os << con->get_remote_close_reason() << std::endl;
-        os << con->get_ec() << " - " << con->get_ec().message() << std::endl;
-        os<<"   *** End Error ***";
-        std::cout<<os.str()<<std::endl;
-    }
-
-    void OnMessage(websocketpp::connection_hdl /*hdl*/, message_ptr msg)
-    {
-        std::string data = msg->get_payload();
-        //std::cout<<"USER_"<<m_id<<" RECV: "<<data<<std::endl;
-
         rapidjson::Document doc;
         doc.Parse(data.c_str());
+
+        if (doc.HasParseError())
+        {
+            std::cout<<"USER_"<<m_id<<" Got invalid JSON payload"<<std::endl;
+            return false;
+        }
+
+        if (!doc.IsObject())
+        {
+            return false;
+        }
+
+        if (!doc.HasMember("id") || !doc["id"].IsInt())
+        {
+            return false;
+        }
+
         int id=doc["id"].GetInt();
+
+        // This is the response to the open message. Just send the service request and ignore the id
         if (id==-123)
         {
-            return; //open response
+            SendReq();
+            return false;
         }
 
         if (id!=m_lastSentId)
@@ -164,9 +288,9 @@ private:
         }
         else
         {
-            m_con->close(websocketpp::close::status::normal, "");
-            m_done(m_id, false);
-            return;
+            return true;
         }
+
+        return false;
     }
 };

@@ -23,37 +23,22 @@
 ******************************************************************************/
 #pragma once
 
-#include <iostream>
+#include <memory>
 #include <string>
-#include <cstdint>
+#include <mutex>
+#include <unordered_map>
+#include "DobConnection.h"
 
-class JsonRpcId
+class DobConnectionRegistry
 {
 public:
-    JsonRpcId() : m_type(0) {}
-    JsonRpcId(std::int64_t id) : m_type(1), m_i(id) {}
-    JsonRpcId(const std::string& id) : m_type(2), m_s(id) {}
-
-    bool IsNull() const {return m_type==0;}
-    bool HasInt() const {return m_type==1;}
-    bool HasStr() const {return m_type==2;}
-
-    std::int64_t Int() const {return m_i;}
-    const std::string& String() const {return m_s;}
+    void InsertConnection(const std::string& connectionName,
+                          std::shared_ptr<DobConnection> dobConnection,
+                          std::shared_ptr<boost::asio::io_context::strand> strand);
+    std::pair<std::shared_ptr<boost::asio::io_context::strand>, std::shared_ptr<DobConnection>> GetConnection(const std::string& connectionName) const;
+    void RemoveConnection(const std::string& connectionName);
 
 private:
-    int m_type; //0=null, 1=int, 2=str
-    std::int64_t m_i;
-    std::string m_s;
+    mutable std::mutex m_lock;
+    std::unordered_map<std::string, std::pair<std::shared_ptr<boost::asio::io_context::strand>, std::shared_ptr<DobConnection>>> m_connections;
 };
-
-inline std::ostream& operator<<(std::ostream& os, const JsonRpcId& id)
-{
-    if (id.HasStr())
-        os<<"\"id\":\""<<id.String()<<"\"";
-    else if (id.HasInt())
-        os<<"\"id\":"<<id.Int();
-    else
-        os<<"\"id\":null";
-    return os;
-}

@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -45,15 +45,20 @@ private:
 
 inline void ResponseSenderStoreTest()
 {
+    const ts::TypeId typeA = 1;
+    const ts::TypeId typeB = 2;
+    const ts::HandlerId handlerA(1);
+    const ts::HandlerId handlerB(2);
+
     ResponseSenderStore rs(2);
     CHECK(rs.Count()==0);
     auto s=rs.Get(1);
     CHECK(s==nullptr);
 
-    auto id=rs.Add(ResSnd::Create(1));
+    auto id=rs.Add(ResSnd::Create(1), typeA, handlerA);
     CHECK(id==1);
     CHECK(rs.Count()==1);
-    id=rs.Add(ResSnd::Create(2));
+    id=rs.Add(ResSnd::Create(2), typeA, handlerA);
     CHECK(id==2);
     CHECK(rs.Count()==2);
 
@@ -69,12 +74,12 @@ inline void ResponseSenderStoreTest()
     CHECK(std::dynamic_pointer_cast<ResSnd>(s)->Id()==2);
     CHECK(rs.Count()==0);
 
-    id=rs.Add(ResSnd::Create(3));
+    id=rs.Add(ResSnd::Create(3), typeA, handlerA);
     CHECK(id==3);
-    id=rs.Add(ResSnd::Create(4));
+    id=rs.Add(ResSnd::Create(4), typeA, handlerA);
     CHECK(id==4);
     CHECK(rs.Count()==2);
-    id=rs.Add(ResSnd::Create(5));
+    id=rs.Add(ResSnd::Create(5), typeA, handlerA);
     CHECK(id==5);
     CHECK(rs.Count()==2);
 
@@ -90,13 +95,13 @@ inline void ResponseSenderStoreTest()
     CHECK(std::dynamic_pointer_cast<ResSnd>(s)->Id()==5);
     CHECK(rs.Count()==0);
 
-    id=rs.Add(ResSnd::Create(6));
+    id=rs.Add(ResSnd::Create(6), typeA, handlerA);
     CHECK(id==6);
-    id=rs.Add(ResSnd::Create(7));
+    id=rs.Add(ResSnd::Create(7), typeA, handlerA);
     CHECK(id==7);
-    id=rs.Add(ResSnd::Create(8));
+    id=rs.Add(ResSnd::Create(8), typeA, handlerA);
     CHECK(id==8);
-    id=rs.Add(ResSnd::Create(9));
+    id=rs.Add(ResSnd::Create(9), typeA, handlerA);
     CHECK(id==9);
 
     s=rs.Get(6);
@@ -117,5 +122,22 @@ inline void ResponseSenderStoreTest()
 
     s=rs.Get(10);
     CHECK(s==nullptr);
+    CHECK(rs.Count()==0);
+
+    // Test DiscardForHandler: only matching handler entries are discarded
+    rs.Add(ResSnd::Create(11), typeA, handlerA);
+    auto idB = rs.Add(ResSnd::Create(12), typeB, handlerB);
+    CHECK(rs.Count()==2);
+    rs.DiscardForHandler(typeA, handlerA);
+    CHECK(rs.Count()==1);
+    s=rs.Get(idB);
+    CHECK(std::dynamic_pointer_cast<ResSnd>(s)->Id()==12);
+    CHECK(rs.Count()==0);
+
+    // Test DiscardAll
+    rs.Add(ResSnd::Create(13), typeA, handlerA);
+    rs.Add(ResSnd::Create(14), typeB, handlerB);
+    CHECK(rs.Count()==2);
+    rs.DiscardAll();
     CHECK(rs.Count()==0);
 }

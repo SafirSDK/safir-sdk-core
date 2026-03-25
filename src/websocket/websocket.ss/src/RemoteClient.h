@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -23,71 +23,73 @@
 ******************************************************************************/
 #pragma once
 
+#include <deque>
 #include <functional>
+#include <memory>
+#include <string>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/beast/websocket.hpp>
+#include <boost/beast/core/flat_buffer.hpp>
+#include <boost/beast/http.hpp>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
+#include "PingHandler.h"
+#include "DobConnection.h"
 #include "JsonRpcRequest.h"
 #include "JsonRpcResponse.h"
-#include "DobConnection.h"
-#include "JsonHelpers.h"
-#include "PingHandler.h"
 
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#pragma warning(disable: 4100)
-#pragma warning(disable: 4355)
-#pragma warning(disable: 4127)
-#pragma warning(disable: 4267)
-#pragma warning(disable: 4996)
-#pragma warning(disable: 4244)
-#endif
-
-#include <websocketpp/config/asio_no_tls.hpp>
-#include <websocketpp/server.hpp>
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+class DobConnectionRegistry;
 
 namespace sd = Safir::Dob;
 namespace ts = Safir::Dob::Typesystem;
 
-class RemoteClient
+class RemoteClient : public std::enable_shared_from_this<RemoteClient>
 {
 public:
-    typedef websocketpp::server<websocketpp::config::asio> WsServer;
-    typedef websocketpp::server<websocketpp::config::asio>::connection_ptr WsConnection;
-    typedef websocketpp::server<websocketpp::config::asio>::message_ptr WsMessage;
+    typedef boost::asio::ip::tcp::socket TcpSocket;
+    typedef boost::beast::websocket::stream<TcpSocket> WsStream;
 
-    RemoteClient(WsServer& server,
-                 boost::asio::io_context& io,
-                 websocketpp::connection_hdl& connectionHandle,
+    RemoteClient(boost::asio::io_context& io,
+                 TcpSocket socket,
+                 std::shared_ptr<DobConnectionRegistry> dobConnectionRegistry,
                  std::function<void(const RemoteClient*)> onClose);
+
+    void Start(std::function<void(bool)> onStarted);
 
     void Close();
 
     std::string ToString() const;
 
 private:
-    WsServer& m_server;
-    boost::asio::io_context::strand m_strand;
-    websocketpp::connection_hdl m_connectionHandle;
-    WsConnection m_connection;
+    // no copy
+    RemoteClient(const RemoteClient&) = delete;
+    RemoteClient& operator=(const RemoteClient&) = delete;
+
+    WsStream m_stream;
+    std::shared_ptr<boost::asio::io_context::strand> m_strand;
+    std::shared_ptr<DobConnectionRegistry> m_dobConnectionRegistry;
     std::function<void(const RemoteClient*)> m_onConnectionClosed;
-    DobConnection m_dob;
+    std::shared_ptr<DobConnection> m_dobConnection;
     std::shared_ptr<PingHandler> m_pingHandler;
+    std::string m_connectionName;
     bool m_enableTypeSystem;
-
+    boost::beast::http::request<boost::beast::http::string_body> m_handshakeRequest;
+    boost::beast::flat_buffer m_handshakeBuffer;
+    boost::beast::flat_buffer m_readBuffer;
+    std::deque<std::string> m_writeQueue;
+    bool m_isWriting;
+    bool m_isClosed;
+    bool m_isOpened;
+    
     void SendToClient(const std::string& msg);
-
-    //websocket events
-    //-----------------
-    void OnClose();
-    void OnError();
-    void OnMessage(WsMessage msg);
+    void SendPing();
+    void NotifyClosed();
+    void LogError(const char* context, const boost::system::error_code& ec);
+    void DoRead();
+    void DoWrite();
+    void CloseInternal();
+    void RemoveDobConnectionFromRegistry();
 
     // handle client commands
     //------------------------
@@ -122,29 +124,4 @@ private:
     void WsGetNumberOfInstances(const JsonRpcRequest& req);
     void WsGetAllInstanceIds(const JsonRpcRequest& req);
     void WsGetInstanceIdPolicy(const JsonRpcRequest& req);
-
-    //---------------helpers--------------------
-
-    inline std::wstring Wstr(const std::string& s) const {return ts::Utilities::ToWstring(s);}
-    inline std::string Str(const std::wstring& s) const {return ts::Utilities::ToUtf8(s);}
-
-    template <class T>
-    std::shared_ptr<T> ToObject(const std::string& json) const
-    {
-        try
-        {
-            auto obj=ts::Internal::ToObjectFromJson(json);
-            auto ptr=std::dynamic_pointer_cast<T>(obj);
-            if (ptr)
-            {
-                return ptr;
-            }
-        }
-        catch (...)
-        {
-            throw std::invalid_argument("The JSON serialized Safir.Dob.Object (Entity/Message/Service/Response) could not be parsed.");
-        }
-
-        throw std::invalid_argument("The JSON serialized Safir.Dob.Object is not of correct type (Entity/Message/Service/Response).");
-    }
 };

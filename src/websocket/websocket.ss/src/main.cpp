@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2016 (http://safirsdkcore.com)
+* Copyright Saab AB, 2026 (http://safirsdkcore.com)
 *
-* Created by: Joel Ottosson / joel.ottosson@consoden.se
+* Created by: Joel Ottosson
 *
 *******************************************************************************
 *
@@ -23,8 +23,11 @@
 ******************************************************************************/
 #include <iostream>
 #include <algorithm>
+#include <memory>
 #include <Safir/Application/CrashReporter.h>
 #include "WebsocketServer.h"
+#include "RestServer.h"
+#include "DobConnectionRegistry.h"
 #include <Safir/Dob/Typesystem/Serialization.h>
 
 #ifdef _MSC_VER
@@ -46,8 +49,11 @@ int main(int /*argc*/, const char** /*argv*/)
     lllog(5)<<"safir_websocket started"<<std::endl;
 
     boost::asio::io_context io;
-    WebsocketServer ws(io);
+    auto dobConnectionRegistry = std::make_shared<DobConnectionRegistry>();
+    WebsocketServer ws(io, dobConnectionRegistry);
+    RestServer rest(io, dobConnectionRegistry);
     boost::asio::post(io, [&ws]{ws.Run();});
+    boost::asio::post(io, [&rest]{rest.Run();});
     boost::thread_group threads;
     auto numberOfThreads=std::max(static_cast<unsigned int>(3), boost::thread::hardware_concurrency());
     for (unsigned int i=0; i<numberOfThreads; ++i)
