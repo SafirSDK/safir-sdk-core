@@ -46,7 +46,7 @@ public:
          , m_timerLarge(m_ioContext, std::chrono::seconds(20))
          , m_razor(L"Razor")
          , m_rb(L"Rymd-B\u00f6rje") //ö
-         , m_large(L"")
+         , m_large(L"large")
     {}
 
     void OnStopOrder() override {m_ioContext.stop();}
