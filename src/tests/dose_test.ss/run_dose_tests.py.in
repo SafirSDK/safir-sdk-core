@@ -39,7 +39,9 @@ import argparse
 import urllib.request
 import tempfile
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "test_support", "python"))
+#This relies on the fact that we're installed in the bin directory on both linux and windows.
+install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@", "python"))
 from output import log
 
 NODE_IDS = {"server-0" : "999999",

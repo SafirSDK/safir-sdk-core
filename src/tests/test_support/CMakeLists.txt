@@ -6,5 +6,6 @@
 INSTALL(FILES
   python/syslog_server.py
   python/testenv.py
+  python/output.py
   DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/python
   COMPONENT TestSuite)
