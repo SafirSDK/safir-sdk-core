@@ -69,5 +69,15 @@ public class Sender {
             (com.saabgroup.safir.Logging.Severity.DEBUG,
              "This is a debug log");
 
+        // Test convenience methods
+        com.saabgroup.safir.Logging.sendEmergency("This is another emergency log using convenience method");
+        com.saabgroup.safir.Logging.sendAlert("This is another alert log using convenience method");
+        com.saabgroup.safir.Logging.sendCritical("This is another critical log using convenience method");
+        com.saabgroup.safir.Logging.sendError("This is another error log using convenience method");
+        com.saabgroup.safir.Logging.sendWarning("This is another warning log using convenience method");
+        com.saabgroup.safir.Logging.sendNotice("This is another notice log using convenience method");
+        com.saabgroup.safir.Logging.sendInformational("This is another informational log using convenience method");
+        com.saabgroup.safir.Logging.sendDebug("This is another debug log using convenience method");
+
     }
 }

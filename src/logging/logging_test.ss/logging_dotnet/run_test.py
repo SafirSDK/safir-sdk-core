@@ -28,6 +28,7 @@ import subprocess
 import sys
 import argparse
 import platform
+import re
 import syslog_server
 from output import out
 
@@ -62,29 +63,59 @@ def fail(message):
     sys.exit(1)
 
 
-if syslog_output.count("This is an emergency log. Bryn\u00e4s \u00e4r b\u00e4st!\u2620") != 3:
-    fail("Brynas ar bast")
+def extract_facility_severity(syslog_line):
+    """Extract facility and severity from a syslog message.
 
-if syslog_output.count("This is an alert log") != 3:
-    fail("Alert log")
+    Syslog messages start with <PRI> where PRI = facility * 8 + severity.
+    Returns (facility, severity) tuple or None if not found.
+    """
+    match = re.match(r'^<(\d+)>', syslog_line)
+    if match:
+        pri = int(match.group(1))
+        facility = pri // 8
+        severity = pri % 8
+        return (facility, severity)
+    return None
 
-if syslog_output.count("This is a critical log") != 3:
-    fail("Critical log")
 
-if syslog_output.count("This is an error log") != 3:
-    fail("Error log")
+def verify_log_message(syslog_output, expected_facility, message_text, expected_severity, expected_count):
+    """Verify that a message appears with the correct facility, severity, and count."""
+    count = 0
+    for line in syslog_output.split('\n'):
+        if message_text in line:
+            result = extract_facility_severity(line)
+            if result is None:
+                fail(f"Could not parse PRI from line: {line}")
+            facility, severity = result
+            if facility != expected_facility:
+                fail(f"Wrong facility for '{message_text}': expected {expected_facility}, got {facility}")
+            if severity != expected_severity:
+                fail(f"Wrong severity for '{message_text}': expected {expected_severity}, got {severity}")
+            count += 1
 
-if syslog_output.count("This is a warning log") != 3:
-    fail("Warning log")
+    if count != expected_count:
+        fail(f"Wrong count for '{message_text}': expected {expected_count}, got {count}")
 
-if syslog_output.count("This is a notice log") != 3:
-    fail("Notice log")
 
-if syslog_output.count("This is an informational log") != 3:
-    fail("Informational log")
+# Verify facility (Local0 = 16) and severity for all messages
+verify_log_message(syslog_output, 16, "This is an emergency log. Bryn\u00e4s \u00e4r b\u00e4st!\u2620", 0, 3)
+verify_log_message(syslog_output, 16, "This is an alert log", 1, 3)
+verify_log_message(syslog_output, 16, "This is a critical log", 2, 3)
+verify_log_message(syslog_output, 16, "This is an error log", 3, 3)
+verify_log_message(syslog_output, 16, "This is a warning log", 4, 3)
+verify_log_message(syslog_output, 16, "This is a notice log", 5, 3)
+verify_log_message(syslog_output, 16, "This is an informational log", 6, 3)
+verify_log_message(syslog_output, 16, "This is a debug log", 7, 3)
 
-if syslog_output.count("This is a debug log") != 3:
-    fail("Debug log")
+# Verify convenience methods also use Local0 facility
+verify_log_message(syslog_output, 16, "This is another emergency log using convenience method", 0, 3)
+verify_log_message(syslog_output, 16, "This is another alert log using convenience method", 1, 3)
+verify_log_message(syslog_output, 16, "This is another critical log using convenience method", 2, 3)
+verify_log_message(syslog_output, 16, "This is another error log using convenience method", 3, 3)
+verify_log_message(syslog_output, 16, "This is another warning log using convenience method", 4, 3)
+verify_log_message(syslog_output, 16, "This is another notice log using convenience method", 5, 3)
+verify_log_message(syslog_output, 16, "This is another informational log using convenience method", 6, 3)
+verify_log_message(syslog_output, 16, "This is another debug log using convenience method", 7, 3)
 
 if len(stdout_output) != 0:
     fail("Unexpected output on stdout")

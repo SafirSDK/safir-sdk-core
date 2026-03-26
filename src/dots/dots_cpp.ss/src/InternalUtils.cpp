@@ -41,13 +41,15 @@ namespace Internal
     void EnsureFailed (const std::wstring & str, const char* file, int line)
     {
         Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Critical,
+                                              Safir::Utilities::Internal::Log::Local0,
                                               L"ENSURE failed: " + str);
 
         const bool success = Safir::Utilities::CrashReporter::Dump();
-        
+
         if (!success)
         {
             Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Critical,
+                                                  Safir::Utilities::Internal::Log::Local0,
                                                   L"ENSURE failed to generate a dump! It looks like CrashReporter is not started.");
         }
 

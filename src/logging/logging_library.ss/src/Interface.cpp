@@ -27,12 +27,14 @@
 #include <iostream>
 
 void LoggingC_SendSystemLog(const std::int32_t severity,
-                            const char * const   message)
+                            const std::int32_t facility,
+                            const char * const message)
 {
     try
     {
         Safir::Utilities::Internal::Log::Send
             (static_cast<Safir::Utilities::Internal::Log::Severity>(severity),
+             static_cast<Safir::Utilities::Internal::Log::Facility>(facility),
              Safir::Utilities::Internal::ToUtf16(message));
     }
     catch (...)

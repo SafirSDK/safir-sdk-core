@@ -69,8 +69,57 @@ namespace Log
 namespace
 {
 
-// Syslog facility used for all Safir logs
-const int SAFIR_FACILITY = (1 << 3); // 1 => user-level messages
+// Convert Facility enum to syslog facility value (shifted by 3 bits as per RFC 3164)
+inline int FacilityToSyslog(const Facility facility)
+{
+    return static_cast<int>(facility) << 3;
+}
+
+// Convert Facility enum to lowercase string name
+inline const char* FacilityToString(const Facility facility)
+{
+    switch (facility)
+    {
+        case Kernel: return "kern";
+        case User: return "user";
+        case Mail: return "mail";
+        case Daemon: return "daemon";
+        case Auth: return "auth";
+        case Syslog: return "syslog";
+        case Lpr: return "lpr";
+        case News: return "news";
+        case Uucp: return "uucp";
+        case Cron: return "cron";
+        case Authpriv: return "authpriv";
+        case Ftp: return "ftp";
+        case Local0: return "local0";
+        case Local1: return "local1";
+        case Local2: return "local2";
+        case Local3: return "local3";
+        case Local4: return "local4";
+        case Local5: return "local5";
+        case Local6: return "local6";
+        case Local7: return "local7";
+        default: return "unknown";
+    }
+}
+
+// Convert Severity enum to lowercase string name
+inline const char* SeverityToString(const Severity severity)
+{
+    switch (severity)
+    {
+        case Emergency: return "emerg";
+        case Alert: return "alert";
+        case Critical: return "crit";
+        case Error: return "err";
+        case Warning: return "warning";
+        case Notice: return "notice";
+        case Informational: return "info";
+        case Debug: return "debug";
+        default: return "unknown";
+    }
+}
 
 std::string GetISO8601Timestamp()
 {
@@ -92,7 +141,7 @@ std::string GetISO8601Timestamp()
 class SystemLogImpl
 {
     friend class SystemLogImplKeeper;
-    friend void Send(const Severity, const std::wstring&);
+    friend void Send(const Severity, const Facility, const std::wstring&);
 
 private:
     //constructor is private, to make sure only SystemLogImplKeeper can create it
@@ -125,7 +174,9 @@ private:
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
                 // Include pid in log message
-                openlog(NULL, LOG_PID, SAFIR_FACILITY);
+                // Facility is set to LOG_USER as a default, but actual facility
+                // is passed explicitly in each syslog() call
+                openlog(NULL, LOG_PID, LOG_USER);
 
 #endif
             }
@@ -152,6 +203,7 @@ public:
     }
 
     void Send(const Severity severity,
+              const Facility facility,
               const std::wstring& text)
     {
         std::wstring logText;
@@ -233,24 +285,24 @@ public:
 
         if (m_nativeLogging)
         {
-            SendNativeLog(severity, ReplaceNewlines(logText));
+            SendNativeLog(severity, facility, ReplaceNewlines(logText));
         }
 
         if (m_sendToSyslogServer)
         {
             // Utf-8 is used when sending to a syslog server
-            SendToSyslogServerRFC5424(severity, ToUtf8(ReplaceNewlines(logText)));
+            SendToSyslogServerRFC5424(severity, facility, ToUtf8(ReplaceNewlines(logText)));
         }
     }
 
 private:
 
     //-------------------------------------------------------------------------
-    void SendNativeLog(const Severity severity, const std::wstring& text)
+    void SendNativeLog(const Severity severity, const Facility facility, const std::wstring& text)
     {
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
-        syslog(SAFIR_FACILITY | severity, "%s", ToUtf8(text).c_str());
+        syslog(FacilityToSyslog(facility) | severity, "%s", ToUtf8(text).c_str());
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
@@ -285,19 +337,26 @@ private:
                 throw std::logic_error("LogImpl::SendNativeLog: Unknown severity!");
         }
 
+        // Format message in EventSentry style: hostname[facility.severity]: message
+        std::wstring formattedText = ToUtf16(boost::asio::ip::host_name()) +
+                                     L"[" + ToUtf16(FacilityToString(facility)) +
+                                     L"." + ToUtf16(SeverityToString(severity)) +
+                                     L"]: " + text;
+
         std::lock_guard<std::mutex> lck(m_lock);
 
-        m_eventLog.Send(eventType, text);
+        m_eventLog.Send(eventType, formattedText);
 #endif
     }
 
     //-------------------------------------------------------------------------
     void SendToSyslogServerRFC5424(const Severity severity,
+                            const Facility facility,
                             const std::string& text)
     {
         std::ostringstream log;
         // RFC 5424 format: <PRI>VERSION TIMESTAMP HOSTNAME APP-NAME PROCID MSGID STRUCTURED-DATA MSG
-        log << "<" << (SAFIR_FACILITY | severity) << ">1 "
+        log << "<" << (FacilityToSyslog(facility) | severity) << ">1 "
             << GetISO8601Timestamp() << ' '
             << boost::asio::ip::host_name() << ' '
             << m_processName << ' '
@@ -454,12 +513,12 @@ private:
 std::once_flag SystemLogImplKeeper::SingletonHelper::m_onceFlag;
 bool SystemLogImplKeeper::destroyed = false;
 
-void TrySendNativeLog(const std::string& errTxt)
+void TrySendNativeLog(const Facility facility, const std::string& errTxt)
 {
     try
     {
 #if defined(linux) || defined(__linux) || defined(__linux__)
-        syslog(SAFIR_FACILITY | Critical, "%s", errTxt.c_str());
+        syslog(FacilityToSyslog(facility) | Critical, "%s", errTxt.c_str());
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         WindowsLogger(L"Unknown process").Send(EVENTLOG_ERROR_TYPE, ToUtf16(errTxt));
 #endif
@@ -470,11 +529,11 @@ void TrySendNativeLog(const std::string& errTxt)
     }
 }
 
-void Send(const Severity severity, const std::wstring& text)
+void Send(const Severity severity, const Facility facility, const std::wstring& text)
 {
     try
     {
-        SystemLogImplKeeper::Instance().Get()->Send(severity, text);
+        SystemLogImplKeeper::Instance().Get()->Send(severity, facility, text);
     }
     catch (const std::runtime_error&)
     {
@@ -484,20 +543,20 @@ void Send(const Severity severity, const std::wstring& text)
         // (Phoenix Singleton) we just create a temporary SystemLogImpl on the stack for this
         // specific call to Send.
         SystemLogImpl log;
-        log.Send(severity, text);
+        log.Send(severity, facility, text);
     }
     catch (const std::exception& e)
     {
         // If it is not possible to send a log we try to send a native log and
         // then just terminate the program.
-        TrySendNativeLog(e.what());
+        TrySendNativeLog(facility, e.what());
         exit(56);
     }
     catch (...)
     {
         // Something really bad happened. We have no information about what it is, just
         // terminate the program.
-        TrySendNativeLog("Caught some really weird exception when trying to send a system log.");
+        TrySendNativeLog(facility, "Caught some really weird exception when trying to send a system log.");
         exit(57);
     }
 }

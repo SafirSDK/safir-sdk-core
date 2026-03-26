@@ -77,50 +77,65 @@ if proc.returncode != 0:
     print(stdout)
     sys.exit(1)
 
+# Facility codes (shifted by 3 bits for PRI calculation)
+# PRI = facility * 8 + severity
+FACILITY_USER = 1
+FACILITY_DAEMON = 3
+FACILITY_LOCAL0 = 16
+FACILITY_LOCAL1 = 17
+
 log_common_part = r"1 \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z \S* " + args.test_exe_name + r" \d+ - - "
-for test in range(12):
+for test in range(15):
     data, addr = sock.recvfrom(10 * 1024)  # buffer size is 10 k
     print("Received data:", data)
     if test == 0:
-        pri = r"<9>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 1) + r">"  # Alert
         text = r"This is a log from a singleton constructor"
     elif test == 1:
-        pri = r"<8>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 0) + r">"  # Emergency
         text = r"This is an emergency log"
     elif test == 2:
-        pri = r"<9>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 1) + r">"  # Alert
         text = r"This is an alert log"
     elif test == 3:
-        pri = r"<10>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 2) + r">"  # Critical
         text = r"This is a critical log with   newline and \t tab"
     elif test == 4:
-        pri = r"<11>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 3) + r">"  # Error
         text = r"This is an error log"
     elif test == 5:
-        pri = r"<12>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 4) + r">"  # Warning
         text = r"This is a warning log with   newline and \t tab"
     elif test == 6:
-        pri = r"<13>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 5) + r">"  # Notice
         text = r"This is a notice log"
     elif test == 7:
-        pri = r"<14>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 6) + r">"  # Informational
         text = r"This is an informational log with   newline and \t tab"
     elif test == 8:
-        pri = r"<15>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 7) + r">"  # Debug
         text = r"This is a debug log"
     elif test == 9:
-        pri = r"<11>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 3) + r">"  # Error
         text = r"This is another error log"
     elif test == 10:
-        pri = r"<15>"
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 7) + r">"  # Debug
         text = r"This is a suuuuuuuuuuper duuuuuuuper long log line a*"
         if truncate_syslog_to_bytes == 1024:
             text+= r"\.\.\.$"
         else:
             text+= r"b*c$"
-
     elif test == 11:
-        pri = r"<9>"
+        pri = r"<" + str(FACILITY_USER * 8 + 4) + r">"  # User + Warning
+        text = r"This is a warning with User facility"
+    elif test == 12:
+        pri = r"<" + str(FACILITY_DAEMON * 8 + 3) + r">"  # Daemon + Error
+        text = r"This is an error with Daemon facility"
+    elif test == 13:
+        pri = r"<" + str(FACILITY_LOCAL1 * 8 + 5) + r">"  # Local1 + Notice
+        text = r"This is a notice with Local1 facility"
+    elif test == 14:
+        pri = r"<" + str(FACILITY_LOCAL0 * 8 + 1) + r">"  # Alert
         text = r"This is a log from a singleton destructor"
 
     p = re.compile(pri + log_common_part + inst_str + text)

@@ -61,8 +61,9 @@ private:
 };
 
 void JNICALL Java_com_saabgroup_safir_Logging_sendSystemLogInternal
-(JNIEnv * _env, jclass, jint _severity, jstring _message)
+(JNIEnv * _env, jclass, jint _severity, jint _facility, jstring _message)
 {
     LoggingC_SendSystemLog(_severity,
+                           _facility,
                            StringConverter(_env, _message));
 }

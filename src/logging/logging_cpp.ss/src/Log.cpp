@@ -37,7 +37,16 @@ namespace Logging
     void SendSystemLog(const Severity       severity,
                        const std::wstring&  message)
     {
-        LoggingC_SendSystemLog(static_cast<std::int32_t>(severity), ToUtf8(message).c_str());
+        SendSystemLog(severity, Local0, message);
+    }
+
+    void SendSystemLog(const Severity       severity,
+                       const Facility       facility,
+                       const std::wstring&  message)
+    {
+        LoggingC_SendSystemLog(static_cast<std::int32_t>(severity),
+                               static_cast<std::int32_t>(facility),
+                               ToUtf8(message).c_str());
     }
 
     namespace Internal

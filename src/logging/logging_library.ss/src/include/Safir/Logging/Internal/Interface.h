@@ -41,15 +41,17 @@ extern "C"
     /**
      * Service for sending log messages to the native system logging mechanism.
      *
-     * The service takes a severity and an arbitrary string.
-     * The severity levels conforms to the ones used by the well known syslog format as specified
-     * in http://www.ietf.org/rfc/rfc3164.txt.
+     * The service takes a severity, facility, and an arbitrary string.
+     * The severity and facility levels conform to the syslog format as specified
+     * in RFC 3164 and RFC 5424.
      *
-     * @param [in] severity Severity according to RFC 3164.
-     * @param [in] message Log text.
+     * @param [in] severity Severity according to RFC 3164/5424.
+     * @param [in] facility Facility according to RFC 3164/5424.
+     * @param [in] message Log text in utf-8.
      */
     LOGGING_LIBRARY_API void LoggingC_SendSystemLog(const std::int32_t severity,
-                                                    const char * const   logMsg);
+                                                    const std::int32_t facility,
+                                                    const char * const logMsg);
 }
 
 #endif

@@ -55,7 +55,7 @@ namespace Safir
 namespace Logging
 {
     /**
-     * Severity level according to RFC 3164. Please read the section on Safir Logging
+     * Severity level according to RFC 3164 and RFC 5424. Please read the section on Safir Logging
      * in the Safir SDK Core User's Guide for some recommendations on when to use the
      * various severity levels.
      **/
@@ -86,18 +86,102 @@ namespace Logging
         Debug
     };
 
+    /**
+     * Syslog facility codes according to RFC 3164 and RFC 5424.
+     * The numeric values are the facility codes as defined in the RFCs.
+     **/
+    enum Facility
+    {
+        /** Kernel messages. */
+        Kernel = 0,
+
+        /** User-level messages. */
+        User = 1,
+
+        /** Mail system. */
+        Mail = 2,
+
+        /** System daemons. */
+        Daemon = 3,
+
+        /** Security/authorization messages. */
+        Auth = 4,
+
+        /** Messages generated internally by syslogd. */
+        Syslog = 5,
+
+        /** Line printer subsystem. */
+        Lpr = 6,
+
+        /** Network news subsystem. */
+        News = 7,
+
+        /** UUCP subsystem. */
+        Uucp = 8,
+
+        /** Clock daemon. */
+        Cron = 9,
+
+        /** Security/authorization messages (private). */
+        Authpriv = 10,
+
+        /** FTP daemon. */
+        Ftp = 11,
+
+        /** Local use 0. */
+        Local0 = 16,
+
+        /** Local use 1. */
+        Local1 = 17,
+
+        /** Local use 2. */
+        Local2 = 18,
+
+        /** Local use 3. */
+        Local3 = 19,
+
+        /** Local use 4. */
+        Local4 = 20,
+
+        /** Local use 5. */
+        Local5 = 21,
+
+        /** Local use 6. */
+        Local6 = 22,
+
+        /** Local use 7. */
+        Local7 = 23
+    };
+
 
     /**
      * Send log messages to the system logging mechanism.
      *
      * The function takes a severity and an arbitrary string.
-     * The severity levels conforms to the ones used by the well known syslog format as specified
-     * in http://www.ietf.org/rfc/rfc3164.txt.
+     * The severity levels conform to the syslog format as specified
+     * in RFC 3164 and RFC 5424.
      *
-     * @param [in] severity Severity according to RFC 3164.
+     * Uses the Local0 facility by default.
+     *
+     * @param [in] severity Severity according to RFC 3164/5424.
      * @param [in] message Log text.
      */
     LOGGING_CPP_API void SendSystemLog(const Severity severity,
+                                       const std::wstring& message);
+
+    /**
+     * Send log messages to the system logging mechanism.
+     *
+     * The function takes a severity, facility, and an arbitrary string.
+     * The severity and facility levels conform to the syslog format as specified
+     * in RFC 3164 and RFC 5424.
+     *
+     * @param [in] severity Severity according to RFC 3164/5424.
+     * @param [in] facility Facility according to RFC 3164/5424.
+     * @param [in] message Log text.
+     */
+    LOGGING_CPP_API void SendSystemLog(const Severity severity,
+                                       const Facility facility,
                                        const std::wstring& message);
 
     // For C++20 or later we add utility functions with formatting
@@ -117,6 +201,8 @@ namespace Logging
      * the C++20 std::format facility and then forwards the resulting
      * string to the primary SendSystemLog overload.
      *
+     * Uses the Local0 facility by default.
+     *
      * Usage examples:
      *  // Simple integral parameter
      *  Safir::Logging::SendSystemLog(Safir::Logging::Informational, L"Current counter value: {}", 42);
@@ -128,7 +214,7 @@ namespace Logging
      *                                remoteAddress,
      *                                remotePort);
      *
-     * @param  severity  Severity according to RFC 3164.
+     * @param  severity  Severity according to RFC 3164/5424.
      * @param  message   Log text with formatting as accepted by std::format.
      * @param  args      Values that will be formatted into the log message.
      */
@@ -139,11 +225,52 @@ namespace Logging
     {
         try
         {
-            SendSystemLog(severity, std::format(message, std::forward<Args>(args)...));
+            SendSystemLog(severity, Local0, std::format(message, std::forward<Args>(args)...));
         }
         catch (const std::exception& e)
         {
-            Internal::LogFormattingException(severity,std::wstring(message.get()),e);
+            Internal::LogFormattingException(severity, std::wstring(message.get()), e);
+        }
+    }
+
+    /**
+     * Send log messages to the system logging mechanism, but with formatting functionality.
+     *
+     * Helper function that allows for logging using
+     * the C++20 std::format facility and then forwards the resulting
+     * string to the primary SendSystemLog overload.
+     *
+     * Usage examples:
+     *  // Simple integral parameter
+     *  Safir::Logging::SendSystemLog(Safir::Logging::Informational, Safir::Logging::Local0,
+     *                                L"Current counter value: {}", 42);
+     *
+     *  // Mixing several parameters and literals
+     *  Safir::Logging::SendSystemLog(Safir::Logging::Error,
+     *                                Safir::Logging::Local1,
+     *                                L"Login failed for user \"{}\" from {}:{}",
+     *                                userName,
+     *                                remoteAddress,
+     *                                remotePort);
+     *
+     * @param  severity  Severity according to RFC 3164/5424.
+     * @param  facility  Facility according to RFC 3164/5424.
+     * @param  message   Log text with formatting as accepted by std::format.
+     * @param  args      Values that will be formatted into the log message.
+     */
+    template<typename... Args>
+    void SendSystemLog(const Severity severity,
+                       const Facility facility,
+                       std::wformat_string<Args...> message,
+                       Args&&... args)
+    {
+        try
+        {
+            SendSystemLog(severity, facility, std::format(message, std::forward<Args>(args)...));
+        }
+        catch (const std::exception& e)
+        {
+            Internal::LogFormattingException(severity, std::wstring(message.get()), e);
         }
     }
 
@@ -156,7 +283,14 @@ namespace Logging
     template<typename... Args>
     void SendEmergency(std::wformat_string<Args...> message, Args&&... args)
     {
-        SendSystemLog(Emergency, message, std::forward<Args>(args)...);
+        try
+        {
+            SendSystemLog(Emergency, Local0, std::format(message, std::forward<Args>(args)...));
+        }
+        catch (const std::exception& e)
+        {
+            Internal::LogFormattingException(Emergency, std::wstring(message.get()), e);
+        }
     }
 
     /**
@@ -168,7 +302,14 @@ namespace Logging
     template<typename... Args>
     void SendAlert(std::wformat_string<Args...> message, Args&&... args)
     {
-        SendSystemLog(Alert, message, std::forward<Args>(args)...);
+        try
+        {
+            SendSystemLog(Alert, Local0, std::format(message, std::forward<Args>(args)...));
+        }
+        catch (const std::exception& e)
+        {
+            Internal::LogFormattingException(Alert, std::wstring(message.get()), e);
+        }
     }
 
     /**
@@ -180,7 +321,14 @@ namespace Logging
     template<typename... Args>
     void SendCritical(std::wformat_string<Args...> message, Args&&... args)
     {
-        SendSystemLog(Critical, message, std::forward<Args>(args)...);
+        try
+        {
+            SendSystemLog(Critical, Local0, std::format(message, std::forward<Args>(args)...));
+        }
+        catch (const std::exception& e)
+        {
+            Internal::LogFormattingException(Critical, std::wstring(message.get()), e);
+        }
     }
 
     /**
@@ -192,7 +340,14 @@ namespace Logging
     template<typename... Args>
     void SendError(std::wformat_string<Args...> message, Args&&... args)
     {
-        SendSystemLog(Error, message, std::forward<Args>(args)...);
+        try
+        {
+            SendSystemLog(Error, Local0, std::format(message, std::forward<Args>(args)...));
+        }
+        catch (const std::exception& e)
+        {
+            Internal::LogFormattingException(Error, std::wstring(message.get()), e);
+        }
     }
 
     /**
@@ -204,7 +359,14 @@ namespace Logging
     template<typename... Args>
     void SendWarning(std::wformat_string<Args...> message, Args&&... args)
     {
-        SendSystemLog(Warning, message, std::forward<Args>(args)...);
+        try
+        {
+            SendSystemLog(Warning, Local0, std::format(message, std::forward<Args>(args)...));
+        }
+        catch (const std::exception& e)
+        {
+            Internal::LogFormattingException(Warning, std::wstring(message.get()), e);
+        }
     }
 
     /**
@@ -216,7 +378,14 @@ namespace Logging
     template<typename... Args>
     void SendNotice(std::wformat_string<Args...> message, Args&&... args)
     {
-        SendSystemLog(Notice, message, std::forward<Args>(args)...);
+        try
+        {
+            SendSystemLog(Notice, Local0, std::format(message, std::forward<Args>(args)...));
+        }
+        catch (const std::exception& e)
+        {
+            Internal::LogFormattingException(Notice, std::wstring(message.get()), e);
+        }
     }
 
     /**
@@ -228,7 +397,14 @@ namespace Logging
     template<typename... Args>
     void SendInformational(std::wformat_string<Args...> message, Args&&... args)
     {
-        SendSystemLog(Informational, message, std::forward<Args>(args)...);
+        try
+        {
+            SendSystemLog(Informational, Local0, std::format(message, std::forward<Args>(args)...));
+        }
+        catch (const std::exception& e)
+        {
+            Internal::LogFormattingException(Informational, std::wstring(message.get()), e);
+        }
     }
 
     /**
@@ -240,7 +416,14 @@ namespace Logging
     template<typename... Args>
     void SendDebug(std::wformat_string<Args...> message, Args&&... args)
     {
-        SendSystemLog(Debug, message, std::forward<Args>(args)...);
+        try
+        {
+            SendSystemLog(Debug, Local0, std::format(message, std::forward<Args>(args)...));
+        }
+        catch (const std::exception& e)
+        {
+            Internal::LogFormattingException(Debug, std::wstring(message.get()), e);
+        }
     }
 
 #endif

@@ -264,6 +264,7 @@ namespace Internal
                 }
 
                 Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Warning,
+                                                      Safir::Utilities::Internal::Log::Local0,
                                                       ostr.str());
 
                 lllog(1) << ostr.str() << std::endl;

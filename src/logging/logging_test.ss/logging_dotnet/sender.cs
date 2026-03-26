@@ -36,6 +36,16 @@ class Sender
         Safir.Logging.SendSystemLog(Safir.Logging.Severity.Informational, "This is an informational log");
         Safir.Logging.SendSystemLog(Safir.Logging.Severity.Debug, "This is a debug log");
 
+        // Test convenience methods
+        Safir.Logging.SendEmergency("This is another emergency log using convenience method");
+        Safir.Logging.SendAlert("This is another alert log using convenience method");
+        Safir.Logging.SendCritical("This is another critical log using convenience method");
+        Safir.Logging.SendError("This is another error log using convenience method");
+        Safir.Logging.SendWarning("This is another warning log using convenience method");
+        Safir.Logging.SendNotice("This is another notice log using convenience method");
+        Safir.Logging.SendInformational("This is another informational log using convenience method");
+        Safir.Logging.SendDebug("This is another debug log using convenience method");
+
         return 0;
     }
 }

@@ -31,7 +31,7 @@
 
 
 #define SEND_SYSTEM_LOG(severity, comment) \
-    {std::wostringstream ostr_123; ostr_123 comment; Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::severity, ostr_123.str());}
+    {std::wostringstream ostr_123; ostr_123 comment; Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::severity, Safir::Utilities::Internal::Log::Local0, ostr_123.str());}
 
 namespace Safir
 {
@@ -53,18 +53,45 @@ namespace Log
         Debug
     };
 
+    // Syslog facilities as defined in RFC 3164/5424
+    // The numeric values are the facility codes (not shifted)
+    enum Facility
+    {
+        Kernel = 0,
+        User = 1,
+        Mail = 2,
+        Daemon = 3,
+        Auth = 4,
+        Syslog = 5,
+        Lpr = 6,
+        News = 7,
+        Uucp = 8,
+        Cron = 9,
+        Authpriv = 10,
+        Ftp = 11,
+        Local0 = 16,
+        Local1 = 17,
+        Local2 = 18,
+        Local3 = 19,
+        Local4 = 20,
+        Local5 = 21,
+        Local6 = 22,
+        Local7 = 23
+    };
+
     /**
     * Service for sending log messages to the native system logging mechanism.
     *
-    * The service takes a severity and an arbitrary string.
-    * The severity levels conforms to the ones used by the well known syslog format as specified
-    * in http://www.ietf.org/rfc/rfc3164.txt.
+    * The service takes a severity, facility, and an arbitrary string.
+    * The severity and facility levels conform to the syslog format as specified
+    * in RFC 3164 and RFC 5424.
     *
-    * @param [in] severity Severity according to RFC 3164.
+    * @param [in] severity Severity according to RFC 3164/5424.
+    * @param [in] facility Facility according to RFC 3164/5424.
     * @param [in] text Log text.
     *
     */
-    LLUF_INTERNAL_API void Send(const Severity severity, const std::wstring& text);
+    LLUF_INTERNAL_API void Send(const Severity severity, const Facility facility, const std::wstring& text);
 
 }
 }
