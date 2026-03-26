@@ -96,8 +96,8 @@ Library::Library()
     , m_traceBufferLock()
     , m_prefixPending(true)
     , m_windowsNativeLogging(false)
-    , m_tracerDataSender(m_ioContext, LlufId_GenerateRandom64())
     , m_tracerSyslogFacility(static_cast<Safir::Logging::Facility>(Safir::Application::TracerParameters::SyslogFacility()))
+    , m_tracerDataSender(m_ioContext, LlufId_GenerateRandom64())
 {
     Safir::Utilities::ProcessInfo proc(Safir::Utilities::ProcessInfo::GetPid());
     m_programName = Safir::Dob::Typesystem::Utilities::ToWstring(proc.GetProcessName());
