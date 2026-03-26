@@ -174,4 +174,13 @@ The SDK provides bindings for:
 - **C#/.NET** (modules suffixed `_dotnet`)
 - **Java** (modules suffixed `_java`)
 
+### Interface Design Philosophy
+
+**IMPORTANT**: Public interfaces are available in C++, C#, and Java. When working on these interfaces, you must ensure they remain as similar as possible across all three languages, while preserving the conventions and idioms of each language. Interfaces should feel native to each language without introducing surprises.
+
+When modifying or creating public interfaces, ensure:
+- Following language-specific naming conventions (e.g., PascalCase methods in C#, camelCase in Java, snake_case or PascalCase in C++ as appropriate)
+- Using language-native patterns (e.g., properties in C#, getters/setters in Java)
+- Maintaining consistent behavior and semantics across all language bindings
+
 Note for Java: Use `putVal()`/`putObj()` instead of `put()` when adding to collections.
