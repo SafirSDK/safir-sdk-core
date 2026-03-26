@@ -16,5 +16,11 @@
       <type>Int32</type>
       <value>49500</value>
     </parameter>
+    <parameter>
+      <summary>Syslog facility code for Tracer syslog output. See Safir::Logging::Facility enum in Safir/Logging/Log.h for valid values (0=Kernel, 1=User, 2=Mail, 3=Daemon, 4=Auth, 5=Syslog, 6=Lpr, 7=News, 8=Uucp, 9=Cron, 10=Authpriv, 11=Ftp, 16=Local0, 17=Local1, 18=Local2, 19=Local3, 20=Local4, 21=Local5, 22=Local6, 23=Local7).</summary>
+      <name>SyslogFacility</name>
+      <type>Int32</type>
+      <value>17</value>
+    </parameter>
   </parameters>
 </class>

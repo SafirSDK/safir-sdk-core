@@ -68,6 +68,18 @@ def fail(message):
 if stdout_output.count("\n") != 36 or syslog_output.count("\n") != 36:
     fail("lines")
 
+# Check that all tracer syslog messages use Local1 facility (17)
+if len(syslog.facilities) != 36:
+    out("Failed! Expected 36 syslog messages with parsed facilities, got", len(syslog.facilities))
+    out("Facilities:", syslog.facilities)
+    sys.exit(1)
+
+for facility in syslog.facilities:
+    if facility != 17:  # Local1
+        out("Failed! Expected all tracer messages to use Local1 facility (17), but got facility", facility)
+        out("All facilities:", syslog.facilities)
+        sys.exit(1)
+
 if stdout_output.count(u"Rymd-B@rje: blahonga") != 6 or syslog_output.count(u"Rymd-Börje: blahonga") != 6:
     fail("blahonga")
 

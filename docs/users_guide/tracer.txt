@@ -100,7 +100,9 @@ application (see the bottom panel in <<tracer_viewer_overview>>):
 The first is really just there since it is easy to use when combined with FORCE_LOG (more
 below) and a terminal or a debugger. The second is there since it was the main tracer
 logging destination in previous Safir SDK Core releases, and is still useful since it
-gets combined with the error logs.
+gets combined with the error logs. The syslog facility used for Tracer messages can be
+configured via the +SyslogFacility+ parameter in +Safir.Application.TracerParameters.dou+
+(default is Local1).
 
 The third output option is new from Safir SDK Core 7.4 and is much more suitable for high
 throughput logging than the Safir Logging facility, and since it is separate from that it

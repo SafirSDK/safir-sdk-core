@@ -40,6 +40,18 @@ class SyslogServer(socketserver.UDPServer):
             else:
                 self.server.buf += data + '\n'
 
+                # Parse facility and severity from PRI field
+                if data.startswith('<') and '>' in data:
+                    pri_end = data.index('>')
+                    try:
+                        pri = int(data[1:pri_end])
+                        facility = pri >> 3  # facility = pri / 8
+                        severity = pri & 0x07  # severity = pri % 8
+                        self.server.facilities.append(facility)
+                        self.server.severities.append(severity)
+                    except ValueError:
+                        pass
+
     def __init__(self, safir_show_config):
         #Run the program that writes the ini file configuration to standard output
         with subprocess.Popen((safir_show_config, "--logging"),
@@ -74,6 +86,8 @@ class SyslogServer(socketserver.UDPServer):
                                         SyslogServer._Handler)
 
         self.buf = None
+        self.facilities = []
+        self.severities = []
         self.stopped = False
 
     def get_data(self, timeout):
@@ -84,6 +98,8 @@ class SyslogServer(socketserver.UDPServer):
         a single non-blocking check for any pending data.
         """
         self.buf = str()
+        self.facilities = []
+        self.severities = []
 
         if self.stopped:
             return self.buf

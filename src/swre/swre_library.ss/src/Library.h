@@ -145,6 +145,7 @@ private:
     bool m_prefixPending;
 
     bool m_windowsNativeLogging;
+    const Safir::Logging::Facility m_tracerSyslogFacility;
 
     TracerDataSender m_tracerDataSender;
     std::shared_ptr<Safir::Dob::Internal::Control::ControlInfoReceiver> m_controlInfoReceiver;

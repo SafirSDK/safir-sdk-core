@@ -57,6 +57,19 @@ def fail(message):
 if stdout_output.count("\n") != 39 or syslog_output.count("\n") != 39:
     fail("lines")
 
+# Check that all tracer syslog messages use Local1 facility (17)
+# Tracer uses Debug severity (7), so PRI = 17 * 8 + 7 = 143
+if len(syslog.facilities) != 39:
+    out("Failed! Expected 39 syslog messages with parsed facilities, got", len(syslog.facilities))
+    out("Facilities:", syslog.facilities)
+    sys.exit(1)
+
+for facility in syslog.facilities:
+    if facility != 17:  # Local1
+        out("Failed! Expected all tracer messages to use Local1 facility (17), but got facility", facility)
+        out("All facilities:", syslog.facilities)
+        sys.exit(1)
+
 if stdout_output.count(u"Rymd-B@rje: blahonga") != 6 or syslog_output.count(u"Rymd-Börje: blahonga") != 6:
     fail("blahonga")
 
@@ -119,6 +132,12 @@ syslog_output = syslog.get_data(1)
 if stdout_output.count("\n") != 13 or syslog_output.count("\n") != 13:
     fail("all lines")
 
+# Check facility for FORCE_LOG all
+for facility in syslog.facilities:
+    if facility != 17:  # Local1
+        out("Failed! FORCE_LOG all: Expected facility Local1 (17), but got", facility)
+        sys.exit(1)
+
 #check that FORCE_LOG works
 os.environ["FORCE_LOG"] = "Razor"
 #check that there is no output when we don't "enable"
@@ -133,6 +152,12 @@ if stdout_output.count(u"Razor: ") != 7 or syslog_output.count(u"Razor: ") != 7:
 
 if stdout_output.count(u"Rymd-B@rje: ") != 0 or syslog_output.count(u"Rymd-Börje: ") != 0:
     fail("Rymd-Borje")
+
+# Check facility for FORCE_LOG Razor
+for facility in syslog.facilities:
+    if facility != 17:  # Local1
+        out("Failed! FORCE_LOG Razor: Expected facility Local1 (17), but got", facility)
+        sys.exit(1)
 
 out("success")
 sys.exit(0)

@@ -97,6 +97,7 @@ Library::Library()
     , m_prefixPending(true)
     , m_windowsNativeLogging(false)
     , m_tracerDataSender(m_ioContext, LlufId_GenerateRandom64())
+    , m_tracerSyslogFacility(static_cast<Safir::Logging::Facility>(Safir::Application::TracerParameters::SyslogFacility()))
 {
     Safir::Utilities::ProcessInfo proc(Safir::Utilities::ProcessInfo::GetPid());
     m_programName = Safir::Dob::Typesystem::Utilities::ToWstring(proc.GetProcessName());
@@ -322,6 +323,7 @@ Library::TraceInternal(const PrefixId prefixId,
         if (ch == '\n')
         {
             Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                          m_tracerSyslogFacility,
                                           m_traceSyslogBuffer);
             m_traceSyslogBuffer.clear();
         }
