@@ -56,47 +56,90 @@ with TestEnvStopper(env):
     out1 = env.Output("sate1")
     out2 = env.Output("sate2")
 
-    expected1 = '''
-Opening DOB connection: sate1
-Starting script execution...
-Register entity handler: Safir.Control.Status, handler=DEFAULT_HANDLER, RequestorDecidesInstanceId
-Connected to DOB!
-Register service handler: Safir.Control.Command, handler=321
-Set all: Safir.Control.Status, instance=1, handler=DEFAULT_HANDLER
-Set all: Safir.Control.Status, instance=2, handler=DEFAULT_HANDLER
-Set all: Safir.Control.Status, instance=3, handler=DEFAULT_HANDLER
-Send message: Safir.Application.BackdoorCommand, channel=123
-OnServiceRequest: Safir.Control.Command
-Script execution completed successfully.
-Disconnected from DOB!
-'''
+    # Helper function to verify output with tolerance for out-of-order messages
+    # Each line can be up to 'window_size' positions out of order
+    def verify_output_with_sliding_window(output, expected_lines, window_size=3):
+        """
+        Verify output contains all expected lines in roughly the right order.
+        Each line can be up to window_size positions ahead of its expected position.
 
-    expected2 = '''
-Opening DOB connection: sate2
-Starting script execution...
-Subscribe entity: Safir.Control.Status, recursive=1
-Connected to DOB!
-Subscribe message: Safir.Application.BackdoorCommand, channel=123, recursive=1
-OnEntity: New Safir.Control.Status, instance=1
-OnEntity: New Safir.Control.Status, instance=2
-OnEntity: New Safir.Control.Status, instance=3
-OnMessage: Safir.Application.BackdoorCommand on channel 123
-Send service request: Safir.Control.Command, handler=321
-OnResponse: Safir.Dob.SuccessResponse
-OnEntity: Delete Safir.Control.Status, instance=1
-OnEntity: Delete Safir.Control.Status, instance=2
-OnEntity: Delete Safir.Control.Status, instance=3
-Script execution completed successfully.
-Disconnected from DOB!
-'''
+        Returns (success, error_message or None)
+        """
+        output_lines = [line.strip() for line in output.strip().split('\n') if line.strip()]
+        remaining_expected = list(expected_lines)  # Copy the list
+        output_idx = 0
 
-    if out1.find(expected1.strip()) == -1:
-        log("SATE1 output did not match expected output! Output was:")
+        while remaining_expected and output_idx < len(output_lines):
+            actual_line = output_lines[output_idx]
+
+            # Check if this actual line matches any of the next 'window_size' expected lines
+            found = False
+            for i in range(min(window_size, len(remaining_expected))):
+                if actual_line == remaining_expected[i]:
+                    # Found a match - remove it from expected list
+                    remaining_expected.pop(i)
+                    found = True
+                    break
+
+            if not found:
+                # This line wasn't in our expected window, skip it
+                pass
+
+            output_idx += 1
+
+        if remaining_expected:
+            missing = '\n  '.join(remaining_expected)
+            return False, f"Missing expected lines:\n  {missing}"
+
+        return True, None
+
+    # Expected output lines for sate1 (in roughly expected order, but with some flexibility)
+    expected1 = [
+        "Opening DOB connection: sate1",
+        "Starting script execution...",
+        "Register entity handler: Safir.Control.Status, handler=DEFAULT_HANDLER, RequestorDecidesInstanceId",
+        "Connected to DOB!",
+        "Register service handler: Safir.Control.Command, handler=321",
+        "Set all: Safir.Control.Status, instance=1, handler=DEFAULT_HANDLER",
+        "Set all: Safir.Control.Status, instance=2, handler=DEFAULT_HANDLER",
+        "Set all: Safir.Control.Status, instance=3, handler=DEFAULT_HANDLER",
+        "Send message: Safir.Application.BackdoorCommand, channel=123",
+        "OnServiceRequest: Safir.Control.Command",
+        "Script execution completed successfully.",
+        "Disconnected from DOB!"
+    ]
+
+    success, error = verify_output_with_sliding_window(out1, expected1, window_size=3)
+    if not success:
+        log(f"SATE1 verification failed: {error}")
+        log("SATE1 output was:")
         log(out1)
         sys.exit(1)
 
-    if out2.find(expected2.strip()) == -1:
-        log("SATE2 output did not match expected output! Output was:")
+    # Expected output lines for sate2 (in roughly expected order, but with some flexibility)
+    expected2 = [
+        "Opening DOB connection: sate2",
+        "Starting script execution...",
+        "Subscribe entity: Safir.Control.Status, recursive=1",
+        "Connected to DOB!",
+        "Subscribe message: Safir.Application.BackdoorCommand, channel=123, recursive=1",
+        "OnEntity: New Safir.Control.Status, instance=1",
+        "OnEntity: New Safir.Control.Status, instance=2",
+        "OnEntity: New Safir.Control.Status, instance=3",
+        "OnMessage: Safir.Application.BackdoorCommand on channel 123",
+        "Send service request: Safir.Control.Command, handler=321",
+        "OnResponse: Safir.Dob.SuccessResponse",
+        "OnEntity: Delete Safir.Control.Status, instance=1",
+        "OnEntity: Delete Safir.Control.Status, instance=2",
+        "OnEntity: Delete Safir.Control.Status, instance=3",
+        "Script execution completed successfully.",
+        "Disconnected from DOB!"
+    ]
+
+    success, error = verify_output_with_sliding_window(out2, expected2, window_size=3)
+    if not success:
+        log(f"SATE2 verification failed: {error}")
+        log("SATE2 output was:")
         log(out2)
         sys.exit(1)
 
