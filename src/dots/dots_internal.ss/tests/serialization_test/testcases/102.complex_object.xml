@@ -22,8 +22,8 @@
                <String xml:space="preserve" index="0">Joel is
                Ottosson</String>
             <String xml:space="preserve" index="1">bbbb</String>
-            <String xml:space="preserve" index="2">cccc</String>
-            <String xml:space="preserve" index="3">dddd</String>
+            <String xml:space="preserve" index="2">C:\Program Files</String>
+            <String xml:space="preserve" index="3">Hello\tWorld\nWhat's up?</String>
             <String xml:space="preserve" index="4">eeee</String>
         </MyStrings>
     </MyItemVal>

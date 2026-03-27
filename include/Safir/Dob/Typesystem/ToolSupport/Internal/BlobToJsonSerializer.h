@@ -113,46 +113,49 @@ namespace Internal
                     break;
                 case ArrayCollectionType:
                     {
-                        std::ostringstream arrayValues;
-                        arrayValues<<",";
-                        WriteMemberName(md->GetName(), arrayValues);
-                        arrayValues<<"[";
-                        bool nonNullValueInserted=false;
-                        int accumulatedNulls=0;
-                        bool hasInsertedValues=false;
+                        // Pre-scan to check if there are any non-null values at all.
+                        // Avoids allocating a temporary buffer just to discard it for all-null arrays.
+                        bool hasNonNull=false;
                         for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                         {
                             bool isNull=true, isChanged=true;
                             reader.ReadStatus(memberIx, arrIx, isNull, isChanged);
-                            if (isNull)
-                            {
-                                //we wait to insert null until we know we have to because an value exists after.
-                                //This way we avoid lots of null at the end of an array
-                                ++accumulatedNulls;
-                            }
-                            else
-                            {
-                                if (hasInsertedValues)
-                                {
-                                    arrayValues<<",";
-                                }
-
-                                for (int nullCount=0; nullCount<accumulatedNulls; ++nullCount)
-                                {
-                                    arrayValues<<"null,";
-                                }
-                                accumulatedNulls=0;
-                                nonNullValueInserted=true;
-
-                                SerializeMember(reader, md, memberIx, arrIx, arrayValues);
-                                hasInsertedValues=true;
-                            }
+                            if (!isNull) { hasNonNull=true; break; }
                         }
-                        arrayValues<<"]";
 
-                        if (nonNullValueInserted) //only add array element if there are non-null values
+                        if (hasNonNull)
                         {
-                            os<<arrayValues.str();
+                            os<<",";
+                            WriteMemberName(md->GetName(), os);
+                            os<<"[";
+                            int accumulatedNulls=0;
+                            bool hasInsertedValues=false;
+                            for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
+                            {
+                                bool isNull=true, isChanged=true;
+                                reader.ReadStatus(memberIx, arrIx, isNull, isChanged);
+                                if (isNull)
+                                {
+                                    //we wait to insert null until we know we have to because a value exists after.
+                                    //This way we avoid lots of null at the end of an array
+                                    ++accumulatedNulls;
+                                }
+                                else
+                                {
+                                    if (hasInsertedValues)
+                                    {
+                                        os<<",";
+                                    }
+                                    for (int nullCount=0; nullCount<accumulatedNulls; ++nullCount)
+                                    {
+                                        os<<"null,";
+                                    }
+                                    accumulatedNulls=0;
+                                    SerializeMember(reader, md, memberIx, arrIx, os);
+                                    hasInsertedValues=true;
+                                }
+                            }
+                            os<<"]";
                         }
                     }
                     break;
@@ -215,11 +218,34 @@ namespace Internal
 
         void WriteString(const std::string& val, std::ostream& os) const
         {
-            std::string str=val;
-            std::string repl=std::string("\\")+std::string("\"");
-            boost::replace_all(str, "\"", repl);
-            boost::replace_all(str, "\n", "\\n");
-            os<<SAFIR_JSON_QUOTE(str);
+            os << '"';
+            for (const unsigned char c : val)
+            {
+                switch (c)
+                {
+                case '"':  os << "\\\""; break;
+                case '\\': os << "\\\\"; break;
+                case '\b': os << "\\b";  break;
+                case '\f': os << "\\f";  break;
+                case '\n': os << "\\n";  break;
+                case '\r': os << "\\r";  break;
+                case '\t': os << "\\t";  break;
+                default:
+                    if (c < 0x20)
+                    {
+                        // Other control characters as \uXXXX
+                        os << "\\u00";
+                        os << "0123456789abcdef"[c >> 4];
+                        os << "0123456789abcdef"[c & 0x0f];
+                    }
+                    else
+                    {
+                        os << static_cast<char>(c);
+                    }
+                    break;
+                }
+            }
+            os << '"';
         }
 
         void WriteHash(const std::pair<DotsC_Int64, const char*>& val, std::ostream& os) const
