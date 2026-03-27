@@ -67,6 +67,25 @@ using Safir::Dob::Typesystem::Utilities::ToWstring;
 static const wchar_t* pingCmd = L"ping";
 static const wchar_t* helpCmd = L"help";
 
+namespace
+{
+    std::wstring SeverityToWstring(Safir::Utilities::Internal::Log::Severity severity)
+    {
+        switch (severity)
+        {
+        case Safir::Utilities::Internal::Log::Emergency:     return L"EMERGENCY";
+        case Safir::Utilities::Internal::Log::Alert:         return L"ALERT";
+        case Safir::Utilities::Internal::Log::Critical:      return L"CRITICAL";
+        case Safir::Utilities::Internal::Log::Error:         return L"ERROR";
+        case Safir::Utilities::Internal::Log::Warning:       return L"WARNING";
+        case Safir::Utilities::Internal::Log::Notice:        return L"NOTICE";
+        case Safir::Utilities::Internal::Log::Informational: return L"INFO";
+        case Safir::Utilities::Internal::Log::Debug:         return L"DEBUG";
+        default:                                             return L"UNKNOWN";
+        }
+    }
+}
+
 typedef boost::tokenizer<boost::char_separator<wchar_t>,
                          std::wstring::const_iterator,
                          std::wstring> wtokenizer;
@@ -93,8 +112,6 @@ Library::Library()
     , m_work(boost::asio::make_work_guard(m_ioContext))
     , m_dispatcher(m_connection, m_ioContext)
     , m_prefixes(m_connection, m_ioContext)
-    , m_traceBufferLock()
-    , m_prefixPending(true)
     , m_windowsNativeLogging(false)
     , m_tracerSyslogFacility(static_cast<Safir::Logging::Facility>(Safir::Application::TracerParameters::SyslogFacility()))
     , m_tracerDataSender(m_ioContext, LlufId_GenerateRandom64())
@@ -148,6 +165,15 @@ Library::Library()
 
     m_windowsNativeLogging = configReader.Logging().get<bool>("SystemLog.native_logging");
 #endif
+
+    // Register callback to forward system log messages to tracer output
+    Safir::Utilities::Internal::Log::SetSystemLogCallback(
+        [this](Safir::Utilities::Internal::Log::Severity severity,
+               Safir::Utilities::Internal::Log::Facility facility,
+               const std::string& message)
+        {
+            OnSystemLog(severity, facility, message);
+        });
 }
 
 Library::~Library()
@@ -223,6 +249,9 @@ Library::StartTraceBackdoor(const std::wstring& connectionNameCommonPart,
 void
 Library::StopTraceBackdoor()
 {
+    // Unregister callback before stopping to prevent callbacks during/after destruction
+    Safir::Utilities::Internal::Log::SetSystemLogCallback(nullptr);
+
     if (m_thread.joinable())
     {
         boost::asio::post(m_ioContext,[this]{m_prefixes.StopEntityHandling();});
@@ -274,100 +303,81 @@ void Library::EnablePrefix(const PrefixId prefixId, const bool enabled)
     m_prefixes.Enable(prefixId, enabled);
 }
 
-// Private method that assumes the buffer lock is already taken.
 void
 Library::TraceInternal(const PrefixId prefixId,
                        const wchar_t ch)
 {
-    if (m_prefixPending)
+    // Capture current settings (lock-free reads via atomics)
+    const bool toStdout = m_prefixes.LogToStdout();
+    const bool toUdp = m_prefixes.LogToTracer();
+    // No syslog when using Windows native logging
+    const bool toSyslog = m_prefixes.LogToSafirLogging() && !m_windowsNativeLogging;
+
+    // Delegate to TraceBuffer - lock is held internally, no external calls while locked
+    m_traceBuffer.Append(ch, toStdout, toUdp, toSyslog,
+                         m_prefixes.GetPrefix(prefixId),
+                         m_prefixes.GetPrefixAscii(prefixId));
+
+    // Check for overflow AFTER releasing lock - safe to call external code
+    if (m_traceBuffer.ConsumeOverflowFlag())
     {
-        //no syslog when using windows native logging
-        if (m_prefixes.LogToSafirLogging() && !m_windowsNativeLogging)
-        {
-            m_traceSyslogBuffer.append(m_prefixes.GetPrefix(prefixId));
-            m_traceSyslogBuffer.append(L": ");
-        }
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+            L"Application is not flushing its tracers. Buffers cleared. Read the Tracer FAQ in the User's Guide for more info.");
+    }
+}
 
-        if (m_prefixes.LogToStdout())
-        {
-            m_traceStdoutBuffer.append(m_prefixes.GetPrefixAscii(prefixId));
-            m_traceStdoutBuffer.append(L": ");
-        }
-
-        if (m_prefixes.LogToTracer())
-        {
-            m_traceUdpBuffer.append(m_prefixes.GetPrefix(prefixId));
-            m_traceUdpBuffer.append(L": ");
-        }
-
-        m_prefixPending = false;
+void
+Library::OnSystemLog(Safir::Utilities::Internal::Log::Severity severity,
+                     Safir::Utilities::Internal::Log::Facility facility,
+                     const std::string& message)
+{
+    // Skip messages from the tracer's own facility to avoid redundant output.
+    // TraceInternal sends tracer output to syslog using m_tracerSyslogFacility.
+    if (static_cast<int>(facility) == static_cast<int>(m_tracerSyslogFacility))
+    {
+        return;
     }
 
-    if (m_prefixes.LogToStdout())
+    // Only forward syslog messages if at least one tracer prefix is enabled (lock-free)
+    if (!m_prefixes.AnyPrefixEnabled())
     {
-        //since we dont know the locale of wcout we strip off all non-ascii chars
-        if ((ch & ~0x7F) == 0)
-        {
-            m_traceStdoutBuffer.push_back(ch);
-        }
-        else
-        {
-            m_traceStdoutBuffer.push_back('@');
-        }
+        return;
     }
 
-    //no syslog when using windows native logging
-    if (m_prefixes.LogToSafirLogging() && !m_windowsNativeLogging)
-    {
-        //Syslogs are flushed on newlines instead of flushes
-        if (ch == '\n')
-        {
-            Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                          m_tracerSyslogFacility,
-                                          m_traceSyslogBuffer);
-            m_traceSyslogBuffer.clear();
-        }
-        else
-        {
-            m_traceSyslogBuffer.push_back(ch);
-        }
-    }
+    // Capture current settings (lock-free reads via atomics)
+    const bool toStdout = m_prefixes.LogToStdout();
+    const bool toUdp = m_prefixes.LogToTracer();
 
-    if (m_prefixes.LogToTracer())
-    {
-        m_traceUdpBuffer.push_back(ch);
-    }
+    // Format: "syslog: [SEVERITY] message\n"
+    const std::wstring formatted = L"syslog: [" + SeverityToWstring(severity) + L"] " + ToWstring(message) + L"\n";
 
-    if (ch == '\n')
-    {
-        m_prefixPending = true;
-
-        //For the peeps who forget to flush their tracers...
-        if (m_traceStdoutBuffer.size() > 50000 || m_traceUdpBuffer.size() > 50000)
-        {
-            Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                          L"Application is not flushing its tracers. Buffers cleared. Read the Tracer FAQ in the User's Guide for more info.");
-            m_traceStdoutBuffer.clear();
-            m_traceUdpBuffer.clear();
-        }
-    }
+    // Delegate to TraceBuffer - no deadlock risk since TraceBuffer never calls external
+    // code while holding its lock
+    m_traceBuffer.AppendSyslogForward(formatted, toStdout, toUdp);
 }
 
 void
 Library::TraceFlush()
 {
-    boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
+    // 1. Drain buffers (releases lock quickly)
+    auto data = m_traceBuffer.Drain();
 
-    if (m_prefixes.LogToStdout() && !m_traceStdoutBuffer.empty())
+    // 2. Output OUTSIDE any lock - safe to call external code
+    if (!data.stdout.empty())
     {
-        std::wcout << m_traceStdoutBuffer << std::flush;
-        m_traceStdoutBuffer.clear();
+        std::wcout << data.stdout << std::flush;
+    }
+    if (!data.udp.empty())
+    {
+        m_tracerDataSender.Send(ToUtf8(data.udp));
     }
 
-    if (m_prefixes.LogToTracer() && !m_traceUdpBuffer.empty())
+    // 3. Send deferred syslog lines (accumulated during Append calls)
+    while (auto line = m_traceBuffer.DrainSyslogLine())
     {
-        m_tracerDataSender.Send(ToUtf8(m_traceUdpBuffer));
-        m_traceUdpBuffer.clear();
+        Safir::Logging::SendSystemLog(Safir::Logging::Debug,
+                                      m_tracerSyslogFacility,
+                                      *line);
     }
 }
 
@@ -388,7 +398,6 @@ void
 Library::TraceWChar(const PrefixId prefixId,
                     const wchar_t ch)
 {
-    boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
     TraceInternal(prefixId, ch);
 }
 
@@ -412,8 +421,22 @@ void
 Library::TraceString(const PrefixId prefixId,
                      const std::wstring& str)
 {
-    boost::lock_guard<boost::mutex> lock(m_traceBufferLock);
-    std::for_each(str.begin(), str.end(), [this, prefixId](const wchar_t c){TraceInternal(prefixId,c);});
+    // Capture current settings (lock-free reads via atomics)
+    const bool toStdout = m_prefixes.LogToStdout();
+    const bool toUdp = m_prefixes.LogToTracer();
+    const bool toSyslog = m_prefixes.LogToSafirLogging() && !m_windowsNativeLogging;
+
+    // Append entire string with single lock acquisition (important for long strings)
+    m_traceBuffer.AppendString(str, toStdout, toUdp, toSyslog,
+                               m_prefixes.GetPrefix(prefixId),
+                               m_prefixes.GetPrefixAscii(prefixId));
+
+    // Check for overflow AFTER releasing lock
+    if (m_traceBuffer.ConsumeOverflowFlag())
+    {
+        Safir::Logging::SendSystemLog(Safir::Logging::Error,
+            L"Application is not flushing its tracers. Buffers cleared. Read the Tracer FAQ in the User's Guide for more info.");
+    }
 }
 
 

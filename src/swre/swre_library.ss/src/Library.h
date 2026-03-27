@@ -27,15 +27,14 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Utilities/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/noncopyable.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/thread/recursive_mutex.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
 #include <mutex>
 #include <list>
 #include <queue>
 #include "Prefixes.h"
+#include "TraceBuffer.h"
 #include "TracerDataSender.h"
 #include <memory>
 #include <Safir/Dob/Consumer.h>
@@ -110,6 +109,10 @@ private:
 
     void OnMessage(const Safir::Dob::MessageProxy messageProxy) override;
 
+    void OnSystemLog(Safir::Utilities::Internal::Log::Severity severity,
+                     Safir::Utilities::Internal::Log::Facility facility,
+                     const std::string& message);
+
     void HandleCommand(const std::vector<std::wstring>& cmdTokens);
     std::wstring GetHelpText();
 
@@ -136,13 +139,7 @@ private:
     void TraceInternal(const PrefixId prefixId,
                        const wchar_t ch);
 
-
-    //trace buffer and the associated lock
-    boost::mutex m_traceBufferLock;
-    std::wstring m_traceStdoutBuffer;
-    std::wstring m_traceSyslogBuffer;
-    std::wstring m_traceUdpBuffer;
-    bool m_prefixPending;
+    TraceBuffer m_traceBuffer;
 
     bool m_windowsNativeLogging;
     const Safir::Logging::Facility m_tracerSyslogFacility;

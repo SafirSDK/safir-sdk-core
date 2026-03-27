@@ -33,6 +33,7 @@
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/asio.hpp>
+#include <atomic>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -41,6 +42,47 @@
 
 
 
+/**
+ * PrefixId is an opaque handle to a prefix, exposed to language bindings.
+ *
+ * INTERNAL IMPLEMENTATION DETAILS (do not rely on these in external code):
+ *
+ * PrefixId is actually a pointer to PrefixState disguised as an int64.
+ * This design enables:
+ * - C API compatibility (C can't handle C++ objects, only integers)
+ * - Language bindings (Java/C#/.NET) can hold PrefixId as a long/Int64
+ * - Direct memory access via GetPrefixStatePointer() for performance
+ *
+ * CRITICAL REQUIREMENTS:
+ *
+ * 1. MUST use std::list<PrefixState> for storage
+ *    - std::list guarantees pointer stability (elements never move in memory)
+ *    - This makes PrefixId (a pointer) valid for the lifetime of the container
+ *    - DO NOT change to std::vector or other containers that relocate elements!
+ *
+ * 2. NEVER remove elements from m_prefixes
+ *    - Once a PrefixId is issued, that pointer must remain valid forever
+ *    - Language bindings may hold PrefixIds for the entire process lifetime
+ *    - Removing elements would create dangling pointers
+ *
+ * 3. GetPrefixStatePointer() returns volatile bool*
+ *    - This pointer is given to language bindings for direct read/write access
+ *    - volatile prevents compiler optimization across the pointer access
+ *    - WARNING: volatile is NOT a threading primitive!
+ *      * Does not provide memory barriers or cache coherency guarantees
+ *      * Relies on bool read/write being atomic on target platforms
+ *      * Synchronization happens via DOB entity updates and frequent memory traffic
+ *    - This is a pragmatic compromise for multi-language C API compatibility
+ *
+ * 4. Thread safety model:
+ *    - m_prefixes guarded by m_prefixSearchLock for Add/iteration
+ *    - Once PrefixId obtained, m_isEnabled can be accessed without lock (via volatile pointer)
+ *    - Correctness depends on:
+ *      a) bool read/write atomicity (guaranteed on modern CPUs)
+ *      b) Synchronization from DOB entity updates (authoritative source of truth)
+ *      c) Frequent memory traffic creating implicit visibility
+ *    - Worst case: a few trace calls see stale enabled/disabled state briefly
+ */
 typedef Safir::Dob::Typesystem::Int64 PrefixId;
 
 class Prefixes:
@@ -79,9 +121,18 @@ public:
         }
     }
 
-    bool LogToStdout() const {return m_logToStdout;}
-    bool LogToSafirLogging() const {return m_logToSafirLogging;}
-    bool LogToTracer() const {return m_logToTracer;}
+    // Lock-free reads via atomics
+    bool LogToStdout() const {return m_logToStdout.load(std::memory_order_acquire);}
+    bool LogToSafirLogging() const {return m_logToSafirLogging.load(std::memory_order_acquire);}
+    bool LogToTracer() const {return m_logToTracer.load(std::memory_order_acquire);}
+
+    // Check if any prefix is enabled - uses lock but only called on syslog paths
+    bool AnyPrefixEnabled() const
+    {
+        std::unique_lock<std::mutex> lck(m_prefixSearchLock);
+        return std::any_of(m_prefixes.begin(), m_prefixes.end(),
+                           [](const PrefixState& p) { return p.m_isEnabled; });
+    }
 
 
     PrefixId Add(const std::wstring & prefix)
@@ -93,7 +144,11 @@ public:
     volatile bool * GetStatePointer(const PrefixId prefixId) { return &ToPrefix(prefixId).m_isEnabled; }
 
     bool IsEnabled(const PrefixId prefixId) const { return ToPrefix(prefixId).m_isEnabled; }
-    void Enable(const PrefixId prefixId, const bool enabled) { ToPrefix(prefixId).m_isEnabled = enabled; UpdateEntity(); }
+    void Enable(const PrefixId prefixId, const bool enabled)
+    {
+        ToPrefix(prefixId).m_isEnabled = enabled;
+        UpdateEntity();
+    }
 
     PrefixId GetPrefixId(const std::wstring& prefix) const
     {
@@ -141,9 +196,12 @@ public:
     {
         const auto entity = std::static_pointer_cast<Safir::Application::TracerStatus>(entityProxy.GetEntity());
 
-        m_logToStdout = entity->LogToStdout().GetValOrDefault(m_logToStdout);
-        m_logToSafirLogging = entity->LogToSafirLogging().GetValOrDefault(m_logToSafirLogging);
-        m_logToTracer = entity->LogToTracer().GetValOrDefault(m_logToTracer);
+        m_logToStdout.store(entity->LogToStdout().GetValOrDefault(m_logToStdout.load(std::memory_order_relaxed)),
+                            std::memory_order_release);
+        m_logToSafirLogging.store(entity->LogToSafirLogging().GetValOrDefault(m_logToSafirLogging.load(std::memory_order_relaxed)),
+                                  std::memory_order_release);
+        m_logToTracer.store(entity->LogToTracer().GetValOrDefault(m_logToTracer.load(std::memory_order_relaxed)),
+                            std::memory_order_release);
 
         std::unique_lock<std::mutex> lck(m_prefixSearchLock);
         auto missingPrefixIds = GetAllPrefixIdsInternal();
@@ -229,17 +287,17 @@ public:
 
                 if (entity->LogToStdout().IsNull())
                 {
-                    entity->LogToStdout() = m_logToStdout;
+                    entity->LogToStdout() = m_logToStdout.load(std::memory_order_relaxed);
                 }
 
                 if (entity->LogToSafirLogging().IsNull())
                 {
-                    entity->LogToSafirLogging() = m_logToSafirLogging;
+                    entity->LogToSafirLogging() = m_logToSafirLogging.load(std::memory_order_relaxed);
                 }
 
                 if (entity->LogToTracer().IsNull())
                 {
-                    entity->LogToTracer() = m_logToTracer;
+                    entity->LogToTracer() = m_logToTracer.load(std::memory_order_relaxed);
                 }
 
                 if (!created)
@@ -316,10 +374,13 @@ private:
         std::wstring m_prefixAscii;
         bool m_isEnabled;
     };
+    // Ensure PrefixId (int64) is large enough to hold a pointer on all platforms
     BOOST_STATIC_ASSERT(sizeof(::PrefixId) >= sizeof(PrefixState*));
 
+    // Convert PrefixId back to PrefixState reference (unwrap the disguised pointer)
     static PrefixState & ToPrefix(const PrefixId prefixId) {return *reinterpret_cast<PrefixState*>(prefixId);}
 
+    // Convert PrefixState address to PrefixId (disguise pointer as int64)
     static PrefixId ToPrefixId(const PrefixState& prefix) {return reinterpret_cast<PrefixId>(&prefix);}
 
     // Does not take any locks!
@@ -352,8 +413,9 @@ private:
     boost::asio::io_context& m_ioContext;
     std::wstring m_programName;
 
-    //contains all the prefixes. Pointers into this structure are returned as handles
-    //the language bindings. NEVER remove anything from this list!
+    // Contains all prefixes. Pointers into this structure are returned as PrefixId handles to
+    // language bindings. MUST be std::list for pointer stability. NEVER remove anything from
+    // this list - PrefixIds must remain valid for the process lifetime!
     std::list<PrefixState> m_prefixes;
     int m_longestPrefix = 0;
     mutable std::mutex m_prefixSearchLock; //lock for anyone that loops through the prefixes or adds elements to it.
@@ -361,7 +423,7 @@ private:
     std::unique_ptr<boost::asio::steady_timer> m_timer;
     std::atomic<bool> m_stop;
 
-    volatile bool m_logToStdout = true;
-    volatile bool m_logToSafirLogging = true;
-    volatile bool m_logToTracer = true;
+    std::atomic<bool> m_logToStdout{true};
+    std::atomic<bool> m_logToSafirLogging{true};
+    std::atomic<bool> m_logToTracer{true};
 };

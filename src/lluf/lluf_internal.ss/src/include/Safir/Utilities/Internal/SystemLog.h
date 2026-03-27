@@ -28,6 +28,7 @@
 #include <Safir/Utilities/Internal/StringUtils.h>
 #include <string>
 #include <sstream>
+#include <functional>
 
 
 #define SEND_SYSTEM_LOG(severity, comment) \
@@ -92,6 +93,24 @@ namespace Log
     *
     */
     LLUF_INTERNAL_API void Send(const Severity severity, const Facility facility, const std::wstring& text);
+
+    /**
+     * Callback type for system log notifications.
+     * Called when a system log message is sent.
+     *
+     * @param severity The severity of the log message.
+     * @param facility The facility of the log message.
+     * @param message The log message text (UTF-8 encoded).
+     */
+    using SystemLogCallback = std::function<void(Severity, Facility, const std::string&)>;
+
+    /**
+     * Set a callback to be notified when system log messages are sent.
+     * Thread safety is the caller's responsibility.
+     *
+     * @param callback The callback function, or nullptr to unregister.
+     */
+    LLUF_INTERNAL_API void SetSystemLogCallback(SystemLogCallback callback);
 
 }
 }

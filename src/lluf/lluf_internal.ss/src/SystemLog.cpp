@@ -142,6 +142,7 @@ class SystemLogImpl
 {
     friend class SystemLogImplKeeper;
     friend void Send(const Severity, const Facility, const std::wstring&);
+    friend void SetSystemLogCallback(SystemLogCallback callback);
 
 private:
     //constructor is private, to make sure only SystemLogImplKeeper can create it
@@ -202,10 +203,33 @@ public:
 #endif
     }
 
+    void SetCallback(SystemLogCallback callback)
+    {
+        m_callback = std::move(callback);
+    }
+
     void Send(const Severity severity,
               const Facility facility,
               const std::wstring& text)
     {
+        // Recursion guard: prevent infinite loops if callback calls SendSystemLog
+        static thread_local bool inCallback = false;
+
+        // Invoke callback first (before any other logging) if registered and not recursing
+        if (m_callback && !inCallback)
+        {
+            inCallback = true;
+            try
+            {
+                m_callback(severity, facility, ToUtf8(text));
+            }
+            catch (...)
+            {
+                // Ignore exceptions from callback
+            }
+            inCallback = false;
+        }
+
         std::wstring logText;
         if (m_includeSafirInstance)
         {
@@ -430,7 +454,8 @@ private:
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
     boost::asio::io_context         m_io;
     boost::asio::ip::udp::socket    m_sock;
-    std::mutex                    m_lock;
+    std::mutex                      m_lock;
+    SystemLogCallback               m_callback;
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -558,6 +583,18 @@ void Send(const Severity severity, const Facility facility, const std::wstring& 
         // terminate the program.
         TrySendNativeLog(facility, "Caught some really weird exception when trying to send a system log.");
         exit(57);
+    }
+}
+
+void SetSystemLogCallback(SystemLogCallback callback)
+{
+    try
+    {
+        SystemLogImplKeeper::Instance().Get()->SetCallback(std::move(callback));
+    }
+    catch (const std::runtime_error&)
+    {
+        // The singleton has been destroyed, ignore
     }
 }
 

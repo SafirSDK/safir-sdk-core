@@ -2,9 +2,9 @@
 #so we never want the "d" suffix on debug builds, which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-SET(headers Library.h Prefixes.h TracerDataSender.h
+SET(headers Library.h Prefixes.h TraceBuffer.h TracerDataSender.h
   include/Safir/SwReports/Internal/Interface.h )
-SET(sources Interface.cpp Library.cpp)
+SET(sources Interface.cpp Library.cpp TraceBuffer.cpp)
 
 ADD_LIBRARY(swre_library SHARED ${sources} ${headers})
 ADD_EXECUTABLE(safir_tracer_listener tracer_listener.cpp)
