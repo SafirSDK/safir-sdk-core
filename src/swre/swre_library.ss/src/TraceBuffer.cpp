@@ -180,7 +180,7 @@ TraceBuffer::DrainedData TraceBuffer::Drain()
     std::lock_guard<std::mutex> lock(m_lock);
 
     DrainedData data;
-    data.stdout = std::move(m_stdoutBuffer);
+    data.out = std::move(m_stdoutBuffer);
     data.udp = std::move(m_udpBuffer);
 
     return data;

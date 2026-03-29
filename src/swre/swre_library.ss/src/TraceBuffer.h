@@ -45,7 +45,7 @@ class TraceBuffer
 public:
     struct DrainedData
     {
-        std::wstring stdout;
+        std::wstring out;
         std::wstring udp;
     };
 

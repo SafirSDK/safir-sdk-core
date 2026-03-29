@@ -363,9 +363,9 @@ Library::TraceFlush()
     auto data = m_traceBuffer.Drain();
 
     // 2. Output OUTSIDE any lock - safe to call external code
-    if (!data.stdout.empty())
+    if (!data.out.empty())
     {
-        std::wcout << data.stdout << std::flush;
+        std::wcout << data.out << std::flush;
     }
     if (!data.udp.empty())
     {
