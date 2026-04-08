@@ -73,7 +73,7 @@ namespace JsonHelpers
         }
         else
         {
-            os<<hash.GetRawValue();
+            os<<SAFIR_WS_QUOTE(hash.GetRawValue());
         }
 
         return os;

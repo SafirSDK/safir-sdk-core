@@ -37,7 +37,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "createRequest", "params": {"entity": {"_DouType": "Safir.Dob.Entity"}, "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "createRequest", "params": {"entity": {"_DouType": "Safir.Dob.Entity"}, "instanceId": "1"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": {"isSuccess": true, "response": {"_DouType": "Safir.Dob.SuccessResponse"}}, "id": 123}
 ----------------------------
 
@@ -68,7 +68,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "deleteEntity", "params": {"typeId": "Test.MyEntity", "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "deleteEntity", "params": {"typeId": "Test.MyEntity", "instanceId": "1"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
 
@@ -84,7 +84,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "deleteRequest", "params": {"typeId": "Test.MyEntity", "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "deleteRequest", "params": {"typeId": "Test.MyEntity", "instanceId": "1"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": {"isSuccess": true, "response": {"_DouType": "Safir.Dob.SuccessResponse"}}, "id": 123}
 ----------------------------
 
@@ -99,7 +99,7 @@ Returns::
 Example::
 ----------------------------
 --> {"jsonrpc": "2.0", "method": "getAllInstanceIds", "params": {"typeId": "Safir.Dob.Entity"}, "id": 123}
-<-- {"jsonrpc": "2.0", "result": [1, 2], "id": 123}
+<-- {"jsonrpc": "2.0", "result": ["1", "2"], "id": 123}
 ----------------------------
 
 ==== Method: getInstanceIdPolicy
@@ -157,7 +157,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "isCreated", "params": {"typeId": "Test.MyEntity", "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "isCreated", "params": {"typeId": "Test.MyEntity", "instanceId": "1"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": true, "id": 123}
 ----------------------------
 
@@ -214,7 +214,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "readEntity", "params": {"typeId": "Test.MyEntity", "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "readEntity", "params": {"typeId": "Test.MyEntity", "instanceId": "1"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": {"_DouType": "Test.MyEntity", "Val1": "foo"}, "id": 123}
 ----------------------------
 
@@ -296,7 +296,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "setEntity", "params": {"entity": {"_DouType": "Test.MyEntity", "Val1": "foo", "Val2": "bar"}, "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "setEntity", "params": {"entity": {"_DouType": "Test.MyEntity", "Val1": "foo", "Val2": "bar"}, "instanceId": "1"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
 
@@ -316,7 +316,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "setEntityChanges", "params": {"entity": {"_DouType": "Test.MyEntity", "Val1": "foo", "Val2": null}, "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "setEntityChanges", "params": {"entity": {"_DouType": "Test.MyEntity", "Val1": "foo", "Val2": null}, "instanceId": "1"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
 
@@ -334,7 +334,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "subscribeEntity", "params": {"typeId": "Safir.Dob.Entity", "instanceId": 10}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "subscribeEntity", "params": {"typeId": "Safir.Dob.Entity", "instanceId": "10"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
 
@@ -399,7 +399,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "unsubscribeEntity", "params": {"typeId": "Safir.Dob.Entity", "instanceId": 10}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "unsubscribeEntity", "params": {"typeId": "Safir.Dob.Entity", "instanceId": "10"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
 
@@ -451,7 +451,7 @@ Returns::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "updateRequest", "params": {"entity": {"_DouType": "Test.MyEntity", "SomeValue": "changedValue"}, "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "updateRequest", "params": {"entity": {"_DouType": "Test.MyEntity", "SomeValue": "changedValue"}, "instanceId": "1"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": {"isSuccess": true, "response": {"_DouType": "Safir.Dob.SuccessResponse"}}, "id": 123}
 ----------------------------
 
@@ -468,7 +468,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onCompletedRegistration", "params": {"typeId": "Test.MyService", "handlerId": -6778878277529052275}}
+--> {"jsonrpc": "2.0", "method": "onCompletedRegistration", "params": {"typeId": "Test.MyService", "handlerId": "-6778878277529052275"}}
 ----------------------------
 
 ==== Notification: onDeletedEntity
@@ -481,7 +481,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onDeletedEntity", "params": {"instanceId": 1, "entity": {"_DouType": "Test.MyEntity"}}}
+--> {"jsonrpc": "2.0", "method": "onDeletedEntity", "params": {"instanceId": "1", "entity": {"_DouType": "Test.MyEntity"}}}
 ----------------------------
 
 ==== Notification: onInitialInjectionsDone
@@ -493,7 +493,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onInitialInjectionsDone", "params": {"typeId": "Test.MyEntity", "handlerId": -6778878277529052275}}
+--> {"jsonrpc": "2.0", "method": "onInitialInjectionsDone", "params": {"typeId": "Test.MyEntity", "handlerId": "-6778878277529052275"}}
 ----------------------------
 
 ==== Notification: onInjectedDeletedEntity
@@ -505,7 +505,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onInjectedDeletedEntity", "params": {"instanceId": 1, "entity": {"_DouType": "Test.MyEntity"}}}
+--> {"jsonrpc": "2.0", "method": "onInjectedDeletedEntity", "params": {"instanceId": "1", "entity": {"_DouType": "Test.MyEntity"}}}
 ----------------------------
 
 ==== Notification: onInjectedNewEntity
@@ -517,7 +517,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onInjectedNewEntity", "params": {"instanceId": 1, "entity": {"_DouType": "Test.MyEntity"}}}
+--> {"jsonrpc": "2.0", "method": "onInjectedNewEntity", "params": {"instanceId": "1", "entity": {"_DouType": "Test.MyEntity"}}}
 ----------------------------
 
 ==== Notification: onInjectedUpdatedEntity
@@ -529,7 +529,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onInjectedUpdatedEntity", "params": {"instanceId": 1, "entity": {"_DouType": "Test.MyEntity"}}}
+--> {"jsonrpc": "2.0", "method": "onInjectedUpdatedEntity", "params": {"instanceId": "1", "entity": {"_DouType": "Test.MyEntity"}}}
 ----------------------------
 
 ==== Notification: onMessage
@@ -541,7 +541,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onMessage", "params": {"channelId": 3313918482685577033, "message": {"_DouType": "Safir.Dob.Message"}}}
+--> {"jsonrpc": "2.0", "method": "onMessage", "params": {"channelId": "3313918482685577033", "message": {"_DouType": "Safir.Dob.Message"}}}
 ----------------------------
 
 ==== Notification: onNewEntity
@@ -553,7 +553,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onNewEntity", "params": {"instanceId": 1, "entity": {"_DouType": "Test.MyEntity"}}}
+--> {"jsonrpc": "2.0", "method": "onNewEntity", "params": {"instanceId": "1", "entity": {"_DouType": "Test.MyEntity"}}}
 ----------------------------
 
 ==== Notification: onNotMessageOverflow
@@ -581,7 +581,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onRegistered", "params": {"typeId": "Test.MyService", "handlerId": -6778878277529052275}}
+--> {"jsonrpc": "2.0", "method": "onRegistered", "params": {"typeId": "Test.MyService", "handlerId": "-6778878277529052275"}}
 ----------------------------
 
 ==== Notification: onRevokedRegistration
@@ -593,7 +593,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onRevokedRegistration", "params": {"typeId": "Test.MyService", "handlerId": -6778878277529052275}}
+--> {"jsonrpc": "2.0", "method": "onRevokedRegistration", "params": {"typeId": "Test.MyService", "handlerId": "-6778878277529052275"}}
 ----------------------------
 
 ==== Notification: onUnregistered
@@ -605,7 +605,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onUnregistered", "params": {"typeId": "Test.MyService", "handlerId": -6778878277529052275}}
+--> {"jsonrpc": "2.0", "method": "onUnregistered", "params": {"typeId": "Test.MyService", "handlerId": "-6778878277529052275"}}
 ----------------------------
 
 ==== Notification: onUpdatedEntity
@@ -618,7 +618,7 @@ Parameters::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onUpdatedEntity", "params": {"instanceId": 1, "entity": {"_DouType": "Test.MyEntity"}}}
+--> {"jsonrpc": "2.0", "method": "onUpdatedEntity", "params": {"instanceId": "1", "entity": {"_DouType": "Test.MyEntity"}}}
 ----------------------------
 
 
@@ -639,7 +639,7 @@ Response::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onCreateRequest", "params": {"handlerId": -6778878277529052275, "instanceId": 1, "entity": {"_DouType": "Safir.Dob.Entity"}}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "onCreateRequest", "params": {"handlerId": "-6778878277529052275", "instanceId": "1", "entity": {"_DouType": "Safir.Dob.Entity"}}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": {"_DouType": "Safir.Dob.SuccessResponse"}, "id": 123}
 ----------------------------
 
@@ -655,7 +655,7 @@ Response::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onDeleteRequest", "params": {"handlerId": -6778878277529052275, "typeId": "Safir.Dob.Entity", "instanceId": 1}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "onDeleteRequest", "params": {"handlerId": "-6778878277529052275", "typeId": "Safir.Dob.Entity", "instanceId": "1"}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": {"_DouType": "Safir.Dob.SuccessResponse"}, "id": 123}
 ----------------------------
 
@@ -670,7 +670,7 @@ Response::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onServiceRequest", "params": {"handlerId": -6778878277529052275, "request": {"_DouType": "Test.MyService"}}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "onServiceRequest", "params": {"handlerId": "-6778878277529052275", "request": {"_DouType": "Test.MyService"}}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": {"_DouType": "Safir.Dob.SuccessResponse"}, "id": 123}
 ----------------------------
 
@@ -686,7 +686,7 @@ Response::
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onUpdateRequest", "params": {"handlerId": -6778878277529052275, "instanceId": 1, "entity": {"_DouType": "Safir.Dob.Entity"}}, "id": 123}
+--> {"jsonrpc": "2.0", "method": "onUpdateRequest", "params": {"handlerId": "-6778878277529052275", "instanceId": "1", "entity": {"_DouType": "Safir.Dob.Entity"}}, "id": 123}
 <-- {"jsonrpc": "2.0", "result": {"_DouType": "Safir.Dob.SuccessResponse"}, "id": 123}
 ----------------------------
 

@@ -130,25 +130,25 @@ int main() {
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":4}",
                          ""));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":1,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":\"1\",\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":5}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":1,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":\"1\",\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}}}"));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":2,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":5}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":2,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":\"2\",\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}}}"));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"unsubscribeMessage\", \"params\":{\"channelId\":1,\"typeId\":\"Safir.Application.BackdoorCommand\"}, \"id\":3}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":3}",
                          ""));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":1,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":\"1\",\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":5}",
                          ""));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendMessage\", \"params\":{\"channelId\":2,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}},\"id\":5}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":5}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":2,\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onMessage\",\"params\":{\"channelId\":\"2\",\"message\":{\"_DouType\":\"Safir.Application.BackdoorCommand\",\"NodeName\":\"Hello\",\"Command\":\"World\"}}}"));
 
     //Entity - register and subscribe
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"registerEntityHandler\", \"params\":{\"typeId\":\"Safir.Dob.ProcessInfo\", \"handlerId\":1}, \"id\":\"regEnt\"}",
@@ -169,27 +169,27 @@ int main() {
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"registerEntityHandler\", \"params\":{\"typeId\":\"Safir.Control.Status\", \"handlerId\":1}, \"id\":\"regEnt\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"regEnt\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onRegistered\",\"params\":{\"typeId\":\"Safir.Control.Status\",\"handlerId\":1}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onRegistered\",\"params\":{\"typeId\":\"Safir.Control.Status\",\"handlerId\":\"1\"}}"));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntity\", \"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dilbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]},\"handlerId\":1}, \"id\":\"setEnt\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntity\", \"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dilbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]},\"handlerId\":1}, \"id\":\"setEnt\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"setEnt\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onNewEntity\",\"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dilbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onNewEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dilbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]}}}"));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntityChanges\", \"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dogbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]}, \"handlerId\":1}, \"id\":\"setEntChanges\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntityChanges\", \"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dogbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]}, \"handlerId\":1}, \"id\":\"setEntChanges\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"setEntChanges\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onUpdatedEntity\",\"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dogbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onUpdatedEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dogbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]}}}"));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteEntity\", \"params\":{\"instanceId\":1,\"typeId\":\"Safir.Dob.ProcessInfo\", \"handlerId\":1}, \"id\":\"delEnt\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteEntity\", \"params\":{\"instanceId\":\"1\",\"typeId\":\"Safir.Dob.ProcessInfo\", \"handlerId\":\"1\"}, \"id\":\"delEnt\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"delEnt\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dogbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dogbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]}}}"));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntity\", \"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1},\"handlerId\":1}, \"id\":\"setEnt1\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntity\", \"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"},\"handlerId\":1}, \"id\":\"setEnt1\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"setEnt1\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onNewEntity\",\"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onNewEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"}}}"));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntity\", \"params\":{\"instanceId\":2,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":2},\"handlerId\":1}, \"id\":\"setEnt2\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntity\", \"params\":{\"instanceId\":\"Ent2\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":2},\"handlerId\":1}, \"id\":\"setEnt2\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"setEnt2\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onNewEntity\",\"params\":{\"instanceId\":2,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":2}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onNewEntity\",\"params\":{\"instanceId\":\"-6851921626803754089\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"2\"}}}"));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"getNumberOfInstances\", \"params\":{\"typeId\":\"Safir.Control.Status\"}, \"id\":\"numInst\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":2,\"id\":\"numInst\"}",
@@ -199,8 +199,16 @@ int main() {
                          "{\"jsonrpc\":\"2.0\",\"result\":true,\"id\":\"isCreated1\"}",
                          ""));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isCreated\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":2}, \"id\":\"isCreated2\"}",
-                         "{\"jsonrpc\":\"2.0\",\"result\":true,\"id\":\"isCreated2\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isCreated\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":\"1\"}, \"id\":\"isCreatedOne\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":true,\"id\":\"isCreatedOne\"}",
+                         ""));
+
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isCreated\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":\"Ent2\"}, \"id\":\"isCreated2Txt\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":true,\"id\":\"isCreated2Txt\"}",
+                         ""));
+
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isCreated\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":\"-6851921626803754089\"}, \"id\":\"isCreated2Num\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":true,\"id\":\"isCreated2Num\"}",
                          ""));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isCreated\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":3}, \"id\":\"isCreated3\"}",
@@ -208,42 +216,42 @@ int main() {
                          ""));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"getAllInstanceIds\", \"params\":{\"typeId\":\"Safir.Control.Status\"}, \"id\":\"allInst\"}",
-                         "{\"jsonrpc\":\"2.0\",\"result\":[1,2],\"id\":\"allInst\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":[\"-6851921626803754089\",\"1\"],\"id\":\"allInst\"}",
                          ""));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"getInstanceIdPolicy\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"handlerId\":1}, \"id\":\"policy\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"getInstanceIdPolicy\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"handlerId\":\"1\"}, \"id\":\"policy\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"RequestorDecidesInstanceId\",\"id\":\"policy\"}",
                          ""));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"readEntity\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":1}, \"id\":\"read\"}",
-                         "{\"jsonrpc\":\"2.0\",\"result\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1},\"id\":\"read\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"readEntity\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":\"1\"}, \"id\":\"read\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"},\"id\":\"read\"}",
                          ""));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteEntity\", \"params\":{\"instanceId\":1,\"typeId\":\"Safir.Control.Status\", \"handlerId\":1}, \"id\":\"delEnt\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteEntity\", \"params\":{\"instanceId\":\"1\",\"typeId\":\"Safir.Control.Status\", \"handlerId\":\"1\"}, \"id\":\"delEnt\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"delEnt\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"}}}"));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteAllInstances\", \"params\":{\"typeId\":\"Safir.Control.Status\", \"handlerId\":1}, \"id\":\"delAll\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteAllInstances\", \"params\":{\"typeId\":\"Safir.Control.Status\", \"handlerId\":\"1\"}, \"id\":\"delAll\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"delAll\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":2,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":2}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":\"-6851921626803754089\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"2\"}}}"));
 
     //create request
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"createRequest\", \"params\":{\"handlerId\":1,\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1}}, \"id\":\"create\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"createRequest\", \"params\":{\"handlerId\":\"1\",\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"}}, \"id\":\"create\"}",
                          "",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onCreateRequest\",\"params\":{\"handlerId\":1,\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1}},\"id\":1}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onCreateRequest\",\"params\":{\"handlerId\":\"1\",\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"}},\"id\":1}"));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"result\":{\"_DouType\":\"Safir.Dob.SuccessResponse\"}, \"id\":1}",
                          "{\"jsonrpc\":\"2.0\",\"result\":{\"isSuccess\":true,\"response\":{\"_DouType\":\"Safir.Dob.SuccessResponse\"}},\"id\":\"create\"}",
                          ""));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntity\", \"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1},\"handlerId\":1}, \"id\":\"setEnt1\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntity\", \"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"},\"handlerId\":\"1\"}, \"id\":\"setEnt1\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"setEnt1\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onNewEntity\",\"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onNewEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"}}}"));
 
     //update request
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"updateRequest\", \"params\":{\"handlerId\":1,\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"SystemIncarnation\":2}}, \"id\":\"update\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"updateRequest\", \"params\":{\"handlerId\":\"1\",\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"SystemIncarnation\":2}}, \"id\":\"update\"}",
                          "",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onUpdateRequest\",\"params\":{\"handlerId\":1,\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"SystemIncarnation\":2}},\"id\":2}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onUpdateRequest\",\"params\":{\"handlerId\":\"1\",\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"SystemIncarnation\":\"2\"}},\"id\":2}"));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"result\":{\"_DouType\":\"Safir.Dob.SuccessResponse\"}, \"id\":2}",
                          "{\"jsonrpc\":\"2.0\",\"result\":{\"isSuccess\":true,\"response\":{\"_DouType\":\"Safir.Dob.SuccessResponse\"}},\"id\":\"update\"}",
@@ -251,33 +259,33 @@ int main() {
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntityChanges\", \"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"SystemIncarnation\":2}, \"handlerId\":1}, \"id\":\"setEntChanges\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"setEntChanges\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onUpdatedEntity\",\"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1,\"SystemIncarnation\":2}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onUpdatedEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\",\"SystemIncarnation\":\"2\"}}}"));
 
     //delete request
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteRequest\", \"params\":{\"handlerId\":1,\"typeId\":\"Safir.Control.Status\",\"instanceId\":1}, \"id\":\"delete\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteRequest\", \"params\":{\"handlerId\":\"1\",\"typeId\":\"Safir.Control.Status\",\"instanceId\":\"1\"}, \"id\":\"delete\"}",
                          "",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeleteRequest\",\"params\":{\"handlerId\":1,\"typeId\":\"Safir.Control.Status\",\"instanceId\":1},\"id\":3}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeleteRequest\",\"params\":{\"handlerId\":\"1\",\"typeId\":\"Safir.Control.Status\",\"instanceId\":\"1\"},\"id\":3}"));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"result\":{\"_DouType\":\"Safir.Dob.SuccessResponse\"}, \"id\":3}",
                          "{\"jsonrpc\":\"2.0\",\"result\":{\"isSuccess\":true,\"response\":{\"_DouType\":\"Safir.Dob.SuccessResponse\"}},\"id\":\"delete\"}",
                          ""));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteEntity\", \"params\":{\"instanceId\":1,\"typeId\":\"Safir.Control.Status\", \"handlerId\":1}, \"id\":\"delEnt\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteEntity\", \"params\":{\"instanceId\":\"1\",\"typeId\":\"Safir.Control.Status\", \"handlerId\":\"1\"}, \"id\":\"delEnt\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"delEnt\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":1,\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":1,\"SystemIncarnation\":2}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\",\"SystemIncarnation\":\"2\"}}}"));
 
     //service request
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"subscribeRegistration\", \"params\":{\"typeId\":\"Safir.Control.Command\"}, \"id\":\"subReg\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"subReg\"}",
                          ""));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"registerServiceHandler\", \"params\":{\"typeId\":\"Safir.Control.Command\", \"handlerId\":1}, \"id\":\"regSrv\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"registerServiceHandler\", \"params\":{\"typeId\":\"Safir.Control.Command\", \"handlerId\":\"1\"}, \"id\":\"regSrv\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"regSrv\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onRegistered\",\"params\":{\"typeId\":\"Safir.Control.Command\",\"handlerId\":1}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onRegistered\",\"params\":{\"typeId\":\"Safir.Control.Command\",\"handlerId\":\"1\"}}"));
 
-    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"serviceRequest\", \"params\":{\"handlerId\":1,\"request\":{\"_DouType\":\"Safir.Control.Command\",\"Operation\":\"Shutdown\",\"NodeId\":1}}, \"id\":\"service\"}",
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"serviceRequest\", \"params\":{\"handlerId\":\"1\",\"request\":{\"_DouType\":\"Safir.Control.Command\",\"Operation\":\"Shutdown\",\"NodeId\":\"1\"}}, \"id\":\"service\"}",
                          "",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onServiceRequest\",\"params\":{\"handlerId\":1,\"request\":{\"_DouType\":\"Safir.Control.Command\",\"Operation\":\"Shutdown\",\"NodeId\":1}},\"id\":4}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onServiceRequest\",\"params\":{\"handlerId\":\"1\",\"request\":{\"_DouType\":\"Safir.Control.Command\",\"Operation\":\"Shutdown\",\"NodeId\":\"1\"}},\"id\":4}"));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"result\":{\"_DouType\":\"Safir.Dob.ErrorResponse\",\"Code\":\"Oh no\",\"AdditionalInfo\":\"I will not\"}, \"id\":4}",
                          "{\"jsonrpc\":\"2.0\",\"result\":{\"isSuccess\":false,\"response\":{\"_DouType\":\"Safir.Dob.ErrorResponse\",\"Code\":\"Oh no\",\"AdditionalInfo\":\"I will not\"}},\"id\":\"service\"}",
@@ -343,9 +351,9 @@ int main() {
 
                     for (rapidjson::SizeType i=0; i<instances.Size(); i++)
                     {
-                        auto inst=instances[i].GetInt64();
+                        auto inst=std::string(instances[i].GetString());
                         std::ostringstream os;
-                        os<<"{\"jsonrpc\":\"2.0\", \"method\":\"readEntity\", \"params\":{\"typeId\":\"Safir.Dob.ProcessInfo\",\"instanceId\":"<<inst<<"}, \"id\":"<<inst<<"}";
+                        os<<"{\"jsonrpc\":\"2.0\", \"method\":\"readEntity\", \"params\":{\"typeId\":\"Safir.Dob.ProcessInfo\",\"instanceId\":\""<<inst<<"\"}, \"id\":\""<<inst<<"\"}";
                         std::string readProcessInfo=os.str();
                         send(readProcessInfo);
                     }
@@ -356,9 +364,9 @@ int main() {
                 {
 
                     //we are stopping and have now found instanceId of safir_web ProcessInfo. Send deleteRequest to force StopOrder
-                    auto inst=doc["id"].GetInt64();
+                    auto inst=std::string(doc["id"].GetString());
                     std::ostringstream os;
-                    os<<"{\"jsonrpc\":\"2.0\", \"method\":\"deleteRequest\", \"params\":{\"typeId\":\"Safir.Dob.ProcessInfo\",\"instanceId\":"<<inst<<"}, \"id\":\"deleteWS\"}";
+                    os<<"{\"jsonrpc\":\"2.0\", \"method\":\"deleteRequest\", \"params\":{\"typeId\":\"Safir.Dob.ProcessInfo\",\"instanceId\":\""<<inst<<"\"}, \"id\":\"deleteWS\"}";
                     std::string deleteProcessInfo=os.str();
                     send(deleteProcessInfo);
                 }

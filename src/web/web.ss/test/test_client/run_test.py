@@ -46,7 +46,7 @@ env = TestEnv(safir_control=arguments.safir_control,
 with TestEnvStopper(env):
     server = env.launchProcess("safir_web", arguments.safir_web)
     log("Waiting for safir_web to start")
-    env.WaitForOutput("safir_web", "Running ws server on")
+    env.WaitForOutput("safir_web", "Running API server on")
     client = env.launchProcess("safir_websocket_test_client", arguments.websocket_test_client, collect_output=False)
     log("Waiting for test client to exit")
     client.wait()

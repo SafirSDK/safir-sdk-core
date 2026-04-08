@@ -37,6 +37,7 @@ public:
                           std::shared_ptr<boost::asio::io_context::strand> strand);
     std::pair<std::shared_ptr<boost::asio::io_context::strand>, std::shared_ptr<DobConnection>> GetConnection(const std::string& connectionName) const;
     void RemoveConnection(const std::string& connectionName);
+    std::vector<std::string> GetAllConnectionNames() const;
 
 private:
     mutable std::mutex m_lock;

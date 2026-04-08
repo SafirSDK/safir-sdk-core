@@ -25,8 +25,7 @@
 #include <algorithm>
 #include <memory>
 #include <Safir/Application/CrashReporter.h>
-#include "WebsocketServer.h"
-#include "RestServer.h"
+#include "ApiServer.h"
 #include "DobConnectionRegistry.h"
 #include <Safir/Dob/Typesystem/Serialization.h>
 
@@ -50,10 +49,8 @@ int main(int /*argc*/, const char** /*argv*/)
 
     boost::asio::io_context io;
     auto dobConnectionRegistry = std::make_shared<DobConnectionRegistry>();
-    WebsocketServer ws(io, dobConnectionRegistry);
-    RestServer rest(io, dobConnectionRegistry);
+    ApiServer ws(io, dobConnectionRegistry);
     boost::asio::post(io, [&ws]{ws.Run();});
-    boost::asio::post(io, [&rest]{rest.Run();});
     boost::thread_group threads;
     auto numberOfThreads=std::max(static_cast<unsigned int>(3), boost::thread::hardware_concurrency());
     for (unsigned int i=0; i<numberOfThreads; ++i)
@@ -63,7 +60,7 @@ int main(int /*argc*/, const char** /*argv*/)
 
     threads.join_all();
 
-    lllog(5)<<"safir_websocket stopped"<<std::endl;
+    lllog(5)<<"safir_web stopped"<<std::endl;
 
     return 0;
 }

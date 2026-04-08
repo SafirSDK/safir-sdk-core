@@ -204,7 +204,7 @@ class CombinedClient:
 
 
 async def run_combined_flow():
-    rest_base = "http://127.0.0.1:10080"
+    rest_base = "http://127.0.0.1:10000"
     connection_name = None
     client = None
 
@@ -321,7 +321,7 @@ async def run_combined_flow():
         reg_notif = await client.wait_for_notification(
             "onRegistered",
             predicate=lambda msg: msg.get("params", {}).get("typeId") == "Safir.Control.Status"
-            and msg.get("params", {}).get("handlerId") == 1)
+            and msg.get("params", {}).get("handlerId") == "1")
         log("Received WS onRegistered:", reg_notif)
         log("Step 11 succeeded")
 
@@ -345,8 +345,8 @@ async def run_combined_flow():
             raise AssertionError("REST setEntity failed: " + str(result))
         on_new = await client.wait_for_notification(
             "onNewEntity",
-            predicate=lambda msg: msg.get("params", {}).get("instanceId") == 101
-            and msg.get("params", {}).get("entity", {}).get("NodeId") == 101)
+            predicate=lambda msg: msg.get("params", {}).get("instanceId") == "101"
+            and msg.get("params", {}).get("entity", {}).get("NodeId") == "101")
         log("Received WS onNewEntity:", on_new)
         log("Step 13 succeeded")
 
@@ -357,7 +357,7 @@ async def run_combined_flow():
             raise AssertionError("REST getAllInstanceIds http status was not 200: " + str(status))
         if "result" not in result:
             raise AssertionError("REST getAllInstanceIds missing 'result': " + str(result))
-        if 101 not in result["result"]:
+        if "101" not in result["result"]:
             raise AssertionError("REST getAllInstanceIds: expected 101 in result, got: " + str(result["result"]))
         log("REST getAllInstanceIds result:", result["result"])
         log("Step 14 succeeded")
@@ -396,7 +396,7 @@ async def run_combined_flow():
             raise AssertionError("REST setEntityChanges failed: " + str(result))
         on_updated = await client.wait_for_notification(
             "onUpdatedEntity",
-            predicate=lambda msg: msg.get("params", {}).get("instanceId") == 101)
+            predicate=lambda msg: msg.get("params", {}).get("instanceId") == "101")
         log("Received WS onUpdatedEntity:", on_updated)
         log("Step 17 succeeded")
 
@@ -423,7 +423,7 @@ async def run_combined_flow():
             raise AssertionError("REST setEntity instance 102 failed: " + str(result))
         await client.wait_for_notification(
             "onNewEntity",
-            predicate=lambda msg: msg.get("params", {}).get("instanceId") == 102)
+            predicate=lambda msg: msg.get("params", {}).get("instanceId") == "102")
         log("Step 19 succeeded")
 
         # ======= STEP 20: deleteEntity instance 101 (REST) + onDeletedEntity (WS) =======
@@ -435,7 +435,7 @@ async def run_combined_flow():
             raise AssertionError("REST deleteEntity failed: " + str(result))
         on_deleted = await client.wait_for_notification(
             "onDeletedEntity",
-            predicate=lambda msg: msg.get("params", {}).get("instanceId") == 101)
+            predicate=lambda msg: msg.get("params", {}).get("instanceId") == "101")
         log("Received WS onDeletedEntity for instance 101:", on_deleted)
         log("Step 20 succeeded")
 
@@ -448,7 +448,7 @@ async def run_combined_flow():
             raise AssertionError("REST deleteAllInstances failed: " + str(result))
         on_deleted_all = await client.wait_for_notification(
             "onDeletedEntity",
-            predicate=lambda msg: msg.get("params", {}).get("instanceId") == 102)
+            predicate=lambda msg: msg.get("params", {}).get("instanceId") == "102")
         log("Received WS onDeletedEntity for instance 102:", on_deleted_all)
         log("Step 21 succeeded")
 
@@ -471,7 +471,7 @@ async def run_combined_flow():
         srv_reg_notif = await client.wait_for_notification(
             "onRegistered",
             predicate=lambda msg: msg.get("params", {}).get("typeId") == "Safir.Control.Command"
-            and msg.get("params", {}).get("handlerId") == 99)
+            and msg.get("params", {}).get("handlerId") == "99")
         log("Received WS onRegistered for service handler:", srv_reg_notif)
         log("Step 23 succeeded")
 
@@ -486,7 +486,7 @@ async def run_combined_flow():
             raise AssertionError("REST createRequest failed: " + str(result))
         on_create_req = await client.wait_for_notification(
             "onCreateRequest",
-            predicate=lambda msg: msg.get("params", {}).get("instanceId") == 200)
+            predicate=lambda msg: msg.get("params", {}).get("instanceId") == "200")
         response_sender_id = on_create_req.get("id")
         log("Received WS onCreateRequest, responseSenderId:", response_sender_id)
         await client.send(json.dumps({"jsonrpc": "2.0",
@@ -505,7 +505,7 @@ async def run_combined_flow():
             raise AssertionError("REST setEntity instance 200 failed: " + str(result))
         await client.wait_for_notification(
             "onNewEntity",
-            predicate=lambda msg: msg.get("params", {}).get("instanceId") == 200)
+            predicate=lambda msg: msg.get("params", {}).get("instanceId") == "200")
         log("Step 25 succeeded")
 
         # ======= STEP 26: updateRequest (REST) + onUpdateRequest (WS) + respond =======
@@ -519,7 +519,7 @@ async def run_combined_flow():
             raise AssertionError("REST updateRequest failed: " + str(result))
         on_update_req = await client.wait_for_notification(
             "onUpdateRequest",
-            predicate=lambda msg: msg.get("params", {}).get("instanceId") == 200)
+            predicate=lambda msg: msg.get("params", {}).get("instanceId") == "200")
         response_sender_id = on_update_req.get("id")
         log("Received WS onUpdateRequest, responseSenderId:", response_sender_id)
         await client.send(json.dumps({"jsonrpc": "2.0",
@@ -538,7 +538,7 @@ async def run_combined_flow():
             raise AssertionError("REST deleteRequest failed: " + str(result))
         on_delete_req = await client.wait_for_notification(
             "onDeleteRequest",
-            predicate=lambda msg: msg.get("params", {}).get("instanceId") == 200)
+            predicate=lambda msg: msg.get("params", {}).get("instanceId") == "200")
         response_sender_id = on_delete_req.get("id")
         log("Received WS onDeleteRequest, responseSenderId:", response_sender_id)
         await client.send(json.dumps({"jsonrpc": "2.0",
@@ -660,7 +660,7 @@ def main():
     with TestEnvStopper(env):
         env.launchProcess("safir_web", arguments.safir_web)
         log("Waiting for safir_web to start")
-        env.WaitForOutput("safir_web", "Running ws server on")
+        env.WaitForOutput("safir_web", "Running API server on")
         asyncio.run(run_combined_flow())
 
     if len(env.Syslog()) != 0:

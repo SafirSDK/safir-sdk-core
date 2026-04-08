@@ -96,7 +96,7 @@ Components are suffixed `.ss` (Safir Subsystem):
 4. **Supporting Components**
    - `dope/` - Object persistence engine (dope_main)
    - `swre/` - Software reports/telemetry
-   - `websocket/` - WebSocket interface (safir_websocket)
+   - `web/` - REST and WebSocket interface (safir_web)
 
 ### Key Directories
 - `include/Safir/` - Public C++ headers (Dob, Logging, Application, Utilities)

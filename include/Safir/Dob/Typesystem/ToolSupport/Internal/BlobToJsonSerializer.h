@@ -256,7 +256,7 @@ namespace Internal
             }
             else
             {
-                os<<val.first;
+                os<<SAFIR_JSON_QUOTE(val.first);
             }
         }
 
@@ -273,7 +273,7 @@ namespace Internal
             }
             else
             {
-                os<<val.first.instanceId;
+                os<<SAFIR_JSON_QUOTE(val.first.instanceId);
             }
             os<<"}";
         }
@@ -293,7 +293,7 @@ namespace Internal
                 break;
             case Int64MemberType:
                 {
-                    os<<reader.template ReadKey<DotsC_Int64>(memberIndex, valueIndex);
+                    os<<SAFIR_JSON_QUOTE(reader.template ReadKey<DotsC_Int64>(memberIndex, valueIndex));
                 }
                 break;
             case EnumerationMemberType:
@@ -389,7 +389,7 @@ namespace Internal
                     reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                     if (!isNull)
                     {
-                        os<<val;
+                        os<<SAFIR_JSON_QUOTE(val);
                         return true;
                     }
                 }

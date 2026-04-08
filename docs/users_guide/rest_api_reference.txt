@@ -34,6 +34,20 @@ HTTP/1.1 200 OK
 
 === Connection status
 
+==== GET /connections
+Get the names of all currently open Dob connections.
+
+Returns::
+ * `result` - A JSON array of connection name strings.
+
+Example::
+----------------------------
+GET /connections HTTP/1.1
+
+HTTP/1.1 200 OK
+{"result": ["myApp", "anotherApp"]}
+----------------------------
+
 ==== GET /connections/{connectionId}/ping
 Test that the server is reachable and that the named connection exists.
 
@@ -114,7 +128,7 @@ Example::
 GET /connections/myApp/entities/Test.MyEntity/instances HTTP/1.1
 
 HTTP/1.1 200 OK
-{"result": [1, 2, 3]}
+{"result": ["1", "2", "3"]}
 ----------------------------
 
 ==== GET /connections/{connectionId}/entities/{typeId}/instanceIdPolicy

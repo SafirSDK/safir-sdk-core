@@ -1,20 +1,20 @@
-SAFIR_WEBSOCKET(1)
-==================
+SAFIR_WEB(1)
+============
 :doctype: manpage
 
 
 NAME
 ----
-safir_websocket - Websocket interface for Safir SDK Core
+safir_web - REST and websocket interface for Safir SDK Core
 
 
 SYNOPSIS
 --------
-*safir_websocket*
+*safir_web*
 
 DESCRIPTION
 -----------
-safir_websocket is the Safir SDK Core service that provides the websocket interface.
+safir_web is the Safir SDK Core service that provides the REST and websocket interface.
 
 
 RESOURCES

@@ -115,6 +115,13 @@ inline RestRoute RouteRestRequest(boost::beast::http::verb verb,
         return {Methods::GetTypeHierarchy, {}, {}, {}};
     }
 
+    // GET /connections  (list all connection names, no connection id)
+    if (seg.size() == 1 && seg[0] == "connections")
+    {
+        if (!isGet) return {kWrongVerb, {}, {}, {}};
+        return {Methods::GetConnections, {}, {}, {}};
+    }
+
     // All remaining routes start with /connections/{id}/...
     if (seg.size() < 3 || seg[0] != "connections")
         return {};

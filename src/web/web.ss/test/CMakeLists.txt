@@ -2,4 +2,5 @@ add_subdirectory(unit_tests)
 add_subdirectory(test_client)
 add_subdirectory(stress_test)
 add_subdirectory(rest_ws_combined)
+add_subdirectory(multiple_connections)
 

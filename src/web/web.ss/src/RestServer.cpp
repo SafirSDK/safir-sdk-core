@@ -34,10 +34,8 @@
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Service.h>
-#include <Safir/Web/Parameters.h>
 #include "RestServer.h"
 #include "DobConnectionRegistry.h"
-#include "IpAddressHelper.h"
 #include "JsonHelpers.h"
 #include "Methods.h"
 #include "RestRouting.h"
@@ -46,7 +44,6 @@
 #include "RequestErrorException.h"
 #include "JsonRpcId.h"
 
-namespace ws = Safir::Web;
 namespace http = boost::beast::http;
 namespace beast = boost::beast;
 
@@ -148,6 +145,21 @@ std::string RestResultInt(std::int64_t value)
     rapidjson::Document doc(rapidjson::kObjectType);
     auto& allocator = doc.GetAllocator();
     doc.AddMember("result", value, allocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
+    return buffer.GetString();
+}
+
+std::string RestResultStringArray(const std::vector<std::string>& values)
+{
+    rapidjson::Document doc(rapidjson::kObjectType);
+    auto& allocator = doc.GetAllocator();
+    rapidjson::Value arr(rapidjson::kArrayType);
+    for (const auto& s : values)
+        arr.PushBack(rapidjson::Value(s.c_str(), allocator), allocator);
+    doc.AddMember("result", arr, allocator);
 
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -530,51 +542,34 @@ class RestHttpSession : public std::enable_shared_from_this<RestHttpSession>
 {
 public:
     RestHttpSession(boost::asio::ip::tcp::socket socket,
+                    http::request<http::string_body> request,
                     std::function<std::pair<std::shared_ptr<boost::asio::io_context::strand>,
-                                            std::shared_ptr<DobConnection>>(const std::string&)> getDobConnectionFunc)
+                                            std::shared_ptr<DobConnection>>(const std::string&)> getDobConnectionFunc,
+                    std::function<std::vector<std::string>()> getAllConnectionNamesFunc)
         : m_stream(std::move(socket))
+        , m_request(std::move(request))
         , m_getDobConnectionFunc(std::move(getDobConnectionFunc))
+        , m_getAllConnectionNamesFunc(std::move(getAllConnectionNamesFunc))
     {
     }
 
     void Start()
     {
-        DoRead();
+        HandleRequest();
     }
 
 private:
     beast::tcp_stream m_stream;
-    beast::flat_buffer m_buffer;
-    http::request_parser<http::string_body> m_parser;
+    http::request<http::string_body> m_request;
     std::function<std::pair<std::shared_ptr<boost::asio::io_context::strand>,
                             std::shared_ptr<DobConnection>>(const std::string&)> m_getDobConnectionFunc;
-
-    void DoRead()
-    {
-        m_parser.body_limit(5 * 1024 * 1024); // 5 MB limit
-        m_stream.expires_after(std::chrono::seconds(30));
-        auto self = shared_from_this();
-        http::async_read(m_stream, m_buffer, m_parser,
-                         [self](const boost::system::error_code& ec, std::size_t)
-        {
-            if (ec)
-            {
-                if (ec == http::error::body_limit)
-                {
-                    self->SendResponse(http::status::payload_too_large,
-                                       JsonError("Request body too large"));
-                }
-                return;
-            }
-            self->HandleRequest();
-        });
-    }
+    std::function<std::vector<std::string>()> m_getAllConnectionNamesFunc;
 
     void SendResponse(http::status statusCode, const std::string& body,
                       const std::string& allowHeader = {})
     {
-        auto response = std::make_shared<http::response<http::string_body>>(statusCode, m_parser.get().version());
-        response->set(http::field::server, "safir_websocket_rest");
+        auto response = std::make_shared<http::response<http::string_body>>(statusCode, m_request.version());
+        response->set(http::field::server, "safir_web");
         response->set(http::field::content_type, "application/json");
         if (!allowHeader.empty())
             response->set(http::field::allow, allowHeader);
@@ -595,8 +590,8 @@ private:
 
     void HandleRequest()
     {
-        const std::string target(m_parser.get().target());
-        const http::verb verb = m_parser.get().method();
+        const std::string target(m_request.target());
+        const http::verb verb = m_request.method();
 
         std::vector<std::string> segments;
         std::unordered_map<std::string, std::string> query;
@@ -632,6 +627,20 @@ private:
             return;
         }
 
+        // getConnections needs no connection
+        if (route.method == Methods::GetConnections)
+        {
+            try
+            {
+                SendResponse(http::status::ok, RestResultStringArray(m_getAllConnectionNamesFunc()));
+            }
+            catch (const std::exception& e)
+            {
+                SendResponse(http::status::internal_server_error, JsonError(e.what()));
+            }
+            return;
+        }
+
         auto strandAndConnection = m_getDobConnectionFunc(route.connectionId);
         if (strandAndConnection.first == nullptr || strandAndConnection.second == nullptr)
         {
@@ -643,7 +652,7 @@ private:
         std::string body;
         if (verb == http::verb::put || verb == http::verb::patch || verb == http::verb::post)
         {
-            body = m_parser.get().body();
+            body = m_request.body();
             // If a body is present it must be valid JSON (or empty for endpoints that don't need it)
             if (!body.empty())
             {
@@ -679,103 +688,14 @@ private:
             });
     }
 };
-}
+} // anonymous namespace
 
-RestServer::RestServer(boost::asio::io_context& io,
-                       const std::shared_ptr<DobConnectionRegistry>& dobConnectionRegistry)
-    : m_dobConnectionRegistry(dobConnectionRegistry)
-    , m_acceptor(io)
-    , m_isRunning(false)
-    , m_isTerminating(false)
+void StartRestSession(
+    boost::asio::ip::tcp::socket socket,
+    boost::beast::http::request<boost::beast::http::string_body> request,
+    std::function<std::pair<std::shared_ptr<boost::asio::io_context::strand>,
+                            std::shared_ptr<DobConnection>>(const std::string&)> getDobConnectionFunc,
+    std::function<std::vector<std::string>()> getAllConnectionNamesFunc)
 {
-}
-
-void RestServer::Run()
-{
-    if (m_isRunning)
-    {
-        return;
-    }
-
-    std::string ip = "";
-    unsigned short port = 0;
-    if (!IpAddressHelper::SplitAddress(ts::Utilities::ToUtf8(ws::Parameters::RestServerEndpoint()), ip, port))
-    {
-        SEND_SYSTEM_LOG(Error, << "REST: ServerEndpoint from configuration could not be parsed as <ip>:<port>" << std::endl);
-        return;
-    }
-
-    const unsigned short restPort = static_cast<unsigned short>(port);
-
-    boost::asio::ip::tcp::endpoint endpoint;
-    try
-    {
-        endpoint = IpAddressHelper::CreateEndpoint(ip, restPort);
-    }
-    catch (const std::exception& e)
-    {
-        SEND_SYSTEM_LOG(Error, << "REST: Could not create REST endpoint. " << e.what() << std::endl);
-        return;
-    }
-
-    boost::system::error_code ec;
-    m_acceptor.open(endpoint.protocol(), ec);
-    if (ec)
-    {
-        SEND_SYSTEM_LOG(Error, << "REST: Could not open acceptor. " << ec << std::endl);
-        return;
-    }
-
-    m_acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), ec);
-    if (ec)
-    {
-        SEND_SYSTEM_LOG(Error, << "REST: Could not set reuse_address. " << ec << std::endl);
-        return;
-    }
-
-    m_acceptor.bind(endpoint, ec);
-    if (ec)
-    {
-        SEND_SYSTEM_LOG(Error, << "REST: Could not bind acceptor. " << ec << std::endl);
-        return;
-    }
-
-    m_acceptor.listen(boost::asio::socket_base::max_listen_connections, ec);
-    if (ec)
-    {
-        SEND_SYSTEM_LOG(Error, << "REST: Could not listen. " << ec << std::endl);
-        return;
-    }
-
-    m_isRunning = true;
-    StartAccept();
-}
-
-void RestServer::Terminate()
-{
-    if (m_isTerminating)
-    {
-        return;
-    }
-
-    m_isTerminating = true;
-    boost::system::error_code ec;
-    m_acceptor.cancel(ec);
-    m_acceptor.close(ec);
-}
-
-void RestServer::StartAccept()
-{
-    m_acceptor.async_accept([this](const boost::system::error_code& ec, boost::asio::ip::tcp::socket socket)
-    {
-        if (!ec)
-        {
-            std::make_shared<RestHttpSession>(std::move(socket), [this](auto connId){return m_dobConnectionRegistry->GetConnection(connId); })->Start();
-        }
-
-        if (!m_isTerminating)
-        {
-            StartAccept();
-        }
-    });
+    std::make_shared<RestHttpSession>(std::move(socket), std::move(request), std::move(getDobConnectionFunc), std::move(getAllConnectionNamesFunc))->Start();
 }

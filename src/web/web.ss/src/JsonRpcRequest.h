@@ -171,7 +171,15 @@ private:
         if ((*m_params)[name].IsInt64())
             return T((*m_params)[name].GetInt64());
 
-        return T(ts::Utilities::ToWstring((*m_params)[name].GetString()));
+        std::string str = (*m_params)[name].GetString();
+        try
+        {
+            return T(boost::lexical_cast<DotsC_Int64>(str));
+        }
+        catch (const boost::bad_lexical_cast&)
+        {
+            return T(ts::Utilities::ToWstring(str));
+        }
     }
 
     inline void ValidateInternal() const

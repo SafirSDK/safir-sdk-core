@@ -55,7 +55,8 @@ public:
                  std::shared_ptr<DobConnectionRegistry> dobConnectionRegistry,
                  std::function<void(const RemoteClient*)> onClose);
 
-    void Start(std::function<void(bool)> onStarted);
+    void Start(boost::beast::http::request<boost::beast::http::string_body> handshakeRequest,
+               std::function<void(bool)> onStarted);
 
     void Close();
 
@@ -74,8 +75,6 @@ private:
     std::shared_ptr<PingHandler> m_pingHandler;
     std::string m_connectionName;
     bool m_enableTypeSystem;
-    boost::beast::http::request<boost::beast::http::string_body> m_handshakeRequest;
-    boost::beast::flat_buffer m_handshakeBuffer;
     boost::beast::flat_buffer m_readBuffer;
     std::deque<std::string> m_writeQueue;
     bool m_isWriting;

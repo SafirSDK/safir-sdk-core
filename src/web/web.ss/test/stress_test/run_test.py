@@ -45,7 +45,7 @@ env = TestEnv(safir_control=arguments.safir_control,
 with TestEnvStopper(env):
     env.launchProcess("safir_web", arguments.safir_web)
     log("Waiting for safir_web to start")
-    env.WaitForOutput("safir_web", "Running ws server on")
+    env.WaitForOutput("safir_web", "Running API server on")
 
     # safir_web <total_num_users> <simultaneous_users> <requests_per_user> 100, 10, 25
     client = env.launchProcess("safir_websocket_stresstest",

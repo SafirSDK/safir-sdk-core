@@ -23,32 +23,24 @@
 ******************************************************************************/
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/beast/http.hpp>
 
 class DobConnectionRegistry;
 class DobConnection;
 
-class RestServer
-{
-public:
-    RestServer(boost::asio::io_context& io,
-               const std::shared_ptr<DobConnectionRegistry>& dobConnectionRegistry);
-
-    void Run();
-    void Terminate();
-
-private:
-    std::shared_ptr<DobConnectionRegistry> m_dobConnectionRegistry;
-    boost::asio::ip::tcp::acceptor m_acceptor;
-    bool m_isRunning;
-    bool m_isTerminating;
-
-    void StartAccept();
-
-    RestServer(const RestServer&) = delete;
-    RestServer& operator=(const RestServer&) = delete;
-};
+// Start an HTTP REST session for an already-accepted socket and a pre-read HTTP request.
+// The request was read at the dispatch level (ApiServer) to determine it is not a
+// WebSocket upgrade.
+void StartRestSession(
+    boost::asio::ip::tcp::socket socket,
+    boost::beast::http::request<boost::beast::http::string_body> request,
+    std::function<std::pair<std::shared_ptr<boost::asio::io_context::strand>,
+                            std::shared_ptr<DobConnection>>(const std::string&)> getDobConnectionFunc,
+    std::function<std::vector<std::string>()> getAllConnectionNamesFunc);

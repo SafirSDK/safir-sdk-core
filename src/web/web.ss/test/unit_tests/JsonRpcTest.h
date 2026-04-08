@@ -59,7 +59,7 @@ inline void JsonRpcTest()
     {
         std::ostringstream os;
         os<<ts::InstanceId(123);
-        CHECK(os.str()=="123");
+        CHECK(os.str()=="\"123\"");
     }
     {
         std::ostringstream os;
@@ -75,7 +75,7 @@ inline void JsonRpcTest()
     {
         std::ostringstream os;
         os<<ts::ChannelId(123);
-        CHECK(os.str()=="123");
+        CHECK(os.str()=="\"123\"");
     }
     {
         std::ostringstream os;
@@ -91,7 +91,7 @@ inline void JsonRpcTest()
     {
         std::ostringstream os;
         os<<ts::HandlerId(123);
-        CHECK(os.str()=="123");
+        CHECK(os.str()=="\"123\"");
     }
 
     //-------------------------------------------
@@ -371,7 +371,7 @@ inline void JsonRpcTest()
         v.push_back(ts::InstanceId(1));
         v.push_back(ts::InstanceId(L"id2"));
         auto json = JsonRpcResponse::UnquotedArray(JsonRpcId("Mr Donk"), v);
-        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[1,\"id2\"],\"id\":\"Mr Donk\"}");
+        CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[\"1\",\"id2\"],\"id\":\"Mr Donk\"}");
         v.clear();
         json = JsonRpcResponse::UnquotedArray(JsonRpcId("Mr Donk"), v);
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"result\":[],\"id\":\"Mr Donk\"}");

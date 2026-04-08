@@ -5,30 +5,19 @@
   <baseClass>Safir.Dob.Parametrization</baseClass>
   <parameters>
 
-    <!-- Websocket server endpoint -->
+    <!-- API server endpoint (REST and WebSocket share this endpoint) -->
     <parameter>
       <summary>
-        The ip address and port for the websocket server on the format ip_address:port
+        The ip address and port for the API server (REST and WebSocket) on the format ip_address:port
         For example if running on loopback interface and port 10000 specify 127.0.0.1:10000
         If no ip_address part is specified, the server will use all IPv4 addresses available on the machine. I.e if you specify :10000
-        then the websocket server is available on port 10000 on all network adapters on the machine.
+        then the API server is available on port 10000 on all network adapters on the machine.
+        Incoming connections with an Upgrade: websocket header are handled as WebSocket connections,
+        all other connections are handled as REST requests.
       </summary>
-      <name>WebsocketServerEndpoint</name>
+      <name>ApiEndpoint</name>
       <type>String</type>
       <value>:16676</value>
-    </parameter>
-
-    <!-- REST server endpoint -->
-    <parameter>
-      <summary>
-        The ip address and port for the REST server on the format ip_address:port
-        For example if running on loopback interface and port 10080 specify 127.0.0.1:10080
-        If no ip_address part is specified, the server will use all IPv4 addresses available on the machine. I.e if you specify :10080
-        then the REST server is available on port 10080 on all network adapters on the machine.
-      </summary>
-      <name>RestServerEndpoint</name>
-      <type>String</type>
-      <value>:10080</value>
     </parameter>
 
     <!-- Interval at which messges with the ping opcode is sent to clients to keep connection open -->
@@ -46,7 +35,7 @@
 
     <!-- Enable typesystem methods such as getTypeHierarchy -->
     <parameter>
-      <summary>Should typesystem commands be handled, If False typesystem commands are invalid.</summary>
+      <summary>Should typesystem commands be handled, If False typesystem commands are handled.</summary>
       <name>EnableTypesystemCommands</name>
       <type>Boolean</type>
       <value>True</value>

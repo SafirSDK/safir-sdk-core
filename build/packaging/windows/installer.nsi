@@ -648,7 +648,7 @@ Section "Uninstall"
   nsExec::Exec '"taskkill" "/f" "/im" "safir_statistics_dump.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_status.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_tool_launcher.exe"'
-  nsExec::Exec '"taskkill" "/f" "/im" "safir_websocket.exe"'
+  nsExec::Exec '"taskkill" "/f" "/im" "safir_web.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "sate.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_tracer_viewer.exe"'
   nsExec::Exec '"taskkill" "/f" "/im" "safir_tracer_listener.exe"'

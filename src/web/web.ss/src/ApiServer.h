@@ -32,11 +32,11 @@
 
 class DobConnectionRegistry;
 
-class WebsocketServer : public sd::StopHandler
+class ApiServer : public sd::StopHandler
 {
 public:
-    WebsocketServer(boost::asio::io_context& io,
-                    const std::shared_ptr<DobConnectionRegistry>& dobConnectionRegistry);
+    ApiServer(boost::asio::io_context& io,
+              const std::shared_ptr<DobConnectionRegistry>& dobConnectionRegistry);
 
     void Run();
     void Terminate();

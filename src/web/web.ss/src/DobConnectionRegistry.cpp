@@ -49,3 +49,15 @@ void DobConnectionRegistry::RemoveConnection(const std::string& connectionName)
     std::lock_guard<std::mutex> lock(m_lock);
     m_connections.erase(connectionName);
 }
+
+std::vector<std::string> DobConnectionRegistry::GetAllConnectionNames() const
+{
+    std::lock_guard<std::mutex> lock(m_lock);
+    std::vector<std::string> names;
+    names.reserve(m_connections.size());
+    for (const auto& kv : m_connections)
+    {
+        names.push_back(kv.first);
+    }
+    return names;
+}

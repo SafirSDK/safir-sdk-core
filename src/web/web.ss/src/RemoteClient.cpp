@@ -23,8 +23,6 @@
 ******************************************************************************/
 #include <sstream>
 #include <boost/beast/core/buffers_to_string.hpp>
-#include <boost/beast/websocket/error.hpp>
-#include <boost/beast/http.hpp>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/Typesystem/Convenience.h>
@@ -51,31 +49,31 @@ RemoteClient::RemoteClient(boost::asio::io_context& io,
     , m_strand(std::make_shared<boost::asio::io_context::strand>(io))
     , m_dobConnectionRegistry(dobConnectionRegistry)
     , m_onConnectionClosed(onClose)
-    , m_dobConnection(std::make_shared<DobConnection>(*m_strand, [this](const std::string& msg){SendToClient(msg);}))
+    , m_dobConnection(nullptr)
     , m_pingHandler(std::make_shared<PingHandler>(*m_strand,
                                                   static_cast<int>(Safir::Web::Parameters::PingInterval()),
                                                   [this]{SendPing();}))
     , m_connectionName()
     , m_enableTypeSystem(Safir::Web::Parameters::EnableTypesystemCommands())
-    , m_handshakeRequest()
-    , m_handshakeBuffer()
     , m_isWriting(false)
     , m_isClosed(false)
     , m_isOpened(false)
 {
 }
 
-void RemoteClient::Start(std::function<void(bool)> onStarted)
+void RemoteClient::Start(boost::beast::http::request<boost::beast::http::string_body> handshakeRequest,
+                         std::function<void(bool)> onStarted)
 {
     auto self = shared_from_this();
-    boost::asio::post(*m_strand, [this, self, onStarted]
+    boost::asio::post(*m_strand, [this, self, onStarted, req = std::move(handshakeRequest)]() mutable
     {
-        http::async_read(m_stream.next_layer(), m_handshakeBuffer, m_handshakeRequest,
-                         boost::asio::bind_executor(*m_strand, [this, self, onStarted](const boost::system::error_code& ec, std::size_t)
+        m_stream.set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
+        m_stream.async_accept(req,
+                              boost::asio::bind_executor(*m_strand, [this, self, onStarted](const boost::system::error_code& acceptEc)
         {
-            if (ec)
+            if (acceptEc)
             {
-                LogError("RemoteClient.HandshakeRead", ec);
+                LogError("RemoteClient.Accept", acceptEc);
                 if (onStarted)
                 {
                     onStarted(false);
@@ -83,29 +81,14 @@ void RemoteClient::Start(std::function<void(bool)> onStarted)
                 return;
             }
 
-            m_stream.set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
-            m_stream.async_accept(m_handshakeRequest,
-                                  boost::asio::bind_executor(*m_strand, [this, self, onStarted](const boost::system::error_code& acceptEc)
+            m_dobConnection = std::make_shared<DobConnection>(*m_strand, [this](const std::string& msg){SendToClient(msg);});
+            m_isOpened = true;
+            m_pingHandler->Start();
+            if (onStarted)
             {
-                if (acceptEc)
-                {
-                    LogError("RemoteClient.Accept", acceptEc);
-                    if (onStarted)
-                    {
-                        onStarted(false);
-                    }
-                    return;
-                }
-
-                m_dobConnection = std::make_shared<DobConnection>(*m_strand, [this](const std::string& msg){SendToClient(msg);});
-                m_isOpened = true;
-                m_pingHandler->Start();
-                if (onStarted)
-                {
-                    onStarted(true);
-                }
-                DoRead();
-            }));
+                onStarted(true);
+            }
+            DoRead();
         }));
     });
 }
@@ -247,7 +230,7 @@ void RemoteClient::DoRead()
     }
     catch (...)
     {
-        SendToClient(JsonRpcResponse::Error(JsonRpcId(), JsonRpcErrorCodes::InternalError, JsonRpcErrorCodes::CodeToString(JsonRpcErrorCodes::InternalError), "Unexpected error in safir_websocket"));
+        SendToClient(JsonRpcResponse::Error(JsonRpcId(), JsonRpcErrorCodes::InternalError, JsonRpcErrorCodes::CodeToString(JsonRpcErrorCodes::InternalError), "Unexpected error in safir_web"));
     }
 
     DoRead(); }));

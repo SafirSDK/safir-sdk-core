@@ -2086,7 +2086,7 @@ val[1]: DotsTest.MemberSequences
 size: 0
 isChanged: false
 ------ To Json -----
-{"_DouType":"DotsTest.MemberSequences","Int32Member":[10,20],"Int64Member":[100,200],"Float32Member":[1.1,2.2],"Float64Member":[11.1,22.2],"BooleanMember":[true,false],"EnumerationMember":["MyFirst","MySecond"],"StringMember":["Aa","Bb"],"TypeIdMember":["DotsTest.MemberDictionaries","DotsTest.MemberSequences"]}
+{"_DouType":"DotsTest.MemberSequences","Int32Member":[10,20],"Int64Member":["100","200"],"Float32Member":[1.1,2.2],"Float64Member":[11.1,22.2],"BooleanMember":[true,false],"EnumerationMember":["MyFirst","MySecond"],"StringMember":["Aa","Bb"],"TypeIdMember":["DotsTest.MemberDictionaries","DotsTest.MemberSequences"]}
 ------ From Json -----
 --- Int32Member ---
 size: 2
@@ -2176,8 +2176,8 @@ isChanged: false
 --- StringItemMember ---
 size: 3
 isChanged: true
-Gustav = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":2},"value":2}]}, changed: true
-Karl = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":2},"value":2}]}, changed: true
+Gustav = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":"2"},"value":"2"}]}, changed: true
+Karl = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":"2"},"value":"2"}]}, changed: true
 Philip = NULL, changed: true
 --- StringObjectMember ---
 size: 2
@@ -2218,8 +2218,8 @@ isChanged: false
 --- StringItemMember ---
 size: 3
 isChanged: true
-Gustav = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":2},"value":2}]}, changed: true
-Karl = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":2},"value":2}]}, changed: true
+Gustav = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":"2"},"value":"2"}]}, changed: true
+Karl = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":"2"},"value":"2"}]}, changed: true
 Philip = NULL, changed: true
 --- StringObjectMember ---
 size: 2
@@ -2227,7 +2227,7 @@ isChanged: true
 Dilbert = {"_DouType":"Object"}, changed: true
 Wally = {"_DouType":"DotsTest.MemberDictionaries","TypeIdStringMember":[{"key":"DotsTest.MemberDictionaries","value":"World"},{"key":"DotsTest.TestEnum","value":"Hello"}]}, changed: true
 ------ To Json -----
-{"_DouType":"DotsTest.MemberDictionaries","Int32StringMember":[{"key":10,"value":"Safir"},{"key":20,"value":"rifaS"}],"Int64BinaryMember":[{"key":100,"value":"SSBhbSBhIFJvY2tlZmVsbGVyIQ=="},{"key":200,"value":"U2FmaXIgcnVsZXMgdGhlIHdvcmxk"}],"StringObjectMember":[{"key":"Dilbert","value":{"_DouType":"Object"}},{"key":"Wally","value":{"_DouType":"DotsTest.MemberDictionaries","TypeIdStringMember":[{"key":"DotsTest.MemberDictionaries","value":"World"},{"key":"DotsTest.TestEnum","value":"Hello"}]}}],"StringItemMember":[{"key":"Gustav","value":{"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":2},"value":2}]}},{"key":"Karl","value":{"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":2},"value":2}]}},{"key":"Philip","value":null}],"TypeIdEnumMember":[{"key":"DotsTest.MemberSequences","value":"MySecond"},{"key":"DotsTest.MemberDictionaries","value":"MyFirst"}],"EnumInstanceIdMember":[{"key":"MyFirst","value":"first"},{"key":"MySecond","value":2}],"InstanceIdEntityIdMember":[{"key":"FirstInstance","value":{"name":"Safir.Dob.Entity","instanceId":"first"}},{"key":"SecondInstance","value":{"name":"Safir.Dob.Entity","instanceId":2}}]}
+{"_DouType":"DotsTest.MemberDictionaries","Int32StringMember":[{"key":10,"value":"Safir"},{"key":20,"value":"rifaS"}],"Int64BinaryMember":[{"key":"100","value":"SSBhbSBhIFJvY2tlZmVsbGVyIQ=="},{"key":"200","value":"U2FmaXIgcnVsZXMgdGhlIHdvcmxk"}],"StringObjectMember":[{"key":"Dilbert","value":{"_DouType":"Object"}},{"key":"Wally","value":{"_DouType":"DotsTest.MemberDictionaries","TypeIdStringMember":[{"key":"DotsTest.MemberDictionaries","value":"World"},{"key":"DotsTest.TestEnum","value":"Hello"}]}}],"StringItemMember":[{"key":"Gustav","value":{"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":"2"},"value":"2"}]}},{"key":"Karl","value":{"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":"2"},"value":"2"}]}},{"key":"Philip","value":null}],"TypeIdEnumMember":[{"key":"DotsTest.MemberSequences","value":"MySecond"},{"key":"DotsTest.MemberDictionaries","value":"MyFirst"}],"EnumInstanceIdMember":[{"key":"MyFirst","value":"first"},{"key":"MySecond","value":"2"}],"InstanceIdEntityIdMember":[{"key":"FirstInstance","value":{"name":"Safir.Dob.Entity","instanceId":"first"}},{"key":"SecondInstance","value":{"name":"Safir.Dob.Entity","instanceId":"2"}}]}
 ------ From Json -----
 --- Int32StringMember ---
 size: 2
@@ -2260,8 +2260,8 @@ isChanged: false
 --- StringItemMember ---
 size: 3
 isChanged: true
-Gustav = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":2},"value":2}]}, changed: true
-Karl = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":2},"value":2}]}, changed: true
+Gustav = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":"2"},"value":"2"}]}, changed: true
+Karl = {"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"first"},"value":"first"},{"key":{"name":"Safir.Dob.Entity","instanceId":"2"},"value":"2"}]}, changed: true
 Philip = NULL, changed: true
 --- StringObjectMember ---
 size: 2
