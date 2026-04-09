@@ -67,6 +67,8 @@ private:
     RemoteClient(const RemoteClient&) = delete;
     RemoteClient& operator=(const RemoteClient&) = delete;
 
+    static constexpr std::size_t MaxWriteQueueSize = 10000;
+
     WsStream m_stream;
     std::shared_ptr<boost::asio::io_context::strand> m_strand;
     std::shared_ptr<DobConnectionRegistry> m_dobConnectionRegistry;

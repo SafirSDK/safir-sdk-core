@@ -83,6 +83,8 @@ void RemoteClient::Start(boost::beast::http::request<boost::beast::http::string_
 
             m_dobConnection = std::make_shared<DobConnection>(*m_strand, [this](const std::string& msg){SendToClient(msg);});
             m_isOpened = true;
+            // Limit read buffer to 64 MB to guard against oversized payloads
+            m_readBuffer.max_size(64 * 1024 * 1024);
             m_pingHandler->Start();
             if (onStarted)
             {
@@ -148,41 +150,42 @@ std::string RemoteClient::ToString() const
 
 void RemoteClient::SendToClient(const std::string& msg)
 {
-    auto self = shared_from_this();
-    boost::asio::post(*m_strand, [this, self, msg]
-    {
-        if (m_isClosed)
-        {
-            return;
-        }
+    // All callers are already on the strand — no post() needed
+    if (m_isClosed)
+        return;
 
-        m_writeQueue.push_back(msg);
-        if (!m_isWriting)
-        {
-            DoWrite();
-        }
-    });
+    /*if (m_writeQueue.size() >= MaxWriteQueueSize)
+    {
+        SEND_SYSTEM_LOG(Error, << "WS: RemoteClient write queue full (" << MaxWriteQueueSize << "), closing connection to " << ToString().c_str() << std::endl);
+        lllog(5) << "WS: RemoteClient write queue full, closing connection to " << ToString().c_str() << std::endl;
+        CloseInternal();
+        return;
+    }*/
+
+    m_writeQueue.push_back(msg);
+    if (!m_isWriting)
+    {
+        DoWrite();
+    }
 }
 
 void RemoteClient::SendPing()
 {
-    auto self = shared_from_this();
-    boost::asio::post(*m_strand, [this, self]
+    // Called from PingHandler which already runs on the strand
+    if (m_isClosed || !m_isOpened)
     {
-        if (m_isClosed || !m_isOpened)
-        {
-            return;
-        }
+        return;
+    }
 
-        m_stream.async_ping({}, boost::asio::bind_executor(*m_strand, [this, self](const boost::system::error_code& ec)
+    auto self = shared_from_this();
+    m_stream.async_ping({}, boost::asio::bind_executor(*m_strand, [this, self](const boost::system::error_code& ec)
+    {
+        if (ec)
         {
-            if (ec)
-            {
-                LogError("RemoteClient.Ping", ec);
-                CloseInternal();
-            }
-        }));
-    });
+            LogError("RemoteClient.Ping", ec);
+            CloseInternal();
+        }
+    }));
 }
 
 void RemoteClient::DoRead()
@@ -203,11 +206,13 @@ void RemoteClient::DoRead()
     auto payload = boost::beast::buffers_to_string(m_readBuffer.data());
     m_readBuffer.consume(m_readBuffer.size());
 
+    bool valid = true;
     try
     {
         lllog(5)<<"WS: RemoteClient.OnMessage "<<payload.c_str()<<std::endl;
 
         JsonRpcRequest req(payload);
+        valid = true;
         try
         {
             req.Validate();
@@ -215,10 +220,13 @@ void RemoteClient::DoRead()
         catch (const RequestErrorException& e)
         {
             SendToClient(JsonRpcResponse::Error(req.Id(), e.Code(), e.Message(), e.Data()));
-            return;
+            valid = false;
         }
 
-        WsDispatch(req);
+        if (valid)
+        {
+            WsDispatch(req);
+        }
     }
     catch (const RequestErrorException& e)
     {
@@ -246,6 +254,7 @@ void RemoteClient::DoWrite()
 
     m_isWriting = true;
     auto self = shared_from_this();
+    
     m_stream.async_write(boost::asio::buffer(m_writeQueue.front()),
                          boost::asio::bind_executor(*m_strand, [this, self](const boost::system::error_code& ec, std::size_t /*bytesTransferred*/)
     {
