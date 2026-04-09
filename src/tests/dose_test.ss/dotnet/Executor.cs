@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Collections;
 
 namespace dose_test_dotnet
@@ -302,24 +303,7 @@ namespace dose_test_dotnet
                 case DoseTest.ActionEnum.Enumeration.CheckReferences:
                     if (m_isActive)
                     {
-                        if (m_consumers != null)
-                        {
-                            for (int i = 0; i < 3; ++i)
-                            {
-                                m_consumers[i] = null;
-                            }
-                            m_consumers = null;
-                        }
-
-                        System.GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
-                        System.GC.WaitForPendingFinalizers();
-
-                        // After releasing the executor's references and a garabage collection, there should be no
-                        // Consumer instances
-                        if (Consumer.instanceCount != 0)
-                        {
-                            Logger.Instance.WriteLine("CHECK_REFERENCES: Expected 0 consumer instances, but found " + Consumer.instanceCount);
-                        }
+                        ClearAndCheckReferences();
 
                         // restore consumers
                         m_consumers = new Consumer[3];
@@ -335,42 +319,7 @@ namespace dose_test_dotnet
                     {
                         m_testConnection.Close();
 
-                        if (m_consumers != null)
-                        {
-                            for (int i = 0; i < 3; ++i)
-                            {
-                                m_consumers[i] = null;
-                            }
-                            m_consumers = null;
-                        }
-
-                        if (m_testDispatcher != null)
-                        {
-                            m_testDispatcher = null;
-                        }
-
-                        if (m_testStopHandler != null)
-                        {
-                            m_testStopHandler = null;
-                        }
-
-                        System.GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
-                        System.GC.WaitForPendingFinalizers();
-
-                        // After releasing the executor's references and a garabage collection, there should be no
-                        // Consumer instances and no Dispatcher instances
-                        if (Consumer.instanceCount != 0)
-                        {
-                            Logger.Instance.WriteLine("CLOSE_AND_CHECK_REFERENCES: Expected 0 consumer instances, but found " + Consumer.instanceCount);
-                        }
-                        if (Dispatcher.instanceCount != 0)
-                        {
-                            Logger.Instance.WriteLine("CLOSE_AND_CHECK_REFERENCES: Expected 0 dispatcher instances, but found " + Dispatcher.instanceCount);
-                        }
-                        if (StopHandler.instanceCount != 0)
-                        {
-                            Logger.Instance.WriteLine("CLOSE_AND_CHECK_REFERENCES: Expected 0 stopHandler instances, but found " + StopHandler.instanceCount);
-                        }
+                        ClearAndCheckAllReferences();
 
                         // Restore dispatcher
                         m_testDispatcher = new Dispatcher(m_testDispatchEvent);
@@ -462,6 +411,77 @@ namespace dose_test_dotnet
                 default:
                     Logger.Instance.WriteLine("Got unexpected action " + action.ActionKind.Val);
                     break;
+            }
+        }
+
+        // Separate methods for GC reference checking to ensure local variables go out of scope.
+        // In debug builds, the JIT extends local variable lifetimes to the end of the method,
+        // which can prevent the GC from collecting objects even after nulling references.
+        // Using NoInlining ensures these methods are not inlined back into the caller.
+        // A double GC.Collect is used because objects with finalizers need one collection to
+        // be moved to the finalization queue and a second to be reclaimed after the finalizer runs.
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ClearAndCheckReferences()
+        {
+            if (m_consumers != null)
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    m_consumers[i] = null;
+                }
+                m_consumers = null;
+            }
+
+            System.GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+            System.GC.WaitForPendingFinalizers();
+            System.GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+            System.GC.WaitForPendingFinalizers();
+
+            if (Consumer.instanceCount != 0)
+            {
+                Logger.Instance.WriteLine("CHECK_REFERENCES: Expected 0 consumer instances, but found " + Consumer.instanceCount);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ClearAndCheckAllReferences()
+        {
+            if (m_consumers != null)
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    m_consumers[i] = null;
+                }
+                m_consumers = null;
+            }
+
+            if (m_testDispatcher != null)
+            {
+                m_testDispatcher = null;
+            }
+
+            if (m_testStopHandler != null)
+            {
+                m_testStopHandler = null;
+            }
+
+            System.GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+            System.GC.WaitForPendingFinalizers();
+            System.GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+            System.GC.WaitForPendingFinalizers();
+
+            if (Consumer.instanceCount != 0)
+            {
+                Logger.Instance.WriteLine("CLOSE_AND_CHECK_REFERENCES: Expected 0 consumer instances, but found " + Consumer.instanceCount);
+            }
+            if (Dispatcher.instanceCount != 0)
+            {
+                Logger.Instance.WriteLine("CLOSE_AND_CHECK_REFERENCES: Expected 0 dispatcher instances, but found " + Dispatcher.instanceCount);
+            }
+            if (StopHandler.instanceCount != 0)
+            {
+                Logger.Instance.WriteLine("CLOSE_AND_CHECK_REFERENCES: Expected 0 stopHandler instances, but found " + StopHandler.instanceCount);
             }
         }
 
