@@ -206,8 +206,23 @@ def read_version():
                 continue
             key, value = line.split("=")
             parts[key] = value
-    return ((parts["MAJOR"], parts["MINOR"], parts["PATCH"], parts["SUFFIX"]),
-            parts["MAJOR"] + "." + parts["MINOR"] + "." + parts["PATCH"] + parts["SUFFIX"])
+
+    version_string = parts["MAJOR"] + "." + parts["MINOR"] + "." + parts["PATCH"] + parts["SUFFIX"]
+
+    # For non-release builds, append git revision
+    if parts["SUFFIX"] != "":
+        try:
+            git_revision = subprocess.check_output(
+                ["git", "describe", "--always", "--dirty", "--abbrev=7"],
+                stderr=subprocess.DEVNULL,
+                universal_newlines=True
+            ).strip()
+            version_string += "-" + git_revision
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            # Git not available or not a git repo, continue without git info
+            pass
+
+    return ((parts["MAJOR"], parts["MINOR"], parts["PATCH"], parts["SUFFIX"]), version_string)
 
 
 class DummyLogger():

@@ -67,7 +67,29 @@ foreach (line IN LISTS version_strings)
   endif()
 endforeach()
 
+# Get git revision for non-release builds
+find_package(Git QUIET)
+set(SAFIR_GIT_REVISION "")
+if (NOT SAFIR_VERSION_SUFFIX STREQUAL "" AND GIT_FOUND)
+  execute_process(
+    COMMAND "${GIT_EXECUTABLE}" describe --always --dirty --abbrev=7
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE SAFIR_GIT_REVISION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+    RESULT_VARIABLE GIT_RESULT
+  )
+  if (GIT_RESULT)
+    message(WARNING "Failed to obtain git revision. Version will not include git hash.")
+    set(SAFIR_GIT_REVISION "")
+  endif()
+endif()
+
+# Build version string, appending git revision for non-release builds
 SET(SAFIR_VERSION_STRING "${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}${SAFIR_VERSION_SUFFIX}")
+if (NOT SAFIR_GIT_REVISION STREQUAL "")
+  SET(SAFIR_VERSION_STRING "${SAFIR_VERSION_STRING}-${SAFIR_GIT_REVISION}")
+endif()
 
 #make the version available to code as well.
 ADD_DEFINITIONS(-DSAFIR_SDK_CORE_VERSION=\"${SAFIR_VERSION_STRING}\")
