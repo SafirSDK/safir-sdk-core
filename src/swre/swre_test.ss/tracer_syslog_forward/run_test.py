@@ -55,31 +55,28 @@ if "TestPrefix: before syslog" not in output:
 if "TestPrefix: after syslog" not in output:
     fail("Missing 'TestPrefix: after syslog' in output")
 
-# Check that syslog messages are forwarded with correct format
-if "syslog: [ERROR] This is an error message" not in output:
-    fail("Missing forwarded ERROR syslog message")
+# Check that syslog messages are forwarded with correct format for all severity levels
+expected_messages = [
+    ("EMERGENCY", "This is an emergency message"),
+    ("ALERT",     "This is an alert message"),
+    ("CRITICAL",  "This is a critical message"),
+    ("ERROR",     "This is an error message"),
+    ("WARNING",   "This is a warning message"),
+    ("NOTICE",    "This is a notice message"),
+    ("INFO",      "This is an informational message"),
+    ("DEBUG",     "This is a debug message"),
+]
 
-if "syslog: [WARNING] This is a warning message" not in output:
-    fail("Missing forwarded WARNING syslog message")
-
-if "syslog: [CRITICAL] This is a critical message" not in output:
-    fail("Missing forwarded CRITICAL syslog message")
-
-# Check ordering: syslog messages should appear between "before" and "after"
 before_pos = output.find("TestPrefix: before syslog")
 after_pos = output.find("TestPrefix: after syslog")
-error_pos = output.find("syslog: [ERROR]")
-warning_pos = output.find("syslog: [WARNING]")
-critical_pos = output.find("syslog: [CRITICAL]")
 
-if not (before_pos < error_pos < after_pos):
-    fail("ERROR syslog message not in expected position")
-
-if not (before_pos < warning_pos < after_pos):
-    fail("WARNING syslog message not in expected position")
-
-if not (before_pos < critical_pos < after_pos):
-    fail("CRITICAL syslog message not in expected position")
+for severity_label, text in expected_messages:
+    marker = f"syslog: [{severity_label}] {text}"
+    if marker not in output:
+        fail(f"Missing forwarded {severity_label} syslog message")
+    pos = output.find(marker)
+    if not (before_pos < pos < after_pos):
+        fail(f"{severity_label} syslog message not in expected position")
 
 print("Test 1 passed!")
 
@@ -193,6 +190,17 @@ try:
 
 except subprocess.TimeoutExpired:
     fail("Test timed out - deadlock detected!")
+
+# Test 6: Forwarded syslog message should appear even without an explicit tracer flush
+print("\nTest 6: Forwarded syslog message should appear without explicit tracer flush")
+output = subprocess.check_output((sender_path, "no_flush")).decode("utf-8").replace("\r", "")
+print("Output:")
+print(output)
+
+if "syslog: [WARNING] warning without flush" not in output:
+    fail("Forwarded syslog message did not appear without explicit flush")
+
+print("Test 6 passed!")
 
 print("\nAll tests passed!")
 sys.exit(0)

@@ -354,6 +354,10 @@ Library::OnSystemLog(Safir::Utilities::Internal::Log::Severity severity,
     // Delegate to TraceBuffer - no deadlock risk since TraceBuffer never calls external
     // code while holding its lock
     m_traceBuffer.AppendSyslogForward(formatted, toStdout, toUdp);
+
+    // Flush immediately so the forwarded message appears without waiting for the
+    // application to next write to its tracer.
+    TraceFlush();
 }
 
 void

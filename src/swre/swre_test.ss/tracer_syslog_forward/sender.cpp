@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 
     Safir::Application::Tracer tracer(L"TestPrefix");
 
-    if (mode == "enable" || mode == "midline" || mode == "tracer_facility" || mode == "overflow")
+    if (mode == "enable" || mode == "midline" || mode == "tracer_facility" || mode == "overflow" || mode == "no_flush")
     {
         tracer.Enable(true);
     }
@@ -96,6 +96,16 @@ int main(int argc, char** argv)
         tracer << L"end" << std::endl;
         tracer << std::flush;
     }
+    else if (mode == "no_flush")
+    {
+        // Test that forwarded syslog messages appear even when the application
+        // never explicitly flushes its tracer after the syslog call.
+        Safir::Utilities::Internal::Log::Send(
+            Safir::Utilities::Internal::Log::Warning,
+            Safir::Utilities::Internal::Log::Local0,
+            L"warning without flush");
+        // No tracer flush here - the syslog forward itself must trigger the flush.
+    }
     else
     {
         // Standard test mode ("enable" or no args)
@@ -103,7 +113,22 @@ int main(int argc, char** argv)
         // Write some tracer output first
         tracer << L"before syslog" << std::endl;
 
-        // Send syslog messages with different severities
+        // Send syslog messages with all severity levels
+        Safir::Utilities::Internal::Log::Send(
+            Safir::Utilities::Internal::Log::Emergency,
+            Safir::Utilities::Internal::Log::Local0,
+            L"This is an emergency message");
+
+        Safir::Utilities::Internal::Log::Send(
+            Safir::Utilities::Internal::Log::Alert,
+            Safir::Utilities::Internal::Log::Local0,
+            L"This is an alert message");
+
+        Safir::Utilities::Internal::Log::Send(
+            Safir::Utilities::Internal::Log::Critical,
+            Safir::Utilities::Internal::Log::Local0,
+            L"This is a critical message");
+
         Safir::Utilities::Internal::Log::Send(
             Safir::Utilities::Internal::Log::Error,
             Safir::Utilities::Internal::Log::Local0,
@@ -115,9 +140,19 @@ int main(int argc, char** argv)
             L"This is a warning message");
 
         Safir::Utilities::Internal::Log::Send(
-            Safir::Utilities::Internal::Log::Critical,
+            Safir::Utilities::Internal::Log::Notice,
             Safir::Utilities::Internal::Log::Local0,
-            L"This is a critical message");
+            L"This is a notice message");
+
+        Safir::Utilities::Internal::Log::Send(
+            Safir::Utilities::Internal::Log::Informational,
+            Safir::Utilities::Internal::Log::Local0,
+            L"This is an informational message");
+
+        Safir::Utilities::Internal::Log::Send(
+            Safir::Utilities::Internal::Log::Debug,
+            Safir::Utilities::Internal::Log::Local0,
+            L"This is a debug message");
 
         // Write some more tracer output after
         tracer << L"after syslog" << std::endl;
