@@ -902,7 +902,8 @@ class DebianPackager():
 
     def build(self):
         """Run the build"""
-        version_string = read_version()[1]
+        (major, minor, patch, suffix), _ = read_version()
+        version_string = major + "." + minor + "." + patch + suffix
         if not self.noclean:
             remove("tmp")
             mkdir("tmp")
