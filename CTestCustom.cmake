@@ -26,5 +26,6 @@ if ((DEFINED ENV{SAFIR_SKIP_SLOW_TESTS}) AND ($ENV{SAFIR_SKIP_SLOW_TESTS}))
     low_memory
     lowmem_basic_operations
     sate_script
+    performance_test
     )
 endif()
