@@ -169,7 +169,7 @@ void RemoteClient::SendPing()
     auto self = shared_from_this();
     boost::asio::post(*m_strand, [this, self]
     {
-        if (m_isClosed || !m_isOpened)
+        if (m_isClosed || !m_isOpened || m_isWriting)
         {
             return;
         }
