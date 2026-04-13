@@ -68,9 +68,12 @@ foreach (line IN LISTS version_strings)
 endforeach()
 
 # Get git revision for non-release builds
-find_package(Git QUIET)
+# Use find_program instead of find_package(Git) to avoid triggering the Conan
+# provider's find_package override, which would run conan install before
+# CMAKE_CXX_STANDARD is set (causing it to default to C++14).
+find_program(GIT_EXECUTABLE git DOC "Git executable")
 set(SAFIR_GIT_REVISION "")
-if (NOT SAFIR_VERSION_SUFFIX STREQUAL "" AND GIT_FOUND)
+if (NOT SAFIR_VERSION_SUFFIX STREQUAL "" AND GIT_EXECUTABLE)
   execute_process(
     COMMAND "${GIT_EXECUTABLE}" describe --always --dirty --abbrev=7
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
