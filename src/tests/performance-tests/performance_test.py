@@ -90,7 +90,6 @@ def run_test(name, args):
                                                         "--num-instances", str(args.num_instances),
                                                         "--num-updates", str(args.num_updates)])
 
-        time.sleep(40)
         env.WaitForOutput("consumer", "Consumer finished")
 
     except Exception as exc:  # pylint: disable=broad-except
