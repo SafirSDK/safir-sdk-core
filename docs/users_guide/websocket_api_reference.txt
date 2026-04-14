@@ -146,6 +146,18 @@ Example::
 <-- {"jsonrpc": "2.0", "result": {"_DouType": "Safir.Websocket.Typesystem.TypeHierarchy", "RootClass": {...}}, "id": 123}
 ----------------------------
 
+==== Method: getVersion
+Get the version of the running Safir SDK Core server.
+
+Returns::
+ * `result` - The version string (e.g. _"1.2.3"_ or _"1.2.3-dev-abc1234"_ for pre-release builds).
+
+Example::
+----------------------------
+--> {"jsonrpc": "2.0", "method": "getVersion", "id": 123}
+<-- {"jsonrpc": "2.0", "result": "1.2.3", "id": 123}
+----------------------------
+
 ==== Method: isCreated
 Check if an entity instance exists in the Dob.
 

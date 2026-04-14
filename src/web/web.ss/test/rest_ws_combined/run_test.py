@@ -637,6 +637,18 @@ async def run_combined_flow():
             raise AssertionError("Websocket close failed: " + str(close_response))
         log("Step 36 succeeded")
 
+        # ======= STEP 37: version (REST) - connection-less =======
+        log("Step 37: REST version")
+        status, result = rest_get(rest_base + "/version")
+        if status != 200:
+            raise AssertionError("REST version http status was not 200: " + str(status))
+        if "result" not in result:
+            raise AssertionError("REST version missing 'result': " + str(result))
+        if not isinstance(result["result"], str) or not result["result"]:
+            raise AssertionError("REST version expected a non-empty string, got: " + str(result))
+        log("REST version result:", result["result"])
+        log("Step 37 succeeded")
+
         log("All steps succeeded! Full REST API coverage verified.")
     finally:
         if client is not None:

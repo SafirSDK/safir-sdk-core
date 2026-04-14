@@ -428,6 +428,10 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
         {
             WsGetTypeHierarchy(req);
         }
+        else if (req.Method() == Methods::GetVersion)
+        {
+            WsGetVersion(req);
+        }
         else
         {
             throw RequestErrorException(JsonRpcErrorCodes::MethodNotFound, "Command is not supported. " + req.Method());
@@ -554,6 +558,12 @@ void RemoteClient::WsGetTypeHierarchy(const JsonRpcRequest& req)
     {
         SendToClient(JsonRpcResponse::Error(req.Id(), JsonRpcErrorCodes::InternalError, "Failed to construct type hierarchy", e.what()));
     }
+}
+
+void RemoteClient::WsGetVersion(const JsonRpcRequest& req)
+{
+    if (!req.Id().IsNull())
+        SendToClient(JsonRpcResponse::String(req.Id(), SAFIR_SDK_CORE_VERSION));
 }
 
 void RemoteClient::WsSubscribeMessage(const JsonRpcRequest& req)

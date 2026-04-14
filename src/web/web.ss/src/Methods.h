@@ -65,6 +65,9 @@ namespace Methods
     //typesystem
     static const std::string GetTypeHierarchy = "getTypeHierarchy";
 
+    // Safir SDK Core version
+    static const std::string GetVersion = "getVersion";
+
     //******************************************************************
     // Methods used in notifications to clients
     //******************************************************************

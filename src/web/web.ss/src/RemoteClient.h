@@ -99,6 +99,7 @@ private:
     void WsClose(const JsonRpcRequest& req);
     void WsIsOpen(const JsonRpcRequest& req);
     void WsGetTypeHierarchy(const JsonRpcRequest& req);
+    void WsGetVersion(const JsonRpcRequest& req);
     void WsSubscribeMessage(const JsonRpcRequest& req);
     void WsSendMessage(const JsonRpcRequest& req);
     void WsUnsubscribeMessage(const JsonRpcRequest& req);

@@ -115,6 +115,13 @@ inline RestRoute RouteRestRequest(boost::beast::http::verb verb,
         return {Methods::GetTypeHierarchy, {}, {}, {}};
     }
 
+    // GET /version
+    if (seg.size() == 1 && seg[0] == "version")
+    {
+        if (!isGet) return {kWrongVerb, {}, {}, {}};
+        return {Methods::GetVersion, {}, {}, {}};
+    }
+
     // GET /connections  (list all connection names, no connection id)
     if (seg.size() == 1 && seg[0] == "connections")
     {

@@ -15,6 +15,22 @@ The REST API is stateless and does not provide its own `open` or `close` operati
 via the WebSocket/JSON-RPC interface (using the `open` method). Once a connection has been opened its
 `connectionName` is used as the `{connectionId}` path segment in all REST requests that target that connection.
 
+=== Safir SDK Core version info
+
+==== GET /version
+Get the version of the running Safir SDK Core.
+
+Returns::
+ * `result` - The version string (e.g. _"1.2.3"_ or _"1.2.3-dev-abc1234"_ for pre-release builds).
+
+Example::
+----------------------------
+GET /version HTTP/1.1
+
+HTTP/1.1 200 OK
+{"result": "1.2.3"}
+----------------------------
+
 === Typesystem
 
 ==== GET /typeHierarchy

@@ -109,6 +109,10 @@ int main() {
                          "{\"jsonrpc\":\"2.0\",\"result\":\"pong\",\"id\":\"bbb\"}",
                          ""));
 
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"getVersion\", \"id\":\"ver1\"}",
+                         std::string("{\"jsonrpc\":\"2.0\",\"result\":\"") + SAFIR_SDK_CORE_VERSION + "\",\"id\":\"ver1\"}",
+                         ""));
+
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"close\", \"id\":\"ddd\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"ddd\"}",
                          ""));

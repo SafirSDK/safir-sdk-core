@@ -627,6 +627,13 @@ private:
             return;
         }
 
+        // getVersion needs no connection
+        if (route.method == Methods::GetVersion)
+        {
+            SendResponse(http::status::ok, RestResultString(SAFIR_SDK_CORE_VERSION));
+            return;
+        }
+
         // getConnections needs no connection
         if (route.method == Methods::GetConnections)
         {
