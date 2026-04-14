@@ -518,6 +518,8 @@ namespace Internal
                 return;
             }
             iterator.m_currentType = m_entityTypes.find(iterator.m_remainingTypes.back());
+            ENSURE(iterator.m_currentType != m_entityTypes.end(), << "Entity iterators can only iterate over entities!");
+
             iterator.m_remainingTypes.pop_back();
             iterator.m_currentContext =
                 ContextSharedTable::Instance().IsContextShared(iterator.m_currentType->first) ? 0 : iterator.m_connectionContext;
