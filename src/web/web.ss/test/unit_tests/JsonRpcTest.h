@@ -50,6 +50,9 @@ inline void JsonRpcTest()
 
         json="{\"param\":1, \"[1,2]\"}";
         CHECK(JsonHelpers::IsObject(json));
+
+        json="c:\\Program Files\\safir_sdk_core";
+        CHECK(JsonHelpers::EscapedString(json)=="c:\\\\Program Files\\\\safir_sdk_core");
     }
     {
         std::ostringstream os;
@@ -307,6 +310,13 @@ inline void JsonRpcTest()
         //----------
         auto json = JsonRpcResponse::Error(JsonRpcId("Me"), 123, "msg", "data");
         CHECK(json=="{\"jsonrpc\":\"2.0\",\"error\":{\"code\":123,\"message\":\"msg\",\"data\":\"data\"},\"id\":\"Me\"}");
+    }
+    {
+        //error with special characters in message that require JSON escaping
+        //--------------------------------------------------------------------
+        std::string json = JsonRpcResponse::Error(JsonRpcId(42), 456, "err: \"quotes\", backslash: \\, tab:\there\nnewline", "");
+        std::string expected = "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":456,\"message\":\"err: \\\"quotes\\\", backslash: \\\\, tab:\\there\\nnewline\"},\"id\":42}";
+        CHECK(json==expected);
     }
     {
         //error

@@ -34,7 +34,7 @@ class JsonRpcResponse
 public:
     static std::string Error(const JsonRpcId& id, int code, const std::string& message, const std::string& data)
     {
-        std::string m = message;
+        auto m = JsonHelpers::EscapedString(message); // just to check that it doesn't throw, the actual escaping is done in the code below to avoid double escaping of the message string
         m.erase(std::remove(m.begin(), m.end(), '\n'), m.cend());
 
         std::ostringstream os;
@@ -43,7 +43,7 @@ public:
 
         if (!data.empty())
         {
-            std::string d = data;
+            auto d = JsonHelpers::EscapedString(data); // just to check that it doesn't throw, the actual escaping is done in the code below to avoid double escaping of the data string
             d.erase(std::remove(d.begin(), d.end(), '\n'), d.cend());
             os<<","<<SAFIR_WS_STR("data", d);
         }

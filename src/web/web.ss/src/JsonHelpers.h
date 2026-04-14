@@ -44,6 +44,38 @@ namespace ts = Safir::Dob::Typesystem;
 
 namespace JsonHelpers
 {
+    inline std::string EscapedString(const std::string& val)
+    {
+        std::ostringstream os;
+        for (const unsigned char c : val)
+        {
+            switch (c)
+            {
+            case '"':  os << "\\\""; break;
+            case '\\': os << "\\\\"; break;
+            case '\b': os << "\\b";  break;
+            case '\f': os << "\\f";  break;
+            case '\n': os << "\\n";  break;
+            case '\r': os << "\\r";  break;
+            case '\t': os << "\\t";  break;
+            default:
+                if (c < 0x20)
+                {
+                    // Other control characters as \uXXXX
+                    os << "\\u00";
+                    os << "0123456789abcdef"[c >> 4];
+                    os << "0123456789abcdef"[c & 0x0f];
+                }
+                else
+                {
+                    os << static_cast<char>(c);
+                }
+                break;
+            }
+        }
+        return os.str();
+    }
+
     template <class T>
     std::shared_ptr<T> ToObject(const std::string& json)
     {
