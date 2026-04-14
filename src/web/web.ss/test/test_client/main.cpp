@@ -195,6 +195,10 @@ int main() {
                          "{\"jsonrpc\":\"2.0\",\"result\":2,\"id\":\"numInst\"}",
                          ""));
 
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"getNumberOfInstances\", \"params\":{\"typeId\":\"Safir.Dob.Item\"}, \"id\":\"numInst\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":0,\"id\":\"numInst\"}",
+                         ""));
+
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"isCreated\", \"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":1}, \"id\":\"isCreated1\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":true,\"id\":\"isCreated1\"}",
                          ""));

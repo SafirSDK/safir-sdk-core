@@ -156,7 +156,19 @@ public:
 
     bool IsCreated(ts::TypeId typeId, const ts::InstanceId& inst) const {return m_con.IsCreated(ts::EntityId(typeId, inst));}
 
-    ts::Int64 GetNumberOfInstances(ts::TypeId typeId, const ts::HandlerId& handler, bool inclSub) const {return m_con.GetNumberOfInstances(typeId, handler, inclSub);}
+    ts::Int64 GetNumberOfInstances(ts::TypeId typeId, const ts::HandlerId& handler, bool inclSub) const
+    {
+        if (ts::Operations::IsOfType(typeId, Safir::Dob::Entity::ClassTypeId))
+        {
+            return m_con.GetNumberOfInstances(typeId, handler, inclSub);
+        }
+        else
+        {
+            lllog(5)<<"WS: DobConnection::GetNumberOfInstances. Type is not an entity type. TypeId"<<typeId<<std::endl;
+            return 0;
+        }
+    }
+
     std::string GetInstanceIdPolicy(ts::TypeId typeId, const ts::HandlerId& handler) const
     {
         auto policy=m_con.GetInstanceIdPolicy(typeId, handler);

@@ -371,8 +371,17 @@ async def run_combined_flow():
             raise AssertionError("REST getNumberOfInstances expected 1, got: " + str(result))
         log("Step 15 succeeded")
 
-        # ======= STEP 16: isCreated (REST) =======
-        log("Step 16: REST isCreated (true for 101, false for 999)")
+        # ======= STEP 16: getNumberOfInstances for non-entity type - expected error (REST) =======
+        log("Step 16: REST getNumberOfInstances (Safir.Dob.Item - not an entity type, expected 0)")
+        status, result = rest_get(conn_url("entities/Safir.Dob.Item/count"))
+        if status != 200:
+            raise AssertionError("REST getNumberOfInstances http status was not 200: " + str(status))
+        if result.get("result") != 0:
+            raise AssertionError("REST getNumberOfInstances expected 1, got: " + str(result))
+        log("Step 16 succeeded")
+
+        # ======= STEP 17: isCreated (REST) =======
+        log("Step 17: REST isCreated (true for 101, false for 999)")
         status, result = rest_get(conn_url("entities/Safir.Control.Status/101/isCreated"))
         if status != 200:
             raise AssertionError("REST isCreated(101) http status was not 200: " + str(status))
@@ -383,10 +392,10 @@ async def run_combined_flow():
             raise AssertionError("REST isCreated(999) http status was not 200: " + str(status))
         if result.get("result") is not False:
             raise AssertionError("REST isCreated(999) expected false, got: " + str(result))
-        log("Step 16 succeeded")
+        log("Step 17 succeeded")
 
-        # ======= STEP 17: setEntityChanges PATCH (REST) + onUpdatedEntity (WS) =======
-        log("Step 17: REST setEntityChanges PATCH (Safir.Control.Status instance 101) + WS onUpdatedEntity")
+        # ======= STEP 18: setEntityChanges PATCH (REST) + onUpdatedEntity (WS) =======
+        log("Step 18: REST setEntityChanges PATCH (Safir.Control.Status instance 101) + WS onUpdatedEntity")
         status, result = rest_patch(
             conn_url("entities/Safir.Control.Status/101?handler=1"),
             {"_DouType": "Safir.Control.Status", "SystemIncarnation": 99})
@@ -398,10 +407,10 @@ async def run_combined_flow():
             "onUpdatedEntity",
             predicate=lambda msg: msg.get("params", {}).get("instanceId") == "101")
         log("Received WS onUpdatedEntity:", on_updated)
-        log("Step 17 succeeded")
+        log("Step 18 succeeded")
 
-        # ======= STEP 18: readEntity success (REST) =======
-        log("Step 18: REST readEntity (Safir.Control.Status instance 101) - success")
+        # ======= STEP 19: readEntity success (REST) =======
+        log("Step 19: REST readEntity (Safir.Control.Status instance 101) - success")
         status, result = rest_get(conn_url("entities/Safir.Control.Status/101"))
         if status != 200:
             raise AssertionError("REST readEntity http status was not 200: " + str(status))
@@ -410,10 +419,10 @@ async def run_combined_flow():
         if result["entity"].get("_DouType") != "Safir.Control.Status":
             raise AssertionError("REST readEntity unexpected entity type: " + str(result))
         log("REST readEntity result:", result)
-        log("Step 18 succeeded")
+        log("Step 19 succeeded")
 
-        # ======= STEP 19: setEntity instance 102 (REST) + onNewEntity (WS) =======
-        log("Step 19: REST setEntity (Safir.Control.Status instance 102) + WS onNewEntity")
+        # ======= STEP 20: setEntity instance 102 (REST) + onNewEntity (WS) =======
+        log("Step 20: REST setEntity (Safir.Control.Status instance 102) + WS onNewEntity")
         status, result = rest_put(
             conn_url("entities/Safir.Control.Status/102?handler=1"),
             {"_DouType": "Safir.Control.Status", "NodeId": 102})
@@ -424,10 +433,10 @@ async def run_combined_flow():
         await client.wait_for_notification(
             "onNewEntity",
             predicate=lambda msg: msg.get("params", {}).get("instanceId") == "102")
-        log("Step 19 succeeded")
+        log("Step 20 succeeded")
 
-        # ======= STEP 20: deleteEntity instance 101 (REST) + onDeletedEntity (WS) =======
-        log("Step 20: REST deleteEntity (Safir.Control.Status instance 101) + WS onDeletedEntity")
+        # ======= STEP 21: deleteEntity instance 101 (REST) + onDeletedEntity (WS) =======
+        log("Step 21: REST deleteEntity (Safir.Control.Status instance 101) + WS onDeletedEntity")
         status, result = rest_delete(conn_url("entities/Safir.Control.Status/101?handler=1"))
         if status != 200:
             raise AssertionError("REST deleteEntity http status was not 200: " + str(status))
@@ -437,10 +446,10 @@ async def run_combined_flow():
             "onDeletedEntity",
             predicate=lambda msg: msg.get("params", {}).get("instanceId") == "101")
         log("Received WS onDeletedEntity for instance 101:", on_deleted)
-        log("Step 20 succeeded")
+        log("Step 21 succeeded")
 
-        # ======= STEP 21: deleteAllInstances (REST) + onDeletedEntity for 102 (WS) =======
-        log("Step 21: REST deleteAllInstances (Safir.Control.Status handler=1) + WS onDeletedEntity")
+        # ======= STEP 22: deleteAllInstances (REST) + onDeletedEntity for 102 (WS) =======
+        log("Step 22: REST deleteAllInstances (Safir.Control.Status handler=1) + WS onDeletedEntity")
         status, result = rest_delete(conn_url("entities/Safir.Control.Status?handler=1"))
         if status != 200:
             raise AssertionError("REST deleteAllInstances http status was not 200: " + str(status))
@@ -450,19 +459,19 @@ async def run_combined_flow():
             "onDeletedEntity",
             predicate=lambda msg: msg.get("params", {}).get("instanceId") == "102")
         log("Received WS onDeletedEntity for instance 102:", on_deleted_all)
-        log("Step 21 succeeded")
+        log("Step 22 succeeded")
 
-        # ======= STEP 22: subscribeRegistration for Safir.Control.Command (REST) =======
-        log("Step 22: REST subscribeRegistration (Safir.Control.Command)")
+        # ======= STEP 23: subscribeRegistration for Safir.Control.Command (REST) =======
+        log("Step 23: REST subscribeRegistration (Safir.Control.Command)")
         status, result = rest_put(conn_url("subscriptions/registrations/Safir.Control.Command"))
         if status != 200:
             raise AssertionError("REST subscribeRegistration (Command) http status was not 200: " + str(status))
         if result.get("status") != "OK":
             raise AssertionError("REST subscribeRegistration (Command) failed: " + str(result))
-        log("Step 22 succeeded")
+        log("Step 23 succeeded")
 
-        # ======= STEP 23: registerServiceHandler (REST) + onRegistered (WS) =======
-        log("Step 23: REST registerServiceHandler (Safir.Control.Command handler=99) + WS onRegistered")
+        # ======= STEP 24: registerServiceHandler (REST) + onRegistered (WS) =======
+        log("Step 24: REST registerServiceHandler (Safir.Control.Command handler=99) + WS onRegistered")
         status, result = rest_put(conn_url("handlers/services/Safir.Control.Command?handler=99"))
         if status != 200:
             raise AssertionError("REST registerServiceHandler http status was not 200: " + str(status))
@@ -473,10 +482,10 @@ async def run_combined_flow():
             predicate=lambda msg: msg.get("params", {}).get("typeId") == "Safir.Control.Command"
             and msg.get("params", {}).get("handlerId") == "99")
         log("Received WS onRegistered for service handler:", srv_reg_notif)
-        log("Step 23 succeeded")
+        log("Step 24 succeeded")
 
-        # ======= STEP 24: createRequest (REST) + onCreateRequest (WS) + respond =======
-        log("Step 24: REST createRequest (Safir.Control.Status instance 200) + WS onCreateRequest + respond")
+        # ======= STEP 25: createRequest (REST) + onCreateRequest (WS) + respond =======
+        log("Step 25: REST createRequest (Safir.Control.Status instance 200) + WS onCreateRequest + respond")
         status, result = rest_post(
             conn_url("requests/entities/Safir.Control.Status?handler=1&instanceId=200"),
             {"_DouType": "Safir.Control.Status", "NodeId": 200})
@@ -492,10 +501,10 @@ async def run_combined_flow():
         await client.send(json.dumps({"jsonrpc": "2.0",
                                       "result": {"_DouType": "Safir.Dob.SuccessResponse"},
                                       "id": response_sender_id}))
-        log("Step 24 succeeded")
+        log("Step 25 succeeded")
 
-        # ======= STEP 25: setEntity instance 200 (REST) + onNewEntity (WS) =======
-        log("Step 25: REST setEntity (Safir.Control.Status instance 200) + WS onNewEntity")
+        # ======= STEP 26: setEntity instance 200 (REST) + onNewEntity (WS) =======
+        log("Step 26: REST setEntity (Safir.Control.Status instance 200) + WS onNewEntity")
         status, result = rest_put(
             conn_url("entities/Safir.Control.Status/200?handler=1"),
             {"_DouType": "Safir.Control.Status", "NodeId": 200})
@@ -506,10 +515,10 @@ async def run_combined_flow():
         await client.wait_for_notification(
             "onNewEntity",
             predicate=lambda msg: msg.get("params", {}).get("instanceId") == "200")
-        log("Step 25 succeeded")
+        log("Step 26 succeeded")
 
-        # ======= STEP 26: updateRequest (REST) + onUpdateRequest (WS) + respond =======
-        log("Step 26: REST updateRequest (Safir.Control.Status instance 200) + WS onUpdateRequest + respond")
+        # ======= STEP 27: updateRequest (REST) + onUpdateRequest (WS) + respond =======
+        log("Step 27: REST updateRequest (Safir.Control.Status instance 200) + WS onUpdateRequest + respond")
         status, result = rest_post(
             conn_url("requests/entities/Safir.Control.Status/200/update"),
             {"_DouType": "Safir.Control.Status", "SystemIncarnation": 42})
@@ -525,10 +534,10 @@ async def run_combined_flow():
         await client.send(json.dumps({"jsonrpc": "2.0",
                                       "result": {"_DouType": "Safir.Dob.SuccessResponse"},
                                       "id": response_sender_id}))
-        log("Step 26 succeeded")
+        log("Step 27 succeeded")
 
-        # ======= STEP 27: deleteRequest (REST) + onDeleteRequest (WS) + respond =======
-        log("Step 27: REST deleteRequest (Safir.Control.Status instance 200) + WS onDeleteRequest + respond")
+        # ======= STEP 28: deleteRequest (REST) + onDeleteRequest (WS) + respond =======
+        log("Step 28: REST deleteRequest (Safir.Control.Status instance 200) + WS onDeleteRequest + respond")
         status, result = rest_post(
             conn_url("requests/entities/Safir.Control.Status/200/delete"),
             {})
@@ -544,10 +553,10 @@ async def run_combined_flow():
         await client.send(json.dumps({"jsonrpc": "2.0",
                                       "result": {"_DouType": "Safir.Dob.SuccessResponse"},
                                       "id": response_sender_id}))
-        log("Step 27 succeeded")
+        log("Step 28 succeeded")
 
-        # ======= STEP 28: serviceRequest (REST) + onServiceRequest (WS) + respond =======
-        log("Step 28: REST serviceRequest (Safir.Control.Command handler=99) + WS onServiceRequest + respond")
+        # ======= STEP 29: serviceRequest (REST) + onServiceRequest (WS) + respond =======
+        log("Step 29: REST serviceRequest (Safir.Control.Command handler=99) + WS onServiceRequest + respond")
         status, result = rest_post(
             conn_url("requests/services/Safir.Control.Command?handler=99"),
             {"_DouType": "Safir.Control.Command", "Operation": "Shutdown", "NodeId": 0})
@@ -563,70 +572,70 @@ async def run_combined_flow():
         await client.send(json.dumps({"jsonrpc": "2.0",
                                       "result": {"_DouType": "Safir.Dob.SuccessResponse"},
                                       "id": response_sender_id}))
-        log("Step 28 succeeded")
+        log("Step 29 succeeded")
 
-        # ======= STEP 29: unsubscribeEntity (REST) =======
-        log("Step 29: REST unsubscribeEntity (Safir.Control.Status)")
+        # ======= STEP 30: unsubscribeEntity (REST) =======
+        log("Step 30: REST unsubscribeEntity (Safir.Control.Status)")
         status, result = rest_delete(conn_url("subscriptions/entities/Safir.Control.Status"))
         if status != 200:
             raise AssertionError("REST unsubscribeEntity http status was not 200: " + str(status))
         if result.get("status") != "OK":
             raise AssertionError("REST unsubscribeEntity failed: " + str(result))
-        log("Step 29 succeeded")
+        log("Step 30 succeeded")
 
-        # ======= STEP 30: unsubscribeMessage (REST) =======
-        log("Step 30: REST unsubscribeMessage (Safir.Application.BackdoorCommand)")
+        # ======= STEP 31: unsubscribeMessage (REST) =======
+        log("Step 31: REST unsubscribeMessage (Safir.Application.BackdoorCommand)")
         status, result = rest_delete(conn_url("subscriptions/messages/Safir.Application.BackdoorCommand"))
         if status != 200:
             raise AssertionError("REST unsubscribeMessage http status was not 200: " + str(status))
         if result.get("status") != "OK":
             raise AssertionError("REST unsubscribeMessage failed: " + str(result))
-        log("Step 30 succeeded")
+        log("Step 31 succeeded")
 
-        # ======= STEP 31: unsubscribeRegistration (Safir.Control.Status) (REST) =======
-        log("Step 31: REST unsubscribeRegistration (Safir.Control.Status)")
+        # ======= STEP 32: unsubscribeRegistration (Safir.Control.Status) (REST) =======
+        log("Step 32: REST unsubscribeRegistration (Safir.Control.Status)")
         status, result = rest_delete(conn_url("subscriptions/registrations/Safir.Control.Status"))
         if status != 200:
             raise AssertionError("REST unsubscribeRegistration (Status) http status was not 200: " + str(status))
         if result.get("status") != "OK":
             raise AssertionError("REST unsubscribeRegistration (Status) failed: " + str(result))
-        log("Step 31 succeeded")
+        log("Step 32 succeeded")
 
-        # ======= STEP 32: unsubscribeRegistration (Safir.Control.Command) (REST) =======
-        log("Step 32: REST unsubscribeRegistration (Safir.Control.Command)")
+        # ======= STEP 33: unsubscribeRegistration (Safir.Control.Command) (REST) =======
+        log("Step 33: REST unsubscribeRegistration (Safir.Control.Command)")
         status, result = rest_delete(conn_url("subscriptions/registrations/Safir.Control.Command"))
         if status != 200:
             raise AssertionError("REST unsubscribeRegistration (Command) http status was not 200: " + str(status))
         if result.get("status") != "OK":
             raise AssertionError("REST unsubscribeRegistration (Command) failed: " + str(result))
-        log("Step 32 succeeded")
+        log("Step 33 succeeded")
 
-        # ======= STEP 33: unregisterHandler for Safir.Control.Status (REST) =======
-        log("Step 33: REST unregisterHandler (Safir.Control.Status handler=1)")
+        # ======= STEP 34: unregisterHandler for Safir.Control.Status (REST) =======
+        log("Step 34: REST unregisterHandler (Safir.Control.Status handler=1)")
         status, result = rest_delete(conn_url("handlers/Safir.Control.Status?handler=1"))
         if status != 200:
             raise AssertionError("REST unregisterHandler (Status) http status was not 200: " + str(status))
         if result.get("status") != "OK":
             raise AssertionError("REST unregisterHandler (Status) failed: " + str(result))
-        log("Step 33 succeeded")
+        log("Step 34 succeeded")
 
-        # ======= STEP 34: unregisterHandler for Safir.Control.Command (REST) =======
-        log("Step 34: REST unregisterHandler (Safir.Control.Command handler=99)")
+        # ======= STEP 35: unregisterHandler for Safir.Control.Command (REST) =======
+        log("Step 35: REST unregisterHandler (Safir.Control.Command handler=99)")
         status, result = rest_delete(conn_url("handlers/Safir.Control.Command?handler=99"))
         if status != 200:
             raise AssertionError("REST unregisterHandler (Command) http status was not 200: " + str(status))
         if result.get("status") != "OK":
             raise AssertionError("REST unregisterHandler (Command) failed: " + str(result))
-        log("Step 34 succeeded")
+        log("Step 35 succeeded")
 
-        # ======= STEP 35: Close connection via websocket =======
-        log("Step 35: Close websocket connection")
+        # ======= STEP 36: Close connection via websocket =======
+        log("Step 36: Close websocket connection")
         close_request_id = "combined-close-1"
         await client.send('{"jsonrpc":"2.0", "method":"close", "id":"' + close_request_id + '"}')
         close_response = await client.wait_for_response(close_request_id)
         if close_response.get("result") != "OK":
             raise AssertionError("Websocket close failed: " + str(close_response))
-        log("Step 35 succeeded")
+        log("Step 36 succeeded")
 
         log("All steps succeeded! Full REST API coverage verified.")
     finally:
