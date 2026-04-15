@@ -41,6 +41,7 @@
 #endif
 
 #include <Safir/Dob/Typesystem/Utilities.h>
+#include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Time/Internal/Interface.h>
 #include <Safir/Time/LibraryParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -122,24 +123,28 @@ void DoufTimeC_GetUtcTime(Safir::Dob::Typesystem::Si64::Second & utcTime, bool& 
 {
     std::call_once(g_onceFlag, []{LoadLibrary();});
 
-    if (g_loadFailed)
+    success = false;
+    try
     {
-        success = false;
-        return;
-    }
+        if (g_loadFailed)
+        {
+            throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Configuration error in TimeProvider, please check your logs!",__WFILE__,__LINE__);
+        }
 
-    // Get current UTC time from the library, return boost clock if the function not is provided
-    if (GetUtcTime != NULL)
-    {
-        utcTime = GetUtcTime();
-    }
-    else
-    {
-        const boost::posix_time::time_duration d = boost::posix_time::microsec_clock::universal_time() - _1_JAN_1970;
-        utcTime = static_cast<double>(d.ticks()) / d.ticks_per_second();
-    }
+        // Get current UTC time from the library, return boost clock if the function not is provided
+        if (GetUtcTime != NULL)
+        {
+            utcTime = GetUtcTime();
+        }
+        else
+        {
+            const boost::posix_time::time_duration d = boost::posix_time::microsec_clock::universal_time() - _1_JAN_1970;
+            utcTime = static_cast<double>(d.ticks()) / d.ticks_per_second();
+        }
 
-    success = true;
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS_AND_RUN(success = false);
 }
 
 // **************************************************************
@@ -149,30 +154,34 @@ void DoufTimeC_GetLocalTimeOffset(Safir::Dob::Typesystem::Int32& offset, bool& s
 {
     std::call_once(g_onceFlag, []{LoadLibrary();});
 
-    if (g_loadFailed)
+    success = false;
+    try
     {
-        success = false;
-        return;
+        if (g_loadFailed)
+        {
+            throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Configuration error in TimeProvider, please check your logs!",__WFILE__,__LINE__);
+        }
+
+        // Get local time offset from the library, return a time offset calulated from boost if the function not is provided
+        if (GetUtcTime != NULL)
+        {
+            offset = GetLocalTimeOffset();
+        }
+        else
+        {
+            using namespace boost::posix_time;
+
+            // boost::date_time::c_local_adjustor uses the C-API to adjust a
+            // moment given in utc to the same moment in the local time zone.
+            typedef boost::date_time::c_local_adjustor<ptime> local_adj;
+
+            const ptime utc_now = second_clock::universal_time();
+            const ptime now = local_adj::utc_to_local(utc_now);
+            const time_duration diff = now - utc_now;
+            offset = static_cast<Safir::Dob::Typesystem::Int32>(diff.total_seconds());
+        }
+
+        success = true;
     }
-
-    // Get local time offset from the library, return a time offset calulated from boost if the function not is provided
-    if (GetUtcTime != NULL)
-    {
-        offset = GetLocalTimeOffset();
-    }
-    else
-    {
-        using namespace boost::posix_time;
-
-        // boost::date_time::c_local_adjustor uses the C-API to adjust a
-        // moment given in utc to the same moment in the local time zone.
-        typedef boost::date_time::c_local_adjustor<ptime> local_adj;
-
-        const ptime utc_now = second_clock::universal_time();
-        const ptime now = local_adj::utc_to_local(utc_now);
-        const time_duration diff = now - utc_now;
-        offset = static_cast<Safir::Dob::Typesystem::Int32>(diff.total_seconds());
-    }
-
-    success = true;
+    CATCH_LIBRARY_EXCEPTIONS_AND_RUN(success = false);
 }

@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/Defs.h>
-#include <Safir/Dob/Typesystem/Exceptions.h>
+#include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Time/TimeProvider.h>
 #include <Safir/Time/Internal/Interface.h>
 
@@ -39,7 +39,7 @@ namespace Time
         DoufTimeC_GetUtcTime(utcTime, success);
         if (!success)
         {
-            throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Configuration error in TimeProvider, please check your logs!",__WFILE__, __LINE__);
+            Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
         }
 
         return utcTime;
@@ -53,7 +53,7 @@ namespace Time
         DoufTimeC_GetLocalTimeOffset(offset, success);
         if (!success)
         {
-            throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Configuration error in TimeProvider, please check your logs!",__WFILE__, __LINE__);
+            Safir::Dob::Typesystem::LibraryExceptions::Instance().Throw();
         }
 
         return offset;

@@ -38,7 +38,7 @@ public class TimeProvider {
         // Get current Utc time
         double utcTime = Library.getUtcTime();
         if (utcTime < 0) {
-            throw new com.saabgroup.safir.dob.typesystem.ConfigurationErrorException("Configuration error in TimeProvider, please check your logs!");
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
         return utcTime; 
     }
@@ -51,7 +51,7 @@ public class TimeProvider {
     public static int getLocalTimeOffset() {
         int offset = Library.getLocalTimeOffset();
         if (offset == -1) {
-            throw new com.saabgroup.safir.dob.typesystem.ConfigurationErrorException("Configuration error in TimeProvider, please check your logs!");
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().Throw();
         }
 
         return offset;        

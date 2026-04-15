@@ -51,9 +51,9 @@ namespace Safir.Time
             GetUtcTime(out utcTime, out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
-                throw new Safir.Dob.Typesystem.ConfigurationErrorException("Configuration error in TimeProvider, please check your logs!");
+                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
             }
-            return utcTime; 
+            return utcTime;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Safir.Time
             GetLocalTimeOffset(out offset, out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
-                throw new Safir.Dob.Typesystem.ConfigurationErrorException("Configuration error in TimeProvider, please check your logs!");
+                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
             }
 
             // Convert time to seconds since 01-Jan-1970
@@ -121,7 +121,7 @@ namespace Safir.Time
             GetLocalTimeOffset(out offset, out success);
             if (!Safir.Dob.Typesystem.Internal.InternalOperations.BoolOf(success))
             {
-                throw new Safir.Dob.Typesystem.ConfigurationErrorException("Configuration error in TimeProvider, please check your logs!");
+                Safir.Dob.Typesystem.LibraryExceptions.Instance.Throw();
             }
 
             // Convert seconds to localtime

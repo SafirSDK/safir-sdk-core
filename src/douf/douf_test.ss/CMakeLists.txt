@@ -1,5 +1,6 @@
 add_subdirectory(AceTimeConverter_test)
 add_subdirectory(ExternalTimeProvider_test)
+add_subdirectory(FailedExternalTimeProvider_test)
 add_subdirectory(TimeProvider_cpp_test)
 add_subdirectory(TimeProvider_dotnet_test)
 add_subdirectory(TimeProvider_java_test)
