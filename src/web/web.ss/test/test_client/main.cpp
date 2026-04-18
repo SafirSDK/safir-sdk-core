@@ -185,7 +185,7 @@ int main() {
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteEntity\", \"params\":{\"instanceId\":\"1\",\"typeId\":\"Safir.Dob.ProcessInfo\", \"handlerId\":\"1\"}, \"id\":\"delEnt\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"delEnt\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Dob.ProcessInfo\",\"Name\":\"Dogbert\",\"Pid\":123,\"ConnectionNames\":[\"Wally\",\"Asok\"]}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"typeId\":\"Safir.Dob.ProcessInfo\",\"instanceId\":\"1\"}}"));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"setEntity\", \"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"},\"handlerId\":1}, \"id\":\"setEnt1\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"setEnt1\"}",
@@ -237,11 +237,11 @@ int main() {
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteEntity\", \"params\":{\"instanceId\":\"1\",\"typeId\":\"Safir.Control.Status\", \"handlerId\":\"1\"}, \"id\":\"delEnt\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"delEnt\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":\"1\"}}"));
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteAllInstances\", \"params\":{\"typeId\":\"Safir.Control.Status\", \"handlerId\":\"1\"}, \"id\":\"delAll\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"delAll\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":\"-6851921626803754089\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"2\"}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":\"-6851921626803754089\"}}"));
 
     //create request
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"createRequest\", \"params\":{\"handlerId\":\"1\",\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\"}}, \"id\":\"create\"}",
@@ -280,7 +280,7 @@ int main() {
 
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"deleteEntity\", \"params\":{\"instanceId\":\"1\",\"typeId\":\"Safir.Control.Status\", \"handlerId\":\"1\"}, \"id\":\"delEnt\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"delEnt\"}",
-                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"instanceId\":\"1\",\"entity\":{\"_DouType\":\"Safir.Control.Status\",\"NodeId\":\"1\",\"SystemIncarnation\":\"2\"}}}"));
+                         "{\"jsonrpc\":\"2.0\",\"method\":\"onDeletedEntity\",\"params\":{\"typeId\":\"Safir.Control.Status\",\"instanceId\":\"1\"}}"));
 
     //service request
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"subscribeRegistration\", \"params\":{\"typeId\":\"Safir.Control.Command\"}, \"id\":\"subReg\"}",

@@ -485,15 +485,14 @@ Example::
 
 ==== Notification: onDeletedEntity
 Deleted entity notification. Subscription response to a subscribeEntity.
-The received entity is what the entity state looked like when it was deleted.
 
 Parameters::
- * `instanceId` - The instance id of the entity.
- * `entity` - The updated entity.
+ * `typeId` - The type of the deleted entity.
+ * `instanceId` - The instance id of the deleted entity.
 
 Example::
 ----------------------------
---> {"jsonrpc": "2.0", "method": "onDeletedEntity", "params": {"instanceId": "1", "entity": {"_DouType": "Test.MyEntity"}}}
+--> {"jsonrpc": "2.0", "method": "onDeletedEntity", "params": {"typeId": "Test.MyEntity", "instanceId": "1"}}
 ----------------------------
 
 ==== Notification: onInitialInjectionsDone

@@ -167,10 +167,17 @@ public:
     {
     }
 
-    std::string ToJson(const sd::EntityProxy& proxy, bool previousEntity=false) const
+    std::string ToJson(const sd::EntityProxy& proxy) const
     {
         std::ostringstream os;
-        os<<"{"<<SAFIR_WS_OBJ("instanceId",proxy.GetInstanceId())<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson((previousEntity ? proxy.GetPrevious().GetBlob() : proxy.GetBlob())))<<"}";
+        os<<"{"<<SAFIR_WS_OBJ("instanceId",proxy.GetInstanceId())<<","<<SAFIR_WS_OBJ("entity",ts::Internal::ToJson(proxy.GetBlob()))<<"}";
+        return os.str();
+    }
+
+    std::string ToJson(ts::TypeId typeId, const ts::InstanceId& instanceId) const
+    {
+        std::ostringstream os;
+        os<<"{"<<SAFIR_WS_STR("typeId", m_typeIdToName(typeId))<<","<<SAFIR_WS_OBJ("instanceId",instanceId)<<"}";
         return os.str();
     }
 

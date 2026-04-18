@@ -141,7 +141,7 @@ void DobConnection::OnUpdatedEntity(const sd::EntityProxy entityProxy)
 void DobConnection::OnDeletedEntity(const sd::EntityProxy entityProxy, const bool)
 {
     lllog(5)<<"WS: OnDeletedEntity"<<std::endl;
-    auto notification=JsonRpcNotification::Json(Methods::OnDeletedEntity, m_proxyToJson.ToJson(entityProxy, true));
+    auto notification=JsonRpcNotification::Json(Methods::OnDeletedEntity, m_proxyToJson.ToJson(entityProxy.GetTypeId(), entityProxy.GetInstanceId()));
     m_wsSend(notification);
 }
 
