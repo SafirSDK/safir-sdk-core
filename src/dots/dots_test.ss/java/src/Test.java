@@ -48,6 +48,7 @@ public class Test {
         test_GetNumberOfMembers();
         test_GetNumberOfParameters();
         test_Create_Routines();
+        test_CreateRoutines_multiple_values_of_same_type();
 
         test_Int32();
         test_Int64();
@@ -366,6 +367,858 @@ public class Test {
         System.out.println("CreateParam          : " + Serialization.toXml(createParameters));
         System.out.println("CreateParamInherited : " + Serialization.toXml(createParametersInherited));
     }
+
+        private static void require(boolean expr, String description) {
+                if (!expr) {
+                        throw new RuntimeException(description);
+                }
+        }
+
+        private static void requireFloat32(float actual, float expected, String description) {
+                require(Math.abs(actual - expected) < 0.0001f, description);
+        }
+
+        private static void requireFloat64(double actual, double expected, String description) {
+                require(Math.abs(actual - expected) < 0.0001, description);
+        }
+
+        private static void requireObjectXml(Object actual, Object expected, String description) {
+                require(actual != null, description + " actual null");
+                require(expected != null, description + " expected null");
+                require(Serialization.toXml(actual).equals(Serialization.toXml(expected)), description);
+        }
+
+        private static void requireTestItem(TestItem actual, TestItem expected, String description) {
+                require(actual != null, description + " actual null");
+                require(expected != null, description + " expected null");
+                require(actual.myInt().getVal() == expected.myInt().getVal(), description);
+        }
+
+        private static void test_CreateRoutines_multiple_values_of_same_type() {
+                {
+                        CreateRoutines obj = CreateRoutines.createInt32(10, 20);
+                        require(obj.int32Member1().getVal() == 10, "createInt32 member1");
+                        require(obj.int32Member2().getVal() == 20, "createInt32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createInt64(100, 200);
+                        require(obj.int64Member1().getVal() == 100, "createInt64 member1");
+                        require(obj.int64Member2().getVal() == 200, "createInt64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createFloat32(10.5f, 20.5f);
+                        requireFloat32(obj.float32Member1().getVal(), 10.5f, "createFloat32 member1");
+                        requireFloat32(obj.float32Member2().getVal(), 20.5f, "createFloat32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createFloat64(100.25, 200.25);
+                        requireFloat64(obj.float64Member1().getVal(), 100.25, "createFloat64 member1");
+                        requireFloat64(obj.float64Member2().getVal(), 200.25, "createFloat64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createBoolean(true, false);
+                        require(obj.booleanMember1().getVal(), "createBoolean member1");
+                        require(!obj.booleanMember2().getVal(), "createBoolean member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createEnumeration(TestEnum.MY_FIRST, TestEnum.MY_SECOND);
+                        require(obj.enumerationMember1().getVal().equals(TestEnum.MY_FIRST), "createEnumeration member1");
+                        require(obj.enumerationMember2().getVal().equals(TestEnum.MY_SECOND), "createEnumeration member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createString("Alpha", "Beta");
+                        require(obj.stringMember1().getVal().equals("Alpha"), "createString member1");
+                        require(obj.stringMember2().getVal().equals("Beta"), "createString member2");
+                }
+                {
+                        EntityId entityId1 = new EntityId(12345, new InstanceId(1));
+                        EntityId entityId2 = new EntityId(23456, new InstanceId(2));
+                        CreateRoutines obj = CreateRoutines.createEntityId(entityId1, entityId2);
+                        require(obj.entityIdMember1().getVal().equals(entityId1), "createEntityId member1");
+                        require(obj.entityIdMember2().getVal().equals(entityId2), "createEntityId member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createTypeId(12345, 23456);
+                        require(obj.typeIdMember1().getVal() == 12345, "createTypeId member1");
+                        require(obj.typeIdMember2().getVal() == 23456, "createTypeId member2");
+                }
+                {
+                        InstanceId instanceId1 = new InstanceId(11);
+                        InstanceId instanceId2 = new InstanceId(22);
+                        CreateRoutines obj = CreateRoutines.createInstanceId(instanceId1, instanceId2);
+                        require(obj.instanceIdMember1().getVal().equals(instanceId1), "createInstanceId member1");
+                        require(obj.instanceIdMember2().getVal().equals(instanceId2), "createInstanceId member2");
+                }
+                {
+                        ChannelId channelId1 = new ChannelId(101);
+                        ChannelId channelId2 = new ChannelId(202);
+                        CreateRoutines obj = CreateRoutines.createChannelId(channelId1, channelId2);
+                        require(obj.channelIdMember1().getVal().equals(channelId1), "createChannelId member1");
+                        require(obj.channelIdMember2().getVal().equals(channelId2), "createChannelId member2");
+                }
+                {
+                        HandlerId handlerId1 = new HandlerId(1001);
+                        HandlerId handlerId2 = new HandlerId(2002);
+                        CreateRoutines obj = CreateRoutines.createHandlerId(handlerId1, handlerId2);
+                        require(obj.handlerIdMember1().getVal().equals(handlerId1), "createHandlerId member1");
+                        require(obj.handlerIdMember2().getVal().equals(handlerId2), "createHandlerId member2");
+                }
+                {
+                        Object object1 = new Object();
+                        AnotherEmptyObject object2 = new AnotherEmptyObject();
+                        CreateRoutines obj = CreateRoutines.createObject(object1, object2);
+                        requireObjectXml(obj.objectMember1().getObj(), object1, "createObject member1");
+                        requireObjectXml(obj.objectMember2().getObj(), object2, "createObject member2");
+                }
+                {
+                        byte[] binary1 = new byte[]{1, 2, 3};
+                        byte[] binary2 = new byte[]{4, 5, 6};
+                        CreateRoutines obj = CreateRoutines.createBinary(binary1, binary2);
+                        require(Arrays.equals(obj.binaryMember1().getVal(), binary1), "createBinary member1");
+                        require(Arrays.equals(obj.binaryMember2().getVal(), binary2), "createBinary member2");
+                }
+                {
+                        TestItem item1 = new TestItem();
+                        TestItem item2 = new TestItem();
+                        item1.myInt().setVal(17);
+                        item2.myInt().setVal(23);
+                        CreateRoutines obj = CreateRoutines.createTestClass(item1, item2);
+                        requireTestItem(obj.testClassMember1().getObj(), item1, "createTestClass member1");
+                        requireTestItem(obj.testClassMember2().getObj(), item2, "createTestClass member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createAmpere32(1.5f, 2.5f);
+                        requireFloat32(obj.ampere32Member1().getVal(), 1.5f, "createAmpere32 member1");
+                        requireFloat32(obj.ampere32Member2().getVal(), 2.5f, "createAmpere32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createCubicMeter32(3.5f, 4.5f);
+                        requireFloat32(obj.cubicMeter32Member1().getVal(), 3.5f, "createCubicMeter32 member1");
+                        requireFloat32(obj.cubicMeter32Member2().getVal(), 4.5f, "createCubicMeter32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createHertz32(5.5f, 6.5f);
+                        requireFloat32(obj.hertz32Member1().getVal(), 5.5f, "createHertz32 member1");
+                        requireFloat32(obj.hertz32Member2().getVal(), 6.5f, "createHertz32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createJoule32(7.5f, 8.5f);
+                        requireFloat32(obj.joule32Member1().getVal(), 7.5f, "createJoule32 member1");
+                        requireFloat32(obj.joule32Member2().getVal(), 8.5f, "createJoule32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKelvin32(9.5f, 10.5f);
+                        requireFloat32(obj.kelvin32Member1().getVal(), 9.5f, "createKelvin32 member1");
+                        requireFloat32(obj.kelvin32Member2().getVal(), 10.5f, "createKelvin32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKilogram32(11.5f, 12.5f);
+                        requireFloat32(obj.kilogram32Member1().getVal(), 11.5f, "createKilogram32 member1");
+                        requireFloat32(obj.kilogram32Member2().getVal(), 12.5f, "createKilogram32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeter32(13.5f, 14.5f);
+                        requireFloat32(obj.meter32Member1().getVal(), 13.5f, "createMeter32 member1");
+                        requireFloat32(obj.meter32Member2().getVal(), 14.5f, "createMeter32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecond32(15.5f, 16.5f);
+                        requireFloat32(obj.meterPerSecond32Member1().getVal(), 15.5f, "createMeterPerSecond32 member1");
+                        requireFloat32(obj.meterPerSecond32Member2().getVal(), 16.5f, "createMeterPerSecond32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecondSquared32(17.5f, 18.5f);
+                        requireFloat32(obj.meterPerSecondSquared32Member1().getVal(), 17.5f, "createMeterPerSecondSquared32 member1");
+                        requireFloat32(obj.meterPerSecondSquared32Member2().getVal(), 18.5f, "createMeterPerSecondSquared32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createNewton32(19.5f, 20.5f);
+                        requireFloat32(obj.newton32Member1().getVal(), 19.5f, "createNewton32 member1");
+                        requireFloat32(obj.newton32Member2().getVal(), 20.5f, "createNewton32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createPascal32(21.5f, 22.5f);
+                        requireFloat32(obj.pascal32Member1().getVal(), 21.5f, "createPascal32 member1");
+                        requireFloat32(obj.pascal32Member2().getVal(), 22.5f, "createPascal32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadian32(23.5f, 24.5f);
+                        requireFloat32(obj.radian32Member1().getVal(), 23.5f, "createRadian32 member1");
+                        requireFloat32(obj.radian32Member2().getVal(), 24.5f, "createRadian32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecond32(25.5f, 26.5f);
+                        requireFloat32(obj.radianPerSecond32Member1().getVal(), 25.5f, "createRadianPerSecond32 member1");
+                        requireFloat32(obj.radianPerSecond32Member2().getVal(), 26.5f, "createRadianPerSecond32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecondSquared32(27.5f, 28.5f);
+                        requireFloat32(obj.radianPerSecondSquared32Member1().getVal(), 27.5f, "createRadianPerSecondSquared32 member1");
+                        requireFloat32(obj.radianPerSecondSquared32Member2().getVal(), 28.5f, "createRadianPerSecondSquared32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSecond32(29.5f, 30.5f);
+                        requireFloat32(obj.second32Member1().getVal(), 29.5f, "createSecond32 member1");
+                        requireFloat32(obj.second32Member2().getVal(), 30.5f, "createSecond32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSquareMeter32(31.5f, 32.5f);
+                        requireFloat32(obj.squareMeter32Member1().getVal(), 31.5f, "createSquareMeter32 member1");
+                        requireFloat32(obj.squareMeter32Member2().getVal(), 32.5f, "createSquareMeter32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSteradian32(33.5f, 34.5f);
+                        requireFloat32(obj.steradian32Member1().getVal(), 33.5f, "createSteradian32 member1");
+                        requireFloat32(obj.steradian32Member2().getVal(), 34.5f, "createSteradian32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createVolt32(35.5f, 36.5f);
+                        requireFloat32(obj.volt32Member1().getVal(), 35.5f, "createVolt32 member1");
+                        requireFloat32(obj.volt32Member2().getVal(), 36.5f, "createVolt32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createWatt32(37.5f, 38.5f);
+                        requireFloat32(obj.watt32Member1().getVal(), 37.5f, "createWatt32 member1");
+                        requireFloat32(obj.watt32Member2().getVal(), 38.5f, "createWatt32 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createAmpere64(1.25, 2.25);
+                        requireFloat64(obj.ampere64Member1().getVal(), 1.25, "createAmpere64 member1");
+                        requireFloat64(obj.ampere64Member2().getVal(), 2.25, "createAmpere64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createCubicMeter64(3.25, 4.25);
+                        requireFloat64(obj.cubicMeter64Member1().getVal(), 3.25, "createCubicMeter64 member1");
+                        requireFloat64(obj.cubicMeter64Member2().getVal(), 4.25, "createCubicMeter64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createHertz64(5.25, 6.25);
+                        requireFloat64(obj.hertz64Member1().getVal(), 5.25, "createHertz64 member1");
+                        requireFloat64(obj.hertz64Member2().getVal(), 6.25, "createHertz64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createJoule64(7.25, 8.25);
+                        requireFloat64(obj.joule64Member1().getVal(), 7.25, "createJoule64 member1");
+                        requireFloat64(obj.joule64Member2().getVal(), 8.25, "createJoule64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKelvin64(9.25, 10.25);
+                        requireFloat64(obj.kelvin64Member1().getVal(), 9.25, "createKelvin64 member1");
+                        requireFloat64(obj.kelvin64Member2().getVal(), 10.25, "createKelvin64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKilogram64(11.25, 12.25);
+                        requireFloat64(obj.kilogram64Member1().getVal(), 11.25, "createKilogram64 member1");
+                        requireFloat64(obj.kilogram64Member2().getVal(), 12.25, "createKilogram64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeter64(13.25, 14.25);
+                        requireFloat64(obj.meter64Member1().getVal(), 13.25, "createMeter64 member1");
+                        requireFloat64(obj.meter64Member2().getVal(), 14.25, "createMeter64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecond64(15.25, 16.25);
+                        requireFloat64(obj.meterPerSecond64Member1().getVal(), 15.25, "createMeterPerSecond64 member1");
+                        requireFloat64(obj.meterPerSecond64Member2().getVal(), 16.25, "createMeterPerSecond64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecondSquared64(17.25, 18.25);
+                        requireFloat64(obj.meterPerSecondSquared64Member1().getVal(), 17.25, "createMeterPerSecondSquared64 member1");
+                        requireFloat64(obj.meterPerSecondSquared64Member2().getVal(), 18.25, "createMeterPerSecondSquared64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createNewton64(19.25, 20.25);
+                        requireFloat64(obj.newton64Member1().getVal(), 19.25, "createNewton64 member1");
+                        requireFloat64(obj.newton64Member2().getVal(), 20.25, "createNewton64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createPascal64(21.25, 22.25);
+                        requireFloat64(obj.pascal64Member1().getVal(), 21.25, "createPascal64 member1");
+                        requireFloat64(obj.pascal64Member2().getVal(), 22.25, "createPascal64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadian64(23.25, 24.25);
+                        requireFloat64(obj.radian64Member1().getVal(), 23.25, "createRadian64 member1");
+                        requireFloat64(obj.radian64Member2().getVal(), 24.25, "createRadian64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecond64(25.25, 26.25);
+                        requireFloat64(obj.radianPerSecond64Member1().getVal(), 25.25, "createRadianPerSecond64 member1");
+                        requireFloat64(obj.radianPerSecond64Member2().getVal(), 26.25, "createRadianPerSecond64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecondSquared64(27.25, 28.25);
+                        requireFloat64(obj.radianPerSecondSquared64Member1().getVal(), 27.25, "createRadianPerSecondSquared64 member1");
+                        requireFloat64(obj.radianPerSecondSquared64Member2().getVal(), 28.25, "createRadianPerSecondSquared64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSecond64(29.25, 30.25);
+                        requireFloat64(obj.second64Member1().getVal(), 29.25, "createSecond64 member1");
+                        requireFloat64(obj.second64Member2().getVal(), 30.25, "createSecond64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSquareMeter64(31.25, 32.25);
+                        requireFloat64(obj.squareMeter64Member1().getVal(), 31.25, "createSquareMeter64 member1");
+                        requireFloat64(obj.squareMeter64Member2().getVal(), 32.25, "createSquareMeter64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSteradian64(33.25, 34.25);
+                        requireFloat64(obj.steradian64Member1().getVal(), 33.25, "createSteradian64 member1");
+                        requireFloat64(obj.steradian64Member2().getVal(), 34.25, "createSteradian64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createVolt64(35.25, 36.25);
+                        requireFloat64(obj.volt64Member1().getVal(), 35.25, "createVolt64 member1");
+                        requireFloat64(obj.volt64Member2().getVal(), 36.25, "createVolt64 member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createWatt64(37.25, 38.25);
+                        requireFloat64(obj.watt64Member1().getVal(), 37.25, "createWatt64 member1");
+                        requireFloat64(obj.watt64Member2().getVal(), 38.25, "createWatt64 member2");
+                }
+
+                {
+                        CreateRoutines obj = CreateRoutines.createInt32Parameter();
+                        require(obj.int32Member1().getVal() == ParameterTypes.getInt32Parameter(), "createInt32Parameter member1");
+                        require(obj.int32Member2().getVal() == ParameterTypes.getInt32Parameter(), "createInt32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createInt64Parameter();
+                        require(obj.int64Member1().getVal() == ParameterTypes.getInt64Parameter(), "createInt64Parameter member1");
+                        require(obj.int64Member2().getVal() == ParameterTypes.getInt64Parameter(), "createInt64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createFloat32Parameter();
+                        requireFloat32(obj.float32Member1().getVal(), ParameterTypes.getFloat32Parameter(), "createFloat32Parameter member1");
+                        requireFloat32(obj.float32Member2().getVal(), ParameterTypes.getFloat32Parameter(), "createFloat32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createFloat64Parameter();
+                        requireFloat64(obj.float64Member1().getVal(), ParameterTypes.getFloat64Parameter(), "createFloat64Parameter member1");
+                        requireFloat64(obj.float64Member2().getVal(), ParameterTypes.getFloat64Parameter(), "createFloat64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createBooleanParameter();
+                        require(obj.booleanMember1().getVal() == ParameterTypes.getBooleanParameter(), "createBooleanParameter member1");
+                        require(obj.booleanMember2().getVal() == ParameterTypes.getBooleanParameter(), "createBooleanParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createEnumerationParameter();
+                        require(obj.enumerationMember1().getVal().equals(ParameterTypes.getEnumerationParameter()), "createEnumerationParameter member1");
+                        require(obj.enumerationMember2().getVal().equals(ParameterTypes.getEnumerationParameter()), "createEnumerationParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createStringParameter();
+                        require(obj.stringMember1().getVal().equals(ParameterTypes.getStringParameter()), "createStringParameter member1");
+                        require(obj.stringMember2().getVal().equals(ParameterTypes.getStringParameter()), "createStringParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createEntityIdParameter();
+                        require(obj.entityIdMember1().getVal().equals(ParameterTypes.getEntityIdParameter()), "createEntityIdParameter member1");
+                        require(obj.entityIdMember2().getVal().equals(ParameterTypes.getEntityIdParameter()), "createEntityIdParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createTypeIdParameter();
+                        require(obj.typeIdMember1().getVal() == ParameterTypes.getTypeIdParameter(), "createTypeIdParameter member1");
+                        require(obj.typeIdMember2().getVal() == ParameterTypes.getTypeIdParameter(), "createTypeIdParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createInstanceIdParameter();
+                        require(obj.instanceIdMember1().getVal().equals(ParameterTypes.getInstanceIdParameter()), "createInstanceIdParameter member1");
+                        require(obj.instanceIdMember2().getVal().equals(ParameterTypes.getInstanceIdParameter()), "createInstanceIdParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createChannelIdParameter();
+                        require(obj.channelIdMember1().getVal().equals(ParameterTypes.getChannelIdParameter()), "createChannelIdParameter member1");
+                        require(obj.channelIdMember2().getVal().equals(ParameterTypes.getChannelIdParameter()), "createChannelIdParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createHandlerIdParameter();
+                        require(obj.handlerIdMember1().getVal().equals(ParameterTypes.getHandlerIdParameter()), "createHandlerIdParameter member1");
+                        require(obj.handlerIdMember2().getVal().equals(ParameterTypes.getHandlerIdParameter()), "createHandlerIdParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createObjectParameter();
+                        Object expected = ParameterTypes.getObjectParameter();
+                        requireObjectXml(obj.objectMember1().getObj(), expected, "createObjectParameter member1");
+                        requireObjectXml(obj.objectMember2().getObj(), expected, "createObjectParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createBinaryParameter();
+                        byte[] expected = ParameterTypes.getBinaryParameter();
+                        require(Arrays.equals(obj.binaryMember1().getVal(), expected), "createBinaryParameter member1");
+                        require(Arrays.equals(obj.binaryMember2().getVal(), expected), "createBinaryParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createTestClassParameter();
+                        TestItem expected = ParameterTypes.getTestClassParameter();
+                        requireTestItem(obj.testClassMember1().getObj(), expected, "createTestClassParameter member1");
+                        requireTestItem(obj.testClassMember2().getObj(), expected, "createTestClassParameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createAmpere32Parameter();
+                        requireFloat32(obj.ampere32Member1().getVal(), ParameterTypes.getAmpere32Parameter(), "createAmpere32Parameter member1");
+                        requireFloat32(obj.ampere32Member2().getVal(), ParameterTypes.getAmpere32Parameter(), "createAmpere32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createCubicMeter32Parameter();
+                        requireFloat32(obj.cubicMeter32Member1().getVal(), ParameterTypes.getCubicMeter32Parameter(), "createCubicMeter32Parameter member1");
+                        requireFloat32(obj.cubicMeter32Member2().getVal(), ParameterTypes.getCubicMeter32Parameter(), "createCubicMeter32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createHertz32Parameter();
+                        requireFloat32(obj.hertz32Member1().getVal(), ParameterTypes.getHertz32Parameter(), "createHertz32Parameter member1");
+                        requireFloat32(obj.hertz32Member2().getVal(), ParameterTypes.getHertz32Parameter(), "createHertz32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createJoule32Parameter();
+                        requireFloat32(obj.joule32Member1().getVal(), ParameterTypes.getJoule32Parameter(), "createJoule32Parameter member1");
+                        requireFloat32(obj.joule32Member2().getVal(), ParameterTypes.getJoule32Parameter(), "createJoule32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKelvin32Parameter();
+                        requireFloat32(obj.kelvin32Member1().getVal(), ParameterTypes.getKelvin32Parameter(), "createKelvin32Parameter member1");
+                        requireFloat32(obj.kelvin32Member2().getVal(), ParameterTypes.getKelvin32Parameter(), "createKelvin32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKilogram32Parameter();
+                        requireFloat32(obj.kilogram32Member1().getVal(), ParameterTypes.getKilogram32Parameter(), "createKilogram32Parameter member1");
+                        requireFloat32(obj.kilogram32Member2().getVal(), ParameterTypes.getKilogram32Parameter(), "createKilogram32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeter32Parameter();
+                        requireFloat32(obj.meter32Member1().getVal(), ParameterTypes.getMeter32Parameter(), "createMeter32Parameter member1");
+                        requireFloat32(obj.meter32Member2().getVal(), ParameterTypes.getMeter32Parameter(), "createMeter32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecond32Parameter();
+                        requireFloat32(obj.meterPerSecond32Member1().getVal(), ParameterTypes.getMeterPerSecond32Parameter(), "createMeterPerSecond32Parameter member1");
+                        requireFloat32(obj.meterPerSecond32Member2().getVal(), ParameterTypes.getMeterPerSecond32Parameter(), "createMeterPerSecond32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecondSquared32Parameter();
+                        requireFloat32(obj.meterPerSecondSquared32Member1().getVal(), ParameterTypes.getMeterPerSecondSquared32Parameter(), "createMeterPerSecondSquared32Parameter member1");
+                        requireFloat32(obj.meterPerSecondSquared32Member2().getVal(), ParameterTypes.getMeterPerSecondSquared32Parameter(), "createMeterPerSecondSquared32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createNewton32Parameter();
+                        requireFloat32(obj.newton32Member1().getVal(), ParameterTypes.getNewton32Parameter(), "createNewton32Parameter member1");
+                        requireFloat32(obj.newton32Member2().getVal(), ParameterTypes.getNewton32Parameter(), "createNewton32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createPascal32Parameter();
+                        requireFloat32(obj.pascal32Member1().getVal(), ParameterTypes.getPascal32Parameter(), "createPascal32Parameter member1");
+                        requireFloat32(obj.pascal32Member2().getVal(), ParameterTypes.getPascal32Parameter(), "createPascal32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadian32Parameter();
+                        requireFloat32(obj.radian32Member1().getVal(), ParameterTypes.getRadian32Parameter(), "createRadian32Parameter member1");
+                        requireFloat32(obj.radian32Member2().getVal(), ParameterTypes.getRadian32Parameter(), "createRadian32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecond32Parameter();
+                        requireFloat32(obj.radianPerSecond32Member1().getVal(), ParameterTypes.getRadianPerSecond32Parameter(), "createRadianPerSecond32Parameter member1");
+                        requireFloat32(obj.radianPerSecond32Member2().getVal(), ParameterTypes.getRadianPerSecond32Parameter(), "createRadianPerSecond32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecondSquared32Parameter();
+                        requireFloat32(obj.radianPerSecondSquared32Member1().getVal(), ParameterTypes.getRadianPerSecondSquared32Parameter(), "createRadianPerSecondSquared32Parameter member1");
+                        requireFloat32(obj.radianPerSecondSquared32Member2().getVal(), ParameterTypes.getRadianPerSecondSquared32Parameter(), "createRadianPerSecondSquared32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSecond32Parameter();
+                        requireFloat32(obj.second32Member1().getVal(), ParameterTypes.getSecond32Parameter(), "createSecond32Parameter member1");
+                        requireFloat32(obj.second32Member2().getVal(), ParameterTypes.getSecond32Parameter(), "createSecond32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSquareMeter32Parameter();
+                        requireFloat32(obj.squareMeter32Member1().getVal(), ParameterTypes.getSquareMeter32Parameter(), "createSquareMeter32Parameter member1");
+                        requireFloat32(obj.squareMeter32Member2().getVal(), ParameterTypes.getSquareMeter32Parameter(), "createSquareMeter32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSteradian32Parameter();
+                        requireFloat32(obj.steradian32Member1().getVal(), ParameterTypes.getSteradian32Parameter(), "createSteradian32Parameter member1");
+                        requireFloat32(obj.steradian32Member2().getVal(), ParameterTypes.getSteradian32Parameter(), "createSteradian32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createVolt32Parameter();
+                        requireFloat32(obj.volt32Member1().getVal(), ParameterTypes.getVolt32Parameter(), "createVolt32Parameter member1");
+                        requireFloat32(obj.volt32Member2().getVal(), ParameterTypes.getVolt32Parameter(), "createVolt32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createWatt32Parameter();
+                        requireFloat32(obj.watt32Member1().getVal(), ParameterTypes.getWatt32Parameter(), "createWatt32Parameter member1");
+                        requireFloat32(obj.watt32Member2().getVal(), ParameterTypes.getWatt32Parameter(), "createWatt32Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createAmpere64Parameter();
+                        requireFloat64(obj.ampere64Member1().getVal(), ParameterTypes.getAmpere64Parameter(), "createAmpere64Parameter member1");
+                        requireFloat64(obj.ampere64Member2().getVal(), ParameterTypes.getAmpere64Parameter(), "createAmpere64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createCubicMeter64Parameter();
+                        requireFloat64(obj.cubicMeter64Member1().getVal(), ParameterTypes.getCubicMeter64Parameter(), "createCubicMeter64Parameter member1");
+                        requireFloat64(obj.cubicMeter64Member2().getVal(), ParameterTypes.getCubicMeter64Parameter(), "createCubicMeter64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createHertz64Parameter();
+                        requireFloat64(obj.hertz64Member1().getVal(), ParameterTypes.getHertz64Parameter(), "createHertz64Parameter member1");
+                        requireFloat64(obj.hertz64Member2().getVal(), ParameterTypes.getHertz64Parameter(), "createHertz64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createJoule64Parameter();
+                        requireFloat64(obj.joule64Member1().getVal(), ParameterTypes.getJoule64Parameter(), "createJoule64Parameter member1");
+                        requireFloat64(obj.joule64Member2().getVal(), ParameterTypes.getJoule64Parameter(), "createJoule64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKelvin64Parameter();
+                        requireFloat64(obj.kelvin64Member1().getVal(), ParameterTypes.getKelvin64Parameter(), "createKelvin64Parameter member1");
+                        requireFloat64(obj.kelvin64Member2().getVal(), ParameterTypes.getKelvin64Parameter(), "createKelvin64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKilogram64Parameter();
+                        requireFloat64(obj.kilogram64Member1().getVal(), ParameterTypes.getKilogram64Parameter(), "createKilogram64Parameter member1");
+                        requireFloat64(obj.kilogram64Member2().getVal(), ParameterTypes.getKilogram64Parameter(), "createKilogram64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeter64Parameter();
+                        requireFloat64(obj.meter64Member1().getVal(), ParameterTypes.getMeter64Parameter(), "createMeter64Parameter member1");
+                        requireFloat64(obj.meter64Member2().getVal(), ParameterTypes.getMeter64Parameter(), "createMeter64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecond64Parameter();
+                        requireFloat64(obj.meterPerSecond64Member1().getVal(), ParameterTypes.getMeterPerSecond64Parameter(), "createMeterPerSecond64Parameter member1");
+                        requireFloat64(obj.meterPerSecond64Member2().getVal(), ParameterTypes.getMeterPerSecond64Parameter(), "createMeterPerSecond64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecondSquared64Parameter();
+                        requireFloat64(obj.meterPerSecondSquared64Member1().getVal(), ParameterTypes.getMeterPerSecondSquared64Parameter(), "createMeterPerSecondSquared64Parameter member1");
+                        requireFloat64(obj.meterPerSecondSquared64Member2().getVal(), ParameterTypes.getMeterPerSecondSquared64Parameter(), "createMeterPerSecondSquared64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createNewton64Parameter();
+                        requireFloat64(obj.newton64Member1().getVal(), ParameterTypes.getNewton64Parameter(), "createNewton64Parameter member1");
+                        requireFloat64(obj.newton64Member2().getVal(), ParameterTypes.getNewton64Parameter(), "createNewton64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createPascal64Parameter();
+                        requireFloat64(obj.pascal64Member1().getVal(), ParameterTypes.getPascal64Parameter(), "createPascal64Parameter member1");
+                        requireFloat64(obj.pascal64Member2().getVal(), ParameterTypes.getPascal64Parameter(), "createPascal64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadian64Parameter();
+                        requireFloat64(obj.radian64Member1().getVal(), ParameterTypes.getRadian64Parameter(), "createRadian64Parameter member1");
+                        requireFloat64(obj.radian64Member2().getVal(), ParameterTypes.getRadian64Parameter(), "createRadian64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecond64Parameter();
+                        requireFloat64(obj.radianPerSecond64Member1().getVal(), ParameterTypes.getRadianPerSecond64Parameter(), "createRadianPerSecond64Parameter member1");
+                        requireFloat64(obj.radianPerSecond64Member2().getVal(), ParameterTypes.getRadianPerSecond64Parameter(), "createRadianPerSecond64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecondSquared64Parameter();
+                        requireFloat64(obj.radianPerSecondSquared64Member1().getVal(), ParameterTypes.getRadianPerSecondSquared64Parameter(), "createRadianPerSecondSquared64Parameter member1");
+                        requireFloat64(obj.radianPerSecondSquared64Member2().getVal(), ParameterTypes.getRadianPerSecondSquared64Parameter(), "createRadianPerSecondSquared64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSecond64Parameter();
+                        requireFloat64(obj.second64Member1().getVal(), ParameterTypes.getSecond64Parameter(), "createSecond64Parameter member1");
+                        requireFloat64(obj.second64Member2().getVal(), ParameterTypes.getSecond64Parameter(), "createSecond64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSquareMeter64Parameter();
+                        requireFloat64(obj.squareMeter64Member1().getVal(), ParameterTypes.getSquareMeter64Parameter(), "createSquareMeter64Parameter member1");
+                        requireFloat64(obj.squareMeter64Member2().getVal(), ParameterTypes.getSquareMeter64Parameter(), "createSquareMeter64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSteradian64Parameter();
+                        requireFloat64(obj.steradian64Member1().getVal(), ParameterTypes.getSteradian64Parameter(), "createSteradian64Parameter member1");
+                        requireFloat64(obj.steradian64Member2().getVal(), ParameterTypes.getSteradian64Parameter(), "createSteradian64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createVolt64Parameter();
+                        requireFloat64(obj.volt64Member1().getVal(), ParameterTypes.getVolt64Parameter(), "createVolt64Parameter member1");
+                        requireFloat64(obj.volt64Member2().getVal(), ParameterTypes.getVolt64Parameter(), "createVolt64Parameter member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createWatt64Parameter();
+                        requireFloat64(obj.watt64Member1().getVal(), ParameterTypes.getWatt64Parameter(), "createWatt64Parameter member1");
+                        requireFloat64(obj.watt64Member2().getVal(), ParameterTypes.getWatt64Parameter(), "createWatt64Parameter member2");
+                }
+
+                {
+                        CreateRoutines obj = CreateRoutines.createInt32Inline();
+                        require(obj.int32Member1().getVal() == 1, "createInt32Inline member1");
+                        require(obj.int32Member2().getVal() == 2, "createInt32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createInt64Inline();
+                        require(obj.int64Member1().getVal() == 11, "createInt64Inline member1");
+                        require(obj.int64Member2().getVal() == 12, "createInt64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createFloat32Inline();
+                        requireFloat32(obj.float32Member1().getVal(), 1.5f, "createFloat32Inline member1");
+                        requireFloat32(obj.float32Member2().getVal(), 2.5f, "createFloat32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createFloat64Inline();
+                        requireFloat64(obj.float64Member1().getVal(), 1.25, "createFloat64Inline member1");
+                        requireFloat64(obj.float64Member2().getVal(), 2.25, "createFloat64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createBooleanInline();
+                        require(obj.booleanMember1().getVal(), "createBooleanInline member1");
+                        require(!obj.booleanMember2().getVal(), "createBooleanInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createEnumerationInline();
+                        require(obj.enumerationMember1().getVal().equals(TestEnum.MY_FIRST), "createEnumerationInline member1");
+                        require(obj.enumerationMember2().getVal().equals(TestEnum.MY_SECOND), "createEnumerationInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createStringInline();
+                        require(obj.stringMember1().getVal().equals("One"), "createStringInline member1");
+                        require(obj.stringMember2().getVal().equals("Two"), "createStringInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createEntityIdInline();
+                        require(obj.entityIdMember1().getVal().equals(new EntityId(TestItem.ClassTypeId, new InstanceId(1))), "createEntityIdInline member1");
+                        require(obj.entityIdMember2().getVal().equals(new EntityId(TestItem.ClassTypeId, new InstanceId("SomeInstance"))), "createEntityIdInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createTypeIdInline();
+                        require(obj.typeIdMember1().getVal() == TestItem.ClassTypeId, "createTypeIdInline member1");
+                        require(obj.typeIdMember2().getVal() == com.saabgroup.safir.dob.Entity.ClassTypeId, "createTypeIdInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createInstanceIdInline();
+                        require(obj.instanceIdMember1().getVal().equals(new InstanceId(1)), "createInstanceIdInline member1");
+                        require(obj.instanceIdMember2().getVal().equals(new InstanceId("SomeInstance")), "createInstanceIdInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createChannelIdInline();
+                        require(obj.channelIdMember1().getVal().equals(new ChannelId(1)), "createChannelIdInline member1");
+                        require(obj.channelIdMember2().getVal().equals(new ChannelId("SomeChannel")), "createChannelIdInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createHandlerIdInline();
+                        require(obj.handlerIdMember1().getVal().equals(new HandlerId(1)), "createHandlerIdInline member1");
+                        require(obj.handlerIdMember2().getVal().equals(new HandlerId("SomeHandler")), "createHandlerIdInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createObjectInline();
+                        Object expected1 = new Object();
+                        TestItem expected2 = new TestItem();
+                        expected2.myInt().setVal(5);
+                        requireObjectXml(obj.objectMember1().getObj(), expected1, "createObjectInline member1");
+                        requireObjectXml(obj.objectMember2().getObj(), expected2, "createObjectInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createBinaryInline();
+                        require(Arrays.equals(obj.binaryMember1().getVal(), new byte[]{1, 2}), "createBinaryInline member1");
+                        require(Arrays.equals(obj.binaryMember2().getVal(), new byte[]{3, 4}), "createBinaryInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createTestClassInline();
+                        TestItem expected1 = new TestItem();
+                        TestItem expected2 = new TestItem();
+                        expected1.myInt().setVal(17);
+                        expected2.myInt().setVal(23);
+                        requireTestItem(obj.testClassMember1().getObj(), expected1, "createTestClassInline member1");
+                        requireTestItem(obj.testClassMember2().getObj(), expected2, "createTestClassInline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createAmpere32Inline();
+                        requireFloat32(obj.ampere32Member1().getVal(), 1.1f, "createAmpere32Inline member1");
+                        requireFloat32(obj.ampere32Member2().getVal(), 2.1f, "createAmpere32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createCubicMeter32Inline();
+                        requireFloat32(obj.cubicMeter32Member1().getVal(), 1.2f, "createCubicMeter32Inline member1");
+                        requireFloat32(obj.cubicMeter32Member2().getVal(), 2.2f, "createCubicMeter32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createHertz32Inline();
+                        requireFloat32(obj.hertz32Member1().getVal(), 1.3f, "createHertz32Inline member1");
+                        requireFloat32(obj.hertz32Member2().getVal(), 2.3f, "createHertz32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createJoule32Inline();
+                        requireFloat32(obj.joule32Member1().getVal(), 1.4f, "createJoule32Inline member1");
+                        requireFloat32(obj.joule32Member2().getVal(), 2.4f, "createJoule32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKelvin32Inline();
+                        requireFloat32(obj.kelvin32Member1().getVal(), 1.5f, "createKelvin32Inline member1");
+                        requireFloat32(obj.kelvin32Member2().getVal(), 2.5f, "createKelvin32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKilogram32Inline();
+                        requireFloat32(obj.kilogram32Member1().getVal(), 1.6f, "createKilogram32Inline member1");
+                        requireFloat32(obj.kilogram32Member2().getVal(), 2.6f, "createKilogram32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeter32Inline();
+                        requireFloat32(obj.meter32Member1().getVal(), 1.7f, "createMeter32Inline member1");
+                        requireFloat32(obj.meter32Member2().getVal(), 2.7f, "createMeter32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecond32Inline();
+                        requireFloat32(obj.meterPerSecond32Member1().getVal(), 1.8f, "createMeterPerSecond32Inline member1");
+                        requireFloat32(obj.meterPerSecond32Member2().getVal(), 2.8f, "createMeterPerSecond32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecondSquared32Inline();
+                        requireFloat32(obj.meterPerSecondSquared32Member1().getVal(), 1.9f, "createMeterPerSecondSquared32Inline member1");
+                        requireFloat32(obj.meterPerSecondSquared32Member2().getVal(), 2.9f, "createMeterPerSecondSquared32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createNewton32Inline();
+                        requireFloat32(obj.newton32Member1().getVal(), 1.10f, "createNewton32Inline member1");
+                        requireFloat32(obj.newton32Member2().getVal(), 2.10f, "createNewton32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createPascal32Inline();
+                        requireFloat32(obj.pascal32Member1().getVal(), 1.11f, "createPascal32Inline member1");
+                        requireFloat32(obj.pascal32Member2().getVal(), 2.11f, "createPascal32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadian32Inline();
+                        requireFloat32(obj.radian32Member1().getVal(), 1.12f, "createRadian32Inline member1");
+                        requireFloat32(obj.radian32Member2().getVal(), 2.12f, "createRadian32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecond32Inline();
+                        requireFloat32(obj.radianPerSecond32Member1().getVal(), 1.13f, "createRadianPerSecond32Inline member1");
+                        requireFloat32(obj.radianPerSecond32Member2().getVal(), 2.13f, "createRadianPerSecond32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecondSquared32Inline();
+                        requireFloat32(obj.radianPerSecondSquared32Member1().getVal(), 1.14f, "createRadianPerSecondSquared32Inline member1");
+                        requireFloat32(obj.radianPerSecondSquared32Member2().getVal(), 2.14f, "createRadianPerSecondSquared32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSecond32Inline();
+                        requireFloat32(obj.second32Member1().getVal(), 1.15f, "createSecond32Inline member1");
+                        requireFloat32(obj.second32Member2().getVal(), 2.15f, "createSecond32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSquareMeter32Inline();
+                        requireFloat32(obj.squareMeter32Member1().getVal(), 1.16f, "createSquareMeter32Inline member1");
+                        requireFloat32(obj.squareMeter32Member2().getVal(), 2.16f, "createSquareMeter32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSteradian32Inline();
+                        requireFloat32(obj.steradian32Member1().getVal(), 1.17f, "createSteradian32Inline member1");
+                        requireFloat32(obj.steradian32Member2().getVal(), 2.17f, "createSteradian32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createVolt32Inline();
+                        requireFloat32(obj.volt32Member1().getVal(), 1.18f, "createVolt32Inline member1");
+                        requireFloat32(obj.volt32Member2().getVal(), 2.18f, "createVolt32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createWatt32Inline();
+                        requireFloat32(obj.watt32Member1().getVal(), 1.19f, "createWatt32Inline member1");
+                        requireFloat32(obj.watt32Member2().getVal(), 2.19f, "createWatt32Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createAmpere64Inline();
+                        requireFloat64(obj.ampere64Member1().getVal(), 11.1, "createAmpere64Inline member1");
+                        requireFloat64(obj.ampere64Member2().getVal(), 12.1, "createAmpere64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createCubicMeter64Inline();
+                        requireFloat64(obj.cubicMeter64Member1().getVal(), 11.2, "createCubicMeter64Inline member1");
+                        requireFloat64(obj.cubicMeter64Member2().getVal(), 12.2, "createCubicMeter64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createHertz64Inline();
+                        requireFloat64(obj.hertz64Member1().getVal(), 11.3, "createHertz64Inline member1");
+                        requireFloat64(obj.hertz64Member2().getVal(), 12.3, "createHertz64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createJoule64Inline();
+                        requireFloat64(obj.joule64Member1().getVal(), 11.4, "createJoule64Inline member1");
+                        requireFloat64(obj.joule64Member2().getVal(), 12.4, "createJoule64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKelvin64Inline();
+                        requireFloat64(obj.kelvin64Member1().getVal(), 11.5, "createKelvin64Inline member1");
+                        requireFloat64(obj.kelvin64Member2().getVal(), 12.5, "createKelvin64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createKilogram64Inline();
+                        requireFloat64(obj.kilogram64Member1().getVal(), 11.6, "createKilogram64Inline member1");
+                        requireFloat64(obj.kilogram64Member2().getVal(), 12.6, "createKilogram64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeter64Inline();
+                        requireFloat64(obj.meter64Member1().getVal(), 11.7, "createMeter64Inline member1");
+                        requireFloat64(obj.meter64Member2().getVal(), 12.7, "createMeter64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecond64Inline();
+                        requireFloat64(obj.meterPerSecond64Member1().getVal(), 11.8, "createMeterPerSecond64Inline member1");
+                        requireFloat64(obj.meterPerSecond64Member2().getVal(), 12.8, "createMeterPerSecond64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createMeterPerSecondSquared64Inline();
+                        requireFloat64(obj.meterPerSecondSquared64Member1().getVal(), 11.9, "createMeterPerSecondSquared64Inline member1");
+                        requireFloat64(obj.meterPerSecondSquared64Member2().getVal(), 12.9, "createMeterPerSecondSquared64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createNewton64Inline();
+                        requireFloat64(obj.newton64Member1().getVal(), 11.10, "createNewton64Inline member1");
+                        requireFloat64(obj.newton64Member2().getVal(), 12.10, "createNewton64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createPascal64Inline();
+                        requireFloat64(obj.pascal64Member1().getVal(), 11.11, "createPascal64Inline member1");
+                        requireFloat64(obj.pascal64Member2().getVal(), 12.11, "createPascal64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadian64Inline();
+                        requireFloat64(obj.radian64Member1().getVal(), 11.12, "createRadian64Inline member1");
+                        requireFloat64(obj.radian64Member2().getVal(), 12.12, "createRadian64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecond64Inline();
+                        requireFloat64(obj.radianPerSecond64Member1().getVal(), 11.13, "createRadianPerSecond64Inline member1");
+                        requireFloat64(obj.radianPerSecond64Member2().getVal(), 12.13, "createRadianPerSecond64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createRadianPerSecondSquared64Inline();
+                        requireFloat64(obj.radianPerSecondSquared64Member1().getVal(), 11.14, "createRadianPerSecondSquared64Inline member1");
+                        requireFloat64(obj.radianPerSecondSquared64Member2().getVal(), 12.14, "createRadianPerSecondSquared64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSecond64Inline();
+                        requireFloat64(obj.second64Member1().getVal(), 11.15, "createSecond64Inline member1");
+                        requireFloat64(obj.second64Member2().getVal(), 12.15, "createSecond64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSquareMeter64Inline();
+                        requireFloat64(obj.squareMeter64Member1().getVal(), 11.16, "createSquareMeter64Inline member1");
+                        requireFloat64(obj.squareMeter64Member2().getVal(), 12.16, "createSquareMeter64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createSteradian64Inline();
+                        requireFloat64(obj.steradian64Member1().getVal(), 11.17, "createSteradian64Inline member1");
+                        requireFloat64(obj.steradian64Member2().getVal(), 12.17, "createSteradian64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createVolt64Inline();
+                        requireFloat64(obj.volt64Member1().getVal(), 11.18, "createVolt64Inline member1");
+                        requireFloat64(obj.volt64Member2().getVal(), 12.18, "createVolt64Inline member2");
+                }
+                {
+                        CreateRoutines obj = CreateRoutines.createWatt64Inline();
+                        requireFloat64(obj.watt64Member1().getVal(), 11.19, "createWatt64Inline member1");
+                        requireFloat64(obj.watt64Member2().getVal(), 12.19, "createWatt64Inline member2");
+                }
+        }
 
     private static String toStringNoUnderscore(MemberType val) {
         return val.toString().replace("_", "");

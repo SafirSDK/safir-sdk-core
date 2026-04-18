@@ -49,6 +49,7 @@
 #include <DotsTest/TestEnum.h>
 #include <DotsTest/TestException.h>
 #include <DotsTest/TypesItemInherited.h>
+#include <DotsTest/CreateRoutines.h>
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Members.h>
@@ -12605,6 +12606,866 @@ BOOST_AUTO_TEST_CASE(GetValOrDefault_return_val)
     BOOST_CHECK_SMALL(mt->Ampere64Member().GetValOrDefault(2.123) - 200.123, 0.1);
     BOOST_CHECK(mt->ObjectMember().GetPtrOrNull() == obj);
     BOOST_CHECK(mt->TestClassMember().GetPtrOrNull() == testItem);
+}
+
+BOOST_AUTO_TEST_CASE(CreateRoutines_mulitple_values_of_same_type)
+{
+    using namespace Safir::Dob::Typesystem;
+    namespace si32 = Safir::Dob::Typesystem::Si32;
+    namespace si64 = Safir::Dob::Typesystem::Si64;
+
+    const auto check_float32 = [](const Float32 actual, const Float32 expected)
+    {
+        BOOST_CHECK_SMALL(actual - expected, 0.0001f);
+    };
+
+    const auto check_float64 = [](const Float64 actual, const Float64 expected)
+    {
+        BOOST_CHECK_SMALL(actual - expected, 0.0001);
+    };
+
+    const auto check_object_xml = [](const ObjectPtr& actual, const ObjectPtr& expected)
+    {
+        BOOST_REQUIRE(actual);
+        BOOST_REQUIRE(expected);
+        BOOST_CHECK_EQUAL(Safir::Dob::Typesystem::Serialization::ToXml(actual),
+                          Safir::Dob::Typesystem::Serialization::ToXml(expected));
+    };
+
+    const auto check_test_item = [](const DotsTest::TestItemPtr& actual, const DotsTest::TestItemPtr& expected)
+    {
+        BOOST_REQUIRE(actual);
+        BOOST_REQUIRE(expected);
+        BOOST_CHECK_EQUAL(actual->MyInt().GetVal(), expected->MyInt().GetVal());
+    };
+
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateInt32(10, 20);
+        BOOST_CHECK_EQUAL(obj->Int32Member1().GetVal(), 10);
+        BOOST_CHECK_EQUAL(obj->Int32Member2().GetVal(), 20);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateInt64(100, 200);
+        BOOST_CHECK_EQUAL(obj->Int64Member1().GetVal(), 100);
+        BOOST_CHECK_EQUAL(obj->Int64Member2().GetVal(), 200);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateFloat32(10.5f, 20.5f);
+        check_float32(obj->Float32Member1().GetVal(), 10.5f);
+        check_float32(obj->Float32Member2().GetVal(), 20.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateFloat64(100.25, 200.25);
+        check_float64(obj->Float64Member1().GetVal(), 100.25);
+        check_float64(obj->Float64Member2().GetVal(), 200.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateBoolean(true, false);
+        BOOST_CHECK_EQUAL(obj->BooleanMember1().GetVal(), true);
+        BOOST_CHECK_EQUAL(obj->BooleanMember2().GetVal(), false);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateEnumeration(DotsTest::TestEnum::MyFirst, DotsTest::TestEnum::MySecond);
+        BOOST_CHECK_EQUAL(obj->EnumerationMember1().GetVal(), DotsTest::TestEnum::MyFirst);
+        BOOST_CHECK_EQUAL(obj->EnumerationMember2().GetVal(), DotsTest::TestEnum::MySecond);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateString(L"Alpha", L"Beta");
+        BOOST_CHECK_EQUAL(obj->StringMember1().GetVal(), L"Alpha");
+        BOOST_CHECK_EQUAL(obj->StringMember2().GetVal(), L"Beta");
+    }
+    {
+        const EntityId entityId1(12345, InstanceId(1));
+        const EntityId entityId2(23456, InstanceId(2));
+        const auto obj = DotsTest::CreateRoutines::CreateEntityId(entityId1, entityId2);
+        BOOST_CHECK(obj->EntityIdMember1().GetVal() == entityId1);
+        BOOST_CHECK(obj->EntityIdMember2().GetVal() == entityId2);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateTypeId(12345, 23456);
+        BOOST_CHECK_EQUAL(obj->TypeIdMember1().GetVal(), 12345);
+        BOOST_CHECK_EQUAL(obj->TypeIdMember2().GetVal(), 23456);
+    }
+    {
+        const InstanceId instanceId1(11);
+        const InstanceId instanceId2(22);
+        const auto obj = DotsTest::CreateRoutines::CreateInstanceId(instanceId1, instanceId2);
+        BOOST_CHECK(obj->InstanceIdMember1().GetVal() == instanceId1);
+        BOOST_CHECK(obj->InstanceIdMember2().GetVal() == instanceId2);
+    }
+    {
+        const ChannelId channelId1(101);
+        const ChannelId channelId2(202);
+        const auto obj = DotsTest::CreateRoutines::CreateChannelId(channelId1, channelId2);
+        BOOST_CHECK(obj->ChannelIdMember1().GetVal() == channelId1);
+        BOOST_CHECK(obj->ChannelIdMember2().GetVal() == channelId2);
+    }
+    {
+        const HandlerId handlerId1(1001);
+        const HandlerId handlerId2(2002);
+        const auto obj = DotsTest::CreateRoutines::CreateHandlerId(handlerId1, handlerId2);
+        BOOST_CHECK(obj->HandlerIdMember1().GetVal() == handlerId1);
+        BOOST_CHECK(obj->HandlerIdMember2().GetVal() == handlerId2);
+    }
+    {
+        const auto object1 = DotsTest::EmptyObject::Create();
+        const auto object2 = DotsTest::AnotherEmptyObject::Create();
+        const auto obj = DotsTest::CreateRoutines::CreateObject(object1, object2);
+        BOOST_CHECK(obj->ObjectMember1().GetPtrOrNull() == object1);
+        BOOST_CHECK(obj->ObjectMember2().GetPtrOrNull() == object2);
+    }
+    {
+        const Binary binary1{1, 2, 3};
+        const Binary binary2{4, 5, 6};
+        const auto obj = DotsTest::CreateRoutines::CreateBinary(binary1, binary2);
+        BOOST_CHECK(obj->BinaryMember1().GetVal() == binary1);
+        BOOST_CHECK(obj->BinaryMember2().GetVal() == binary2);
+    }
+    {
+        const auto item1 = DotsTest::TestItem::Create();
+        const auto item2 = DotsTest::TestItem::Create();
+        item1->MyInt() = 17;
+        item2->MyInt() = 23;
+        const auto obj = DotsTest::CreateRoutines::CreateTestClass(item1, item2);
+        BOOST_CHECK(obj->TestClassMember1().GetPtrOrNull() == item1);
+        BOOST_CHECK(obj->TestClassMember2().GetPtrOrNull() == item2);
+        BOOST_CHECK_EQUAL(obj->TestClassMember1()->MyInt().GetVal(), 17);
+        BOOST_CHECK_EQUAL(obj->TestClassMember2()->MyInt().GetVal(), 23);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateAmpere32(1.5f, 2.5f);
+        check_float32(obj->Ampere32Member1().GetVal(), 1.5f);
+        check_float32(obj->Ampere32Member2().GetVal(), 2.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateCubicMeter32(3.5f, 4.5f);
+        check_float32(obj->CubicMeter32Member1().GetVal(), 3.5f);
+        check_float32(obj->CubicMeter32Member2().GetVal(), 4.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateHertz32(5.5f, 6.5f);
+        check_float32(obj->Hertz32Member1().GetVal(), 5.5f);
+        check_float32(obj->Hertz32Member2().GetVal(), 6.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateJoule32(7.5f, 8.5f);
+        check_float32(obj->Joule32Member1().GetVal(), 7.5f);
+        check_float32(obj->Joule32Member2().GetVal(), 8.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKelvin32(9.5f, 10.5f);
+        check_float32(obj->Kelvin32Member1().GetVal(), 9.5f);
+        check_float32(obj->Kelvin32Member2().GetVal(), 10.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKilogram32(11.5f, 12.5f);
+        check_float32(obj->Kilogram32Member1().GetVal(), 11.5f);
+        check_float32(obj->Kilogram32Member2().GetVal(), 12.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeter32(13.5f, 14.5f);
+        check_float32(obj->Meter32Member1().GetVal(), 13.5f);
+        check_float32(obj->Meter32Member2().GetVal(), 14.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecond32(15.5f, 16.5f);
+        check_float32(obj->MeterPerSecond32Member1().GetVal(), 15.5f);
+        check_float32(obj->MeterPerSecond32Member2().GetVal(), 16.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecondSquared32(17.5f, 18.5f);
+        check_float32(obj->MeterPerSecondSquared32Member1().GetVal(), 17.5f);
+        check_float32(obj->MeterPerSecondSquared32Member2().GetVal(), 18.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateNewton32(19.5f, 20.5f);
+        check_float32(obj->Newton32Member1().GetVal(), 19.5f);
+        check_float32(obj->Newton32Member2().GetVal(), 20.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreatePascal32(21.5f, 22.5f);
+        check_float32(obj->Pascal32Member1().GetVal(), 21.5f);
+        check_float32(obj->Pascal32Member2().GetVal(), 22.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadian32(23.5f, 24.5f);
+        check_float32(obj->Radian32Member1().GetVal(), 23.5f);
+        check_float32(obj->Radian32Member2().GetVal(), 24.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecond32(25.5f, 26.5f);
+        check_float32(obj->RadianPerSecond32Member1().GetVal(), 25.5f);
+        check_float32(obj->RadianPerSecond32Member2().GetVal(), 26.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecondSquared32(27.5f, 28.5f);
+        check_float32(obj->RadianPerSecondSquared32Member1().GetVal(), 27.5f);
+        check_float32(obj->RadianPerSecondSquared32Member2().GetVal(), 28.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSecond32(29.5f, 30.5f);
+        check_float32(obj->Second32Member1().GetVal(), 29.5f);
+        check_float32(obj->Second32Member2().GetVal(), 30.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSquareMeter32(31.5f, 32.5f);
+        check_float32(obj->SquareMeter32Member1().GetVal(), 31.5f);
+        check_float32(obj->SquareMeter32Member2().GetVal(), 32.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSteradian32(33.5f, 34.5f);
+        check_float32(obj->Steradian32Member1().GetVal(), 33.5f);
+        check_float32(obj->Steradian32Member2().GetVal(), 34.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateVolt32(35.5f, 36.5f);
+        check_float32(obj->Volt32Member1().GetVal(), 35.5f);
+        check_float32(obj->Volt32Member2().GetVal(), 36.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateWatt32(37.5f, 38.5f);
+        check_float32(obj->Watt32Member1().GetVal(), 37.5f);
+        check_float32(obj->Watt32Member2().GetVal(), 38.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateAmpere64(1.25, 2.25);
+        check_float64(obj->Ampere64Member1().GetVal(), 1.25);
+        check_float64(obj->Ampere64Member2().GetVal(), 2.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateCubicMeter64(3.25, 4.25);
+        check_float64(obj->CubicMeter64Member1().GetVal(), 3.25);
+        check_float64(obj->CubicMeter64Member2().GetVal(), 4.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateHertz64(5.25, 6.25);
+        check_float64(obj->Hertz64Member1().GetVal(), 5.25);
+        check_float64(obj->Hertz64Member2().GetVal(), 6.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateJoule64(7.25, 8.25);
+        check_float64(obj->Joule64Member1().GetVal(), 7.25);
+        check_float64(obj->Joule64Member2().GetVal(), 8.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKelvin64(9.25, 10.25);
+        check_float64(obj->Kelvin64Member1().GetVal(), 9.25);
+        check_float64(obj->Kelvin64Member2().GetVal(), 10.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKilogram64(11.25, 12.25);
+        check_float64(obj->Kilogram64Member1().GetVal(), 11.25);
+        check_float64(obj->Kilogram64Member2().GetVal(), 12.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeter64(13.25, 14.25);
+        check_float64(obj->Meter64Member1().GetVal(), 13.25);
+        check_float64(obj->Meter64Member2().GetVal(), 14.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecond64(15.25, 16.25);
+        check_float64(obj->MeterPerSecond64Member1().GetVal(), 15.25);
+        check_float64(obj->MeterPerSecond64Member2().GetVal(), 16.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecondSquared64(17.25, 18.25);
+        check_float64(obj->MeterPerSecondSquared64Member1().GetVal(), 17.25);
+        check_float64(obj->MeterPerSecondSquared64Member2().GetVal(), 18.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateNewton64(19.25, 20.25);
+        check_float64(obj->Newton64Member1().GetVal(), 19.25);
+        check_float64(obj->Newton64Member2().GetVal(), 20.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreatePascal64(21.25, 22.25);
+        check_float64(obj->Pascal64Member1().GetVal(), 21.25);
+        check_float64(obj->Pascal64Member2().GetVal(), 22.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadian64(23.25, 24.25);
+        check_float64(obj->Radian64Member1().GetVal(), 23.25);
+        check_float64(obj->Radian64Member2().GetVal(), 24.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecond64(25.25, 26.25);
+        check_float64(obj->RadianPerSecond64Member1().GetVal(), 25.25);
+        check_float64(obj->RadianPerSecond64Member2().GetVal(), 26.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecondSquared64(27.25, 28.25);
+        check_float64(obj->RadianPerSecondSquared64Member1().GetVal(), 27.25);
+        check_float64(obj->RadianPerSecondSquared64Member2().GetVal(), 28.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSecond64(29.25, 30.25);
+        check_float64(obj->Second64Member1().GetVal(), 29.25);
+        check_float64(obj->Second64Member2().GetVal(), 30.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSquareMeter64(31.25, 32.25);
+        check_float64(obj->SquareMeter64Member1().GetVal(), 31.25);
+        check_float64(obj->SquareMeter64Member2().GetVal(), 32.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSteradian64(33.25, 34.25);
+        check_float64(obj->Steradian64Member1().GetVal(), 33.25);
+        check_float64(obj->Steradian64Member2().GetVal(), 34.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateVolt64(35.25, 36.25);
+        check_float64(obj->Volt64Member1().GetVal(), 35.25);
+        check_float64(obj->Volt64Member2().GetVal(), 36.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateWatt64(37.25, 38.25);
+        check_float64(obj->Watt64Member1().GetVal(), 37.25);
+        check_float64(obj->Watt64Member2().GetVal(), 38.25);
+    }
+
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateInt32Parameter();
+        BOOST_CHECK_EQUAL(obj->Int32Member1().GetVal(), DotsTest::ParameterTypes::Int32Parameter());
+        BOOST_CHECK_EQUAL(obj->Int32Member2().GetVal(), DotsTest::ParameterTypes::Int32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateInt64Parameter();
+        BOOST_CHECK_EQUAL(obj->Int64Member1().GetVal(), DotsTest::ParameterTypes::Int64Parameter());
+        BOOST_CHECK_EQUAL(obj->Int64Member2().GetVal(), DotsTest::ParameterTypes::Int64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateFloat32Parameter();
+        check_float32(obj->Float32Member1().GetVal(), DotsTest::ParameterTypes::Float32Parameter());
+        check_float32(obj->Float32Member2().GetVal(), DotsTest::ParameterTypes::Float32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateFloat64Parameter();
+        check_float64(obj->Float64Member1().GetVal(), DotsTest::ParameterTypes::Float64Parameter());
+        check_float64(obj->Float64Member2().GetVal(), DotsTest::ParameterTypes::Float64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateBooleanParameter();
+        BOOST_CHECK_EQUAL(obj->BooleanMember1().GetVal(), DotsTest::ParameterTypes::BooleanParameter());
+        BOOST_CHECK_EQUAL(obj->BooleanMember2().GetVal(), DotsTest::ParameterTypes::BooleanParameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateEnumerationParameter();
+        BOOST_CHECK_EQUAL(obj->EnumerationMember1().GetVal(), DotsTest::ParameterTypes::EnumerationParameter());
+        BOOST_CHECK_EQUAL(obj->EnumerationMember2().GetVal(), DotsTest::ParameterTypes::EnumerationParameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateStringParameter();
+        BOOST_CHECK_EQUAL(obj->StringMember1().GetVal(), DotsTest::ParameterTypes::StringParameter());
+        BOOST_CHECK_EQUAL(obj->StringMember2().GetVal(), DotsTest::ParameterTypes::StringParameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateEntityIdParameter();
+        BOOST_CHECK(obj->EntityIdMember1().GetVal() == DotsTest::ParameterTypes::EntityIdParameter());
+        BOOST_CHECK(obj->EntityIdMember2().GetVal() == DotsTest::ParameterTypes::EntityIdParameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateTypeIdParameter();
+        BOOST_CHECK_EQUAL(obj->TypeIdMember1().GetVal(), DotsTest::ParameterTypes::TypeIdParameter());
+        BOOST_CHECK_EQUAL(obj->TypeIdMember2().GetVal(), DotsTest::ParameterTypes::TypeIdParameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateInstanceIdParameter();
+        BOOST_CHECK(obj->InstanceIdMember1().GetVal() == DotsTest::ParameterTypes::InstanceIdParameter());
+        BOOST_CHECK(obj->InstanceIdMember2().GetVal() == DotsTest::ParameterTypes::InstanceIdParameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateChannelIdParameter();
+        BOOST_CHECK(obj->ChannelIdMember1().GetVal() == DotsTest::ParameterTypes::ChannelIdParameter());
+        BOOST_CHECK(obj->ChannelIdMember2().GetVal() == DotsTest::ParameterTypes::ChannelIdParameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateHandlerIdParameter();
+        BOOST_CHECK(obj->HandlerIdMember1().GetVal() == DotsTest::ParameterTypes::HandlerIdParameter());
+        BOOST_CHECK(obj->HandlerIdMember2().GetVal() == DotsTest::ParameterTypes::HandlerIdParameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateObjectParameter();
+        const auto expected = DotsTest::ParameterTypes::ObjectParameter();
+        check_object_xml(obj->ObjectMember1().GetPtrOrNull(), expected);
+        check_object_xml(obj->ObjectMember2().GetPtrOrNull(), expected);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateBinaryParameter();
+        const auto expected = DotsTest::ParameterTypes::BinaryParameter();
+        BOOST_CHECK(obj->BinaryMember1().GetVal() == expected);
+        BOOST_CHECK(obj->BinaryMember2().GetVal() == expected);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateTestClassParameter();
+        const auto expected = DotsTest::ParameterTypes::TestClassParameter();
+        check_test_item(obj->TestClassMember1().GetPtrOrNull(), expected);
+        check_test_item(obj->TestClassMember2().GetPtrOrNull(), expected);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateAmpere32Parameter();
+        check_float32(obj->Ampere32Member1().GetVal(), DotsTest::ParameterTypes::Ampere32Parameter());
+        check_float32(obj->Ampere32Member2().GetVal(), DotsTest::ParameterTypes::Ampere32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateCubicMeter32Parameter();
+        check_float32(obj->CubicMeter32Member1().GetVal(), DotsTest::ParameterTypes::CubicMeter32Parameter());
+        check_float32(obj->CubicMeter32Member2().GetVal(), DotsTest::ParameterTypes::CubicMeter32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateHertz32Parameter();
+        check_float32(obj->Hertz32Member1().GetVal(), DotsTest::ParameterTypes::Hertz32Parameter());
+        check_float32(obj->Hertz32Member2().GetVal(), DotsTest::ParameterTypes::Hertz32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateJoule32Parameter();
+        check_float32(obj->Joule32Member1().GetVal(), DotsTest::ParameterTypes::Joule32Parameter());
+        check_float32(obj->Joule32Member2().GetVal(), DotsTest::ParameterTypes::Joule32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKelvin32Parameter();
+        check_float32(obj->Kelvin32Member1().GetVal(), DotsTest::ParameterTypes::Kelvin32Parameter());
+        check_float32(obj->Kelvin32Member2().GetVal(), DotsTest::ParameterTypes::Kelvin32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKilogram32Parameter();
+        check_float32(obj->Kilogram32Member1().GetVal(), DotsTest::ParameterTypes::Kilogram32Parameter());
+        check_float32(obj->Kilogram32Member2().GetVal(), DotsTest::ParameterTypes::Kilogram32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeter32Parameter();
+        check_float32(obj->Meter32Member1().GetVal(), DotsTest::ParameterTypes::Meter32Parameter());
+        check_float32(obj->Meter32Member2().GetVal(), DotsTest::ParameterTypes::Meter32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecond32Parameter();
+        check_float32(obj->MeterPerSecond32Member1().GetVal(), DotsTest::ParameterTypes::MeterPerSecond32Parameter());
+        check_float32(obj->MeterPerSecond32Member2().GetVal(), DotsTest::ParameterTypes::MeterPerSecond32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecondSquared32Parameter();
+        check_float32(obj->MeterPerSecondSquared32Member1().GetVal(), DotsTest::ParameterTypes::MeterPerSecondSquared32Parameter());
+        check_float32(obj->MeterPerSecondSquared32Member2().GetVal(), DotsTest::ParameterTypes::MeterPerSecondSquared32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateNewton32Parameter();
+        check_float32(obj->Newton32Member1().GetVal(), DotsTest::ParameterTypes::Newton32Parameter());
+        check_float32(obj->Newton32Member2().GetVal(), DotsTest::ParameterTypes::Newton32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreatePascal32Parameter();
+        check_float32(obj->Pascal32Member1().GetVal(), DotsTest::ParameterTypes::Pascal32Parameter());
+        check_float32(obj->Pascal32Member2().GetVal(), DotsTest::ParameterTypes::Pascal32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadian32Parameter();
+        check_float32(obj->Radian32Member1().GetVal(), DotsTest::ParameterTypes::Radian32Parameter());
+        check_float32(obj->Radian32Member2().GetVal(), DotsTest::ParameterTypes::Radian32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecond32Parameter();
+        check_float32(obj->RadianPerSecond32Member1().GetVal(), DotsTest::ParameterTypes::RadianPerSecond32Parameter());
+        check_float32(obj->RadianPerSecond32Member2().GetVal(), DotsTest::ParameterTypes::RadianPerSecond32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecondSquared32Parameter();
+        check_float32(obj->RadianPerSecondSquared32Member1().GetVal(), DotsTest::ParameterTypes::RadianPerSecondSquared32Parameter());
+        check_float32(obj->RadianPerSecondSquared32Member2().GetVal(), DotsTest::ParameterTypes::RadianPerSecondSquared32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSecond32Parameter();
+        check_float32(obj->Second32Member1().GetVal(), DotsTest::ParameterTypes::Second32Parameter());
+        check_float32(obj->Second32Member2().GetVal(), DotsTest::ParameterTypes::Second32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSquareMeter32Parameter();
+        check_float32(obj->SquareMeter32Member1().GetVal(), DotsTest::ParameterTypes::SquareMeter32Parameter());
+        check_float32(obj->SquareMeter32Member2().GetVal(), DotsTest::ParameterTypes::SquareMeter32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSteradian32Parameter();
+        check_float32(obj->Steradian32Member1().GetVal(), DotsTest::ParameterTypes::Steradian32Parameter());
+        check_float32(obj->Steradian32Member2().GetVal(), DotsTest::ParameterTypes::Steradian32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateVolt32Parameter();
+        check_float32(obj->Volt32Member1().GetVal(), DotsTest::ParameterTypes::Volt32Parameter());
+        check_float32(obj->Volt32Member2().GetVal(), DotsTest::ParameterTypes::Volt32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateWatt32Parameter();
+        check_float32(obj->Watt32Member1().GetVal(), DotsTest::ParameterTypes::Watt32Parameter());
+        check_float32(obj->Watt32Member2().GetVal(), DotsTest::ParameterTypes::Watt32Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateAmpere64Parameter();
+        check_float64(obj->Ampere64Member1().GetVal(), DotsTest::ParameterTypes::Ampere64Parameter());
+        check_float64(obj->Ampere64Member2().GetVal(), DotsTest::ParameterTypes::Ampere64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateCubicMeter64Parameter();
+        check_float64(obj->CubicMeter64Member1().GetVal(), DotsTest::ParameterTypes::CubicMeter64Parameter());
+        check_float64(obj->CubicMeter64Member2().GetVal(), DotsTest::ParameterTypes::CubicMeter64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateHertz64Parameter();
+        check_float64(obj->Hertz64Member1().GetVal(), DotsTest::ParameterTypes::Hertz64Parameter());
+        check_float64(obj->Hertz64Member2().GetVal(), DotsTest::ParameterTypes::Hertz64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateJoule64Parameter();
+        check_float64(obj->Joule64Member1().GetVal(), DotsTest::ParameterTypes::Joule64Parameter());
+        check_float64(obj->Joule64Member2().GetVal(), DotsTest::ParameterTypes::Joule64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKelvin64Parameter();
+        check_float64(obj->Kelvin64Member1().GetVal(), DotsTest::ParameterTypes::Kelvin64Parameter());
+        check_float64(obj->Kelvin64Member2().GetVal(), DotsTest::ParameterTypes::Kelvin64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKilogram64Parameter();
+        check_float64(obj->Kilogram64Member1().GetVal(), DotsTest::ParameterTypes::Kilogram64Parameter());
+        check_float64(obj->Kilogram64Member2().GetVal(), DotsTest::ParameterTypes::Kilogram64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeter64Parameter();
+        check_float64(obj->Meter64Member1().GetVal(), DotsTest::ParameterTypes::Meter64Parameter());
+        check_float64(obj->Meter64Member2().GetVal(), DotsTest::ParameterTypes::Meter64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecond64Parameter();
+        check_float64(obj->MeterPerSecond64Member1().GetVal(), DotsTest::ParameterTypes::MeterPerSecond64Parameter());
+        check_float64(obj->MeterPerSecond64Member2().GetVal(), DotsTest::ParameterTypes::MeterPerSecond64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecondSquared64Parameter();
+        check_float64(obj->MeterPerSecondSquared64Member1().GetVal(), DotsTest::ParameterTypes::MeterPerSecondSquared64Parameter());
+        check_float64(obj->MeterPerSecondSquared64Member2().GetVal(), DotsTest::ParameterTypes::MeterPerSecondSquared64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateNewton64Parameter();
+        check_float64(obj->Newton64Member1().GetVal(), DotsTest::ParameterTypes::Newton64Parameter());
+        check_float64(obj->Newton64Member2().GetVal(), DotsTest::ParameterTypes::Newton64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreatePascal64Parameter();
+        check_float64(obj->Pascal64Member1().GetVal(), DotsTest::ParameterTypes::Pascal64Parameter());
+        check_float64(obj->Pascal64Member2().GetVal(), DotsTest::ParameterTypes::Pascal64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadian64Parameter();
+        check_float64(obj->Radian64Member1().GetVal(), DotsTest::ParameterTypes::Radian64Parameter());
+        check_float64(obj->Radian64Member2().GetVal(), DotsTest::ParameterTypes::Radian64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecond64Parameter();
+        check_float64(obj->RadianPerSecond64Member1().GetVal(), DotsTest::ParameterTypes::RadianPerSecond64Parameter());
+        check_float64(obj->RadianPerSecond64Member2().GetVal(), DotsTest::ParameterTypes::RadianPerSecond64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecondSquared64Parameter();
+        check_float64(obj->RadianPerSecondSquared64Member1().GetVal(), DotsTest::ParameterTypes::RadianPerSecondSquared64Parameter());
+        check_float64(obj->RadianPerSecondSquared64Member2().GetVal(), DotsTest::ParameterTypes::RadianPerSecondSquared64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSecond64Parameter();
+        check_float64(obj->Second64Member1().GetVal(), DotsTest::ParameterTypes::Second64Parameter());
+        check_float64(obj->Second64Member2().GetVal(), DotsTest::ParameterTypes::Second64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSquareMeter64Parameter();
+        check_float64(obj->SquareMeter64Member1().GetVal(), DotsTest::ParameterTypes::SquareMeter64Parameter());
+        check_float64(obj->SquareMeter64Member2().GetVal(), DotsTest::ParameterTypes::SquareMeter64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSteradian64Parameter();
+        check_float64(obj->Steradian64Member1().GetVal(), DotsTest::ParameterTypes::Steradian64Parameter());
+        check_float64(obj->Steradian64Member2().GetVal(), DotsTest::ParameterTypes::Steradian64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateVolt64Parameter();
+        check_float64(obj->Volt64Member1().GetVal(), DotsTest::ParameterTypes::Volt64Parameter());
+        check_float64(obj->Volt64Member2().GetVal(), DotsTest::ParameterTypes::Volt64Parameter());
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateWatt64Parameter();
+        check_float64(obj->Watt64Member1().GetVal(), DotsTest::ParameterTypes::Watt64Parameter());
+        check_float64(obj->Watt64Member2().GetVal(), DotsTest::ParameterTypes::Watt64Parameter());
+    }
+
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateInt32Inline();
+        BOOST_CHECK_EQUAL(obj->Int32Member1().GetVal(), 1);
+        BOOST_CHECK_EQUAL(obj->Int32Member2().GetVal(), 2);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateInt64Inline();
+        BOOST_CHECK_EQUAL(obj->Int64Member1().GetVal(), 11);
+        BOOST_CHECK_EQUAL(obj->Int64Member2().GetVal(), 12);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateFloat32Inline();
+        check_float32(obj->Float32Member1().GetVal(), 1.5f);
+        check_float32(obj->Float32Member2().GetVal(), 2.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateFloat64Inline();
+        check_float64(obj->Float64Member1().GetVal(), 1.25);
+        check_float64(obj->Float64Member2().GetVal(), 2.25);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateBooleanInline();
+        BOOST_CHECK_EQUAL(obj->BooleanMember1().GetVal(), true);
+        BOOST_CHECK_EQUAL(obj->BooleanMember2().GetVal(), false);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateEnumerationInline();
+        BOOST_CHECK_EQUAL(obj->EnumerationMember1().GetVal(), DotsTest::TestEnum::MyFirst);
+        BOOST_CHECK_EQUAL(obj->EnumerationMember2().GetVal(), DotsTest::TestEnum::MySecond);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateStringInline();
+        BOOST_CHECK_EQUAL(obj->StringMember1().GetVal(), L"One");
+        BOOST_CHECK_EQUAL(obj->StringMember2().GetVal(), L"Two");
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateEntityIdInline();
+        BOOST_CHECK(obj->EntityIdMember1().GetVal() == EntityId(DotsTest::TestItem::ClassTypeId, InstanceId(1)));
+        BOOST_CHECK(obj->EntityIdMember2().GetVal() == EntityId(DotsTest::TestItem::ClassTypeId, InstanceId(L"SomeInstance")));
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateTypeIdInline();
+        BOOST_CHECK_EQUAL(obj->TypeIdMember1().GetVal(), DotsTest::TestItem::ClassTypeId);
+        BOOST_CHECK_EQUAL(obj->TypeIdMember2().GetVal(), Safir::Dob::Entity::ClassTypeId);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateInstanceIdInline();
+        BOOST_CHECK(obj->InstanceIdMember1().GetVal() == InstanceId(1));
+        BOOST_CHECK(obj->InstanceIdMember2().GetVal() == InstanceId(L"SomeInstance"));
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateChannelIdInline();
+        BOOST_CHECK(obj->ChannelIdMember1().GetVal() == ChannelId(1));
+        BOOST_CHECK(obj->ChannelIdMember2().GetVal() == ChannelId(L"SomeChannel"));
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateHandlerIdInline();
+        BOOST_CHECK(obj->HandlerIdMember1().GetVal() == HandlerId(1));
+        BOOST_CHECK(obj->HandlerIdMember2().GetVal() == HandlerId(L"SomeHandler"));
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateObjectInline();
+        const auto expected1 = Safir::Dob::Typesystem::Object::Create();
+        const auto expected2 = DotsTest::TestItem::Create();
+        expected2->MyInt() = 5;
+        check_object_xml(obj->ObjectMember1().GetPtrOrNull(), expected1);
+        check_object_xml(obj->ObjectMember2().GetPtrOrNull(), expected2);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateBinaryInline();
+        const Binary expected1{1, 2};
+        const Binary expected2{3, 4};
+        BOOST_CHECK(obj->BinaryMember1().GetVal() == expected1);
+        BOOST_CHECK(obj->BinaryMember2().GetVal() == expected2);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateTestClassInline();
+        const auto expected1 = DotsTest::TestItem::Create();
+        const auto expected2 = DotsTest::TestItem::Create();
+        expected1->MyInt() = 17;
+        expected2->MyInt() = 23;
+        check_test_item(obj->TestClassMember1().GetPtrOrNull(), expected1);
+        check_test_item(obj->TestClassMember2().GetPtrOrNull(), expected2);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateAmpere32Inline();
+        check_float32(obj->Ampere32Member1().GetVal(), 1.1f);
+        check_float32(obj->Ampere32Member2().GetVal(), 2.1f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateCubicMeter32Inline();
+        check_float32(obj->CubicMeter32Member1().GetVal(), 1.2f);
+        check_float32(obj->CubicMeter32Member2().GetVal(), 2.2f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateHertz32Inline();
+        check_float32(obj->Hertz32Member1().GetVal(), 1.3f);
+        check_float32(obj->Hertz32Member2().GetVal(), 2.3f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateJoule32Inline();
+        check_float32(obj->Joule32Member1().GetVal(), 1.4f);
+        check_float32(obj->Joule32Member2().GetVal(), 2.4f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKelvin32Inline();
+        check_float32(obj->Kelvin32Member1().GetVal(), 1.5f);
+        check_float32(obj->Kelvin32Member2().GetVal(), 2.5f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKilogram32Inline();
+        check_float32(obj->Kilogram32Member1().GetVal(), 1.6f);
+        check_float32(obj->Kilogram32Member2().GetVal(), 2.6f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeter32Inline();
+        check_float32(obj->Meter32Member1().GetVal(), 1.7f);
+        check_float32(obj->Meter32Member2().GetVal(), 2.7f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecond32Inline();
+        check_float32(obj->MeterPerSecond32Member1().GetVal(), 1.8f);
+        check_float32(obj->MeterPerSecond32Member2().GetVal(), 2.8f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecondSquared32Inline();
+        check_float32(obj->MeterPerSecondSquared32Member1().GetVal(), 1.9f);
+        check_float32(obj->MeterPerSecondSquared32Member2().GetVal(), 2.9f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateNewton32Inline();
+        check_float32(obj->Newton32Member1().GetVal(), 1.10f);
+        check_float32(obj->Newton32Member2().GetVal(), 2.10f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreatePascal32Inline();
+        check_float32(obj->Pascal32Member1().GetVal(), 1.11f);
+        check_float32(obj->Pascal32Member2().GetVal(), 2.11f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadian32Inline();
+        check_float32(obj->Radian32Member1().GetVal(), 1.12f);
+        check_float32(obj->Radian32Member2().GetVal(), 2.12f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecond32Inline();
+        check_float32(obj->RadianPerSecond32Member1().GetVal(), 1.13f);
+        check_float32(obj->RadianPerSecond32Member2().GetVal(), 2.13f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecondSquared32Inline();
+        check_float32(obj->RadianPerSecondSquared32Member1().GetVal(), 1.14f);
+        check_float32(obj->RadianPerSecondSquared32Member2().GetVal(), 2.14f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSecond32Inline();
+        check_float32(obj->Second32Member1().GetVal(), 1.15f);
+        check_float32(obj->Second32Member2().GetVal(), 2.15f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSquareMeter32Inline();
+        check_float32(obj->SquareMeter32Member1().GetVal(), 1.16f);
+        check_float32(obj->SquareMeter32Member2().GetVal(), 2.16f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSteradian32Inline();
+        check_float32(obj->Steradian32Member1().GetVal(), 1.17f);
+        check_float32(obj->Steradian32Member2().GetVal(), 2.17f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateVolt32Inline();
+        check_float32(obj->Volt32Member1().GetVal(), 1.18f);
+        check_float32(obj->Volt32Member2().GetVal(), 2.18f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateWatt32Inline();
+        check_float32(obj->Watt32Member1().GetVal(), 1.19f);
+        check_float32(obj->Watt32Member2().GetVal(), 2.19f);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateAmpere64Inline();
+        check_float64(obj->Ampere64Member1().GetVal(), 11.1);
+        check_float64(obj->Ampere64Member2().GetVal(), 12.1);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateCubicMeter64Inline();
+        check_float64(obj->CubicMeter64Member1().GetVal(), 11.2);
+        check_float64(obj->CubicMeter64Member2().GetVal(), 12.2);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateHertz64Inline();
+        check_float64(obj->Hertz64Member1().GetVal(), 11.3);
+        check_float64(obj->Hertz64Member2().GetVal(), 12.3);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateJoule64Inline();
+        check_float64(obj->Joule64Member1().GetVal(), 11.4);
+        check_float64(obj->Joule64Member2().GetVal(), 12.4);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKelvin64Inline();
+        check_float64(obj->Kelvin64Member1().GetVal(), 11.5);
+        check_float64(obj->Kelvin64Member2().GetVal(), 12.5);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateKilogram64Inline();
+        check_float64(obj->Kilogram64Member1().GetVal(), 11.6);
+        check_float64(obj->Kilogram64Member2().GetVal(), 12.6);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeter64Inline();
+        check_float64(obj->Meter64Member1().GetVal(), 11.7);
+        check_float64(obj->Meter64Member2().GetVal(), 12.7);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecond64Inline();
+        check_float64(obj->MeterPerSecond64Member1().GetVal(), 11.8);
+        check_float64(obj->MeterPerSecond64Member2().GetVal(), 12.8);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateMeterPerSecondSquared64Inline();
+        check_float64(obj->MeterPerSecondSquared64Member1().GetVal(), 11.9);
+        check_float64(obj->MeterPerSecondSquared64Member2().GetVal(), 12.9);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateNewton64Inline();
+        check_float64(obj->Newton64Member1().GetVal(), 11.10);
+        check_float64(obj->Newton64Member2().GetVal(), 12.10);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreatePascal64Inline();
+        check_float64(obj->Pascal64Member1().GetVal(), 11.11);
+        check_float64(obj->Pascal64Member2().GetVal(), 12.11);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadian64Inline();
+        check_float64(obj->Radian64Member1().GetVal(), 11.12);
+        check_float64(obj->Radian64Member2().GetVal(), 12.12);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecond64Inline();
+        check_float64(obj->RadianPerSecond64Member1().GetVal(), 11.13);
+        check_float64(obj->RadianPerSecond64Member2().GetVal(), 12.13);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateRadianPerSecondSquared64Inline();
+        check_float64(obj->RadianPerSecondSquared64Member1().GetVal(), 11.14);
+        check_float64(obj->RadianPerSecondSquared64Member2().GetVal(), 12.14);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSecond64Inline();
+        check_float64(obj->Second64Member1().GetVal(), 11.15);
+        check_float64(obj->Second64Member2().GetVal(), 12.15);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSquareMeter64Inline();
+        check_float64(obj->SquareMeter64Member1().GetVal(), 11.16);
+        check_float64(obj->SquareMeter64Member2().GetVal(), 12.16);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateSteradian64Inline();
+        check_float64(obj->Steradian64Member1().GetVal(), 11.17);
+        check_float64(obj->Steradian64Member2().GetVal(), 12.17);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateVolt64Inline();
+        check_float64(obj->Volt64Member1().GetVal(), 11.18);
+        check_float64(obj->Volt64Member2().GetVal(), 12.18);
+    }
+    {
+        const auto obj = DotsTest::CreateRoutines::CreateWatt64Inline();
+        check_float64(obj->Watt64Member1().GetVal(), 11.19);
+        check_float64(obj->Watt64Member2().GetVal(), 12.19);
+    }
 }
 
 // Test_Enumeration();

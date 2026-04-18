@@ -47,6 +47,7 @@ class DotsTestDotnet
         Test_GetNumberOfMembers();
         Test_GetNumberOfParameters();
         Test_Create_Routines();
+        Test_CreateRoutines_multiple_values_of_same_type();
         Test_Int32();
         Test_Int64();
         Test_Float32();
@@ -460,6 +461,865 @@ class DotsTestDotnet
 
         Console.WriteLine("CreateParam          : " + Safir.Dob.Typesystem.Serialization.ToXml(createParameters));
         Console.WriteLine("CreateParamInherited : " + Safir.Dob.Typesystem.Serialization.ToXml(createParametersInherited));
+    }
+
+    private static void Ensure(bool expr, string description)
+    {
+        if (!expr)
+        {
+            throw new Exception(description);
+        }
+    }
+
+    private static void EnsureFloat32(float actual, float expected, string description)
+    {
+        Ensure(Math.Abs(actual - expected) < 0.0001f, description);
+    }
+
+    private static void EnsureFloat64(double actual, double expected, string description)
+    {
+        Ensure(Math.Abs(actual - expected) < 0.0001, description);
+    }
+
+    private static void EnsureObjectXml(Safir.Dob.Typesystem.Object actual, Safir.Dob.Typesystem.Object expected, string description)
+    {
+        Ensure(actual != null, description + " actual null");
+        Ensure(expected != null, description + " expected null");
+        Ensure(Safir.Dob.Typesystem.Serialization.ToXml(actual) == Safir.Dob.Typesystem.Serialization.ToXml(expected), description);
+    }
+
+    private static void EnsureTestItem(DotsTest.TestItem actual, DotsTest.TestItem expected, string description)
+    {
+        Ensure(actual != null, description + " actual null");
+        Ensure(expected != null, description + " expected null");
+        Ensure(actual.MyInt.Val == expected.MyInt.Val, description);
+    }
+
+    private static void Test_CreateRoutines_multiple_values_of_same_type()
+    {
+        {
+            var obj = DotsTest.CreateRoutines.CreateInt32(10, 20);
+            Ensure(obj.Int32Member1.Val == 10, "CreateInt32 member1");
+            Ensure(obj.Int32Member2.Val == 20, "CreateInt32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateInt64(100, 200);
+            Ensure(obj.Int64Member1.Val == 100, "CreateInt64 member1");
+            Ensure(obj.Int64Member2.Val == 200, "CreateInt64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateFloat32(10.5f, 20.5f);
+            EnsureFloat32(obj.Float32Member1.Val, 10.5f, "CreateFloat32 member1");
+            EnsureFloat32(obj.Float32Member2.Val, 20.5f, "CreateFloat32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateFloat64(100.25, 200.25);
+            EnsureFloat64(obj.Float64Member1.Val, 100.25, "CreateFloat64 member1");
+            EnsureFloat64(obj.Float64Member2.Val, 200.25, "CreateFloat64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateBoolean(true, false);
+            Ensure(obj.BooleanMember1.Val, "CreateBoolean member1");
+            Ensure(!obj.BooleanMember2.Val, "CreateBoolean member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateEnumeration(DotsTest.TestEnum.Enumeration.MyFirst, DotsTest.TestEnum.Enumeration.MySecond);
+            Ensure(obj.EnumerationMember1.Val == DotsTest.TestEnum.Enumeration.MyFirst, "CreateEnumeration member1");
+            Ensure(obj.EnumerationMember2.Val == DotsTest.TestEnum.Enumeration.MySecond, "CreateEnumeration member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateString("Alpha", "Beta");
+            Ensure(obj.StringMember1.Val == "Alpha", "CreateString member1");
+            Ensure(obj.StringMember2.Val == "Beta", "CreateString member2");
+        }
+        {
+            var entityId1 = new Safir.Dob.Typesystem.EntityId(12345, new Safir.Dob.Typesystem.InstanceId(1));
+            var entityId2 = new Safir.Dob.Typesystem.EntityId(23456, new Safir.Dob.Typesystem.InstanceId(2));
+            var obj = DotsTest.CreateRoutines.CreateEntityId(entityId1, entityId2);
+            Ensure(obj.EntityIdMember1.Val == entityId1, "CreateEntityId member1");
+            Ensure(obj.EntityIdMember2.Val == entityId2, "CreateEntityId member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateTypeId(12345, 23456);
+            Ensure(obj.TypeIdMember1.Val == 12345, "CreateTypeId member1");
+            Ensure(obj.TypeIdMember2.Val == 23456, "CreateTypeId member2");
+        }
+        {
+            var instanceId1 = new Safir.Dob.Typesystem.InstanceId(11);
+            var instanceId2 = new Safir.Dob.Typesystem.InstanceId(22);
+            var obj = DotsTest.CreateRoutines.CreateInstanceId(instanceId1, instanceId2);
+            Ensure(obj.InstanceIdMember1.Val == instanceId1, "CreateInstanceId member1");
+            Ensure(obj.InstanceIdMember2.Val == instanceId2, "CreateInstanceId member2");
+        }
+        {
+            var channelId1 = new Safir.Dob.Typesystem.ChannelId(101);
+            var channelId2 = new Safir.Dob.Typesystem.ChannelId(202);
+            var obj = DotsTest.CreateRoutines.CreateChannelId(channelId1, channelId2);
+            Ensure(obj.ChannelIdMember1.Val == channelId1, "CreateChannelId member1");
+            Ensure(obj.ChannelIdMember2.Val == channelId2, "CreateChannelId member2");
+        }
+        {
+            var handlerId1 = new Safir.Dob.Typesystem.HandlerId(1001);
+            var handlerId2 = new Safir.Dob.Typesystem.HandlerId(2002);
+            var obj = DotsTest.CreateRoutines.CreateHandlerId(handlerId1, handlerId2);
+            Ensure(obj.HandlerIdMember1.Val == handlerId1, "CreateHandlerId member1");
+            Ensure(obj.HandlerIdMember2.Val == handlerId2, "CreateHandlerId member2");
+        }
+        {
+            var object1 = new Safir.Dob.Typesystem.Object();
+            var object2 = new DotsTest.AnotherEmptyObject();
+            var obj = DotsTest.CreateRoutines.CreateObject(object1, object2);
+            EnsureObjectXml(obj.ObjectMember1.Obj, object1, "CreateObject member1");
+            EnsureObjectXml(obj.ObjectMember2.Obj, object2, "CreateObject member2");
+        }
+        {
+            var binary1 = new byte[] {1, 2, 3};
+            var binary2 = new byte[] {4, 5, 6};
+            var obj = DotsTest.CreateRoutines.CreateBinary(binary1, binary2);
+            Ensure(obj.BinaryMember1.Val.SequenceEqual(binary1), "CreateBinary member1");
+            Ensure(obj.BinaryMember2.Val.SequenceEqual(binary2), "CreateBinary member2");
+        }
+        {
+            var item1 = new DotsTest.TestItem();
+            var item2 = new DotsTest.TestItem();
+            item1.MyInt.Val = 17;
+            item2.MyInt.Val = 23;
+            var obj = DotsTest.CreateRoutines.CreateTestClass(item1, item2);
+            EnsureTestItem(obj.TestClassMember1.Obj, item1, "CreateTestClass member1");
+            EnsureTestItem(obj.TestClassMember2.Obj, item2, "CreateTestClass member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateAmpere32(1.5f, 2.5f);
+            EnsureFloat32(obj.Ampere32Member1.Val, 1.5f, "CreateAmpere32 member1");
+            EnsureFloat32(obj.Ampere32Member2.Val, 2.5f, "CreateAmpere32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateCubicMeter32(3.5f, 4.5f);
+            EnsureFloat32(obj.CubicMeter32Member1.Val, 3.5f, "CreateCubicMeter32 member1");
+            EnsureFloat32(obj.CubicMeter32Member2.Val, 4.5f, "CreateCubicMeter32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateHertz32(5.5f, 6.5f);
+            EnsureFloat32(obj.Hertz32Member1.Val, 5.5f, "CreateHertz32 member1");
+            EnsureFloat32(obj.Hertz32Member2.Val, 6.5f, "CreateHertz32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateJoule32(7.5f, 8.5f);
+            EnsureFloat32(obj.Joule32Member1.Val, 7.5f, "CreateJoule32 member1");
+            EnsureFloat32(obj.Joule32Member2.Val, 8.5f, "CreateJoule32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKelvin32(9.5f, 10.5f);
+            EnsureFloat32(obj.Kelvin32Member1.Val, 9.5f, "CreateKelvin32 member1");
+            EnsureFloat32(obj.Kelvin32Member2.Val, 10.5f, "CreateKelvin32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKilogram32(11.5f, 12.5f);
+            EnsureFloat32(obj.Kilogram32Member1.Val, 11.5f, "CreateKilogram32 member1");
+            EnsureFloat32(obj.Kilogram32Member2.Val, 12.5f, "CreateKilogram32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeter32(13.5f, 14.5f);
+            EnsureFloat32(obj.Meter32Member1.Val, 13.5f, "CreateMeter32 member1");
+            EnsureFloat32(obj.Meter32Member2.Val, 14.5f, "CreateMeter32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecond32(15.5f, 16.5f);
+            EnsureFloat32(obj.MeterPerSecond32Member1.Val, 15.5f, "CreateMeterPerSecond32 member1");
+            EnsureFloat32(obj.MeterPerSecond32Member2.Val, 16.5f, "CreateMeterPerSecond32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecondSquared32(17.5f, 18.5f);
+            EnsureFloat32(obj.MeterPerSecondSquared32Member1.Val, 17.5f, "CreateMeterPerSecondSquared32 member1");
+            EnsureFloat32(obj.MeterPerSecondSquared32Member2.Val, 18.5f, "CreateMeterPerSecondSquared32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateNewton32(19.5f, 20.5f);
+            EnsureFloat32(obj.Newton32Member1.Val, 19.5f, "CreateNewton32 member1");
+            EnsureFloat32(obj.Newton32Member2.Val, 20.5f, "CreateNewton32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreatePascal32(21.5f, 22.5f);
+            EnsureFloat32(obj.Pascal32Member1.Val, 21.5f, "CreatePascal32 member1");
+            EnsureFloat32(obj.Pascal32Member2.Val, 22.5f, "CreatePascal32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadian32(23.5f, 24.5f);
+            EnsureFloat32(obj.Radian32Member1.Val, 23.5f, "CreateRadian32 member1");
+            EnsureFloat32(obj.Radian32Member2.Val, 24.5f, "CreateRadian32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecond32(25.5f, 26.5f);
+            EnsureFloat32(obj.RadianPerSecond32Member1.Val, 25.5f, "CreateRadianPerSecond32 member1");
+            EnsureFloat32(obj.RadianPerSecond32Member2.Val, 26.5f, "CreateRadianPerSecond32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecondSquared32(27.5f, 28.5f);
+            EnsureFloat32(obj.RadianPerSecondSquared32Member1.Val, 27.5f, "CreateRadianPerSecondSquared32 member1");
+            EnsureFloat32(obj.RadianPerSecondSquared32Member2.Val, 28.5f, "CreateRadianPerSecondSquared32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSecond32(29.5f, 30.5f);
+            EnsureFloat32(obj.Second32Member1.Val, 29.5f, "CreateSecond32 member1");
+            EnsureFloat32(obj.Second32Member2.Val, 30.5f, "CreateSecond32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSquareMeter32(31.5f, 32.5f);
+            EnsureFloat32(obj.SquareMeter32Member1.Val, 31.5f, "CreateSquareMeter32 member1");
+            EnsureFloat32(obj.SquareMeter32Member2.Val, 32.5f, "CreateSquareMeter32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSteradian32(33.5f, 34.5f);
+            EnsureFloat32(obj.Steradian32Member1.Val, 33.5f, "CreateSteradian32 member1");
+            EnsureFloat32(obj.Steradian32Member2.Val, 34.5f, "CreateSteradian32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateVolt32(35.5f, 36.5f);
+            EnsureFloat32(obj.Volt32Member1.Val, 35.5f, "CreateVolt32 member1");
+            EnsureFloat32(obj.Volt32Member2.Val, 36.5f, "CreateVolt32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateWatt32(37.5f, 38.5f);
+            EnsureFloat32(obj.Watt32Member1.Val, 37.5f, "CreateWatt32 member1");
+            EnsureFloat32(obj.Watt32Member2.Val, 38.5f, "CreateWatt32 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateAmpere64(1.25, 2.25);
+            EnsureFloat64(obj.Ampere64Member1.Val, 1.25, "CreateAmpere64 member1");
+            EnsureFloat64(obj.Ampere64Member2.Val, 2.25, "CreateAmpere64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateCubicMeter64(3.25, 4.25);
+            EnsureFloat64(obj.CubicMeter64Member1.Val, 3.25, "CreateCubicMeter64 member1");
+            EnsureFloat64(obj.CubicMeter64Member2.Val, 4.25, "CreateCubicMeter64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateHertz64(5.25, 6.25);
+            EnsureFloat64(obj.Hertz64Member1.Val, 5.25, "CreateHertz64 member1");
+            EnsureFloat64(obj.Hertz64Member2.Val, 6.25, "CreateHertz64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateJoule64(7.25, 8.25);
+            EnsureFloat64(obj.Joule64Member1.Val, 7.25, "CreateJoule64 member1");
+            EnsureFloat64(obj.Joule64Member2.Val, 8.25, "CreateJoule64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKelvin64(9.25, 10.25);
+            EnsureFloat64(obj.Kelvin64Member1.Val, 9.25, "CreateKelvin64 member1");
+            EnsureFloat64(obj.Kelvin64Member2.Val, 10.25, "CreateKelvin64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKilogram64(11.25, 12.25);
+            EnsureFloat64(obj.Kilogram64Member1.Val, 11.25, "CreateKilogram64 member1");
+            EnsureFloat64(obj.Kilogram64Member2.Val, 12.25, "CreateKilogram64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeter64(13.25, 14.25);
+            EnsureFloat64(obj.Meter64Member1.Val, 13.25, "CreateMeter64 member1");
+            EnsureFloat64(obj.Meter64Member2.Val, 14.25, "CreateMeter64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecond64(15.25, 16.25);
+            EnsureFloat64(obj.MeterPerSecond64Member1.Val, 15.25, "CreateMeterPerSecond64 member1");
+            EnsureFloat64(obj.MeterPerSecond64Member2.Val, 16.25, "CreateMeterPerSecond64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecondSquared64(17.25, 18.25);
+            EnsureFloat64(obj.MeterPerSecondSquared64Member1.Val, 17.25, "CreateMeterPerSecondSquared64 member1");
+            EnsureFloat64(obj.MeterPerSecondSquared64Member2.Val, 18.25, "CreateMeterPerSecondSquared64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateNewton64(19.25, 20.25);
+            EnsureFloat64(obj.Newton64Member1.Val, 19.25, "CreateNewton64 member1");
+            EnsureFloat64(obj.Newton64Member2.Val, 20.25, "CreateNewton64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreatePascal64(21.25, 22.25);
+            EnsureFloat64(obj.Pascal64Member1.Val, 21.25, "CreatePascal64 member1");
+            EnsureFloat64(obj.Pascal64Member2.Val, 22.25, "CreatePascal64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadian64(23.25, 24.25);
+            EnsureFloat64(obj.Radian64Member1.Val, 23.25, "CreateRadian64 member1");
+            EnsureFloat64(obj.Radian64Member2.Val, 24.25, "CreateRadian64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecond64(25.25, 26.25);
+            EnsureFloat64(obj.RadianPerSecond64Member1.Val, 25.25, "CreateRadianPerSecond64 member1");
+            EnsureFloat64(obj.RadianPerSecond64Member2.Val, 26.25, "CreateRadianPerSecond64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecondSquared64(27.25, 28.25);
+            EnsureFloat64(obj.RadianPerSecondSquared64Member1.Val, 27.25, "CreateRadianPerSecondSquared64 member1");
+            EnsureFloat64(obj.RadianPerSecondSquared64Member2.Val, 28.25, "CreateRadianPerSecondSquared64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSecond64(29.25, 30.25);
+            EnsureFloat64(obj.Second64Member1.Val, 29.25, "CreateSecond64 member1");
+            EnsureFloat64(obj.Second64Member2.Val, 30.25, "CreateSecond64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSquareMeter64(31.25, 32.25);
+            EnsureFloat64(obj.SquareMeter64Member1.Val, 31.25, "CreateSquareMeter64 member1");
+            EnsureFloat64(obj.SquareMeter64Member2.Val, 32.25, "CreateSquareMeter64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSteradian64(33.25, 34.25);
+            EnsureFloat64(obj.Steradian64Member1.Val, 33.25, "CreateSteradian64 member1");
+            EnsureFloat64(obj.Steradian64Member2.Val, 34.25, "CreateSteradian64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateVolt64(35.25, 36.25);
+            EnsureFloat64(obj.Volt64Member1.Val, 35.25, "CreateVolt64 member1");
+            EnsureFloat64(obj.Volt64Member2.Val, 36.25, "CreateVolt64 member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateWatt64(37.25, 38.25);
+            EnsureFloat64(obj.Watt64Member1.Val, 37.25, "CreateWatt64 member1");
+            EnsureFloat64(obj.Watt64Member2.Val, 38.25, "CreateWatt64 member2");
+        }
+
+        {
+            var obj = DotsTest.CreateRoutines.CreateInt32Parameter();
+            Ensure(obj.Int32Member1.Val == DotsTest.ParameterTypes.Int32Parameter, "CreateInt32Parameter member1");
+            Ensure(obj.Int32Member2.Val == DotsTest.ParameterTypes.Int32Parameter, "CreateInt32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateInt64Parameter();
+            Ensure(obj.Int64Member1.Val == DotsTest.ParameterTypes.Int64Parameter, "CreateInt64Parameter member1");
+            Ensure(obj.Int64Member2.Val == DotsTest.ParameterTypes.Int64Parameter, "CreateInt64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateFloat32Parameter();
+            EnsureFloat32(obj.Float32Member1.Val, DotsTest.ParameterTypes.Float32Parameter, "CreateFloat32Parameter member1");
+            EnsureFloat32(obj.Float32Member2.Val, DotsTest.ParameterTypes.Float32Parameter, "CreateFloat32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateFloat64Parameter();
+            EnsureFloat64(obj.Float64Member1.Val, DotsTest.ParameterTypes.Float64Parameter, "CreateFloat64Parameter member1");
+            EnsureFloat64(obj.Float64Member2.Val, DotsTest.ParameterTypes.Float64Parameter, "CreateFloat64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateBooleanParameter();
+            Ensure(obj.BooleanMember1.Val == DotsTest.ParameterTypes.BooleanParameter, "CreateBooleanParameter member1");
+            Ensure(obj.BooleanMember2.Val == DotsTest.ParameterTypes.BooleanParameter, "CreateBooleanParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateEnumerationParameter();
+            Ensure(obj.EnumerationMember1.Val == DotsTest.ParameterTypes.EnumerationParameter, "CreateEnumerationParameter member1");
+            Ensure(obj.EnumerationMember2.Val == DotsTest.ParameterTypes.EnumerationParameter, "CreateEnumerationParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateStringParameter();
+            Ensure(obj.StringMember1.Val == DotsTest.ParameterTypes.StringParameter, "CreateStringParameter member1");
+            Ensure(obj.StringMember2.Val == DotsTest.ParameterTypes.StringParameter, "CreateStringParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateEntityIdParameter();
+            Ensure(obj.EntityIdMember1.Val == DotsTest.ParameterTypes.EntityIdParameter, "CreateEntityIdParameter member1");
+            Ensure(obj.EntityIdMember2.Val == DotsTest.ParameterTypes.EntityIdParameter, "CreateEntityIdParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateTypeIdParameter();
+            Ensure(obj.TypeIdMember1.Val == DotsTest.ParameterTypes.TypeIdParameter, "CreateTypeIdParameter member1");
+            Ensure(obj.TypeIdMember2.Val == DotsTest.ParameterTypes.TypeIdParameter, "CreateTypeIdParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateInstanceIdParameter();
+            Ensure(obj.InstanceIdMember1.Val == DotsTest.ParameterTypes.InstanceIdParameter, "CreateInstanceIdParameter member1");
+            Ensure(obj.InstanceIdMember2.Val == DotsTest.ParameterTypes.InstanceIdParameter, "CreateInstanceIdParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateChannelIdParameter();
+            Ensure(obj.ChannelIdMember1.Val == DotsTest.ParameterTypes.ChannelIdParameter, "CreateChannelIdParameter member1");
+            Ensure(obj.ChannelIdMember2.Val == DotsTest.ParameterTypes.ChannelIdParameter, "CreateChannelIdParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateHandlerIdParameter();
+            Ensure(obj.HandlerIdMember1.Val == DotsTest.ParameterTypes.HandlerIdParameter, "CreateHandlerIdParameter member1");
+            Ensure(obj.HandlerIdMember2.Val == DotsTest.ParameterTypes.HandlerIdParameter, "CreateHandlerIdParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateObjectParameter();
+            var expected = DotsTest.ParameterTypes.ObjectParameter;
+            EnsureObjectXml(obj.ObjectMember1.Obj, expected, "CreateObjectParameter member1");
+            EnsureObjectXml(obj.ObjectMember2.Obj, expected, "CreateObjectParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateBinaryParameter();
+            var expected = DotsTest.ParameterTypes.BinaryParameter;
+            Ensure(obj.BinaryMember1.Val.SequenceEqual(expected), "CreateBinaryParameter member1");
+            Ensure(obj.BinaryMember2.Val.SequenceEqual(expected), "CreateBinaryParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateTestClassParameter();
+            var expected = DotsTest.ParameterTypes.TestClassParameter;
+            EnsureTestItem(obj.TestClassMember1.Obj, expected, "CreateTestClassParameter member1");
+            EnsureTestItem(obj.TestClassMember2.Obj, expected, "CreateTestClassParameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateAmpere32Parameter();
+            EnsureFloat32(obj.Ampere32Member1.Val, DotsTest.ParameterTypes.Ampere32Parameter, "CreateAmpere32Parameter member1");
+            EnsureFloat32(obj.Ampere32Member2.Val, DotsTest.ParameterTypes.Ampere32Parameter, "CreateAmpere32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateCubicMeter32Parameter();
+            EnsureFloat32(obj.CubicMeter32Member1.Val, DotsTest.ParameterTypes.CubicMeter32Parameter, "CreateCubicMeter32Parameter member1");
+            EnsureFloat32(obj.CubicMeter32Member2.Val, DotsTest.ParameterTypes.CubicMeter32Parameter, "CreateCubicMeter32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateHertz32Parameter();
+            EnsureFloat32(obj.Hertz32Member1.Val, DotsTest.ParameterTypes.Hertz32Parameter, "CreateHertz32Parameter member1");
+            EnsureFloat32(obj.Hertz32Member2.Val, DotsTest.ParameterTypes.Hertz32Parameter, "CreateHertz32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateJoule32Parameter();
+            EnsureFloat32(obj.Joule32Member1.Val, DotsTest.ParameterTypes.Joule32Parameter, "CreateJoule32Parameter member1");
+            EnsureFloat32(obj.Joule32Member2.Val, DotsTest.ParameterTypes.Joule32Parameter, "CreateJoule32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKelvin32Parameter();
+            EnsureFloat32(obj.Kelvin32Member1.Val, DotsTest.ParameterTypes.Kelvin32Parameter, "CreateKelvin32Parameter member1");
+            EnsureFloat32(obj.Kelvin32Member2.Val, DotsTest.ParameterTypes.Kelvin32Parameter, "CreateKelvin32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKilogram32Parameter();
+            EnsureFloat32(obj.Kilogram32Member1.Val, DotsTest.ParameterTypes.Kilogram32Parameter, "CreateKilogram32Parameter member1");
+            EnsureFloat32(obj.Kilogram32Member2.Val, DotsTest.ParameterTypes.Kilogram32Parameter, "CreateKilogram32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeter32Parameter();
+            EnsureFloat32(obj.Meter32Member1.Val, DotsTest.ParameterTypes.Meter32Parameter, "CreateMeter32Parameter member1");
+            EnsureFloat32(obj.Meter32Member2.Val, DotsTest.ParameterTypes.Meter32Parameter, "CreateMeter32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecond32Parameter();
+            EnsureFloat32(obj.MeterPerSecond32Member1.Val, DotsTest.ParameterTypes.MeterPerSecond32Parameter, "CreateMeterPerSecond32Parameter member1");
+            EnsureFloat32(obj.MeterPerSecond32Member2.Val, DotsTest.ParameterTypes.MeterPerSecond32Parameter, "CreateMeterPerSecond32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecondSquared32Parameter();
+            EnsureFloat32(obj.MeterPerSecondSquared32Member1.Val, DotsTest.ParameterTypes.MeterPerSecondSquared32Parameter, "CreateMeterPerSecondSquared32Parameter member1");
+            EnsureFloat32(obj.MeterPerSecondSquared32Member2.Val, DotsTest.ParameterTypes.MeterPerSecondSquared32Parameter, "CreateMeterPerSecondSquared32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateNewton32Parameter();
+            EnsureFloat32(obj.Newton32Member1.Val, DotsTest.ParameterTypes.Newton32Parameter, "CreateNewton32Parameter member1");
+            EnsureFloat32(obj.Newton32Member2.Val, DotsTest.ParameterTypes.Newton32Parameter, "CreateNewton32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreatePascal32Parameter();
+            EnsureFloat32(obj.Pascal32Member1.Val, DotsTest.ParameterTypes.Pascal32Parameter, "CreatePascal32Parameter member1");
+            EnsureFloat32(obj.Pascal32Member2.Val, DotsTest.ParameterTypes.Pascal32Parameter, "CreatePascal32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadian32Parameter();
+            EnsureFloat32(obj.Radian32Member1.Val, DotsTest.ParameterTypes.Radian32Parameter, "CreateRadian32Parameter member1");
+            EnsureFloat32(obj.Radian32Member2.Val, DotsTest.ParameterTypes.Radian32Parameter, "CreateRadian32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecond32Parameter();
+            EnsureFloat32(obj.RadianPerSecond32Member1.Val, DotsTest.ParameterTypes.RadianPerSecond32Parameter, "CreateRadianPerSecond32Parameter member1");
+            EnsureFloat32(obj.RadianPerSecond32Member2.Val, DotsTest.ParameterTypes.RadianPerSecond32Parameter, "CreateRadianPerSecond32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecondSquared32Parameter();
+            EnsureFloat32(obj.RadianPerSecondSquared32Member1.Val, DotsTest.ParameterTypes.RadianPerSecondSquared32Parameter, "CreateRadianPerSecondSquared32Parameter member1");
+            EnsureFloat32(obj.RadianPerSecondSquared32Member2.Val, DotsTest.ParameterTypes.RadianPerSecondSquared32Parameter, "CreateRadianPerSecondSquared32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSecond32Parameter();
+            EnsureFloat32(obj.Second32Member1.Val, DotsTest.ParameterTypes.Second32Parameter, "CreateSecond32Parameter member1");
+            EnsureFloat32(obj.Second32Member2.Val, DotsTest.ParameterTypes.Second32Parameter, "CreateSecond32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSquareMeter32Parameter();
+            EnsureFloat32(obj.SquareMeter32Member1.Val, DotsTest.ParameterTypes.SquareMeter32Parameter, "CreateSquareMeter32Parameter member1");
+            EnsureFloat32(obj.SquareMeter32Member2.Val, DotsTest.ParameterTypes.SquareMeter32Parameter, "CreateSquareMeter32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSteradian32Parameter();
+            EnsureFloat32(obj.Steradian32Member1.Val, DotsTest.ParameterTypes.Steradian32Parameter, "CreateSteradian32Parameter member1");
+            EnsureFloat32(obj.Steradian32Member2.Val, DotsTest.ParameterTypes.Steradian32Parameter, "CreateSteradian32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateVolt32Parameter();
+            EnsureFloat32(obj.Volt32Member1.Val, DotsTest.ParameterTypes.Volt32Parameter, "CreateVolt32Parameter member1");
+            EnsureFloat32(obj.Volt32Member2.Val, DotsTest.ParameterTypes.Volt32Parameter, "CreateVolt32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateWatt32Parameter();
+            EnsureFloat32(obj.Watt32Member1.Val, DotsTest.ParameterTypes.Watt32Parameter, "CreateWatt32Parameter member1");
+            EnsureFloat32(obj.Watt32Member2.Val, DotsTest.ParameterTypes.Watt32Parameter, "CreateWatt32Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateAmpere64Parameter();
+            EnsureFloat64(obj.Ampere64Member1.Val, DotsTest.ParameterTypes.Ampere64Parameter, "CreateAmpere64Parameter member1");
+            EnsureFloat64(obj.Ampere64Member2.Val, DotsTest.ParameterTypes.Ampere64Parameter, "CreateAmpere64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateCubicMeter64Parameter();
+            EnsureFloat64(obj.CubicMeter64Member1.Val, DotsTest.ParameterTypes.CubicMeter64Parameter, "CreateCubicMeter64Parameter member1");
+            EnsureFloat64(obj.CubicMeter64Member2.Val, DotsTest.ParameterTypes.CubicMeter64Parameter, "CreateCubicMeter64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateHertz64Parameter();
+            EnsureFloat64(obj.Hertz64Member1.Val, DotsTest.ParameterTypes.Hertz64Parameter, "CreateHertz64Parameter member1");
+            EnsureFloat64(obj.Hertz64Member2.Val, DotsTest.ParameterTypes.Hertz64Parameter, "CreateHertz64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateJoule64Parameter();
+            EnsureFloat64(obj.Joule64Member1.Val, DotsTest.ParameterTypes.Joule64Parameter, "CreateJoule64Parameter member1");
+            EnsureFloat64(obj.Joule64Member2.Val, DotsTest.ParameterTypes.Joule64Parameter, "CreateJoule64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKelvin64Parameter();
+            EnsureFloat64(obj.Kelvin64Member1.Val, DotsTest.ParameterTypes.Kelvin64Parameter, "CreateKelvin64Parameter member1");
+            EnsureFloat64(obj.Kelvin64Member2.Val, DotsTest.ParameterTypes.Kelvin64Parameter, "CreateKelvin64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKilogram64Parameter();
+            EnsureFloat64(obj.Kilogram64Member1.Val, DotsTest.ParameterTypes.Kilogram64Parameter, "CreateKilogram64Parameter member1");
+            EnsureFloat64(obj.Kilogram64Member2.Val, DotsTest.ParameterTypes.Kilogram64Parameter, "CreateKilogram64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeter64Parameter();
+            EnsureFloat64(obj.Meter64Member1.Val, DotsTest.ParameterTypes.Meter64Parameter, "CreateMeter64Parameter member1");
+            EnsureFloat64(obj.Meter64Member2.Val, DotsTest.ParameterTypes.Meter64Parameter, "CreateMeter64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecond64Parameter();
+            EnsureFloat64(obj.MeterPerSecond64Member1.Val, DotsTest.ParameterTypes.MeterPerSecond64Parameter, "CreateMeterPerSecond64Parameter member1");
+            EnsureFloat64(obj.MeterPerSecond64Member2.Val, DotsTest.ParameterTypes.MeterPerSecond64Parameter, "CreateMeterPerSecond64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecondSquared64Parameter();
+            EnsureFloat64(obj.MeterPerSecondSquared64Member1.Val, DotsTest.ParameterTypes.MeterPerSecondSquared64Parameter, "CreateMeterPerSecondSquared64Parameter member1");
+            EnsureFloat64(obj.MeterPerSecondSquared64Member2.Val, DotsTest.ParameterTypes.MeterPerSecondSquared64Parameter, "CreateMeterPerSecondSquared64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateNewton64Parameter();
+            EnsureFloat64(obj.Newton64Member1.Val, DotsTest.ParameterTypes.Newton64Parameter, "CreateNewton64Parameter member1");
+            EnsureFloat64(obj.Newton64Member2.Val, DotsTest.ParameterTypes.Newton64Parameter, "CreateNewton64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreatePascal64Parameter();
+            EnsureFloat64(obj.Pascal64Member1.Val, DotsTest.ParameterTypes.Pascal64Parameter, "CreatePascal64Parameter member1");
+            EnsureFloat64(obj.Pascal64Member2.Val, DotsTest.ParameterTypes.Pascal64Parameter, "CreatePascal64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadian64Parameter();
+            EnsureFloat64(obj.Radian64Member1.Val, DotsTest.ParameterTypes.Radian64Parameter, "CreateRadian64Parameter member1");
+            EnsureFloat64(obj.Radian64Member2.Val, DotsTest.ParameterTypes.Radian64Parameter, "CreateRadian64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecond64Parameter();
+            EnsureFloat64(obj.RadianPerSecond64Member1.Val, DotsTest.ParameterTypes.RadianPerSecond64Parameter, "CreateRadianPerSecond64Parameter member1");
+            EnsureFloat64(obj.RadianPerSecond64Member2.Val, DotsTest.ParameterTypes.RadianPerSecond64Parameter, "CreateRadianPerSecond64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecondSquared64Parameter();
+            EnsureFloat64(obj.RadianPerSecondSquared64Member1.Val, DotsTest.ParameterTypes.RadianPerSecondSquared64Parameter, "CreateRadianPerSecondSquared64Parameter member1");
+            EnsureFloat64(obj.RadianPerSecondSquared64Member2.Val, DotsTest.ParameterTypes.RadianPerSecondSquared64Parameter, "CreateRadianPerSecondSquared64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSecond64Parameter();
+            EnsureFloat64(obj.Second64Member1.Val, DotsTest.ParameterTypes.Second64Parameter, "CreateSecond64Parameter member1");
+            EnsureFloat64(obj.Second64Member2.Val, DotsTest.ParameterTypes.Second64Parameter, "CreateSecond64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSquareMeter64Parameter();
+            EnsureFloat64(obj.SquareMeter64Member1.Val, DotsTest.ParameterTypes.SquareMeter64Parameter, "CreateSquareMeter64Parameter member1");
+            EnsureFloat64(obj.SquareMeter64Member2.Val, DotsTest.ParameterTypes.SquareMeter64Parameter, "CreateSquareMeter64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSteradian64Parameter();
+            EnsureFloat64(obj.Steradian64Member1.Val, DotsTest.ParameterTypes.Steradian64Parameter, "CreateSteradian64Parameter member1");
+            EnsureFloat64(obj.Steradian64Member2.Val, DotsTest.ParameterTypes.Steradian64Parameter, "CreateSteradian64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateVolt64Parameter();
+            EnsureFloat64(obj.Volt64Member1.Val, DotsTest.ParameterTypes.Volt64Parameter, "CreateVolt64Parameter member1");
+            EnsureFloat64(obj.Volt64Member2.Val, DotsTest.ParameterTypes.Volt64Parameter, "CreateVolt64Parameter member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateWatt64Parameter();
+            EnsureFloat64(obj.Watt64Member1.Val, DotsTest.ParameterTypes.Watt64Parameter, "CreateWatt64Parameter member1");
+            EnsureFloat64(obj.Watt64Member2.Val, DotsTest.ParameterTypes.Watt64Parameter, "CreateWatt64Parameter member2");
+        }
+
+        {
+            var obj = DotsTest.CreateRoutines.CreateInt32Inline();
+            Ensure(obj.Int32Member1.Val == 1, "CreateInt32Inline member1");
+            Ensure(obj.Int32Member2.Val == 2, "CreateInt32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateInt64Inline();
+            Ensure(obj.Int64Member1.Val == 11, "CreateInt64Inline member1");
+            Ensure(obj.Int64Member2.Val == 12, "CreateInt64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateFloat32Inline();
+            EnsureFloat32(obj.Float32Member1.Val, 1.5f, "CreateFloat32Inline member1");
+            EnsureFloat32(obj.Float32Member2.Val, 2.5f, "CreateFloat32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateFloat64Inline();
+            EnsureFloat64(obj.Float64Member1.Val, 1.25, "CreateFloat64Inline member1");
+            EnsureFloat64(obj.Float64Member2.Val, 2.25, "CreateFloat64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateBooleanInline();
+            Ensure(obj.BooleanMember1.Val, "CreateBooleanInline member1");
+            Ensure(!obj.BooleanMember2.Val, "CreateBooleanInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateEnumerationInline();
+            Ensure(obj.EnumerationMember1.Val == DotsTest.TestEnum.Enumeration.MyFirst, "CreateEnumerationInline member1");
+            Ensure(obj.EnumerationMember2.Val == DotsTest.TestEnum.Enumeration.MySecond, "CreateEnumerationInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateStringInline();
+            Ensure(obj.StringMember1.Val == "One", "CreateStringInline member1");
+            Ensure(obj.StringMember2.Val == "Two", "CreateStringInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateEntityIdInline();
+            Ensure(obj.EntityIdMember1.Val == new Safir.Dob.Typesystem.EntityId(DotsTest.TestItem.ClassTypeId, new Safir.Dob.Typesystem.InstanceId(1)), "CreateEntityIdInline member1");
+            Ensure(obj.EntityIdMember2.Val == new Safir.Dob.Typesystem.EntityId(DotsTest.TestItem.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("SomeInstance")), "CreateEntityIdInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateTypeIdInline();
+            Ensure(obj.TypeIdMember1.Val == DotsTest.TestItem.ClassTypeId, "CreateTypeIdInline member1");
+            Ensure(obj.TypeIdMember2.Val == Safir.Dob.Entity.ClassTypeId, "CreateTypeIdInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateInstanceIdInline();
+            Ensure(obj.InstanceIdMember1.Val == new Safir.Dob.Typesystem.InstanceId(1), "CreateInstanceIdInline member1");
+            Ensure(obj.InstanceIdMember2.Val == new Safir.Dob.Typesystem.InstanceId("SomeInstance"), "CreateInstanceIdInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateChannelIdInline();
+            Ensure(obj.ChannelIdMember1.Val == new Safir.Dob.Typesystem.ChannelId(1), "CreateChannelIdInline member1");
+            Ensure(obj.ChannelIdMember2.Val == new Safir.Dob.Typesystem.ChannelId("SomeChannel"), "CreateChannelIdInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateHandlerIdInline();
+            Ensure(obj.HandlerIdMember1.Val == new Safir.Dob.Typesystem.HandlerId(1), "CreateHandlerIdInline member1");
+            Ensure(obj.HandlerIdMember2.Val == new Safir.Dob.Typesystem.HandlerId("SomeHandler"), "CreateHandlerIdInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateObjectInline();
+            var expected1 = new Safir.Dob.Typesystem.Object();
+            var expected2 = new DotsTest.TestItem();
+            expected2.MyInt.Val = 5;
+            EnsureObjectXml(obj.ObjectMember1.Obj, expected1, "CreateObjectInline member1");
+            EnsureObjectXml(obj.ObjectMember2.Obj, expected2, "CreateObjectInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateBinaryInline();
+            Ensure(obj.BinaryMember1.Val.SequenceEqual(new byte[] {1, 2}), "CreateBinaryInline member1");
+            Ensure(obj.BinaryMember2.Val.SequenceEqual(new byte[] {3, 4}), "CreateBinaryInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateTestClassInline();
+            var expected1 = new DotsTest.TestItem();
+            var expected2 = new DotsTest.TestItem();
+            expected1.MyInt.Val = 17;
+            expected2.MyInt.Val = 23;
+            EnsureTestItem(obj.TestClassMember1.Obj, expected1, "CreateTestClassInline member1");
+            EnsureTestItem(obj.TestClassMember2.Obj, expected2, "CreateTestClassInline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateAmpere32Inline();
+            EnsureFloat32(obj.Ampere32Member1.Val, 1.1f, "CreateAmpere32Inline member1");
+            EnsureFloat32(obj.Ampere32Member2.Val, 2.1f, "CreateAmpere32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateCubicMeter32Inline();
+            EnsureFloat32(obj.CubicMeter32Member1.Val, 1.2f, "CreateCubicMeter32Inline member1");
+            EnsureFloat32(obj.CubicMeter32Member2.Val, 2.2f, "CreateCubicMeter32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateHertz32Inline();
+            EnsureFloat32(obj.Hertz32Member1.Val, 1.3f, "CreateHertz32Inline member1");
+            EnsureFloat32(obj.Hertz32Member2.Val, 2.3f, "CreateHertz32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateJoule32Inline();
+            EnsureFloat32(obj.Joule32Member1.Val, 1.4f, "CreateJoule32Inline member1");
+            EnsureFloat32(obj.Joule32Member2.Val, 2.4f, "CreateJoule32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKelvin32Inline();
+            EnsureFloat32(obj.Kelvin32Member1.Val, 1.5f, "CreateKelvin32Inline member1");
+            EnsureFloat32(obj.Kelvin32Member2.Val, 2.5f, "CreateKelvin32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKilogram32Inline();
+            EnsureFloat32(obj.Kilogram32Member1.Val, 1.6f, "CreateKilogram32Inline member1");
+            EnsureFloat32(obj.Kilogram32Member2.Val, 2.6f, "CreateKilogram32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeter32Inline();
+            EnsureFloat32(obj.Meter32Member1.Val, 1.7f, "CreateMeter32Inline member1");
+            EnsureFloat32(obj.Meter32Member2.Val, 2.7f, "CreateMeter32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecond32Inline();
+            EnsureFloat32(obj.MeterPerSecond32Member1.Val, 1.8f, "CreateMeterPerSecond32Inline member1");
+            EnsureFloat32(obj.MeterPerSecond32Member2.Val, 2.8f, "CreateMeterPerSecond32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecondSquared32Inline();
+            EnsureFloat32(obj.MeterPerSecondSquared32Member1.Val, 1.9f, "CreateMeterPerSecondSquared32Inline member1");
+            EnsureFloat32(obj.MeterPerSecondSquared32Member2.Val, 2.9f, "CreateMeterPerSecondSquared32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateNewton32Inline();
+            EnsureFloat32(obj.Newton32Member1.Val, 1.10f, "CreateNewton32Inline member1");
+            EnsureFloat32(obj.Newton32Member2.Val, 2.10f, "CreateNewton32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreatePascal32Inline();
+            EnsureFloat32(obj.Pascal32Member1.Val, 1.11f, "CreatePascal32Inline member1");
+            EnsureFloat32(obj.Pascal32Member2.Val, 2.11f, "CreatePascal32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadian32Inline();
+            EnsureFloat32(obj.Radian32Member1.Val, 1.12f, "CreateRadian32Inline member1");
+            EnsureFloat32(obj.Radian32Member2.Val, 2.12f, "CreateRadian32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecond32Inline();
+            EnsureFloat32(obj.RadianPerSecond32Member1.Val, 1.13f, "CreateRadianPerSecond32Inline member1");
+            EnsureFloat32(obj.RadianPerSecond32Member2.Val, 2.13f, "CreateRadianPerSecond32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecondSquared32Inline();
+            EnsureFloat32(obj.RadianPerSecondSquared32Member1.Val, 1.14f, "CreateRadianPerSecondSquared32Inline member1");
+            EnsureFloat32(obj.RadianPerSecondSquared32Member2.Val, 2.14f, "CreateRadianPerSecondSquared32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSecond32Inline();
+            EnsureFloat32(obj.Second32Member1.Val, 1.15f, "CreateSecond32Inline member1");
+            EnsureFloat32(obj.Second32Member2.Val, 2.15f, "CreateSecond32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSquareMeter32Inline();
+            EnsureFloat32(obj.SquareMeter32Member1.Val, 1.16f, "CreateSquareMeter32Inline member1");
+            EnsureFloat32(obj.SquareMeter32Member2.Val, 2.16f, "CreateSquareMeter32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSteradian32Inline();
+            EnsureFloat32(obj.Steradian32Member1.Val, 1.17f, "CreateSteradian32Inline member1");
+            EnsureFloat32(obj.Steradian32Member2.Val, 2.17f, "CreateSteradian32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateVolt32Inline();
+            EnsureFloat32(obj.Volt32Member1.Val, 1.18f, "CreateVolt32Inline member1");
+            EnsureFloat32(obj.Volt32Member2.Val, 2.18f, "CreateVolt32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateWatt32Inline();
+            EnsureFloat32(obj.Watt32Member1.Val, 1.19f, "CreateWatt32Inline member1");
+            EnsureFloat32(obj.Watt32Member2.Val, 2.19f, "CreateWatt32Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateAmpere64Inline();
+            EnsureFloat64(obj.Ampere64Member1.Val, 11.1, "CreateAmpere64Inline member1");
+            EnsureFloat64(obj.Ampere64Member2.Val, 12.1, "CreateAmpere64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateCubicMeter64Inline();
+            EnsureFloat64(obj.CubicMeter64Member1.Val, 11.2, "CreateCubicMeter64Inline member1");
+            EnsureFloat64(obj.CubicMeter64Member2.Val, 12.2, "CreateCubicMeter64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateHertz64Inline();
+            EnsureFloat64(obj.Hertz64Member1.Val, 11.3, "CreateHertz64Inline member1");
+            EnsureFloat64(obj.Hertz64Member2.Val, 12.3, "CreateHertz64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateJoule64Inline();
+            EnsureFloat64(obj.Joule64Member1.Val, 11.4, "CreateJoule64Inline member1");
+            EnsureFloat64(obj.Joule64Member2.Val, 12.4, "CreateJoule64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKelvin64Inline();
+            EnsureFloat64(obj.Kelvin64Member1.Val, 11.5, "CreateKelvin64Inline member1");
+            EnsureFloat64(obj.Kelvin64Member2.Val, 12.5, "CreateKelvin64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateKilogram64Inline();
+            EnsureFloat64(obj.Kilogram64Member1.Val, 11.6, "CreateKilogram64Inline member1");
+            EnsureFloat64(obj.Kilogram64Member2.Val, 12.6, "CreateKilogram64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeter64Inline();
+            EnsureFloat64(obj.Meter64Member1.Val, 11.7, "CreateMeter64Inline member1");
+            EnsureFloat64(obj.Meter64Member2.Val, 12.7, "CreateMeter64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecond64Inline();
+            EnsureFloat64(obj.MeterPerSecond64Member1.Val, 11.8, "CreateMeterPerSecond64Inline member1");
+            EnsureFloat64(obj.MeterPerSecond64Member2.Val, 12.8, "CreateMeterPerSecond64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateMeterPerSecondSquared64Inline();
+            EnsureFloat64(obj.MeterPerSecondSquared64Member1.Val, 11.9, "CreateMeterPerSecondSquared64Inline member1");
+            EnsureFloat64(obj.MeterPerSecondSquared64Member2.Val, 12.9, "CreateMeterPerSecondSquared64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateNewton64Inline();
+            EnsureFloat64(obj.Newton64Member1.Val, 11.10, "CreateNewton64Inline member1");
+            EnsureFloat64(obj.Newton64Member2.Val, 12.10, "CreateNewton64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreatePascal64Inline();
+            EnsureFloat64(obj.Pascal64Member1.Val, 11.11, "CreatePascal64Inline member1");
+            EnsureFloat64(obj.Pascal64Member2.Val, 12.11, "CreatePascal64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadian64Inline();
+            EnsureFloat64(obj.Radian64Member1.Val, 11.12, "CreateRadian64Inline member1");
+            EnsureFloat64(obj.Radian64Member2.Val, 12.12, "CreateRadian64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecond64Inline();
+            EnsureFloat64(obj.RadianPerSecond64Member1.Val, 11.13, "CreateRadianPerSecond64Inline member1");
+            EnsureFloat64(obj.RadianPerSecond64Member2.Val, 12.13, "CreateRadianPerSecond64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateRadianPerSecondSquared64Inline();
+            EnsureFloat64(obj.RadianPerSecondSquared64Member1.Val, 11.14, "CreateRadianPerSecondSquared64Inline member1");
+            EnsureFloat64(obj.RadianPerSecondSquared64Member2.Val, 12.14, "CreateRadianPerSecondSquared64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSecond64Inline();
+            EnsureFloat64(obj.Second64Member1.Val, 11.15, "CreateSecond64Inline member1");
+            EnsureFloat64(obj.Second64Member2.Val, 12.15, "CreateSecond64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSquareMeter64Inline();
+            EnsureFloat64(obj.SquareMeter64Member1.Val, 11.16, "CreateSquareMeter64Inline member1");
+            EnsureFloat64(obj.SquareMeter64Member2.Val, 12.16, "CreateSquareMeter64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateSteradian64Inline();
+            EnsureFloat64(obj.Steradian64Member1.Val, 11.17, "CreateSteradian64Inline member1");
+            EnsureFloat64(obj.Steradian64Member2.Val, 12.17, "CreateSteradian64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateVolt64Inline();
+            EnsureFloat64(obj.Volt64Member1.Val, 11.18, "CreateVolt64Inline member1");
+            EnsureFloat64(obj.Volt64Member2.Val, 12.18, "CreateVolt64Inline member2");
+        }
+        {
+            var obj = DotsTest.CreateRoutines.CreateWatt64Inline();
+            EnsureFloat64(obj.Watt64Member1.Val, 11.19, "CreateWatt64Inline member1");
+            EnsureFloat64(obj.Watt64Member2.Val, 12.19, "CreateWatt64Inline member2");
+        }
     }
 
 
