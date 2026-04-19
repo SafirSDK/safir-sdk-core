@@ -41,7 +41,6 @@
 #include "Methods.h"
 #include "RestRouting.h"
 #include "Typesystem.h"
-#include "JsonRpcResponse.h"
 #include "RequestErrorException.h"
 #include "JsonRpcId.h"
 #include "CommandValidator.h"
@@ -104,18 +103,6 @@ std::string RestResultFromJsonText(const std::string& json)
     }
 
     return RestResultFromParsedValue(valueDoc);
-}
-
-std::string RestResultFromJsonRpcResult(const std::string& jsonRpc)
-{
-    rapidjson::Document rpcDoc;
-    rpcDoc.Parse(jsonRpc.c_str());
-    if (rpcDoc.HasParseError() || !rpcDoc.IsObject() || !rpcDoc.HasMember("result"))
-    {
-        throw std::invalid_argument("Failed to parse JSON-RPC result");
-    }
-
-    return RestResultFromParsedValue(rpcDoc["result"]);
 }
 
 std::string RestResultString(const std::string& value)
@@ -256,10 +243,6 @@ void ExecuteRestCall(std::shared_ptr<DobConnection> dobConnection,
         {
             onSuccess(RestResultString("pong"));
         }
-        else if (method == Methods::GetTypeHierarchy)
-        {
-            onSuccess(RestResultFromJsonText(Typesystem::GetTypeHierarchy()));
-        }
         else if (method == Methods::ReadEntity)
         {
             const auto typeId     = ResolveTypeId(typeIdStr);
@@ -283,7 +266,17 @@ void ExecuteRestCall(std::shared_ptr<DobConnection> dobConnection,
             if (!ts::Operations::IsOfType(typeId, sd::Entity::ClassTypeId))
                 throw std::invalid_argument("typeId must refer to a subtype of Safir.Dob.Entity");
             auto ids = dobConnection->GetAllInstanceIds(typeId);
-            onSuccess(RestResultFromJsonRpcResult(JsonRpcResponse::UnquotedArray(JsonRpcId(1), ids)));
+            std::ostringstream os;
+            os << "[";
+            bool comma = false;
+            for (const auto& id : ids)
+            {
+                if (comma) os << ",";
+                os << id;
+                comma = true;
+            }
+            os << "]";
+            onSuccess(RestResultFromJsonText(os.str()));
         }
         else if (method == Methods::GetInstanceIdPolicy)
         {
@@ -671,6 +664,33 @@ private:
             catch (const std::exception& e)
             {
                 SendResponse(http::status::internal_server_error, JsonError(e.what()));
+            }
+            return;
+        }
+
+        // getParameter needs no connection
+        if (route.method == Methods::GetParameter)
+        {
+            auto it = query.find("name");
+            if (it == query.end() || it->second.empty())
+            {
+                SendResponse(http::status::bad_request,
+                             JsonError("Query parameter 'name' is required. Use GET /parameter?name=MyNamespace.MyClass.MyParameter"));
+                return;
+            }
+            if (it->second.rfind('.') == std::string::npos)
+            {
+                SendResponse(http::status::bad_request,
+                             JsonError("'name' must be a fully qualified parameter name like 'MyNamespace.MyClass.MyParameter'"));
+                return;
+            }
+            try
+            {
+                SendResponse(http::status::ok, RestResultFromJsonText(Typesystem::GetParameter(it->second)));
+            }
+            catch (const std::exception& e)
+            {
+                SendResponse(http::status::bad_request, JsonError(e.what()));
             }
             return;
         }

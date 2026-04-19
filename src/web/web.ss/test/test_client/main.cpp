@@ -97,6 +97,10 @@ int main() {
                          "{\"jsonrpc\":\"2.0\",\"result\":false,\"id\":\"aaa\"}",
                          ""));
 
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"getParameter\", \"params\":{\"parameter\":\"WebTest.Parameters.MyInt32Par\"}, \"id\":\"getPar\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":42,\"id\":\"getPar\"}",
+                         ""));
+
     items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"open\", \"params\":{\"connectionName\":\"test\"}, \"id\":\"bbb\"}",
                          "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"bbb\"}",
                          ""));

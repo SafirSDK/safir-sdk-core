@@ -434,6 +434,10 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
         {
             WsGetTypeHierarchy(req);
         }
+        else if (req.Method() == Methods::GetParameter && m_enableTypeSystem)
+        {
+            WsGetParameter(req);
+        }
         else if (req.Method() == Methods::GetVersion)
         {
             WsGetVersion(req);
@@ -568,6 +572,13 @@ void RemoteClient::WsGetTypeHierarchy(const JsonRpcRequest& req)
     {
         SendToClient(JsonRpcResponse::Error(req.Id(), JsonRpcErrorCodes::InternalError, "Failed to construct type hierarchy", e.what()));
     }
+}
+
+void RemoteClient::WsGetParameter(const JsonRpcRequest& req)
+{
+    CommandValidator::ValidateGetParameter(req);
+    if (!req.Id().IsNull())
+        SendToClient(JsonRpcResponse::Json(req.Id(), Typesystem::GetParameter(req.ParameterName())));
 }
 
 void RemoteClient::WsGetVersion(const JsonRpcRequest& req)

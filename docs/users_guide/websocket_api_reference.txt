@@ -146,6 +146,22 @@ Example::
 <-- {"jsonrpc": "2.0", "result": {"_DouType": "Safir.Websocket.Typesystem.TypeHierarchy", "RootClass": {...}}, "id": 123}
 ----------------------------
 
+==== Method: getParameter
+Get the value(s) of a DOU parameter. This method is only allowed if _EnableTypesystemCommands_ is set to _true_ in
+the WebSocket server configuration.
+
+Params::
+ * `parameter` - The fully qualified parameter name, e.g. _"MyNamespace.MyClass.MyParameter"_.
+
+Returns::
+ * `result` - The parameter value directly. For single-value parameters, the value itself. For arrays and sequences, a JSON array of values. For dictionaries, a JSON array of objects with `key` and `value` fields.
+
+Example::
+----------------------------
+--> {"jsonrpc": "2.0", "method": "getParameter", "params": {"parameter": "MyNamespace.MyClass.MyParameter"}, "id": 123}
+<-- {"jsonrpc": "2.0", "result": 42, "id": 123}
+----------------------------
+
 ==== Method: getVersion
 Get the version of the running Safir SDK Core server.
 

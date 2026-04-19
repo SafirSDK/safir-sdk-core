@@ -179,17 +179,9 @@ void ApiServer::Terminate()
     shutDownTimer->expires_after(std::chrono::milliseconds(500));
     shutDownTimer->async_wait([this, shutDownTimer](const boost::system::error_code&)
     {
-        boost::asio::post(m_connectionsStrand, [this]
-        {
-            boost::system::error_code localEc;
-            m_acceptor.cancel(localEc);
-            m_acceptor.close(localEc);
-        });
-
+        lllog(5)<<"API: all connections closed..."<<std::endl;
         m_io.stop();
     });
-
-    lllog(5)<<"API: all connections closed..."<<std::endl;
 }
 
 void ApiServer::StartAccept()

@@ -416,42 +416,6 @@ inline void JsonRpcTest()
     }
 
     //-------------------------------------------
-    // Test JsonHelpers::SplitArrayOfObjects
-    //-------------------------------------------
-    {
-        // single object
-        auto parts = JsonHelpers::SplitArrayOfObjects("[{\"a\":1}]");
-        CHECK(parts.size()==1);
-        CHECK(parts[0]=="{\"a\":1}");
-    }
-    {
-        // multiple objects
-        auto parts = JsonHelpers::SplitArrayOfObjects("[{\"a\":1},{\"b\":2},{\"c\":3}]");
-        CHECK(parts.size()==3);
-        CHECK(parts[0]=="{\"a\":1}");
-        CHECK(parts[1]=="{\"b\":2}");
-        CHECK(parts[2]=="{\"c\":3}");
-    }
-    {
-        // nested objects are kept intact as one element
-        auto parts = JsonHelpers::SplitArrayOfObjects("[{\"outer\":{\"inner\":42}}]");
-        CHECK(parts.size()==1);
-        CHECK(parts[0]=="{\"outer\":{\"inner\":42}}");
-    }
-    {
-        // empty array
-        auto parts = JsonHelpers::SplitArrayOfObjects("[]");
-        CHECK(parts.size()==0);
-    }
-    {
-        // array with multiple nested objects
-        auto parts = JsonHelpers::SplitArrayOfObjects("[{\"x\":{\"y\":1}},{\"a\":2}]");
-        CHECK(parts.size()==2);
-        CHECK(parts[0]=="{\"x\":{\"y\":1}}");
-        CHECK(parts[1]=="{\"a\":2}");
-    }
-
-    //-------------------------------------------
     // Test JsonRpcRequest - additional error paths
     //-------------------------------------------
 

@@ -229,6 +229,15 @@ namespace CommandValidator
             throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Invalid parameter in method 'getInstanceIdPolicy'", "typeId is mandatory in command 'getInstanceIdPolicy'");
     }
 
+    inline void ValidateGetParameter(const JsonRpcRequest& req)
+    {
+        if (!req.HasParameterName() || req.ParameterName().empty())
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Invalid parameter in method 'getParameter'", "'parameter' is mandatory and must be a fully qualified name like 'MyNamespace.MyClass.MyParameter'");
+        const auto& name = req.ParameterName();
+        if (name.rfind('.') == std::string::npos)
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Invalid parameter in method 'getParameter'", "'parameter' must be a fully qualified name like 'MyNamespace.MyClass.MyParameter'");
+    }
+
     inline void ValidateSendSystemLog(const JsonRpcRequest& req)
     {
         static const std::vector<std::string> validSeverities = {

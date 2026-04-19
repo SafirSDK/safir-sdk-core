@@ -120,35 +120,6 @@ namespace JsonHelpers
     {
         return json[0]=='{' && json[json.length()-1]=='}';
     }
-
-    inline std::vector<std::string> SplitArrayOfObjects(const std::string& json)
-    {
-        std::vector<std::string> result;
-
-        size_t uncloseBracketCount=0;
-        size_t startIndex=0;
-        for (size_t i=0; i<json.length(); i++)
-        {
-            if (json[i]=='{')
-            {
-                if (uncloseBracketCount==0)
-                {
-                    startIndex=i;
-                }
-                ++uncloseBracketCount;
-            }
-            else if (json[i]=='}')
-            {
-                --uncloseBracketCount;
-                if (uncloseBracketCount==0)
-                {
-                    result.emplace_back(json.substr(startIndex, i-startIndex+1));
-                }
-            }
-        }
-
-        return result;
-    }
 }
 
 inline std::ostream& operator<<(std::ostream& os, const ts::HandlerId& hash) {return JsonHelpers::AddHashedVal(os, hash);}

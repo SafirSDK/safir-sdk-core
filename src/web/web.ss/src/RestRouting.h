@@ -115,6 +115,13 @@ inline RestRoute RouteRestRequest(boost::beast::http::verb verb,
         return {Methods::GetTypeHierarchy, {}, {}, {}};
     }
 
+    // GET /parameter?name=Fully.Qualified.ParameterName
+    if (seg.size() == 1 && seg[0] == "parameter")
+    {
+        if (!isGet) return {kWrongVerb, {}, {}, {}};
+        return {Methods::GetParameter, {}, {}, {}};
+    }
+
     // GET /version
     if (seg.size() == 1 && seg[0] == "version")
     {

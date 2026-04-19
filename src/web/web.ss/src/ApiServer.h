@@ -24,6 +24,7 @@
 #pragma once
 
 
+#include <atomic>
 #include <set>
 #include <boost/asio.hpp>
 #include <boost/asio/signal_set.hpp>
@@ -50,7 +51,7 @@ private:
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
     std::set<std::shared_ptr<RemoteClient> > m_connections;
     boost::asio::signal_set m_signals;
-    bool m_isTerminating;
+    std::atomic<bool> m_isTerminating;
 
     //own DOB connection
     sd::Connection m_dobConnection;

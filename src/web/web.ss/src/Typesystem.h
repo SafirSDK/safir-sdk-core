@@ -29,5 +29,5 @@ namespace ts = Safir::Dob::Typesystem;
 namespace Typesystem
 {
     std::string GetTypeHierarchy();
-
+    std::string GetParameter(const std::string& fullyQualifiedName);
 }

@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>WebTest.Parameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+
+    <!-- ======================== Single value parameters ======================== -->
+
+    <parameter>
+      <name>MyBooleanPar</name>
+      <type>Boolean</type>
+      <value>True</value>
+    </parameter>
+
+    <parameter>
+      <name>MyInt32Par</name>
+      <type>Int32</type>
+      <value>42</value>
+    </parameter>
+
+    <parameter>
+      <name>MyInt64Par</name>
+      <type>Int64</type>
+      <value>1234567890123</value>
+    </parameter>
+
+    <parameter>
+      <name>MyFloat32Par</name>
+      <type>Float32</type>
+      <value>3.14</value>
+    </parameter>
+
+    <parameter>
+      <name>MyFloat64Par</name>
+      <type>Float64</type>
+      <value>2.718281828459</value>
+    </parameter>
+
+    <parameter>
+      <name>MyStringPar</name>
+      <type>String</type>
+      <value>Hello World</value>
+    </parameter>
+
+    <!-- Binary value is base64 encoding of the ASCII bytes "Hello World" -->
+    <parameter>
+      <name>MyBinaryPar</name>
+      <type>Binary</type>
+      <value>SGVsbG8gV29ybGQ=</value>
+    </parameter>
+
+    <parameter>
+      <name>MyTypeIdPar</name>
+      <type>TypeId</type>
+      <value>Safir.Dob.Entity</value>
+    </parameter>
+
+    <parameter>
+      <name>MyInstanceIdPar</name>
+      <type>InstanceId</type>
+      <value>myNamedInstance</value>
+    </parameter>
+
+    <parameter>
+      <name>MyHandlerIdPar</name>
+      <type>HandlerId</type>
+      <value>myHandler</value>
+    </parameter>
+
+    <parameter>
+      <name>MyChannelIdPar</name>
+      <type>ChannelId</type>
+      <value>myChannel</value>
+    </parameter>
+
+    <parameter>
+      <name>MyEntityIdPar</name>
+      <type>EntityId</type>
+      <entityId>
+        <name>Safir.Dob.Entity</name>
+        <instanceId>theOnlyInstance</instanceId>
+      </entityId>
+    </parameter>
+
+    <!-- Enumeration parameter -->
+    <parameter>
+      <name>MyEnumPar</name>
+      <type>Safir.Dob.MemoryLevel</type>
+      <value>Normal</value>
+    </parameter>
+
+    <!-- Object parameter - contains a serialized Safir.Dob.ResponseErrorInfo item -->
+    <parameter>
+      <name>MyObjectPar</name>
+      <type>Safir.Dob.ResponseErrorInfo</type>
+      <Safir.Dob.ResponseErrorInfo>
+        <Member>1</Member>
+        <Index>0</Index>
+        <Code>SafirReqErr</Code>
+      </Safir.Dob.ResponseErrorInfo>
+    </parameter>
+
+    <!-- ======================== Array parameters ======================== -->
+
+    <parameter>
+      <name>MyInt32ArrayPar</name>
+      <type>Int32</type>
+      <array>
+        <value>10</value>
+        <value>20</value>
+        <value>30</value>
+      </array>
+    </parameter>
+
+    <parameter>
+      <name>MyStringArrayPar</name>
+      <type>String</type>
+      <array>
+        <value>first</value>
+        <value>second</value>
+        <value>third</value>
+      </array>
+    </parameter>
+
+    <parameter>
+      <name>MyEntityIdArrayPar</name>
+      <type>EntityId</type>
+      <array>
+        <entityId>
+          <name>Safir.Dob.Entity</name>
+          <instanceId>one</instanceId>
+        </entityId>
+        <entityId>
+          <name>Safir.Dob.Entity</name>
+          <instanceId>two</instanceId>
+        </entityId>
+      </array>
+    </parameter>
+
+    <parameter>
+      <name>MyEnumArrayPar</name>
+      <type>Safir.Dob.MemoryLevel</type>
+      <array>
+        <value>Normal</value>
+        <value>Warning</value>
+        <value>Low</value>
+      </array>
+    </parameter>
+
+    <parameter>
+      <name>MyObjectArrayPar</name>
+      <type>Safir.Dob.ResponseErrorInfo</type>
+      <array>
+        <Safir.Dob.ResponseErrorInfo>
+          <Member>1</Member>
+          <Index>0</Index>
+          <Code>SafirReqErr</Code>
+        </Safir.Dob.ResponseErrorInfo>
+        <Safir.Dob.ResponseErrorInfo>
+          <Member>2</Member>
+          <Index>1</Index>
+          <Code>SafirNullMember</Code>
+        </Safir.Dob.ResponseErrorInfo>
+      </array>
+    </parameter>
+
+    <!-- ======================== Dictionary parameters ======================== -->
+    <!-- Note: sequence parameters are not supported; use array instead.       -->
+
+    <!-- Dictionary: String key -> Float64 value -->
+    <parameter>
+      <name>MyStringToFloat64DictPar</name>
+      <type>Float64</type>
+      <dictionary keyType="String">
+        <entry>
+          <key>Hot</key>
+          <value>65.4321</value>
+        </entry>
+        <entry>
+          <key>Cold</key>
+          <value>-12.3456</value>
+        </entry>
+      </dictionary>
+    </parameter>
+
+    <!-- Dictionary: Int32 key -> String value -->
+    <parameter>
+      <name>MyInt32ToStringDictPar</name>
+      <type>String</type>
+      <dictionary keyType="Int32">
+        <entry>
+          <key>1</key>
+          <value>one</value>
+        </entry>
+        <entry>
+          <key>2</key>
+          <value>two</value>
+        </entry>
+      </dictionary>
+    </parameter>
+
+    <!-- Dictionary: Enum key (Safir.Dob.MemoryLevel) -> Int32 value -->
+    <parameter>
+      <name>MyEnumToInt32DictPar</name>
+      <type>Int32</type>
+      <dictionary keyType="Safir.Dob.MemoryLevel">
+        <entry>
+          <key>Normal</key>
+          <value>100</value>
+        </entry>
+        <entry>
+          <key>Warning</key>
+          <value>80</value>
+        </entry>
+        <entry>
+          <key>Low</key>
+          <value>50</value>
+        </entry>
+      </dictionary>
+    </parameter>
+
+  </parameters>
+</class>

@@ -48,10 +48,28 @@ HTTP/1.1 200 OK
 {"result": {"_DouType": "Safir.Websocket.Typesystem.TypeHierarchy", "RootClass": {...}}}
 ----------------------------
 
+==== GET /parameter
+Get the value(s) of a DOU parameter. This endpoint is only available when _EnableTypesystemCommands_ is set to
+_true_ in the WebSocket server configuration.
+
+Query parameters::
+ * `name` - The fully qualified parameter name, e.g. _MyNamespace.MyClass.MyParameter_.
+
+Returns::
+ * `result` - The parameter value directly. For single-value parameters, the value itself. For arrays and sequences, a JSON array of values. For dictionaries, a JSON array of objects with `key` and `value` fields.
+
+Example::
+----------------------------
+GET /parameter?name=MyNamespace.MyClass.MyParameter HTTP/1.1
+
+HTTP/1.1 200 OK
+{"result": 42}
+----------------------------
+
 === Connection status
 
 ==== GET /connections
-Get the names of all currently open Dob connections.
+Get the names of all currently open Dob connections. This endpoint is only available via REST and has no WebSocket equivalent.
 
 Returns::
  * `result` - A JSON array of connection name strings.

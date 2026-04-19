@@ -145,6 +145,9 @@ public:
     bool HasSender() const {return HasParam("sender");}
     std::string Sender() const {return m_doc["params"]["sender"].GetString();}
 
+    bool HasParameterName() const {return HasParam("parameter");}
+    std::string ParameterName() const {return m_doc["params"]["parameter"].GetString();}
+
 private:
     rj::Document m_doc;
     JsonRpcId m_id;
@@ -216,7 +219,11 @@ private:
             throw RequestErrorException(JsonRpcErrorCodes::InvalidRequest, "Method must be a string.");
 
         if (m_doc.HasMember("params"))
+        {
+            if (!m_doc["params"].IsObject())
+                throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Member 'params' must be a JSON object.");
             m_params=&m_doc["params"];
+        }
         else
             return; //nothing more to validate, the rest is params
 
