@@ -266,6 +266,19 @@ void DobObjectEditWidget::Init()
                 }
             }
         }
+        else if (index.column() == 4)
+        {
+            auto mt = p->GetMemberInfo()->memberType;
+            auto tid = p->GetMemberInfo()->memberTypeId;
+            if (mt == ObjectMemberType && tid != Safir::Dob::Typesystem::Object::ClassTypeId)
+            {
+                emit OpenObjectEdit(tid);
+            }
+            else if (mt == EnumerationMemberType)
+            {
+                emit OpenEnumViewer(p->GetMemberInfo()->memberTypeId, p->IsNull() ? QString{} : p->GetValue());
+            }
+        }
     });
 
     connect(m_sourceModel, &DobObjectModel::OpenEditor, this, [this](const QModelIndex& srcIndex)

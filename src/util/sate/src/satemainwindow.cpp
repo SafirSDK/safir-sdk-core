@@ -485,6 +485,8 @@ void SateMainWindow::OnOpenObjectEdit(const int64_t typeId)
 
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, [this](auto title, auto text){ AddXmlPage(title, text); });
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, [this](auto title, auto text){ AddJsonPage(title, text); });
+    connect(oe, &DobObjectEditWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEdit);
+    connect(oe, &DobObjectEditWidget::OpenEnumViewer, this, &SateMainWindow::OnOpenEnumViewer);
     
     if (baseClass == TypesystemRepository::Response)
     {
@@ -515,6 +517,8 @@ void SateMainWindow::OnOpenObjectEditWithInstance(QString channelHandler,
     auto oe = new DobObjectEditWidget(&m_dob, channelHandler, instance, object, this);
     connect(oe, &DobObjectEditWidget::XmlSerializedObject, this, [this](auto title, auto text){ AddXmlPage(title, text); });
     connect(oe, &DobObjectEditWidget::JsonSerializedObject, this, [this](auto title, auto text){ AddJsonPage(title, text); });
+    connect(oe, &DobObjectEditWidget::OpenObjectEdit, this, &SateMainWindow::OnOpenObjectEdit);
+    connect(oe, &DobObjectEditWidget::OpenEnumViewer, this, &SateMainWindow::OnOpenEnumViewer);
     if (baseClass == TypesystemRepository::Response)
     {
         connect(oe, &DobObjectEditWidget::SetResponseObject, this, &SateMainWindow::SetResponseObject);

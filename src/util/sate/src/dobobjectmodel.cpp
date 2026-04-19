@@ -226,6 +226,17 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
 
             return item->IsNull() ? QColor(135, 134, 132) : QColor(250, 185, 0);
         }
+        if (index.column() == 4)
+        {
+            auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+            auto mt = item->GetMemberInfo()->memberType;
+            auto tid = item->GetMemberInfo()->memberTypeId;
+            if ((mt == ObjectMemberType && tid != Safir::Dob::Typesystem::Object::ClassTypeId) ||
+                mt == EnumerationMemberType)
+            {
+                return QColor(116, 192, 252); // blue link color
+            }
+        }
     }
     break;
 
@@ -260,6 +271,19 @@ QVariant DobObjectModel::data(const QModelIndex &index, int role) const
             {
                 QFont font;
                 font.setBold(true);
+                return font;
+            }
+        }
+        if (index.column() == 4)
+        {
+            auto item = static_cast<const MemberTreeItem*>(index.internalPointer());
+            auto mt = item->GetMemberInfo()->memberType;
+            auto tid = item->GetMemberInfo()->memberTypeId;
+            if ((mt == ObjectMemberType && tid != Safir::Dob::Typesystem::Object::ClassTypeId) ||
+                mt == EnumerationMemberType)
+            {
+                QFont font;
+                font.setUnderline(true);
                 return font;
             }
         }

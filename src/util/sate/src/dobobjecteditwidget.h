@@ -47,6 +47,8 @@ signals:
     void XmlSerializedObject(const QString& title, const QString& text);
     void JsonSerializedObject(const QString& title, const QString& text);
     void SetResponseObject(const Safir::Dob::ResponsePtr& response);
+    void OpenObjectEdit(int64_t typeId);
+    void OpenEnumViewer(int64_t typeId, const QString& currentItem);
 
 private slots:
     void PositionFilters();
