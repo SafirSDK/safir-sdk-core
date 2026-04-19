@@ -14,6 +14,7 @@ target_link_libraries(safir_web PRIVATE
   safir_generated-Core-cpp
   dots_internal
   lluf_internal
+  logging_cpp
   rapidjson
   Boost::boost)
 

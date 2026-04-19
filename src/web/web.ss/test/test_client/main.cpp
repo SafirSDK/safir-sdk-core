@@ -299,6 +299,15 @@ int main() {
                          "{\"jsonrpc\":\"2.0\",\"result\":{\"isSuccess\":false,\"response\":{\"_DouType\":\"Safir.Dob.ErrorResponse\",\"Code\":\"Oh no\",\"AdditionalInfo\":\"I will not\"}},\"id\":\"service\"}",
                          ""));
 
+    //sendSystemLog
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendSystemLog\", \"params\":{\"severity\":\"Error\",\"facility\":\"Local0\",\"text\":\"component-test-log-1\"}, \"id\":\"syslog1\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"syslog1\"}",
+                         ""));
+
+    items.push(QueueItem("{\"jsonrpc\":\"2.0\", \"method\":\"sendSystemLog\", \"params\":{\"severity\":\"Warning\",\"facility\":\"Local1\",\"text\":\"component-test-log-2\",\"sender\":\"testclient\"}, \"id\":\"syslog2\"}",
+                         "{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"syslog2\"}",
+                         ""));
+
 
     std::cout<<"Starting client..."<<std::endl;
     try {

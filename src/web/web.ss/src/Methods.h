@@ -59,6 +59,9 @@ namespace Methods
     static const std::string GetAllInstanceIds = "getAllInstanceIds";
     static const std::string GetInstanceIdPolicy = "getInstanceIdPolicy";
 
+    //logging
+    static const std::string SendSystemLog = "sendSystemLog";
+
     //connections
     static const std::string GetConnections = "getConnections";
 

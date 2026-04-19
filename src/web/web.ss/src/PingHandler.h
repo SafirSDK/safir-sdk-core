@@ -56,7 +56,7 @@ public:
             m_running=true;
             m_timer.expires_after(m_pingInterval);
             auto self(shared_from_this());
-            m_timer.async_wait(boost::asio::bind_executor(m_strand, [self](const boost::system::error_code&){self->OnTimeout();}));
+            m_timer.async_wait(boost::asio::bind_executor(m_strand, [self](const boost::system::error_code& ec){if (!ec) self->OnTimeout();}));
         });
     }
 
@@ -103,7 +103,7 @@ private:
             }
 
             auto self(shared_from_this());
-            m_timer.async_wait(boost::asio::bind_executor(m_strand, [self](const boost::system::error_code&){self->OnTimeout();}));
+            m_timer.async_wait(boost::asio::bind_executor(m_strand, [self](const boost::system::error_code& ec){if (!ec) self->OnTimeout();}));
         }
     }
 };

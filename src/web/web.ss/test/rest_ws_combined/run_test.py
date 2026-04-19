@@ -628,17 +628,102 @@ async def run_combined_flow():
             raise AssertionError("REST unregisterHandler (Command) failed: " + str(result))
         log("Step 35 succeeded")
 
-        # ======= STEP 36: Close connection via websocket =======
-        log("Step 36: Close websocket connection")
+        # ======= STEP 36: sendSystemLog (WS) with sender =======
+        log("Step 36: WS sendSystemLog (severity=Error, facility=Local0, sender=myApp)")
+        request_id = "sendSystemLog-ws-1"
+        await client.send(json.dumps({
+            "jsonrpc": "2.0",
+            "method": "sendSystemLog",
+            "params": {"severity": "Error", "facility": "Local0", "text": "ws-sendSystemLog-test", "sender": "myApp"},
+            "id": request_id
+        }))
+        response = await client.wait_for_response(request_id)
+        if response.get("result") != "OK":
+            raise AssertionError("WS sendSystemLog failed: " + str(response))
+        log("Step 36 succeeded")
+
+        # ======= STEP 37: sendSystemLog (REST) with sender =======
+        log("Step 37: REST sendSystemLog (severity=Warning, facility=Local1, sender=restClient)")
+        status, result = rest_post(
+            rest_base + "/log",
+            {"severity": "Warning", "facility": "Local1", "text": "rest-sendSystemLog-test", "sender": "restClient"})
+        if status != 200:
+            raise AssertionError("REST sendSystemLog http status was not 200: " + str(status))
+        if result.get("status") != "OK":
+            raise AssertionError("REST sendSystemLog failed: " + str(result))
+        log("Step 37 succeeded")
+
+        # ======= STEP 38: sendSystemLog (WS) without sender - remote IP expected =======
+        log("Step 38: WS sendSystemLog without sender (remote IP should be used)")
+        request_id = "sendSystemLog-ws-noSender"
+        await client.send(json.dumps({
+            "jsonrpc": "2.0",
+            "method": "sendSystemLog",
+            "params": {"severity": "Notice", "facility": "Local0", "text": "ws-sendSystemLog-noSender"},
+            "id": request_id
+        }))
+        response = await client.wait_for_response(request_id)
+        if response.get("result") != "OK":
+            raise AssertionError("WS sendSystemLog (no sender) failed: " + str(response))
+        log("Step 38 succeeded")
+
+        # ======= STEP 39: sendSystemLog (REST) without sender - remote IP expected =======
+        log("Step 39: REST sendSystemLog without sender (remote IP should be used)")
+        status, result = rest_post(
+            rest_base + "/log",
+            {"severity": "Notice", "facility": "Local0", "text": "rest-sendSystemLog-noSender"})
+        if status != 200:
+            raise AssertionError("REST sendSystemLog (no sender) http status was not 200: " + str(status))
+        if result.get("status") != "OK":
+            raise AssertionError("REST sendSystemLog (no sender) failed: " + str(result))
+        log("Step 39 succeeded")
+
+        # ======= STEP 40: sendSystemLog (WS) without facility - Local0 default =======
+        log("Step 40: WS sendSystemLog without facility (Local0 should be used as default)")
+        request_id = "sendSystemLog-ws-noFacility"
+        await client.send(json.dumps({
+            "jsonrpc": "2.0",
+            "method": "sendSystemLog",
+            "params": {"severity": "Notice", "text": "ws-sendSystemLog-noFacility", "sender": "noFacilityTest"},
+            "id": request_id
+        }))
+        response = await client.wait_for_response(request_id)
+        if response.get("result") != "OK":
+            raise AssertionError("WS sendSystemLog (no facility) failed: " + str(response))
+        log("Step 40 succeeded")
+
+        # ======= STEP 41: sendSystemLog (REST) without facility - Local0 default =======
+        log("Step 41: REST sendSystemLog without facility (Local0 should be used as default)")
+        status, result = rest_post(
+            rest_base + "/log",
+            {"severity": "Notice", "text": "rest-sendSystemLog-noFacility", "sender": "noFacilityTest"})
+        if status != 200:
+            raise AssertionError("REST sendSystemLog (no facility) http status was not 200: " + str(status))
+        if result.get("status") != "OK":
+            raise AssertionError("REST sendSystemLog (no facility) failed: " + str(result))
+        log("Step 41 succeeded")
+
+        # ======= STEP 42: sendSystemLog REST - invalid facility =======
+        log("Step 42: REST sendSystemLog - invalid facility (expected 400)")
+        status, result = rest_post(
+            rest_base + "/log",
+            {"severity": "Error", "facility": "BadFacility", "text": "this-should-not-be-logged"},
+            allow_http_error=True)
+        if status != 400:
+            raise AssertionError("REST sendSystemLog with invalid facility expected 400, got: " + str(status))
+        log("Step 42 succeeded")
+
+        # ======= STEP 43: Close connection via websocket =======
+        log("Step 43: Close websocket connection")
         close_request_id = "combined-close-1"
         await client.send('{"jsonrpc":"2.0", "method":"close", "id":"' + close_request_id + '"}')
         close_response = await client.wait_for_response(close_request_id)
         if close_response.get("result") != "OK":
             raise AssertionError("Websocket close failed: " + str(close_response))
-        log("Step 36 succeeded")
+        log("Step 43 succeeded")
 
-        # ======= STEP 37: version (REST) - connection-less =======
-        log("Step 37: REST version")
+        # ======= STEP 44: version (REST) - connection-less =======
+        log("Step 44: REST version")
         status, result = rest_get(rest_base + "/version")
         if status != 200:
             raise AssertionError("REST version http status was not 200: " + str(status))
@@ -647,7 +732,7 @@ async def run_combined_flow():
         if not isinstance(result["result"], str) or not result["result"]:
             raise AssertionError("REST version expected a non-empty string, got: " + str(result))
         log("REST version result:", result["result"])
-        log("Step 37 succeeded")
+        log("Step 44 succeeded")
 
         log("All steps succeeded! Full REST API coverage verified.")
     finally:
@@ -685,8 +770,32 @@ def main():
         asyncio.run(run_combined_flow())
 
     if len(env.Syslog()) != 0:
-        log("Unexpected syslog output:\n" + env.Syslog())
-        return 1
+        expected_log_entries = [
+            "ws-sendSystemLog-test",
+            "rest-sendSystemLog-test",
+            "ws-sendSystemLog-noSender",
+            "rest-sendSystemLog-noSender",
+            "ws-sendSystemLog-noFacility",
+            "rest-sendSystemLog-noFacility",
+        ]
+        unexpected_syslog = "\n".join(
+            line for line in env.Syslog().splitlines()
+            if not any(entry in line for entry in expected_log_entries))
+        if unexpected_syslog.strip():
+            log("Unexpected syslog output:\n" + unexpected_syslog)
+            return 1
+
+        # Verify that no-sender entries were logged with the remote IP in brackets
+        syslog_lines = env.Syslog().splitlines()
+        for no_sender_text in ["ws-sendSystemLog-noSender", "rest-sendSystemLog-noSender"]:
+            matching = [line for line in syslog_lines if no_sender_text in line]
+            if not matching:
+                log(f"Expected syslog entry not found: {no_sender_text}")
+                return 1
+            # The entry must contain a bracketed IP address, e.g. [127.0.0.1]
+            if not any("[" in line and "]" in line for line in matching):
+                log(f"Syslog entry for '{no_sender_text}' missing bracketed sender (remote IP): {matching}")
+                return 1
 
     if not env.ReturnCodesOk():
         log("Some process exited with an unexpected value")

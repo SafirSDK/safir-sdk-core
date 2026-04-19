@@ -56,8 +56,13 @@ with TestEnvStopper(env):
 
 syslog_output = env.Syslog()
 if len(syslog_output) != 0:
-    log("Unexpected syslog output:\n" + syslog_output)
-    sys.exit(1)
+    expected_log_entries = ["component-test-log-1", "component-test-log-2"]
+    unexpected_syslog = "\n".join(
+        line for line in syslog_output.splitlines()
+        if not any(entry in line for entry in expected_log_entries))
+    if unexpected_syslog.strip():
+        log("Unexpected syslog output:\n" + unexpected_syslog)
+        sys.exit(1)
 
 if not env.ReturnCodesOk():
     log("Some process exited with an unexpected value")

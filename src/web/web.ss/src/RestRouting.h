@@ -122,6 +122,13 @@ inline RestRoute RouteRestRequest(boost::beast::http::verb verb,
         return {Methods::GetVersion, {}, {}, {}};
     }
 
+    // POST /log  → sendSystemLog (no connection required)
+    if (seg.size() == 1 && seg[0] == "log")
+    {
+        if (!isPost) return {kWrongVerb, {}, {}, {}};
+        return {Methods::SendSystemLog, {}, {}, {}};
+    }
+
     // GET /connections  (list all connection names, no connection id)
     if (seg.size() == 1 && seg[0] == "connections")
     {
@@ -180,14 +187,10 @@ inline RestRoute RouteRestRequest(boost::beast::http::verb verb,
                 if (!isGet) return {kWrongVerb, {}, {}, {}};
                 return {Methods::GetNumberOfInstances, connId, typeId, {}};
             }
-            if (fifth == "isCreated")
-            {
-                // /connections/{id}/entities/{typeId}/isCreated — instanceId from query param
-                if (!isGet) return {kWrongVerb, {}, {}, {}};
-                return {Methods::IsCreated, connId, typeId, {}};
-            }
 
             // fifth is instanceId
+            // Note: isCreated requires an explicit instanceId; use the 6-segment form:
+            //   GET /connections/{id}/entities/{typeId}/{instanceId}/isCreated
             const std::string& instanceId = fifth;
             if (isGet)    return {Methods::ReadEntity,       connId, typeId, instanceId};
             if (isPut)    return {Methods::SetEntity,        connId, typeId, instanceId};

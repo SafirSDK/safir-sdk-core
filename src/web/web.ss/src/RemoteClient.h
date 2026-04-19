@@ -68,6 +68,7 @@ private:
     RemoteClient& operator=(const RemoteClient&) = delete;
 
     WsStream m_stream;
+    std::string m_remoteAddress;
     std::shared_ptr<boost::asio::io_context::strand> m_strand;
     std::shared_ptr<DobConnectionRegistry> m_dobConnectionRegistry;
     std::function<void(const RemoteClient*)> m_onConnectionClosed;
@@ -124,4 +125,5 @@ private:
     void WsGetNumberOfInstances(const JsonRpcRequest& req);
     void WsGetAllInstanceIds(const JsonRpcRequest& req);
     void WsGetInstanceIdPolicy(const JsonRpcRequest& req);
+    void WsSendSystemLog(const JsonRpcRequest& req);
 };

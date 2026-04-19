@@ -279,6 +279,23 @@ Example::
 <-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
 ----------------------------
 
+==== Method: sendSystemLog
+Send a message to the system log (syslog). Does not require an open Dob connection.
+
+Parameters::
+ * `severity` - Severity level. Valid values: _Emergency_, _Alert_, _Critical_, _Error_, _Warning_, _Notice_, _Informational_, _Debug_.
+ * `facility` - Syslog facility. Valid values: _Kernel_, _User_, _Mail_, _Daemon_, _Auth_, _Syslog_, _Lpr_, _News_, _Uucp_, _Cron_, _Authpriv_, _Ftp_, _Local0_, _Local1_, _Local2_, _Local3_, _Local4_, _Local5_, _Local6_, _Local7_. Optional. _([small]*Default:* Local0)_
+ * `text` - The log message text.
+ * `sender` - Optional. Application name to include in the log message. When omitted, the remote IP address of the client is used. _([small]*Default:* remote IP address)_
+Returns::
+ * `value` - On success the string _OK_ is returned.
+
+Example::
+----------------------------
+--> {"jsonrpc": "2.0", "method": "sendSystemLog", "params": {"severity": "Error", "facility": "Local0", "text": "Something went wrong", "sender": "myApp"}, "id": 123}
+<-- {"jsonrpc": "2.0", "result": "OK", "id": 123}
+----------------------------
+
 ==== Method: serviceRequest
 Send a service request to a handler.
 

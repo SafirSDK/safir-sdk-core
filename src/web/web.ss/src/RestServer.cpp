@@ -34,6 +34,7 @@
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/Service.h>
+#include <Safir/Logging/Log.h>
 #include "RestServer.h"
 #include "DobConnectionRegistry.h"
 #include "JsonHelpers.h"
@@ -43,6 +44,7 @@
 #include "JsonRpcResponse.h"
 #include "RequestErrorException.h"
 #include "JsonRpcId.h"
+#include "CommandValidator.h"
 
 namespace http = boost::beast::http;
 namespace beast = boost::beast;
@@ -610,6 +612,52 @@ private:
             SendResponse(http::status::method_not_allowed,
                          JsonError("Method not allowed for this endpoint"),
                          "GET, PUT, PATCH, DELETE, POST");
+            return;
+        }
+
+        // sendSystemLog needs no connection
+        if (route.method == Methods::SendSystemLog)
+        {
+            boost::system::error_code epEc;
+            const auto remoteEp = m_stream.socket().remote_endpoint(epEc);
+            const std::string remoteAddr = epEc ? "unknown" : remoteEp.address().to_string();
+
+            try
+            {
+                const std::string& body = m_request.body();
+                if (body.empty())
+                    throw std::invalid_argument("Request body with severity and text is required");
+
+                rapidjson::Document doc;
+                doc.Parse(body.c_str());
+                if (doc.HasParseError())
+                    throw std::invalid_argument("Request body is not valid JSON");
+
+                if (!doc.HasMember("severity") || !doc["severity"].IsString())
+                    throw std::invalid_argument("severity is mandatory and must be a string");
+                if (doc.HasMember("facility") && !doc["facility"].IsString())
+                    throw std::invalid_argument("facility must be a string");
+                if (!doc.HasMember("text") || !doc["text"].IsString())
+                    throw std::invalid_argument("text is mandatory and must be a string");
+                if (doc.HasMember("sender") && !doc["sender"].IsString())
+                    throw std::invalid_argument("sender must be a string");
+
+                const auto severity = CommandValidator::ParseSeverity(doc["severity"].GetString());
+                const auto facility = (doc.HasMember("facility") && doc["facility"].IsString())
+                    ? CommandValidator::ParseFacility(doc["facility"].GetString()) : Safir::Logging::Local0;
+                const std::string text = "[" + (doc.HasMember("sender") && doc["sender"].IsString()
+                    ? std::string(doc["sender"].GetString()) : remoteAddr) + "] " + doc["text"].GetString();
+                Safir::Logging::SendSystemLog(severity, facility, ts::Utilities::ToWstring(text));
+                SendResponse(http::status::ok, RestStatusOk());
+            }
+            catch (const RequestErrorException& e)
+            {
+                SendResponse(http::status::bad_request, JsonError(e.Data().empty() ? e.Message() : e.Data()));
+            }
+            catch (const std::exception& e)
+            {
+                SendResponse(http::status::bad_request, JsonError(e.what()));
+            }
             return;
         }
 

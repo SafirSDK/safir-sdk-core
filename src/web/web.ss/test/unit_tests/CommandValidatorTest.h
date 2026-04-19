@@ -998,4 +998,121 @@ inline void CommandValidatorTest()
         r.Validate();
         CommandValidator::ValidateResponse(r); // must not throw
     }
+
+    // ---- ValidateSendSystemLog ----
+    {
+        // missing severity
+        try
+        {
+            auto json = "{\"jsonrpc\":\"2.0\",\"method\":\"sendSystemLog\",\"params\":{\"facility\":\"Local0\",\"text\":\"hello\"}}";
+            JsonRpcRequest r(json);
+            r.Validate();
+            CommandValidator::ValidateSendSystemLog(r);
+            CHECK(false);
+        }
+        catch (const RequestErrorException& e)
+        {
+            CHECK(e.Code()==JsonRpcErrorCodes::InvalidParams);
+        }
+    }
+    {
+        // missing facility - now optional, must NOT throw
+        auto json = "{\"jsonrpc\":\"2.0\",\"method\":\"sendSystemLog\",\"params\":{\"severity\":\"Error\",\"text\":\"hello\"}}";
+        JsonRpcRequest r(json);
+        r.Validate();
+        CommandValidator::ValidateSendSystemLog(r); // must not throw
+    }
+    {
+        // missing text
+        try
+        {
+            auto json = "{\"jsonrpc\":\"2.0\",\"method\":\"sendSystemLog\",\"params\":{\"severity\":\"Error\",\"facility\":\"Local0\"}}";
+            JsonRpcRequest r(json);
+            r.Validate();
+            CommandValidator::ValidateSendSystemLog(r);
+            CHECK(false);
+        }
+        catch (const RequestErrorException& e)
+        {
+            CHECK(e.Code()==JsonRpcErrorCodes::InvalidParams);
+        }
+    }
+    {
+        // invalid severity value
+        try
+        {
+            auto json = "{\"jsonrpc\":\"2.0\",\"method\":\"sendSystemLog\",\"params\":{\"severity\":\"Verbose\",\"facility\":\"Local0\",\"text\":\"hello\"}}";
+            JsonRpcRequest r(json);
+            r.Validate();
+            CommandValidator::ValidateSendSystemLog(r);
+            CHECK(false);
+        }
+        catch (const RequestErrorException& e)
+        {
+            CHECK(e.Code()==JsonRpcErrorCodes::InvalidParams);
+        }
+    }
+    {
+        // invalid facility value
+        try
+        {
+            auto json = "{\"jsonrpc\":\"2.0\",\"method\":\"sendSystemLog\",\"params\":{\"severity\":\"Error\",\"facility\":\"Foo\",\"text\":\"hello\"}}";
+            JsonRpcRequest r(json);
+            r.Validate();
+            CommandValidator::ValidateSendSystemLog(r);
+            CHECK(false);
+        }
+        catch (const RequestErrorException& e)
+        {
+            CHECK(e.Code()==JsonRpcErrorCodes::InvalidParams);
+        }
+    }
+    {
+        // valid - all severity levels
+        const std::vector<std::string> severities = {"Emergency","Alert","Critical","Error","Warning","Notice","Informational","Debug"};
+        for (const auto& sev : severities)
+        {
+            auto json = "{\"jsonrpc\":\"2.0\",\"method\":\"sendSystemLog\",\"params\":{\"severity\":\"" + sev + "\",\"facility\":\"Local0\",\"text\":\"test\"}}";
+            JsonRpcRequest r(json);
+            r.Validate();
+            CommandValidator::ValidateSendSystemLog(r); // must not throw
+        }
+    }
+    {
+        // valid - all facility levels
+        const std::vector<std::string> facilities = {
+            "Kernel","User","Mail","Daemon","Auth","Syslog","Lpr","News","Uucp","Cron","Authpriv","Ftp",
+            "Local0","Local1","Local2","Local3","Local4","Local5","Local6","Local7"
+        };
+        for (const auto& fac : facilities)
+        {
+            auto json = "{\"jsonrpc\":\"2.0\",\"method\":\"sendSystemLog\",\"params\":{\"severity\":\"Error\",\"facility\":\"" + fac + "\",\"text\":\"test\"}}";
+            JsonRpcRequest r(json);
+            r.Validate();
+            CommandValidator::ValidateSendSystemLog(r); // must not throw
+        }
+    }
+
+    {
+        // sender is optional — present sender must not throw
+        auto json = "{\"jsonrpc\":\"2.0\",\"method\":\"sendSystemLog\",\"params\":{\"severity\":\"Error\",\"facility\":\"Local0\",\"text\":\"hello\",\"sender\":\"myApp\"}}";
+        JsonRpcRequest r(json);
+        r.Validate();
+        CommandValidator::ValidateSendSystemLog(r); // must not throw
+    }
+
+    {
+        // sender with wrong type (not a string) — must throw InvalidParams from JsonRpcRequest::Validate
+        try
+        {
+            auto json = "{\"jsonrpc\":\"2.0\",\"method\":\"sendSystemLog\",\"params\":{\"severity\":\"Error\",\"facility\":\"Local0\",\"text\":\"hello\",\"sender\":42}}";
+            JsonRpcRequest r(json);
+            r.Validate();
+            CHECK(false);
+        }
+        catch (const RequestErrorException& e)
+        {
+            CHECK(e.Code() == JsonRpcErrorCodes::InvalidParams);
+        }
+    }
 }

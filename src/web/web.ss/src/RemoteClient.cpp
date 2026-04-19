@@ -27,6 +27,7 @@
 #include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Dob/Typesystem/Convenience.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
+#include <Safir/Logging/Log.h>
 #include <Safir/Web/Parameters.h>
 #include "RemoteClient.h"
 #include "DobConnectionRegistry.h"
@@ -46,6 +47,11 @@ RemoteClient::RemoteClient(boost::asio::io_context& io,
                            std::shared_ptr<DobConnectionRegistry> dobConnectionRegistry,
                            std::function<void(const RemoteClient*)> onClose)
     : m_stream(std::move(socket))
+    , m_remoteAddress([this]() -> std::string {
+          boost::system::error_code ec;
+          const auto ep = m_stream.next_layer().remote_endpoint(ec);
+          return ec ? "unknown" : ep.address().to_string();
+      }())
     , m_strand(std::make_shared<boost::asio::io_context::strand>(io))
     , m_dobConnectionRegistry(dobConnectionRegistry)
     , m_onConnectionClosed(onClose)
@@ -432,6 +438,10 @@ void RemoteClient::WsDispatch(const JsonRpcRequest& req)
         {
             WsGetVersion(req);
         }
+        else if (req.Method() == Methods::SendSystemLog)
+        {
+            WsSendSystemLog(req);
+        }
         else
         {
             throw RequestErrorException(JsonRpcErrorCodes::MethodNotFound, "Command is not supported. " + req.Method());
@@ -564,6 +574,17 @@ void RemoteClient::WsGetVersion(const JsonRpcRequest& req)
 {
     if (!req.Id().IsNull())
         SendToClient(JsonRpcResponse::String(req.Id(), SAFIR_SDK_CORE_VERSION));
+}
+
+void RemoteClient::WsSendSystemLog(const JsonRpcRequest& req)
+{
+    CommandValidator::ValidateSendSystemLog(req);
+    const auto severity = CommandValidator::ParseSeverity(req.SeverityStr());
+    const auto facility = req.HasFacilityStr() ? CommandValidator::ParseFacility(req.FacilityStr()) : Safir::Logging::Local0;
+    const auto text = "[" + (req.HasSender() ? req.Sender() : m_remoteAddress) + "] " + req.Text();
+    Safir::Logging::SendSystemLog(severity, facility, ts::Utilities::ToWstring(text));
+    if (!req.Id().IsNull())
+        SendToClient(JsonRpcResponse::String(req.Id(), "OK"));
 }
 
 void RemoteClient::WsSubscribeMessage(const JsonRpcRequest& req)

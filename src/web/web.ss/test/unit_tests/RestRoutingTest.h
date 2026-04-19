@@ -214,15 +214,10 @@ inline void RestRoutingTest()
         CHECK(r.method == Methods::GetNumberOfInstances);
     }
     {
-        // GET /connections/c/entities/T/isCreated  (instanceId from query param)
-        auto r = Route(bhttp::verb::get, "/connections/c/entities/Safir.Dob.Entity/isCreated");
-        CHECK(r.method == Methods::IsCreated);
-        CHECK(r.instanceIdStr.empty());
-    }
-    {
         // GET /connections/c/entities/T/42/isCreated  (instanceId in path)
         auto r = Route(bhttp::verb::get, "/connections/c/entities/Safir.Dob.Entity/42/isCreated");
         CHECK(r.method == Methods::IsCreated);
+        CHECK(r.typeIdStr == "Safir.Dob.Entity");
         CHECK(r.instanceIdStr == "42");
     }
     {
@@ -387,5 +382,26 @@ inline void RestRoutingTest()
         // subscriptions/unknownKind
         auto r = Route(bhttp::verb::put, "/connections/c/subscriptions/unknown/T");
         CHECK(r.method.empty());
+    }
+
+    //-------------------------------------------
+    // RouteRestRequest — /log (connectionless)
+    //-------------------------------------------
+
+    {
+        // POST /log  → sendSystemLog (no connectionId)
+        auto r = Route(bhttp::verb::post, "/log");
+        CHECK(r.method == Methods::SendSystemLog);
+        CHECK(r.connectionId.empty());
+    }
+    {
+        // GET /log  → wrong verb
+        auto r = Route(bhttp::verb::get, "/log");
+        CHECK(r.method == kWrongVerb);
+    }
+    {
+        // PUT /log  → wrong verb
+        auto r = Route(bhttp::verb::put, "/log");
+        CHECK(r.method == kWrongVerb);
     }
 }

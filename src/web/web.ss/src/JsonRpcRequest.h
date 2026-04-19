@@ -133,6 +133,18 @@ public:
     bool HasIncludeUpdates() const {return HasParam("includeUpdates");}
     bool IncludeUpdates() const {return m_doc["params"]["includeUpdates"].GetBool();}
 
+    bool HasSeverityStr() const {return HasParam("severity");}
+    std::string SeverityStr() const {return m_doc["params"]["severity"].GetString();}
+
+    bool HasFacilityStr() const {return HasParam("facility");}
+    std::string FacilityStr() const {return m_doc["params"]["facility"].GetString();}
+
+    bool HasText() const {return HasParam("text");}
+    std::string Text() const {return m_doc["params"]["text"].GetString();}
+
+    bool HasSender() const {return HasParam("sender");}
+    std::string Sender() const {return m_doc["params"]["sender"].GetString();}
+
 private:
     rj::Document m_doc;
     JsonRpcId m_id;
@@ -191,8 +203,6 @@ private:
         //If this is actually a response and not a request, validate as response instead.
         if (IsResponse())
         {
-            if (!m_doc.HasMember("result"))
-                throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Response must contain the member 'result'.");
             if (!m_doc["result"].IsObject())
                 throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Member 'result' has wrong type. It must be an object of type Safir.Dob.Response");
 
@@ -266,6 +276,18 @@ private:
 
         if (m_params->HasMember("includeUpdates") && !(*m_params)["includeUpdates"].IsBool())
             throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'includeUpdates' has wrong type.");
+
+        if (m_params->HasMember("severity") && !(*m_params)["severity"].IsString())
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'severity' has wrong type.");
+
+        if (m_params->HasMember("facility") && !(*m_params)["facility"].IsString())
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'facility' has wrong type.");
+
+        if (m_params->HasMember("text") && !(*m_params)["text"].IsString())
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'text' has wrong type.");
+
+        if (m_params->HasMember("sender") && !(*m_params)["sender"].IsString())
+            throw RequestErrorException(JsonRpcErrorCodes::InvalidParams, "Param 'sender' has wrong type.");
 
     }
 };
