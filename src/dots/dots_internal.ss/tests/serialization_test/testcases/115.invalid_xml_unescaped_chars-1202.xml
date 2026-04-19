@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BlobTest.MyCollections>
+
+  <DictStringInt32>
+    <entry>
+      <key xml:space="preserve">a < b</key>
+      <value>1</value>
+    </entry>
+  </DictStringInt32>
+
+</BlobTest.MyCollections>

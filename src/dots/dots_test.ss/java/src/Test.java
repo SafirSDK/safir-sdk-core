@@ -114,6 +114,9 @@ public class Test {
 
         testSequences();
         testDictionaries();
+        testDictionaryKeySpecialChars();
+        testMemberValueSpecialChars();
+        testJsonEscaping();
 
         Test_DeserializeUnlinkedObject();
 
@@ -11524,6 +11527,49 @@ public class Test {
         System.out.println("------ From Json -----");
         MemberDictionaries fromJson = (MemberDictionaries) Serialization.toObjectFromJson(json);
         printDictionaries(fromJson);
+    }
+
+    private static void testDictionaryKeySpecialChars() {
+        Header("DictionaryKeySpecialChars");
+        MemberDictionaries md = new MemberDictionaries();
+        md.stringInt32Member().putVal("<hello>", 1);
+        md.stringInt32Member().putVal("a & b", 2);
+        System.out.println("------ To Xml -----");
+        System.out.println(Serialization.toXml(md));
+    }
+
+    private static void testMemberValueSpecialChars() {
+        Header("MemberValueSpecialChars");
+        MemberTypes mt = new MemberTypes();
+        mt.instanceIdMember().setVal(new InstanceId("<hello>"));
+        mt.handlerIdMember().setVal(new HandlerId("a & b"));
+        mt.channelIdMember().setVal(new ChannelId("<test>"));
+        mt.entityIdMember().setVal(new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("<first>")));
+        System.out.println("------ To Xml -----");
+        System.out.println(Serialization.toXml(mt));
+    }
+
+    private static void testJsonEscaping() {
+        Header("JsonEscaping");
+
+        // Dictionary keys: InstanceId and EntityId keyed dicts with JSON special chars
+        MemberDictionaries md = new MemberDictionaries();
+        md.instanceIdEntityIdMember().putVal(new InstanceId("say \"hi\""),
+            new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId(1)));
+        md.entityIdHandlerIdMember().putVal(
+            new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("say \"hi\"")),
+            new HandlerId(1));
+        System.out.println("------ Dict Keys To Json -----");
+        System.out.println(Serialization.toJson(md));
+
+        // Member values: InstanceId/HandlerId/ChannelId/EntityId with JSON special chars
+        MemberTypes mt = new MemberTypes();
+        mt.instanceIdMember().setVal(new InstanceId("say \"hi\""));
+        mt.handlerIdMember().setVal(new HandlerId("back\\slash"));
+        mt.channelIdMember().setVal(new ChannelId("say \"hi\""));
+        mt.entityIdMember().setVal(new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("say \"hi\"")));
+        System.out.println("------ Member Values To Json -----");
+        System.out.println(Serialization.toJson(mt));
     }
 
     interface ThrowingFunction {

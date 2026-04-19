@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BlobTest.MyCollections>
+
+  <DictStringInt32>
+    <entry>
+      <key xml:space="preserve">&lt;hello&gt;</key>
+      <value>1</value>
+    </entry>
+    <entry>
+      <key xml:space="preserve">a &amp; b</key>
+      <value>2</value>
+    </entry>
+  </DictStringInt32>
+
+  <DictHandlerIdBool>
+    <entry>
+      <key>&lt;MyHandler&gt;</key>
+      <value>true</value>
+    </entry>
+    <entry>
+      <key>a &amp; b</key>
+      <value>false</value>
+    </entry>
+  </DictHandlerIdBool>
+
+  <DictEntityIdObject>
+    <entry>
+      <key>
+        <name>BlobTest.MyEntity</name>
+        <instanceId>&lt;first&gt;</instanceId>
+      </key>
+      <BlobTest.MyItem>
+        <MyNumber>42</MyNumber>
+      </BlobTest.MyItem>
+    </entry>
+  </DictEntityIdObject>
+
+</BlobTest.MyCollections>

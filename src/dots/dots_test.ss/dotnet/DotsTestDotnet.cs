@@ -109,6 +109,9 @@ class DotsTestDotnet
         Test_GetDouFilePath();
         Test_Sequences();
         Test_Dictionaries();
+        Test_DictionaryKeySpecialChars();
+        Test_MemberValueSpecialChars();
+        Test_JsonEscaping();
         Test_DeserializeUnlinkedObject();
         Test_ObjectClone();
         Test_ContainerClone();
@@ -10093,6 +10096,52 @@ class DotsTestDotnet
         Console.WriteLine("------ From Json -----");
         var fromJson = Safir.Dob.Typesystem.Serialization.ToObjectFromJson (json) as DotsTest.MemberDictionaries;
         PrintDictionaries(fromJson);
+    }
+
+    private static void Test_DictionaryKeySpecialChars()
+    {
+        Header("DictionaryKeySpecialChars");
+        var md = new DotsTest.MemberDictionaries();
+        md.StringInt32Member.Add("<hello>", 1);
+        md.StringInt32Member.Add("a & b", 2);
+        Console.WriteLine("------ To Xml -----");
+        Console.WriteLine(Safir.Dob.Typesystem.Serialization.ToXml(md));
+    }
+
+    private static void Test_MemberValueSpecialChars()
+    {
+        Header("MemberValueSpecialChars");
+        var mt = new DotsTest.MemberTypes();
+        mt.InstanceIdMember.Val = new Safir.Dob.Typesystem.InstanceId("<hello>");
+        mt.HandlerIdMember.Val = new Safir.Dob.Typesystem.HandlerId("a & b");
+        mt.ChannelIdMember.Val = new Safir.Dob.Typesystem.ChannelId("<test>");
+        mt.EntityIdMember.Val = new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("<first>"));
+        Console.WriteLine("------ To Xml -----");
+        Console.WriteLine(Safir.Dob.Typesystem.Serialization.ToXml(mt));
+    }
+
+    private static void Test_JsonEscaping()
+    {
+        Header("JsonEscaping");
+
+        // Dictionary keys: InstanceId and EntityId keyed dicts with JSON special chars
+        var md = new DotsTest.MemberDictionaries();
+        md.InstanceIdEntityIdMember.Add(new Safir.Dob.Typesystem.InstanceId("say \"hi\""),
+            new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId(1)));
+        md.EntityIdHandlerIdMember.Add(
+            new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("say \"hi\"")),
+            new Safir.Dob.Typesystem.HandlerId(1));
+        Console.WriteLine("------ Dict Keys To Json -----");
+        Console.WriteLine(Safir.Dob.Typesystem.Serialization.ToJson(md));
+
+        // Member values: InstanceId/HandlerId/ChannelId/EntityId with JSON special chars
+        var mt = new DotsTest.MemberTypes();
+        mt.InstanceIdMember.Val = new Safir.Dob.Typesystem.InstanceId("say \"hi\"");
+        mt.HandlerIdMember.Val = new Safir.Dob.Typesystem.HandlerId("back\\slash");
+        mt.ChannelIdMember.Val = new Safir.Dob.Typesystem.ChannelId("say \"hi\"");
+        mt.EntityIdMember.Val = new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("say \"hi\""));
+        Console.WriteLine("------ Member Values To Json -----");
+        Console.WriteLine(Safir.Dob.Typesystem.Serialization.ToJson(mt));
     }
 
     private static void Test_ObjectClone()

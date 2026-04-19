@@ -96,6 +96,22 @@ inline void JsonRpcTest()
         os<<ts::HandlerId(123);
         CHECK(os.str()=="\"123\"");
     }
+    {
+        // special chars in string IDs must be JSON-escaped
+        std::ostringstream os;
+        os<<ts::InstanceId(L"say \"hi\"");
+        CHECK(os.str()=="\"say \\\"hi\\\"\"");
+    }
+    {
+        std::ostringstream os;
+        os<<ts::HandlerId(L"back\\slash");
+        CHECK(os.str()=="\"back\\\\slash\"");
+    }
+    {
+        std::ostringstream os;
+        os<<ts::ChannelId(L"say \"hi\"");
+        CHECK(os.str()=="\"say \\\"hi\\\"\"");
+    }
 
     //-------------------------------------------
     // Test JsonRpcRequest

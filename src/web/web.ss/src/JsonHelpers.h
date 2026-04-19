@@ -101,7 +101,7 @@ namespace JsonHelpers
     {
         if (hash.Utf8StringLength()>0)
         {
-            os<<SAFIR_WS_QUOTE(hash.Utf8String());
+            os << '"' << EscapedString(hash.Utf8String()) << '"';
         }
         else
         {

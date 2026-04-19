@@ -241,7 +241,7 @@ namespace Internal
                     os<< "<name>" << SerializationUtils::TypeIdToString(m_repository, eid.first.typeId) << "</name>";
                     if (eid.second)
                     {
-                        os<<"<instanceId>"<<eid.second<<"</instanceId>";
+                        os<<"<instanceId>"; WriteString(eid.second, os); os<<"</instanceId>";
                     }
                     else
                     {
@@ -261,7 +261,7 @@ namespace Internal
                     std::pair<DotsC_Int64, const char*> hash=reader.template ReadKey< std::pair<DotsC_Int64, const char*> >(memberIndex, valueIndex);
                     if (hash.second)
                     {
-                        os<<hash.second;
+                        WriteString(hash.second, os);
                     }
                     else
                     {
@@ -272,7 +272,7 @@ namespace Internal
 
             case StringMemberType:
                 {
-                    os<<reader.template ReadKey<const char*>(memberIndex, valueIndex);
+                    WriteString(reader.template ReadKey<const char*>(memberIndex, valueIndex), os);
                 }
                 break;
 
@@ -373,7 +373,7 @@ namespace Internal
                         WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                         if (val.second)
                         {
-                            os<<val.second;
+                            WriteString(val.second, os);
                         }
                         else
                         {
@@ -395,7 +395,7 @@ namespace Internal
                         os<<"<name>"<<SerializationUtils::TypeIdToString(m_repository, val.first.typeId)<<"</name>";
                         if (val.second)
                         {
-                            os<<"<instanceId>"<<val.second<<"</instanceId>";
+                            os<<"<instanceId>"; WriteString(val.second, os); os<<"</instanceId>";
                         }
                         else
                         {

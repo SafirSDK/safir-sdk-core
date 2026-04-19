@@ -10782,6 +10782,56 @@ void TestDictionaries()
     PrintDictionaries(fromJson);
 }
 
+void TestDictionaryKeySpecialChars()
+{
+    Header(L"DictionaryKeySpecialChars");
+    DotsTest::MemberDictionariesPtr md=DotsTest::MemberDictionaries::Create();
+    md->StringInt32Member().Insert(L"<hello>", 1);
+    md->StringInt32Member().Insert(L"a & b", 2);
+    std::wcout<<L"------ To Xml -----"<<std::endl;
+    std::wstring xml=ts::Serialization::ToXml(md);
+    std::wcout<<xml<<std::endl;
+}
+
+void TestMemberValueSpecialChars()
+{
+    Header(L"MemberValueSpecialChars");
+    DotsTest::MemberTypesPtr mt=DotsTest::MemberTypes::Create();
+    mt->InstanceIdMember().SetVal(ts::InstanceId(L"<hello>"));
+    mt->HandlerIdMember().SetVal(ts::HandlerId(L"a & b"));
+    mt->ChannelIdMember().SetVal(ts::ChannelId(L"<test>"));
+    mt->EntityIdMember().SetVal(ts::EntityId(Safir::Dob::Entity::ClassTypeId,
+                                             ts::InstanceId(L"<first>")));
+    std::wcout<<L"------ To Xml -----"<<std::endl;
+    std::wstring xml=ts::Serialization::ToXml(mt);
+    std::wcout<<xml<<std::endl;
+}
+
+void TestJsonEscaping()
+{
+    Header(L"JsonEscaping");
+
+    // Dictionary keys: InstanceId and EntityId keyed dicts with JSON special chars
+    DotsTest::MemberDictionariesPtr md=DotsTest::MemberDictionaries::Create();
+    md->InstanceIdEntityIdMember().Insert(ts::InstanceId(L"say \"hi\""),
+        ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(1)));
+    md->EntityIdHandlerIdMember().Insert(
+        ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(L"say \"hi\"")),
+        ts::HandlerId(1));
+    std::wcout<<L"------ Dict Keys To Json -----"<<std::endl;
+    std::wcout<<ts::Serialization::ToJson(md)<<std::endl;
+
+    // Member values: InstanceId/HandlerId/ChannelId/EntityId with JSON special chars
+    DotsTest::MemberTypesPtr mt=DotsTest::MemberTypes::Create();
+    mt->InstanceIdMember().SetVal(ts::InstanceId(L"say \"hi\""));
+    mt->HandlerIdMember().SetVal(ts::HandlerId(L"back\\slash"));
+    mt->ChannelIdMember().SetVal(ts::ChannelId(L"say \"hi\""));
+    mt->EntityIdMember().SetVal(ts::EntityId(Safir::Dob::Entity::ClassTypeId,
+                                             ts::InstanceId(L"say \"hi\"")));
+    std::wcout<<L"------ Member Values To Json -----"<<std::endl;
+    std::wcout<<ts::Serialization::ToJson(mt)<<std::endl;
+}
+
 void Test_SequenceDiff()
 {
     DotsTest::MemberSequencesPtr ms1=DotsTest::MemberSequences::Create();
@@ -10893,6 +10943,9 @@ BOOST_AUTO_TEST_CASE (old_style_tests)
         Test_GetDouFilePath();
         TestSequences();
         TestDictionaries();
+        TestDictionaryKeySpecialChars();
+        TestMemberValueSpecialChars();
+        TestJsonEscaping();
         Test_DeserializeUnlinkedObject();
 
         ContainerTest();

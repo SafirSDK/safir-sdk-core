@@ -252,7 +252,7 @@ namespace Internal
         {
             if (val.second)
             {
-                os<<SAFIR_JSON_QUOTE(val.second);
+                WriteString(val.second, os);
             }
             else
             {
@@ -269,7 +269,7 @@ namespace Internal
             WriteMemberName("instanceId", os);
             if (val.second)
             {
-                os<<SAFIR_JSON_QUOTE(val.second);
+                WriteString(val.second, os);
             }
             else
             {

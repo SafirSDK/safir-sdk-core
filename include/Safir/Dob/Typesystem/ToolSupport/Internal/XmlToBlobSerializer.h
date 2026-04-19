@@ -70,7 +70,14 @@ namespace Internal
             boost::property_tree::ptree pt;
             boost::iostreams::array_source src(xml, strlen(xml));
             boost::iostreams::stream<boost::iostreams::array_source> stream(src);
-            boost::property_tree::xml_parser::read_xml(stream, pt, boost::property_tree::xml_parser::no_comments);
+            try
+            {
+                boost::property_tree::xml_parser::read_xml(stream, pt, boost::property_tree::xml_parser::no_comments);
+            }
+            catch (const boost::property_tree::xml_parser::xml_parser_error& e)
+            {
+                throw ParseError("XmlToBinary serialization error", std::string("Failed to parse XML: ") + e.what(), "", 1202);
+            }
             this->operator ()(pt, blob);
         }
 

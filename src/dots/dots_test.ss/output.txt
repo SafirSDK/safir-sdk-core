@@ -2272,6 +2272,32 @@ Wally = {"_DouType":"DotsTest.MemberDictionaries","TypeIdStringMember":[{"key":"
 
 
 =====================================================
+Testing: DictionaryKeySpecialChars
+=====================================================
+------ To Xml -----
+<?xml version="1.0" encoding="utf-8"?><DotsTest.MemberDictionaries><StringInt32Member><entry><key xml:space="preserve">&lt;hello&gt;</key><value>1</value></entry><entry><key xml:space="preserve">a &amp; b</key><value>2</value></entry></StringInt32Member></DotsTest.MemberDictionaries>
+
+
+
+=====================================================
+Testing: MemberValueSpecialChars
+=====================================================
+------ To Xml -----
+<?xml version="1.0" encoding="utf-8"?><DotsTest.MemberTypes><EntityIdMember><name>Safir.Dob.Entity</name><instanceId>&lt;first&gt;</instanceId></EntityIdMember><InstanceIdMember>&lt;hello&gt;</InstanceIdMember><ChannelIdMember>&lt;test&gt;</ChannelIdMember><HandlerIdMember>a &amp; b</HandlerIdMember></DotsTest.MemberTypes>
+
+
+
+=====================================================
+Testing: JsonEscaping
+=====================================================
+------ Dict Keys To Json -----
+{"_DouType":"DotsTest.MemberDictionaries","EntityIdHandlerIdMember":[{"key":{"name":"Safir.Dob.Entity","instanceId":"say \"hi\""},"value":"1"}],"InstanceIdEntityIdMember":[{"key":"say \"hi\"","value":{"name":"Safir.Dob.Entity","instanceId":"1"}}]}
+------ Member Values To Json -----
+{"_DouType":"DotsTest.MemberTypes","EntityIdMember":{"name":"Safir.Dob.Entity","instanceId":"say \"hi\""},"InstanceIdMember":"say \"hi\"","ChannelIdMember":"say \"hi\"","HandlerIdMember":"back\\slash"}
+
+
+
+=====================================================
 Testing: DeserializeUnlinkedObject
 =====================================================
 Class name: DotsTest.ExtraObject
