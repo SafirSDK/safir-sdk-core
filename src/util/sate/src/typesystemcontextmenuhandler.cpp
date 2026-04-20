@@ -226,10 +226,13 @@ void TypesystemContextMenuHandler::CreateContextMenu(int64_t typeId, TypesystemR
                                      false,
                                      false);
     }
-    else if (chosenAction == registerEntityHandlerEllipsis ||
-             chosenAction == registerServiceHandlerEllipsis)
+    else if (chosenAction == registerEntityHandlerEllipsis)
     {
-        m_registerDlg->Show(typeId);
+        m_registerDlg->Show(typeId, true);
+    }
+    else if( chosenAction == registerServiceHandlerEllipsis)
+    {
+        m_registerDlg->Show(typeId, false);
     }
     else if (chosenAction == unregisterAllHandlers)
     {

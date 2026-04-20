@@ -40,7 +40,7 @@ public:
     ~RegisterHandlerDialog();
 
     // For Entities use allFieldsVisible=true, for serviceReq false
-    void Show(int64_t typeId, bool allFieldsVisible = true);
+    void Show(int64_t typeId, bool allFieldsVisible);
 
     int64_t TypeId() const;
     Safir::Dob::Typesystem::HandlerId Handler() const;
