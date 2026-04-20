@@ -2253,7 +2253,7 @@ Apart from handling requests on entities the entity handler is of course allowed
 change an entity whenever it wants to. There are two calls that can be used to do this,
 +SetAll+ and +SetChanges+. +SetAll+ will take your local object instance (i.e. the one you
 have created in your code) and set the shared memory instance to be exactly
-that. +SetChanges+ will only those members that you have changed (as signalled by the
+that. +SetChanges+ will update only those members that you have changed (as signalled by the
 <<change_flags>>) and merge them into the instance that is already in shared memory. If
 the requested instance is not already in shared memory the object will just be set as if
 SetAll was called. Most applications should use SetChanges for most of their
@@ -2268,8 +2268,82 @@ that the resulting entity still is in a valid state, depending on the applicatio
 logic. E.g. if two members have some kind of relationship where only some combinations
 are valid you need to make sure that a SetChanges will result in a valid combination.
 
+Note that the change flags subscribers see are _not_ the change flags that the owner used
+— see <<interpreting_change_flags>> for how the Dob determines what to signal to
+subscribers.
+
 There are legacy/deprecated reasons for using SetChanges too, that are described in
 <<timestamp_merge>>, but if you are not using that feature you can ignore those reasons.
+
+====== SetChanges with collection members
+
+How SetChanges handles the three collection types (see <<collections>>) follows from their
+different change flag designs. In short: arrays support per-element merging; sequences of
+simple values are always replaced as a whole, while sequences of items can also merge
+per-element; dictionaries support per-value merging _unless_ keys have been added or
+removed, in which case the whole dictionary is replaced.
+
+*Arrays* have a change flag per element, so SetChanges processes each element independently.
+An element whose flag is set is written into shared memory; an element whose flag is not set is
+left untouched. For arrays of items (complex members) the merge recurses into each changed
+element, updating only the sub-members that are themselves marked changed.
+
+*Sequences* of simple values have a single change flag for the whole collection. If it is
+set, the entire sequence in shared memory is replaced with the local copy. If it is not set,
+the sequence in shared memory is left completely unchanged.
+
+*Sequences of items* behave differently. The collection-level flag distinguishes two cases:
+if it is set (elements were added, removed, or replaced by assigning a new object at an
+existing index), the whole sequence in shared memory is replaced with the local copy. If it is not set but sub-members of existing elements have
+their change flags set, SetChanges will merge element-by-element by index — recursing into
+each element the same way it does for regular item members. Note that in this second case
+the sequence sizes must match; it is not possible to add or remove elements without the
+collection-level flag being set.
+
+*Dictionaries* have two levels of change flags: each value has its own flag, and the
+dictionary as a whole has a collection-level flag that is set whenever a key is added or
+removed.
+
+* If the collection-level flag is set (a key was added or removed), SetChanges replaces the
+  entire dictionary in shared memory with the local copy.
+* If the collection-level flag is not set (only values of existing keys were modified),
+  SetChanges updates only the values whose flag is set. For dictionaries of items this
+  recursion goes into the item, just as for regular item members.
+
+Since SetChanges is simply a Read followed by a MergeChanges followed by a SetAll,
+applications that need different merge behaviour for collections — for example, computing a
+full merged dictionary themselves before writing — can implement that logic and call SetAll
+directly with the result.
+
+.Array: per-element merge
+====
+The entity instance in shared memory has a +Scores+ array of five elements: +[10, 20, 30, 40, 50]+.
+A local object is created where only element 2 is set (change flag set) to +99+.
+After SetChanges the instance in shared memory contains +[10, 20, 99, 40, 50]+.
+====
+
+.Sequence: whole-collection replace
+====
+The entity instance in shared memory has a +Tags+ sequence: +["alpha", "beta", "gamma"]+.
+A local object is created and +["alpha"]+ is added to it (the sequence's change flag is set).
+After SetChanges the sequence in shared memory is +["alpha"]+ — "beta" and "gamma" are gone.
+====
+
+.Dictionary: modifying an existing value (no key added/removed)
+====
+The entity instance in shared memory has an +Attributes+ dictionary: +{A: 1, B: 42, C: 7}+.
+A local object is created and the value of +B+ is changed to +100+ (only B's value flag is
+set; the collection-level flag is not set since no key was added or removed).
+After SetChanges the instance in shared memory contains +{A: 1, B: 100, C: 7}+.
+====
+
+.Dictionary: adding a key (whole dictionary replaced)
+====
+The entity instance in shared memory has an +Attributes+ dictionary: +{A: 1, B: 42}+.
+A local object is created and key +D+ with value +99+ is added. The collection-level flag
+is set. After SetChanges the instance in shared memory contains +{D: 99}+ — both +A+ and
++B+ are gone, since the local object did not contain them.
+====
 
 ===== Subscribing to entities
 Once more there is a consumer interface to be implemented to subscribe to entities, +EntitySubscriber+, which provides callbacks when an entity is created, updated or deleted.
