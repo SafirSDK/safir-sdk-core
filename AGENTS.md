@@ -54,7 +54,7 @@ Slow tests skipped by `SAFIR_SKIP_SLOW_TESTS`: LowLevelLogger, Communication tes
 ### CI/CD (Jenkins)
 
 The Jenkinsfile defines a matrix build across:
-- **Platforms**: ubuntu-noble, debian-bookworm, debian-trixie, vs2022, vs2026
+- **Platforms**: ubuntu-noble, debian-trixie, vs2022, vs2026
 - **Architectures**: amd64 (x86 dropped for most platforms)
 - **Build types**: RelWithDebInfo, DebugOnly
 
@@ -62,7 +62,7 @@ Test stages:
 1. Build and Unit Test
 2. Standalone Tests
 3. Multinode Tests
-4. Multicomputer Tests (cpp only, requires debian-bookworm)
+4. Multicomputer Tests (cpp only, requires debian-trixie)
 5. Build Examples
 
 ## Architecture

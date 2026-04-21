@@ -199,8 +199,8 @@ def build_examples(){
 pipeline {
     parameters {
         choice(name: 'PLATFORM_FILTER',
-               choices: ['all', 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022', 'vs2026'],
-               description: "Run on specific platform. Note that multicomputer tests will only run if 'all' or 'debian-bookworm' is selected.")
+               choices: ['all', 'ubuntu-noble', 'debian-trixie', 'vs2022', 'vs2026'],
+               description: "Run on specific platform. Note that multicomputer tests will only run if 'all' or 'debian-trixie' is selected.")
 
         booleanParam(name: 'SKIP_SLOW_TESTS',
                      defaultValue: false,
@@ -232,7 +232,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022', 'vs2026'
+                        values 'ubuntu-noble', 'debian-trixie', 'vs2022', 'vs2026'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -245,9 +245,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit bookworm and visual studio
+                        axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit visual studio
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble', 'debian-bookworm', 'vs2022', 'vs2026'
+                            values 'ubuntu-noble', 'vs2022', 'vs2026'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -276,9 +276,9 @@ pipeline {
         stage('Render documentation') {
             when {
                 beforeAgent true
-                expression { return nodesByLabel("debian-bookworm-amd64-build").size() > 0 }
+                expression { return nodesByLabel("debian-trixie-amd64-build").size() > 0 }
             }
-            agent { label 'debian-bookworm-amd64-build' }
+            agent { label 'debian-trixie-amd64-build' }
             steps { script {
                 render_documentation()
             }}
@@ -303,7 +303,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022', 'vs2026'
+                        values 'ubuntu-noble', 'debian-trixie', 'vs2022', 'vs2026'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -322,9 +322,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit bookworm and visual studio
+                        axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit visual studio
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble', 'debian-bookworm', 'vs2022', 'vs2026'
+                            values 'ubuntu-noble', 'vs2022', 'vs2026'
                         }
                         axis {
                             name 'BUILD_ARCH'
@@ -344,12 +344,12 @@ pipeline {
                     stage('Multicomputer Tests') {
                         when { allOf {
                             expression {LANGUAGES == "cpp-cpp-cpp-cpp-cpp"}
-                            expression { return nodesByLabel("debian-bookworm-amd64-build").size() > 0 }
+                            expression { return nodesByLabel("debian-trixie-amd64-build").size() > 0 }
                             anyOf {
-                                //The multicomputer test slave uses the debian-bookworm-amd64 release build,
+                                //The multicomputer test slave uses the debian-trixie-amd64 release build,
                                 //so we can't run unless they are part of the build
                                 expression {params.PLATFORM_FILTER == 'all'}
-                                expression {params.PLATFORM_FILTER == 'debian-bookworm'}
+                                expression {params.PLATFORM_FILTER == 'debian-trixie'}
                             }
                         }}
                         steps {
@@ -392,7 +392,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BUILD_PLATFORM'
-                        values 'ubuntu-noble', 'debian-bookworm', 'debian-trixie', 'vs2022', 'vs2026'
+                        values 'ubuntu-noble', 'debian-trixie', 'vs2022', 'vs2026'
                     }
                     axis {
                         name 'BUILD_ARCH'
@@ -405,9 +405,9 @@ pipeline {
                 }
                 excludes {
                     exclude {
-                        axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit bookworm and visual studio
+                        axis { //ubuntu no longer support 32 bit builds, and we have dropped support for 32 bit visual studio
                             name 'BUILD_PLATFORM'
-                            values 'ubuntu-noble', 'debian-bookworm', 'vs2022', 'vs2026'
+                            values 'ubuntu-noble', 'vs2022', 'vs2026'
                         }
                         axis {
                             name 'BUILD_ARCH'
