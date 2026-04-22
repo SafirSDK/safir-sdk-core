@@ -87,7 +87,8 @@ namespace Internal
 
         //Returns true if the request was successfully posted to someone else, and false otherwise
         bool DistributeRequest(const DistributionData& request,
-                               const ConnectionConsumerPair& receiver);
+                               const ConnectionConsumerPair& receiver,
+                               const char* calledFrom);
 
         //called from HandleDisconnect
         void FinalizeOutstandingRequests(const ConnectionPtr& toConnection, const ConnectionPtr& fromConnection);

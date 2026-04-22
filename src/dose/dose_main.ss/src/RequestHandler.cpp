@@ -461,7 +461,7 @@ namespace
             return;
         }
 
-        if (DistributeRequest(request, receiver))
+        if (DistributeRequest(request, receiver, "DispatchRequest"))
         {
             handled = true;
         }
@@ -546,7 +546,8 @@ namespace
     }
 
     bool RequestHandler::DistributeRequest(const DistributionData& request,
-                                           const ConnectionConsumerPair& receiver)
+                                           const ConnectionConsumerPair& receiver,
+                                           const char* calledFrom)
     {
         const ConnectionPtr sender = Connections::Instance().GetConnection(request.GetSenderId(), std::nothrow);
 
@@ -568,7 +569,14 @@ namespace
         else
         {
             SEND_SYSTEM_LOG(Error,
-                            << "DOSE_MAIN: Got a request that was neither sent to or from this node!");
+                            << "DOSE_MAIN: Got a request that was neither sent to or from this node!"
+                            << " calledFrom=" << calledFrom
+                            << " senderId=" << request.GetSenderId()
+                            << " senderFound=" << (sender != NULL)
+                            << " senderIsLocal=" << (sender != NULL ? sender->IsLocal() : false)
+                            << " receiver=" << receiver.connection->NameWithCounter()
+                            << " receiverId=" << receiver.connection->Id()
+                            << " receiverIsLocal=" << receiver.connection->IsLocal());
             // "This does not really cause any problems, but it is unexpected,
             return true; //Always OK, request not for us.
         }
@@ -718,7 +726,7 @@ namespace
             return; //ignore the request and let the timeout on the other node take care of it.
         }
 
-        DistributeRequest(request, receiver);
+        DistributeRequest(request, receiver, "HandleMessageFromRemoteNode");
     }
 
     void RequestHandler::ReleaseAllBlocked(int64_t blockingConnection)
@@ -773,7 +781,7 @@ namespace
             }
             else
             {
-                if (DistributeRequest(request, receiver))
+                if (DistributeRequest(request, receiver, "HandlePendingExternalRequest"))
                 {
                     it->second.pop_front();
                 }
