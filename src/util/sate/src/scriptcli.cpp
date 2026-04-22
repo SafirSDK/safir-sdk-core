@@ -53,7 +53,10 @@ ScriptCli::~ScriptCli()
 int ScriptCli::Execute()
 {
     QMetaObject::invokeMethod(this, [this]() {
-        ExecuteInternal();
+        if (!ExecuteInternal())
+        {
+            m_app->exit(1);
+        }
     }, Qt::QueuedConnection);
 
     return m_app->exec();

@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, sys, argparse, socket, glob, logging, uuid, time
+import os, sys, argparse, subprocess, glob, logging, uuid, time
 from testenv import TestEnv, TestEnvStopper, log
 
 log_dir = os.path.normpath(os.path.join(os.getcwd(), "sate_output"))
@@ -37,6 +37,7 @@ parser.add_argument("--dope_main", required=True)
 parser.add_argument("--sate", required=True)
 parser.add_argument("--script1", required=True)
 parser.add_argument("--script2", required=True)
+parser.add_argument("--invalid-script", required=True)
 parser.add_argument("--safir-show-config", required=True)
 arguments = parser.parse_args()
 
@@ -142,6 +143,20 @@ with TestEnvStopper(env):
         log("SATE2 output was:")
         log(out2)
         sys.exit(1)
+
+    # Test that sate exits with a non-zero error code for an invalid script
+    log("Testing invalid script error handling")
+    result = subprocess.run([arguments.sate, "-s", arguments.invalid_script],
+                            capture_output=True, timeout=10)
+    if result.returncode == 0:
+        log("FAIL: sate exited with 0 for an invalid script, expected a non-zero error code")
+        log("stderr: " + result.stderr.decode())
+        sys.exit(1)
+    stderr = result.stderr.decode()
+    if "Error" not in stderr:
+        log("FAIL: expected an error message on stderr for invalid script, got: " + repr(stderr))
+        sys.exit(1)
+    log("OK: sate correctly exited with error code " + str(result.returncode) + " for invalid script")
 
     log("Exited, will now exit testenv.")
 

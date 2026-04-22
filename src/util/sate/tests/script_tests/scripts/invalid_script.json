@@ -1,0 +1,5 @@
+
+[
+    {"method": "delay", "params": {"time": 1000}}
+    {"method": "delay", "params": {"time": 1000}}
+]

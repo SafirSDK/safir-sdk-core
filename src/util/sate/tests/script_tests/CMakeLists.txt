@@ -6,6 +6,7 @@ ADD_TEST(NAME sate_script
   --sate $<TARGET_FILE:sate>
   --script1 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/script1.json
   --script2 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/script2.json
+  --invalid-script ${CMAKE_CURRENT_SOURCE_DIR}/scripts/invalid_script.json
   --safir-show-config $<TARGET_FILE:safir_show_config>
   )
 
