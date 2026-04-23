@@ -68,6 +68,7 @@ namespace Control
 
     private:
         Safir::Dob::SecondaryConnection m_connection;
+        bool m_initialInjectionsComplete;
     };
 }
 }

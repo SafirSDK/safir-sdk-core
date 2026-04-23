@@ -24,6 +24,7 @@
 #include "TracerStatusHandler.h"
 
 #include <Safir/Dob/ConnectionAspectMisc.h>
+#include <Safir/Dob/ConnectionAspectPostpone.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/LowMemoryException.h>
 #include <Safir/Application/TracerStatus.h>
@@ -37,6 +38,7 @@ namespace Control
 {
 
     TracerStatusHandler::TracerStatusHandler()
+        : m_initialInjectionsComplete(false)
     {
     }
 
@@ -80,13 +82,20 @@ namespace Control
     void TracerStatusHandler::OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId /*typeId*/,
                                                       const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
     {
-
+        m_initialInjectionsComplete = true;
     }
 
 
     void TracerStatusHandler::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
                                               Safir::Dob::ResponseSenderPtr        responseSender)
     {
+        if (!m_initialInjectionsComplete)
+        {
+            // A ghost may exist for this instance that hasn't been injected yet. Postpone the
+            // request so it gets redispatched after OnInitialInjectionsDone has been called.
+            Safir::Dob::ConnectionAspectPostpone(m_connection).Postpone(true);
+            return;
+        }
         m_connection.SetChanges(entityRequestProxy.GetRequest(),
                                 entityRequestProxy.GetInstanceId(),
                                 entityRequestProxy.GetReceivingHandlerId());
@@ -105,6 +114,11 @@ namespace Control
     void TracerStatusHandler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
                                               Safir::Dob::ResponseSenderPtr        responseSender)
     {
+        if (!m_initialInjectionsComplete)
+        {
+            Safir::Dob::ConnectionAspectPostpone(m_connection).Postpone(true);
+            return;
+        }
         m_connection.Delete(entityRequestProxy.GetEntityId(),
                             entityRequestProxy.GetReceivingHandlerId());
         responseSender->Send(Safir::Dob::SuccessResponse::Create());
