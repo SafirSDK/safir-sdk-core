@@ -94,6 +94,7 @@ namespace Control
             // A ghost may exist for this instance that hasn't been injected yet. Postpone the
             // request so it gets redispatched after OnInitialInjectionsDone has been called.
             Safir::Dob::ConnectionAspectPostpone(m_connection).Postpone(true);
+            responseSender->Discard();
             return;
         }
         m_connection.SetChanges(entityRequestProxy.GetRequest(),
@@ -105,6 +106,12 @@ namespace Control
     void TracerStatusHandler::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
                                            Safir::Dob::ResponseSenderPtr        responseSender)
     {
+        if (!m_initialInjectionsComplete)
+        {
+            Safir::Dob::ConnectionAspectPostpone(m_connection).Postpone(true);
+            responseSender->Discard();
+            return;
+        }
         m_connection.SetChanges(entityRequestProxy.GetRequest(),
                                 entityRequestProxy.GetInstanceId(),
                                 entityRequestProxy.GetReceivingHandlerId());
@@ -117,6 +124,7 @@ namespace Control
         if (!m_initialInjectionsComplete)
         {
             Safir::Dob::ConnectionAspectPostpone(m_connection).Postpone(true);
+            responseSender->Discard();
             return;
         }
         m_connection.Delete(entityRequestProxy.GetEntityId(),
