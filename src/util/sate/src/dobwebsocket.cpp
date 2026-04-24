@@ -785,8 +785,8 @@ void DobWebSocket::HandleNotification(const QJsonObject& j)
     else if (method == "onDeletedEntity")
     {
         auto instance = JsonToHash<sdt::InstanceId>(p["instanceId"]);
-        auto entity = std::dynamic_pointer_cast<Safir::Dob::Entity>(ToObjectPtr(p["entity"].toObject()));
-        sdt::EntityId eid(entity->GetTypeId(), instance);
+        auto typeId = sdt::Operations::GetTypeId(p["typeId"].toString().toStdWString());
+        sdt::EntityId eid(typeId, instance);
         DecreaseInstanceCounter(eid);
         emit DobInterface::OnEntity(eid, sdt::HandlerId(), nullptr, DobInterface::DeletedEntity);
     }

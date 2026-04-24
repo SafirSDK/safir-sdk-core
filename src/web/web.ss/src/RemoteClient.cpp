@@ -180,6 +180,10 @@ void RemoteClient::SendPing()
             return;
         }
 
+        if (m_tracer && m_tracer->IsEnabled())
+        {
+            *m_tracer << L"<< PING" << std::endl;
+        }
         m_stream.async_ping({}, boost::asio::bind_executor(*m_strand, [this, self](const boost::system::error_code& ec)
         {
             if (ec)
@@ -198,16 +202,17 @@ void RemoteClient::DoRead()
                                                                  {
     if (ec)
     {
-        if (ec != boost::beast::websocket::error::closed)
-        {
-            LogError("RemoteClient.Read", ec);
-        }
         CloseInternal();
         return;
     }
 
     auto payload = boost::beast::buffers_to_string(m_readBuffer.data());
     m_readBuffer.consume(m_readBuffer.size());
+
+    if (m_tracer && m_tracer->IsEnabled())
+    {
+        *m_tracer << L">> " << ts::Utilities::ToWstring(payload) << std::endl;
+    }
 
     try
     {
@@ -251,6 +256,10 @@ void RemoteClient::DoWrite()
     }
 
     m_isWriting = true;
+    if (m_tracer && m_tracer->IsEnabled())
+    {
+        *m_tracer << L"<< " << ts::Utilities::ToWstring(m_writeQueue.front()) << std::endl;
+    }
     auto self = shared_from_this();
     m_stream.async_write(boost::asio::buffer(m_writeQueue.front()),
                          boost::asio::bind_executor(*m_strand, [this, self](const boost::system::error_code& ec, std::size_t /*bytesTransferred*/)
@@ -301,6 +310,12 @@ void RemoteClient::CloseInternal()
     }
     m_isClosed = true;
     m_pingHandler->Stop();
+
+    if (m_tracer && m_tracer->IsEnabled())
+    {
+        *m_tracer << L"Closing connection" << std::endl;
+    }
+
     m_dobConnection->Close();
     NotifyClosed();
 }
@@ -311,6 +326,7 @@ void RemoteClient::RemoveDobConnectionFromRegistry()
     {
         m_dobConnectionRegistry->RemoveConnection(m_connectionName);
         m_connectionName.clear();
+        m_tracer.reset();
     }
 }
 
@@ -538,7 +554,12 @@ void RemoteClient::WsOpen(const JsonRpcRequest& req)
     m_connectionName = req.ConnectionName();
     auto context = req.HasContext() ? req.Context() : 0;
     m_dobConnection->Open(Wstr(m_connectionName), context);
-    
+    m_tracer.emplace(ts::Utilities::ToWstring(m_connectionName));
+    if (m_tracer && m_tracer->IsEnabled())
+    {
+        *m_tracer << L"Opening connection" << std::endl;
+    }
+
     if (m_dobConnectionRegistry)
     {
         m_dobConnectionRegistry->InsertConnection(m_connectionName, m_dobConnection, m_strand);

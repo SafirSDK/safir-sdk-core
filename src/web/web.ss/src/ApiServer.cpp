@@ -58,6 +58,7 @@ ApiServer::ApiServer(boost::asio::io_context& io,
     , m_isTerminating(false)
     , m_dobConnection()
     , m_dobDispatcher(m_dobConnection, m_io)
+    , m_tracer(L"ApiServer")
 {
 #if defined (_WIN32)
     m_signals.add(SIGABRT);
@@ -77,6 +78,9 @@ void ApiServer::Run()
 
     lllog(5)<<"API: Wait for DOB to let us open a connection..."<<std::endl;
     m_dobConnection.Open(L"safir_web", L"", 0, this, &m_dobDispatcher);
+
+    // Start tracer backdoor to be able to enable/disable tracing via DOB commands
+    Safir::Application::TracerBackdoor::Start(m_dobConnection);
 
     std::string ip="";
     unsigned short port=0;
@@ -138,6 +142,8 @@ void ApiServer::Run()
 
     lllog(5)<<"API: Running server on "<<serverTcpEndpoint.address().to_string().c_str()<<":"<<serverTcpEndpoint.port()<<std::endl;
     std::wcout<<L"Running API server on "<<serverTcpEndpoint.address().to_string().c_str()<<L":"<<serverTcpEndpoint.port()<<std::endl;
+    m_tracer << L"Listening on " << ts::Utilities::ToWstring(serverTcpEndpoint.address().to_string())
+             << L":" << serverTcpEndpoint.port() << std::endl;
 }
 
 void ApiServer::Terminate()
@@ -148,6 +154,7 @@ void ApiServer::Terminate()
     }
 
     m_isTerminating = true;
+    m_tracer << L"Shutting down" << std::endl;
     lllog(5)<<"API: safir_web is starting to shut down..."<<std::endl;
 
     boost::system::error_code signalsEc;
@@ -160,6 +167,7 @@ void ApiServer::Terminate()
     //close this dob connection
     if (m_dobConnection.IsOpen())
     {
+        Safir::Application::TracerBackdoor::Stop();
         m_dobConnection.Close();
     }
 
@@ -235,11 +243,17 @@ void ApiServer::StartAccept()
                         {
                             OnConnectionOpen(con);
                             lllog(5) << "API: New WebSocket connection: " << con->ToString().c_str() << std::endl;
+                            m_tracer << L"WebSocket connected: " << ts::Utilities::ToWstring(con->ToString()) << std::endl;
                         }
                     });
                 }
                 else
                 {
+                    if (m_tracer.IsEnabled())
+                    {
+                        m_tracer << L"REST " << ts::Utilities::ToWstring(std::string(request.method_string()))
+                                 << L" " << ts::Utilities::ToWstring(std::string(request.target())) << std::endl;
+                    }
                     StartRestSession(stream->release_socket(), std::move(request),
                                      [this](const std::string& connId) { return m_dobConnectionRegistry->GetConnection(connId); },
                                      [this]() { return m_dobConnectionRegistry->GetAllConnectionNames(); });
@@ -270,6 +284,7 @@ void ApiServer::OnConnectionClosed(const RemoteClient* con)
         if (it != m_connections.end())
         {
             lllog(5)<<"API: WebSocket connection closed: "<<con->ToString().c_str()<<std::endl;
+            m_tracer << L"WebSocket disconnected: " << ts::Utilities::ToWstring(con->ToString()) << std::endl;
             m_connections.erase(it);
 
             if (m_connections.empty())
@@ -286,6 +301,7 @@ void ApiServer::OnConnectionClosed(const RemoteClient* con)
 
 void ApiServer::OnStopOrder()
 {
+    m_tracer << L"StopOrder received" << std::endl;
     lllog(5)<<"API: Got StopOrder. All connected clients will be disconnected."<<std::endl;
     Terminate();
 }

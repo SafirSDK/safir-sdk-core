@@ -26,6 +26,7 @@
 #include <deque>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/websocket.hpp>
@@ -34,6 +35,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
+#include <Safir/Application/Tracer.h>
 #include "PingHandler.h"
 #include "DobConnection.h"
 #include "JsonRpcRequest.h"
@@ -75,6 +77,7 @@ private:
     std::shared_ptr<DobConnection> m_dobConnection;
     std::shared_ptr<PingHandler> m_pingHandler;
     std::string m_connectionName;
+    std::optional<Safir::Application::Tracer> m_tracer;
     bool m_enableTypeSystem;
     boost::beast::flat_buffer m_readBuffer;
     std::deque<std::string> m_writeQueue;

@@ -29,6 +29,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <Safir/Application/Tracer.h>
 #include "RemoteClient.h"
 
 class DobConnectionRegistry;
@@ -56,6 +57,8 @@ private:
     //own DOB connection
     sd::Connection m_dobConnection;
     Safir::Utilities::AsioDispatcher m_dobDispatcher;
+
+    Safir::Application::Tracer m_tracer;
 
     void StartAccept();
     void OnConnectionOpen(const std::shared_ptr<RemoteClient>& con);
