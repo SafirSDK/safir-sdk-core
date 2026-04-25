@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2011-2025 (http://safirsdkcore.com)
+# Copyright Saab AB, 2011-2025-2026 (http://safirsdkcore.com)
 #
 # Created by: Joel Ottosson (joel.ottosson@gmail.com)
 #

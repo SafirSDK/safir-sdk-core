@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2022, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *

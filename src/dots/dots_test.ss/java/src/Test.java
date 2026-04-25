@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2009-2013, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2009-2013, 2024, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *

@@ -1,6 +1,6 @@
 /* ****************************************************************************
 *
-* Copyright Saab AB, 2005-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2005-2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *

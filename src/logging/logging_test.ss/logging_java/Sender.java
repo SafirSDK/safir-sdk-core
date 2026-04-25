@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén <anders.widen@consoden.se>
 *

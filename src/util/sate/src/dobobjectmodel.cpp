@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2024 (http://safirsdkcore.com)
+* Copyright Saab AB, 2024, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson
 *
