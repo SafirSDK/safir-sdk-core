@@ -38,7 +38,7 @@ parser.add_argument("--jar", required=True)
 
 arguments = parser.parse_args()
 
-sender_cmd = ("java", "-jar", arguments.jar)
+sender_cmd = ("java", "--enable-native-access=ALL-UNNAMED", "-jar", arguments.jar)
 
 log_server = syslog_server.SyslogServer(arguments.safir_show_config)
 

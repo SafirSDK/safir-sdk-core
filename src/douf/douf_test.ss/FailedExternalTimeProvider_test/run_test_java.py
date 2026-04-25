@@ -30,7 +30,7 @@ parser.add_argument("--jar", required=True)
 
 arguments = parser.parse_args()
 
-result = subprocess.call(("java", "-jar", arguments.jar))
+result = subprocess.call(("java", "--enable-native-access=ALL-UNNAMED", "-jar", arguments.jar))
 
 print("Result =", result)
 
