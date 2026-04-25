@@ -1,4 +1,54 @@
 -----------------------------------------------------------------------------------------------------------------------
+2026-04-26 version 7.4.2
+-----------------------------------------------------------------------------------------------------------------------
+
+This release has a few improvements an many minor bugfixes. The main improvements are
+that it is now possible to specify the Syslog facility when sending logs through
+Safir.Logging and that it is possible to control SimulateOverflow flags through
+Dobexplorer.
+
+There are also quite a few improvements to safir_web (formerly safir_websocket), where an
+added REST api is the biggest.
+
+Safir.Logging error reports are now forwarded to tracers, making it easier to see
+system-level errors in the Tracer GUI.
+
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#566 Make it possible to toggle SimulateOverflow flags from dobexplorer
+#580 Add option to set syslog facility in the Safir.Logging interfaces
+#561 Update users guide with Syslog RFC 5424 information
+#110 Add more information about SetChanges and SetAll to Users Guide
+#593 Drop support for Debian Bookworm
+#563 Add support for VS2026
+#564 Remove Sate legacy
+#567 CreateRoutine with multiple enum values gives compile error
+#568 Make type column clickable in SATE object editor
+#577 Attempting to make a sequence parameter should generate an error
+#579 Make empty tracer prefixes illegal
+#576 Using the tracer without causing a flush call will never log anything
+#573 Create a way to make syslog error reports go to tracers too
+#581 Add parameter to control which syslog facility the Tracer uses for its syslog logging
+#596 Tracer prefixes do not always appear in the TracerViewer
+#583 JSON serialization should use Strings instead of Number for Int64 types
+#586 Incorrect use of ExceptionKeeper in dots serialization code
+#575 ToXml serialization of a dictionary that has a key with <,> or & in it gives invalid xml
+#572 Dope hangs if xml deserialization fails with unexpected exception type
+#574 Parsing dictionary xml where key field contains <,> or& results in unexpected exception type
+#582 Support for reading parameters in safir web
+#595 Add tracers to safir_web
+#585 safir_web: calling getNumberOfInstances on non-entity type crashes safir_web
+#584 Add a Websocket and/or REST api for logging to Safir.Logging
+#589 safir_web: Unescaped backslashes in JSON error messages
+#590 safir_web: add a way to query version
+#592 safir_web onDeletedEntity shall only supply an EntityId
+#594 safir_status error in multicomputer tests
+#565 Sate script output is not working on Windows
+#571 Sate register service handler dialog shows options that are not relevant for services
+#591 Douf C interfaces should correctly handle exception passing
+#562 MergeChanges in Utilities should allow objects of different type-id.
+
+-----------------------------------------------------------------------------------------------------------------------
 2025-12-29 version 7.4.1
 -----------------------------------------------------------------------------------------------------------------------
 
