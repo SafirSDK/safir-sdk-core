@@ -10952,12 +10952,12 @@ BOOST_AUTO_TEST_CASE (old_style_tests)
     }
     catch (const Safir::Dob::Typesystem::FundamentalException & e)
     {
-        std::wcout << "Caught exception in _tmain: "<<std::endl;
+        std::wcout << "Caught exception in main: "<<std::endl;
         std::wcout << e.GetExceptionInfo() << std::endl;
     }
     catch (...)
     {
-        std::wcout << "Caught ... exception in _tmain: "<<std::endl;
+        std::wcout << "Caught ... exception in main: "<<std::endl;
     }
 }
 
