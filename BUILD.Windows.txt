@@ -29,9 +29,9 @@ Items marked with an asterisk (*) are optional.
 
 The easiest way to install these prerequisites is using chocolatey (www.chocolatey.org):
 
-   choco install cmake Temurin17 graphviz nsis doxygen.install ninja python3 dejavufonts asciidoctorj dia gzip
+   choco install cmake Temurin21 graphviz nsis doxygen.install ninja python3 dejavufonts asciidoctorj dia gzip
 
-Temurin17 is a packaged version OpenJDK 17.
+Temurin21 is a packaged version OpenJDK 21.
 
 Conan and websockets
 --------------------
