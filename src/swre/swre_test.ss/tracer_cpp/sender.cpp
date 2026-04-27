@@ -65,6 +65,9 @@ int main(int argc, char ** argv)
     razor << "foo" << std::flush << "bar" << std::endl;
     razor << "this is the end\nmy only friend, the end" << std::endl;
     rb << "of our elaborate plans" << std::endl;
+    //tyrone << "Fy bubblan f\u00f6r ondska!" << std::endl;
+    //Flora::tracer << "Slabbgryta" << std::endl;
+
 #if __cpp_lib_format
     razor.print(L"I l{}ve the smell of {} in the morning, ", 0, L"std::format");
     razor.println(L"it smells like v{}ct{}ry.", 1, 0);
