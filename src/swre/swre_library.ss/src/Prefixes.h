@@ -137,18 +137,8 @@ public:
 
     PrefixId Add(const std::wstring & prefix)
     {
-        bool wasNew = false;
-        PrefixId result;
-        {
-            std::unique_lock<std::mutex> lck(m_prefixSearchLock);
-            wasNew = (std::find(m_prefixes.begin(), m_prefixes.end(), prefix) == m_prefixes.end());
-            result = AddInternal(prefix);
-        }
-        if (wasNew)
-        {
-            UpdateEntity();
-        }
-        return result;
+        std::unique_lock<std::mutex> lck(m_prefixSearchLock);
+        return AddInternal(prefix);
     }
 
     volatile bool * GetStatePointer(const PrefixId prefixId) { return &ToPrefix(prefixId).m_isEnabled; }
