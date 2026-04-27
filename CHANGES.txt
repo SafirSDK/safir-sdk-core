@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------------------------------------------------
-2026-04-26 version 7.4.2
+2026-04-27 version 7.4.2
 -----------------------------------------------------------------------------------------------------------------------
 
 This release has a few improvements an many minor bugfixes. The main improvements are
@@ -29,7 +29,6 @@ This release fixes the following issues (see http://safirsdkcore.com for details
 #576 Using the tracer without causing a flush call will never log anything
 #573 Create a way to make syslog error reports go to tracers too
 #581 Add parameter to control which syslog facility the Tracer uses for its syslog logging
-#596 Tracer prefixes do not always appear in the TracerViewer
 #583 JSON serialization should use Strings instead of Number for Int64 types
 #586 Incorrect use of ExceptionKeeper in dots serialization code
 #575 ToXml serialization of a dictionary that has a key with <,> or & in it gives invalid xml
