@@ -22,7 +22,11 @@
 *
 ******************************************************************************/
 #include <Safir/Application/Tracer.h>
-#include "tracer_helper_dll.h"
+#ifdef _WIN32
+#  include <windows.h>
+#else
+#  include "tracer_helper_dll.h"
+#endif
 
 //disable stupid incorrect microsoft warning.
 #ifdef _MSC_VER
@@ -42,6 +46,13 @@ Safir::Application::Tracer Flora::tracer(L"Flora");
 
 int main(int argc, char ** argv)
 {
+#ifdef _WIN32
+    // Load the helper DLL at runtime so its static initializers run while the
+    // Windows DLL loader lock is held. With the bug present this deadlocks;
+    // after the fix it should complete normally.
+    LoadLibraryA("tracer_helper_dll.dll");
+#endif
+
     bool enable = false;
     if (argc == 2 && std::string(argv[1]) == "enable")
     {

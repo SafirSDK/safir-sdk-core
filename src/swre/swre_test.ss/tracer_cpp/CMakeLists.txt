@@ -7,15 +7,16 @@ add_library(thread_attach_dll SHARED thread_attach_dll.cpp)
 add_library(tracer_helper_dll SHARED tracer_helper_dll.cpp)
 target_link_libraries(tracer_helper_dll PRIVATE swre_interface_cpp thread_attach_dll)
 
-add_library(tracer_dll_wrapper SHARED tracer_dll_wrapper.cpp)
-target_link_libraries(tracer_dll_wrapper PRIVATE tracer_helper_dll)
-
 add_executable(tracer_sender_cpp sender.cpp)
 
-target_link_libraries(tracer_sender_cpp PRIVATE
-  swre_interface_cpp
-  tracer_helper_dll
-  tracer_dll_wrapper)
+if(WIN32)
+  # On Windows, tracer_helper_dll is loaded at runtime via LoadLibrary to
+  # trigger static initializers while the loader lock is held.
+  target_link_libraries(tracer_sender_cpp PRIVATE swre_interface_cpp)
+  add_dependencies(tracer_sender_cpp tracer_helper_dll)
+else()
+  target_link_libraries(tracer_sender_cpp PRIVATE swre_interface_cpp tracer_helper_dll)
+endif()
 
 ADD_TEST(NAME tracer_cpp
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
