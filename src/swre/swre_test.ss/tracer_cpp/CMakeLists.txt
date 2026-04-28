@@ -2,8 +2,10 @@ if (NOT MSVC OR MSVC_VERSION GREATER_EQUAL 1930)
   set(CMAKE_CXX_STANDARD 20)
 endif()
 
+add_library(thread_attach_dll SHARED thread_attach_dll.cpp)
+
 add_library(tracer_helper_dll SHARED tracer_helper_dll.cpp)
-target_link_libraries(tracer_helper_dll PRIVATE swre_interface_cpp)
+target_link_libraries(tracer_helper_dll PRIVATE swre_interface_cpp thread_attach_dll)
 
 add_executable(tracer_sender_cpp sender.cpp)
 
