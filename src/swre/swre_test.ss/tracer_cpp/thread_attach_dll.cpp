@@ -22,6 +22,11 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID)
     }
     return TRUE;
 }
+
+// Exported so the linker generates an import lib and embeds this DLL
+// in tracer_helper_dll's import table, guaranteeing load order.
+__declspec(dllexport) void thread_attach_dll_dummy() {}
+
 #else
 // Nothing needed on Linux - the loader lock issue is Windows-specific
 void thread_attach_dll_dummy() {}
