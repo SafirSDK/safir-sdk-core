@@ -266,7 +266,6 @@ void RemoteClient::DoWrite()
     {
         if (ec)
         {
-            LogError("RemoteClient.Write", ec);
             CloseInternal();
             return;
         }
