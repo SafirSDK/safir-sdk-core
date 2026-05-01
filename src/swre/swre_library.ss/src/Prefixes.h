@@ -101,6 +101,7 @@ public:
 
     void StartEntityHandling(const std::wstring& programName)
     {
+        m_started = true;
         m_programName = programName;
 
         m_connection.SubscribeEntity(GetMyEntityId(), true, true, this);
@@ -137,8 +138,18 @@ public:
 
     PrefixId Add(const std::wstring & prefix)
     {
-        std::unique_lock<std::mutex> lck(m_prefixSearchLock);
-        return AddInternal(prefix);
+        bool wasNew = false;
+        PrefixId result;
+        {
+            std::unique_lock<std::mutex> lck(m_prefixSearchLock);
+            wasNew = (std::find(m_prefixes.begin(), m_prefixes.end(), prefix) == m_prefixes.end());
+            result = AddInternal(prefix);
+        }
+        if (wasNew)
+        {
+            UpdateEntity();
+        }
+        return result;
     }
 
     volatile bool * GetStatePointer(const PrefixId prefixId) { return &ToPrefix(prefixId).m_isEnabled; }
@@ -226,7 +237,7 @@ public:
 
     void UpdateEntity()
     {
-        if (m_stop)
+        if (!m_started || m_stop)
         {
             return;
         }
@@ -422,6 +433,7 @@ private:
 
     std::unique_ptr<boost::asio::steady_timer> m_timer;
     std::atomic<bool> m_stop;
+    std::atomic<bool> m_started{false};
 
     std::atomic<bool> m_logToStdout{true};
     std::atomic<bool> m_logToSafirLogging{true};

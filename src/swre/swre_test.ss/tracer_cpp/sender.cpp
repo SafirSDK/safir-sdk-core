@@ -28,6 +28,17 @@
 #pragma warning (disable : 4428)
 #endif
 
+// Add a couple of static instances that we never use, just to check that we are
+// not accidentally making the tracers not possible to be statics.
+static Safir::Application::Tracer tyrone(L"Tyrone");
+
+class Flora
+{
+public:
+    static Safir::Application::Tracer tracer;
+};
+Safir::Application::Tracer Flora::tracer(L"Flora");
+
 int main(int argc, char ** argv)
 {
     bool enable = false;
