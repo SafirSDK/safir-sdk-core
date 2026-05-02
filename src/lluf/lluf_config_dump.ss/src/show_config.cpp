@@ -160,20 +160,23 @@ int main(int argc, char * argv[])
         return 1;
     }
 
+    if (options.version)
+    {
+        std::cout << "Safir SDK Core " << SAFIR_SDK_CORE_VERSION << std::endl;
+        return 0;
+    }
+    if (options.revision)
+    {
+        std::cout << "Git revision: " << SAFIR_SDK_CORE_GIT_REVISION_FULL << std::endl;
+        std::cout << "Branch: " << SAFIR_SDK_CORE_GIT_BRANCH << std::endl;
+        std::cout << "Status: " << SAFIR_SDK_CORE_GIT_STATUS << std::endl;
+        return 0;
+    }
+
     try
     {
         Safir::Utilities::Internal::ConfigReader reader;
 
-        if (options.version)
-        {
-            std::cout << "Safir SDK Core " << SAFIR_SDK_CORE_VERSION << std::endl;
-        }
-        if (options.revision)
-        {
-            std::cout << "Git revision: " << SAFIR_SDK_CORE_GIT_REVISION_FULL << std::endl;
-            std::cout << "Branch: " << SAFIR_SDK_CORE_GIT_BRANCH << std::endl;
-            std::cout << "Status: " << SAFIR_SDK_CORE_GIT_STATUS << std::endl;
-        }
         if (options.locations)
         {
             std::cout << "; ==== locations.ini ====" << std::endl;
