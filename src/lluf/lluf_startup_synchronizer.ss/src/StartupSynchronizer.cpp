@@ -77,10 +77,10 @@ namespace
             {
                 create_directories(dir);
             }
-            catch (...)
+            catch (const std::exception& e)
             {
                 std::ostringstream ostr;
-                ostr << "Failed to create directory '" << dir.string() << "'" << std::endl;
+                ostr << "Failed to create directory '" << dir.string() << "': " << e.what() << std::endl;
                 throw std::logic_error(ostr.str());
             }
         }

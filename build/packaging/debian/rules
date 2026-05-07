@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-.PHONY: override_dh_install install_runtime install_tools install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_strip override_dh_compress
+.PHONY: override_dh_auto_install install_runtime install_tools install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_strip override_dh_compress
 
 
 #upstream wants to control compilation flags
@@ -11,8 +11,12 @@ else
 	CMAKE_BUILD_TYPE=RelWithDebInfo
 endif
 
+# debhelper compat 12+ replaces HOME with a temp directory, which breaks conan's
+# package cache lookup. Read the real home from the passwd database instead.
+REAL_HOME := $(shell getent passwd $$LOGNAME | cut -d: -f6)
+
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_BUILD_TYPE:STRING=$(CMAKE_BUILD_TYPE)
+	CONAN_HOME=$(REAL_HOME)/.conan2 dh_auto_configure -- -DCMAKE_BUILD_TYPE:STRING=$(CMAKE_BUILD_TYPE)
 
 %:
 	dh $@ --buildsystem=cmake+ninja --with=cli
@@ -29,6 +33,8 @@ install_runtime:
 
 	#create some needed directories
 	mkdir -p debian/safir-sdk-core/var/lib/safir-sdk-core
+	mkdir -p debian/safir-sdk-core/var/lib/safir-sdk-core/dump
+	mkdir -p debian/safir-sdk-core/var/log/safir-sdk-core
 
 install_tools: export DESTDIR=$(shell pwd)/debian/safir-sdk-core-tools
 install_tools:

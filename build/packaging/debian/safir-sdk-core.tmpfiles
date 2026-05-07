@@ -1,1 +1,3 @@
 d /run/safir-sdk-core 0775 root safirusers -
+d /run/safir-sdk-core/locks 0775 root safirusers -
+d /run/safir-sdk-core/ipc 0775 root safirusers -
