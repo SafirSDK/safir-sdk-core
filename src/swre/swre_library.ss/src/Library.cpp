@@ -348,8 +348,11 @@ Library::OnSystemLog(Safir::Utilities::Internal::Log::Severity severity,
     const bool toStdout = m_prefixes.LogToStdout();
     const bool toUdp = m_prefixes.LogToTracer();
 
-    // Format: "syslog: [SEVERITY] message\n"
-    const std::wstring formatted = L"syslog: [" + SeverityToWstring(severity) + L"] " + ToWstring(message) + L"\n";
+    // Format: "syslog: [SEVERITY] message\n", with each line in message prefixed
+    const std::wstring prefix = L"syslog: [" + SeverityToWstring(severity) + L"] ";
+    std::wstring msg = std::regex_replace(ToWstring(message), std::wregex(L"[\\r\\n]+$"), L"");
+    msg = std::regex_replace(msg, std::wregex(L"\\r\\n|[\\r\\n]"), L"\n" + prefix);
+    const std::wstring formatted = prefix + msg + L"\n";
 
     // Delegate to TraceBuffer - no deadlock risk since TraceBuffer never calls external
     // code while holding its lock
