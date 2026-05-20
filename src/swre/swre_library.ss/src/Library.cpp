@@ -254,11 +254,14 @@ Library::StopTraceBackdoor()
 
     if (m_thread.joinable())
     {
-        boost::asio::post(m_ioContext,[this]{m_prefixes.StopEntityHandling();});
-        if (m_controlInfoReceiver)
+        boost::asio::post(m_ioContext,[this]
         {
-            m_controlInfoReceiver->Stop();
-        }
+            m_prefixes.StopEntityHandling();
+            if (m_controlInfoReceiver)
+            {
+                m_controlInfoReceiver->Stop();
+            }
+        });
 
         m_work.reset();
         m_thread.join();
