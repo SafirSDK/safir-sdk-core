@@ -27,6 +27,7 @@
 
 #include <QTimer>
 #include <QSortFilterProxyModel>
+#include "qt_compat.h"
 
 class EnumSortFilterProxyModel : public QSortFilterProxyModel
 {
@@ -37,8 +38,9 @@ public:
 
     void setFilterRegularExpression(const int column, QRegularExpression&& regex)
     {
+        FILTER_CHANGE_BEGIN();
         m_filters[column] = std::move(regex);
-        invalidateFilter();
+        FILTER_CHANGE_END();
     }
 
 protected:

@@ -27,6 +27,7 @@
 #include "typesysteminheritancemodel.h"
 #include "typesystemnamespacemodel.h"
 #include "iconfactory.h"
+#include "qt_compat.h"
 #include <QLineEdit>
 #include <QDebug>
 #include <QTreeView>
@@ -53,8 +54,9 @@ public:
 
     void SetFilter(const QString& filter)
     {
+        FILTER_CHANGE_BEGIN();
         m_filter = filter;
-        invalidateFilter();
+        FILTER_CHANGE_END();
     }
 
 protected:

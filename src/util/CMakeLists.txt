@@ -1,3 +1,4 @@
+add_subdirectory(qt_common)
 add_subdirectory(pathed)
 add_subdirectory(gactool)
 add_subdirectory(memory_allocator/src)

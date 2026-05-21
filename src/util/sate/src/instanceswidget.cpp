@@ -41,6 +41,7 @@
 #include "messageinstancesmodel.h"
 #include "typesystemrepository.h"
 #include "utilities.h"
+#include "qt_compat.h"
 #include <map>
 #include <Safir/Dob/QueueParameters.h>
 
@@ -55,14 +56,16 @@ public:
 
     void clearFilterRegularExpression(const int column)
     {
+        FILTER_CHANGE_BEGIN();
         m_filters.erase(column);
-        invalidateFilter();
+        FILTER_CHANGE_END();
     }
 
     void setFilterRegularExpression(const int column, const QRegularExpression& regex)
     {
+        FILTER_CHANGE_BEGIN();
         m_filters[column] = regex;
-        invalidateFilter();
+        FILTER_CHANGE_END();
     }
 
 protected:

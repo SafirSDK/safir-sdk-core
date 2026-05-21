@@ -24,6 +24,7 @@
 #include "parameterswidget.h"
 #include "ui_parameterswidget.h"
 #include "parametersmodel.h"
+#include "qt_compat.h"
 
 #include <QSortFilterProxyModel>
 #include <QTimer>
@@ -39,8 +40,9 @@ public:
 
     void setFilterRegularExpression(const int column, QRegularExpression&& regex)
     {
+        FILTER_CHANGE_BEGIN();
         m_filters[column] = std::move(regex);
-        invalidateFilter();
+        FILTER_CHANGE_END();
     }
 
 protected:

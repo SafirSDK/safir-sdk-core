@@ -50,14 +50,15 @@ QT_WRAP_UI(ui_headers ${ui})
 QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
 QT_ADD_RESOURCES(rcc_sources
   resources.qrc
-  ../../style/dark/darkstyle.qrc
-  ../../style/light/lightstyle.qrc
-  ../../style/customizations/customizations.qrc
+  ${QT_STYLESHEET_DIR}/dark/darkstyle.qrc
+  ${QT_STYLESHEET_DIR}/light/lightstyle.qrc
+  ${QT_STYLESHEET_DIR}/customizations/customizations.qrc
 )
 
 ADD_EXECUTABLE(safir_tracer_viewer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} ${rcc_sources})
 
 TARGET_LINK_LIBRARIES(safir_tracer_viewer PRIVATE
+  qt_common
   lluf_config
   communication
   control_utils

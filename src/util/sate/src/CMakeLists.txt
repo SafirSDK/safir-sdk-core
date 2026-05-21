@@ -126,14 +126,15 @@ QT_WRAP_UI(ui_headers ${ui})
 QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
 QT_ADD_RESOURCES(rcc_sources
   sate_resources.qrc
-  ../../style/dark/darkstyle.qrc
-  ../../style/light/lightstyle.qrc
-  ../../style/customizations/customizations.qrc
+  ${QT_STYLESHEET_DIR}/dark/darkstyle.qrc
+  ${QT_STYLESHEET_DIR}/light/lightstyle.qrc
+  ${QT_STYLESHEET_DIR}/customizations/customizations.qrc
 )
 
 ADD_EXECUTABLE(sate WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} ${rcc_sources})
 
 TARGET_LINK_LIBRARIES(sate PRIVATE
+  qt_common
   douf_time_cpp
   lluf_internal
   lluf_crash_reporter

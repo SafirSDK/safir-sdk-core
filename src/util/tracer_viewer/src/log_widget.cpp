@@ -43,6 +43,7 @@
 #include <QRegularExpression>
 #include <QItemSelection>
 #include "selectable_text_delegate.h"
+#include "qt_compat.h"
 #include <algorithm>
 #include <QEvent>
 
@@ -57,16 +58,18 @@ public:
 
     void clearFilterRegularExpression(const int column)
     {
+        FILTER_CHANGE_BEGIN();
         if (auto* lm = qobject_cast<LogModel*>(sourceModel()))
             lm->clearFilter(column);
-        invalidateFilter();
+        FILTER_CHANGE_END();
     }
 
     void setFilterRegularExpression(const int column, const QRegularExpression& regex)
     {
+        FILTER_CHANGE_BEGIN();
         if (auto* lm = qobject_cast<LogModel*>(sourceModel()))
             lm->setFilter(column, regex);
-        invalidateFilter();
+        FILTER_CHANGE_END();
     }
 
 protected:

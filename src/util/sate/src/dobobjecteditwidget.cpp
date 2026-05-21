@@ -28,6 +28,7 @@
 #include "dobobjectdelegate.h"
 #include "dobobjectbuilder.h"
 #include "utilities.h"
+#include "qt_compat.h"
 #include <QTreeView>
 #include <QKeyEvent>
 #include <QComboBox>
@@ -64,8 +65,9 @@ public:
 
     void setFilterRegularExpression(const int column, QRegularExpression&& regex)
     {
+        FILTER_CHANGE_BEGIN();
         m_filters[column] = std::move(regex);
-        invalidateFilter();
+        FILTER_CHANGE_END();
     }
 
 protected:
