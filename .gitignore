@@ -137,7 +137,6 @@ CMakeDoxygenDefaults.cmake
 conan/
 conan_host_profile
 conan.*
-conanfile.txt
 conaninfo.txt
 conanbuildinfo.txt
 graph_info.json

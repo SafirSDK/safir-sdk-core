@@ -38,12 +38,6 @@ dependencies.
 If you're building for another Debian-based distribution you may have to adjust some
 package names.
 
-We're using a Conan recipe that is not yet updated in the Conan repositories, so that
-needs to be installed. Open a terminal in the root of the unpacked Safir SDK Core source
-code and run:
-
-  conan export build/qt-advanced-docking-system
-
 Building Safir SDK Core Installation Packages
 ---------------------------------------------
 Now you can build Safir SDK Core using the build script. Open a terminal in the root of

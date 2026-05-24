@@ -1,12 +1,13 @@
 #This file sets up some of the compiler flags we want for GCC and MSVC.
 cmake_minimum_required(VERSION 3.13)
 
-if (MSVC_VERSION EQUAL 1900)
-  set(CMAKE_CXX_STANDARD 14)
-else()
-  set(CMAKE_CXX_STANDARD 17)
+if (NOT CMAKE_CXX_STANDARD)
+  if (MSVC_VERSION EQUAL 1900)
+    set(CMAKE_CXX_STANDARD 14)
+  else()
+    set(CMAKE_CXX_STANDARD 17)
+  endif()
 endif()
-
 if (UNIX)
 
   add_compile_options($<$<CXX_COMPILER_ID:GNU>:-fstack-protector-strong>)

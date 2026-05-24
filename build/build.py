@@ -722,7 +722,7 @@ class VisualStudioBuilder(BuilderBase):
             elif self.arguments.use_studio == "vs2022":
                 vcver = "14.4" #vc 17.10.4 or later
             elif self.arguments.use_studio == "vs2026":
-                vcver = "14.50"
+                vcver = "14.5"
             cmd = '"{}" {} -vcvars_ver={} & set'.format(vcvarsall, self.arguments.arch, vcver)
 
         LOGGER.log("Running '" + cmd + "' to extract environment")

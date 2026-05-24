@@ -3,14 +3,37 @@ cmake_minimum_required(VERSION 3.24.0)
 #Don't add /W3 to MSVC compilation flags. We set warning levels ourselves
 cmake_policy(SET CMP0092 NEW)
 
-#This allows the build script to specify which vs toolset to use. That is currently
-#the only thing this is used for.
-if (DEFINED ENV{CONAN_EXTRA_ARGUMENTS})
-  separate_arguments(CONAN_EXTRA_ARGUMENTS UNIX_COMMAND $ENV{CONAN_EXTRA_ARGUMENTS})
-  set(CONAN_INSTALL_ARGS --build=missing ${CONAN_EXTRA_ARGUMENTS} CACHE STRING "Command line arguments for conan install" FORCE)
+set(CMAKE_CXX_STANDARD 20)
+
+# Configure Conan provider to use project-local profiles
+# On Linux/NixOS: use system Qt via platform_requires
+# On Windows: use default profile (Qt from Conan)
+if(UNIX)
+  set(CONAN_HOST_PROFILE "${CMAKE_SOURCE_DIR}/build/conan-profiles/linux-system-qt;auto-cmake" CACHE STRING "Conan host profile")
+  # Export the system Qt stub recipe so Conan can satisfy qt-advanced-docking-system's
+  # qt dependency from the local cache rather than attempting to download from ConanCenter.
+  find_program(_conan_cmd conan)
+  if(_conan_cmd)
+    message(STATUS "Exporting qt system wrapper recipe to Conan cache")
+    execute_process(
+      COMMAND ${_conan_cmd} export "${CMAKE_SOURCE_DIR}/build/conan-recipes/qt-system"
+      RESULT_VARIABLE _conan_export_result
+      OUTPUT_QUIET
+      ERROR_QUIET
+    )
+    if(NOT _conan_export_result EQUAL 0)
+      message(WARNING "CMake-Conan: Failed to export qt system wrapper recipe")
+    endif()
+    unset(_conan_cmd)
+    unset(_conan_export_result)
+  endif()
+else()
+  set(CONAN_HOST_PROFILE "default;auto-cmake" CACHE STRING "Conan host profile")
 endif()
 
-set (CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/src/cmake/conan_provider.cmake)
+# Enable Conan dependency provider
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/src/cmake/conan_provider.cmake)
+
 PROJECT(safir-sdk-core CXX C)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -210,6 +233,21 @@ ENABLE_TESTING()
 configure_file(CTestCustom.cmake . COPYONLY)
 set_property (GLOBAL PROPERTY USE_FOLDERS True)
 
+# Trigger Conan provider early by finding a package we need
+# This ensures CONAN_GENERATORS_FOLDER is set before subdirectories are added
+find_package(Boost QUIET)
+
+# Now get the Conan generators folder and persist the paths for subdirectories
+get_property(CONAN_GENERATORS_FOLDER GLOBAL PROPERTY CONAN_GENERATORS_FOLDER)
+if(CONAN_GENERATORS_FOLDER)
+  # Permanently add Conan folder to search paths so subdirectories can find packages
+  list(PREPEND CMAKE_MODULE_PATH "${CONAN_GENERATORS_FOLDER}")
+  list(PREPEND CMAKE_PREFIX_PATH "${CONAN_GENERATORS_FOLDER}")
+  message(STATUS "Conan: Added generators folder to search paths: ${CONAN_GENERATORS_FOLDER}")
+else()
+  message(WARNING "Conan: CONAN_GENERATORS_FOLDER not set - provider may not have run")
+endif()
+
 add_subdirectory(src)
 add_subdirectory(docs)
 
@@ -232,12 +270,6 @@ INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/conan/licenses/
   DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/more_third_party_licenses
   COMPONENT Runtime
   PATTERN .gitignore EXCLUDE)
-
-if (WIN32)
-  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/conan/bin/ninja.exe
-    DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-    COMPONENT Development)
-endif()
 
 set(ignore_me
   "Some of our build methods pass along extra variables to cmake, which causes warnings."

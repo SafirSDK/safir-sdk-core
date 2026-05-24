@@ -81,6 +81,22 @@ if (MSVC)
   add_definitions(-DSAFIR_LINK_QT_STATICALLY)
 endif()
 
+# On Linux, xcb must be explicitly listed on the link command line on distros whose
+# linker enforces that every DSO referenced by Qt's xcb platform plugin is named
+# directly (--as-needed / -z defs semantics).  Mirror the Windows plugin approach
+# above and attach xcb as an INTERFACE dependency of Qt::Widgets so all Qt tools
+# pick it up automatically.
+if(UNIX AND NOT APPLE)
+  find_library(XCB_LIBRARY NAMES xcb)
+  if(XCB_LIBRARY)
+    if(Qt6_FOUND)
+      target_link_libraries(Qt6::Widgets INTERFACE ${XCB_LIBRARY})
+    elseif(Qt5_FOUND)
+      target_link_libraries(Qt5::Widgets INTERFACE ${XCB_LIBRARY})
+    endif()
+  endif()
+endif()
+
 if (NOT Qt6_FOUND AND NOT Qt5_FOUND)
   message(FATAL_ERROR "Appropriate version of Qt with the needed modules (${NEEDED_QT_MODULES}) was not found.")
 endif()

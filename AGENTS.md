@@ -25,9 +25,6 @@ sudo apt-get install python3 pipx python-is-python3 python3-distro build-essenti
 # Install Conan 2
 pipx install "conan>=2.5.0"
 
-# Export required Conan recipe (from source root)
-conan export build/qt-advanced-docking-system
-
 # Build packages (creates .deb files in tmp/)
 build/build.py --package
 

@@ -1,4 +1,4 @@
-find_package(qt-advanced-docking-system CONFIG REQUIRED)
+find_package(qt6advanceddocking CONFIG REQUIRED)
 
 set(ui
     satemainwindow.ui
@@ -143,7 +143,7 @@ TARGET_LINK_LIBRARIES(sate PRIVATE
   dots_cpp
   dose_internal
   dose_cpp
-  qt-advanced-docking-system::qt-advanced-docking-system
+  ads::qt6advanceddocking
   Qt::WebSockets
   Qt::Svg
   Qt::Widgets)

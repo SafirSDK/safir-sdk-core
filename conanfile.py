@@ -21,7 +21,6 @@ class SafirSdkCoreConan(ConanFile):
                        "boost/*:magic_autolink":False,
                        "boost/*:without_wave": True,
                        "boost/*:without_fiber": True,
-                       "boost/*:without_context": True,
                        "boost/*:without_contract": True,
                        "boost/*:without_coroutine": True,
                        "boost/*:without_serialization": True,
@@ -86,12 +85,11 @@ class SafirSdkCoreConan(ConanFile):
                        #"cmake/*:with_openssl": False,
                        #"cmake/*:bootstrap": True
                        }
-    def configure(self):
-        if self.settings.os == "Windows":
-            self.options["qt-advanced-docking-system"].qt_from_conan = True
-
     def generate(self):
         for dep in self.dependencies.values():
+            # Skip platform dependencies (they don't have package_folder)
+            if not dep.package_folder:
+                continue
             name = str(dep).split("/")[0]
             print("Copying license files from", name, "to", os.path.join(self.build_folder, "licenses", name))
             copy(self,
@@ -100,22 +98,18 @@ class SafirSdkCoreConan(ConanFile):
                  dst=os.path.join(self.build_folder, "licenses", name),
                  ignore_case=True,
                  keep_path=False)
-            if "ninja" == name and self.settings.os == "Windows":
-                print("Copying ninja executable from", name, "to", os.path.join(self.build_folder, "bin"))
-                copy(self, "ninja.exe", src=dep.cpp_info.bindirs[0], dst=os.path.join(self.build_folder, "bin"))
 
     def requirements(self):
         self.requires("rapidjson/cci.20230929")
-        self.requires("ninja/1.13.0")
-        self.requires("qt-advanced-docking-system/4.4.1")
+        self.requires("qt-advanced-docking-system/4.5.0")
         self.requires("sentry-breakpad/0.6.5")
-
-        #newer protobufs require newer abseils than what we can use (see below).
-        self.requires("protobuf/5.29.3")
-        #newer abseils require cmake from conan, which is not invokable
-        #from nixos which is one of our dev platforms. Use an older abseil
-        self.requires("abseil/20240116.2")
+        self.requires("protobuf/6.33.5")
+        self.requires("abseil/20260107.1")
 
         if self.settings.os == "Windows":
             self.requires("boost/1.86.0")
-            self.requires("qt/6.10.1")
+            self.requires("qt/[>=6.8 <6.9]") #we are aiming for the latest LTS release here
+        else:
+            # Satisfied by the qt-system wrapper, which reports the actual installed version
+            # via pkg-config. Requires at least Qt 6.4 (available in Ubuntu Noble).
+            self.requires("qt/[>=6.4]")

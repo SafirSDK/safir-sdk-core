@@ -1,4 +1,4 @@
-find_package(qt-advanced-docking-system CONFIG REQUIRED)
+find_package(qt6advanceddocking CONFIG REQUIRED)
 
 set(ui
   tracer_viewer_main_window.ui
@@ -63,7 +63,7 @@ TARGET_LINK_LIBRARIES(safir_tracer_viewer PRIVATE
   communication
   control_utils
   dose_cpp
-  qt-advanced-docking-system::qt-advanced-docking-system
+  ads::qt6advanceddocking
   Boost::regex
   Qt::Svg
   Qt::Widgets

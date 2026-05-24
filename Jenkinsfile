@@ -49,7 +49,6 @@ def runCommandInVenv(Map map) {
 
 def clean_check_and_build(platform, arch) {
     runCommand (command: "git clean -fxd")
-    runCommandInVenv (command: "conan export build/qt-advanced-docking-system/")
     runCommandInVenv (command: "python build/check_source_tree.py")
     runCommandInVenv (command: "python build/build.py --jenkins --package",
                 windows_arguments: "--use-studio ${platform} --arch ${arch}")
