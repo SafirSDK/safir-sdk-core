@@ -545,7 +545,8 @@ void TrySendNativeLog(const Facility facility, const std::string& errTxt)
 #if defined(linux) || defined(__linux) || defined(__linux__)
         syslog(FacilityToSyslog(facility) | Critical, "%s", errTxt.c_str());
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        WindowsLogger(L"Unknown process").Send(EVENTLOG_ERROR_TYPE, ToUtf16(errTxt));
+        const std::wstring formattedText = L"[" + ToUtf16(FacilityToString(facility)) + L".crit]: " + ToUtf16(errTxt);
+        WindowsLogger(L"Unknown process").Send(EVENTLOG_ERROR_TYPE, formattedText);
 #endif
     }
     catch (...)
