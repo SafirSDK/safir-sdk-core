@@ -29,6 +29,7 @@ if(UNIX)
   endif()
 else()
   set(CONAN_HOST_PROFILE "default;auto-cmake" CACHE STRING "Conan host profile")
+  set(CONAN_INSTALL_ARGS "--build=missing;-s:b;compiler.cppstd=20" CACHE STRING "Conan install arguments")
 endif()
 
 # Enable Conan dependency provider
