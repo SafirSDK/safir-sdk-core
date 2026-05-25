@@ -554,6 +554,10 @@ Section /o "Development" SecDevelopment
 
   CreateShortCut "${StartMenuDir}\Documentation\Safir SDK Core User's Guide.lnk" \
                    "$INSTDIR\docs\users_guide.html" "" "" "" SW_SHOWNORMAL "" "Safir SDK Core User's Guide."
+
+  ; Register cmake package so that find_package(SafirSDKCore) works without PATH tricks
+  WriteRegStr HKLM "Software\Kitware\CMake\Packages\SafirSDKCore" "path" "$INSTDIR\cmake"
+
 SectionEnd
 
 Section /o "Test suite" SecTest
@@ -680,5 +684,6 @@ Section "Uninstall"
 
   DeleteRegKey HKLM "Software\Safir SDK Core"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core"
+  DeleteRegKey HKLM "Software\Kitware\CMake\Packages\SafirSDKCore"
 
 SectionEnd
