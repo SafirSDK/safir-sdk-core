@@ -282,7 +282,7 @@ Function .onInit
     ClearErrors
     ${GetOptions} $cmdLineParams '/?' $R0
     IfErrors +3 0
-    MessageBox MB_OK "Accepted command line arguments are /notools, /nodevelopment, /testsuite and /silent!"
+    MessageBox MB_OK "Accepted command line arguments are /notools, /nodevelopment and /testsuite. Use /S for silent installation!"
     Abort
 
     Pop $R0
