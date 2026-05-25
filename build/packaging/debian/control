@@ -3,7 +3,7 @@ Maintainer: Lars Hagström <lars@foldspace.nu>
 Section: libs
 Priority: optional
 Standards-Version: 4.7.0
-Build-Depends: debhelper (>= 13), cmake (>= 3.24), python3 (>= 3.8.0), default-jdk-headless|openjdk-21-jdk-headless|openjdk-25-jdk-headless, asciidoctor, dia, dblatex, cli-common-dev (>= 0.8~), libboost-all-dev, unixodbc-dev, doxygen, graphviz, qt6-base-dev
+Build-Depends: debhelper (>= 13), cmake (>= 3.24), python3 (>= 3.8.0), default-jdk-headless|openjdk-21-jdk-headless|openjdk-25-jdk-headless, asciidoctor, dia, dblatex, cli-common-dev (>= 0.8~), libboost-all-dev, unixodbc-dev, doxygen, graphviz, qt6-base-dev, qt6-base-private-dev
 
 Package: safir-sdk-core
 Architecture: any

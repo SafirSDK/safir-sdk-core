@@ -2,3 +2,8 @@ include(default)
 
 [platform_tool_requires]
 cmake/3.31.11
+
+[conf]
+# qt-advanced-docking-system 4.5.0 auto-detects Qt version via find_package(QT NAMES Qt6 Qt5).
+# On some Ubuntu machines it falls back to Qt5 instead of Qt6. Force Qt6 explicitly.
+qt-advanced-docking-system*:tools.cmake.cmaketoolchain:extra_variables={"QT_VERSION_MAJOR": 6}
