@@ -86,7 +86,7 @@ namespace Internal
                 (new boost::interprocess::managed_shared_memory
                  (boost::interprocess::create_only,
                   SHARED_MEMORY_NAME,
-                  Safir::Dob::NodeParameters::SharedMemorySize() * 1024 * 1024,
+                  static_cast<std::int64_t>(Safir::Dob::NodeParameters::SharedMemorySize()) * 1024 * 1024,
                   0,
                   perms));
         }
