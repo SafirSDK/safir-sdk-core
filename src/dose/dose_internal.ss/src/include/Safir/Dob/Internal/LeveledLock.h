@@ -135,8 +135,8 @@ namespace Internal
     public:
         inline void lock()
         {
-            LeveledLockBase<level, masterLevel>::AddLevel();
             m_lock.lock();
+            LeveledLockBase<level, masterLevel>::AddLevel();
         }
 
         inline void unlock()
@@ -173,8 +173,8 @@ namespace Internal
     public:
         inline void lock()
         {
-            LeveledLockBase<level, masterLevel>::AddLevel();
             m_lock.lock();
+            LeveledLockBase<level, masterLevel>::AddLevel();
         }
 
         inline void unlock()
@@ -185,8 +185,8 @@ namespace Internal
 
         inline void lock_upgradable()
         {
-            LeveledLockBase<level, masterLevel>::AddLevel();
             m_lock.lock_upgradable();
+            LeveledLockBase<level, masterLevel>::AddLevel();
         }
 
         inline void unlock_upgradable()
@@ -197,8 +197,8 @@ namespace Internal
 
         inline void lock_sharable()
         {
-            LeveledLockBase<level, masterLevel>::AddLevel();
             m_lock.lock_sharable();
+            LeveledLockBase<level, masterLevel>::AddLevel();
         }
 
         inline void unlock_sharable()
@@ -241,8 +241,8 @@ namespace Internal
     public:
         inline void lock()
         {
-            LeveledLockBase<level, masterLevel>::AddLevel();
             m_lock.lock();
+            LeveledLockBase<level, masterLevel>::AddLevel();
         }
 
         inline void unlock()
@@ -253,8 +253,8 @@ namespace Internal
 
         inline void lock_upgrade()
         {
-            LeveledLockBase<level, masterLevel>::AddLevel();
             m_lock.lock_upgrade();
+            LeveledLockBase<level, masterLevel>::AddLevel();
         }
 
         inline void unlock_upgrade()
@@ -265,8 +265,8 @@ namespace Internal
 
         inline void lock_shared()
         {
-            LeveledLockBase<level, masterLevel>::AddLevel();
             m_lock.lock_shared();
+            LeveledLockBase<level, masterLevel>::AddLevel();
         }
 
         inline void unlock_shared()
