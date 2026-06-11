@@ -91,7 +91,7 @@ namespace Internal
         // iterator support
         iterator begin() {return arrayPtr;}
         const_iterator begin() const {return arrayPtr;}
-        iterator end() {arrayPtr + arraySize;}
+        iterator end() {return arrayPtr + arraySize;}
 
         // direct element access
         reference operator[](size_t i) {return *(arrayPtr + i);}
