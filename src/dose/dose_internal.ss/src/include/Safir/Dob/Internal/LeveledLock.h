@@ -69,16 +69,29 @@ namespace Internal
     // 3. The thread holds a lock at the same level AND the master lock is held.
 
 
-    // Base class that contains the AddLevel and RemoveLevel methods
+    // Base class that contains the CheckLevel, RegisterLevel and RemoveLevel methods
     template<unsigned short level, unsigned short masterLevel>
     class LeveledLockBase
     {
     public:
 
-        inline void AddLevel()
+        // Performs the deadlock/ordering check. This must be called *before* blocking
+        // on the underlying lock, so that ordering violations are detected pre-emptively
+        // rather than manifesting as a real deadlock. Check() is a side-effect-free read
+        // of the calling thread's held levels, so it is safe to run before acquisition.
+        inline void CheckLevel() const
         {
 #if !defined(NDEBUG) && !defined(DOSE_NO_LOCK_CHECKING)
             Check();
+#endif
+        }
+
+        // Registers the level as held. This must be called *after* the underlying lock
+        // has been successfully acquired, so that a throwing lock acquisition leaves no
+        // phantom level registered.
+        inline void RegisterLevel()
+        {
+#if !defined(NDEBUG) && !defined(DOSE_NO_LOCK_CHECKING)
             LeveledLockHelper::Instance().AddLevel(level);
 #endif
         }
@@ -135,8 +148,9 @@ namespace Internal
     public:
         inline void lock()
         {
+            LeveledLockBase<level, masterLevel>::CheckLevel();
             m_lock.lock();
-            LeveledLockBase<level, masterLevel>::AddLevel();
+            LeveledLockBase<level, masterLevel>::RegisterLevel();
         }
 
         inline void unlock()
@@ -149,7 +163,8 @@ namespace Internal
         {
             if (m_lock.try_lock())
             {
-                LeveledLockBase<level, masterLevel>::AddLevel();
+                LeveledLockBase<level, masterLevel>::CheckLevel();
+                LeveledLockBase<level, masterLevel>::RegisterLevel();
                 return true;
             }
             else
@@ -173,8 +188,9 @@ namespace Internal
     public:
         inline void lock()
         {
+            LeveledLockBase<level, masterLevel>::CheckLevel();
             m_lock.lock();
-            LeveledLockBase<level, masterLevel>::AddLevel();
+            LeveledLockBase<level, masterLevel>::RegisterLevel();
         }
 
         inline void unlock()
@@ -185,8 +201,9 @@ namespace Internal
 
         inline void lock_upgradable()
         {
+            LeveledLockBase<level, masterLevel>::CheckLevel();
             m_lock.lock_upgradable();
-            LeveledLockBase<level, masterLevel>::AddLevel();
+            LeveledLockBase<level, masterLevel>::RegisterLevel();
         }
 
         inline void unlock_upgradable()
@@ -197,8 +214,9 @@ namespace Internal
 
         inline void lock_sharable()
         {
+            LeveledLockBase<level, masterLevel>::CheckLevel();
             m_lock.lock_sharable();
-            LeveledLockBase<level, masterLevel>::AddLevel();
+            LeveledLockBase<level, masterLevel>::RegisterLevel();
         }
 
         inline void unlock_sharable()
@@ -217,7 +235,8 @@ namespace Internal
         {
             if (m_lock.try_lock())
             {
-                LeveledLockBase<level, masterLevel>::AddLevel();
+                LeveledLockBase<level, masterLevel>::CheckLevel();
+                LeveledLockBase<level, masterLevel>::RegisterLevel();
                 return true;
             }
             else
@@ -241,8 +260,9 @@ namespace Internal
     public:
         inline void lock()
         {
+            LeveledLockBase<level, masterLevel>::CheckLevel();
             m_lock.lock();
-            LeveledLockBase<level, masterLevel>::AddLevel();
+            LeveledLockBase<level, masterLevel>::RegisterLevel();
         }
 
         inline void unlock()
@@ -253,8 +273,9 @@ namespace Internal
 
         inline void lock_upgrade()
         {
+            LeveledLockBase<level, masterLevel>::CheckLevel();
             m_lock.lock_upgrade();
-            LeveledLockBase<level, masterLevel>::AddLevel();
+            LeveledLockBase<level, masterLevel>::RegisterLevel();
         }
 
         inline void unlock_upgrade()
@@ -265,8 +286,9 @@ namespace Internal
 
         inline void lock_shared()
         {
+            LeveledLockBase<level, masterLevel>::CheckLevel();
             m_lock.lock_shared();
-            LeveledLockBase<level, masterLevel>::AddLevel();
+            LeveledLockBase<level, masterLevel>::RegisterLevel();
         }
 
         inline void unlock_shared()
