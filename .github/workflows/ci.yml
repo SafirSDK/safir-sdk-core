@@ -1,0 +1,201 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop, 'feature/**', 'private/**']
+  pull_request:
+  workflow_dispatch:
+
+env:
+  SAFIR_SKIP_SLOW_TESTS: "1"
+
+# checks: write lets the test-reporter publish a Check run with the results.
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  build:
+    name: ${{ matrix.platform }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+
+    # Keep the Conan cache (and thus the from-scratch Boost/Qt builds) off the
+    # cramped Windows C: drive. The hosted Windows runners only have ~32-85 GB
+    # free on C: but a near-empty 147 GB D: "Temporary Storage" drive, where the
+    # workspace already lives. Linux keeps the default ~/.conan2.
+    env:
+      CONAN_HOME: ${{ matrix.conan_home }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-noble
+            arch: amd64
+            runner: ubuntu-24.04
+            conan_home: /home/runner/.conan2
+
+          - platform: vs2022
+            arch: amd64
+            runner: windows-2022
+            studio: vs2022
+            conan_home: 'D:\.conan2'
+
+          - platform: vs2026
+            arch: amd64
+            runner: windows-2025-vs2026
+            studio: vs2026
+            conan_home: 'D:\.conan2'
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: "Verify D: drive exists (Windows)"
+        # CI puts CONAN_HOME on D:\.conan2 because the C: drive is too small for
+        # the from-scratch Boost/Qt builds. If the runner image ever drops the D:
+        # "Temporary Storage" drive, fail loudly here instead of with a confusing
+        # out-of-disk error mid-build.
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'D:\')) {
+            Write-Error "D: drive not found. CI relies on it for CONAN_HOME ($env:CONAN_HOME) because C: is too small for the Boost/Qt builds. The runner image likely changed - revisit the conan_home matrix value in this workflow."
+            exit 1
+          }
+          Write-Host "D: drive present; CONAN_HOME=$env:CONAN_HOME"
+
+      - name: Install Linux prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            python3 pipx python-is-python3 python3-distro \
+            build-essential g++ cmake \
+            default-jdk \
+            libboost-all-dev unixodbc-dev \
+            doxygen graphviz \
+            qt6-base-dev qt6-websockets-dev qt6-base-private-dev qt6-svg-dev \
+            dia dblatex texlive-font-utils \
+            devscripts debhelper fakeroot \
+            ninja-build python3-websocket \
+            asciidoctor cli-common-dev
+
+      - name: Install Windows prerequisites
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          choco install nsis --no-progress -y
+          # choco installs NSIS but does not put it on PATH. windows-2022 shipped
+          # NSIS on PATH already; windows-2025-vs2026 does not, so makensis was not
+          # found during packaging. Add it explicitly for the later build step.
+          echo "C:\Program Files (x86)\NSIS" >> "$GITHUB_PATH"
+
+      - name: Set up Java (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Python venv
+        shell: bash
+        run: |
+          python -m venv --system-site-packages .venv
+          # Export VIRTUAL_ENV (not just PATH) so CMake's find_package(Python3)
+          # selects the venv interpreter. Without it, FindPython3 on Windows
+          # prefers the registry/system Python and the ctest scripts run with an
+          # interpreter that lacks our pip requirements (e.g. websockets).
+          echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            echo "$GITHUB_WORKSPACE/.venv/Scripts" >> $GITHUB_PATH
+          else
+            echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+          fi
+
+      - name: Install Python requirements
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r build/requirements.txt
+
+      - name: Cache Conan packages
+        uses: actions/cache@v5
+        with:
+          path: ${{ matrix.conan_home }}
+          key: conan-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('conanfile.py', 'build/requirements.txt') }}
+          restore-keys: |
+            conan-v2-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Trim Conan cache after restore
+        # The restored cache may carry each dependency's source/build/download
+        # folders (~/.conan2/p/b/<ref>/{s,b,d}) alongside the package binary (p/).
+        # Those are huge for source-built Boost/Qt and only waste runner disk
+        # during the build. Drop them now so the build has room. Safe: conan
+        # consumes the cached package binaries without these folders.
+        shell: bash
+        run: conan cache clean "*" || true
+
+      - name: Check source tree
+        run: python build/check_source_tree.py
+
+      - name: Build and package (Linux)
+        if: runner.os == 'Linux'
+        run: python build/build.py --jenkins
+
+      - name: Build and package (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: python build\build.py --jenkins --use-studio ${{ matrix.studio }} --arch amd64
+
+      - name: Trim Conan cache before saving
+        # Conan keeps each dependency's source/build/download folders next to the
+        # final package binary under ~/.conan2/p/b/<ref>/. Only the package binary
+        # is needed on restore; the rest (huge for source-built Boost/Qt) just eats
+        # runner disk. The --lru prune also drops package binaries not used in this
+        # build (e.g. an old Qt version left behind after a conanfile bump), so the
+        # cache doesn't accumulate every version ever built. Conan refreshes the
+        # last-used time of everything it resolves, so the current deps are kept.
+        # Run always so a failed build still saves a lean cache.
+        if: always()
+        shell: bash
+        run: |
+          conan remove "*" --lru=1d --confirm || true
+          conan cache clean "*" || true
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: packages-${{ matrix.platform }}-${{ matrix.arch }}
+          path: |
+            tmp/*.deb
+            build/packaging/windows/*.exe
+          if-no-files-found: ignore
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: buildlog-${{ matrix.platform }}-${{ matrix.arch }}
+          path: buildlog.html
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: test-results-${{ matrix.platform }}-${{ matrix.arch }}
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
+      - name: Publish test report
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: tests-${{ matrix.platform }}-${{ matrix.arch }}
+          path: '**/*.junit.xml'
+          reporter: java-junit
+          # The build step already fails the job on test failures; keep this
+          # step from erroring (e.g. on fork PRs without checks: write) so it
+          # never masks the real result.
+          fail-on-error: false

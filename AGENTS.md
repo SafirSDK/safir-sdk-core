@@ -25,10 +25,12 @@ sudo apt-get install python3 pipx python-is-python3 python3-distro build-essenti
 # Install Conan 2
 pipx install "conan>=2.5.0"
 
-# Build packages (creates .deb files in tmp/)
+# Build AND package (creates .deb files in tmp/). build.py only builds-and-
+# packages; there is no build-without-package mode. Shared logic lives in
+# safir_build_common.py.
 build/build.py
 
-# Jenkins-style build
+# Jenkins-style build (more verbose, obeys the build-matrix variables)
 build/build.py --jenkins
 
 # Manual CMake build (for other Linux distributions)
@@ -36,6 +38,10 @@ cmake . -DCMAKE_BUILD_TYPE=Release
 make
 make install
 ```
+
+To build an external user dou-project, use `dobmake_batch.py` (installed as
+`dobmake-batch`). To just build the source tree as a developer, use cmake/ninja
+directly (see BUILD.Linux.txt / BUILD.Windows.txt).
 
 ### Running Tests
 ```bash
@@ -48,12 +54,24 @@ SAFIR_SKIP_SLOW_TESTS=1 ctest
 
 Slow tests skipped by `SAFIR_SKIP_SLOW_TESTS`: LowLevelLogger, Communication tests, ElectionHandler tests, DOPE backend tests, restart/light node tests, WebSocket tests, system picture tests, Incarnation_And_Control_Tests, sate_script.
 
-### CI/CD (Jenkins)
+### CI/CD
 
-The Jenkinsfile defines a matrix build across:
+Two CI systems run against the repository.
+
+**GitHub Actions** (`.github/workflows/ci.yml`) runs on pushes to
+master/develop/feature/private branches and on pull requests. A matrix builds
+and packages across ubuntu-noble, debian-trixie, vs2022 and vs2026 (amd64).
+There is no Debian-labelled runner, so the debian-trixie row builds inside a
+`debian:13` container on the ubuntu-latest host (with `--shm-size=200m`, because
+dose_main needs a 100 MB `/dev/shm`). Each row runs `build/build.py --jenkins`,
+uploads the packages, build log and JUnit results as artifacts, and publishes
+the test results as a GitHub Check (via dorny/test-reporter). The whole workflow
+runs with `SAFIR_SKIP_SLOW_TESTS=1`.
+
+**Jenkins** (`Jenkinsfile`) is the canonical release build. Matrix build across:
 - **Platforms**: ubuntu-noble, debian-trixie, vs2022, vs2026
 - **Architectures**: amd64 (x86 dropped for most platforms)
-- **Package types**: Full (ships both Debug and RelWithDebInfo MSVC-runtime flavours), DebugOnly
+- **Package types** (`PACKAGE_TYPE` axis): Full (ships both Debug and RelWithDebInfo MSVC-runtime flavours), DebugOnly
 
 Test stages:
 1. Build and Unit Test
@@ -61,6 +79,20 @@ Test stages:
 3. Multinode Tests
 4. Multicomputer Tests (cpp only, requires debian-trixie)
 5. Build Examples
+
+### Shared Library ABI Classification
+
+Every non-imported `SHARED` library defined in the tree must be classified by
+ABI flavor in its `CMakeLists.txt`, or CMake configuration fails with a
+`FATAL_ERROR` (see `src/cmake/SafirLibraryAbi.cmake`):
+- `safir_mark_dual_abi(<target>)` — libraries with a C++ public ABI. On MSVC
+  these ship in both Debug and RelWithDebInfo MSVC-runtime flavours; the `d`
+  debug postfix is applied automatically.
+- `safir_mark_single_abi(<target>)` — C-ABI / JNI / runtime-only libraries.
+  Clears the MSVC debug postfix so the filename stays stable for name-based
+  loaders (JNI, `dlopen`).
+
+A newly added SHARED library must call exactly one of these.
 
 ## Architecture
 

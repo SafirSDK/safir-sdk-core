@@ -907,40 +907,54 @@ def translate_results_to_junit(suite_name):
     """Translate ctest output to junit output"""
     with open(os.path.join("Testing", "TAG"), 'rb') as tag_file:
         dirname = tag_file.readline().decode("utf-8").strip()
+    dom = xml.dom.minidom.parse(os.path.join("Testing", dirname, "Test.xml"))
+
+    # Buffer the testcases so the <testsuite> open tag can carry aggregate
+    # attributes (tests/failures/time). Without at least one attribute on
+    # <testsuite>, xml2js (used by dorny/test-reporter) produces no attribute
+    # object and the java-junit parser crashes on testsuite.$.time.
+    testcases = []
+    total_time = 0.0
+    num_failures = 0
+
+    testing = dom.getElementsByTagName("Testing")[0]
+    for child in testing.childNodes:
+        if child.nodeType == xml.dom.Node.ELEMENT_NODE:
+            if child.tagName == "Test":
+                test_name = getText(child.getElementsByTagName("Name")[0].childNodes)
+                #test_target = os.path.split(getText(child.getElementsByTagName("Path")[0].childNodes))[-1]
+                test_status = child.getAttribute("Status")
+                for meas in child.getElementsByTagName("NamedMeasurement"):
+                    if meas.getAttribute("name") == "Exit Code":
+                        exit_code = getText(meas.getElementsByTagName("Value")[0].childNodes)
+                    if meas.getAttribute("name") == "Exit Value":
+                        exit_value = getText(meas.getElementsByTagName("Value")[0].childNodes)
+                    if meas.getAttribute("name") == "Execution Time":
+                        execution_time = float(getText(meas.getElementsByTagName("Value")[0].childNodes))
+
+                meas = child.getElementsByTagName("Measurement")[0]
+
+                total_time += execution_time
+                case = ("  <testcase name=\"" + test_name + "\" classname=\"" + suite_name + "\" time=\"" +
+                        str(execution_time) + "\">\n")
+                output = escape(getText(meas.getElementsByTagName("Value")[0].childNodes))
+                if test_status == "passed":
+                    #success
+                    case += "<system-out>" + output + "\n</system-out>\n"
+                else:
+                    #failure
+                    num_failures += 1
+                    case += ("<error message=\"" + exit_code + "(" + exit_value + ")\">" + output +
+                             "\n</error>\n")
+                case += "  </testcase>\n"
+                testcases.append(case)
+
     with open(suite_name + ".junit.xml", "w") as junitfile:
-        junitfile.write("<?xml version=\"1.0\"?>\n<testsuite>\n")
-
-        dom = xml.dom.minidom.parse(os.path.join("Testing", dirname, "Test.xml"))
-
-        testing = dom.getElementsByTagName("Testing")[0]
-        for child in testing.childNodes:
-            if child.nodeType == xml.dom.Node.ELEMENT_NODE:
-                if child.tagName == "Test":
-                    test_name = getText(child.getElementsByTagName("Name")[0].childNodes)
-                    #test_target = os.path.split(getText(child.getElementsByTagName("Path")[0].childNodes))[-1]
-                    test_status = child.getAttribute("Status")
-                    for meas in child.getElementsByTagName("NamedMeasurement"):
-                        if meas.getAttribute("name") == "Exit Code":
-                            exit_code = getText(meas.getElementsByTagName("Value")[0].childNodes)
-                        if meas.getAttribute("name") == "Exit Value":
-                            exit_value = getText(meas.getElementsByTagName("Value")[0].childNodes)
-                        if meas.getAttribute("name") == "Execution Time":
-                            execution_time = float(getText(meas.getElementsByTagName("Value")[0].childNodes))
-
-                    meas = child.getElementsByTagName("Measurement")[0]
-
-                    junitfile.write("  <testcase name=\"" + test_name + "\" classname=\"" + suite_name + "\" time=\"" +
-                                    str(execution_time) + "\">\n")
-                    output = escape(getText(meas.getElementsByTagName("Value")[0].childNodes))
-                    if test_status == "passed":
-                        #success
-                        junitfile.write("<system-out>" + output + "\n</system-out>\n")
-                    else:
-                        #failure
-
-                        junitfile.write("<error message=\"" + exit_code + "(" + exit_value + ")\">" + output +
-                                        "\n</error>\n")
-                    junitfile.write("  </testcase>\n")
+        junitfile.write("<?xml version=\"1.0\"?>\n")
+        junitfile.write("<testsuite name=\"" + suite_name + "\" tests=\"" + str(len(testcases)) +
+                        "\" failures=\"" + str(num_failures) + "\" time=\"" + str(total_time) + "\">\n")
+        for case in testcases:
+            junitfile.write(case)
         junitfile.write("</testsuite>")
 
 

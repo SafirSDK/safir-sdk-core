@@ -24,7 +24,6 @@
 #
 ###############################################################################
 import argparse
-import random
 import re
 import socket
 import struct
@@ -71,6 +70,18 @@ def _build_datagram(inc_id: int,
 
 
 # --------------------------------------------------------------------------- helpers
+
+
+def _free_port() -> int:
+    """
+    Ask the OS for a free UDP port. Binding to port 0 lets the OS pick an
+    ephemeral port that is guaranteed not to be in use or in an OS-reserved
+    excluded range (on Windows, picking a random port can hit such a range and
+    fail with WSAEACCES / error 10013).
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.bind(("", 0))
+        return s.getsockname()[1]
 
 
 def _wait_for_pattern(stream,
@@ -157,7 +168,7 @@ def _stop(proc: subprocess.Popen) -> None:
 
 
 def test_basic(listener: str):
-    group, port = DEFAULT_GROUP, random.randint(50000, 60000)
+    group, port = DEFAULT_GROUP, _free_port()
     proc = _start_listener(listener, [], group, port)
 
     payload = "Hello tracer\n"
@@ -168,7 +179,7 @@ def test_basic(listener: str):
 
 
 def test_program_regex(listener: str):
-    group, port = DEFAULT_GROUP, random.randint(50000, 60000)
+    group, port = DEFAULT_GROUP, _free_port()
     proc = _start_listener(listener,
                            ["--program-regex", "^accept"],
                            group, port)
@@ -186,7 +197,7 @@ def test_program_regex(listener: str):
 
 
 def test_node_regex(listener: str):
-    group, port = DEFAULT_GROUP, random.randint(50000, 60000)
+    group, port = DEFAULT_GROUP, _free_port()
     proc = _start_listener(listener,
                            ["--node-regex", "node42$"],
                            group, port)
@@ -204,7 +215,7 @@ def test_node_regex(listener: str):
 
 
 def test_show_program_name(listener: str):
-    group, port = DEFAULT_GROUP, random.randint(50000, 60000)
+    group, port = DEFAULT_GROUP, _free_port()
     proc = _start_listener(listener, ["--show-program-name"], group, port)
 
     _send(group, port, _build_datagram(1, 3, 1, "MyProg", "n", "Line\n"))
@@ -213,7 +224,7 @@ def test_show_program_name(listener: str):
 
 
 def test_show_node_name(listener: str):
-    group, port = DEFAULT_GROUP, random.randint(50000, 60000)
+    group, port = DEFAULT_GROUP, _free_port()
     proc = _start_listener(listener, ["--show-node-name"], group, port)
 
     _send(group, port, _build_datagram(1, 4, 1, "p", "NODE_X", "abc\n"))
@@ -222,7 +233,7 @@ def test_show_node_name(listener: str):
 
 
 def test_show_send_time(listener: str):
-    group, port = DEFAULT_GROUP, random.randint(50000, 60000)
+    group, port = DEFAULT_GROUP, _free_port()
     proc = _start_listener(listener, ["--show-send-time"], group, port)
 
     _send(group, port, _build_datagram(1, 5, 1, "p", "n", "time\n"))
@@ -231,7 +242,7 @@ def test_show_send_time(listener: str):
 
 
 def test_show_recv_time(listener: str):
-    group, port = DEFAULT_GROUP, random.randint(50000, 60000)
+    group, port = DEFAULT_GROUP, _free_port()
     proc = _start_listener(listener, ["--show-recv-time"], group, port)
 
     _send(group, port, _build_datagram(1, 6, 1, "p", "n", "recv\n"))
@@ -240,7 +251,7 @@ def test_show_recv_time(listener: str):
 
 
 def test_csv(listener: str):
-    group, port = DEFAULT_GROUP, random.randint(50000, 60000)
+    group, port = DEFAULT_GROUP, _free_port()
     proc = _start_listener(listener, ["--csv"], group, port)
 
     _send(group, port, _build_datagram(1, 7, 1, "CSVprog", "CSVnode", "msg\n"))
@@ -250,7 +261,7 @@ def test_csv(listener: str):
 
 def test_sequence_warning(listener: str):
     """Send sequence numbers 1 and 3 – expect missing-packet message."""
-    group, port = DEFAULT_GROUP, random.randint(50000, 60000)
+    group, port = DEFAULT_GROUP, _free_port()
     proc = _start_listener(listener, [], group, port)
 
     sender = 1234
