@@ -26,10 +26,10 @@ sudo apt-get install python3 pipx python-is-python3 python3-distro build-essenti
 pipx install "conan>=2.5.0"
 
 # Build packages (creates .deb files in tmp/)
-build/build.py --package
+build/build.py
 
 # Jenkins-style build
-build/build.py --jenkins --package
+build/build.py --jenkins
 
 # Manual CMake build (for other Linux distributions)
 cmake . -DCMAKE_BUILD_TYPE=Release
@@ -53,7 +53,7 @@ Slow tests skipped by `SAFIR_SKIP_SLOW_TESTS`: LowLevelLogger, Communication tes
 The Jenkinsfile defines a matrix build across:
 - **Platforms**: ubuntu-noble, debian-trixie, vs2022, vs2026
 - **Architectures**: amd64 (x86 dropped for most platforms)
-- **Build types**: RelWithDebInfo, DebugOnly
+- **Package types**: Full (ships both Debug and RelWithDebInfo MSVC-runtime flavours), DebugOnly
 
 Test stages:
 1. Build and Unit Test

@@ -100,16 +100,12 @@ private:
             params << "--arch" << "x86";
         }
 
-#if _MSC_VER >= 1930
+#if _MSC_VER >= 1950
+        params << "--use-studio" << "vs2026";
+#elif _MSC_VER >= 1930
         params << "--use-studio" << "vs2022";
-#elif _MSC_VER >= 1920
-        params << "--use-studio" << "vs2019";
-#elif _MSC_VER >= 1910
-        params << "--use-studio" << "vs2017";
-#elif _MSC_VER == 1900
-        params << "--use-studio" << "vs2015";
 #elif defined(_MSC_VER)
-#  error "Unknown version of Visual Studio. Dobmake won't stand for it!"
+#  error "Unsupported version of Visual Studio. Safir SDK Core requires Visual Studio 2022 or later."
 #endif
 
         if (!m_installDir.isEmpty())

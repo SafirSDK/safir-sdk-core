@@ -2,6 +2,7 @@ ADD_LIBRARY(lluf_utils SHARED
   DynamicLibraryLoader.cpp
   ProcessInfo.cpp
 )
+safir_mark_dual_abi(lluf_utils)
 
 TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
   PUBLIC

@@ -2,6 +2,7 @@ FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_internal SHARED ${sources} ${headers})
+safir_mark_dual_abi(dose_internal)
 
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(dose_internal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)

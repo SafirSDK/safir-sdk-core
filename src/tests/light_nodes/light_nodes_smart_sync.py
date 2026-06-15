@@ -69,8 +69,6 @@ def launch_node(args, safir_instance, node_id, start_dope=False):
         env.session_id = session_id
         env.launchProcess("safir_web", args.safir_web)
 
-        #if node_id == 5:
-            #env.launchProcess("dobexplorer", args.dobexplorer)
         yield env
     finally:
         log("--- kill node" + str(node_id))
@@ -92,7 +90,6 @@ def parse_arguments():
     parser.add_argument("--dose_main", required=True)
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)
-    parser.add_argument("--dobexplorer", required=False)
     parser.add_argument("--safir_web", required=True)
     arguments = parser.parse_args()
     return arguments

@@ -1,8 +1,5 @@
-#this library has a C interface and we only want one version of it,
-#so we never want the "d" suffix on debug builds, which is default on windows.
-SET(CMAKE_DEBUG_POSTFIX "")
-
 add_library(external_time_provider_for_test SHARED test_provider.cpp)
+safir_mark_single_abi(external_time_provider_for_test)
 
 ADD_EXECUTABLE(ExternalTimeProvider_test test.cpp)
 

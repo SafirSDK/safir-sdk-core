@@ -1,11 +1,8 @@
-#this project contains a library that has a C interface and we only want one version of it,
-#so we never want the "d" suffix on debug builds, which is default on windows.
-SET(CMAKE_DEBUG_POSTFIX "")
-
 ADD_LIBRARY(dose_java_jni SHARED
   dose_java_jni.cpp
   Callbacks.cpp
   ConsumerTable.cpp)
+safir_mark_single_abi(dose_java_jni)
 
 TARGET_INCLUDE_DIRECTORIES(dose_java_jni PRIVATE
   ${JAVA_INCLUDE_PATH}

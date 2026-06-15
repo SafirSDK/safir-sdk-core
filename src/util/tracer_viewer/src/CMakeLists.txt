@@ -1,5 +1,3 @@
-find_package(qt6advanceddocking CONFIG REQUIRED)
-
 set(ui
   tracer_viewer_main_window.ui
   apps_widget.ui
@@ -45,6 +43,8 @@ if (NOT TARGET Qt::Widgets)
   message(STATUS "Could not find Qt, will not build Safir TraceView")
   return()
 endif()
+
+find_package(qt6advanceddocking CONFIG REQUIRED)
 
 QT_WRAP_UI(ui_headers ${ui})
 QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})

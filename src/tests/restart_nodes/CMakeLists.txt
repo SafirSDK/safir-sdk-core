@@ -1,8 +1,3 @@
-#if dobexplorer is not built we cant run this test.
-if (NOT TARGET dobexplorer)
-  return()
-endif()
-
 add_executable(WaitingStatesOwner Owner.cpp)
 add_executable(RequestSender RequestSender.cpp)
 
@@ -34,7 +29,6 @@ ADD_TEST(NAME restart_nodes_with_entity_updates_only
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --owner $<TARGET_FILE:WaitingStatesOwner>
   --sender $<TARGET_FILE:RequestSender>
-  --dobexplorer $<TARGET_FILE:dobexplorer>
   --safir-control $<TARGET_FILE:safir_control>
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
@@ -50,7 +44,6 @@ ADD_TEST(NAME restart_nodes_with_entity_requests_only
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --owner $<TARGET_FILE:WaitingStatesOwner>
   --sender $<TARGET_FILE:RequestSender>
-  --dobexplorer $<TARGET_FILE:dobexplorer>
   --safir-control $<TARGET_FILE:safir_control>
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
@@ -67,7 +60,6 @@ ADD_TEST(NAME restart_nodes_with_entity_requests_and_updates
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --owner $<TARGET_FILE:WaitingStatesOwner>
   --sender $<TARGET_FILE:RequestSender>
-  --dobexplorer $<TARGET_FILE:dobexplorer>
   --safir-control $<TARGET_FILE:safir_control>
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>

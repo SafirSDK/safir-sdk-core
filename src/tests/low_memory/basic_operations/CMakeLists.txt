@@ -1,8 +1,3 @@
-#if dobexplorer is not built we cant run this test.
-if (NOT TARGET dobexplorer)
-  return()
-endif()
-
 add_executable(basic_operations basic_operations.cpp)
 
 target_link_libraries(basic_operations PRIVATE
@@ -18,7 +13,6 @@ ADD_TEST(NAME lowmem_basic_operations
   --safir-control $<TARGET_FILE:safir_control>
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
-  --dobexplorer $<TARGET_FILE:dobexplorer>
   --safir-show-config $<TARGET_FILE:safir_show_config>
   )
 

@@ -36,7 +36,6 @@ import urllib.request
 import time
 import socket
 import datetime
-import random
 
 try:
     import apt
@@ -163,7 +162,7 @@ class WindowsInstaller():
 
     def __setup_debug_runtime(self):
         #we get out of here immediately if we're not running debug.
-        if os.environ.get("BUILD_TYPE") != "DebugOnly":
+        if os.environ.get("PACKAGE_TYPE") != "DebugOnly":
             return
 
         #build machines should have debug runtime on them
@@ -480,7 +479,7 @@ class JenkinsController:
         # from Jenkins environment variables
         parameters = {"SOURCE_PROJECT" : os.environ.get("JOB_NAME"),
                       "SOURCE_BUILD_NUMBER" : os.environ.get("BUILD_NUMBER"),
-                      "BUILD_IDENTIFIER" : "debian-trixie-amd64-RelWithDebInfo",
+                      "BUILD_IDENTIFIER" : "debian-trixie-amd64-Full",
                       "SLAVE_ROLE": self.slave_role}
         self.interface.build(self.job_name, parameters)
 
@@ -583,44 +582,56 @@ def build_examples():
                                                                  os.path.join(olddir, "inst")))
     #We don't test the dous_2 and dous_3 builds, since it is just too fiddly to get automated.
 
-    #For some RelWithDebInfo builds we build in Release instead, to ensure that is possible
-    build_type = os.environ.get("BUILD_TYPE", "RelWithDebInfo")
-    if build_type == "RelWithDebInfo" and random.random() > 0.5:
-        build_type = "Release"
-    #DebugOnly is a Jenkins matrix axis value, not a CMake config — map it to Debug
-    if build_type == "DebugOnly":
-        build_type = "Debug"
+    #PACKAGE_TYPE is a Jenkins matrix axis value (Full or DebugOnly), not a CMake
+    #config. It tells us which installation package the examples get built
+    #against, so it determines which app configs we expect to be able to build.
+    #We build the examples in every such config to guard against cmake
+    #config/export mismatches - it has happened that e.g. Release code could not
+    #be built against a RelWithDebInfo install, and we don't want to regress.
+    #
+    #  DebugOnly package -> ships only the debug MSVC runtime flavour, so only a
+    #                       Debug app can link it.
+    #  Full package      -> ships both runtime flavours, so Debug, Release and
+    #                       RelWithDebInfo apps all link.
+    #
+    #This gives the combinations (app config x package type) that we expect to
+    #work: Debug x DebugOnly, and Debug / Release / RelWithDebInfo x Full.
+    package_type = os.environ.get("PACKAGE_TYPE", "Full")
+    if package_type == "DebugOnly":
+        configs = ("Debug", )
+    else:
+        configs = ("Debug", "Release", "RelWithDebInfo")
 
     for (builddir, installdir) in dirs:
         os.chdir(builddir)
 
         if sys.platform == "win32":
-            cmd = [
-                "dobmake-batch.py",
-            ]
-        else:
-            cmd = [
-                "dobmake-batch",
-            ]
-
-        cmd += ("--verbose", "--jenkins", "--skip-tests")
-
-
-        if sys.platform == "win32":
+            #MSVC ships per-config runtimes, so a single dobmake-batch run builds
+            #all the configs (in separate subdirs) against the same install.
+            cmd = ["dobmake-batch.py", "--verbose", "--jenkins", "--skip-tests"]
             cmd += ("--use-studio", os.environ["BUILD_PLATFORM"])
             cmd += ("--arch", os.environ["BUILD_ARCH"])
-            if build_type == "Release":
-                cmd += ("--configs", "Debug", "Release")
+            cmd += ("--configs", ) + configs
+            if installdir is not None:
+                cmd += ("--install", installdir)
+
+            log("Running command ", " ".join(cmd))
+            result = nice_call(cmd, shell=True)
+            if result != 0:
+                raise SetupError("Build examples failed. Returncode = " + str(result))
         else:
-            cmd += ("--config", build_type)
+            #Linux dobmake-batch only takes a single --config, so build each
+            #config in turn.
+            for config in configs:
+                cmd = ["dobmake-batch", "--verbose", "--jenkins", "--skip-tests"]
+                cmd += ("--config", config)
+                if installdir is not None:
+                    cmd += ("--install", installdir)
 
-        if installdir is not None:
-            cmd += ("--install", installdir)
-
-        log("Running command ", " ".join(cmd))
-        result = nice_call(cmd, shell=sys.platform == "win32")
-        if result != 0:
-            raise SetupError("Build examples failed. Returncode = " + str(result))
+                log("Running command ", " ".join(cmd))
+                result = nice_call(cmd, shell=False)
+                if result != 0:
+                    raise SetupError("Build examples failed. Returncode = " + str(result))
 
         os.chdir(olddir)
 

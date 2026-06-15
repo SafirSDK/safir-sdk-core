@@ -1,10 +1,7 @@
 include(SafirCompilerSettings)
 include(SafirLoadBoost)
 include(NuGetPackaging)
-
-if (MSVC)
-  SET(CMAKE_DEBUG_POSTFIX "d")
-endif()
+include(SafirLibraryAbi)
 
 
 #
@@ -24,7 +21,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(NEEDED_QT_MODULES Core Widgets Network WebSockets Svg)
 
-find_package(Qt6 COMPONENTS ${NEEDED_QT_MODULES} QUIET)
+if(NOT SAFIR_DUAL_ABI_ONLY)
+  find_package(Qt6 COMPONENTS ${NEEDED_QT_MODULES} QUIET)
+endif()
 
 if (MSVC)
   # On Windows we build qt in Conan and link statically
@@ -97,7 +96,7 @@ if(UNIX AND NOT APPLE)
   endif()
 endif()
 
-if (NOT Qt6_FOUND AND NOT Qt5_FOUND)
+if (NOT Qt6_FOUND AND NOT Qt5_FOUND AND NOT SAFIR_DUAL_ABI_ONLY)
   message(FATAL_ERROR "Appropriate version of Qt with the needed modules (${NEEDED_QT_MODULES}) was not found.")
 endif()
 
@@ -155,7 +154,21 @@ function (SAFIR_INSTALL)
     message(FATAL_ERROR "Invalid COMPONENT '${INST_COMPONENT}'")
   endif()
 
+  # In a dual-ABI-only build (the Debug pass of a Windows release build) only the
+  # dual-ABI C++ shared libraries are built. install() is a no-op in that mode
+  # (see the override in the top-level CMakeLists) unless we explicitly allow it,
+  # so here we only allow the install for dual-ABI targets - the rest were never
+  # built and the RelWithDebInfo pass installs them. See SafirLibraryAbi.cmake.
   foreach (target ${INST_TARGETS})
+    if (SAFIR_DUAL_ABI_ONLY)
+      get_property(_dual_abi_libs GLOBAL PROPERTY SAFIR_DUAL_ABI_LIBS)
+      list(FIND _dual_abi_libs "${target}" _is_dual_abi)
+      if (_is_dual_abi EQUAL -1)
+        continue()
+      endif()
+      set(SAFIR_ALLOW_INSTALL TRUE)
+    endif()
+
     get_target_property(target_type ${target} TYPE)
     get_target_property(assembly_file ${target} ASSEMBLY_FILE)
     get_target_property(jar_file ${target} JAR_FILE)
@@ -399,6 +412,21 @@ function(target_link_libraries)
   if(has_private EQUAL -1 AND has_public EQUAL -1 AND has_interface EQUAL -1)
     message(FATAL_ERROR "target_link_libraries lacks a visibility keyword (PRIVATE/PUBLIC/INTERFACE)!")
   endif()
+
+  # Record PUBLIC/INTERFACE deps so SafirLibraryAbi.cmake can verify that no
+  # single-ABI library exposes a dual-ABI dep through a propagating link.
+  list(GET ARGN 0 _tll_target)
+  set(_tll_propagating False)
+  foreach(_tll_arg IN LISTS ARGN)
+    if(_tll_arg STREQUAL "PUBLIC" OR _tll_arg STREQUAL "INTERFACE")
+      set(_tll_propagating True)
+    elseif(_tll_arg STREQUAL "PRIVATE" OR _tll_arg STREQUAL "LINK_PRIVATE")
+      set(_tll_propagating False)
+    elseif(_tll_propagating)
+      _safir_record_propagating_link(${_tll_target} "${_tll_arg}")
+    endif()
+  endforeach()
+
   _target_link_libraries(${ARGN})
 endfunction()
 ##############

@@ -29,7 +29,6 @@ ADD_TEST(NAME light_nodes_smart_sync
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  #--dobexplorer $<TARGET_FILE:dobexplorer>
   --safir_web $<TARGET_FILE:safir_web>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_smart_sync

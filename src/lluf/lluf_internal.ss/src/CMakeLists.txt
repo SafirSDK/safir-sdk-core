@@ -10,6 +10,7 @@ ADD_LIBRARY(lluf_internal SHARED ${headers}
   LogWin32.cpp
   ProcessMonitorWin32.cpp
 )
+safir_mark_dual_abi(lluf_internal)
 
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(lluf_internal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)

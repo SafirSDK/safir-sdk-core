@@ -12,8 +12,7 @@ ADD_TEST(NAME tracer_backdoor
   --dope-main $<TARGET_FILE:signal_persistence_ready>
   --safir-show-config $<TARGET_FILE:safir_show_config>
   --safir-web $<TARGET_FILE:safir_web>
-  --safir-status $<TARGET_FILE:safir_status>
-  --dobexplorer $<TARGET_FILE:dobexplorer>)
+  --safir-status $<TARGET_FILE:safir_status>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST tracer_backdoor TIMEOUT 360
                           CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/test_config")

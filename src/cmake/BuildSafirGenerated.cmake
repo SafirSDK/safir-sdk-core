@@ -51,7 +51,11 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
     include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 
-    #Debug dlls on windows need d suffix
+    #Debug dlls on windows need d suffix. In an external build we are
+    #called as a function from a user CMakeLists, so SafirLibraryAbi.cmake
+    #has not been included; set the debug postfix directly. Inside the
+    #Safir SDK Core build tree the same effect comes from the global default
+    #set in CMakeLists.txt and the safir_mark_dual_abi() call below.
     if (MSVC)
       SET(CMAKE_DEBUG_POSTFIX "d")
     endif()
@@ -294,6 +298,13 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
   ADD_LIBRARY(safir_generated-${_gen_NAME}-cpp SHARED ${cpp_files})
 
+  #Generated DLLs expose Safir.Dob C++ types in their public headers, so they
+  #are dual-ABI on Windows. Only register inside the Core build tree - external
+  #builds do not pull in SafirLibraryAbi.cmake.
+  if (NOT SAFIR_EXTERNAL_BUILD)
+    safir_mark_dual_abi(safir_generated-${_gen_NAME}-cpp)
+  endif()
+
   if (NO_SAFIR_UNITY_BUILD)
     set_target_properties(safir_generated-${_gen_NAME}-cpp PROPERTIES UNITY_BUILD False)
   else()
@@ -508,11 +519,17 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
         set (_in_export EXPORT SafirSDKCore)
       endif()
 
+      # The generated cpp library is dual-ABI, so it is built (and must be
+      # installed) even in a dual-ABI-only build. Allow its install explicitly;
+      # the include/dou/java/dotnet installs below stay suppressed by the
+      # install() override in that mode. See SafirLibraryAbi.cmake.
+      set(SAFIR_ALLOW_INSTALL TRUE)
       INSTALL(TARGETS safir_generated-${_in_NAME}-cpp
         ${_in_export}
         RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT ${component_runtime}
         LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_runtime}
         ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_development})
+      unset(SAFIR_ALLOW_INSTALL)
 
       INSTALL(DIRECTORY ${_in_CXX_INCLUDE_DIRECTORY}
         DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}

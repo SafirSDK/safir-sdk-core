@@ -1,4 +1,5 @@
 ADD_LIBRARY(douf_time_cpp SHARED TimeProvider.cpp)
+safir_mark_dual_abi(douf_time_cpp)
 
 TARGET_LINK_LIBRARIES(douf_time_cpp PRIVATE
   douf_time_library

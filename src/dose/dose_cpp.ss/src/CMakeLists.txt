@@ -2,6 +2,7 @@ FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_cpp SHARED ${sources} ${headers})
+safir_mark_dual_abi(dose_cpp)
 
 TARGET_LINK_LIBRARIES(dose_cpp PRIVATE
   lluf_internal

@@ -2,6 +2,7 @@ FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(communication SHARED ${sources} ${headers} CommunicationMessage.proto)
+safir_mark_dual_abi(communication)
 
 PROTOBUF_GENERATE(TARGET communication OUT_VAR generated_files)
 

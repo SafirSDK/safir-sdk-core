@@ -1,7 +1,3 @@
-#this library has a C interface and we only want one version of it,
-#so we never want the "d" suffix on debug builds, which is default on windows.
-SET(CMAKE_DEBUG_POSTFIX "")
-
 FILE(GLOB sources *.cpp)
 
 #we need to disable some warnings, since we do some wierd things with pointers
@@ -11,6 +7,7 @@ endif()
 
 
 ADD_LIBRARY(douf_time_library SHARED ${sources})
+safir_mark_single_abi(douf_time_library)
 
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(douf_time_library PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)

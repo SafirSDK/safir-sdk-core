@@ -41,7 +41,6 @@ def parse_arguments():
     parser.add_argument("--safir-show-config", required=True)
     parser.add_argument("--safir-web", required=True)
     parser.add_argument("--safir-status", required=True)
-    parser.add_argument("--dobexplorer", required=True)
     return parser.parse_args()
 
 @contextmanager
@@ -56,7 +55,6 @@ def test_case(name, args):
                       args.dope_main,
                       args.safir_show_config)
         env.launchProcess("safir_web", args.safir_web)
-        #env.launchProcess("dobexplorer", args.dobexplorer)
         yield env
 
     except Exception as e:

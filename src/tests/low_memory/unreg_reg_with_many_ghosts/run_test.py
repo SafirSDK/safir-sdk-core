@@ -34,7 +34,6 @@ parser.add_argument("--subscriber", required=True)
 parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose_main", required=True)
 parser.add_argument("--dope_main", required=True)
-parser.add_argument("--dobexplorer", required=True)
 parser.add_argument("--safir-show-config", required=True)
 
 arguments = parser.parse_args()
@@ -45,8 +44,6 @@ env = TestEnv(safir_control=arguments.safir_control,
               safir_show_config=arguments.safir_show_config)
 
 with TestEnvStopper(env):
-    #env.launchProcess("dobexplorer", arguments.dobexplorer)
-    #time.sleep(10)
     env.launchProcess("slow_entity_subscriber", arguments.subscriber)
     
     eater = env.launchProcess("unreg_reg_with_many_ghosts", arguments.unreg_reg_with_many_ghosts)

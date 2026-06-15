@@ -43,7 +43,7 @@ Building Safir SDK Core Installation Packages
 Now you can build Safir SDK Core using the build script. Open a terminal in the root of
 the unpacked source code and run:
 
-  build/build.py --package
+  build/build.py
 
 After a long wait you should have a set of installation packages in the tmp directory
 that has been created in the source root.

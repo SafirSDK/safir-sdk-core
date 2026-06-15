@@ -23,15 +23,18 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""Build and package the safir-sdk-core source tree.
+"""Command line build tool for user dou-projects (installed as 'dobmake-batch').
 
-This is the entry point used by Jenkins and by anyone producing the
-installation packages. Building and packaging is the only thing it does - there
-is no separate "build without packaging" mode here. To build an external user
-dou-project use dobmake_batch.py instead (installed as dobmake-batch); to just
-build the source tree as a developer, use cmake/ninja directly (see
-BUILD.Linux.txt / BUILD.Windows.txt). The shared logic lives in
-safir_build_common.py next to this file.
+This is the non-GUI counterpart of the dobmake application: it builds the dou
+project in the current directory using the same logic as the Safir SDK Core
+build, but it deliberately does NOT offer the --package option. Packaging is a
+concern of the SDK build itself (build.py) only, which keeps the SDK-specific
+release machinery (including the dual-ABI fast path) out of reach of user
+builds. The shared build logic lives in safir_build_common.py, which is
+installed alongside this script so 'import safir_build_common' resolves via the
+script's own directory on sys.path.
+
+Run this from the directory containing your project's CMakeLists.txt.
 """
 import sys
 import argparse
@@ -42,22 +45,23 @@ import safir_build_common as common
 def parse_command_line():
     """parse the command line"""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    action = parser.add_mutually_exclusive_group()
 
-    parser.add_argument("--noclean",
+    action.add_argument("--install",
+                        metavar="PATH",
+                        help="Build the source in the current directory and install it to "
+                        "PATH. If PATH is set to 'None' the install step will be run "
+                        "without setting CMAKE_INSTALL_PREFIX, useful if your "
+                        "CMakeLists.txt has absolute paths in the INSTALL directives.")
+
+    action.add_argument("--clean",
                         action="store_true",
-                        help="Attempt to continue from a previous build instead of "
-                        "building from scratch.")
+                        help="Remove previous build results instead of building.")
 
     common.add_common_arguments(parser)
     common.add_platform_options(parser)
 
     arguments = parser.parse_args()
-
-    # Packaging is the only mode this script has, so set the flags the shared
-    # builder logic keys on. (dobmake_batch.py leaves these unset/false.)
-    arguments.package = True
-    arguments.package_noclean = arguments.noclean
-
     common.finalize_arguments(arguments)
     return arguments
 

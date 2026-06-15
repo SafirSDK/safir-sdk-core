@@ -1,7 +1,3 @@
-#this library has a C interface and we only want one version of it,
-#so we never want the "d" suffix on debug builds, which is default on windows.
-SET(CMAKE_DEBUG_POSTFIX "")
-
 #we need to disable some warnings, since these things contain wierdness
 if (NOT MSVC)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pedantic")
@@ -9,6 +5,7 @@ endif()
 
 
 add_library(test_library SHARED test_library.cpp)
+safir_mark_single_abi(test_library)
 
 ADD_EXECUTABLE(DynamicLibraryLoader_test1 test1.cpp)
 ADD_EXECUTABLE(DynamicLibraryLoader_test2 test2.cpp)

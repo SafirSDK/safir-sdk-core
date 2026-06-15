@@ -1,9 +1,6 @@
-#this project contains a library that has a C interface and we only want one version of it,
-#so we never want the "d" suffix on debug builds, which is default on windows.
-SET(CMAKE_DEBUG_POSTFIX "")
-
 ADD_LIBRARY(swre_java_jni SHARED
   swre_jni.cpp)
+safir_mark_single_abi(swre_java_jni)
 
 TARGET_INCLUDE_DIRECTORIES(swre_java_jni
   PRIVATE

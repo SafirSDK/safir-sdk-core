@@ -10,6 +10,7 @@ add_library(system_picture SHARED ${sources} ${headers}
   RawStatisticsMessage.proto
   SystemStateMessage.proto
   ElectionMessage.proto)
+safir_mark_dual_abi(system_picture)
 
 
 PROTOBUF_GENERATE(TARGET system_picture OUT_VAR generated_files)

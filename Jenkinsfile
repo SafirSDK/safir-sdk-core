@@ -50,7 +50,7 @@ def runCommandInVenv(Map map) {
 def clean_check_and_build(platform, arch) {
     runCommand (command: "git clean -fxd")
     runCommandInVenv (command: "python build/check_source_tree.py")
-    runCommandInVenv (command: "python build/build.py --jenkins --package",
+    runCommandInVenv (command: "python build/build.py --jenkins",
                 windows_arguments: "--use-studio ${platform} --arch ${arch}")
 }
 
@@ -238,8 +238,8 @@ pipeline {
                         values 'x86', 'amd64'
                     }
                     axis {
-                        name 'BUILD_TYPE'
-                        values 'RelWithDebInfo', 'DebugOnly'
+                        name 'PACKAGE_TYPE'
+                        values 'Full', 'DebugOnly'
                     }
                 }
                 excludes {
@@ -263,7 +263,7 @@ pipeline {
                 post {
                     always {
                         //archive artifacts and check for warnings
-                        archive_and_analyze(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE)
+                        archive_and_analyze(BUILD_PLATFORM, BUILD_ARCH, PACKAGE_TYPE)
 
                         junit keepLongStdio: true, skipPublishingChecks: true, testResults: '**/*.junit.xml'
                         cleanWs()
@@ -309,8 +309,8 @@ pipeline {
                         values 'x86', 'amd64'
                     }
                     axis {
-                        name 'BUILD_TYPE'
-                        values 'RelWithDebInfo', 'DebugOnly'
+                        name 'PACKAGE_TYPE'
+                        values 'Full', 'DebugOnly'
                     }
                     axis {
                         name 'LANGUAGES'
@@ -333,12 +333,12 @@ pipeline {
                 }
                 stages {
                     stage('Standalone Tests') { steps { script {
-                        clean_and_copy_artifacts(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER)
-                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, LANGUAGES, "standalone-tests")
+                        clean_and_copy_artifacts(BUILD_PLATFORM, BUILD_ARCH, PACKAGE_TYPE, JOB_NAME, BUILD_NUMBER)
+                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, PACKAGE_TYPE, JOB_NAME, BUILD_NUMBER, LANGUAGES, "standalone-tests")
                     }}}
                     stage('Multinode Tests') { steps { script {
                         //artifacts are left over from previous stage
-                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, LANGUAGES, "multinode-tests")
+                        run_test_suite(BUILD_PLATFORM, BUILD_ARCH, PACKAGE_TYPE, JOB_NAME, BUILD_NUMBER, LANGUAGES, "multinode-tests")
                     }}}
                     stage('Multicomputer Tests') {
                         when { allOf {
@@ -354,10 +354,10 @@ pipeline {
                         steps {
                             lock( 'multicomputer-test-slaves' ) {
                                 script {
-                                    echo "Took multicomputer-test-slaves lock: ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE} ${BUILD_NUMBER} ${JOB_NAME}"
+                                    echo "Took multicomputer-test-slaves lock: ${BUILD_PLATFORM}-${BUILD_ARCH}-${PACKAGE_TYPE} ${BUILD_NUMBER} ${JOB_NAME}"
                                     //artifacts are left over from previous stage
-                                    run_test_suite(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER, LANGUAGES, "multicomputer-tests")
-                                    echo "Releasing multicomputer-test-slaves lock: ${BUILD_PLATFORM}-${BUILD_ARCH}-${BUILD_TYPE}"
+                                    run_test_suite(BUILD_PLATFORM, BUILD_ARCH, PACKAGE_TYPE, JOB_NAME, BUILD_NUMBER, LANGUAGES, "multicomputer-tests")
+                                    echo "Releasing multicomputer-test-slaves lock: ${BUILD_PLATFORM}-${BUILD_ARCH}-${PACKAGE_TYPE}"
                     }}}}
 
 
@@ -398,8 +398,8 @@ pipeline {
                         values 'x86', 'amd64'
                     }
                     axis {
-                        name 'BUILD_TYPE'
-                        values 'RelWithDebInfo', 'DebugOnly'
+                        name 'PACKAGE_TYPE'
+                        values 'Full', 'DebugOnly'
                     }
                 }
                 excludes {
@@ -416,7 +416,7 @@ pipeline {
                 }
                 stages {
                     stage('Build') { steps { script {
-                        clean_and_copy_artifacts(BUILD_PLATFORM, BUILD_ARCH, BUILD_TYPE, JOB_NAME, BUILD_NUMBER)
+                        clean_and_copy_artifacts(BUILD_PLATFORM, BUILD_ARCH, PACKAGE_TYPE, JOB_NAME, BUILD_NUMBER)
                         build_examples ()
                     }}}
                 }

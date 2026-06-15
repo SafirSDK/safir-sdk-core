@@ -2,6 +2,7 @@ FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_internal SHARED ${sources} ${headers} AnyObject.proto)
+safir_mark_dual_abi(dots_internal)
 
 PROTOBUF_GENERATE(TARGET dots_internal OUT_VAR generated_files)
 

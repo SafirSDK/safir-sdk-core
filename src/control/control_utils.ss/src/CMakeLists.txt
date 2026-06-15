@@ -4,6 +4,7 @@ set(proto_files DoseMainCommands.proto ControlCommands.proto ControlInfo.proto)
 
 
 ADD_LIBRARY(control_utils SHARED ${sources} ${headers} ${proto_files})
+safir_mark_dual_abi(control_utils)
 
 PROTOBUF_GENERATE(TARGET control_utils OUT_VAR generated_files)
 

@@ -49,10 +49,6 @@ def launch_node(args, instance):
                   args.safir_show_config,
                   wait_for_persistence=instance == 0)
 
-    if instance == 0:
-        #env.launchProcess("Dobexplorer", args.dobexplorer)
-        pass
-
     for handler in range(args.handlers):
         if instance == 0:
             cmd = (args.owner, "--handler", str(handler))
@@ -69,7 +65,6 @@ def parse_arguments():
     parser.add_argument("--owner", required=True)
     parser.add_argument("--sender", required=True)
     parser.add_argument("--safir-control", required=True)
-    parser.add_argument("--dobexplorer", required=True)
     parser.add_argument("--dose_main", required=True)
     parser.add_argument("--dope_main", required=True)
     parser.add_argument("--safir-show-config", required=True)

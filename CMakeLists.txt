@@ -5,6 +5,13 @@ cmake_policy(SET CMP0092 NEW)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# When ON, configure only enough of the tree to build safir_dual_abi_libs:
+# the dual-flavour C++-ABI shared libraries that Windows release builds need
+# in both Debug and RelWithDebInfo. Skips Qt (no Qt-consuming subdir is
+# needed for those libs), so neither cmake nor conan spend time on it.
+# See src/cmake/SafirLibraryAbi.cmake.
+option(SAFIR_DUAL_ABI_ONLY "Build only the dual-ABI C++ shared library slice" OFF)
+
 # Configure Conan provider to use project-local profiles
 # On Linux/NixOS: use system Qt via platform_requires
 # On Windows: use default profile (Qt from Conan)
@@ -29,7 +36,20 @@ if(UNIX)
   endif()
   set(_conan_install_args "--build=missing")
 else()
-  set(CONAN_HOST_PROFILE "default;auto-cmake" CACHE STRING "Conan host profile")
+  # The windows-qt profile carries Qt's (and pcre2's) feature trimming. It is
+  # applied to BOTH the host and build contexts so the build-context Qt
+  # (tool_required for moc/rcc/uic) gets the same options as the Qt we ship.
+  # Otherwise it falls back to its full default feature set and Conan builds a
+  # second, redundant Qt - plus glib/harfbuzz/openssl/sqlite3/libpq/... - from
+  # source. See build/conan-profiles/windows-qt.
+  #
+  # Both profiles carry auto-cmake so the build context tracks the compiler and
+  # generator CMake is actually using right now, instead of a stale cached
+  # `default` profile. If host and build disagree on compiler.version, the two
+  # Qts get different package_ids and Qt builds twice anyway - and a stale
+  # `default` can even point CMake at an uninstalled Visual Studio generator.
+  set(CONAN_HOST_PROFILE "default;auto-cmake;${CMAKE_SOURCE_DIR}/build/conan-profiles/windows-qt" CACHE STRING "Conan host profile")
+  set(CONAN_BUILD_PROFILE "default;auto-cmake;${CMAKE_SOURCE_DIR}/build/conan-profiles/windows-qt" CACHE STRING "Conan build profile")
   set(_conan_install_args "--build=missing;-s:b;compiler.cppstd=20")
 endif()
 
@@ -41,6 +61,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     "-s;build_type=Release;--conf;user.safir:cmake_build_type=RelWithDebInfo")
 endif()
 
+if(SAFIR_DUAL_ABI_ONLY)
+  list(APPEND _conan_install_args
+    "--conf;user.safir:dual_abi_only=True")
+endif()
+
 set(CONAN_INSTALL_ARGS "${_conan_install_args}" CACHE STRING "Conan install arguments" FORCE)
 unset(_conan_install_args)
 
@@ -48,6 +73,26 @@ unset(_conan_install_args)
 set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/src/cmake/conan_provider.cmake)
 
 PROJECT(safir-sdk-core CXX C)
+
+# In a dual-ABI-only build (the Debug pass of a Windows release build) only the
+# dual-ABI C++ shared libraries are built - see src/cmake/SafirLibraryAbi.cmake.
+# The install rules in the tree, however, refer to the whole project (exes, JNI,
+# C# assemblies, java jars, manpages, headers, the export set, ...), and a
+# staged install would fail trying to copy artifacts that were never built.
+#
+# Rather than guard every one of the ~90 install() sites, we override install()
+# itself: in dual-ABI-only mode it does nothing unless SAFIR_ALLOW_INSTALL is
+# set. The two Safir install helpers (SAFIR_INSTALL and
+# INSTALL_SAFIR_GENERATED_LIBRARY) raise that flag only while installing the
+# binary artifacts of a dual-ABI target, so exactly the dual-ABI *.dll/.lib/.pdb
+# (with the debug 'd' postfix) get staged and nothing else. The RelWithDebInfo
+# pass installs the full project normally.
+function(install)
+  if (SAFIR_DUAL_ABI_ONLY AND NOT SAFIR_ALLOW_INSTALL)
+    return()
+  endif()
+  _install(${ARGN})
+endfunction()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -265,8 +310,16 @@ add_subdirectory(src)
 add_subdirectory(docs)
 
 SAFIR_INSTALL_PYTHON(
-  SCRIPT build/build.py
+  SCRIPT build/dobmake_batch.py
   RENAME dobmake-batch.py
+  COMPONENT Development)
+
+# dobmake-batch imports safir_build_common; it must sit next to the script in bin/
+# so it resolves via the script's own directory on sys.path. Keep the .py extension
+# (it is an imported module, not an executable entry point) and do not mark it
+# executable.
+INSTALL(FILES build/safir_build_common.py
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
   COMPONENT Development)
 
 INSTALL(FILES COPYING.txt

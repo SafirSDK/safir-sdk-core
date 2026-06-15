@@ -1,11 +1,8 @@
-#this library has a C interface and we only want one version of it,
-#so we never want the "d" suffix on debug builds, which is default on windows.
-SET(CMAKE_DEBUG_POSTFIX "")
-
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_dll SHARED ${sources} ${headers})
+safir_mark_single_abi(dose_dll)
 
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(dose_dll PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)

@@ -1,4 +1,5 @@
 ADD_LIBRARY(swre_interface_cpp SHARED BackdoorKeeper.cpp CrashReporter.cpp SwReport.cpp Tracer.cpp TraceStreamBuffer.cpp)
+safir_mark_dual_abi(swre_interface_cpp)
 
 TARGET_LINK_LIBRARIES(swre_interface_cpp PRIVATE
   swre_library
