@@ -48,6 +48,10 @@
      // Can't get any calling conventions to work for arm. __attribute__((pcs("aapcs"))) doesnt work..
 #    define STANDARD_CALLING_CONVENTION
 #    define ANOTHER_CALLING_CONVENTION
+#  elif defined (__aarch64__)
+     // AArch64 has a single procedure call standard (AAPCS64), so there is no alternative convention.
+#    define STANDARD_CALLING_CONVENTION
+#    define ANOTHER_CALLING_CONVENTION
 #  endif
 #endif
 

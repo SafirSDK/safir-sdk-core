@@ -51,6 +51,8 @@
 #    define ANOTHER_CC __attribute__((ms_abi))
 #  elif defined (__arm__)
 #    define ANOTHER_CC
+#  elif defined (__aarch64__)
+#    define ANOTHER_CC
 #  endif
 const char * fun2_name = "TestFunction2";
 #endif

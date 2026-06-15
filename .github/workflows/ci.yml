@@ -47,6 +47,15 @@ jobs:
             runner: ubuntu-24.04
             conan_home: /home/runner/.conan2
 
+          # Native arm64 build on GitHub's hosted Arm runner. The Linux build
+          # steps are arch-agnostic (keyed on runner.os), so no other changes are
+          # needed; the Conan cache key already includes runner.arch so amd64 and
+          # arm64 caches stay separate.
+          - platform: ubuntu-noble
+            arch: arm64
+            runner: ubuntu-24.04-arm
+            conan_home: /home/runner/.conan2
+
           # No Debian runner exists, so build inside a Debian container on the
           # ubuntu-latest host. Runs as root (the container's default user):
           # writes to $GITHUB_ENV/$GITHUB_PATH and the mounted workspace all work
