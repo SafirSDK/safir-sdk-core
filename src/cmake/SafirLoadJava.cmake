@@ -30,8 +30,13 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
           message(FATAL_ERROR "add_jar of ${NAME} has OUTPUT_DIR set, which I kinda don't like")
         endif()
 
-        _add_jar(${NAME} ${ARGN} OUTPUT_DIR ${CMAKE_JAVA_OUTPUT_DIRECTORY})
-      endfunction()
+        if (CMAKE_JAVA_OUTPUT_DIRECTORY)
+          _add_jar(${NAME} ${ARGN} OUTPUT_DIR ${CMAKE_JAVA_OUTPUT_DIRECTORY})
+        else()
+          _add_jar(${NAME} ${ARGN})
+        endif()
+
+     endfunction()
 
     SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8 -Xlint:unchecked -Xlint:deprecation --release 11)
   else()

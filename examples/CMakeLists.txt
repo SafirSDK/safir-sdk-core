@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.24.0)
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0")
+  #Use new FindBoost behaviour
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 if (DEFINED ENV{JENKINS_HOME} OR SAFIR_EXAMPLES_USE_CONAN)
   set (CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/../src/cmake/conan_provider.cmake)
 endif()
 
 PROJECT(safir_sdk_core_examples C CXX) #Conan stuff requires C, and it does not break anything else.
 
-#You can use later standards as well, but this is how we have to set it up for vs2015 compatibility.
-if (MSVC_VERSION EQUAL 1900)
-  set(CMAKE_CXX_STANDARD 14)
-else()
-  set(CMAKE_CXX_STANDARD 17)
-endif()
+set(CMAKE_CXX_STANDARD 17)
 
 #
 # !! If you are trying to compile the examples, please read this !!

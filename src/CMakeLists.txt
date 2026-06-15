@@ -102,7 +102,7 @@ if (NOT Qt6_FOUND AND NOT Qt5_FOUND)
 endif()
 
 # Old Conan recipes do not generate the versionless targets, so we
-# need to do that ourselves. 
+# need to do that ourselves.
 if (NOT TARGET Qt::Core)
   if (Qt6_FOUND)
     add_library (Qt::Core ALIAS Qt6::Core)
@@ -389,15 +389,15 @@ endfunction()
 #
 # This is an "overload" of the builtin TARGET_LINK_LIBRARIES function.
 #
-# The purpose is to check that the keyword PRIVATE has not been left out.
-# This check is slightly overzealous, since not all TARGET_LINK_LIBRARIES
-# calls actually need to use the PRIVATE keyword, but those few exceptions
-# can just add it anyway.
+# The purpose is to check that a visibility keyword has not been left out.
+# This enforces modern CMake style (keyword-based calls).
 #
 function(target_link_libraries)
-  list(FIND ARGN "PRIVATE" has_private_keyword)
-  if(has_private_keyword EQUAL -1)
-    message(FATAL_ERROR "target_link_libraries lacks PRIVATE keyword!")
+  list(FIND ARGN "PRIVATE" has_private)
+  list(FIND ARGN "PUBLIC" has_public)
+  list(FIND ARGN "INTERFACE" has_interface)
+  if(has_private EQUAL -1 AND has_public EQUAL -1 AND has_interface EQUAL -1)
+    message(FATAL_ERROR "target_link_libraries lacks a visibility keyword (PRIVATE/PUBLIC/INTERFACE)!")
   endif()
   _target_link_libraries(${ARGN})
 endfunction()
