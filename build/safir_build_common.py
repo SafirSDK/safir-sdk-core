@@ -199,6 +199,35 @@ def pushd(new_dir):
     finally:
         os.chdir(previous_dir)
 
+def get_git_revision_info():
+    """Collect git revision details from the current checkout.
+
+    Returns a dict of strings, or None if this is not a usable git checkout.
+    Used to inject the revision into the Debian package build: that build
+    compiles from an extracted "git archive" tarball that has no .git of its
+    own, so it cannot query git itself (see lluf_config_dump CMakeLists.txt)."""
+    def _git(args):
+        try:
+            return subprocess.check_output(
+                ["git"] + args, stderr=subprocess.DEVNULL,
+                universal_newlines=True).strip()
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return None
+
+    short = _git(["describe", "--always", "--dirty", "--abbrev=7"])
+    if short is None:
+        return None
+
+    dirty = subprocess.call(["git", "diff-index", "--quiet", "HEAD", "--"],
+                            stderr=subprocess.DEVNULL)
+    return {
+        "SAFIR_GIT_REVISION": short,
+        "SAFIR_GIT_REVISION_FULL": _git(["rev-parse", "HEAD"]) or "Unknown",
+        "SAFIR_GIT_BRANCH": _git(["rev-parse", "--abbrev-ref", "HEAD"]) or "Unknown",
+        "SAFIR_GIT_STATUS": "dirty - uncommitted changes" if dirty else "clean",
+    }
+
+
 def read_version():
     """Parse the VERSION.txt file to find out our version"""
     parts = {}
@@ -853,6 +882,10 @@ class DebianPackager():
         """Run the build"""
         (major, minor, patch, suffix), _ = read_version()
         version_string = major + "." + minor + "." + patch + suffix
+        # Capture the revision from the real checkout now, before we descend
+        # into the extracted tarball (which has no .git), so we can hand it to
+        # the package build via debuild below.
+        git_info = get_git_revision_info()
         if not self.noclean:
             remove("tmp")
             mkdir("tmp")
@@ -885,6 +918,10 @@ class DebianPackager():
             val = os.environ.get(var)
             if val is not None:
                 command += ("--set-envvar", var + "=" + val)
+
+        #Inject the git revision so debian/rules can pass it on to cmake.
+        for key, val in (git_info or {}).items():
+            command += ("--set-envvar", key + "=" + val)
 
         command += ["-us", "-uc", "-nc"]
 

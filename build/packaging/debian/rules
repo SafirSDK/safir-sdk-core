@@ -13,10 +13,22 @@ endif
 
 # debhelper compat 12+ replaces HOME with a temp directory, which breaks conan's
 # package cache lookup. Read the real home from the passwd database instead.
-REAL_HOME := $(shell getent passwd $$LOGNAME | cut -d: -f6)
+# LOGNAME is unset under debuild's sanitized environment (e.g. building in a
+# container), and "getent passwd" with an empty argument dumps the whole
+# database, so fall back to the current user from "id -un".
+REAL_HOME := $(shell getent passwd "$${LOGNAME:-$$(id -un)}" | cut -d: -f6)
+
+# build.py injects the git revision (debuild --set-envvar) because this build
+# compiles from an unpacked "git archive" tarball with no .git to query. Forward
+# it to cmake so safir_show_config --revision reports it. Quoted because the
+# status string contains spaces.
+GIT_REVISION_ARGS =
+ifneq (,$(SAFIR_GIT_REVISION))
+GIT_REVISION_ARGS = -DSAFIR_GIT_REVISION:STRING="$(SAFIR_GIT_REVISION)" -DSAFIR_GIT_REVISION_FULL:STRING="$(SAFIR_GIT_REVISION_FULL)" -DSAFIR_GIT_BRANCH:STRING="$(SAFIR_GIT_BRANCH)" -DSAFIR_GIT_STATUS:STRING="$(SAFIR_GIT_STATUS)"
+endif
 
 override_dh_auto_configure:
-	CONAN_HOME=$(REAL_HOME)/.conan2 dh_auto_configure -- -DCMAKE_BUILD_TYPE:STRING=$(CMAKE_BUILD_TYPE)
+	CONAN_HOME=$(REAL_HOME)/.conan2 dh_auto_configure -- -DCMAKE_BUILD_TYPE:STRING=$(CMAKE_BUILD_TYPE) $(GIT_REVISION_ARGS)
 
 %:
 	dh $@ --buildsystem=cmake+ninja --with=cli

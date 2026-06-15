@@ -2,8 +2,17 @@
 
 FIND_PACKAGE(Git QUIET)
 
-# Get extended git information
-if (GIT_FOUND)
+# The revision can be injected from the outside (-DSAFIR_GIT_REVISION=...). The
+# Debian package build does this because it compiles from a "git archive"
+# tarball that has no .git of its own - querying git there would either fail or
+# (when a parent checkout happens to be present) silently report the wrong tree.
+# For a normal in-tree build no override is passed and we query git directly.
+if (SAFIR_GIT_REVISION)
+  set(GIT_REVISION_SHORT "${SAFIR_GIT_REVISION}")
+  set(GIT_REVISION_FULL "${SAFIR_GIT_REVISION_FULL}")
+  set(GIT_BRANCH "${SAFIR_GIT_BRANCH}")
+  set(GIT_STATUS "${SAFIR_GIT_STATUS}")
+elseif (GIT_FOUND)
   execute_process(
     COMMAND "${GIT_EXECUTABLE}" describe --always --dirty --abbrev=7
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"

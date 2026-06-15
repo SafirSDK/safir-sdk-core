@@ -20,7 +20,8 @@ Key characteristics:
 sudo apt-get install python3 pipx python-is-python3 python3-distro build-essential \
      g++ cmake default-jdk asciidoctor cli-common-dev libboost-all-dev unixodbc-dev doxygen \
      graphviz qt6-base-dev qt6-websockets-dev qt6-base-private-dev qt6-svg-dev dia dblatex \
-     devscripts debhelper fakeroot ninja-build python3-websocket texlive-font-utils
+     devscripts debhelper fakeroot ninja-build python3-websocket texlive-font-utils \
+     ghostscript
 
 # Install Conan 2
 pipx install "conan>=2.5.0"

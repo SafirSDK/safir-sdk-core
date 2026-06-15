@@ -19,6 +19,18 @@ jobs:
     name: ${{ matrix.platform }}-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
 
+    # Most rows run directly on the host runner. The Debian row sets
+    # matrix.container to a Debian image so the build runs against Debian's real
+    # toolchain/libs; an empty image here means "no container" (run on host).
+    # GitHub has no Debian-labelled runner, so a container on ubuntu-latest is
+    # the only way to get a genuine Debian build. The object form is needed so we
+    # can pass --shm-size: Docker defaults /dev/shm to 64 MB, but dose_main
+    # creates a 100 MB managed_shared_memory there and quick_exit(1)s if it can't,
+    # which fails every test that starts the DOB.
+    container:
+      image: ${{ matrix.container }}
+      options: ${{ matrix.container_options }}
+
     # Keep the Conan cache (and thus the from-scratch Boost/Qt builds) off the
     # cramped Windows C: drive. The hosted Windows runners only have ~32-85 GB
     # free on C: but a near-empty 147 GB D: "Temporary Storage" drive, where the
@@ -35,6 +47,19 @@ jobs:
             runner: ubuntu-24.04
             conan_home: /home/runner/.conan2
 
+          # No Debian runner exists, so build inside a Debian container on the
+          # ubuntu-latest host. Runs as root (the container's default user):
+          # writes to $GITHUB_ENV/$GITHUB_PATH and the mounted workspace all work
+          # without UID juggling, and root-owned files are correct for a system
+          # .deb anyway (lintian's root-owner warnings are cosmetic). CONAN_HOME
+          # is /root/.conan2 because there is no /home/runner inside the container.
+          - platform: debian-trixie
+            arch: amd64
+            runner: ubuntu-latest
+            container: debian:13
+            container_options: --shm-size=200m
+            conan_home: /root/.conan2
+
           - platform: vs2022
             arch: amd64
             runner: windows-2022
@@ -48,6 +73,23 @@ jobs:
             conan_home: 'D:\.conan2'
 
     steps:
+      - name: Bootstrap Debian container
+        # The debian:13 image is bare: no git (actions/checkout needs it to
+        # produce a real working tree, otherwise build scripts that call git
+        # break), no sudo (the shared "Install Linux prerequisites" step calls
+        # sudo apt-get), and no ca-certificates (https apt/pip would fail). Run
+        # this before checkout so the repo is cloned with git. Skipped on
+        # non-container rows where matrix.container is empty.
+        if: ${{ matrix.container != '' }}
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends sudo ca-certificates git
+          # The workspace is mounted owned by the host runner UID (1001) but we
+          # run as root, so git refuses with "dubious ownership". checkout works
+          # around this for itself, but build.py's own git calls would still
+          # fail; mark all repos safe globally for root.
+          git config --global --add safe.directory '*'
+
       - uses: actions/checkout@v5
 
       - name: "Verify D: drive exists (Windows)"
@@ -69,13 +111,13 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            python3 pipx python-is-python3 python3-distro \
+            python3 python3-venv python3-pip pipx python-is-python3 python3-distro \
             build-essential g++ cmake \
             default-jdk \
             libboost-all-dev unixodbc-dev \
             doxygen graphviz \
             qt6-base-dev qt6-websockets-dev qt6-base-private-dev qt6-svg-dev \
-            dia dblatex texlive-font-utils \
+            dia dblatex texlive-font-utils ghostscript \
             devscripts debhelper fakeroot \
             ninja-build python3-websocket \
             asciidoctor cli-common-dev
@@ -84,7 +126,12 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          choco install nsis --no-progress -y
+          # doxygen/graphviz/asciidoctorj/dia render the documentation that the
+          # Windows packages must ship (see BUILD.Windows.txt); without them the
+          # build silently skips docs. dejavufonts/gzip back the doc generation.
+          # asciidoctorj is the JVM asciidoctor and needs Java at build time - the
+          # "Set up Java (Windows)" step below puts it on PATH before the build.
+          choco install nsis doxygen.install graphviz asciidoctorj dia dejavufonts gzip --no-progress -y
           # choco installs NSIS but does not put it on PATH. windows-2022 shipped
           # NSIS on PATH already; windows-2025-vs2026 does not, so makensis was not
           # found during packaging. Add it explicitly for the later build step.
@@ -122,9 +169,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ${{ matrix.conan_home }}
-          key: conan-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('conanfile.py', 'build/requirements.txt') }}
+          key: conan-v2-${{ matrix.platform }}-${{ runner.arch }}-${{ hashFiles('conanfile.py', 'build/requirements.txt') }}
           restore-keys: |
-            conan-v2-${{ runner.os }}-${{ runner.arch }}-
+            conan-v2-${{ matrix.platform }}-${{ runner.arch }}-
 
       - name: Trim Conan cache after restore
         # The restored cache may carry each dependency's source/build/download
