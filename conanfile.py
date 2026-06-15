@@ -1,12 +1,12 @@
 """ Conan stuff for Safir SDK Core """
 from conan import ConanFile
+from conan.tools.cmake import CMakeConfigDeps
 from conan.tools.files import copy
 import os
 
 class SafirSdkCoreConan(ConanFile):
     """ Conan stuff for Safir SDK Core """
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps"
     default_options = {"protobuf/*:lite":True,
                        "protobuf/*:shared":False,
                        "protobuf/*:with_zlib":False,
@@ -86,6 +86,16 @@ class SafirSdkCoreConan(ConanFile):
                        #"cmake/*:bootstrap": True
                        }
     def generate(self):
+        deps = CMakeConfigDeps(self)
+        # When conan installs Release packages on behalf of a RelWithDebInfo cmake
+        # build (to reuse ConanCenter pre-built binaries), CMakeConfigDeps must
+        # generate files labelled RelWithDebInfo so cmake can find them. The cmake
+        # build signals this via user.safir:cmake_build_type.
+        cmake_build_type = self.conf.get("user.safir:cmake_build_type", default=None)
+        if cmake_build_type:
+            deps.configuration = cmake_build_type
+        deps.generate()
+
         for dep in self.dependencies.values():
             # Skip platform dependencies (they don't have package_folder)
             if not dep.package_folder:

@@ -85,7 +85,22 @@ if (MSVC)
             optimized "${SAFIR_SDK_CORE_LIBRARIES_DIR}/${lib}.lib")
   endforeach()
 else()
+  get_property(_safir_targets_before DIRECTORY PROPERTY IMPORTED_TARGETS)
   include("${SAFIR_SDK_CORE_CMAKE_DIR}/SafirSDKCore.cmake")
+  get_property(_safir_targets_after DIRECTORY PROPERTY IMPORTED_TARGETS)
+
+  # Map Release <-> RelWithDebInfo on all newly imported Safir targets, so a
+  # RelWithDebInfo install is usable from a Release consumer and vice versa.
+  foreach(_safir_target IN LISTS _safir_targets_after)
+    if(NOT _safir_target IN_LIST _safir_targets_before)
+      set_property(TARGET ${_safir_target} PROPERTY MAP_IMPORTED_CONFIG_RELEASE RelWithDebInfo Release)
+      set_property(TARGET ${_safir_target} PROPERTY MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release)
+    endif()
+  endforeach()
+  unset(_safir_targets_before)
+  unset(_safir_targets_after)
+  unset(_safir_target)
+
   set(SAFIR_SDK_CORE_LIBRARIES ${libraries})
 endif()
 unset(libraries)

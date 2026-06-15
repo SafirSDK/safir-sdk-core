@@ -27,10 +27,22 @@ if(UNIX)
     unset(_conan_cmd)
     unset(_conan_export_result)
   endif()
+  set(_conan_install_args "--build=missing")
 else()
   set(CONAN_HOST_PROFILE "default;auto-cmake" CACHE STRING "Conan host profile")
-  set(CONAN_INSTALL_ARGS "--build=missing;-s:b;compiler.cppstd=20" CACHE STRING "Conan install arguments")
+  set(_conan_install_args "--build=missing;-s:b;compiler.cppstd=20")
 endif()
+
+# ConanCenter rarely has RelWithDebInfo pre-built binaries, so use Release
+# packages instead. Signal the actual cmake build type to the conanfile so
+# CMakeDeps generates files labelled RelWithDebInfo (matching cmake).
+if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  list(APPEND _conan_install_args
+    "-s;build_type=Release;--conf;user.safir:cmake_build_type=RelWithDebInfo")
+endif()
+
+set(CONAN_INSTALL_ARGS "${_conan_install_args}" CACHE STRING "Conan install arguments" FORCE)
+unset(_conan_install_args)
 
 # Enable Conan dependency provider
 set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/src/cmake/conan_provider.cmake)

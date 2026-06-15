@@ -36,6 +36,7 @@ import urllib.request
 import time
 import socket
 import datetime
+import random
 
 try:
     import apt
@@ -582,6 +583,14 @@ def build_examples():
                                                                  os.path.join(olddir, "inst")))
     #We don't test the dous_2 and dous_3 builds, since it is just too fiddly to get automated.
 
+    #For some RelWithDebInfo builds we build in Release instead, to ensure that is possible
+    build_type = os.environ.get("BUILD_TYPE", "RelWithDebInfo")
+    if build_type == "RelWithDebInfo" and random.random() > 0.5:
+        build_type = "Release"
+    #DebugOnly is a Jenkins matrix axis value, not a CMake config — map it to Debug
+    if build_type == "DebugOnly":
+        build_type = "Debug"
+
     for (builddir, installdir) in dirs:
         os.chdir(builddir)
 
@@ -596,9 +605,14 @@ def build_examples():
 
         cmd += ("--verbose", "--jenkins", "--skip-tests")
 
+
         if sys.platform == "win32":
             cmd += ("--use-studio", os.environ["BUILD_PLATFORM"])
             cmd += ("--arch", os.environ["BUILD_ARCH"])
+            if build_type == "Release":
+                cmd += ("--configs", "Debug", "Release")
+        else:
+            cmd += ("--config", build_type)
 
         if installdir is not None:
             cmd += ("--install", installdir)
