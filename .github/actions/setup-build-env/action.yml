@@ -1,0 +1,134 @@
+name: Set up build environment
+description: >
+  Installs the toolchains, Python venv and Conan cache that both the SDK build
+  and the examples build need. The repo must already be checked out (and, in the
+  Debian container, git/sudo/ca-certificates already bootstrapped) before this
+  runs. Kept as a composite action so the build and build-examples jobs cannot
+  drift apart.
+
+inputs:
+  platform:
+    description: The matrix.platform value, used to key the Conan cache.
+    required: true
+  conan-home:
+    description: CONAN_HOME path for this runner; also the Conan cache path.
+    required: true
+  conan-cache-prefix:
+    description: >
+      Cache key prefix. Independent jobs pass distinct prefixes so their caches
+      (e.g. the SDK's Qt/Boost build vs. the examples' small Boost-1.79 set) do
+      not collide.
+    required: false
+    default: conan-v2
+
+runs:
+  using: composite
+  steps:
+    - name: "Verify D: drive exists (Windows)"
+      # CI puts CONAN_HOME on D:\.conan2 because the C: drive is too small for
+      # the from-scratch Boost/Qt builds. If the runner image ever drops the D:
+      # "Temporary Storage" drive, fail loudly here instead of with a confusing
+      # out-of-disk error mid-build.
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        if (-not (Test-Path 'D:\')) {
+          Write-Error "D: drive not found. CI relies on it for CONAN_HOME ($env:CONAN_HOME) because C: is too small for the Boost/Qt builds. The runner image likely changed - revisit the conan_home matrix value in this workflow."
+          exit 1
+        }
+        Write-Host "D: drive present; CONAN_HOME=$env:CONAN_HOME"
+
+    - name: Install Linux prerequisites
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        # python3-apt backs run_test.py's DebianInstaller (it calls
+        # apt.cache.Cache() to decide whether the SDK is already installed); the
+        # examples build crashes without it. Harmless for the SDK build.
+        sudo apt-get install -y --no-install-recommends \
+          python3 python3-venv python3-pip pipx python-is-python3 python3-distro python3-apt \
+          build-essential g++ cmake \
+          default-jdk \
+          libboost-all-dev unixodbc-dev \
+          doxygen graphviz \
+          qt6-base-dev qt6-websockets-dev qt6-base-private-dev qt6-svg-dev \
+          dia dblatex texlive-font-utils ghostscript \
+          devscripts debhelper fakeroot \
+          ninja-build python3-websocket \
+          asciidoctor cli-common-dev
+
+    - name: Install Windows prerequisites
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        # doxygen/graphviz/asciidoctorj/dia render the documentation that the
+        # Windows packages must ship (see BUILD.Windows.txt); without them the
+        # build silently skips docs. dejavufonts/gzip back the doc generation.
+        # asciidoctorj is the JVM asciidoctor and needs Java at build time - the
+        # "Set up Java (Windows)" step below puts it on PATH before the build.
+        choco install nsis doxygen.install graphviz dia dejavufonts gzip --no-progress -y
+        # asciidoctorj's choco package fetches its zip from search.maven.org,
+        # which intermittently returns 403 (rate-limit/block) - it fails on one
+        # build and succeeds on the next with no change. Retry just this package
+        # a few times so a transient 403 doesn't sink the whole job.
+        for attempt in 1 2 3 4 5; do
+          if choco install asciidoctorj --no-progress -y; then
+            break
+          fi
+          if [ "$attempt" -eq 5 ]; then
+            echo "asciidoctorj install failed after $attempt attempts"
+            exit 1
+          fi
+          echo "asciidoctorj install attempt $attempt failed; retrying in 30s..."
+          sleep 30
+        done
+        # choco installs NSIS but does not put it on PATH. windows-2022 shipped
+        # NSIS on PATH already; windows-2025-vs2026 does not, so makensis was not
+        # found during packaging. Add it explicitly for the later build step.
+        echo "C:\Program Files (x86)\NSIS" >> "$GITHUB_PATH"
+
+    - name: Set up Java (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: '21'
+
+    - name: Set up Python venv
+      shell: bash
+      run: |
+        python -m venv --system-site-packages .venv
+        # Export VIRTUAL_ENV (not just PATH) so CMake's find_package(Python3)
+        # selects the venv interpreter. Without it, FindPython3 on Windows
+        # prefers the registry/system Python and the ctest scripts run with an
+        # interpreter that lacks our pip requirements (e.g. websockets).
+        echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          echo "$GITHUB_WORKSPACE/.venv/Scripts" >> $GITHUB_PATH
+        else
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+        fi
+
+    - name: Install Python requirements
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r build/requirements.txt
+
+    - name: Cache Conan packages
+      uses: actions/cache@v5
+      with:
+        path: ${{ inputs.conan-home }}
+        key: ${{ inputs.conan-cache-prefix }}-${{ inputs.platform }}-${{ runner.arch }}-${{ hashFiles('conanfile.py', 'build/requirements.txt') }}
+        restore-keys: |
+          ${{ inputs.conan-cache-prefix }}-${{ inputs.platform }}-${{ runner.arch }}-
+
+    - name: Trim Conan cache after restore
+      # The restored cache may carry each dependency's source/build/download
+      # folders (~/.conan2/p/b/<ref>/{s,b,d}) alongside the package binary (p/).
+      # Those are huge for source-built Boost/Qt and only waste runner disk
+      # during the build. Drop them now so the build has room. Safe: conan
+      # consumes the cached package binaries without these folders.
+      shell: bash
+      run: conan cache clean "*" || true

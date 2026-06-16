@@ -608,7 +608,26 @@ def build_examples():
         if sys.platform == "win32":
             #MSVC ships per-config runtimes, so a single dobmake-batch run builds
             #all the configs (in separate subdirs) against the same install.
-            cmd = ["dobmake-batch.py", "--verbose", "--jenkins", "--skip-tests"]
+            #
+            #Invoke the installed script through the current interpreter, not by
+            #bare name via shell=True: cmd.exe launches a ".py" file through its
+            #file association *asynchronously* and returns 0 immediately without
+            #waiting, so the build never ran and the step falsely succeeded.
+            #Running sys.executable on the resolved script path makes it a real
+            #child process whose output and return code we actually get.
+            #Search PATH by hand rather than via shutil.which: on Python 3.12+
+            #which() only tests a bare name whose extension is in PATHEXT, and
+            #".PY" is not in PATHEXT on the CI runner, so it never checks
+            #"dobmake-batch.py" itself and returns None even though the file is
+            #on PATH (check_installation appends the SDK bin dir).
+            script = next(
+                (os.path.join(d, "dobmake-batch.py")
+                 for d in os.environ.get("PATH", "").split(os.pathsep)
+                 if os.path.isfile(os.path.join(d, "dobmake-batch.py"))),
+                None)
+            if script is None:
+                raise SetupError("Could not find dobmake-batch.py on PATH")
+            cmd = [sys.executable, script, "--verbose", "--jenkins", "--skip-tests"]
             cmd += ("--use-studio", os.environ["BUILD_PLATFORM"])
             cmd += ("--arch", os.environ["BUILD_ARCH"])
             cmd += ("--configs", ) + configs
@@ -616,7 +635,7 @@ def build_examples():
                 cmd += ("--install", installdir)
 
             log("Running command ", " ".join(cmd))
-            result = nice_call(cmd, shell=True)
+            result = nice_call(cmd, shell=False)
             if result != 0:
                 raise SetupError("Build examples failed. Returncode = " + str(result))
         else:
