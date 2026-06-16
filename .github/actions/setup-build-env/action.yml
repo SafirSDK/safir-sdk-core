@@ -70,18 +70,27 @@ runs:
         choco install nsis doxygen.install graphviz dia dejavufonts gzip --no-progress -y
         # asciidoctorj's choco package fetches its zip from search.maven.org,
         # which intermittently returns 403 (rate-limit/block) - it fails on one
-        # build and succeeds on the next with no change. Retry just this package
-        # a few times so a transient 403 doesn't sink the whole job.
-        for attempt in 1 2 3 4 5; do
+        # build and succeeds on the next with no change. A fixed 30s retry over
+        # 5 attempts (~2min) was not enough: the 403 has persisted across all of
+        # them. Retry with exponential backoff (capped at 15min) so we ride out
+        # a rate-limit window of roughly 2 hours before failing the whole job.
+        max_attempts=13
+        delay=30
+        max_delay=900
+        for attempt in $(seq 1 "$max_attempts"); do
           if choco install asciidoctorj --no-progress -y; then
             break
           fi
-          if [ "$attempt" -eq 5 ]; then
+          if [ "$attempt" -eq "$max_attempts" ]; then
             echo "asciidoctorj install failed after $attempt attempts"
             exit 1
           fi
-          echo "asciidoctorj install attempt $attempt failed; retrying in 30s..."
-          sleep 30
+          echo "asciidoctorj install attempt $attempt failed; retrying in ${delay}s..."
+          sleep "$delay"
+          delay=$((delay * 2))
+          if [ "$delay" -gt "$max_delay" ]; then
+            delay=$max_delay
+          fi
         done
         # choco installs NSIS but does not put it on PATH. windows-2022 shipped
         # NSIS on PATH already; windows-2025-vs2026 does not, so makensis was not

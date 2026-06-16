@@ -149,3 +149,4 @@ test_output/
 .gdb_history
 .qt/
 .aider*
+.claude
