@@ -34,7 +34,6 @@ import re
 import traceback
 import signal
 import platform
-from xml.sax.saxutils import escape, quoteattr
 import argparse
 import urllib.request
 import tempfile
@@ -297,8 +296,16 @@ class Results:
     def write_test_result(self, expr, name, output):
         with open(name + ".junit.xml", "w") as junitfile:
             log("Test", name, " success:", expr)
-            junitfile.write("<?xml version=\"1.0\"?>\n<testsuite>\n  <testcase name=\"" + name +
-                            "\" classname=\"dose_test\"")
+            # The testsuite/testcase must carry attributes (at least time): some
+            # JUnit consumers (e.g. the GitHub Actions dorny/test-reporter) crash
+            # on an attribute-less <testsuite>. Failure output is wrapped in CDATA
+            # so callers can pass raw process output; the only sequence CDATA
+            # can't hold verbatim is "]]>", which we split across two sections.
+            failures = 0 if expr else 1
+            junitfile.write("<?xml version=\"1.0\"?>\n"
+                            "<testsuite name=\"dose_test\" tests=\"1\" failures=\"" + str(failures) +
+                            "\" time=\"0\">\n"
+                            "  <testcase name=\"" + name + "\" classname=\"dose_test\" time=\"0\"")
             if expr:
                 """success"""
                 junitfile.write("/>\n")
@@ -306,8 +313,10 @@ class Results:
                 """failure"""
                 log(" -", name, "failed!")
                 self.num_tc_failed += 1
-                junitfile.write(">\n    <error message=\"Failed\">" + output + "\n</error>\n  </testcase>\n")
-            junitfile.write("</testsuite>")
+                safe_output = output.replace("]]>", "]]]]><![CDATA[>")
+                junitfile.write(">\n    <failure message=\"Failed\"><![CDATA[" + safe_output +
+                                "]]></failure>\n  </testcase>\n")
+            junitfile.write("</testsuite>\n")
         return expr
 
     def split(self, data):
@@ -337,15 +346,15 @@ class Results:
         if not res:
             output += "(A line with a '-' in front means that it is missing, and one with a '+' in front means that it has been added, compared to the expected result.)\n\n"
             if len(diff0) != 0:
-                output += "Partner 0 diff:\n" + escape("".join(diff0)) + "\n\n"
+                output += "Partner 0 diff:\n" + "".join(diff0) + "\n\n"
             if len(diff1) != 0:
-                output += "Partner 1 diff:\n" + escape("".join(diff1)) + "\n\n"
+                output += "Partner 1 diff:\n" + "".join(diff1) + "\n\n"
             if len(diff2) != 0:
-                output += "Partner 2 diff:\n" + escape("".join(diff2)) + "\n\n"
+                output += "Partner 2 diff:\n" + "".join(diff2) + "\n\n"
             if len(diff3) != 0:
-                output += "Partner 3 diff:\n" + escape("".join(diff3)) + "\n\n"
+                output += "Partner 3 diff:\n" + "".join(diff3) + "\n\n"
             if len(diff4) != 0:
-                output += "Partner 4 diff:\n" + escape("".join(diff4)) + "\n\n"
+                output += "Partner 4 diff:\n" + "".join(diff4) + "\n\n"
 
         self.write_test_result(res, tcname, output)
         return res
@@ -582,7 +591,7 @@ class Runner:
             log("Checking syslog contents")
             syslog_data = self.syslog.get_data(3)  # wait for 3 seconds to collect any output
             results.write_test_result(
-                len(syslog_data) == 0, "syslog_output", "syslog is not empty:\n" + quoteattr(syslog_data))
+                len(syslog_data) == 0, "syslog_output", "syslog is not empty:\n" + syslog_data)
 
     def run_sequencer(self, parameters):
         log("** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2, parameters.lang3, parameters.lang4)

@@ -1,0 +1,56 @@
+name: Set up test environment
+description: >
+  Installs only what the dose test jobs need to install a prebuilt package and
+  run the test suite: a Python venv with the repo requirements and a Java
+  runtime for the Java test partners. Deliberately leaner than
+  setup-build-env - no compilers, Qt/Boost -dev packages, doc toolchain
+  (doxygen/dia/texlive/asciidoctorj) or Conan cache, none of which a
+  test-only job needs. The package's own runtime dependencies are pulled in by
+  apt when run_test.py installs the .deb, so they are not listed here.
+
+runs:
+  using: composite
+  steps:
+    - name: Install Linux prerequisites
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        # Only the Python harness tooling that runs run_test.py/run_dose_tests
+        # itself goes here; the SDK's own runtime needs (Boost/Qt, plus the JRE
+        # and Mono for the Java/.NET test partners) are declared as package
+        # dependencies and pulled in by apt when run_test.py installs the .deb.
+        # python3-apt backs run_test.py's DebianInstaller (it calls
+        # apt.cache.Cache() to decide whether the SDK is already installed) and
+        # python3-websocket backs the websocket tests.
+        sudo apt-get install -y --no-install-recommends \
+          python3 python3-venv python3-pip python-is-python3 python3-distro python3-apt \
+          python3-websocket
+
+    - name: Set up Java (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: '21'
+
+    - name: Set up Python venv
+      shell: bash
+      run: |
+        python -m venv --system-site-packages .venv
+        # Export VIRTUAL_ENV (not just PATH) so CMake's find_package(Python3)
+        # selects the venv interpreter. Without it, FindPython3 on Windows
+        # prefers the registry/system Python and the ctest scripts run with an
+        # interpreter that lacks our pip requirements (e.g. websockets).
+        echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          echo "$GITHUB_WORKSPACE/.venv/Scripts" >> $GITHUB_PATH
+        else
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+        fi
+
+    - name: Install Python requirements
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r build/requirements.txt

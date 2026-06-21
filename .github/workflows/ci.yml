@@ -260,6 +260,10 @@ jobs:
           # Separate cache from the SDK build: the examples only pull a small
           # Boost 1.79, so they must not share (or evict) the SDK's Qt/Boost cache.
           conan-cache-prefix: conan-examples-v1
+          # The examples build only compiles apps against the installed SDK; it
+          # never renders docs or builds packages, so skip that toolchain (and
+          # the flaky asciidoctorj choco install) entirely.
+          docs-and-packaging: "false"
 
       - name: Download SDK package
         # v8 runs on Node 24; the v6 tag still bundles Node 20, which GitHub is
@@ -302,3 +306,149 @@ jobs:
         run: |
           conan remove "*" --lru=1d --confirm || true
           conan cache clean "*" || true
+
+  # Run the big dose test suite (243 testcases) against the installed SDK package,
+  # in both the "standalone" (one node) and "multinode" (four nodes, all on this
+  # one machine) configurations. This mirrors the Jenkins "Test suite" stage. The
+  # flow matches build-examples: install the testsuite package via run_test.py,
+  # which then drives run_dose_tests with the partner languages from $LANGUAGES.
+  # The multicomputer config is intentionally NOT run here - it needs separate
+  # slave *machines* (Jenkins agents), which hosted GitHub runners can't provide.
+  dose-tests:
+    name: ${{ matrix.kind }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.languages }}
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    # A dose run that hangs (e.g. a partner that never connects) would otherwise
+    # sit until the 6-hour default. 30 min is comfortably above an observed
+    # healthy run; revisit once we have more timing data.
+    timeout-minutes: 30
+
+    container:
+      image: ${{ matrix.container }}
+      options: ${{ matrix.container_options }}
+
+    env:
+      # run_test.py passes --jenkins to run_dose_tests, which then reads the
+      # partner-language assignment from $LANGUAGES (5 dash-separated languages,
+      # one per partner). This is what makes each matrix row a distinct
+      # cross-language interop run.
+      LANGUAGES: ${{ matrix.languages }}
+      # run_dose_tests --jenkins puts its temp area (lock files, crash dumps) at
+      # $WORKSPACE/temp; on Jenkins WORKSPACE is the build workspace. github.workspace
+      # is the GHA equivalent, so reuse it. Safir creates the subdirs itself.
+      WORKSPACE: ${{ github.workspace }}
+      # run_test.py's run_test_suite() reads $JOB_NAME to detect 32-bit-on-64
+      # ("32on64") Jenkins jobs and drop the Java partner. We are never that, so
+      # any value without "32on64" both satisfies the lookup (it would KeyError if
+      # unset) and keeps all partners enabled.
+      JOB_NAME: ${{ github.workflow }}-${{ matrix.kind }}
+
+    # kind x languages x platform = 2 x 3 x 5 = 30 jobs. kind/languages/platform
+    # are real cross-product axes; the include entries only attach the coupled
+    # per-platform settings (runner, container, conan_home) to each platform token,
+    # so the five build rows stay defined in one place instead of 30 duplicates.
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [standalone, multinode]
+        languages:
+          - dotnet-java-cpp-dotnet-java
+          - java-cpp-dotnet-java-cpp
+          - cpp-cpp-cpp-cpp-cpp
+        platform: [ubuntu-noble-amd64, ubuntu-noble-arm64, debian-trixie-amd64, vs2022, vs2026]
+        include:
+          - platform: ubuntu-noble-amd64
+            platform_name: ubuntu-noble
+            arch: amd64
+            runner: ubuntu-24.04
+          - platform: ubuntu-noble-arm64
+            platform_name: ubuntu-noble
+            arch: arm64
+            runner: ubuntu-24.04-arm
+          - platform: debian-trixie-amd64
+            platform_name: debian-trixie
+            arch: amd64
+            runner: ubuntu-latest
+            container: debian:13
+            # The multinode tests run four safir_control nodes at once, each
+            # with its own shared memory in /dev/shm: ~100 MB Dob distribution
+            # (SharedMemorySize) + 10 MB typesystem per node, so ~440 MB total.
+            # 200m fits a single node (standalone passes) but not four, so the
+            # extra nodes fail to map their shared memory, the system never
+            # forms and the sequencer hangs until the timeout. Native runners
+            # have a large /dev/shm; give the container comparable headroom
+            # (tmpfs only consumes what is actually used).
+            container_options: --shm-size=2g
+          - platform: vs2022
+            platform_name: vs2022
+            arch: amd64
+            runner: windows-2022
+          - platform: vs2026
+            platform_name: vs2026
+            arch: amd64
+            runner: windows-2025-vs2026
+
+    steps:
+      - name: Bootstrap Debian container
+        # Same as the build job: the bare debian:13 image needs git/sudo/ca-certs
+        # before checkout and before the shared setup runs sudo apt-get.
+        if: ${{ matrix.container != '' }}
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends sudo ca-certificates git
+          git config --global --add safe.directory '*'
+
+      - uses: actions/checkout@v5
+
+      - name: Set up test environment
+        # The dose tests only install a prebuilt package and run it; they never
+        # compile or invoke Conan. setup-test-env installs just the Python venv
+        # and a JRE, skipping the compilers, Qt/Boost -dev packages, doc
+        # toolchain and Conan cache that setup-build-env carries.
+        uses: ./.github/actions/setup-test-env
+
+      - name: Download SDK package
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-${{ matrix.platform_name }}-${{ matrix.arch }}
+          path: package-download
+
+      - name: Stage installer at repo root
+        # Identical to build-examples: run_test.py globs the installer from the
+        # repo root, but the artifact preserves the tmp/ and packaging paths, so
+        # move whatever .deb/.exe it contains up to the root.
+        shell: bash
+        run: |
+          echo "Downloaded artifact contents:"
+          find package-download -type f
+          find package-download -type f \( -name '*.deb' -o -name '*.exe' \) -exec mv {} . \;
+          echo "Repo root after staging:"
+          ls -la safir-sdk-core_*.deb SafirSDKCore*.exe 2>/dev/null || true
+
+      - name: Run dose tests (Linux)
+        if: runner.os == 'Linux'
+        run: python build/jenkins_stuff/run_test.py --test ${{ matrix.kind }}-tests
+
+      - name: Run dose tests (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: python build\jenkins_stuff\run_test.py --test ${{ matrix.kind }}-tests
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: dose-results-${{ matrix.kind }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.languages }}
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
+      - name: Publish test report
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: dose-${{ matrix.kind }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.languages }}
+          path: '**/*.junit.xml'
+          reporter: java-junit
+          # run_test.py already fails the job on test failures; don't let the
+          # reporter error mask the real result.
+          fail-on-error: false

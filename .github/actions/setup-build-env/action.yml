@@ -4,7 +4,9 @@ description: >
   and the examples build need. The repo must already be checked out (and, in the
   Debian container, git/sudo/ca-certificates already bootstrapped) before this
   runs. Kept as a composite action so the build and build-examples jobs cannot
-  drift apart.
+  drift apart. The doc and package-building toolchain is only installed when
+  docs-and-packaging is "true" (the default); the examples build sets it to
+  "false" since it merely compiles apps against an installed SDK.
 
 inputs:
   platform:
@@ -20,6 +22,17 @@ inputs:
       not collide.
     required: false
     default: conan-v2
+  docs-and-packaging:
+    description: >
+      Whether to install the documentation toolchain (doxygen, graphviz, dia,
+      dblatex, texlive, ghostscript, asciidoctor/asciidoctorj) and the
+      package-building tools (devscripts/debhelper/fakeroot on Linux, NSIS on
+      Windows). The SDK build needs them to render and ship docs and to build
+      the .deb/.exe; the examples build only compiles apps against an installed
+      SDK, so it passes "false" to skip them (notably the flaky asciidoctorj
+      choco install).
+    required: false
+    default: "true"
 
 runs:
   using: composite
@@ -43,23 +56,34 @@ runs:
       shell: bash
       run: |
         sudo apt-get update -qq
-        # python3-apt backs run_test.py's DebianInstaller (it calls
-        # apt.cache.Cache() to decide whether the SDK is already installed); the
-        # examples build crashes without it. Harmless for the SDK build.
+        # The compilers, CMake/Ninja, JDK, Boost/unixODBC and Qt that both the
+        # SDK build and the examples build need. python3-apt backs run_test.py's
+        # DebianInstaller (it calls apt.cache.Cache() to decide whether the SDK
+        # is already installed); the examples build crashes without it.
+        # mono-devel supplies the C# compiler (mcs); without it FindCSharp sets
+        # CSHARP_FOUND=false and the C# example apps are silently skipped.
         sudo apt-get install -y --no-install-recommends \
           python3 python3-venv python3-pip pipx python-is-python3 python3-distro python3-apt \
           build-essential g++ cmake \
-          default-jdk \
+          default-jdk mono-devel \
           libboost-all-dev unixodbc-dev \
-          doxygen graphviz \
           qt6-base-dev qt6-websockets-dev qt6-base-private-dev qt6-svg-dev \
+          ninja-build python3-websocket
+
+    - name: Install Linux documentation and packaging tools
+      if: runner.os == 'Linux' && inputs.docs-and-packaging == 'true'
+      shell: bash
+      run: |
+        # Only the SDK build renders the shipped docs and builds the .deb; the
+        # examples build needs none of this.
+        sudo apt-get install -y --no-install-recommends \
+          doxygen graphviz \
           dia dblatex texlive-font-utils ghostscript \
           devscripts debhelper fakeroot \
-          ninja-build python3-websocket \
           asciidoctor cli-common-dev
 
     - name: Install Windows prerequisites
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && inputs.docs-and-packaging == 'true'
       shell: bash
       run: |
         # doxygen/graphviz/asciidoctorj/dia render the documentation that the

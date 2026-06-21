@@ -292,13 +292,20 @@ class DebianInstaller():
 
         log("Installing packages", packages)
 
-        proc = subprocess.Popen(["sudo", "dpkg", "--install"] + packages,
+        #Install through apt-get rather than "dpkg --install" so the packages'
+        #declared runtime dependencies (${shlibs:Depends} et al.) are resolved
+        #and pulled in. dpkg would just error out on unmet deps, which only
+        #worked before because every dep happened to be preinstalled. apt-get
+        #treats an argument as a local .deb only if it contains a path
+        #separator, so the globbed filenames are prefixed with "./".
+        local_packages = [os.path.join(".", pkg) for pkg in packages]
+        proc = subprocess.Popen(["sudo", "apt-get", "install", "--yes"] + local_packages,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 encoding="utf-8")
         output = proc.communicate()[0]
         if proc.returncode != 0:
-            raise SetupError("Failed to run dpkg --install. returncode = " + str(proc.returncode) + "\nOutput:\n" +
+            raise SetupError("Failed to run apt-get install. returncode = " + str(proc.returncode) + "\nOutput:\n" +
                              output)
 
     def check_installation(self):
@@ -522,9 +529,22 @@ def run_test_suite(kind):
 
         log(f"Launching test suite with arguments {arguments}")
         if sys.platform == "win32":
-            result = nice_call([
-                "run_dose_tests.py",
-            ] + arguments, shell=True)
+            #Invoke the installed script through the current interpreter rather
+            #than by bare name via shell=True: cmd.exe launches a ".py" file
+            #through its file association *asynchronously* and returns 0
+            #immediately without waiting, so the suite never runs and the step
+            #falsely succeeds (no output, no junit). Search PATH by hand because
+            #shutil.which only matches a bare name whose extension is in PATHEXT,
+            #and ".PY" is not in PATHEXT on the CI runner. Same workaround as
+            #build_examples().
+            script = next(
+                (os.path.join(d, "run_dose_tests.py")
+                 for d in os.environ.get("PATH", "").split(os.pathsep)
+                 if os.path.isfile(os.path.join(d, "run_dose_tests.py"))),
+                None)
+            if script is None:
+                raise SetupError("Could not find run_dose_tests.py on PATH")
+            result = nice_call([sys.executable, script] + arguments, shell=False)
         else:
             result = nice_call([
                 "run_dose_tests",

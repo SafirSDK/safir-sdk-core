@@ -36,6 +36,7 @@ Package: safir-sdk-core-dev
 Architecture: any
 Section: libdevel
 Depends: ${shlibs:Depends}, ${misc:Depends}, python3 (>= 3.8.0), unixodbc-dev, libboost-all-dev, safir-sdk-core (= ${binary:Version})
+Suggests: cmake, ninja-build, g++, default-jdk, mono-devel
 Description: Safir SDK Core development files
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,
@@ -49,8 +50,14 @@ Description: Safir SDK Core development files
 Package: safir-sdk-core-testsuite
 Architecture: any
 Section: libdevel
+# The runtime package only Suggests a JRE/Mono (a C++-only user need not
+# install them), but the test suite ships the dose_test_java and
+# dose_test_dotnet partners and cannot run its tests without them, so it
+# Depends on a Java runtime and Mono. mono-runtime is what the Jenkins test
+# machines have always used to run these partners.
 Depends: ${shlibs:Depends}, ${misc:Depends}, python3 (>= 3.8.0),
-         safir-sdk-core(= ${binary:Version}), safir-sdk-core-tools (= ${binary:Version})
+         safir-sdk-core(= ${binary:Version}), safir-sdk-core-tools (= ${binary:Version}),
+         default-jre-headless, mono-runtime
 Description: Safir SDK Core test suite
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,
