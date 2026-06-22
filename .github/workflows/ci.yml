@@ -9,7 +9,9 @@ on:
 env:
   SAFIR_SKIP_SLOW_TESTS: "1"
 
-# checks: write lets the test-reporter publish a Check run with the results.
+# checks: write lets the test-summary job publish a Check run with the
+# aggregated results. (That job also needs pull-requests: write for its PR
+# comment, granted in its own job-level permissions block.)
 permissions:
   contents: read
   checks: write
@@ -161,18 +163,6 @@ jobs:
           name: test-results-${{ matrix.platform }}-${{ matrix.arch }}
           path: '**/*.junit.xml'
           if-no-files-found: ignore
-
-      - name: Publish test report
-        uses: dorny/test-reporter@v3
-        if: always()
-        with:
-          name: tests-${{ matrix.platform }}-${{ matrix.arch }}
-          path: '**/*.junit.xml'
-          reporter: java-junit
-          # The build step already fails the job on test failures; keep this
-          # step from erroring (e.g. on fork PRs without checks: write) so it
-          # never masks the real result.
-          fail-on-error: false
 
   # Build the example apps against the SDK package the build job produced. This
   # mirrors the Jenkins "Build examples" stage: it installs the package
@@ -442,13 +432,52 @@ jobs:
           path: '**/*.junit.xml'
           if-no-files-found: ignore
 
-      - name: Publish test report
-        uses: dorny/test-reporter@v3
-        if: always()
+  # Aggregate every test job's junit results into one report. The build and
+  # dose-tests jobs each upload their *.junit.xml as artifacts; this job pulls
+  # them all and publishes a single Check run + run-summary page + PR comment,
+  # so the pass/fail status of all ~35 test jobs - and the details of any
+  # failure - are visible from one place instead of clicking each job's own
+  # report. Runs on always() so it still reports when some test job failed.
+  test-summary:
+    name: Test summary
+    needs: [build, dose-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    # checks: write to create the Check run; pull-requests: write so the action
+    # can post/update the summary comment on PRs (the workflow-level grant omits
+    # it, and a job-level permissions block replaces rather than extends it).
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - name: Download all test result artifacts
+        uses: actions/download-artifact@v8
         with:
-          name: dose-${{ matrix.kind }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.languages }}
-          path: '**/*.junit.xml'
-          reporter: java-junit
-          # run_test.py already fails the job on test failures; don't let the
-          # reporter error mask the real result.
-          fail-on-error: false
+          # Matches the build job's test-results-* and the dose-tests job's
+          # dose-results-* artifacts while skipping packages-*/buildlog-*. Each
+          # artifact lands in its own subdir under artifacts/ (no merge-multiple)
+          # so identical relative junit paths from different platforms don't
+          # overwrite each other.
+          pattern: '*results-*'
+          path: artifacts
+
+      - name: Publish consolidated test report
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          check_name: Test results
+          files: artifacts/**/*.junit.xml
+          # Signalling model - two separate binary signals:
+          #  - The build/dose-tests JOBS answer "did it build and run?". They go
+          #    red ONLY on a real error (build break, crash, hang, setup
+          #    failure). A plain test failure does NOT fail those jobs: build.py
+          #    runs ctest with allow_fail and returns 0, and run_dose_tests
+          #    returns 0 on testcase diffs - a failure lands only in the junit.
+          #  - This "Test results" check answers "did the tests pass?". fail_on
+          #    'test failures' (the action's default, set explicitly here for
+          #    intent) turns the check red whenever any test fails or errors, and
+          #    green when all pass.
+          # action_fail false keeps the test-summary job itself green: the job is
+          # not a test runner, so the red belongs on the check, not on the job.
+          fail_on: test failures
+          action_fail: false
