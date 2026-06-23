@@ -3,6 +3,9 @@ name: CI
 on:
   push:
     branches: [master, develop, 'feature/**', 'private/**']
+    # Version tags (e.g. 7.4.3 or 7.4.3-alpha1) trigger a full build and, via the
+    # release job below, publish the installers/.deb zips on a GitHub release.
+    tags: ['[0-9]*.[0-9]*.[0-9]*']
   pull_request:
   workflow_dispatch:
 
@@ -481,3 +484,74 @@ jobs:
           # not a test runner, so the red belongs on the check, not on the job.
           fail_on: test failures
           action_fail: false
+
+  # On a version-tag push, publish a GitHub release with the distributable
+  # installers the build job produced: the Windows .exe installers as-is, and the
+  # Linux .deb sets zipped one archive per platform+arch. Test-result and
+  # build-log artifacts are deliberately left off the release. Depends only on
+  # build (not the test jobs), so the release is cut from the build output as
+  # soon as packaging succeeds; change `needs` if you want test gating.
+  release:
+    name: Publish release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    # The workflow-level grant is contents: read; a job-level block replaces it,
+    # so re-grant read and add write so gh can create the release and upload assets.
+    permissions:
+      contents: write
+    steps:
+      - name: Download package artifacts
+        # Pull every per-platform packages-* artifact (skipping buildlog-*/
+        # *results-*). Each lands in its own subdir under dist/, preserving the
+        # tmp/ (.deb) and build/packaging/windows/ (.exe) paths from the upload.
+        uses: actions/download-artifact@v8
+        with:
+          pattern: packages-*
+          path: dist
+
+      - name: Assemble release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          for dir in dist/packages-*; do
+            [ -d "$dir" ] || continue
+            # The artifact name is packages-<platform>-<arch>; use that suffix to
+            # label the per-build deb zip.
+            label="${dir#dist/packages-}"
+            # Zip the .deb set for this Linux build into one archive (-j flattens
+            # paths so the zip holds just the .deb files, no tmp/ wrapper).
+            mapfile -t debs < <(find "$dir" -type f -name '*.deb' | sort)
+            if [ "${#debs[@]}" -gt 0 ]; then
+              zip -j "release-assets/safir-sdk-core-debs-${label}.zip" "${debs[@]}"
+            fi
+            # Windows installers go in as-is; their filenames already carry the
+            # version and VS year, so vs2022/vs2026 never collide.
+            find "$dir" -type f -name '*.exe' -exec cp {} release-assets/ \;
+          done
+          echo "Release assets:"
+          ls -la release-assets
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          # Pre-release for alpha/beta tags (those carry a -suffix); a bare
+          # MAJOR.MINOR.PATCH tag publishes as a normal release.
+          prerelease=()
+          if [[ "$TAG" == *-* ]]; then
+            prerelease=(--prerelease)
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            # Release already exists (e.g. a re-run): just (re)upload the assets.
+            gh release upload "$TAG" release-assets/* --clobber
+          else
+            gh release create "$TAG" release-assets/* \
+              --title "Safir SDK Core ${TAG}" \
+              --generate-notes \
+              "${prerelease[@]}"
+          fi
