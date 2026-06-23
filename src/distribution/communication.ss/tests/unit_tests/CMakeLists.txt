@@ -23,7 +23,9 @@ target_link_libraries(communication_unit_tests PRIVATE
   lluf_internal
   lluf_id
   protobuf::protobuf
-  Boost::regex)
+  Boost::regex
+  # Resolver.h calls GetAdaptersAddresses() on Windows.
+  $<$<PLATFORM_ID:Windows>:iphlpapi>)
 
 ADD_TEST(NAME Communication_MessageQueueTest COMMAND communication_unit_tests MessageQueueTest)
 SET_SAFIR_TEST_PROPERTIES(TEST Communication_MessageQueueTest TIMEOUT 360)

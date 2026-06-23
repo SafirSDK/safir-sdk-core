@@ -3,6 +3,8 @@ ADD_EXECUTABLE(safir_resolver communication_resolver.cpp)
 TARGET_LINK_LIBRARIES(safir_resolver PRIVATE
   Boost::program_options
   Boost::regex
-  Boost::thread)
+  Boost::thread
+  # Resolver.h calls GetAdaptersAddresses() on Windows.
+  $<$<PLATFORM_ID:Windows>:iphlpapi>)
 
 SAFIR_INSTALL(TARGETS safir_resolver COMPONENT Tools)

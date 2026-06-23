@@ -49,6 +49,7 @@
     //Windows implementation
     #include <winsock2.h>
     #include <ws2tcpip.h>
+    #include <iphlpapi.h>
 #else
     //Linux implementation
     #include <net/if.h>
@@ -413,42 +414,125 @@ namespace Com
 
 #ifdef _MSC_VER
 
-        //Windows implementation
+        //Windows implementation.
+        //
+        //Enumerate interfaces through GetAdaptersAddresses(), iterating each
+        //adapter's FirstUnicastAddress list. Unlike the old
+        //WSAIoctl(SIO_GET_INTERFACE_LIST) path this reliably enumerates
+        //layer-3-only tunnel adapters (WireGuard/Wintun, OpenVPN TUN, etc.),
+        //has no fixed cap on the number of interfaces, and surfaces both IPv4
+        //and IPv6 (including secondary) addresses. It also exposes the adapter
+        //FriendlyName, enabling name-based resolution as on Linux.
         static std::vector<AdapterInfo> GetAdapters()
         {
             std::vector<AdapterInfo> result;
-            WSADATA WinsockData;
-            if (WSAStartup(MAKEWORD(2, 2), &WinsockData) != 0)
+
+            //Initialize Winsock defensively before calling inet_ntop() below.
+            //In practice Winsock is normally already up (boost::asio does it) and
+            //inet_ntop()/GetAdaptersAddresses() tend to work regardless, but this
+            //static method may be called standalone (e.g. by the safir_resolver
+            //tool), so we don't want to rely on that. WSAStartup is reference
+            //counted, so the matching WSACleanup is harmless.
+            WSADATA winsockData;
+            const bool winsockStarted = (WSAStartup(MAKEWORD(2, 2), &winsockData) == 0);
+
+            //Query the required buffer size first, then fetch into a buffer of
+            //that size. Loop a few times to cope with the adapter set changing
+            //between the two calls.
+            const ULONG flags = GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER;
+            std::vector<unsigned char> buffer;
+            ULONG bufLen = 16 * 1024;
+            ULONG ret = ERROR_BUFFER_OVERFLOW;
+            for (int attempt = 0; attempt < 3 && ret == ERROR_BUFFER_OVERFLOW; ++attempt)
             {
+                buffer.resize(bufLen);
+                auto* head = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(buffer.data());
+                ret = GetAdaptersAddresses(AF_UNSPEC, flags, nullptr, head, &bufLen);
+            }
+
+            if (ret != NO_ERROR)
+            {
+                if (winsockStarted)
+                {
+                    WSACleanup();
+                }
                 return result;
             }
 
-            SOCKET sd = WSASocketW(AF_INET, SOCK_DGRAM, 0, 0, 0, 0);
-            if (sd == SOCKET_ERROR)
+            //Collect IPv4 first, then IPv6, so that for a given interface name an
+            //IPv4 address is preferred over an IPv6 one (matching the Linux path
+            //and the previous behaviour where exact name matches resolved to the
+            //IPv4 address).
+            const auto* head = reinterpret_cast<const IP_ADAPTER_ADDRESSES*>(buffer.data());
+            for (const int family : {AF_INET, AF_INET6})
             {
-                return result;
+                for (const IP_ADAPTER_ADDRESSES* aa = head; aa != nullptr; aa = aa->Next)
+                {
+                    //We deliberately do not filter on OperStatus. Neither the old
+                    //SIO_GET_INTERFACE_LIST path nor the Linux getifaddrs() path
+                    //(see #606) filter on link/operational state, so any address
+                    //the OS reports for an adapter is enumerated here too.
+
+                    //FriendlyName is a wide string; convert it to UTF-8 for
+                    //name-based matching (e.g. "Ethernet", "WireGuard tunnel").
+                    //FriendlyNames are user-/OS-localized and may contain
+                    //non-ASCII characters, so we use a proper conversion rather
+                    //than a lossy per-character narrowing.
+                    std::string name;
+                    if (aa->FriendlyName != nullptr)
+                    {
+                        const int needed = WideCharToMultiByte(CP_UTF8, 0, aa->FriendlyName, -1,
+                                                               nullptr, 0, nullptr, nullptr);
+                        if (needed > 0)
+                        {
+                            //needed includes the terminating null; size the string
+                            //to the character count (needed - 1).
+                            name.resize(static_cast<size_t>(needed - 1));
+                            WideCharToMultiByte(CP_UTF8, 0, aa->FriendlyName, -1,
+                                                &name[0], needed, nullptr, nullptr);
+                        }
+                    }
+
+                    for (const IP_ADAPTER_UNICAST_ADDRESS* ua = aa->FirstUnicastAddress; ua != nullptr; ua = ua->Next)
+                    {
+                        const sockaddr* sa = ua->Address.lpSockaddr;
+                        if (sa == nullptr || sa->sa_family != family)
+                        {
+                            continue;
+                        }
+
+                        char buf[INET6_ADDRSTRLEN] = {0};
+                        if (family == AF_INET)
+                        {
+                            const auto* sin = reinterpret_cast<const sockaddr_in*>(sa);
+                            if (inet_ntop(AF_INET, &sin->sin_addr, buf, sizeof(buf)) == nullptr)
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            const auto* sin6 = reinterpret_cast<const sockaddr_in6*>(sa);
+                            if (inet_ntop(AF_INET6, &sin6->sin6_addr, buf, sizeof(buf)) == nullptr)
+                            {
+                                continue;
+                            }
+                        }
+
+                        AdapterInfo ai;
+                        ai.name = name;
+                        ai.ipAddress = buf;
+                        ai.ipVersion = (family == AF_INET) ? 4 : 6;
+                        result.push_back(ai);
+                    }
+                }
             }
 
-            INTERFACE_INFO InterfaceList[20];
-            unsigned long nBytesReturned;
-            if (WSAIoctl(sd, SIO_GET_INTERFACE_LIST, 0, 0, &InterfaceList,
-                sizeof(InterfaceList), &nBytesReturned, 0, 0) == SOCKET_ERROR)
+            if (winsockStarted)
             {
-                return result;
+                WSACleanup();
             }
 
-            int nNumInterfaces = nBytesReturned / sizeof(INTERFACE_INFO);
-            for (int i = 0; i < nNumInterfaces; ++i)
-            {
-                AdapterInfo ai;
-                const sockaddr_in *pAddress = reinterpret_cast<const sockaddr_in*>(&(InterfaceList[i].iiAddress));
-                ai.ipAddress = inet_ntoa(pAddress->sin_addr);
-                ai.name = ai.ipAddress;
-                ai.ipVersion = 4;
-                result.push_back(ai);
-            }
-
-            WSACleanup();
             return result;
         }
 

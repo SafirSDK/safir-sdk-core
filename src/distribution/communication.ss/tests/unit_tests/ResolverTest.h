@@ -118,6 +118,59 @@ public:
         }
 #endif
 
+        //GetAdapters must enumerate every interface that carries an IP address,
+        //including layer-3-only tunnel interfaces (WireGuard, OpenVPN TUN, etc.).
+        //We cannot create such an interface in a unit test, but we can verify the
+        //enumeration is sane: every entry has a name and address, and the loopback
+        //IPv4 address is present (it is preferred over the IPv6 loopback because
+        //IPv4 addresses are collected first).
+        {
+            const auto adapters = Com::Resolver::GetAdapters();
+            CHECK(!adapters.empty());
+            bool foundLoopbackV4 = false;
+            for (const auto& a : adapters)
+            {
+                CHECK(!a.name.empty());
+                CHECK(!a.ipAddress.empty());
+                CHECK(a.ipVersion == 4 || a.ipVersion == 6);
+                if (a.ipAddress == "127.0.0.1")
+                {
+                    foundLoopbackV4 = true;
+                }
+            }
+            CHECK(foundLoopbackV4);
+        }
+
+        //Name-based local resolution: an interface name must resolve to that
+        //interface's address. We cannot hardcode a name that exists on every
+        //platform (it is "lo" on Linux but a localized FriendlyName like
+        //"Ethernet" on Windows), so we pick a real IPv4 interface from the
+        //enumeration and verify it resolves back to its own address. This
+        //exercises the Windows name path enabled by FriendlyName (#607), which
+        //previously could not match a name since name equalled the IP address.
+        {
+            const auto adapters = Com::Resolver::GetAdapters();
+            const Com::Resolver::AdapterInfo* v4 = nullptr;
+            for (const auto& a : adapters)
+            {
+                //Skip names containing ':' - ResolveLocalEndpoint splits the
+                //port off at the first colon, so a name like "eth0:0" would be
+                //mis-parsed. (This is the pre-existing name/port ambiguity, not
+                //what we are testing here.)
+                if (a.ipVersion == 4 && a.name.find(':') == std::string::npos)
+                {
+                    v4 = &a;
+                    break;
+                }
+            }
+            CHECK(v4 != nullptr);
+            if (v4 != nullptr)
+            {
+                const auto resolved = Com::Resolver::ResolveLocalEndpoint(v4->name + ":4242", true);
+                CHECK(resolved == v4->ipAddress + ":4242");
+            }
+        }
+
         std::wcout<<"Testing resolve local endpoint"<<std::endl;
         resolveLocal("192.168.*.*:12345");
         resolveLocal("eth0:10000");

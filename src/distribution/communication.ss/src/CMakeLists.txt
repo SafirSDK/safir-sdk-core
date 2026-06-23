@@ -13,11 +13,15 @@ endif()
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(communication PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-TARGET_LINK_LIBRARIES(communication PRIVATE
-  lluf_id
-  lluf_internal
-  protobuf::protobuf
-  Boost::regex)
+TARGET_LINK_LIBRARIES(communication
+  PRIVATE
+    lluf_id
+    lluf_internal
+    protobuf::protobuf
+    Boost::regex
+  PUBLIC
+    # Resolver.h (a PUBLIC header) calls GetAdaptersAddresses() on Windows.
+    $<$<PLATFORM_ID:Windows>:iphlpapi>)
 
 SAFIR_INSTALL(TARGETS communication)
 
