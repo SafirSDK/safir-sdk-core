@@ -568,13 +568,16 @@ jobs:
           if [[ "$TAG" == *-* ]]; then
             prerelease=(--prerelease)
           fi
-          if gh release view "$TAG" >/dev/null 2>&1; then
+          # --repo is required: this job has no checkout, so gh cannot infer the
+          # repository from a local git remote (it errors "not a git repository").
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             # Release already exists (e.g. a re-run): just (re)upload the assets.
-            gh release upload "$TAG" release-assets/* --clobber
+            gh release upload "$TAG" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
           else
             # Create as a draft so publishing is a deliberate manual step in the
             # GitHub UI after the assets/notes have been reviewed.
             gh release create "$TAG" release-assets/* \
+              --repo "$GITHUB_REPOSITORY" \
               --draft \
               --title "Safir SDK Core ${TAG}" \
               --generate-notes \
