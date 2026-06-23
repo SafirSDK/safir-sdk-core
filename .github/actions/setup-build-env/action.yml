@@ -34,6 +34,15 @@ inputs:
     required: false
     default: "true"
 
+outputs:
+  cache-primary-key:
+    description: >
+      The exact Conan cache key this run restored against. The build/build-examples
+      jobs feed it to actions/cache/save so they control WHEN the cache is written
+      (e.g. skipping the save on tag/release builds) instead of letting the
+      all-in-one cache action save unconditionally in its post step.
+    value: ${{ steps.conan-cache.outputs.cache-primary-key }}
+
 runs:
   using: composite
   steps:
@@ -149,8 +158,13 @@ runs:
         python -m pip install --upgrade pip
         pip install -r build/requirements.txt
 
-    - name: Cache Conan packages
-      uses: actions/cache@v5
+    - name: Restore Conan packages
+      # Restore only. The matching save is done by the calling job after the
+      # build+trim, so it can decide whether to write the cache at all (tag/
+      # release builds skip the save to avoid churning the shared cache with a
+      # one-off release build). cache-primary-key is exposed as an output above.
+      id: conan-cache
+      uses: actions/cache/restore@v5
       with:
         path: ${{ inputs.conan-home }}
         key: ${{ inputs.conan-cache-prefix }}-${{ inputs.platform }}-${{ runner.arch }}-${{ hashFiles('conanfile.py', 'build/requirements.txt') }}

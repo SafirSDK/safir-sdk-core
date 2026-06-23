@@ -109,6 +109,7 @@ jobs:
       # Toolchains, Python venv and Conan cache. Shared with the build-examples
       # job via a composite action so the two setups cannot drift apart.
       - name: Set up build environment
+        id: setup-build-env
         uses: ./.github/actions/setup-build-env
         with:
           platform: ${{ matrix.platform }}
@@ -140,6 +141,17 @@ jobs:
         run: |
           conan remove "*" --lru=1d --confirm || true
           conan cache clean "*" || true
+
+      - name: Save Conan cache
+        # Skip the cache upload on tag/release builds: a one-off release build
+        # should not overwrite the shared per-branch cache. Otherwise save the
+        # trimmed cache (always, so a failed build still saves a lean cache),
+        # using the exact key the restore step resolved.
+        if: ${{ always() && !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ matrix.conan_home }}
+          key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
 
       - name: Upload packages
         uses: actions/upload-artifact@v6
@@ -246,6 +258,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Set up build environment
+        id: setup-build-env
         uses: ./.github/actions/setup-build-env
         with:
           platform: ${{ matrix.platform }}
@@ -299,6 +312,15 @@ jobs:
         run: |
           conan remove "*" --lru=1d --confirm || true
           conan cache clean "*" || true
+
+      - name: Save Conan cache
+        # Same as the build job: skip the cache upload on tag/release builds, and
+        # otherwise save the trimmed cache under the restore step's exact key.
+        if: ${{ always() && !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ matrix.conan_home }}
+          key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
 
   # Run the big dose test suite (243 testcases) against the installed SDK package,
   # in both the "standalone" (one node) and "multinode" (four nodes, all on this
