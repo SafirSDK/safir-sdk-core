@@ -485,7 +485,7 @@ jobs:
           fail_on: test failures
           action_fail: false
 
-  # On a version-tag push, publish a GitHub release with the distributable
+  # On a version-tag push, create a DRAFT GitHub release with the distributable
   # installers the build job produced: the Windows .exe installers as-is, and the
   # Linux .deb sets zipped one archive per platform+arch. Test-result and
   # build-log artifacts are deliberately left off the release. Depends only on
@@ -550,7 +550,10 @@ jobs:
             # Release already exists (e.g. a re-run): just (re)upload the assets.
             gh release upload "$TAG" release-assets/* --clobber
           else
+            # Create as a draft so publishing is a deliberate manual step in the
+            # GitHub UI after the assets/notes have been reviewed.
             gh release create "$TAG" release-assets/* \
+              --draft \
               --title "Safir SDK Core ${TAG}" \
               --generate-notes \
               "${prerelease[@]}"
