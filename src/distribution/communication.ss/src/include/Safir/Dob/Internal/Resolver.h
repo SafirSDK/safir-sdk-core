@@ -51,9 +51,9 @@
     #include <ws2tcpip.h>
 #else
     //Linux implementation
-    #include <sys/ioctl.h>
     #include <net/if.h>
     #include <netinet/in.h>
+    #include <arpa/inet.h>
     #include <sys/types.h>
     #include <ifaddrs.h>
 #endif
@@ -453,81 +453,64 @@ namespace Com
         }
 
 #else
+        //Linux implementation.
+        //
+        //Enumerate the AF_INET/AF_INET6 entries from getifaddrs() directly. Every
+        //interface that carries an IP address yields such an entry with both the
+        //interface name and the address in a single pass, so we do not depend on a
+        //link-layer (AF_PACKET) entry being present. This makes layer-3-only
+        //interfaces (WireGuard, OpenVPN TUN, etc.) first-class, and also surfaces
+        //secondary addresses that the old SIOCGIFADDR (primary-only) path missed.
         static std::vector<AdapterInfo> GetAdapters()
         {
             std::vector<AdapterInfo> result;
 
-            auto names=GetInterfaceNames();
-            for (const auto& name : names)
+            struct ifaddrs* addrs = nullptr;
+            if (getifaddrs(&addrs) == -1)
             {
-                auto a4=GetInterfaceIpAddress(name, 4);
-                if (!a4.empty())
-                {
-                    AdapterInfo ai;
-                    ai.name=name;
-                    ai.ipAddress=a4;
-                    ai.ipVersion=4;
-                    result.push_back(ai);
-                    continue;
-                }
-
-                auto a6=GetInterfaceIpAddress(name, 6);
-                if (!a6.empty())
-                {
-                    AdapterInfo ai;
-                    ai.name=name;
-                    ai.ipAddress=a6;
-                    ai.ipVersion=6;
-                    result.push_back(ai);
-                    continue;
-                }
+                return result;
             }
 
-            return result;
-        }
-
-        //Linux implementation
-        static std::vector<std::string> GetInterfaceNames()
-        {
-            std::vector<std::string> result;
-            struct ifaddrs *addrs,*tmp;
-            getifaddrs(&addrs);
-            tmp = addrs;
-            while (tmp)
+            //Collect IPv4 first, then IPv6, so that for a given interface name an
+            //IPv4 address is preferred over an IPv6 one (preserving the previous
+            //behaviour where exact name matches resolved to the IPv4 address).
+            for (const int family : {AF_INET, AF_INET6})
             {
-                if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_PACKET)
+                for (struct ifaddrs* tmp = addrs; tmp != nullptr; tmp = tmp->ifa_next)
                 {
-                    result.push_back(std::string(tmp->ifa_name));
+                    if (tmp->ifa_addr == nullptr || tmp->ifa_addr->sa_family != family)
+                    {
+                        continue;
+                    }
+
+                    char buf[INET6_ADDRSTRLEN] = {0};
+                    if (family == AF_INET)
+                    {
+                        const auto* sa = reinterpret_cast<const struct sockaddr_in*>(tmp->ifa_addr);
+                        if (inet_ntop(AF_INET, &sa->sin_addr, buf, sizeof(buf)) == nullptr)
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        const auto* sa = reinterpret_cast<const struct sockaddr_in6*>(tmp->ifa_addr);
+                        if (inet_ntop(AF_INET6, &sa->sin6_addr, buf, sizeof(buf)) == nullptr)
+                        {
+                            continue;
+                        }
+                    }
+
+                    AdapterInfo ai;
+                    ai.name = tmp->ifa_name;
+                    ai.ipAddress = buf;
+                    ai.ipVersion = (family == AF_INET) ? 4 : 6;
+                    result.push_back(ai);
                 }
-                tmp = tmp->ifa_next;
             }
 
             freeifaddrs(addrs);
             return result;
-        }
-
-        static std::string GetInterfaceIpAddress(const std::string& interfaceName, int protocol)
-        {
-            try
-            {
-                struct ifreq ifr;
-                strncpy(ifr.ifr_name, interfaceName.c_str(), IFNAMSIZ);
-                ifr.ifr_name[IFNAMSIZ - 1] = 0;
-                int fd=socket((protocol==6 ? AF_INET6 : AF_INET), SOCK_DGRAM, 0);
-                if (ioctl(fd, SIOCGIFADDR, &ifr)==-1)
-                {
-                    close(fd);
-                    return "";
-                }
-                close(fd);
-
-                struct sockaddr_in* ipaddr = (struct sockaddr_in*)&ifr.ifr_addr;
-                return std::string(inet_ntoa(ipaddr->sin_addr));
-            }
-            catch(...)
-            {
-                return "";
-            }
         }
 #endif
     };

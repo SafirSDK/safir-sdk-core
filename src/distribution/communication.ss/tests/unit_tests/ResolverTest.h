@@ -94,6 +94,28 @@ public:
 
 #ifndef _MSC_VER
         CHECK(Com::Resolver::ResolveLocalEndpoint("lo:123",true) == "127.0.0.1:123");
+
+        //GetAdapters must enumerate every interface that carries an IP address,
+        //including layer-3-only interfaces with no link-layer (AF_PACKET) entry.
+        //We cannot create such an interface in a unit test, but we can verify the
+        //enumeration is sane: every entry has a name and address, and the loopback
+        //IPv4 address is present (it is preferred over the IPv6 ::1 for name "lo").
+        {
+            const auto adapters = Com::Resolver::GetAdapters();
+            CHECK(!adapters.empty());
+            bool foundLoopbackV4 = false;
+            for (const auto& a : adapters)
+            {
+                CHECK(!a.name.empty());
+                CHECK(!a.ipAddress.empty());
+                CHECK(a.ipVersion == 4 || a.ipVersion == 6);
+                if (a.name == "lo" && a.ipAddress == "127.0.0.1")
+                {
+                    foundLoopbackV4 = true;
+                }
+            }
+            CHECK(foundLoopbackV4);
+        }
 #endif
 
         std::wcout<<"Testing resolve local endpoint"<<std::endl;
