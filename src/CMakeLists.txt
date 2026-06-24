@@ -306,8 +306,13 @@ function(add_library NAME)
   #call the real add_library function
   _add_library(${NAME} ${ARGN})
 
-  #Set library versions
-  set_property(TARGET ${NAME} PROPERTY VERSION ${SAFIR_VERSION_STRING})
+  #Set library versions. The real *nix filename uses the bare MAJOR.MINOR.PATCH
+  #(e.g. libfoo.so.7.4.3) - the conventional numeric form. The pre-release suffix
+  #and git hash carried by SAFIR_VERSION_STRING are deliberately kept out of the
+  #filename; the package version (e.g. 7.4.3~alpha2-1) conveys pre-release status.
+  #SOVERSION is the DT_SONAME (libfoo.so.7) and stays at MAJOR, the ABI version.
+  set_property(TARGET ${NAME} PROPERTY VERSION
+    ${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH})
   set_property(TARGET ${NAME} PROPERTY SOVERSION ${SAFIR_VERSION_MAJOR})
 endfunction()
 

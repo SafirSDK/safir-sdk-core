@@ -3,6 +3,9 @@ name: CI
 on:
   push:
     branches: [master, develop, 'feature/**', 'private/**']
+    # Version tags (e.g. 7.4.3 or 7.4.3-alpha1) trigger a full build and, via the
+    # release job below, publish the installers/.deb zips on a GitHub release.
+    tags: ['[0-9]*.[0-9]*.[0-9]*']
   pull_request:
   workflow_dispatch:
 
@@ -106,6 +109,7 @@ jobs:
       # Toolchains, Python venv and Conan cache. Shared with the build-examples
       # job via a composite action so the two setups cannot drift apart.
       - name: Set up build environment
+        id: setup-build-env
         uses: ./.github/actions/setup-build-env
         with:
           platform: ${{ matrix.platform }}
@@ -137,6 +141,17 @@ jobs:
         run: |
           conan remove "*" --lru=1d --confirm || true
           conan cache clean "*" || true
+
+      - name: Save Conan cache
+        # Skip the cache upload on tag/release builds: a one-off release build
+        # should not overwrite the shared per-branch cache. Otherwise save the
+        # trimmed cache (always, so a failed build still saves a lean cache),
+        # using the exact key the restore step resolved.
+        if: ${{ always() && !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ matrix.conan_home }}
+          key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
 
       - name: Upload packages
         uses: actions/upload-artifact@v6
@@ -243,6 +258,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Set up build environment
+        id: setup-build-env
         uses: ./.github/actions/setup-build-env
         with:
           platform: ${{ matrix.platform }}
@@ -296,6 +312,15 @@ jobs:
         run: |
           conan remove "*" --lru=1d --confirm || true
           conan cache clean "*" || true
+
+      - name: Save Conan cache
+        # Same as the build job: skip the cache upload on tag/release builds, and
+        # otherwise save the trimmed cache under the restore step's exact key.
+        if: ${{ always() && !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ matrix.conan_home }}
+          key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
 
   # Run the big dose test suite (243 testcases) against the installed SDK package,
   # in both the "standalone" (one node) and "multinode" (four nodes, all on this
@@ -481,3 +506,104 @@ jobs:
           # not a test runner, so the red belongs on the check, not on the job.
           fail_on: test failures
           action_fail: false
+
+  # On a version-tag push, create a DRAFT GitHub release with the distributable
+  # installers the build job produced: the Windows .exe installers as-is, and the
+  # Linux .deb sets bundled one .tar.bz2 per platform+arch (named like the manual
+  # releases: safir-sdk-core_<ver>_<arch>-<distro>.debs.tar.bz2). Test-result and
+  # build-log artifacts are deliberately left off the release. Depends only on
+  # build (not the test jobs), so the release is cut from the build output as
+  # soon as packaging succeeds; change `needs` if you want test gating.
+  release:
+    name: Publish release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    # The workflow-level grant is contents: read; a job-level block replaces it,
+    # so re-grant read and add write so gh can create the release and upload assets.
+    permissions:
+      contents: write
+    steps:
+      - name: Download package artifacts
+        # Pull every per-platform packages-* artifact (skipping buildlog-*/
+        # *results-*). Each lands in its own subdir under dist/, preserving the
+        # tmp/ (.deb) and build/packaging/windows/ (.exe) paths from the upload.
+        uses: actions/download-artifact@v8
+        with:
+          pattern: packages-*
+          path: dist
+
+      - name: Assemble release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          assets_dir="$PWD/release-assets"
+          for dir in dist/packages-*; do
+            [ -d "$dir" ] || continue
+            # The artifact name is packages-<platform>-<arch>; the distro is the
+            # platform part (everything before the trailing -<arch>).
+            label="${dir#dist/packages-}"
+            distro="${label%-*}"
+            # Bundle this Linux build's .deb set into one bzip2 tarball, matching
+            # the manual releases' naming: safir-sdk-core_<ver>_<arch>-<distro>.debs.tar.bz2.
+            # Version and arch are read from a .deb filename (<pkg>_<ver>_<arch>.deb)
+            # so they reflect what was actually built (e.g. 7.4.3~alpha1-1, amd64).
+            mapfile -t debs < <(find "$dir" -type f -name '*.deb' | sort)
+            if [ "${#debs[@]}" -gt 0 ]; then
+              base="$(basename "${debs[0]}")"
+              ver="$(echo "$base" | awk -F'_' '{print $(NF-1)}')"
+              arch="${base##*_}"; arch="${arch%.deb}"
+              # The .deb version is <upstream>-<debian-revision> (e.g.
+              # 7.4.3~alpha1-1). Drop the trailing debian revision; the manual
+              # releases never carried it in the asset name.
+              ver="${ver%-*}"
+              # The .deb files keep the tilde (debian needs it for version
+              # ordering), but the dash is the canonical form everywhere else,
+              # so translate it back for the outer tarball's asset name
+              # (e.g. 7.4.3~alpha1 -> 7.4.3-alpha1).
+              ver="${ver//\~/-}"
+              debdir="$(dirname "${debs[0]}")"
+              # tar from inside debdir so the archive holds just the .deb files
+              # (no tmp/ wrapper); -f path is absolute so the cd doesn't break it.
+              ( cd "$debdir" && tar -cjf \
+                  "$assets_dir/safir-sdk-core_${ver}_${arch}-${distro}.debs.tar.bz2" *.deb )
+            fi
+            # Windows installers already carry the canonical dash version (no
+            # tilde to translate). Their filenames include the version and VS
+            # year, so vs2022/vs2026 never collide.
+            while IFS= read -r exe; do
+              cp "$exe" "release-assets/$(basename "$exe")"
+            done < <(find "$dir" -type f -name '*.exe')
+          done
+          echo "Release assets:"
+          ls -la release-assets
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          # Pre-release for alpha/beta tags (those carry a -suffix); a bare
+          # MAJOR.MINOR.PATCH tag publishes as a normal release.
+          prerelease=()
+          if [[ "$TAG" == *-* ]]; then
+            prerelease=(--prerelease)
+          fi
+          # --repo is required: this job has no checkout, so gh cannot infer the
+          # repository from a local git remote (it errors "not a git repository").
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # Release already exists (e.g. a re-run): just (re)upload the assets.
+            gh release upload "$TAG" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            # Create as a draft so publishing is a deliberate manual step in the
+            # GitHub UI after the assets/notes have been reviewed.
+            gh release create "$TAG" release-assets/* \
+              --repo "$GITHUB_REPOSITORY" \
+              --draft \
+              --title "Safir SDK Core ${TAG}" \
+              --generate-notes \
+              "${prerelease[@]}"
+          fi
