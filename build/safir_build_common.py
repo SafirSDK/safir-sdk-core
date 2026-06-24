@@ -228,6 +228,23 @@ def get_git_revision_info():
     }
 
 
+def _head_is_on_release_tag():
+    """True if HEAD is exactly on a git tag, i.e. this is a release build.
+
+    Uses --tags so lightweight tags count (release tags are created with plain
+    `git tag`). Returns False if git is unavailable or HEAD is not on a tag.
+    """
+    try:
+        subprocess.check_output(
+            ["git", "describe", "--tags", "--exact-match", "HEAD"],
+            stderr=subprocess.DEVNULL,
+            universal_newlines=True
+        )
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+
 def read_version():
     """Parse the VERSION.txt file to find out our version"""
     parts = {}
@@ -241,8 +258,13 @@ def read_version():
 
     version_string = parts["MAJOR"] + "." + parts["MINOR"] + "." + parts["PATCH"] + parts["SUFFIX"]
 
-    # For non-release builds, append git revision
-    if parts["SUFFIX"] != "":
+    # For non-release builds with a pre-release SUFFIX, append the git revision so
+    # successive dev builds of the same alpha/beta are distinguishable. A build
+    # whose HEAD sits exactly on a tag is a release (the tag identifies it), so
+    # keep the version clean - just like stable releases, which use an empty
+    # SUFFIX and never reach here. This keeps the git hash out of release
+    # artifact names (e.g. the Windows installer filename).
+    if parts["SUFFIX"] != "" and not _head_is_on_release_tag():
         try:
             git_revision = subprocess.check_output(
                 ["git", "describe", "--always", "--dirty", "--abbrev=7"],
