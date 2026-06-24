@@ -554,10 +554,14 @@ jobs:
               base="$(basename "${debs[0]}")"
               ver="$(echo "$base" | awk -F'_' '{print $(NF-1)}')"
               arch="${base##*_}"; arch="${arch%.deb}"
+              # The .deb version is <upstream>-<debian-revision> (e.g.
+              # 7.4.3~alpha1-1). Drop the trailing debian revision; the manual
+              # releases never carried it in the asset name.
+              ver="${ver%-*}"
               # The .deb files keep the tilde (debian needs it for version
               # ordering), but the dash is the canonical form everywhere else,
               # so translate it back for the outer tarball's asset name
-              # (e.g. 7.4.3~alpha1-1 -> 7.4.3-alpha1-1).
+              # (e.g. 7.4.3~alpha1 -> 7.4.3-alpha1).
               ver="${ver//\~/-}"
               debdir="$(dirname "${debs[0]}")"
               # tar from inside debdir so the archive holds just the .deb files
