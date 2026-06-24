@@ -504,13 +504,34 @@ add_subdirectory_and_set_ide_folder(config)
 
 #non-msvc systems need the cmake export file.
 #msvc uses autolinking, so we don't need this file there.
-if (NOT MSVC)
+#
+#Whether the export file is shipped is a property of the machine that *built*
+#this package, not of the consumer's environment. Bake the decision into the
+#config file at configure time (via @SAFIR_CONFIG_IS_MSVC@) instead of
+#re-detecting MSVC/WIN32 when find_package() runs - the consumer may invoke
+#find_package() before any compiler identity is established (e.g. through the
+#Conan dependency provider), at which point MSVC would wrongly evaluate FALSE
+#and the config file would try to include the non-existent SafirSDKCore.cmake.
+if (MSVC)
+  set(SAFIR_CONFIG_IS_MSVC 1)
+else()
+  set(SAFIR_CONFIG_IS_MSVC 0)
   INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
     COMPONENT Development)
 endif()
 
 configure_file(cmake/SafirSDKCoreConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
+
+#Generate a package version file so that version-constrained requests such as
+#find_package(SafirSDKCore 7.0 REQUIRED) work. SameMajorVersion: a consumer that
+#asks for a version is satisfied by any install with the same major version and
+#an equal-or-greater minor/patch.
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfigVersion.cmake"
+  VERSION "${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}"
+  COMPATIBILITY SameMajorVersion)
 
 INSTALL(FILES
   cmake/BuildSafirGenerated.cmake
@@ -520,5 +541,6 @@ INSTALL(FILES
   cmake/FindCSharp.cmake
   cmake/SafirLoadJava.cmake
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfigVersion.cmake"
   DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
   COMPONENT Development)
