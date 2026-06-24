@@ -554,9 +554,10 @@ jobs:
               base="$(basename "${debs[0]}")"
               ver="$(echo "$base" | awk -F'_' '{print $(NF-1)}')"
               arch="${base##*_}"; arch="${arch%.deb}"
-              # Use a dash in the asset name where the debian version has a tilde
-              # (e.g. 7.4.3~alpha1 -> 7.4.3-alpha1). GitHub rewrites ~ to . in
-              # uploaded asset names, so sanitize here to get the dash we want.
+              # The .deb files keep the tilde (debian needs it for version
+              # ordering), but the dash is the canonical form everywhere else,
+              # so translate it back for the outer tarball's asset name
+              # (e.g. 7.4.3~alpha1-1 -> 7.4.3-alpha1-1).
               ver="${ver//\~/-}"
               debdir="$(dirname "${debs[0]}")"
               # tar from inside debdir so the archive holds just the .deb files
@@ -564,12 +565,11 @@ jobs:
               ( cd "$debdir" && tar -cjf \
                   "$assets_dir/safir-sdk-core_${ver}_${arch}-${distro}.debs.tar.bz2" *.deb )
             fi
-            # Windows installers: copy in, replacing any ~ in the name with a dash
-            # for the same reason as above. Their filenames already carry the
-            # version and VS year, so vs2022/vs2026 never collide.
+            # Windows installers already carry the canonical dash version (no
+            # tilde to translate). Their filenames include the version and VS
+            # year, so vs2022/vs2026 never collide.
             while IFS= read -r exe; do
-              name="$(basename "$exe")"
-              cp "$exe" "release-assets/${name//\~/-}"
+              cp "$exe" "release-assets/$(basename "$exe")"
             done < <(find "$dir" -type f -name '*.exe')
           done
           echo "Release assets:"

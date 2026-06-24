@@ -903,7 +903,13 @@ class DebianPackager():
     def build(self):
         """Run the build"""
         (major, minor, patch, suffix), _ = read_version()
-        version_string = major + "." + minor + "." + patch + suffix
+        # Debian needs a tilde (not the canonical dash) in the upstream version so
+        # a pre-release sorts before the final release (7.4.3~alpha1 < 7.4.3).
+        # This is the single place that translates dash to tilde, confining the
+        # tilde to the Debian artifacts: the orig tarball name and extracted
+        # source dir below must match debian/changelog's upstream version.
+        deb_suffix = suffix.replace("-", "~", 1)
+        version_string = major + "." + minor + "." + patch + deb_suffix
         # Capture the revision from the real checkout now, before we descend
         # into the extracted tarball (which has no .git), so we can hand it to
         # the package build via debuild below.
