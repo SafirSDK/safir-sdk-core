@@ -509,7 +509,8 @@ jobs:
 
   # On a version-tag push, create a DRAFT GitHub release with the distributable
   # installers the build job produced: the Windows .exe installers as-is, and the
-  # Linux .deb sets zipped one archive per platform+arch. Test-result and
+  # Linux .deb sets bundled one .tar.bz2 per platform+arch (named like the manual
+  # releases: safir-sdk-core_<ver>_<arch>-<distro>.debs.tar.bz2). Test-result and
   # build-log artifacts are deliberately left off the release. Depends only on
   # build (not the test jobs), so the release is cut from the build output as
   # soon as packaging succeeds; change `needs` if you want test gating.
@@ -537,16 +538,27 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-assets
+          assets_dir="$PWD/release-assets"
           for dir in dist/packages-*; do
             [ -d "$dir" ] || continue
-            # The artifact name is packages-<platform>-<arch>; use that suffix to
-            # label the per-build deb zip.
+            # The artifact name is packages-<platform>-<arch>; the distro is the
+            # platform part (everything before the trailing -<arch>).
             label="${dir#dist/packages-}"
-            # Zip the .deb set for this Linux build into one archive (-j flattens
-            # paths so the zip holds just the .deb files, no tmp/ wrapper).
+            distro="${label%-*}"
+            # Bundle this Linux build's .deb set into one bzip2 tarball, matching
+            # the manual releases' naming: safir-sdk-core_<ver>_<arch>-<distro>.debs.tar.bz2.
+            # Version and arch are read from a .deb filename (<pkg>_<ver>_<arch>.deb)
+            # so they reflect what was actually built (e.g. 7.4.3~alpha1-1, amd64).
             mapfile -t debs < <(find "$dir" -type f -name '*.deb' | sort)
             if [ "${#debs[@]}" -gt 0 ]; then
-              zip -j "release-assets/safir-sdk-core-debs-${label}.zip" "${debs[@]}"
+              base="$(basename "${debs[0]}")"
+              ver="$(echo "$base" | awk -F'_' '{print $(NF-1)}')"
+              arch="${base##*_}"; arch="${arch%.deb}"
+              debdir="$(dirname "${debs[0]}")"
+              # tar from inside debdir so the archive holds just the .deb files
+              # (no tmp/ wrapper); -f path is absolute so the cd doesn't break it.
+              ( cd "$debdir" && tar -cjf \
+                  "$assets_dir/safir-sdk-core_${ver}_${arch}-${distro}.debs.tar.bz2" *.deb )
             fi
             # Windows installers go in as-is; their filenames already carry the
             # version and VS year, so vs2022/vs2026 never collide.
