@@ -170,6 +170,69 @@ jobs:
           path: '**/*.junit.xml'
           if-no-files-found: ignore
 
+  # Render the shipped documentation (User's Guide + Requirements Specification,
+  # HTML + PDF) the way Jenkins' "Render documentation" stage does. This is a
+  # standalone docs build: docs/CMakeLists.txt only builds the asciidoctor
+  # documents when there is no parent project, so it needs just the doc toolchain
+  # (asciidoctor/dia/dblatex/texlive/ghostscript) plus cmake/ninja - no compilers,
+  # Qt, Boost or Conan. The output (HTML/PDF) is distro-independent, so it runs
+  # straight on ubuntu-latest rather than in a debian container. No `needs`: it is
+  # independent of the build artifacts and runs in parallel, as its own stage does
+  # in Jenkins.
+  render-docs:
+    name: Render documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install documentation toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            cmake ninja-build \
+            asciidoctor dia dblatex texlive-font-utils ghostscript
+
+      - name: Render documentation
+        # Mirrors Jenkins render_documentation(): standalone in-source docs build.
+        run: |
+          set -euo pipefail
+          rm -rf rendered_docs
+          cd docs
+          cmake . -G Ninja
+          ninja
+          ninja install
+          mv rendered_docs ..
+
+      - name: Verify expected documents were produced
+        # docs/CMakeLists.txt SILENTLY skips rendering (message STATUS + return)
+        # if the asciidoctor/dblatex toolchain is missing, so a toolchain
+        # regression would otherwise upload partial docs and pass green. Fail loud.
+        run: |
+          set -euo pipefail
+          missing=0
+          for f in \
+            rendered_docs/users_guide.html \
+            rendered_docs/users_guide.pdf \
+            rendered_docs/requirements_specification.html \
+            rendered_docs/requirements_specification.pdf; do
+            if [ ! -s "$f" ]; then
+              echo "MISSING or empty: $f"; missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "Documentation render produced incomplete output - the doc toolchain likely regressed."
+            exit 1
+          fi
+          ls -la rendered_docs
+
+      - name: Upload rendered documentation
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: rendered-docs
+          path: rendered_docs
+          if-no-files-found: ignore
+
   # Build the example apps against the SDK package the build job produced. This
   # mirrors the Jenkins "Build examples" stage: it installs the package
   # system-wide and uses dobmake-batch (via run_test.py) to compile the example

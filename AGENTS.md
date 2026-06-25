@@ -99,10 +99,12 @@ What has moved over so far:
 - The standalone, multinode and multicomputer dose test suites.
 - Build Examples.
 - Drafting a GitHub release with installers on version-tag pushes.
+- Documentation rendering (User's Guide + Requirements Specification, HTML +
+  PDF), via a standalone `render-docs` job on ubuntu-latest. It runs the
+  asciidoctor/dia/dblatex toolchain directly (no container) and uploads the
+  rendered docs as an artifact.
 
 Not yet migrated / still missing on GitHub Actions:
-- **Documentation rendering.** The doc-generation step (doxygen/dia/texlive/
-  asciidoctorj) is not run in the GHA workflow yet.
 - **The full ("slow") unit tests.** GHA runs with `SAFIR_SKIP_SLOW_TESTS=1`, so
   the slow tests listed under *Running Tests* above never run there. The
   intended fix is to **break the slow tests out into a separate test suite that
@@ -110,6 +112,11 @@ Not yet migrated / still missing on GitHub Actions:
   leaving multi-hour cases inside the unit-test run (a unit test that takes
   hours is not really a unit test). This is a sizeable undertaking and has not
   been started.
+- **Workflow security hardening (zizmor).** The GHA workflows have not been
+  audited with [zizmor](https://github.com/woodruffw/zizmor), the static analysis
+  tool for GitHub Actions security. We want to run it over the workflow/action
+  files and address its findings (e.g. over-broad token permissions, unpinned
+  action references, template-injection risks), ideally wired in as a CI check.
 - **Build-warnings analysis and the quality gate.** Jenkins'
   `archive_and_analyze()` scans `buildlog.html` for GCC, MSBuild, CMake, Java,
   Doxygen and **lintian** (`.deb` packaging) warnings via `scanForIssues`/
