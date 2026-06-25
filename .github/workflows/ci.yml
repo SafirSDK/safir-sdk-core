@@ -11,6 +11,16 @@ on:
 
 env:
   SAFIR_SKIP_SLOW_TESTS: "1"
+  # Multicomputer overlay address plan (10.68.x.y so the existing 1*.*68.*.* .dou
+  # bind pattern matches with NO config change). Each master/slaves pair is an
+  # isolated point-to-point tunnel, so all four pairs reuse the same addresses
+  # without colliding. Consumed only by the multicomputer-master/-slaves jobs; the
+  # master needs just its own + the seed's address, the rest live on the slaves runner.
+  MASTER_ADDR: "10.68.1.1"
+  SERVER_1_ADDR: "10.68.0.2"   # seed (core-multicomputer-test-server-1-slave)
+  CLIENT_0_ADDR: "10.68.0.3"
+  CLIENT_1_ADDR: "10.68.0.4"
+  SLAVE_SUBNET: "10.68.0.0/24"
 
 # checks: write lets the test-summary job publish a Check run with the
 # aggregated results. (That job also needs pull-requests: write for its PR
@@ -127,31 +137,12 @@ jobs:
         shell: cmd
         run: python build\build.py --jenkins --use-studio ${{ matrix.studio }} --arch amd64
 
-      - name: Trim Conan cache before saving
-        # Conan keeps each dependency's source/build/download folders next to the
-        # final package binary under ~/.conan2/p/b/<ref>/. Only the package binary
-        # is needed on restore; the rest (huge for source-built Boost/Qt) just eats
-        # runner disk. The --lru prune also drops package binaries not used in this
-        # build (e.g. an old Qt version left behind after a conanfile bump), so the
-        # cache doesn't accumulate every version ever built. Conan refreshes the
-        # last-used time of everything it resolves, so the current deps are kept.
-        # Run always so a failed build still saves a lean cache.
+      - name: Trim and save Conan cache
         if: always()
-        shell: bash
-        run: |
-          conan remove "*" --lru=1d --confirm || true
-          conan cache clean "*" || true
-
-      - name: Save Conan cache
-        # Skip the cache upload on tag/release builds: a one-off release build
-        # should not overwrite the shared per-branch cache. Otherwise save the
-        # trimmed cache (always, so a failed build still saves a lean cache),
-        # using the exact key the restore step resolved.
-        if: ${{ always() && !startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/cache/save@v5
+        uses: ./.github/actions/save-conan-cache
         with:
-          path: ${{ matrix.conan_home }}
-          key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
+          conan-home: ${{ matrix.conan_home }}
+          cache-key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
 
       - name: Upload packages
         uses: actions/upload-artifact@v6
@@ -281,18 +272,7 @@ jobs:
           path: package-download
 
       - name: Stage installer at repo root
-        # run_test.py globs the installer in the working directory (the repo root:
-        # safir-sdk-core_*.deb on Linux, SafirSDKCore*.exe on Windows). The
-        # artifact preserves the original tmp/ and build/packaging/windows/ paths,
-        # so the package lands somewhere under package-download/ rather than at its
-        # root - find it wherever it is and move it up.
-        shell: bash
-        run: |
-          echo "Downloaded artifact contents:"
-          find package-download -type f
-          find package-download -type f \( -name '*.deb' -o -name '*.exe' \) -exec mv {} . \;
-          echo "Repo root after staging:"
-          ls -la safir-sdk-core_*.deb SafirSDKCore*.exe 2>/dev/null || true
+        uses: ./.github/actions/stage-installer
 
       - name: Build examples (Linux)
         if: runner.os == 'Linux'
@@ -303,24 +283,12 @@ jobs:
         shell: cmd
         run: python build\jenkins_stuff\run_test.py --test build-examples
 
-      - name: Trim Conan cache before saving
-        # Same hygiene as the build job: drop source/build/download folders and
-        # stale package binaries so the saved cache stays lean. Run always so a
-        # failed build still saves a clean cache.
+      - name: Trim and save Conan cache
         if: always()
-        shell: bash
-        run: |
-          conan remove "*" --lru=1d --confirm || true
-          conan cache clean "*" || true
-
-      - name: Save Conan cache
-        # Same as the build job: skip the cache upload on tag/release builds, and
-        # otherwise save the trimmed cache under the restore step's exact key.
-        if: ${{ always() && !startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/cache/save@v5
+        uses: ./.github/actions/save-conan-cache
         with:
-          path: ${{ matrix.conan_home }}
-          key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
+          conan-home: ${{ matrix.conan_home }}
+          cache-key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
 
   # Run the big dose test suite (243 testcases) against the installed SDK package,
   # in both the "standalone" (one node) and "multinode" (four nodes, all on this
@@ -429,16 +397,7 @@ jobs:
           path: package-download
 
       - name: Stage installer at repo root
-        # Identical to build-examples: run_test.py globs the installer from the
-        # repo root, but the artifact preserves the tmp/ and packaging paths, so
-        # move whatever .deb/.exe it contains up to the root.
-        shell: bash
-        run: |
-          echo "Downloaded artifact contents:"
-          find package-download -type f
-          find package-download -type f \( -name '*.deb' -o -name '*.exe' \) -exec mv {} . \;
-          echo "Repo root after staging:"
-          ls -la safir-sdk-core_*.deb SafirSDKCore*.exe 2>/dev/null || true
+        uses: ./.github/actions/stage-installer
 
       - name: Run dose tests (Linux)
         if: runner.os == 'Linux'
@@ -457,6 +416,332 @@ jobs:
           path: '**/*.junit.xml'
           if-no-files-found: ignore
 
+  # Multicomputer dose tests = the node under test (Server_0, the "master") on one
+  # runner talking to three debian slave nodes (Server_1 seed + Client_0 + Client_1)
+  # on another, joined by an accountless/secretless WireGuard overlay punched between
+  # the two runners (only the built-in GITHUB_TOKEN, see .github/actions/wireguard-overlay).
+  # master and slaves run as a matched PAIR per platform: they share the upstream
+  # `needs` but do NOT depend on each other (they start concurrently to punch the live
+  # tunnel). The WireGuard rendezvous artifacts are namespaced per matrix platform
+  # (master-<platform>/slaves-<platform>) so the four concurrent pairs never cross-wire.
+  #
+  # Only the four host-NATIVE platforms can be a master: the wireguard-overlay action
+  # manipulates host networking, so the master can't run in a job container, and
+  # debian-trixie has no host-native runner (it only exists as a debian:13 container).
+  # debian is still exercised here - it is the platform all three SLAVE nodes run on.
+  #
+  # `needs: [build, dose-tests]` defers the start until the build packages exist AND
+  # the standalone/multinode matrix has finished, which staggers the runner budget
+  # (this is the last wave). The `if` lets them still run when a dose-tests row fails
+  # (multicomputer only really needs the packages from build), but not when build
+  # itself failed or the run was cancelled.
+  multicomputer-master:
+    name: multicomputer-master-${{ matrix.platform }}
+    needs: [build, dose-tests]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-noble-amd64
+            platform_name: ubuntu-noble
+            arch: amd64
+            runner: ubuntu-24.04
+          - platform: ubuntu-noble-arm64
+            platform_name: ubuntu-noble
+            arch: arm64
+            runner: ubuntu-24.04-arm
+          - platform: vs2022
+            platform_name: vs2022
+            arch: amd64
+            runner: windows-2022
+          - platform: vs2026
+            platform_name: vs2026
+            arch: amd64
+            runner: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up test environment
+        uses: ./.github/actions/setup-test-env
+
+      - name: Download SDK package (master platform)
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-${{ matrix.platform_name }}-${{ matrix.arch }}
+          path: package-download
+
+      - name: Stage installer at repo root
+        uses: ./.github/actions/stage-installer
+
+      - name: Establish WireGuard overlay (Server_0 side)
+        uses: ./.github/actions/wireguard-overlay
+        with:
+          my-role: master-${{ matrix.platform }}
+          peer-role: slaves-${{ matrix.platform }}
+          wg-address: ${{ env.MASTER_ADDR }}/32
+          # /16 covers both the slave container /24 AND the slaves wg transit /32
+          # (10.68.1.2), which we punch/verify against before the containers exist.
+          peer-allowed-ips: 10.68.0.0/16
+          verify-peer-ip: 10.68.1.2
+          github-token: ${{ github.token }}
+
+      # The Windows runner's Defender Firewall default-blocks inbound traffic to
+      # new (unsigned) programs, so the slaves' Dob discovery/data UDP - and ICMP -
+      # arriving on wg0 for safir_control is dropped even though the WireGuard
+      # handshake itself succeeds (the WireGuard service installs its own allow
+      # rule). The nodes never form a system and the sequencer hangs forever. This
+      # is a throwaway runner, so just turn the firewall off for the run.
+      - name: Open the firewall for cross-node Dob traffic (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: netsh advfirewall set allprofiles state off
+
+      - name: Map the seed hostname to Server_1 (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          echo "${SERVER_1_ADDR} core-multicomputer-test-server-1-slave" | sudo tee -a /etc/hosts
+
+      - name: Map the seed hostname to Server_1 (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Add-Content -Path "$env:WINDIR\System32\drivers\etc\hosts" `
+            -Value "$env:SERVER_1_ADDR core-multicomputer-test-server-1-slave"
+
+      # Wait for the seed slave to be reachable before starting, so node discovery
+      # doesn't race the slave containers (apt-install) coming up. Git Bash runs
+      # this on Windows too; nc isn't there, so fall back to ping (OS-aware flags).
+      - name: Wait for the seed slave
+        shell: bash
+        run: |
+          set -uo pipefail
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            seed_up() { ping -n 1 -w 1000 "$1" >/dev/null 2>&1; }
+          else
+            seed_up() { nc -z -u -w1 "$1" 30000 2>/dev/null || ping -c1 -W1 "$1" >/dev/null 2>&1; }
+          fi
+          echo "Waiting for the seed slave ${SERVER_1_ADDR} ..."
+          for i in $(seq 1 100); do
+            if seed_up "${SERVER_1_ADDR}"; then
+              echo "seed reachable on attempt $i"
+              exit 0
+            fi
+            sleep 3
+          done
+          # Fail fast: if the seed never comes up, run_test.py would otherwise hang
+          # until the 30-min job timeout with no clear cause. Surface it here instead.
+          echo "Seed slave ${SERVER_1_ADDR} never became reachable"
+          exit 1
+
+      # Same entrypoint as the standalone/multinode dose tests: run_test.py installs
+      # the staged package and runs the suite. SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES=1
+      # tells it NOT to launch the slaves via JenkinsController - the slaves job
+      # starts them as containers instead; the master still sends STOP over the
+      # network (--stop-slaves). Windows invokes run_test.py via cmd, matching how
+      # the standalone/multinode Windows dose tests run it.
+      - name: Run multicomputer master (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          WORKSPACE: ${{ github.workspace }}
+          LANGUAGES: cpp-cpp-cpp-cpp-cpp
+          JOB_NAME: ${{ github.workflow }}-multicomputer-master
+          SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES: "1"
+        run: python build/jenkins_stuff/run_test.py --test multicomputer-tests
+
+      - name: Run multicomputer master (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        env:
+          WORKSPACE: ${{ github.workspace }}
+          LANGUAGES: cpp-cpp-cpp-cpp-cpp
+          JOB_NAME: ${{ github.workflow }}-multicomputer-master
+          SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES: "1"
+        run: python build\jenkins_stuff\run_test.py --test multicomputer-tests
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: multicomputer-results-${{ matrix.platform }}
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
+      # The whole dose_test_output dir holds the per-process stdout/stderr and the
+      # partnerN.txt results - the only place the master node's own startup output
+      # lands, so it's what we need when the node never reaches production (sequencer
+      # stuck in connection.Open). always() so a hung run killed by the timeout still
+      # archives it.
+      - name: Archive dose_test_output (master)
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: dose-output-master-${{ matrix.platform }}
+          path: dose_test_output
+          if-no-files-found: ignore
+
+  multicomputer-slaves:
+    name: multicomputer-slaves-debian (for ${{ matrix.platform }} master)
+    needs: [build, dose-tests]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # One debian slaves runner per master platform; the platform only namespaces
+        # the WireGuard rendezvous so each slaves runner pairs with its own master.
+        platform: [ubuntu-noble-amd64, ubuntu-noble-arm64, vs2022, vs2026]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download SDK package (debian, for slaves)
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-debian-trixie-amd64
+          path: package-download
+
+      # The workspace is mounted into the slave containers, so staging the .deb at
+      # the repo root here puts it at /work for all three. deb-only: the slaves are
+      # debian containers that never use a Windows .exe.
+      - name: Stage installer at repo root
+        uses: ./.github/actions/stage-installer
+        with:
+          deb-only: "true"
+
+      - name: Establish WireGuard overlay (slaves-runner side)
+        uses: ./.github/actions/wireguard-overlay
+        with:
+          my-role: slaves-${{ matrix.platform }}
+          peer-role: master-${{ matrix.platform }}
+          # Transit address on a /32; the slave nodes live on the bridge below.
+          wg-address: "10.68.1.2/32"
+          peer-allowed-ips: ${{ env.MASTER_ADDR }}/32
+          verify-peer-ip: ${{ env.MASTER_ADDR }}
+          github-token: ${{ github.token }}
+
+      # Routing master <-> the three container IPs across wg0 + a docker bridge:
+      # the master reaches all three containers bidirectionally at every datagram
+      # size up to 60 KB. Large Dob datagrams still need FragmentSize lowered to fit
+      # the wg0 MTU (see Safir.Dob.NodeParameters.dou in the multicomputer test
+      # config): on this overlay anything over the tunnel MTU is kernel-IP-fragmented
+      # before WireGuard encapsulates it, so a single lost fragment drops the whole
+      # datagram.
+      - name: Route the wg tunnel into a docker bridge for the slave nodes
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo sysctl -w net.ipv4.ip_forward=1
+          # Docker's default FORWARD policy is DROP; DOCKER-USER is the supported
+          # hook to let wg0 <-> bridge traffic through.
+          sudo iptables -I DOCKER-USER -i wg0 -j ACCEPT
+          sudo iptables -I DOCKER-USER -o wg0 -j ACCEPT
+          # Don't masquerade tunnel-bound container traffic, so the master sees the
+          # real 10.68.0.x source (Docker would otherwise SNAT it to the host).
+          sudo iptables -t nat -I POSTROUTING -s "${SLAVE_SUBNET}" -o wg0 -j ACCEPT
+          docker network create --subnet "${SLAVE_SUBNET}" --gateway 10.68.0.254 safirnet
+
+      # Each slave node is its own debian:13 container so it sees exactly one
+      # 1*.*68.*.* address (Safir binds the first local match). The container runs
+      # the SAME path the standalone/multinode dose tests use: provision the
+      # harness prereqs (mirrors setup-test-env), then run_test.py, whose
+      # DebianInstaller installs the staged .deb (pulling the SDK's runtime deps via
+      # apt) and dispatches --slave. The slave idles in wait_for_safir_control until
+      # the master sends STOP (--stop-slaves); the job ends when all three exit.
+      - name: Launch the three debian slave nodes
+        shell: bash
+        env:
+          LANGUAGES: cpp-cpp-cpp-cpp-cpp
+        run: |
+          set -euo pipefail
+          start_slave() {
+            local name="$1" ip="$2" role="$3"
+            # Give each slave its OWN /work mount instead of sharing one across all
+            # three containers, so each harness run's .venv / dose_test_output /
+            # temp area is naturally isolated.
+            rm -rf "run-$role"
+            mkdir -p "run-$role"
+            cp -a build "run-$role/build"
+            cp -a ./*.deb "run-$role/"
+            docker run -d --name "$name" --network safirnet --ip "$ip" \
+              --add-host "core-multicomputer-test-server-1-slave:${SERVER_1_ADDR}" \
+              --shm-size=2g \
+              -e LANGUAGES="$LANGUAGES" -e JOB_NAME="multicomputer-$role" \
+              -v "$PWD/run-$role":/work -w /work debian:13 \
+              bash -c "set -e
+                apt-get update -qq
+                apt-get install -y --no-install-recommends \
+                  sudo ca-certificates git iputils-ping netcat-openbsd \
+                  python3 python3-venv python3-pip python-is-python3 python3-distro python3-apt python3-websocket
+                git config --global --add safe.directory '*'
+                echo \"=== [$role] reachability probe to master ${MASTER_ADDR} ===\"
+                if ping -c3 -W2 ${MASTER_ADDR}; then
+                  echo \"PROBE [$role]: ICMP to master ${MASTER_ADDR} PASS\"
+                else
+                  echo \"PROBE [$role]: ICMP to master ${MASTER_ADDR} FAIL\"
+                fi
+                python3 -m venv --system-site-packages .venv
+                . .venv/bin/activate
+                python -m pip install --quiet --upgrade pip
+                pip install --quiet -r build/requirements.txt
+                export WORKSPACE=/work
+                python build/jenkins_stuff/run_test.py --slave $role"
+          }
+          start_slave server-1 "${SERVER_1_ADDR}" server-1
+          start_slave client-0 "${CLIENT_0_ADDR}" client-0
+          start_slave client-1 "${CLIENT_1_ADDR}" client-1
+
+      - name: Stream slave output and wait for the containers to exit
+        shell: bash
+        # GHA shows one live log stream per job and runs steps sequentially, so we
+        # follow all three containers concurrently with a [name] prefix, then dump
+        # each full log in a collapsible group. The master drives shutdown over the
+        # network via --stop-slaves; a clean slave shutdown exits 0, so a non-zero
+        # container exit code means that slave crashed - fail the job so it shows red.
+        run: |
+          set -uo pipefail
+          pids=()
+          for name in server-1 client-0 client-1; do
+            ( docker logs -f "$name" 2>&1 | sed -u "s/^/[$name] /" ) &
+            pids+=("$!")
+          done
+          docker wait server-1 client-0 client-1 || true
+          sleep 2
+          kill "${pids[@]}" 2>/dev/null || true
+          echo ""
+          for name in server-1 client-0 client-1; do
+            echo "::group::$name full log"
+            docker logs "$name" 2>&1
+            echo "::endgroup::"
+          done
+          rc=0
+          for name in server-1 client-0 client-1; do
+            code="$(docker inspect -f '{{.State.ExitCode}}' "$name" 2>/dev/null || echo 1)"
+            echo "slave $name exited with code $code"
+            if [ "$code" != "0" ]; then rc=1; fi
+          done
+          exit "$rc"
+
+      # Each slave wrote its output to its own run-<role>/dose_test_output (its
+      # private /work mount). Those files are owned by the container's root user on
+      # the bind mount, so relax perms before the runner user uploads them.
+      - name: Archive dose_test_output (slaves)
+        if: always()
+        shell: bash
+        run: sudo chmod -R a+rX run-* 2>/dev/null || true
+
+      - name: Upload dose_test_output (slaves)
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: dose-output-slaves-${{ matrix.platform }}
+          path: run-*/dose_test_output
+          if-no-files-found: ignore
+
   # Aggregate every test job's junit results into one report. The build and
   # dose-tests jobs each upload their *.junit.xml as artifacts; this job pulls
   # them all and publishes a single Check run + run-summary page + PR comment,
@@ -465,7 +750,7 @@ jobs:
   # report. Runs on always() so it still reports when some test job failed.
   test-summary:
     name: Test summary
-    needs: [build, dose-tests]
+    needs: [build, dose-tests, multicomputer-master, multicomputer-slaves]
     if: always()
     runs-on: ubuntu-latest
     # checks: write to create the Check run; pull-requests: write so the action
@@ -567,7 +852,7 @@ jobs:
               # tar from inside debdir so the archive holds just the .deb files
               # (no tmp/ wrapper); -f path is absolute so the cd doesn't break it.
               ( cd "$debdir" && tar -cjf \
-                  "$assets_dir/safir-sdk-core_${ver}_${arch}-${distro}.debs.tar.bz2" *.deb )
+                  "$assets_dir/safir-sdk-core_${ver}_${arch}-${distro}.debs.tar.bz2" ./*.deb )
             fi
             # Windows installers already carry the canonical dash version (no
             # tilde to translate). Their filenames include the version and VS

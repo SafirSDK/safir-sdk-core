@@ -1,0 +1,244 @@
+name: wireguard-overlay
+description: >
+  Bring up one side of an accountless, secretless point-to-point WireGuard
+  tunnel between two jobs in the SAME workflow run. A keypair is generated per
+  run (never stored); the public UDP endpoint is discovered via STUN and
+  exchanged with the peer through a GitHub artifact, authenticated only by the
+  built-in GITHUB_TOKEN. Works on Linux (kernel wireguard via ip/wg) and Windows
+  (WireGuard-for-Windows via wireguard.exe /installtunnelservice). Both the
+  Linux<->Linux and Windows<->Linux punches are exercised by the multicomputer
+  dose run that consumes this action.
+
+inputs:
+  my-role:
+    description: Artifact suffix identifying THIS side (e.g. master / slaves).
+    required: true
+  peer-role:
+    description: Artifact suffix of the side to fetch (the other job).
+    required: true
+  wg-address:
+    description: CIDR to assign to wg0 on this side, e.g. "10.68.1.1/32".
+    required: true
+  peer-allowed-ips:
+    description: allowed-ips for the peer, e.g. "10.68.0.0/24".
+    required: true
+  wg-port:
+    description: Fixed UDP port WireGuard listens on (also the STUN source port).
+    required: false
+    default: "51820"
+  github-token:
+    description: Token used by gh for the artifact-based rendezvous.
+    required: true
+  verify-peer-ip:
+    description: >
+      If set, after bringing wg0 up, loop-ping this peer address until the
+      handshake completes. The ping is what actually drives the NAT punch (both
+      peers ping concurrently), so this both opens the hole and verifies the
+      tunnel - the step fails if no handshake lands within the window. Must be an
+      address covered by peer-allowed-ips. Leave empty to skip.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Install wireguard-tools (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wireguard-tools
+        sudo modprobe wireguard || true
+
+    # choco install + wireguard.exe /installtunnelservice: the wintun driver and
+    # tunnel service install fine with the GitHub Windows runner's admin rights.
+    - name: Install WireGuard for Windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        choco install wireguard -y --no-progress
+        & 'C:\Program Files\WireGuard\wg.exe' version
+
+    # Shared: Git Bash on Windows runs this same script. wg.exe isn't on PATH on
+    # Windows and the interpreter is `python` (not python3), so resolve both per OS.
+    - name: Generate keys and discover public endpoint via STUN
+      shell: bash
+      env:
+        WG_PORT: ${{ inputs.wg-port }}
+      run: |
+        set -euo pipefail
+        umask 077
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          WG="/c/Program Files/WireGuard/wg.exe"; PY=python
+        else
+          WG=wg; PY=python3
+        fi
+        "$WG" genkey > priv.key
+        "$WG" pubkey < priv.key > pub.key
+        echo "Public key: $(cat pub.key)"
+        mapped="$("$PY" "$GITHUB_ACTION_PATH/stun.py" "$WG_PORT")"
+        echo "Mapped (public) endpoint: $mapped"
+        echo "$(cat pub.key) $mapped" > endpoint.txt
+        echo "endpoint.txt: $(cat endpoint.txt)"
+
+    - name: Publish my endpoint
+      uses: actions/upload-artifact@v6
+      with:
+        name: endpoint-${{ inputs.my-role }}
+        path: endpoint.txt
+        retention-days: 1
+
+    - name: Fetch peer endpoint (poll until the other job has published)
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set -uo pipefail
+        # python's zipfile (vs `unzip`) keeps this identical on Git Bash, which
+        # has no unzip.
+        if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
+        mkdir -p peer
+        name="endpoint-${{ inputs.peer-role }}"
+        api="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts"
+        # 'gh run download' only sees artifacts of a COMPLETED run, so it can't
+        # fetch a sibling job's artifact mid-run. The raw artifacts REST API lists
+        # them as soon as they upload, so poll that and pull the zip directly.
+        for i in $(seq 1 120); do
+          url="$(gh api "$api" --paginate \
+                   --jq ".artifacts[] | select(.name==\"$name\" and .expired==false) | .archive_download_url" \
+                 2>/dev/null | head -n1)"
+          if [ -n "$url" ]; then
+            echo "Found $name on attempt $i"
+            if gh api "$url" > peer/endpoint.zip 2>/dev/null; then
+              "$PY" -c "import zipfile; zipfile.ZipFile('peer/endpoint.zip').extractall('peer')"
+              echo "Peer endpoint:"; cat peer/endpoint.txt
+              exit 0
+            fi
+          fi
+          echo "peer endpoint not ready yet (attempt $i) ..."
+          sleep 5
+        done
+        echo "Timed out waiting for peer endpoint"; exit 1
+
+    - name: Bring up the WireGuard tunnel (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      env:
+        WG_PORT: ${{ inputs.wg-port }}
+        WG_ADDRESS: ${{ inputs.wg-address }}
+        PEER_ALLOWED_IPS: ${{ inputs.peer-allowed-ips }}
+      run: |
+        set -euo pipefail
+        peer_pub="$(awk '{print $1}' peer/endpoint.txt)"
+        peer_endpoint="$(awk '{print $2}' peer/endpoint.txt)"
+        echo "Peer pubkey=$peer_pub endpoint=$peer_endpoint"
+
+        sudo ip link add wg0 type wireguard
+        sudo wg set wg0 private-key priv.key listen-port "$WG_PORT"
+        sudo ip addr add "$WG_ADDRESS" dev wg0
+        sudo wg set wg0 peer "$peer_pub" \
+          endpoint "$peer_endpoint" \
+          allowed-ips "$PEER_ALLOWED_IPS" \
+          persistent-keepalive 25
+        sudo ip link set wg0 up
+        # wg's allowed-ips is only a crypto-routing ACL; with raw ip/wg (not
+        # wg-quick) it installs NO kernel route. Our transit addrs are /32, so
+        # 'ip addr add' creates no on-link route either - without this the kernel
+        # has no path to the peer's subnet and every data packet is dropped before
+        # it ever reaches the tunnel (handshake still completes - that's control
+        # traffic to the public endpoint over the default route).
+        sudo ip route add "$PEER_ALLOWED_IPS" dev wg0
+        echo "=== wg show ==="; sudo wg show
+        echo "=== ip route ==="; ip route
+
+    # WireGuard-for-Windows has no `ip`/`wg set`: write a wg-quick-style .conf and
+    # install it as a tunnel service. AllowedIPs in the conf ALSO installs the
+    # route to the peer subnet (unlike the Linux path, which adds it by hand).
+    - name: Write wg0.conf (Windows)
+      if: runner.os == 'Windows'
+      shell: bash
+      env:
+        WG_PORT: ${{ inputs.wg-port }}
+        WG_ADDRESS: ${{ inputs.wg-address }}
+        PEER_ALLOWED_IPS: ${{ inputs.peer-allowed-ips }}
+      run: |
+        set -euo pipefail
+        peer_pub="$(awk '{print $1}' peer/endpoint.txt)"
+        peer_endpoint="$(awk '{print $2}' peer/endpoint.txt)"
+        echo "Peer pubkey=$peer_pub endpoint=$peer_endpoint"
+        cat > wg0.conf <<EOF
+        [Interface]
+        PrivateKey = $(cat priv.key)
+        Address = ${WG_ADDRESS}
+        ListenPort = ${WG_PORT}
+
+        [Peer]
+        PublicKey = $peer_pub
+        Endpoint = $peer_endpoint
+        AllowedIPs = ${PEER_ALLOWED_IPS}
+        PersistentKeepalive = 25
+        EOF
+        cat wg0.conf
+
+    # Install the conf as a tunnel service (creates the wintun adapter, assigns
+    # the address, installs the AllowedIPs routes, starts it). Tunnel name = conf
+    # basename = "wg0".
+    - name: Install the WireGuard tunnel service (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $conf = (Resolve-Path wg0.conf).Path
+        & 'C:\Program Files\WireGuard\wireguard.exe' /installtunnelservice $conf
+        Start-Sleep -Seconds 2
+        & 'C:\Program Files\WireGuard\wg.exe' show
+
+    - name: Punch and verify the tunnel (Linux)
+      if: ${{ runner.os == 'Linux' && inputs.verify-peer-ip != '' }}
+      shell: bash
+      env:
+        VERIFY_PEER_IP: ${{ inputs.verify-peer-ip }}
+      run: |
+        set -uo pipefail
+        # Pinging the peer's wg address drives the NAT punch (both peers do this
+        # concurrently). We gate on the actual WireGuard HANDSHAKE, not on an ICMP
+        # reply: the encrypted tunnel can be fully up and carrying traffic while
+        # ICMP echo between the transit /32s still doesn't round-trip. Dob is UDP
+        # anyway, so a completed handshake is the signal that matters here.
+        ok=0
+        for i in $(seq 1 90); do
+          ping -c1 -W1 "$VERIFY_PEER_IP" >/dev/null 2>&1 || true
+          hs="$(sudo wg show wg0 latest-handshakes | awk '{print $2}')"
+          if [ -n "$hs" ] && [ "$hs" != "0" ]; then
+            ok=1; echo "tunnel up: handshake registered (attempt $i, ts=$hs)"; break
+          fi
+          sleep 1
+        done
+        echo "=== wg show ==="; sudo wg show
+        if [ "$ok" != "1" ]; then
+          echo "WireGuard tunnel did not come up (no handshake with peer)"
+          exit 1
+        fi
+
+    - name: Punch and verify the tunnel (Windows)
+      if: ${{ runner.os == 'Windows' && inputs.verify-peer-ip != '' }}
+      shell: bash
+      env:
+        VERIFY_PEER_IP: ${{ inputs.verify-peer-ip }}
+      run: |
+        set -uo pipefail
+        WG="/c/Program Files/WireGuard/wg.exe"
+        ok=0
+        for i in $(seq 1 90); do
+          # Windows ping flags differ from Linux (-n count, -w timeout-ms).
+          ping -n 1 -w 1000 "$VERIFY_PEER_IP" >/dev/null 2>&1 || true
+          hs="$("$WG" show wg0 latest-handshakes | awk '{print $2}')"
+          if [ -n "$hs" ] && [ "$hs" != "0" ]; then
+            ok=1; echo "tunnel up: handshake registered (attempt $i, ts=$hs)"; break
+          fi
+          sleep 1
+        done
+        echo "=== wg show ==="; "$WG" show
+        if [ "$ok" != "1" ]; then
+          echo "WireGuard tunnel did not come up (no handshake with peer)"
+          exit 1
+        fi

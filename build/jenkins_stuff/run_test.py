@@ -516,15 +516,22 @@ def run_test_suite(kind):
         if kind == "multinode":
             arguments += ("--multinode", )
         if kind == "multicomputer":
-            server_1 = JenkinsController("server-1")
-            client_0 = JenkinsController("client-0")
-            client_1 = JenkinsController("client-1")
-            if server_1.is_restarting():
-                log("Jenkins is restarting, exiting quickly...")
-                return
-            server_1.start_slave()
-            client_0.start_slave()
-            client_1.start_slave()
+            # On GitHub Actions the slaves are launched as independent containers
+            # by the workflow, not as Jenkins jobs - so skip JenkinsController
+            # entirely. The Dob-level coordination is unchanged: the master still
+            # sends STOP over the network via --stop-slaves.
+            if os.environ.get("SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES") == "1":
+                log("SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES=1: slaves launched externally, skipping JenkinsController")
+            else:
+                server_1 = JenkinsController("server-1")
+                client_0 = JenkinsController("client-0")
+                client_1 = JenkinsController("client-1")
+                if server_1.is_restarting():
+                    log("Jenkins is restarting, exiting quickly...")
+                    return
+                server_1.start_slave()
+                client_0.start_slave()
+                client_1.start_slave()
             arguments += ("--multicomputer", "--stop-slaves")
 
         log(f"Launching test suite with arguments {arguments}")

@@ -1,0 +1,38 @@
+name: Stage installer at repo root
+description: >
+  Move the SDK installer that the build job uploaded up to the repo root, where
+  run_test.py globs it (safir-sdk-core_*.deb on Linux, SafirSDKCore*.exe on
+  Windows). The package artifact preserves the original tmp/ (.deb) and
+  build/packaging/windows/ (.exe) paths, so the file lands somewhere under the
+  download dir rather than at its root - find it wherever it is and move it up.
+
+inputs:
+  source-dir:
+    description: Directory the package artifact was downloaded into.
+    required: false
+    default: package-download
+  deb-only:
+    description: >
+      Stage only .deb files. The multicomputer slave containers are debian-only
+      and never consume a Windows .exe, so they set this to skip the .exe glob.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Stage installer at repo root
+      shell: bash
+      env:
+        SOURCE_DIR: ${{ inputs.source-dir }}
+        DEB_ONLY: ${{ inputs.deb-only }}
+      run: |
+        echo "Downloaded artifact contents:"
+        find "$SOURCE_DIR" -type f
+        if [ "$DEB_ONLY" = "true" ]; then
+          find "$SOURCE_DIR" -type f -name '*.deb' -exec mv {} . \;
+        else
+          find "$SOURCE_DIR" -type f \( -name '*.deb' -o -name '*.exe' \) -exec mv {} . \;
+        fi
+        echo "Repo root after staging:"
+        ls -la safir-sdk-core_*.deb SafirSDKCore*.exe 2>/dev/null || true

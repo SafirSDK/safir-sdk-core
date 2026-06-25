@@ -61,13 +61,20 @@ Two CI systems run against the repository.
 
 **GitHub Actions** (`.github/workflows/ci.yml`) runs on pushes to
 master/develop/feature/private branches and on pull requests. A matrix builds
-and packages across ubuntu-noble, debian-trixie, vs2022 and vs2026 (amd64).
-There is no Debian-labelled runner, so the debian-trixie row builds inside a
-`debian:13` container on the ubuntu-latest host (with `--shm-size=200m`, because
-dose_main needs a 100 MB `/dev/shm`). Each row runs `build/build.py --jenkins`,
-uploads the packages, build log and JUnit results as artifacts, and publishes
-the test results as a GitHub Check (via dorny/test-reporter). The whole workflow
-runs with `SAFIR_SKIP_SLOW_TESTS=1`.
+and packages across ubuntu-noble (amd64 + arm64), debian-trixie, vs2022 and
+vs2026. There is no Debian-labelled runner, so the debian-trixie row builds
+inside a `debian:13` container on the ubuntu-latest host (with `--shm-size`,
+because dose_main needs a 100 MB `/dev/shm`). Each row runs
+`build/build.py --jenkins`, then downstream jobs install the produced package
+and run the example builds and the dose test suites (standalone, multinode, and
+multicomputer). The multicomputer run joins two hosted runners over an
+accountless WireGuard overlay (`.github/actions/wireguard-overlay`), so the node
+under test on a native runner talks to three debian slave containers on a
+second runner. Every job uploads its JUnit results as artifacts; a final
+`test-summary` job aggregates them into one GitHub Check (via
+`EnricoMi/publish-unit-test-result-action`). A `release` job drafts a GitHub
+release with the installers on version-tag pushes. The whole workflow runs with
+`SAFIR_SKIP_SLOW_TESTS=1`.
 
 **Jenkins** (`Jenkinsfile`) is the canonical release build. Matrix build across:
 - **Platforms**: ubuntu-noble, debian-trixie, vs2022, vs2026
@@ -80,6 +87,56 @@ Test stages:
 3. Multinode Tests
 4. Multicomputer Tests (cpp only, requires debian-trixie)
 5. Build Examples
+
+### Jenkins → GitHub Actions migration status
+
+The goal is for GitHub Actions to fully replace Jenkins as the canonical CI.
+What has moved over so far:
+- Build and package across all platforms (incl. native arm64, which Jenkins
+  does not do).
+- Unit tests (run by `build.py --jenkins` via ctest), **minus the slow tests** —
+  see below.
+- The standalone, multinode and multicomputer dose test suites.
+- Build Examples.
+- Drafting a GitHub release with installers on version-tag pushes.
+
+Not yet migrated / still missing on GitHub Actions:
+- **Documentation rendering.** The doc-generation step (doxygen/dia/texlive/
+  asciidoctorj) is not run in the GHA workflow yet.
+- **The full ("slow") unit tests.** GHA runs with `SAFIR_SKIP_SLOW_TESTS=1`, so
+  the slow tests listed under *Running Tests* above never run there. The
+  intended fix is to **break the slow tests out into a separate test suite that
+  is launched on its own, the way the dose test suites are** — rather than
+  leaving multi-hour cases inside the unit-test run (a unit test that takes
+  hours is not really a unit test). This is a sizeable undertaking and has not
+  been started.
+- **Build-warnings analysis and the quality gate.** Jenkins'
+  `archive_and_analyze()` scans `buildlog.html` for GCC, MSBuild, CMake, Java,
+  Doxygen and **lintian** (`.deb` packaging) warnings via `scanForIssues`/
+  `publishIssues`, and applies a quality gate (`threshold: 1, TOTAL → unstable`)
+  so a single new warning marks the build unstable. GHA only uploads
+  `buildlog.html` as an artifact; it never parses it, so there is no warnings
+  gate and no lintian check. This is the main quality signal Jenkins enforces
+  that GHA does not.
+
+Deliberate-or-pending coverage differences (decide before retiring Jenkins):
+- **`PACKAGE_TYPE = DebugOnly`.** Jenkins runs a `Full × DebugOnly` axis across
+  Build, Test suite and Build examples; GHA only ever builds and tests `Full`
+  (the default). The DebugOnly path — chiefly the Windows debug-runtime-only
+  packaging — is not exercised on GHA.
+- **32-bit (x86) builds.** Jenkins still keeps `debian-trixie` × `x86` in its
+  matrix (x86 is dropped only for ubuntu/vs2022/vs2026), gated on an x86 agent
+  being online. GHA has no x86 at all. This may be an intentional drop, but it
+  should be a conscious decision rather than a silent omission.
+- **Generic unit-test output.** Jenkins zips `**/test_output/**` from the
+  unit-test stage; GHA archives only JUnit XML plus the dose `dose_test_output`,
+  so non-dose ctest output is not captured.
+
+Opportunities the GHA setup newly makes practical:
+- **DOPE ODBC tests.** These have not run in Jenkins for a long time, because
+  maintaining a database setup for them was abandoned. GitHub-hosted runners
+  ship with databases preinstalled, so reintroducing an ODBC test job is much
+  more tractable now than it was under Jenkins.
 
 ### Shared Library ABI Classification
 

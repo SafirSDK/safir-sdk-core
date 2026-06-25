@@ -1,0 +1,36 @@
+name: Save Conan cache
+description: >
+  Trim the Conan cache then save it under the key the restore step resolved.
+  Conan keeps each dependency's source/build/download folders next to the final
+  package binary; only the binary is needed on restore, so the trim drops the
+  rest (huge for source-built Boost/Qt) plus stale package binaries not used in
+  this build, keeping the saved cache lean. Skipped on tag/release builds so a
+  one-off release build never overwrites the shared per-branch cache. The
+  matching restore lives in setup-build-env.
+
+inputs:
+  conan-home:
+    description: Conan cache directory to trim and save.
+    required: true
+  cache-key:
+    description: Primary key the restore step resolved (setup-build-env output).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Run always so a failed build still saves a lean cache. Conan refreshes the
+    # last-used time of everything it resolves, so the current deps are kept.
+    - name: Trim Conan cache before saving
+      if: always()
+      shell: bash
+      run: |
+        conan remove "*" --lru=1d --confirm || true
+        conan cache clean "*" || true
+
+    - name: Save Conan cache
+      if: ${{ always() && !startsWith(github.ref, 'refs/tags/') }}
+      uses: actions/cache/save@v5
+      with:
+        path: ${{ inputs.conan-home }}
+        key: ${{ inputs.cache-key }}

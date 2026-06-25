@@ -114,7 +114,14 @@
       <summary>Network fragment size. Messages larger than this value will be splitted up in fragmenst.</summary>
       <name>FragmentSize</name>
       <type>Int32</type>
-      <value>1450</value>
+      <!-- This is the total UDP payload per datagram (header + data), so the IP
+           packet on the wire is FragmentSize + 8 (UDP) + 20 (IP). On GitHub
+           Actions the multicomputer nodes talk over a WireGuard overlay whose
+           wg0 MTU is the WireGuard default of 1420. Keeping FragmentSize at
+           1420 - 28 = 1392 makes each datagram fit the tunnel exactly, so the
+           kernel does not IP-fragment every datagram before WireGuard
+           encapsulates it. -->
+      <value>1392</value>
     </parameter>
 
     <parameter>
