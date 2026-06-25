@@ -92,13 +92,14 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github-token }}
+        PEER_ROLE: ${{ inputs.peer-role }}
       run: |
         set -uo pipefail
         # python's zipfile (vs `unzip`) keeps this identical on Git Bash, which
         # has no unzip.
         if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
         mkdir -p peer
-        name="endpoint-${{ inputs.peer-role }}"
+        name="endpoint-${PEER_ROLE}"
         api="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts"
         # 'gh run download' only sees artifacts of a COMPLETED run, so it can't
         # fetch a sibling job's artifact mid-run. The raw artifacts REST API lists

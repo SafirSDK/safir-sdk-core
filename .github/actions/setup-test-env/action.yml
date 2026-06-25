@@ -36,8 +36,12 @@ runs:
 
     - name: Set up Python venv
       shell: bash
-      run: |
+      run: | # zizmor: ignore[github-env]
         python -m venv --system-site-packages .venv
+        # The values written to GITHUB_ENV/GITHUB_PATH below are static
+        # (GITHUB_WORKSPACE + literal .venv paths), not attacker-derived, so there
+        # is no injection vector. This is the documented way to put the venv on
+        # PATH and point CMake's find_package(Python3) at it across later steps.
         # Export VIRTUAL_ENV (not just PATH) so CMake's find_package(Python3)
         # selects the venv interpreter. Without it, FindPython3 on Windows
         # prefers the registry/system Python and the ctest scripts run with an

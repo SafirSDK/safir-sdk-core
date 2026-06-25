@@ -1,0 +1,12 @@
+# zizmor configuration (https://docs.zizmor.sh/configuration/)
+#
+# unpinned-uses policy: third-party actions must be pinned to a full commit
+# SHA (a repointed tag is a real supply-chain risk), but the first-party
+# actions/* maintained by GitHub are allowed to float on major-version tags so
+# we get their security/bugfix updates without a manual SHA-bump treadmill.
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        "actions/*": ref-pin
+        "*": hash-pin

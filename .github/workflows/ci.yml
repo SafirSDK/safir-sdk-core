@@ -22,14 +22,36 @@ env:
   CLIENT_1_ADDR: "10.68.0.4"
   SLAVE_SUBNET: "10.68.0.0/24"
 
-# checks: write lets the test-summary job publish a Check run with the
-# aggregated results. (That job also needs pull-requests: write for its PR
-# comment, granted in its own job-level permissions block.)
+# Default the whole workflow to read-only. The only job that needs more is
+# test-summary, which grants itself checks: write (to publish the aggregated
+# Check run) and pull-requests: write (its PR comment) in its own job-level
+# permissions block; release likewise grants its own contents: write.
 permissions:
   contents: read
-  checks: write
 
 jobs:
+  # Static security analysis of the workflow/action files themselves (zizmor).
+  # Catches over-broad token permissions, unpinned third-party actions,
+  # template-injection and credential-persistence issues before they merge.
+  # Fast and dependency-light, so it runs as its own up-front job rather than
+  # gating the build matrix; deliberate exceptions are recorded as inline
+  # `# zizmor: ignore[...]` comments and in .github/zizmor.yml.
+  workflow-lint:
+    name: Workflow security lint (zizmor)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        # GH_TOKEN lets zizmor's online audits resolve action refs via the GitHub
+        # API without hitting the anonymous rate limit. Pinned version so a new
+        # zizmor release can't turn the job red without a deliberate bump.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: pipx run zizmor==1.26.1 .github/
+
   build:
     name: ${{ matrix.platform }}-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
@@ -115,6 +137,8 @@ jobs:
           git config --global --add safe.directory '*'
 
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       # Toolchains, Python venv and Conan cache. Shared with the build-examples
       # job via a composite action so the two setups cannot drift apart.
@@ -134,7 +158,7 @@ jobs:
 
       - name: Build and package (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
+        shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
         run: python build\build.py --jenkins --use-studio ${{ matrix.studio }} --arch amd64
 
       - name: Trim and save Conan cache
@@ -184,6 +208,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Install documentation toolchain
         run: |
@@ -310,6 +336,8 @@ jobs:
           git config --global --add safe.directory '*'
 
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Set up build environment
         id: setup-build-env
@@ -343,7 +371,7 @@ jobs:
 
       - name: Build examples (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
+        shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
         run: python build\jenkins_stuff\run_test.py --test build-examples
 
       - name: Trim and save Conan cache
@@ -445,6 +473,8 @@ jobs:
           git config --global --add safe.directory '*'
 
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Set up test environment
         # The dose tests only install a prebuilt package and run it; they never
@@ -468,7 +498,7 @@ jobs:
 
       - name: Run dose tests (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
+        shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
         run: python build\jenkins_stuff\run_test.py --test ${{ matrix.kind }}-tests
 
       - name: Upload test results
@@ -526,6 +556,8 @@ jobs:
             runner: windows-2025-vs2026
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Set up test environment
         uses: ./.github/actions/setup-test-env
@@ -618,7 +650,7 @@ jobs:
 
       - name: Run multicomputer master (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
+        shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
         env:
           WORKSPACE: ${{ github.workspace }}
           LANGUAGES: cpp-cpp-cpp-cpp-cpp
@@ -661,6 +693,8 @@ jobs:
         platform: [ubuntu-noble-amd64, ubuntu-noble-arm64, vs2022, vs2026]
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Download SDK package (debian, for slaves)
         uses: actions/download-artifact@v8
@@ -836,7 +870,12 @@ jobs:
           path: artifacts
 
       - name: Publish consolidated test report
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        # Pinned to a commit SHA (zizmor unpinned-uses): this is the one
+        # third-party action in the workflow, so it carries real supply-chain
+        # risk if its tag were repointed. First-party actions/* are left on
+        # floating major tags (allowed via .github/zizmor.yml). SHA is v2.24.0;
+        # bump both together.
+        uses: EnricoMi/publish-unit-test-result-action@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
         with:
           check_name: Test results
           files: artifacts/**/*.junit.xml

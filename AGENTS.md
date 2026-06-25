@@ -73,8 +73,9 @@ under test on a native runner talks to three debian slave containers on a
 second runner. Every job uploads its JUnit results as artifacts; a final
 `test-summary` job aggregates them into one GitHub Check (via
 `EnricoMi/publish-unit-test-result-action`). A `release` job drafts a GitHub
-release with the installers on version-tag pushes. The whole workflow runs with
-`SAFIR_SKIP_SLOW_TESTS=1`.
+release with the installers on version-tag pushes. A `workflow-lint` job runs
+zizmor over the workflow/action files (see the migration notes below). The whole
+workflow runs with `SAFIR_SKIP_SLOW_TESTS=1`.
 
 **Jenkins** (`Jenkinsfile`) is the canonical release build. Matrix build across:
 - **Platforms**: ubuntu-noble, debian-trixie, vs2022, vs2026
@@ -103,6 +104,14 @@ What has moved over so far:
   PDF), via a standalone `render-docs` job on ubuntu-latest. It runs the
   asciidoctor/dia/dblatex toolchain directly (no container) and uploads the
   rendered docs as an artifact.
+- Workflow security hardening with [zizmor](https://github.com/woodruffw/zizmor),
+  wired in as the `workflow-lint` job (runs `zizmor .github/`, version pinned).
+  **Whenever you edit anything under `.github/` (workflows or composite
+  actions), re-run `zizmor .github/` and keep it clean before committing** — the
+  CI job will fail otherwise. Deliberate exceptions are recorded as inline
+  `# zizmor: ignore[<rule>]` comments with a rationale, plus the `unpinned-uses`
+  policy in `.github/zizmor.yml` (third-party actions must be hash-pinned;
+  first-party `actions/*` may float on major tags).
 
 Not yet migrated / still missing on GitHub Actions:
 - **The full ("slow") unit tests.** GHA runs with `SAFIR_SKIP_SLOW_TESTS=1`, so
@@ -112,11 +121,6 @@ Not yet migrated / still missing on GitHub Actions:
   leaving multi-hour cases inside the unit-test run (a unit test that takes
   hours is not really a unit test). This is a sizeable undertaking and has not
   been started.
-- **Workflow security hardening (zizmor).** The GHA workflows have not been
-  audited with [zizmor](https://github.com/woodruffw/zizmor), the static analysis
-  tool for GitHub Actions security. We want to run it over the workflow/action
-  files and address its findings (e.g. over-broad token permissions, unpinned
-  action references, template-injection risks), ideally wired in as a CI check.
 - **Build-warnings analysis and the quality gate.** Jenkins'
   `archive_and_analyze()` scans `buildlog.html` for GCC, MSBuild, CMake, Java,
   Doxygen and **lintian** (`.deb` packaging) warnings via `scanForIssues`/
