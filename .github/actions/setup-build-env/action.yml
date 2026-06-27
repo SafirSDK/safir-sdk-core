@@ -85,10 +85,13 @@ runs:
       run: |
         # Only the SDK build renders the shipped docs and builds the .deb; the
         # examples build needs none of this.
+        # lintian is only a 'recommends' of devscripts, so --no-install-recommends
+        # drops it; without it debuild silently skips the lintian check that the
+        # warnings-summary job collects (and that Jenkins ran). List it explicitly.
         sudo apt-get install -y --no-install-recommends \
           doxygen graphviz \
           dia dblatex texlive-font-utils ghostscript \
-          devscripts debhelper fakeroot \
+          devscripts debhelper fakeroot lintian \
           asciidoctor cli-common-dev
 
     - name: Install Windows prerequisites

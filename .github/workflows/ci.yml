@@ -220,13 +220,13 @@ jobs:
 
       - name: Render documentation
         # Mirrors Jenkins render_documentation(): standalone in-source docs build.
+        # Tee to buildlog.txt so the warnings-summary job can scan the doxygen and
+        # cmake output for warnings.
         run: |
           set -euo pipefail
           rm -rf rendered_docs
           cd docs
-          cmake . -G Ninja
-          ninja
-          ninja install
+          { cmake . -G Ninja && ninja && ninja install; } 2>&1 | tee ../buildlog.txt
           mv rendered_docs ..
 
       - name: Verify expected documents were produced
@@ -257,6 +257,14 @@ jobs:
         with:
           name: rendered-docs
           path: rendered_docs
+          if-no-files-found: ignore
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: buildlog-docs
+          path: buildlog.txt
           if-no-files-found: ignore
 
   # Build the example apps against the SDK package the build job produced. This
@@ -365,14 +373,16 @@ jobs:
       - name: Stage installer at repo root
         uses: ./.github/actions/stage-installer
 
-      - name: Build examples (Linux)
-        if: runner.os == 'Linux'
-        run: python build/jenkins_stuff/run_test.py --test build-examples
-
-      - name: Build examples (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
-        run: python build\jenkins_stuff\run_test.py --test build-examples
+      # Tee the build output to buildlog.txt so the warnings-summary job can scan
+      # the examples compile for warnings (dobmake-batch runs --verbose, so all
+      # compiler output reaches stdout). bash works on every runner (incl. the
+      # debian container and Windows) and python takes forward-slash paths; the
+      # original cmd shell had no tee. pipefail ties the exit code to run_test.py.
+      - name: Build examples
+        shell: bash
+        run: |
+          set -o pipefail
+          python build/jenkins_stuff/run_test.py --test build-examples 2>&1 | tee buildlog.txt
 
       - name: Trim and save Conan cache
         if: always()
@@ -380,6 +390,14 @@ jobs:
         with:
           conan-home: ${{ matrix.conan_home }}
           cache-key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: buildlog-examples-${{ matrix.platform }}-${{ matrix.arch }}
+          path: buildlog.txt
+          if-no-files-found: ignore
 
   # Run the big dose test suite (243 testcases) against the installed SDK package,
   # in both the "standalone" (one node) and "multinode" (four nodes, all on this
@@ -893,6 +911,85 @@ jobs:
           # not a test runner, so the red belongs on the check, not on the job.
           fail_on: test failures
           action_fail: false
+
+  # Collect the compiler/cmake/doxygen/lintian warnings from every build and
+  # publish one consolidated "Build warnings" Check with source-linked
+  # annotations - the GitHub-Actions replacement for Jenkins' warnings-ng
+  # analysis (archive_and_analyze in the Jenkinsfile). Each build/examples/docs
+  # job uploads its log as a buildlog-* artifact; buildlog_to_text.py unwraps it
+  # and DROPS warnings from Conan dependency builds (only our own tree's
+  # diagnostics survive), and lintian_to_sarif.py extracts the .deb packaging
+  # warnings (Quality Monitor has no lintian parser). Runs on always() so it
+  # reports even when a build failed. Summary-only: no quality-gates are set, so
+  # the Check shows the warnings but the job stays green (GitHub has no
+  # "unstable" state, and this matches test-summary's action_fail:false model).
+  warnings-summary:
+    name: Warnings summary
+    needs: [build, build-examples, render-docs]
+    if: always()
+    runs-on: ubuntu-latest
+    # checks: write to publish the Check; pull-requests: write for the PR comment
+    # (a job-level block replaces, not extends, the workflow grant).
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Download all build-log artifacts
+        uses: actions/download-artifact@v8
+        with:
+          # buildlog-<platform>-<arch> (SDK build), buildlog-examples-* and
+          # buildlog-docs. Each lands in its own subdir under buildlogs/.
+          pattern: 'buildlog-*'
+          path: buildlogs
+
+      - name: Extract our-code warnings from the build logs
+        run: |
+          set -euo pipefail
+          # buildlogs/<artifact>/buildlog.{html,txt} -> buildlogs/<artifact>.log,
+          # Conan-dependency warnings stripped, our paths made repo-relative.
+          python build/buildlog_to_text.py --root buildlogs
+          # The .deb packaging warnings (lintian + dpkg/dh) have no analysis-model
+          # parser, so convert them to SARIF.
+          python build/packaging_to_sarif.py --root buildlogs -o buildlogs/packaging.sarif
+
+      - name: Detect pull request
+        id: pr
+        uses: jwalton/gh-find-current-pr@f3d61b485d2801773f7a07b2aaa3306bd8f8e653 # v1.3.5
+
+      - name: Publish build-warnings summary
+        uses: uhafner/quality-monitor@0100da6973a1498aad89af676852a8c788d397f8 # v4.15.0
+        with:
+          checks-name: Build warnings
+          pr-number: ${{ steps.pr.outputs.number }}
+          # Patterns MUST be **/-prefixed: Quality Monitor resolves them as
+          # recursive globs and a bare "buildlogs/*.log" matches nothing.
+          # No quality-gates key => warnings are reported but never fail the job.
+          config: |
+            {
+              "analysis": [
+                {
+                  "name": "Build warnings",
+                  "id": "warnings",
+                  "tools": [
+                    { "id": "gcc",     "pattern": "**/buildlog-*.log" },
+                    { "id": "msbuild", "pattern": "**/buildlog-*.log" },
+                    { "id": "java",    "pattern": "**/buildlog-*.log" },
+                    { "id": "doxygen", "pattern": "**/buildlog-*.log" },
+                    { "id": "cmake",   "pattern": "**/buildlog-*.log" },
+                    { "id": "sarif",   "name": "Packaging", "pattern": "**/packaging.sarif" }
+                  ]
+                }
+              ]
+            }
 
   # On a version-tag push, create a DRAFT GitHub release with the distributable
   # installers the build job produced: the Windows .exe installers as-is, and the

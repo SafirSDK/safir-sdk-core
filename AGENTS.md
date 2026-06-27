@@ -112,6 +112,26 @@ What has moved over so far:
   `# zizmor: ignore[<rule>]` comments with a rationale, plus the `unpinned-uses`
   policy in `.github/zizmor.yml` (third-party actions must be hash-pinned;
   first-party `actions/*` may float on major tags).
+- **Build-warnings analysis**, via a `warnings-summary` job that replaces
+  Jenkins' `archive_and_analyze()`. Each build/examples/docs job uploads its log
+  as a `buildlog-*` artifact; `build/buildlog_to_text.py` unwraps it and **drops
+  warnings from Conan dependency builds** — both by path (dependency/system
+  paths outside the checkout) and by stripping the whole `conan install` …
+  `Finalizing install` section (where dependency CMake/Boost/meson warnings have
+  relative paths indistinguishable from ours) — leaving only our own tree's
+  diagnostics, paths made repo-relative for source links.
+  `build/packaging_to_sarif.py` extracts the `.deb` packaging warnings (lintian
+  plus the `dpkg-*`/`dh_*` tooling warnings) to SARIF, since the analysis tool
+  has no parser for them. [Quality
+  Monitor](https://github.com/uhafner/quality-monitor) — same `analysis-model`
+  parsers as the Jenkins warnings-ng plugin — then publishes one "Build warnings"
+  Check with source-linked annotations covering GCC, MSBuild, CMake, Java,
+  Doxygen and the packaging warnings. lintian was silently absent from the Linux
+  builds (it is only a `devscripts` *recommends*, dropped by
+  `--no-install-recommends`); it is now installed in `setup-build-env` so
+  `debuild` runs it as it does on Jenkins. (ALINK `A99999` .dll.policy
+  resource-path warnings from the .NET assembly linker are deliberately not
+  collected — they are cosmetic.)
 
 Not yet migrated / still missing on GitHub Actions:
 - **The full ("slow") unit tests.** GHA runs with `SAFIR_SKIP_SLOW_TESTS=1`, so
@@ -121,14 +141,14 @@ Not yet migrated / still missing on GitHub Actions:
   leaving multi-hour cases inside the unit-test run (a unit test that takes
   hours is not really a unit test). This is a sizeable undertaking and has not
   been started.
-- **Build-warnings analysis and the quality gate.** Jenkins'
-  `archive_and_analyze()` scans `buildlog.html` for GCC, MSBuild, CMake, Java,
-  Doxygen and **lintian** (`.deb` packaging) warnings via `scanForIssues`/
-  `publishIssues`, and applies a quality gate (`threshold: 1, TOTAL → unstable`)
-  so a single new warning marks the build unstable. GHA only uploads
-  `buildlog.html` as an artifact; it never parses it, so there is no warnings
-  gate and no lintian check. This is the main quality signal Jenkins enforces
-  that GHA does not.
+- **The build-warnings quality gate.** Jenkins applied a quality gate
+  (`threshold: 1, TOTAL → unstable`) so a single new warning marked the build
+  unstable. The GHA `warnings-summary` job (above) reports the warnings but sets
+  no quality gate, because GitHub has no "unstable" build state — the Check goes
+  green and the warnings are informational. Enforcing a gate would mean either
+  failing the job outright (stricter than Jenkins ever was) or publishing a
+  neutral Check via the Checks API; a gate can be turned on later by adding a
+  `quality-gates` block to the job's Quality Monitor config.
 
 Deliberate-or-pending coverage differences (decide before retiring Jenkins):
 - **`PACKAGE_TYPE = DebugOnly`.** Jenkins runs a `Full × DebugOnly` axis across
@@ -142,6 +162,18 @@ Deliberate-or-pending coverage differences (decide before retiring Jenkins):
 - **Generic unit-test output.** Jenkins zips `**/test_output/**` from the
   unit-test stage; GHA archives only JUnit XML plus the dose `dose_test_output`,
   so non-dose ctest output is not captured.
+- **Conan cache-save warnings.** Every build/examples job ends with a
+  `##[warning]Cache save failed … Unable to reserve cache with key … another
+  job may be creating this cache`. This is benign and pre-dates the warnings
+  work: the Conan cache key (`conan-v2-<platform>-<arch>-<hash>`) only changes
+  when dependencies change, and GitHub cache keys are write-once — so the first
+  run on a branch saves the cache and every later run with unchanged deps is
+  rejected because the key already exists (it is *not* a race between matrix
+  rows; each platform has its own key). Harmless, but the yellow annotation is
+  noisy. It cannot be filtered by the warnings pipeline (it is a runner
+  annotation, never written to `buildlog.html`); silencing it would mean making
+  the cache step save only on a miss (e.g. skip save when the restore was an
+  exact hit). Left as a follow-up.
 
 Opportunities the GHA setup newly makes practical:
 - **DOPE ODBC tests.** These have not run in Jenkins for a long time, because
