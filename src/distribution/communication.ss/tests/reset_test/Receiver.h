@@ -93,7 +93,6 @@ public:
     {
         m_com.Stop();
         m_work.reset();
-        m_io.restart();
         m_threads.join_all();
     }
 
