@@ -83,7 +83,9 @@ namespace
         ,m_deliveryHandler(ioContext, m_me.nodeId, m_protocol, m_nodeTypes[nodeTypeId]->SlidingWindowSize())
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                   [this](const char* d, size_t s, const bool mc){return OnRecv(d,s,mc);},
-                  [this](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
+                  [this](){const auto undelivered=m_deliveryHandler.NumberOfUndeliveredMessages();
+                           lllog(9)<<m_logPrefix.c_str()<<L"ReceiverReady check: NumberOfUndeliveredMessages="<<undelivered<<L" (limit "<<Parameters::MaxNumberOfUndelivered<<L")"<<std::endl;
+                           return undelivered<Parameters::MaxNumberOfUndelivered;})
     {        
         auto safirInstance = Safir::Utilities::Internal::Expansion::GetSafirInstance();
 
