@@ -9,6 +9,16 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Serialize CI per branch/ref: only one run per branch executes at a time, and a
+# new push waits for the in-progress run to finish instead of cancelling it.
+# These builds are expensive, and not cancelling preserves the Conan/build cache
+# reuse within a branch. If several commits stack up while a run is in progress,
+# only the newest stays queued - the older still-pending run is superseded (so
+# we skip intermediate commits rather than building every one).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   SAFIR_SKIP_SLOW_TESTS: "1"
   # Multicomputer overlay address plan (10.68.x.y so the existing 1*.*68.*.* .dou
@@ -942,6 +952,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
+
+      # The buildlog/packaging parsers below have no CMake/CTest coverage (they
+      # are CI tooling, not shippable code), so guard them with their own unit
+      # tests here before we trust their output.
+      - name: Test the warnings parsers
+        run: python -m unittest discover -s build -p 'test_*.py' -v
 
       - name: Download all build-log artifacts
         uses: actions/download-artifact@v8

@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-.PHONY: override_dh_auto_install install_runtime install_tools install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_strip override_dh_compress
+.PHONY: override_dh_auto_install install_runtime install_tools install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_cligacpolicy override_dh_strip override_dh_compress
 
 
 #upstream wants to control compilation flags
@@ -32,6 +32,18 @@ override_dh_auto_configure:
 
 %:
 	dh $@ --buildsystem=cmake+ninja --with=cli
+
+# We DO install our .NET/mono assemblies and their publisher-policy assemblies
+# into the GAC (see the *.installcligac files and the Policy.*.dll generation in
+# src/cmake/CSharpMacros.cmake). But we generate that policy ourselves and register
+# it via dh_installcligac. dh_cligacpolicy is the alternative, config-driven way to
+# generate GAC policy: it only acts on a package that has a debian/<package>.cligacpolicy
+# file, and skips any package without one. We have none, so it is a no-op for us
+# apart from its build-dep check, which literal-matches the exact string
+# "cli-common-dev (>= 0.5.7)" and so cannot coexist with dh_makeclilibs' proper
+# "(>= 0.8~)" requirement on the same line. Skip the no-op tool to drop its spurious
+# warning; we keep (>= 0.8~) for dh_makeclilibs and dh_clideps.
+override_dh_cligacpolicy:
 
 override_dh_auto_install: install_runtime install_tools install_development install_testsuite
 

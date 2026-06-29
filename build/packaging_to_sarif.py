@@ -63,12 +63,31 @@ _DEBHELPER_RE = re.compile(r"^(?P<tool>(?:dpkg-[a-z]+|dh_[a-z_]+)): warning: (?P
 # Trailing "[some/path]" in a lintian message names the offending file.
 _LOCATION_RE = re.compile(r"\[([^\]]+)\]\s*$")
 
+# Known-benign packaging lines to drop. We only suppress findings that are
+# provably outside our control and provably harmless, so the report can stay
+# completely clean:
+#
+# * dpkg-shlibdeps "diversions involved" is emitted because libc6 diverts the
+#   dynamic loader /lib64/ld-linux-x86-64.so.2 -> *.usr-is-merged as part of the
+#   Debian /usr-merge (DEP-17) transition. dpkg-shlibdeps is conservative and
+#   warns whenever any diversion is in play, but the libc6 dependency it computes
+#   is correct. It originates in the build distro's libc packaging, not in our
+#   debian/* (dpkg bug #1035904), so there is nothing we can fix here. The
+#   follow-up " diversion by libc6 ..." detail lines have no "tool: warning:"
+#   prefix and are already ignored.
+_IGNORED_RES = (
+    re.compile(r"^dpkg-shlibdeps: warning: diversions involved - output may be incorrect$"),
+)
+
 _SEVERITY = {"E": "error", "W": "warning"}
 
 
 def _parse_line(line):
     """Return a finding dict for a packaging warning line, or None."""
     stripped = line.rstrip()
+
+    if any(ignore.match(stripped) for ignore in _IGNORED_RES):
+        return None
 
     match = _LINTIAN_RE.match(stripped)
     if match is not None:

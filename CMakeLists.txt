@@ -148,24 +148,31 @@ foreach (line IN LISTS version_strings)
   endif()
 endforeach()
 
-# Get git revision for non-release builds
+# Get git revision for non-release builds.
+# The revision can be injected from the outside (-DSAFIR_GIT_REVISION=...); the
+# Debian package build does this because it compiles from a "git archive"
+# tarball with no .git of its own. Only query git when no override was provided
+# (clobbering it here would also shadow the cache value for subdirectories like
+# lluf_config_dump that read SAFIR_GIT_REVISION).
 # Use find_program instead of find_package(Git) to avoid triggering the Conan
 # provider's find_package override, which would run conan install before
 # CMAKE_CXX_STANDARD is set (causing it to default to C++14).
-find_program(GIT_EXECUTABLE git DOC "Git executable")
-set(SAFIR_GIT_REVISION "")
-if (NOT SAFIR_VERSION_SUFFIX STREQUAL "" AND GIT_EXECUTABLE)
-  execute_process(
-    COMMAND "${GIT_EXECUTABLE}" describe --always --abbrev=7
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    OUTPUT_VARIABLE SAFIR_GIT_REVISION
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_QUIET
-    RESULT_VARIABLE GIT_RESULT
-  )
-  if (GIT_RESULT)
-    message(WARNING "Failed to obtain git revision. Version will not include git hash.")
-    set(SAFIR_GIT_REVISION "")
+if (NOT DEFINED SAFIR_GIT_REVISION)
+  find_program(GIT_EXECUTABLE git DOC "Git executable")
+  set(SAFIR_GIT_REVISION "")
+  if (NOT SAFIR_VERSION_SUFFIX STREQUAL "" AND GIT_EXECUTABLE)
+    execute_process(
+      COMMAND "${GIT_EXECUTABLE}" describe --always --abbrev=7
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+      OUTPUT_VARIABLE SAFIR_GIT_REVISION
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_QUIET
+      RESULT_VARIABLE GIT_RESULT
+    )
+    if (GIT_RESULT)
+      message(WARNING "Failed to obtain git revision. Version will not include git hash.")
+      set(SAFIR_GIT_REVISION "")
+    endif()
   endif()
 endif()
 
@@ -216,6 +223,36 @@ function (SAFIR_INSTALL_PYTHON)
     ${_RENAME_ARG})
 endfunction()
 
+#
+# This function installs one or more private, import-only Python modules: helper
+# modules that are never executed directly, only imported by our entry-point
+# scripts. Contrast with SAFIR_INSTALL_PYTHON above, which installs *executable*
+# entry points into bin/. Import-only modules are installed as plain files (no
+# execute bit, .py extension kept) into the shared SAFIR_INSTALL_DESTINATION_PYTHON
+# directory, which the entry-point scripts add to sys.path themselves. Keeping
+# them out of bin/ (a PATH directory) avoids exposing non-executable .py files to
+# users, along with the lintian no-manual-page / script-with-language-extension
+# warnings that follow.
+#
+# Usage: SAFIR_INSTALL_PYTHON_MODULE(FILES <file> [<file> ...]
+#                                    [COMPONENT <component>])
+#
+function (SAFIR_INSTALL_PYTHON_MODULE)
+  cmake_parse_arguments(INST "" "COMPONENT" "FILES" ${ARGN})
+
+  if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL_PYTHON_MODULE '${INST_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  if (NOT INST_FILES)
+    message(FATAL_ERROR "SAFIR_INSTALL_PYTHON_MODULE requires at least one FILES argument")
+  endif()
+
+  INSTALL(FILES ${INST_FILES}
+    DESTINATION ${SAFIR_INSTALL_DESTINATION_PYTHON}
+    COMPONENT ${INST_COMPONENT})
+endfunction()
+
 MESSAGE(STATUS "CMAKE_SIZEOF_VOID_P = ${CMAKE_SIZEOF_VOID_P}")
 MESSAGE(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
@@ -233,6 +270,10 @@ set(CMAKE_INSTALL_MESSAGE LAZY)
 SET(SAFIR_INSTALL_DESTINATION_INCLUDE include)
 SET(SAFIR_INSTALL_DESTINATION_BIN bin)
 SET(SAFIR_INSTALL_DESTINATION_LIB lib)
+#Shared private directory for import-only Python helper modules (see
+#SAFIR_INSTALL_PYTHON_MODULE). Identical on both platforms, so every installed
+#entry-point script in bin/ finds it at the same relative path (../lib/...).
+SET(SAFIR_INSTALL_DESTINATION_PYTHON lib/safir-sdk-core/python)
 
 if (UNIX)
   SET(SAFIR_INSTALL_DESTINATION_CMAKE lib/cmake/SafirSDKCore)
@@ -314,12 +355,10 @@ SAFIR_INSTALL_PYTHON(
   RENAME dobmake-batch.py
   COMPONENT Development)
 
-# dobmake-batch imports safir_build_common; it must sit next to the script in bin/
-# so it resolves via the script's own directory on sys.path. Keep the .py extension
-# (it is an imported module, not an executable entry point) and do not mark it
-# executable.
-INSTALL(FILES build/safir_build_common.py
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+# dobmake-batch imports safir_build_common, a private import-only module;
+# dobmake-batch adds the shared python dir to sys.path itself.
+SAFIR_INSTALL_PYTHON_MODULE(
+  FILES build/safir_build_common.py
   COMPONENT Development)
 
 INSTALL(FILES COPYING.txt

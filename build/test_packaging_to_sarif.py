@@ -32,8 +32,10 @@ import unittest
 
 import packaging_to_sarif
 
-# A real slice of the .deb packaging output: two lintian warnings plus the
-# dpkg/dh tooling warnings that appear during the package build.
+# A real slice of the .deb packaging output: two lintian warnings, the benign
+# dpkg-shlibdeps "diversions involved" line (suppressed as known noise), plus the
+# dpkg/dh tooling warnings that appear during the package build. Of these five
+# lines, four become findings - the diversions line is dropped.
 REAL = ("W: safir-sdk-core-dev: no-manual-page [usr/bin/safir_build_common.py]\n"
         "W: safir-sdk-core-dev: script-with-language-extension [usr/bin/safir_build_common.py]\n"
         "dpkg-shlibdeps: warning: diversions involved - output may be incorrect\n"
@@ -64,16 +66,24 @@ class ParseLintianTest(unittest.TestCase):
 
 class ParseDebhelperTest(unittest.TestCase):
 
-    def test_dpkg_shlibdeps_warning(self):
+    def test_dpkg_shlibdeps_real_warning_still_reported(self):
+        # A genuine dpkg-shlibdeps warning must still surface; only the specific
+        # benign "diversions involved" line is suppressed.
         findings = packaging_to_sarif.parse_logs(
-            ["dpkg-shlibdeps: warning: diversions involved - output may be incorrect"])
+            ["dpkg-shlibdeps: warning: package could be avoiding an unnecessary dependency"])
         self.assertEqual(len(findings), 1)
-        finding = findings[0]
-        self.assertEqual(finding["tool"], "dpkg-shlibdeps")
-        self.assertEqual(finding["rule"], "dpkg-shlibdeps")
-        self.assertEqual(finding["severity"], "warning")
-        self.assertEqual(finding["uri"], "dpkg-shlibdeps")
-        self.assertIn("diversions involved", finding["text"])
+        self.assertEqual(findings[0]["tool"], "dpkg-shlibdeps")
+
+    def test_diversions_warning_suppressed(self):
+        # libc6 /usr-merge diversion noise (dpkg bug #1035904) - not our bug,
+        # harmless, dropped so the report stays clean.
+        findings = packaging_to_sarif.parse_logs([
+            "dpkg-shlibdeps: warning: diversions involved - output may be incorrect\n"
+            " diversion by libc6 from: /lib64/ld-linux-x86-64.so.2\n"
+            "dpkg-shlibdeps: warning: diversions involved - output may be incorrect\n"
+            " diversion by libc6 to: /lib64/ld-linux-x86-64.so.2.usr-is-merged\n"
+        ])
+        self.assertEqual(findings, [])
 
     def test_dh_warning(self):
         findings = packaging_to_sarif.parse_logs(
@@ -102,9 +112,10 @@ class ParseCommonTest(unittest.TestCase):
         self.assertEqual(findings, [])
 
     def test_dedupe_across_logs(self):
-        # The same findings come from three Linux logs -> one of each.
+        # The same findings come from three Linux logs -> one of each (the
+        # diversions line in REAL is suppressed, so four not five).
         findings = packaging_to_sarif.parse_logs([REAL, REAL, REAL])
-        self.assertEqual(len(findings), 5)
+        self.assertEqual(len(findings), 4)
 
     def test_distinct_files_not_deduped(self):
         findings = packaging_to_sarif.parse_logs(
@@ -119,13 +130,13 @@ class SarifTest(unittest.TestCase):
         self.assertEqual(sarif["version"], "2.1.0")
         run = sarif["runs"][0]
         self.assertEqual(run["tool"]["driver"]["name"], "Debian packaging")
-        self.assertEqual(len(run["results"]), 5)
+        self.assertEqual(len(run["results"]), 4)
         # Every result's ruleId must be declared in the driver's rule list.
         rule_ids = {rule["id"] for rule in run["tool"]["driver"]["rules"]}
         for result in run["results"]:
             self.assertIn(result["ruleId"], rule_ids)
         self.assertIn("no-manual-page", rule_ids)
-        self.assertIn("dpkg-shlibdeps", rule_ids)
+        self.assertIn("dh_cligacpolicy", rule_ids)
 
 
 class MainTest(unittest.TestCase):

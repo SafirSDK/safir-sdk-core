@@ -30,14 +30,24 @@ project in the current directory using the same logic as the Safir SDK Core
 build, but it deliberately does NOT offer the --package option. Packaging is a
 concern of the SDK build itself (build.py) only, which keeps the SDK-specific
 release machinery (including the dual-ABI fast path) out of reach of user
-builds. The shared build logic lives in safir_build_common.py, which is
-installed alongside this script so 'import safir_build_common' resolves via the
-script's own directory on sys.path.
+builds. The shared build logic lives in safir_build_common.py, a private,
+import-only module (never run directly). In an installed tree it lives in the
+shared private python dir lib/safir-sdk-core/python (deliberately out of bin/, so
+it is not exposed on PATH); in the source tree it sits next to this script. We
+add both candidate locations to sys.path so 'import safir_build_common' resolves
+in either layout.
 
 Run this from the directory containing your project's CMakeLists.txt.
 """
+import os
 import sys
 import argparse
+
+_script_dir = os.path.dirname(os.path.realpath(__file__))
+for _candidate in (_script_dir,
+                   os.path.join(_script_dir, "..", "lib", "safir-sdk-core", "python")):
+    if _candidate not in sys.path:
+        sys.path.insert(0, _candidate)
 
 import safir_build_common as common
 

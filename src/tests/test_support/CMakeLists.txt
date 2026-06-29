@@ -3,9 +3,9 @@
 #All other uses of these classes should access them from the source tree, using
 #SET_SAFIR_TEST_PROPERTIES
 
-INSTALL(FILES
+SAFIR_INSTALL_PYTHON_MODULE(
+  FILES
   python/syslog_server.py
   python/testenv.py
   python/output.py
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/python
   COMPONENT TestSuite)
