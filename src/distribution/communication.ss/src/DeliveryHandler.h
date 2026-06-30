@@ -99,7 +99,11 @@ namespace Com
 
         void Start()
         {
-            m_numberOfUndeliveredMessages=0;
+            // Do NOT reset m_numberOfUndeliveredMessages here. The counter is incremented
+            // on m_receiveStrand and decremented inside a lambda on m_deliverStrand; the
+            // two strands are not synchronised across Stop/Start. Zeroing here races with
+            // in-flight decrements from before Stop, which then underflow the unsigned
+            // counter to UINT_MAX and permanently freeze the reader.
             m_running=true;
         }
 
