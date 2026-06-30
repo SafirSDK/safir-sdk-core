@@ -42,6 +42,7 @@ import itertools
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "..", "tests", "test_support", "python"))
 from output import log
+from communication_test_support import set_network_state, check_multicast_loopback
 
 FORMATTER = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
@@ -193,21 +194,11 @@ class Node():
 
     def disconnect(self):
         log(f"Disconnecting node {self.node_id}")
-        self.__set_network_state(False)
+        set_network_state(False, self.session_id)
 
     def reconnect(self):
         log(f"Reconnecting node {self.node_id}")
-        self.__set_network_state(True)
-
-    def __set_network_state(self, state):
-        cmd = ("up " if state else "down ") + self.session_id
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        #Send three times to make it super likely that it will get there.
-        sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
-        time.sleep(0.01)
-        sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
-        time.sleep(0.01)
-        sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
+        set_network_state(True, self.session_id)
 
     @staticmethod
     def __compare_states(state, expected):
@@ -2100,8 +2091,10 @@ def parse_arguments():
 
 def main():
     test_permutations()
-    
+
     args = parse_arguments()
+
+    check_multicast_loopback()
 
     rmdir("test_output")
     mkdir("test_output")

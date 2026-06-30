@@ -27,6 +27,7 @@ import os, sys, argparse, socket, glob, logging, uuid, time
 import asyncio, json, websockets
 from contextlib import contextmanager
 from testenv import TestEnv, TestEnvStopper, log
+from communication_test_support import async_set_network_state as set_network_state, check_multicast_loopback
 
 failed_tests = set()
 # ===================================================================
@@ -71,16 +72,6 @@ def launch_node(args, safir_instance, node_id):
     finally:
         log("--- kill node" + str(node_id))
         env.killprocs()
-
-# Simulate network up/down
-async def set_network_state(state, session_id):
-    cmd = ("up " if state == True else "down ") + session_id
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
-    await asyncio.sleep(0.1)
-    sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
-    await asyncio.sleep(0.1)
-    sock.sendto(bytes(cmd, "utf-8"), ("239.6.6.6", 16666))
 
 def parse_arguments():
     parser = argparse.ArgumentParser("test script")
@@ -718,6 +709,7 @@ async def two_normal_two_light_toggle_network_many_times_on_both_light(args):
 # main
 # ===========================================
 async def main(args):
+    check_multicast_loopback()
     await one_normal_one_light_detach_reattach_light(args)                      # ok
     await one_normal_two_light_detach_reattach_one_light(args)                  # ok
     await one_normal_two_light_restart_normal(args)                             # ok

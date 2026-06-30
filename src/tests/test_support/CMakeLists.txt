@@ -8,4 +8,5 @@ SAFIR_INSTALL_PYTHON_MODULE(
   python/syslog_server.py
   python/testenv.py
   python/output.py
+  python/communication_test_support.py
   COMPONENT TestSuite)
