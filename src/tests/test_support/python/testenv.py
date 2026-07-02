@@ -261,13 +261,15 @@ class TestEnvInstalled(TestEnv):
     production binaries (safir_control, dose_main, dope_main, safir_show_config)
     live in bin, on the PATH. Resolves each binary by name from the PATH (failing
     fast with a clear error if one is missing) and forwards to TestEnv. Pass
-    with_dope=False for a system without dope_main. All other keyword arguments
-    (start_syslog_server, ignore_control_cmd, ...) are passed straight through.
+    with_dope=False for a system without dope_main. Pass dope_main_name to run a
+    stand-in for dope_main (e.g. "signal_persistence_ready" for tests where dope is
+    not involved). All other keyword arguments (start_syslog_server,
+    ignore_control_cmd, ...) are passed straight through.
     """
-    def __init__(self, with_dope=True, **kwargs):
+    def __init__(self, with_dope=True, dope_main_name="dope_main", **kwargs):
         super().__init__(
             safir_control=_resolve_installed_binary("safir_control"),
             dose_main=_resolve_installed_binary("dose_main"),
-            dope_main=_resolve_installed_binary("dope_main") if with_dope else None,
+            dope_main=_resolve_installed_binary(dope_main_name) if with_dope else None,
             safir_show_config=_resolve_installed_binary("safir_show_config"),
             **kwargs)
