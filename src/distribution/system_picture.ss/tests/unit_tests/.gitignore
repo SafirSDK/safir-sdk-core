@@ -10,3 +10,4 @@ RawHandler_test
 RawChanges_test
 ElectionHandler_test
 Coordinator_test
+run_election_handler_tests.py

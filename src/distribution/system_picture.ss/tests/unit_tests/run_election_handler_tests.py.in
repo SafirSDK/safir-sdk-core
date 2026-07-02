@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+###############################################################################
+#
+# Copyright Saab AB, 2014, 2026 (http://safirsdkcore.com)
+#
+# Created by: Lars Hagstrom (lars@foldspace.nu)
+#
+###############################################################################
+#
+# This file is part of Safir SDK Core.
+#
+# Safir SDK Core is free software: you can redistribute it and/or modify
+# it under the terms of version 3 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# Safir SDK Core is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+#
+###############################################################################
+import os
+import sys
+import argparse
+import subprocess
+
+#This relies on the fact that we're installed in the bin directory on both linux and windows.
+install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
+from testenv import log
+
+#The test binary is installed in bin, which is on the PATH. It is a self-contained
+#Boost.Test binary that needs no runtime configuration.
+ELECTION_HANDLER_TEST = "ElectionHandler_test"
+
+#Each entry is a named case and the extra command line arguments to pass to the
+#test binary. The "--" separates Boost.Test's own arguments from the custom
+#--overflows argument that the test parses itself.
+CASES = (
+    ("plain", ()),
+    ("with_overflows", ("--", "--overflows")),
+)
+
+
+def run():
+    failed = []
+    for name, extra_args in CASES:
+        log("=" * 60)
+        log("Running ElectionHandler test case: " + name)
+        result = subprocess.call((ELECTION_HANDLER_TEST,) + extra_args)
+        if result != 0:
+            log("*** Case '%s' failed with return code %d" % (name, result))
+            failed.append(name)
+    return failed
+
+
+def main():
+    failed = run()
+    log("=" * 60)
+    if failed:
+        log("*** FAILURE: %d election handler test case(s) failed: %s"
+            % (len(failed), ", ".join(failed)))
+        return 1
+    log("*** SUCCESS: all election handler test cases passed")
+    return 0
+
+
+if __name__ == "__main__":
+    argparse.ArgumentParser(
+        description="System-level test that runs the ElectionHandler Boost.Test "
+        "binary in its two variants (plain and with simulated send overflows). "
+        "The binary is self-contained and needs no runtime configuration.").parse_args()
+    sys.exit(main())
