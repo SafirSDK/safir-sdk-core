@@ -26,8 +26,23 @@
 import os, sys, argparse, socket, glob, logging, uuid, time
 import asyncio, json, websockets
 from contextlib import contextmanager
-from testenv import TestEnv, TestEnvStopper, log
+
+#This relies on the fact that we're installed in the bin directory on both linux and windows.
+install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
+from testenv import TestEnvInstalled, TestEnvStopper, log
 from communication_test_support import async_set_network_state as set_network_state, check_multicast_loopback
+
+#The safir_web binary we launch is installed in bin, which is on the PATH.
+SAFIR_WEB = "safir_web"
+
+#Set up to use our own test configuration and point the typesystem at the
+#installed dou files. The last part of each path is baked in by cmake during
+#configuration/installation.
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(
+    install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@", "light_nodes", "test_config")
+os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(
+    install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
 
 failed_tests = set()
 # ===================================================================
@@ -52,36 +67,31 @@ def test_case(name):
         log("--- Finished: " + name + " ---")
 
 @contextmanager
-def launch_node(args, safir_instance, node_id):
+def launch_node(safir_instance, node_id):
     try:
         session_id = str(uuid.uuid4())
         os.environ["SAFIR_COM_NETWORK_SIMULATION"] = session_id # Enable network simulation
         os.environ["SAFIR_INSTANCE"] = str(safir_instance)
         log("--- Launching node", str(node_id))
-        env = TestEnv(args.safir_control,
-                    args.dose_main,
-                    args.dope_main if safir_instance == 1 else None,
-                    args.safir_show_config,
+        env = TestEnvInstalled(with_dope = safir_instance == 1,
                     start_syslog_server = True if safir_instance == 1 else False,
                     ignore_control_cmd = True if safir_instance == 1 else False,
                     wait_for_persistence = safir_instance < 3,
                     force_node_id = node_id)
         env.session_id = session_id
-        env.launchProcess("safir_web", args.safir_web)
+        env.launchProcess("safir_web", SAFIR_WEB)
         yield env
     finally:
         log("--- kill node" + str(node_id))
         env.killprocs()
 
 def parse_arguments():
-    parser = argparse.ArgumentParser("test script")
-    parser.add_argument("--safir-control", required=True)
-    parser.add_argument("--dose_main", required=True)
-    parser.add_argument("--dope_main", required=True)
-    parser.add_argument("--safir-show-config", required=True)
-    parser.add_argument("--safir_web", required=True)
-    arguments = parser.parse_args()
-    return arguments
+    parser = argparse.ArgumentParser(
+        description="Light-node system test (keep-state variant): starts normal "
+        "and light Safir nodes and exercises detach/reattach and restart scenarios "
+        "where light nodes keep their state on detach. Nodes are driven via "
+        "safir_control and observed through a safir_web websocket client.")
+    return parser.parse_args()
 
 # Read json method
 def method(msg):
@@ -286,10 +296,10 @@ class SafirApp:
 # ===================================================================
 # Test cases
 # ===================================================================
-async def one_normal_one_light_detach_reattach_light_changed_entities(args):
+async def one_normal_one_light_detach_reattach_light_changed_entities():
     with test_case("one_normal_one_light_detach_reattach_light_changed_entities"),\
-        launch_node(args, safir_instance=1, node_id=1) as node1,\
-        launch_node(args, safir_instance=5, node_id=5) as node5:
+        launch_node(safir_instance=1, node_id=1) as node1,\
+        launch_node(safir_instance=5, node_id=5) as node5:
     
         app1 = SafirApp(safir_instance=1, node_id=1)
         app5 = SafirApp(safir_instance=5, node_id=5)
@@ -349,10 +359,10 @@ async def one_normal_one_light_detach_reattach_light_changed_entities(args):
 
         await asyncio.gather(app1.stop(), app5.stop())
 
-async def one_normal_one_light_detach_reattach_light_changed_registrations(args):
+async def one_normal_one_light_detach_reattach_light_changed_registrations():
     with test_case("one_normal_one_light_detach_reattach_light_changed_registrations"),\
-        launch_node(args, safir_instance=1, node_id=1) as node1,\
-        launch_node(args, safir_instance=5, node_id=5) as node5:
+        launch_node(safir_instance=1, node_id=1) as node1,\
+        launch_node(safir_instance=5, node_id=5) as node5:
     
         app1 = SafirApp(safir_instance=1, node_id=1)
         app5 = SafirApp(safir_instance=5, node_id=5)
@@ -407,10 +417,10 @@ async def one_normal_one_light_detach_reattach_light_changed_registrations(args)
 
         await asyncio.gather(app1.stop(), app5.stop())
 
-async def one_normal_one_light_detach_reattach_light_big_pool(args):
+async def one_normal_one_light_detach_reattach_light_big_pool():
     with test_case("one_normal_one_light_detach_reattach_light_big_pool"),\
-        launch_node(args, safir_instance=1, node_id=1) as node1,\
-        launch_node(args, safir_instance=5, node_id=5) as node5:
+        launch_node(safir_instance=1, node_id=1) as node1,\
+        launch_node(safir_instance=5, node_id=5) as node5:
     
         app1 = SafirApp(safir_instance=1, node_id=1)
         app5 = SafirApp(safir_instance=5, node_id=5)
@@ -497,12 +507,12 @@ async def one_normal_one_light_detach_reattach_light_big_pool(args):
 
         await asyncio.gather(app1.stop(), app5.stop())
 
-async def two_normal_two_light_detach_reattach_light(args):
+async def two_normal_two_light_detach_reattach_light():
     with test_case("two_normal_two_light_detach_reattach_light"),\
-        launch_node(args, safir_instance=1, node_id=1) as node1,\
-        launch_node(args, safir_instance=2, node_id=2) as node2,\
-        launch_node(args, safir_instance=5, node_id=5) as node5,\
-        launch_node(args, safir_instance=6, node_id=6) as node6:
+        launch_node(safir_instance=1, node_id=1) as node1,\
+        launch_node(safir_instance=2, node_id=2) as node2,\
+        launch_node(safir_instance=5, node_id=5) as node5,\
+        launch_node(safir_instance=6, node_id=6) as node6:
 
         app1 = SafirApp(safir_instance=1, node_id=1)
         app2 = SafirApp(safir_instance=2, node_id=2)
@@ -535,21 +545,22 @@ async def two_normal_two_light_detach_reattach_light(args):
 # ===========================================
 # main
 # ===========================================
-async def main(args):
+async def main():
     check_multicast_loopback()
-    await one_normal_one_light_detach_reattach_light_changed_entities(args)
-    await one_normal_one_light_detach_reattach_light_changed_registrations(args)
-    await one_normal_one_light_detach_reattach_light_big_pool(args)
-    await two_normal_two_light_detach_reattach_light(args)
+    await one_normal_one_light_detach_reattach_light_changed_entities()
+    await one_normal_one_light_detach_reattach_light_changed_registrations()
+    await one_normal_one_light_detach_reattach_light_big_pool()
+    await two_normal_two_light_detach_reattach_light()
 
     #---- Some code for repeating a test
     # for i in range(5):
     #     log("--- Round " + str(i+1))
-    #     await one_normal_one_light_detach_reattach_light_big_pool(args)
+    #     await one_normal_one_light_detach_reattach_light_big_pool()
     #     if len(failed_tests) > 0: return
 
 if __name__ == "__main__":
-    asyncio.run(main(parse_arguments()))
+    parse_arguments()
+    asyncio.run(main())
     for failed in failed_tests:
         log("*** Failed: ", failed)
     sys.exit(1 if len(failed_tests) > 0 else 0)
