@@ -40,7 +40,9 @@ import logging
 import uuid
 import itertools
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "..", "tests", "test_support", "python"))
+#This relies on the fact that we're installed in the bin directory on both linux and windows.
+install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
 from output import log
 from communication_test_support import set_network_state, check_multicast_loopback
 
@@ -2076,7 +2078,9 @@ TEST_CASES = (
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Component test suite for System Picture')
-    parser.add_argument("--exe", help="The test node executable", required=True)
+    parser.add_argument("--exe",
+                        help="The test node executable. Defaults to the installed binary, resolved via PATH.",
+                        default="system_picture_component_test_node")
     parser.add_argument("-t",
                         "--test-case",
                         default="all",
@@ -2101,10 +2105,10 @@ def main():
     olddir = os.getcwd()
     os.chdir("test_output")
 
-    thisdir = os.path.normpath(os.path.dirname(os.path.realpath(__file__)))
-
-    #Set up to use our own test configuration
-    os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(thisdir, "config")
+    #Set up to use our own test configuration. The last part of the path is
+    #baked in by cmake during configuration/installation.
+    os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(
+        install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@", "system_picture", "config")
 
     if args.test_case == "all":
         testcases = TEST_CASES

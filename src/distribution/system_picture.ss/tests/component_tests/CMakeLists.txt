@@ -8,10 +8,19 @@ TARGET_LINK_LIBRARIES(system_picture_component_test_node PRIVATE
   lluf_id
   Boost::program_options)
 
-ADD_TEST(NAME system_picture_component_test
-  COMMAND ${Python3_EXECUTABLE}
-  ${CMAKE_CURRENT_SOURCE_DIR}/run_system_picture_component_test.py
-     --exe $<TARGET_FILE:system_picture_component_test_node>)
+#These tests are slow and system-level, so they are not run as part of ctest.
+#Instead the test node binary and the driver script are installed into the
+#TestSuite component and run against an installed package, just like the dose
+#tests (see src/tests/dose_test.ss).
+SAFIR_INSTALL(TARGETS system_picture_component_test_node COMPONENT TestSuite)
 
-SET_SAFIR_TEST_PROPERTIES(TEST system_picture_component_test TIMEOUT 3600) #Suuuuper slow tests.
+configure_file(run_system_picture_component_test.py.in
+  "${CMAKE_CURRENT_BINARY_DIR}/run_system_picture_component_test.py" @ONLY)
+
+SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/run_system_picture_component_test.py
+  COMPONENT TestSuite)
+
+INSTALL(DIRECTORY config
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/system_picture
+  COMPONENT TestSuite)
 
