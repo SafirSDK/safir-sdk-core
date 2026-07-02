@@ -1,3 +1,11 @@
+#These tests are slow and system-level, so they are not run as part of ctest.
+#Instead the driver script and its config are installed into the TestSuite
+#component and run against an installed package, just like the dose tests (see
+#src/tests/dose_test.ss). The production binaries the test drives (safir_control,
+#dose_main, dope_main, safir_show_config) are all found on the PATH in bin, as are
+#the test-only binaries WaitingStatesOwner and RequestSender that we install below.
+#The DoseTest dou types are provided by the installed DoseTest test-suite library
+#(see src/tests/dose_test_dou.ss).
 add_executable(WaitingStatesOwner Owner.cpp)
 add_executable(RequestSender RequestSender.cpp)
 
@@ -14,63 +22,24 @@ target_link_libraries(RequestSender
   safir_generated-DoseTest-cpp
   Boost::program_options)
 
+SAFIR_INSTALL(TARGETS WaitingStatesOwner RequestSender COMPONENT TestSuite)
+
 if (MSVC)
   if ((CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo") OR
       (CMAKE_BUILD_TYPE STREQUAL "Release"))
-    set(num_clients 4)
+    set(RESTART_NODES_NUM_CLIENTS 4)
   else()
-    set(num_clients 2)
+    set(RESTART_NODES_NUM_CLIENTS 2)
   endif()
 else()
-  set(num_clients 10)
+  set(RESTART_NODES_NUM_CLIENTS 10)
 endif()
 
-ADD_TEST(NAME restart_nodes_with_entity_updates_only
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
-  --owner $<TARGET_FILE:WaitingStatesOwner>
-  --sender $<TARGET_FILE:RequestSender>
-  --safir-control $<TARGET_FILE:safir_control>
-  --dose_main $<TARGET_FILE:dose_main>
-  --dope_main $<TARGET_FILE:dope_main>
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  --clients ${num_clients}
-  --entity-updates)
+configure_file(run_restart_nodes_tests.py.in
+  "${CMAKE_CURRENT_BINARY_DIR}/run_restart_nodes_tests.py" @ONLY)
+SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/run_restart_nodes_tests.py
+  COMPONENT TestSuite)
 
-SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_updates_only
-  TIMEOUT 3000
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
-
-ADD_TEST(NAME restart_nodes_with_entity_requests_only
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
-  --owner $<TARGET_FILE:WaitingStatesOwner>
-  --sender $<TARGET_FILE:RequestSender>
-  --safir-control $<TARGET_FILE:safir_control>
-  --dose_main $<TARGET_FILE:dose_main>
-  --dope_main $<TARGET_FILE:dope_main>
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  --clients ${num_clients}
-  --handlers 2
-  --entity-requests)
-
-SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_only
-  TIMEOUT 6000
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
-
-ADD_TEST(NAME restart_nodes_with_entity_requests_and_updates
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
-  --owner $<TARGET_FILE:WaitingStatesOwner>
-  --sender $<TARGET_FILE:RequestSender>
-  --safir-control $<TARGET_FILE:safir_control>
-  --dose_main $<TARGET_FILE:dose_main>
-  --dope_main $<TARGET_FILE:dope_main>
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  --clients ${num_clients}
-  --handlers 2
-  --entity-requests
-  --entity-updates
-  --update-period 25)
-
-SET_SAFIR_TEST_PROPERTIES(TEST restart_nodes_with_entity_requests_and_updates
-  TIMEOUT 6000
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
-
+INSTALL(DIRECTORY test_config
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/restart_nodes
+  COMPONENT TestSuite)
