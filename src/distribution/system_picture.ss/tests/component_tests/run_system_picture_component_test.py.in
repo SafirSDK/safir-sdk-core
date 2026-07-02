@@ -46,6 +46,9 @@ sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
 from output import log
 from communication_test_support import set_network_state, check_multicast_loopback
 
+#The test node binary is installed into bin, which is on the PATH.
+NODE_EXE = "system_picture_component_test_node"
+
 FORMATTER = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
 class Failure(Exception):
@@ -146,7 +149,7 @@ class Node():
         self.session_id = str(uuid.uuid4())
         self.actual_ctrl = None
         self.actual_main = None
-        command = [args.exe, "--id", str(node_id)]
+        command = [NODE_EXE, "--id", str(node_id)]
         if self.multicast:
             command.append("--use-multicast")
         if self.light_node:
@@ -2078,9 +2081,6 @@ TEST_CASES = (
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Component test suite for System Picture')
-    parser.add_argument("--exe",
-                        help="The test node executable. Defaults to the installed binary, resolved via PATH.",
-                        default="system_picture_component_test_node")
     parser.add_argument("-t",
                         "--test-case",
                         default="all",
