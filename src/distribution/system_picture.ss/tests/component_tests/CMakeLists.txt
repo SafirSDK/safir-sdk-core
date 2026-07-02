@@ -14,10 +14,10 @@ TARGET_LINK_LIBRARIES(system_picture_component_test_node PRIVATE
 #tests (see src/tests/dose_test.ss).
 SAFIR_INSTALL(TARGETS system_picture_component_test_node COMPONENT TestSuite)
 
-configure_file(run_system_picture_component_test.py.in
-  "${CMAKE_CURRENT_BINARY_DIR}/run_system_picture_component_test.py" @ONLY)
+configure_file(run_system_picture_component_tests.py.in
+  "${CMAKE_CURRENT_BINARY_DIR}/run_system_picture_component_tests.py" @ONLY)
 
-SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/run_system_picture_component_test.py
+SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/run_system_picture_component_tests.py
   COMPONENT TestSuite)
 
 INSTALL(DIRECTORY config
