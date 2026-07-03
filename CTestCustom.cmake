@@ -8,7 +8,6 @@ if ((DEFINED ENV{SAFIR_SKIP_SLOW_TESTS}) AND ($ENV{SAFIR_SKIP_SLOW_TESTS}))
     ElectionHandler_test
     ElectionHandler_test_with_overflows
     RawHandler_test
-    LamportClocks
     dope_file_backend_test
     dope_none_backend_test
     restart_nodes_with_entity_updates_only
