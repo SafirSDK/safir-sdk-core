@@ -570,6 +570,12 @@ def run_test_suite(kind):
 
 def run_slow_test_suite():
     log("Launching slow test suite")
+    #Run every test and report real results rather than letting the up-front
+    #multicast loopback check refuse the whole suite: this orchestrator path is
+    #used by CI, where we want the actual per-test outcomes (the check still runs
+    #and logs its diagnostic, it just doesn't block). The refuse-by-default
+    #behaviour is for the direct, dev-facing run_slow_tests invocation.
+    arguments = ["--ignore-multicast-check"]
     if sys.platform == "win32":
         #Invoke the installed script through the current interpreter rather than
         #by bare name, and search PATH by hand, for the same reasons as in
@@ -581,9 +587,9 @@ def run_slow_test_suite():
             None)
         if script is None:
             raise SetupError("Could not find run_slow_tests.py on PATH")
-        result = nice_call([sys.executable, script], shell=False)
+        result = nice_call([sys.executable, script] + arguments, shell=False)
     else:
-        result = nice_call(["run_slow_tests"])
+        result = nice_call(["run_slow_tests"] + arguments)
 
     if result != 0:
         raise SetupError("Slow test suite failed. Returncode = " + str(result))

@@ -537,6 +537,57 @@ jobs:
           path: '**/*.junit.xml'
           if-no-files-found: ignore
 
+  # Run the slow, system-level test suite (system picture, incarnation/control,
+  # light/restart nodes, lowmem, DOPE none/file backends, tracer backdoor,
+  # election handler) against the installed SDK package. These were moved out of
+  # ctest into the TestSuite component; the flow matches dose-tests - install the
+  # testsuite package via run_test.py, which then drives run_slow_tests. The odbc
+  # DOPE backend is not included (it needs a database; it runs under --test
+  # database). First cut runs on ubuntu-noble amd64 only: the suite is long, so we
+  # start on one native Linux runner (large /dev/shm, no container) and can add
+  # platforms to the matrix later.
+  slow-tests:
+    name: slow-tests-${{ matrix.platform }}-${{ matrix.arch }}
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    # The suite is long: system_picture alone is ~40 min, and a known-flaky
+    # light-node subtest can burn a 10 min timeout. Give generous headroom over an
+    # observed healthy run; revisit once we have more timing data.
+    timeout-minutes: 150
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-noble-amd64]
+        include:
+          - platform: ubuntu-noble-amd64
+            platform_name: ubuntu-noble
+            arch: amd64
+            runner: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up test environment
+        # Same lean test-only setup as dose-tests: a Python venv (with websockets,
+        # which run_tracer_backdoor_tests needs) and a JRE. The SDK's own runtime
+        # deps come in via apt when run_test.py installs the .deb.
+        uses: ./.github/actions/setup-test-env
+
+      - name: Download SDK package
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-${{ matrix.platform_name }}-${{ matrix.arch }}
+          path: package-download
+
+      - name: Stage installer at repo root
+        uses: ./.github/actions/stage-installer
+
+      - name: Run slow tests
+        run: python build/jenkins_stuff/run_test.py --test slow-tests
+
   # Multicomputer dose tests = the node under test (Server_0, the "master") on one
   # runner talking to three debian slave nodes (Server_1 seed + Client_0 + Client_1)
   # on another, joined by an accountless/secretless WireGuard overlay punched between
