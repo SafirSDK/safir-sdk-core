@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+###############################################################################
+#
+# Copyright Saab AB, 2026 (http://safirsdkcore.com)
+#
+# Created by: Lars Hagstrom (lars@foldspace.nu)
+#
+###############################################################################
+#
+# This file is part of Safir SDK Core.
+#
+# Safir SDK Core is free software: you can redistribute it and/or modify
+# it under the terms of version 3 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# Safir SDK Core is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+#
+###############################################################################
+#
+# Umbrella runner for the slow, system-level "population 1" test suite. These
+# tests are not run as part of ctest; they are installed into the TestSuite
+# component and run against an installed package, just like the dose tests (see
+# src/tests/dose_test.ss and run_dose_tests). This script simply invokes each of
+# the installed per-test driver scripts in turn and reports an aggregate result,
+# so a developer can run the whole slow suite locally with a single command
+# after installing the package.
+#
+import os
+import re
+import sys
+import time
+import argparse
+import subprocess
+
+#This relies on the fact that we're installed in the bin directory on both linux and windows.
+install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
+from output import log
+
+#Used for the up-front multicast loopback precheck (see main). Guarded so the
+#umbrella still works if the module is somehow not installed - in that case the
+#multicast-dependent tests just report for themselves as before.
+try:
+    from communication_test_support import check_multicast_loopback
+except ImportError:
+    check_multicast_loopback = None
+
+#The slow-suite driver scripts, in the order we run them. Each is one of the
+#per-test drivers installed into bin by the TestSuite component (bare name on
+#linux, name.py on windows - both forms are resolved on the PATH below).
+#
+#When a new slow test is migrated into the TestSuite component, add its driver
+#here so it becomes part of this suite.
+DRIVERS = (
+    "run_system_picture_component_tests",
+    "run_incarnation_and_control_tests",
+    "run_light_nodes_clear_state_tests",
+    "run_light_nodes_keep_state_tests",
+    "run_light_nodes_smart_sync_tests",
+    "run_restart_nodes_tests",
+    "run_lowmem_basic_operations_tests",
+    "run_dope_none_backend_test",
+    "run_dope_file_backend_test",
+    "run_tracer_backdoor_tests",
+    "run_election_handler_tests",
+)
+
+#The odbc dope backend test needs a configured database, so it is not part of
+#the default suite. It can be included with --include-odbc (it is run in CI by
+#run_test.py --test database instead).
+ODBC_DRIVER = "run_dope_odbc_backend_test"
+
+#These drivers rely on working multicast loopback on the host - they use it to
+#toggle safir_control's DebugCommandServer (Parameters::NetworkEnabled). On a
+#host where multicast loopback does not work (e.g. the multicast route goes out
+#a wifi interface that doesn't loop it back) they fail fast, or worse time out.
+#We check for it up front and, by default, refuse to run them there.
+MULTICAST_DRIVERS = frozenset((
+    "run_system_picture_component_tests",
+    "run_light_nodes_clear_state_tests",
+    "run_light_nodes_keep_state_tests",
+    "run_light_nodes_smart_sync_tests",
+))
+
+
+def multicast_loopback_ok():
+    """Returns (ok, message). ok is False if the host's multicast loopback does
+    not work; message is the diagnostic. check_multicast_loopback() sys.exit()s
+    with a diagnostic on failure and returns None on success, so we translate
+    that into a return value here."""
+    if check_multicast_loopback is None:
+        return (True, None)
+    try:
+        check_multicast_loopback()
+        return (True, None)
+    except SystemExit as e:
+        message = e.code if isinstance(e.code, str) else "multicast loopback check failed"
+        return (False, message)
+    except Exception as e:
+        return (False, "multicast loopback check error: %s" % e)
+
+
+def resolve_driver(name):
+    """Find an installed driver on the PATH, handling both the linux stripped
+    name and the windows name.py form. We don't use shutil.which because '.py'
+    is not in PATHEXT on windows. Returns the full path, or None if not found."""
+    for directory in os.environ.get("PATH", "").split(os.pathsep):
+        for candidate in (name, name + ".py"):
+            path = os.path.join(directory, candidate)
+            if os.path.isfile(path):
+                return path
+    return None
+
+
+def run_driver(name):
+    """Run a single driver, streaming its output. Returns (ok, duration)."""
+    log("=" * 70)
+    log("Running slow test: " + name)
+    log("=" * 70)
+
+    script = resolve_driver(name)
+    if script is None:
+        log("*** Could not find driver '%s' on the PATH. Is the TestSuite "
+            "component installed?" % name)
+        return (False, 0.0)
+
+    #Invoke through the current interpreter rather than by bare name: on windows
+    #cmd.exe launches a '.py' file asynchronously and returns 0 immediately,
+    #which would falsely report success. Same workaround as run_test.py.
+    start = time.time()
+    result = subprocess.call([sys.executable, script])
+    duration = time.time() - start
+
+    if result != 0:
+        log("*** '%s' failed with return code %d" % (name, result))
+    return (result == 0, duration)
+
+
+def run(drivers):
+    results = []
+    for name in drivers:
+        ok, duration = run_driver(name)
+        results.append((name, ok, duration))
+    return results
+
+
+def print_summary(results):
+    log("=" * 70)
+    log("Slow test suite summary")
+    log("=" * 70)
+    width = max(len(name) for name, _, _ in results)
+    for name, ok, duration in results:
+        log("  %s   %-7s %6.1f s" % (name.ljust(width), "OK" if ok else "FAILED", duration))
+    log("=" * 70)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Run the slow, system-level test suite against an installed "
+        "Safir SDK Core package. These tests are not part of ctest; they are "
+        "installed into the TestSuite component and driven here, one command for "
+        "the whole suite (the dose tests are a separate suite, run_dose_tests). "
+        "Note: run_tracer_backdoor_tests requires the 'websockets' pip package, "
+        "and the odbc dope backend (--include-odbc) requires a configured "
+        "database.")
+    parser.add_argument("--list", action="store_true",
+                        help="List the tests in the suite and exit.")
+    parser.add_argument("-k", "--filter", metavar="REGEX",
+                        help="Only run tests whose name matches this regex.")
+    parser.add_argument("--include-odbc", action="store_true",
+                        help="Also run the odbc dope backend test (needs a database).")
+    parser.add_argument("--ignore-multicast-check", action="store_true",
+                        help="Run the multicast-dependent tests even if the "
+                        "up-front multicast loopback check fails. Without this, "
+                        "the suite refuses to run them on a host where multicast "
+                        "loopback does not work.")
+    args = parser.parse_args()
+
+    drivers = list(DRIVERS)
+    if args.include_odbc:
+        drivers.append(ODBC_DRIVER)
+
+    if args.filter:
+        pattern = re.compile(args.filter)
+        drivers = [d for d in drivers if pattern.search(d)]
+
+    if args.list:
+        for d in drivers:
+            print(d)
+        return 0
+
+    if not drivers:
+        log("*** No tests matched filter '%s'" % args.filter)
+        return 1
+
+    #If any selected test needs multicast loopback, check it works up front so
+    #we fail with a clear explanation instead of a silent per-test fast-fail.
+    multicast_selected = [d for d in drivers if d in MULTICAST_DRIVERS]
+    if multicast_selected:
+        ok, message = multicast_loopback_ok()
+        if not ok:
+            log("=" * 70)
+            log("*** Multicast loopback is not working on this host.")
+            if message:
+                for line in str(message).splitlines():
+                    log("    " + line)
+            log("The following selected test(s) rely on it and will not work:")
+            for d in multicast_selected:
+                log("    " + d)
+            if not args.ignore_multicast_check:
+                log("Refusing to run. Fix the host (e.g. route local multicast "
+                    "to loopback: 'sudo ip route add 239.0.0.0/8 dev lo'), or "
+                    "re-run with --ignore-multicast-check to try anyway.")
+                log("=" * 70)
+                return 1
+            log("--ignore-multicast-check given: running them anyway.")
+            log("=" * 70)
+
+    results = run(drivers)
+    print_summary(results)
+
+    failed = [name for name, ok, _ in results if not ok]
+    if failed:
+        log("*** FAILURE: %d of %d slow test(s) failed: %s"
+            % (len(failed), len(results), ", ".join(failed)))
+        return 1
+    log("*** SUCCESS: all %d slow test(s) passed" % len(results))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

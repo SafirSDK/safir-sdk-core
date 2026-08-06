@@ -45,15 +45,38 @@ To build an external user dou-project, use `dobmake_batch.py` (installed as
 directly (see BUILD.Linux.txt / BUILD.Windows.txt).
 
 ### Running Tests
+
+There are two categories of tests, run two different ways.
+
+**Fast tests — CTest.**
 ```bash
 # Run all tests via CTest (after building)
 ctest
 
-# Skip slow tests (recommended for quick iterations)
+# Skip the remaining slow tests (recommended for quick iterations)
 SAFIR_SKIP_SLOW_TESTS=1 ctest
 ```
+`SAFIR_SKIP_SLOW_TESTS` (set in CI, unset locally) still skips the slow tests
+that remain in ctest: LowLevelLogger, some Communication tests, RawHandler,
+StopHandler, the WebSocket tests, sate_script and performance_test.
 
-Slow tests skipped by `SAFIR_SKIP_SLOW_TESTS`: LowLevelLogger, Communication tests, ElectionHandler tests, DOPE backend tests, restart/light node tests, WebSocket tests, system picture tests, Incarnation_And_Control_Tests, sate_script.
+**Slow system tests — the installed TestSuite.** The big "population 1"
+system-level tests (system picture, incarnation/control, light/restart nodes,
+lowmem, DOPE none/file backends, tracer backdoor, election handler) have been
+moved out of ctest into the TestSuite install component, so they run against an
+*installed* package the way the dose suite does — a hours-long case is not
+really a unit test. Run the whole set with a single command after installing:
+```bash
+make install            # or: ninja install
+run_slow_tests          # runs the whole slow suite; see run_slow_tests --list / --help
+```
+`run_tracer_backdoor_tests` needs the `websockets` pip package; the odbc DOPE
+backend needs a database and is opt-in (`run_slow_tests --include-odbc`, or in
+CI `run_test.py --test database`). Some tests (system picture, light nodes) need
+working multicast loopback on the host; `run_slow_tests` checks this up front and
+refuses to run them if it is missing (override with `--ignore-multicast-check`;
+a typical dev-host fix is `sudo ip route add 239.0.0.0/8 dev lo`). The dose tests
+are a separate installed suite (`run_dose_tests`).
 
 ### CI/CD
 
@@ -135,12 +158,17 @@ What has moved over so far:
 
 Not yet migrated / still missing on GitHub Actions:
 - **The full ("slow") unit tests.** GHA runs with `SAFIR_SKIP_SLOW_TESTS=1`, so
-  the slow tests listed under *Running Tests* above never run there. The
-  intended fix is to **break the slow tests out into a separate test suite that
-  is launched on its own, the way the dose test suites are** — rather than
-  leaving multi-hour cases inside the unit-test run (a unit test that takes
-  hours is not really a unit test). This is a sizeable undertaking and has not
-  been started.
+  the slow tests never run there. The fix — **breaking the slow tests out into a
+  separate suite launched on its own, the way the dose test suites are** — is now
+  largely done: the big system-level cases are installed into the TestSuite
+  component and run via `run_slow_tests` (see *Running Tests*), with a
+  `run_test.py --test slow-tests` orchestrator hook. What remains: (a) the last
+  few ctest offenders not yet moved (LowLevelLogger, RawHandler_test,
+  StopHandler_test, and the Communication Discoverer/DataSender/DataReceiver
+  sub-suites); and (b) the GHA `.yml` job that actually invokes
+  `run_test.py --test slow-tests` — the driver and orchestrator exist, but no
+  workflow step calls them yet. (WebSocket tests, sate_script and
+  performance_test are deliberately staying as ctest.)
 - **The build-warnings quality gate.** Jenkins applied a quality gate
   (`threshold: 1, TOTAL → unstable`) so a single new warning marked the build
   unstable. The GHA `warnings-summary` job (above) reports the warnings but sets

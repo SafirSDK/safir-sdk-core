@@ -568,6 +568,27 @@ def run_test_suite(kind):
         raise SetupError("Test suite failed. Returncode = " + str(result))
 
 
+def run_slow_test_suite():
+    log("Launching slow test suite")
+    if sys.platform == "win32":
+        #Invoke the installed script through the current interpreter rather than
+        #by bare name, and search PATH by hand, for the same reasons as in
+        #run_test_suite() above (async .py launch / .PY not in PATHEXT).
+        script = next(
+            (os.path.join(d, "run_slow_tests.py")
+             for d in os.environ.get("PATH", "").split(os.pathsep)
+             if os.path.isfile(os.path.join(d, "run_slow_tests.py"))),
+            None)
+        if script is None:
+            raise SetupError("Could not find run_slow_tests.py on PATH")
+        result = nice_call([sys.executable, script], shell=False)
+    else:
+        result = nice_call(["run_slow_tests"])
+
+    if result != 0:
+        raise SetupError("Slow test suite failed. Returncode = " + str(result))
+
+
 def run_test_slave(slave_type):
     command = ["run_dose_tests", "--jenkins", "--slave", slave_type]
     log(f"Launching Multinode test slave using command {' '.join(command)}")
@@ -692,7 +713,7 @@ def parse_command_line():
     parser.add_argument(
         "--test",
         "-t",
-        choices=["standalone-tests", "multinode-tests", "multicomputer-tests", "build-examples", "database"],
+        choices=["standalone-tests", "multinode-tests", "multicomputer-tests", "slow-tests", "build-examples", "database"],
         help="Which test to perform")
 
     parser.add_argument("--slave",
@@ -739,6 +760,8 @@ def main():
             run_test_suite(kind="multinode")
         if args.test == "multicomputer-tests":
             run_test_suite(kind="multicomputer")
+        if args.test == "slow-tests":
+            run_slow_test_suite()
         elif args.test == "build-examples":
             build_examples()
         elif args.test == "database":
