@@ -2,7 +2,6 @@ cmake_policy(SET CMP0012 NEW)
 if ((DEFINED ENV{SAFIR_SKIP_SLOW_TESTS}) AND ($ENV{SAFIR_SKIP_SLOW_TESTS}))
   MESSAGE(WARNING "ENVIRONMENT VARIABLE SAFIR_SKIP_SLOW_TESTS IS SET! SKIPPING SOME TESTS!")
   set(CTEST_CUSTOM_TESTS_IGNORE
-    LowLevelLogger
     Communication_DiscovererTest
     Communication_DataSenderTest
     ElectionHandler_test
