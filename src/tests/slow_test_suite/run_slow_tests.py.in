@@ -70,6 +70,7 @@ DRIVERS = (
     "run_dope_file_backend_test",
     "run_tracer_backdoor_tests",
     "run_election_handler_tests",
+    "run_communication_tests",
 )
 
 #The odbc dope backend test needs a configured database, so it is not part of
