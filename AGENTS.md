@@ -95,6 +95,21 @@ second runner. Every job uploads its JUnit results as artifacts; a final
 release with the installers on version-tag pushes. A `workflow-lint` job runs
 zizmor over the workflow/action files (see the migration notes below).
 
+> **The platform matrix is duplicated across jobs — keep them in sync.** GitHub
+> Actions does not support YAML anchors, so each job spells out its own
+> `strategy.matrix`. The same platform table appears (in three slightly
+> different shapes) in `build`, `build-examples`, `dose-tests`, `slow-tests`,
+> `multicomputer-master` and `multicomputer-slaves`. `build`/`build-examples`
+> are identical to each other (they carry `conan_home` and key the platform
+> without the arch suffix); `dose-tests`/`slow-tests` are identical to each
+> other (combined `ubuntu-noble-amd64` platform token + separate
+> `platform_name`); the multicomputer jobs use a 4-platform subset (no debian).
+> When you add or rename a platform, change a runner label, or bump a container
+> image / `--shm-size`, **update every job's matrix**, not just the one you are
+> looking at. We deliberately keep them inline (a `fromJSON`-from-setup-job
+> generator was considered and rejected: the churn is low and the indirection
+> hurts readability more than the duplication does).
+
 **Jenkins** (`Jenkinsfile`) is the canonical release build. Matrix build across:
 - **Platforms**: ubuntu-noble, debian-trixie, vs2022, vs2026
 - **Architectures**: amd64 (x86 dropped for most platforms)
@@ -152,14 +167,14 @@ What has moved over so far:
   collected — they are cosmetic.)
 
 Not yet migrated / still missing on GitHub Actions:
-- **The full ("slow") unit tests — done, one refinement left.** The big,
-  multi-process system-level cases were broken out into the installed TestSuite
-  component and run via `run_slow_tests` (see *Running Tests*), launched in CI by
-  the `slow-tests` job (`run_test.py --test slow-tests`). Every remaining ctest
-  test is fast enough to run inline, so the old `SAFIR_SKIP_SLOW_TESTS` skip
-  switch was removed entirely. The one refinement left: the `slow-tests` job runs
-  on ubuntu-noble amd64 only for now — broaden the matrix to the other platforms
-  (debian-trixie, arm64, vs2022/vs2026) once it is proven stable in GHA.
+- **The full ("slow") unit tests — done.** The big, multi-process system-level
+  cases were broken out into the installed TestSuite component and run via
+  `run_slow_tests` (see *Running Tests*), launched in CI by the `slow-tests` job
+  (`run_test.py --test slow-tests`) across the full platform matrix (ubuntu-noble
+  amd64/arm64, debian-trixie, vs2022/vs2026). Each driver has its own wall-clock
+  timeout so a hung test is killed and reported instead of stalling the whole
+  suite. Every remaining ctest test is fast enough to run inline, so the old
+  `SAFIR_SKIP_SLOW_TESTS` skip switch was removed entirely.
 - **The build-warnings quality gate.** Jenkins applied a quality gate
   (`threshold: 1, TOTAL → unstable`) so a single new warning marked the build
   unstable. The GHA `warnings-summary` job (above) reports the warnings but sets
