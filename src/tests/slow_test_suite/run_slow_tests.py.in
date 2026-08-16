@@ -36,6 +36,7 @@ import os
 import re
 import sys
 import time
+import signal
 import argparse
 import subprocess
 
@@ -120,6 +121,27 @@ def resolve_driver(name):
     return None
 
 
+def reap_process_group(proc):
+    """Kill any processes still alive in the driver's process group.
+
+    A driver that dies uncleanly (e.g. an unhandled exception before its
+    TestEnvStopper runs) can leave safir_control/dose_main/dope_main orphaned.
+    Since Safir allows only one instance per machine, those orphans would make
+    every later driver's safir_control exit immediately - one failing test would
+    cascade into all the following ones. We run each driver in its own process
+    group (start_new_session) and SIGKILL that whole group afterwards, which
+    cleans up only this driver's descendants and never touches an unrelated
+    Safir system a developer may have running elsewhere. POSIX only; the
+    slow-tests CI job and local dev use is Linux.
+    """
+    if os.name != "posix":
+        return
+    try:
+        os.killpg(proc.pid, signal.SIGKILL)  # proc.pid == pgid (start_new_session)
+    except (ProcessLookupError, PermissionError):
+        pass  # group already empty, nothing to reap
+
+
 def run_driver(name):
     """Run a single driver, streaming its output. Returns (ok, duration)."""
     log("=" * 70)
@@ -135,8 +157,16 @@ def run_driver(name):
     #Invoke through the current interpreter rather than by bare name: on windows
     #cmd.exe launches a '.py' file asynchronously and returns 0 immediately,
     #which would falsely report success. Same workaround as run_test.py.
+    #start_new_session puts the driver and its descendants in their own process
+    #group so we can reap any orphans afterwards (see reap_process_group).
     start = time.time()
-    result = subprocess.call([sys.executable, script])
+    proc = subprocess.Popen(
+        [sys.executable, script],
+        start_new_session=(os.name == "posix"))
+    try:
+        result = proc.wait()
+    finally:
+        reap_process_group(proc)
     duration = time.time() - start
 
     if result != 0:
