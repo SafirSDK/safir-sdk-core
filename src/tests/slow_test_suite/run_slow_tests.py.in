@@ -95,6 +95,10 @@ TIMEOUTS = {
     "run_light_nodes_clear_state_tests":  1200,  # ~350 s observed
     "run_light_nodes_keep_state_tests":   1200,  # ~225 s observed
     "run_light_nodes_smart_sync_tests":   1200,  # ~365 s observed
+    # Four full node start/stop cycles with disk sleeps; its old ctest cap was
+    # 3600 s "for slow machines", so keep that ceiling rather than DEFAULT's 900,
+    # which the slowest (Windows) row could plausibly exceed on a healthy run.
+    "run_dope_file_backend_test":         3600,
 }
 
 
@@ -145,24 +149,36 @@ def resolve_driver(name):
 
 
 def reap_process_group(proc):
-    """Kill any processes still alive in the driver's process group.
+    """Kill any processes still alive in the driver's process tree.
 
     A driver that dies uncleanly (e.g. an unhandled exception before its
     TestEnvStopper runs) can leave safir_control/dose_main/dope_main orphaned.
     Since Safir allows only one instance per machine, those orphans would make
     every later driver's safir_control exit immediately - one failing test would
-    cascade into all the following ones. We run each driver in its own process
-    group (start_new_session) and SIGKILL that whole group afterwards, which
-    cleans up only this driver's descendants and never touches an unrelated
-    Safir system a developer may have running elsewhere. POSIX only; the
-    slow-tests CI job and local dev use is Linux.
+    cascade into all the following ones. We clean up only this driver's
+    descendants and never touch an unrelated Safir system a developer may have
+    running elsewhere:
+
+      * POSIX: each driver runs in its own process group (start_new_session);
+        SIGKILL the whole group.
+      * Windows: no session process group here, so recursively kill the driver's
+        process tree with `taskkill /F /T` (a good stand-in for the group kill;
+        no Job Object needed). This also kills the still-running driver itself,
+        which is why the timeout path no longer needs a separate proc.kill().
+
+    The suite runs on Windows too (vs2022/vs2026 rows), so both paths matter.
     """
-    if os.name != "posix":
-        return
-    try:
-        os.killpg(proc.pid, signal.SIGKILL)  # proc.pid == pgid (start_new_session)
-    except (ProcessLookupError, PermissionError):
-        pass  # group already empty, nothing to reap
+    if os.name == "posix":
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)  # proc.pid == pgid (start_new_session)
+        except (ProcessLookupError, PermissionError):
+            pass  # group already empty, nothing to reap
+    else:
+        # taskkill returns non-zero when the tree is already gone (nothing to
+        # reap) - expected on a clean exit, so swallow it and its output.
+        subprocess.call(
+            ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def run_driver(name, timeout):
@@ -195,12 +211,12 @@ def run_driver(name, timeout):
         timed_out = True
         result = None
     finally:
-        #On posix reap_process_group SIGKILLs the whole group, which includes
-        #proc itself; on windows there are no process groups here, so kill the
-        #child directly. Either way, reap the (now dead) child so we don't leave
-        #a zombie.
-        if timed_out and os.name != "posix":
-            proc.kill()
+        #Reap the driver's whole process tree after every run, not just on
+        #timeout: a driver that crashed before its TestEnvStopper ran can leave
+        #orphans too, and either way they would cascade into every later driver
+        #(see reap_process_group). This kills the still-running driver itself on
+        #timeout (SIGKILL to the group on posix, taskkill /T on windows), so we
+        #then reap the now-dead child to avoid leaving a zombie.
         reap_process_group(proc)
         if timed_out:
             try:
@@ -267,15 +283,15 @@ def main():
         pattern = re.compile(args.filter)
         drivers = [d for d in drivers if pattern.search(d)]
 
+    if not drivers:
+        log("*** No tests matched filter '%s'" % args.filter)
+        return 1
+
     if args.list:
         width = max(len(d) for d in drivers)
         for d in drivers:
             print("%s   timeout %d s" % (d.ljust(width), timeout_for(d)))
         return 0
-
-    if not drivers:
-        log("*** No tests matched filter '%s'" % args.filter)
-        return 1
 
     #If any selected test needs multicast loopback, check it works up front so
     #we fail with a clear explanation instead of a silent per-test fast-fail.
