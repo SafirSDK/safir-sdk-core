@@ -88,7 +88,6 @@ def archive_and_analyze(platform, arch, buildType){
         tool: cmake(pattern:"**/buildlog.html",
                     id:"cmake_${buildIdentifier}",
                     name:"CMake ${buildIdentifier}"),
-        filters: [excludeFile('CTestCustom.cmake')],
         sourceCodeEncoding: 'UTF-8'
     )
     def java = scanForIssues (
@@ -201,15 +200,8 @@ pipeline {
                choices: ['all', 'ubuntu-noble', 'debian-trixie', 'vs2022', 'vs2026'],
                description: "Run on specific platform. Note that multicomputer tests will only run if 'all' or 'debian-trixie' is selected.")
 
-        booleanParam(name: 'SKIP_SLOW_TESTS',
-                     defaultValue: false,
-                     description: 'If this is true, all unit tests that take "a long time" will be skipped. The system test suite will still be run.')
-
     }
     agent none
-    environment {
-        SAFIR_SKIP_SLOW_TESTS = "${SKIP_SLOW_TESTS}"
-    }
 
     stages {
         stage('Build') {

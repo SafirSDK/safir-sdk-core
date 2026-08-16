@@ -52,13 +52,9 @@ There are two categories of tests, run two different ways.
 ```bash
 # Run all tests via CTest (after building)
 ctest
-
-# Skip the remaining slow tests (recommended for quick iterations)
-SAFIR_SKIP_SLOW_TESTS=1 ctest
 ```
-`SAFIR_SKIP_SLOW_TESTS` (set in CI, unset locally) still skips the slow tests
-that remain in ctest: LowLevelLogger, some Communication tests, RawHandler,
-StopHandler, the WebSocket tests, sate_script and performance_test.
+Every ctest test now runs by default; the truly slow, multi-process cases were
+moved into the installed slow suite (below), so there is no longer a skip switch.
 
 **Slow system tests — the installed TestSuite.** The big "population 1"
 system-level tests (system picture, incarnation/control, light/restart nodes,
@@ -97,8 +93,7 @@ second runner. Every job uploads its JUnit results as artifacts; a final
 `test-summary` job aggregates them into one GitHub Check (via
 `EnricoMi/publish-unit-test-result-action`). A `release` job drafts a GitHub
 release with the installers on version-tag pushes. A `workflow-lint` job runs
-zizmor over the workflow/action files (see the migration notes below). The whole
-workflow runs with `SAFIR_SKIP_SLOW_TESTS=1`.
+zizmor over the workflow/action files (see the migration notes below).
 
 **Jenkins** (`Jenkinsfile`) is the canonical release build. Matrix build across:
 - **Platforms**: ubuntu-noble, debian-trixie, vs2022, vs2026
@@ -157,18 +152,14 @@ What has moved over so far:
   collected — they are cosmetic.)
 
 Not yet migrated / still missing on GitHub Actions:
-- **The full ("slow") unit tests.** GHA runs with `SAFIR_SKIP_SLOW_TESTS=1`, so
-  the slow tests never run there. The fix — **breaking the slow tests out into a
-  separate suite launched on its own, the way the dose test suites are** — is now
-  largely done: the big system-level cases are installed into the TestSuite
-  component and run via `run_slow_tests` (see *Running Tests*), with a
-  `run_test.py --test slow-tests` orchestrator hook. What remains: (a) the last
-  few ctest offenders not yet moved (LowLevelLogger, RawHandler_test,
-  StopHandler_test, and the Communication Discoverer/DataSender/DataReceiver
-  sub-suites); and (b) the GHA `.yml` job that actually invokes
-  `run_test.py --test slow-tests` — the driver and orchestrator exist, but no
-  workflow step calls them yet. (WebSocket tests, sate_script and
-  performance_test are deliberately staying as ctest.)
+- **The full ("slow") unit tests — done, one refinement left.** The big,
+  multi-process system-level cases were broken out into the installed TestSuite
+  component and run via `run_slow_tests` (see *Running Tests*), launched in CI by
+  the `slow-tests` job (`run_test.py --test slow-tests`). Every remaining ctest
+  test is fast enough to run inline, so the old `SAFIR_SKIP_SLOW_TESTS` skip
+  switch was removed entirely. The one refinement left: the `slow-tests` job runs
+  on ubuntu-noble amd64 only for now — broaden the matrix to the other platforms
+  (debian-trixie, arm64, vs2022/vs2026) once it is proven stable in GHA.
 - **The build-warnings quality gate.** Jenkins applied a quality gate
   (`threshold: 1, TOTAL → unstable`) so a single new warning marked the build
   unstable. The GHA `warnings-summary` job (above) reports the warnings but sets
