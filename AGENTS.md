@@ -76,144 +76,76 @@ are a separate installed suite (`run_dose_tests`).
 
 ### CI/CD
 
-Two CI systems run against the repository.
+Two CI systems run against the repository: **GitHub Actions** (the target CI)
+and **Jenkins** (`Jenkinsfile`, still the canonical release build). The goal is
+for GitHub Actions to fully replace Jenkins.
 
 **GitHub Actions** (`.github/workflows/ci.yml`) runs on pushes to
 master/develop/feature/private branches and on pull requests. A matrix builds
 and packages across ubuntu-noble (amd64 + arm64), debian-trixie, vs2022 and
-vs2026. There is no Debian-labelled runner, so the debian-trixie row builds
-inside a `debian:13` container on the ubuntu-latest host (with `--shm-size`,
-because dose_main needs a 100 MB `/dev/shm`). Each row runs
-`build/build.py --jenkins`, then downstream jobs install the produced package
-and run the example builds and the dose test suites (standalone, multinode, and
-multicomputer). The multicomputer run joins two hosted runners over an
-accountless WireGuard overlay (`.github/actions/wireguard-overlay`), so the node
-under test on a native runner talks to three debian slave containers on a
-second runner. Every job uploads its JUnit results as artifacts; a final
-`test-summary` job aggregates them into one GitHub Check (via
-`EnricoMi/publish-unit-test-result-action`). A `release` job drafts a GitHub
-release with the installers on version-tag pushes. A `workflow-lint` job runs
-zizmor over the workflow/action files (see the migration notes below).
+vs2026; there is no Debian-labelled runner, so debian-trixie builds inside a
+`debian:13` container on ubuntu-latest (with `--shm-size`, because dose_main
+needs a 100 MB `/dev/shm`). Each row runs `build/build.py --jenkins`; downstream
+jobs install the package and run the example builds, the dose test suites
+(standalone, multinode, and multicomputer — the last joins two runners over an
+accountless WireGuard overlay so a native node talks to three debian slave
+containers), and the installed slow-test suite. A `test-summary` job aggregates
+JUnit results into one Check, a `release` job drafts a release on version-tag
+pushes, `render-docs` renders the guides, and `workflow-lint` runs zizmor.
 
-> **The platform matrix is duplicated across jobs — keep them in sync.** GitHub
-> Actions does not support YAML anchors, so each job spells out its own
-> `strategy.matrix`. The same platform table appears (in three slightly
-> different shapes) in `build`, `build-examples`, `dose-tests`, `slow-tests`,
-> `multicomputer-master` and `multicomputer-slaves`. `build`/`build-examples`
-> are identical to each other (they carry `conan_home` and key the platform
-> without the arch suffix); `dose-tests`/`slow-tests` are identical to each
-> other (combined `ubuntu-noble-amd64` platform token + separate
-> `platform_name`); the multicomputer jobs use a 4-platform subset (no debian).
-> When you add or rename a platform, change a runner label, or bump a container
-> image / `--shm-size`, **update every job's matrix**, not just the one you are
-> looking at. We deliberately keep them inline (a `fromJSON`-from-setup-job
-> generator was considered and rejected: the churn is low and the indirection
-> hurts readability more than the duplication does).
+**Rules when editing CI** (ignore either and the build breaks or rots silently):
+- **`.github/` changes → run `zizmor .github/` and keep it clean before
+  committing** (the `workflow-lint` job fails otherwise). Deliberate exceptions
+  are inline `# zizmor: ignore[<rule>]` comments with a rationale; third-party
+  actions must be hash-pinned (`unpinned-uses` policy in `.github/zizmor.yml`),
+  first-party `actions/*` may float on major tags.
+- **The platform matrix is duplicated — keep every copy in sync.** GitHub
+  Actions has no YAML anchors, so `build`, `build-examples`, `dose-tests`,
+  `slow-tests`, `multicomputer-master` and `multicomputer-slaves` each spell out
+  their own `strategy.matrix` (`build`≡`build-examples`, keyed on platform
+  without the arch suffix and carrying `conan_home`; `dose-tests`≡`slow-tests`,
+  using a combined `ubuntu-noble-amd64` token + separate `platform_name`; the
+  multicomputer jobs are a debian-less 4-platform subset). When you add/rename a
+  platform, change a runner label, or bump a container image / `--shm-size`,
+  update **every** job. (A `fromJSON`-from-setup-job generator was considered and
+  rejected — churn is low and the indirection hurts readability more.)
 
-**Jenkins** (`Jenkinsfile`) is the canonical release build. Matrix build across:
-- **Platforms**: ubuntu-noble, debian-trixie, vs2022, vs2026
-- **Architectures**: amd64 (x86 dropped for most platforms)
-- **Package types** (`PACKAGE_TYPE` axis): Full (ships both Debug and RelWithDebInfo MSVC-runtime flavours), DebugOnly
+**Jenkins** (`Jenkinsfile`) matrix: platforms ubuntu-noble / debian-trixie /
+vs2022 / vs2026; amd64 (plus x86 on debian-trixie); `PACKAGE_TYPE` axis Full
+(both MSVC-runtime flavours) and DebugOnly. Stages: Build + Unit Test,
+Standalone, Multinode, Multicomputer (cpp only, debian-trixie), Build Examples.
 
-Test stages:
-1. Build and Unit Test
-2. Standalone Tests
-3. Multinode Tests
-4. Multicomputer Tests (cpp only, requires debian-trixie)
-5. Build Examples
+#### Migration status (reference — kept until Jenkins is retired)
 
-### Jenkins → GitHub Actions migration status
+**Moved over:** build+package on all platforms (incl. native arm64, which
+Jenkins can't do); ctest unit tests (via `build.py --jenkins`); the slow tests
+(now the `slow-tests` job across the full matrix, each driver wall-clock-timed,
+so `SAFIR_SKIP_SLOW_TESTS` is gone); standalone/multinode/multicomputer dose
+suites; Build Examples; release drafting; doc rendering (`render-docs`, runs the
+asciidoctor/dia/dblatex toolchain directly); zizmor hardening (`workflow-lint`);
+build-warnings analysis (`warnings-summary`: `buildlog_to_text.py` drops
+Conan-dependency warnings by path and by stripping the `conan install` …
+`Finalizing install` block, `packaging_to_sarif.py` extracts lintian/dpkg/dh
+warnings to SARIF, and Quality Monitor publishes one source-linked Check;
+lintian is now installed in `setup-build-env` so `debuild` runs it as on
+Jenkins; cosmetic ALINK `A99999` .dll.policy warnings are dropped).
 
-The goal is for GitHub Actions to fully replace Jenkins as the canonical CI.
-What has moved over so far:
-- Build and package across all platforms (incl. native arm64, which Jenkins
-  does not do).
-- Unit tests (run by `build.py --jenkins` via ctest), **minus the slow tests** —
-  see below.
-- The standalone, multinode and multicomputer dose test suites.
-- Build Examples.
-- Drafting a GitHub release with installers on version-tag pushes.
-- Documentation rendering (User's Guide + Requirements Specification, HTML +
-  PDF), via a standalone `render-docs` job on ubuntu-latest. It runs the
-  asciidoctor/dia/dblatex toolchain directly (no container) and uploads the
-  rendered docs as an artifact.
-- Workflow security hardening with [zizmor](https://github.com/woodruffw/zizmor),
-  wired in as the `workflow-lint` job (runs `zizmor .github/`, version pinned).
-  **Whenever you edit anything under `.github/` (workflows or composite
-  actions), re-run `zizmor .github/` and keep it clean before committing** — the
-  CI job will fail otherwise. Deliberate exceptions are recorded as inline
-  `# zizmor: ignore[<rule>]` comments with a rationale, plus the `unpinned-uses`
-  policy in `.github/zizmor.yml` (third-party actions must be hash-pinned;
-  first-party `actions/*` may float on major tags).
-- **Build-warnings analysis**, via a `warnings-summary` job that replaces
-  Jenkins' `archive_and_analyze()`. Each build/examples/docs job uploads its log
-  as a `buildlog-*` artifact; `build/buildlog_to_text.py` unwraps it and **drops
-  warnings from Conan dependency builds** — both by path (dependency/system
-  paths outside the checkout) and by stripping the whole `conan install` …
-  `Finalizing install` section (where dependency CMake/Boost/meson warnings have
-  relative paths indistinguishable from ours) — leaving only our own tree's
-  diagnostics, paths made repo-relative for source links.
-  `build/packaging_to_sarif.py` extracts the `.deb` packaging warnings (lintian
-  plus the `dpkg-*`/`dh_*` tooling warnings) to SARIF, since the analysis tool
-  has no parser for them. [Quality
-  Monitor](https://github.com/uhafner/quality-monitor) — same `analysis-model`
-  parsers as the Jenkins warnings-ng plugin — then publishes one "Build warnings"
-  Check with source-linked annotations covering GCC, MSBuild, CMake, Java,
-  Doxygen and the packaging warnings. lintian was silently absent from the Linux
-  builds (it is only a `devscripts` *recommends*, dropped by
-  `--no-install-recommends`); it is now installed in `setup-build-env` so
-  `debuild` runs it as it does on Jenkins. (ALINK `A99999` .dll.policy
-  resource-path warnings from the .NET assembly linker are deliberately not
-  collected — they are cosmetic.)
+**Pending / decide before retiring Jenkins:**
+- **No build-warnings quality gate.** `warnings-summary` reports but does not
+  gate (GitHub has no "unstable" state); enforce later via a `quality-gates`
+  block on the Quality Monitor job.
+- **`PACKAGE_TYPE = DebugOnly` not built on GHA** (only Full) — the Windows
+  debug-runtime-only packaging path is unexercised.
+- **No 32-bit (x86) on GHA**; Jenkins still keeps debian-trixie × x86. Confirm
+  this is an intentional drop, not a silent one.
+- **Generic ctest output not archived** — GHA keeps only JUnit XML + the dose
+  `dose_test_output`, not `**/test_output/**`.
+- **Benign Conan "Cache save failed … another job may be creating this cache"
+  annotation** on every build (write-once cache key already saved; harmless but
+  noisy, can't be filtered as it's a runner annotation). Fix = save-on-miss-only.
 
-Not yet migrated / still missing on GitHub Actions:
-- **The full ("slow") unit tests — done.** The big, multi-process system-level
-  cases were broken out into the installed TestSuite component and run via
-  `run_slow_tests` (see *Running Tests*), launched in CI by the `slow-tests` job
-  (`run_test.py --test slow-tests`) across the full platform matrix (ubuntu-noble
-  amd64/arm64, debian-trixie, vs2022/vs2026). Each driver has its own wall-clock
-  timeout so a hung test is killed and reported instead of stalling the whole
-  suite. Every remaining ctest test is fast enough to run inline, so the old
-  `SAFIR_SKIP_SLOW_TESTS` skip switch was removed entirely.
-- **The build-warnings quality gate.** Jenkins applied a quality gate
-  (`threshold: 1, TOTAL → unstable`) so a single new warning marked the build
-  unstable. The GHA `warnings-summary` job (above) reports the warnings but sets
-  no quality gate, because GitHub has no "unstable" build state — the Check goes
-  green and the warnings are informational. Enforcing a gate would mean either
-  failing the job outright (stricter than Jenkins ever was) or publishing a
-  neutral Check via the Checks API; a gate can be turned on later by adding a
-  `quality-gates` block to the job's Quality Monitor config.
-
-Deliberate-or-pending coverage differences (decide before retiring Jenkins):
-- **`PACKAGE_TYPE = DebugOnly`.** Jenkins runs a `Full × DebugOnly` axis across
-  Build, Test suite and Build examples; GHA only ever builds and tests `Full`
-  (the default). The DebugOnly path — chiefly the Windows debug-runtime-only
-  packaging — is not exercised on GHA.
-- **32-bit (x86) builds.** Jenkins still keeps `debian-trixie` × `x86` in its
-  matrix (x86 is dropped only for ubuntu/vs2022/vs2026), gated on an x86 agent
-  being online. GHA has no x86 at all. This may be an intentional drop, but it
-  should be a conscious decision rather than a silent omission.
-- **Generic unit-test output.** Jenkins zips `**/test_output/**` from the
-  unit-test stage; GHA archives only JUnit XML plus the dose `dose_test_output`,
-  so non-dose ctest output is not captured.
-- **Conan cache-save warnings.** Every build/examples job ends with a
-  `##[warning]Cache save failed … Unable to reserve cache with key … another
-  job may be creating this cache`. This is benign and pre-dates the warnings
-  work: the Conan cache key (`conan-v2-<platform>-<arch>-<hash>`) only changes
-  when dependencies change, and GitHub cache keys are write-once — so the first
-  run on a branch saves the cache and every later run with unchanged deps is
-  rejected because the key already exists (it is *not* a race between matrix
-  rows; each platform has its own key). Harmless, but the yellow annotation is
-  noisy. It cannot be filtered by the warnings pipeline (it is a runner
-  annotation, never written to `buildlog.html`); silencing it would mean making
-  the cache step save only on a miss (e.g. skip save when the restore was an
-  exact hit). Left as a follow-up.
-
-Opportunities the GHA setup newly makes practical:
-- **DOPE ODBC tests.** These have not run in Jenkins for a long time, because
-  maintaining a database setup for them was abandoned. GitHub-hosted runners
-  ship with databases preinstalled, so reintroducing an ODBC test job is much
-  more tractable now than it was under Jenkins.
+**Newly practical:** a DOPE ODBC test job — hosted runners ship databases
+preinstalled, so it's far more tractable than under Jenkins (abandoned there).
 
 ### Shared Library ABI Classification
 
