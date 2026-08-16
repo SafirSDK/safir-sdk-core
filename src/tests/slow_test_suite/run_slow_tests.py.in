@@ -79,6 +79,29 @@ DRIVERS = (
 #run_test.py --test database instead).
 ODBC_DRIVER = "run_dope_odbc_backend_test"
 
+#Per-driver wall-clock timeout in seconds. A driver that hangs (e.g. a node that
+#never reaches its expected state) would otherwise block the whole suite until
+#the CI job's global timeout, killing every remaining test with no clue which
+#one hung. With a timeout the hung driver is killed (its whole process group,
+#see reap_process_group), reported as a TIMEOUT against its own name, and the
+#suite carries on. These are generous ceilings - well above the run time
+#observed on the slow, shared CI runners (shown in the comments for reference) -
+#not tight SLAs: a legitimately slow run must never be killed, and a real hang
+#blows past any sane multiple anyway. Anything not listed uses DEFAULT_TIMEOUT.
+DEFAULT_TIMEOUT = 900  # 15 min; covers every driver except the ones below
+TIMEOUTS = {
+    "run_system_picture_component_tests": 7200,  # ~2330 s observed
+    "run_restart_nodes_tests":            1800,  # ~550 s observed
+    "run_light_nodes_clear_state_tests":  1200,  # ~350 s observed
+    "run_light_nodes_keep_state_tests":   1200,  # ~225 s observed
+    "run_light_nodes_smart_sync_tests":   1200,  # ~365 s observed
+}
+
+
+def timeout_for(name):
+    """The wall-clock timeout (seconds) for a driver."""
+    return TIMEOUTS.get(name, DEFAULT_TIMEOUT)
+
 #These drivers rely on working multicast loopback on the host - they use it to
 #toggle safir_control's DebugCommandServer (Parameters::NetworkEnabled). On a
 #host where multicast loopback does not work (e.g. the multicast route goes out
@@ -142,17 +165,19 @@ def reap_process_group(proc):
         pass  # group already empty, nothing to reap
 
 
-def run_driver(name):
-    """Run a single driver, streaming its output. Returns (ok, duration)."""
+def run_driver(name, timeout):
+    """Run a single driver, streaming its output, killing it if it exceeds
+    timeout seconds. Returns (status, duration) where status is one of
+    "OK", "FAILED", "TIMEOUT"."""
     log("=" * 70)
-    log("Running slow test: " + name)
+    log("Running slow test: %s (timeout %d s)" % (name, timeout))
     log("=" * 70)
 
     script = resolve_driver(name)
     if script is None:
         log("*** Could not find driver '%s' on the PATH. Is the TestSuite "
             "component installed?" % name)
-        return (False, 0.0)
+        return ("FAILED", 0.0)
 
     #Invoke through the current interpreter rather than by bare name: on windows
     #cmd.exe launches a '.py' file asynchronously and returns 0 immediately,
@@ -163,22 +188,42 @@ def run_driver(name):
     proc = subprocess.Popen(
         [sys.executable, script],
         start_new_session=(os.name == "posix"))
+    timed_out = False
     try:
-        result = proc.wait()
+        result = proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        result = None
     finally:
+        #On posix reap_process_group SIGKILLs the whole group, which includes
+        #proc itself; on windows there are no process groups here, so kill the
+        #child directly. Either way, reap the (now dead) child so we don't leave
+        #a zombie.
+        if timed_out and os.name != "posix":
+            proc.kill()
         reap_process_group(proc)
+        if timed_out:
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                pass
     duration = time.time() - start
 
+    if timed_out:
+        log("*** '%s' TIMED OUT after %.1f s (limit %d s) and was killed."
+            % (name, duration, timeout))
+        return ("TIMEOUT", duration)
     if result != 0:
         log("*** '%s' failed with return code %d" % (name, result))
-    return (result == 0, duration)
+        return ("FAILED", duration)
+    return ("OK", duration)
 
 
 def run(drivers):
     results = []
     for name in drivers:
-        ok, duration = run_driver(name)
-        results.append((name, ok, duration))
+        status, duration = run_driver(name, timeout_for(name))
+        results.append((name, status, duration))
     return results
 
 
@@ -187,8 +232,8 @@ def print_summary(results):
     log("Slow test suite summary")
     log("=" * 70)
     width = max(len(name) for name, _, _ in results)
-    for name, ok, duration in results:
-        log("  %s   %-7s %6.1f s" % (name.ljust(width), "OK" if ok else "FAILED", duration))
+    for name, status, duration in results:
+        log("  %s   %-7s %6.1f s" % (name.ljust(width), status, duration))
     log("=" * 70)
 
 
@@ -223,8 +268,9 @@ def main():
         drivers = [d for d in drivers if pattern.search(d)]
 
     if args.list:
+        width = max(len(d) for d in drivers)
         for d in drivers:
-            print(d)
+            print("%s   timeout %d s" % (d.ljust(width), timeout_for(d)))
         return 0
 
     if not drivers:
@@ -257,7 +303,7 @@ def main():
     results = run(drivers)
     print_summary(results)
 
-    failed = [name for name, ok, _ in results if not ok]
+    failed = [name for name, status, _ in results if status != "OK"]
     if failed:
         log("*** FAILURE: %d of %d slow test(s) failed: %s"
             % (len(failed), len(results), ", ".join(failed)))
