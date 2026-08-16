@@ -53,12 +53,17 @@ There are two categories of tests, run two different ways.
 # Run all tests via CTest (after building)
 ctest
 ```
-Every ctest test now runs by default; the truly slow, multi-process cases were
-moved into the installed slow suite (below), so there is no longer a skip switch.
+Every ctest test now runs by default; there is no longer a skip switch. The
+hours-long, multi-process "population 1" cases were moved into the installed slow
+suite (below). A handful of shorter multi-process tests still run inline in ctest
+(WebSocket component/stress, performance_test, sate_script, RawHandler_test,
+StopHandler_test) — they were in the old skip list but are cheap enough (~15 s
+each) to keep here.
 
 **Slow system tests — the installed TestSuite.** The big "population 1"
 system-level tests (system picture, incarnation/control, light/restart nodes,
-lowmem, DOPE none/file backends, tracer backdoor, election handler) have been
+lowmem, DOPE none/file backends, tracer backdoor, election handler,
+communication) have been
 moved out of ctest into the TestSuite install component, so they run against an
 *installed* package the way the dose suite does — a hours-long case is not
 really a unit test. Run the whole set with a single command after installing:
