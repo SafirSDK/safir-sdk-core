@@ -95,11 +95,16 @@ install a breakpad exception handler (`lluf_crash_reporter`) and spawn hidden
 child processes (`ControlApp.cpp`) while unsigned and with no hash reputation.
 
 **Decision: no action taken.** Detection keys on the file hash, so every build
-is a new unknown binary and this can recur on any Windows build — GHA runners
-have Defender too — but it is rare enough not to chase. If it recurs: verify
-the cache as above, then `Add-MpPreference -ExclusionPath <workspace>` on that
-machine. Authenticode-signing released binaries is the real fix if end users
-start hitting it.
+is a new unknown binary and this could recur on any Windows build, but it is
+rare enough not to chase. Whether the GHA vs2022/vs2026 rows are exposed is
+unverified: they have never hit it, and we have not checked whether Defender's
+real-time protection is active on those images (`Get-MpComputerStatus` on a
+Windows row would settle it). Note that nothing in CI disables Defender
+antivirus — the `netsh advfirewall` call in the multicomputer jobs turns off the
+Defender *firewall*, a different component. If it recurs: verify the cache as
+above, then `Add-MpPreference -ExclusionPath <workspace>` on that machine.
+Authenticode-signing released binaries is the real fix if end users start
+hitting it.
 
 ### CI/CD
 
