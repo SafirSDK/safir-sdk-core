@@ -79,6 +79,28 @@ refuses to run them if it is missing (override with `--ignore-multicast-check`;
 a typical dev-host fix is `sudo ip route add 239.0.0.0/8 dev lo`). The dose tests
 are a separate installed suite (`run_dose_tests`).
 
+### Windows Defender false positives
+
+Defender has flagged a freshly built `safir_control.exe` as
+`Exploit:Win64/Facupel!dha`, failing `TryStart_safir` with `OSError [WinError
+225]` (`ERROR_VIRUS_INFECTED`, raised by `CreateProcess` — the binary never
+runs, so this is not a code fault). Seen 2026-08-17 on a vs2022 development
+build.
+
+Confirmed a reputation/behaviour false positive, not a compromised Conan
+package: `conan cache check-integrity "*"` passed, a Defender scan of the cache
+and build tree was clean, and no other binary was flagged (16 targets link the
+same breakpad/boost code). Our Windows binaries trip heuristics because they
+install a breakpad exception handler (`lluf_crash_reporter`) and spawn hidden
+child processes (`ControlApp.cpp`) while unsigned and with no hash reputation.
+
+**Decision: no action taken.** Detection keys on the file hash, so every build
+is a new unknown binary and this can recur on any Windows build — GHA runners
+have Defender too — but it is rare enough not to chase. If it recurs: verify
+the cache as above, then `Add-MpPreference -ExclusionPath <workspace>` on that
+machine. Authenticode-signing released binaries is the real fix if end users
+start hitting it.
+
 ### CI/CD
 
 Two CI systems run against the repository: **GitHub Actions** (the target CI)
