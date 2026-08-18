@@ -299,14 +299,26 @@ class DebianInstaller():
         #treats an argument as a local .deb only if it contains a path
         #separator, so the globbed filenames are prefixed with "./".
         local_packages = [os.path.join(".", pkg) for pkg in packages]
-        proc = subprocess.Popen(["sudo", "apt-get", "install", "--yes"] + local_packages,
+        #Stream apt-get's output line by line (rather than buffering it and only
+        #printing on failure) so a slow or stuck install is diagnosable from the
+        #log with per-line timestamps - a silent multi-minute stall here once ate
+        #the whole CI job timeout with no clue as to whether it was a download, a
+        #dpkg lock, or a postinst. DPkg::Lock::Timeout makes a held lock fail after
+        #a couple of minutes instead of hanging indefinitely, and a noninteractive
+        #frontend keeps a debconf prompt from blocking on stdin forever. The env
+        #assignment is passed as a sudo argument rather than via Popen's env=,
+        #because sudo's default env_reset would otherwise strip it before apt-get.
+        proc = subprocess.Popen(["sudo", "DEBIAN_FRONTEND=noninteractive",
+                                 "apt-get", "install", "--yes",
+                                 "-o", "DPkg::Lock::Timeout=120"] + local_packages,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 encoding="utf-8")
-        output = proc.communicate()[0]
+        for line in proc.stdout:
+            log("apt-get:", line.rstrip())
+        proc.wait()
         if proc.returncode != 0:
-            raise SetupError("Failed to run apt-get install. returncode = " + str(proc.returncode) + "\nOutput:\n" +
-                             output)
+            raise SetupError("Failed to run apt-get install. returncode = " + str(proc.returncode))
 
     def check_installation(self):
         log("Running safir_show_config to test that exes can be run")
