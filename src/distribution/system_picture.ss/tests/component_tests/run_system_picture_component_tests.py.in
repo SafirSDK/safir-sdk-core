@@ -43,8 +43,10 @@ import itertools
 #This relies on the fact that we're installed in the bin directory on both linux and windows.
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
+import traceback
 from output import log
 from communication_test_support import set_network_state, check_multicast_loopback
+from junit import JUnitReporter
 
 #The test node binary is installed into bin, which is on the PATH.
 NODE_EXE = "system_picture_component_test_node"
@@ -2114,7 +2116,7 @@ def main():
         testcases = TEST_CASES
     else:
         testcases = (args.test_case, )
-    failure = False
+    reporter = JUnitReporter("run_system_picture_component_tests")
     try:
         for testcase in testcases:
             log(f"Performing testcase {testcase}")
@@ -2123,20 +2125,32 @@ def main():
             os.chdir(testcase)
             os.environ["LLL_LOGDIR"] = os.path.normpath(os.path.join(os.getcwd(), "lll"))
             func = globals().get("test_" + testcase)
+            start = time.time()
             if func is None:
                 log(f" - '{testcase}': missing implementation")
+                reporter.add_case(testcase, False, 0.0, "missing implementation")
+                os.chdir(outputdir)
                 continue
-            result = func(args)
-            if result:
-                log(f" - '{testcase}': Success")
-            else:
-                log(f" - '{testcase}': Failure")
-                failure = True
+            #Record each case and carry on: one failing (or throwing) case must
+            #not abort the rest, so the junit report covers the whole suite.
+            try:
+                result = func(args)
+            except Exception:
+                reporter.add_case(testcase, False, time.time() - start, traceback.format_exc())
+                log(f" - '{testcase}': Failure (exception)")
+                os.chdir(outputdir)
+                continue
+            passed = bool(result)
+            reporter.add_case(testcase, passed, time.time() - start,
+                              "" if passed else "test reported failure (see log output)")
+            log(f" - '{testcase}': {'Success' if passed else 'Failure'}")
             os.chdir(outputdir)
     except KeyboardInterrupt:
         log("Caught Ctrl-C, exiting")
+        reporter.write()
         return 1
-    return 1 if failure else 0
+    reporter.write()
+    return 1 if reporter.num_failed else 0
 
 
 sys.exit(main())

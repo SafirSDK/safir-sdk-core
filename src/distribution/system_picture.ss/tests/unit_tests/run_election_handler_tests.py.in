@@ -25,6 +25,7 @@
 ###############################################################################
 import os
 import sys
+import time
 import argparse
 import subprocess
 
@@ -32,6 +33,7 @@ import subprocess
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
 from testenv import log
+from junit import JUnitReporter
 
 #The test binary is installed in bin, which is on the PATH. It is a self-contained
 #Boost.Test binary that needs no runtime configuration.
@@ -46,24 +48,26 @@ CASES = (
 )
 
 
-def run():
-    failed = []
+def run(reporter):
     for name, extra_args in CASES:
         log("=" * 60)
         log("Running ElectionHandler test case: " + name)
+        start = time.time()
         result = subprocess.call((ELECTION_HANDLER_TEST,) + extra_args)
+        reporter.add_case(name, result == 0, time.time() - start,
+                          "" if result == 0 else "exited with code %d" % result)
         if result != 0:
             log("*** Case '%s' failed with return code %d" % (name, result))
-            failed.append(name)
-    return failed
 
 
 def main():
-    failed = run()
+    reporter = JUnitReporter("run_election_handler_tests")
+    run(reporter)
+    reporter.write()
     log("=" * 60)
-    if failed:
-        log("*** FAILURE: %d election handler test case(s) failed: %s"
-            % (len(failed), ", ".join(failed)))
+    if reporter.num_failed:
+        log("*** FAILURE: %d of %d election handler test case(s) failed"
+            % (reporter.num_failed, reporter.num_run))
         return 1
     log("*** SUCCESS: all election handler test cases passed")
     return 0

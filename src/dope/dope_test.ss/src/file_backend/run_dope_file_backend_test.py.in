@@ -38,6 +38,7 @@ from io import StringIO
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
 from testenv import TestEnvInstalled, TestEnvStopper, log
+from junit import JUnitReporter
 
 #The test-only binary we launch is installed in bin, which is on the PATH, as are
 #the production binaries safir_show_config and dope_bin2xml.
@@ -285,4 +286,5 @@ if __name__ == "__main__":
         description="System-level test that exercises the DOPE 'File' persistence "
         "backend: it verifies entities are written to disk, reloaded on restart, "
         "converted between binary and xml storage, and updated correctly.").parse_args()
-    sys.exit(main())
+    reporter = JUnitReporter("run_dope_file_backend_test")
+    sys.exit(reporter.run_single("dope_file_backend", main))

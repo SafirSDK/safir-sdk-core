@@ -23,12 +23,13 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, time, sys, argparse, re
+import os, time, sys, argparse, re, traceback
 
 #This relies on the fact that we're installed in the bin directory on both linux and windows.
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
 from testenv import TestEnvInstalled, TestEnvStopper, log
+from junit import JUnitReporter
 
 #The test-only binaries we launch are installed in bin, which is on the PATH.
 OWNER = "WaitingStatesOwner"
@@ -167,24 +168,30 @@ def main():
     else:
         cases = {args.test_case: TEST_CASES[args.test_case]}
 
-    failed = []
+    reporter = JUnitReporter("run_restart_nodes_tests")
     for name, params in cases.items():
         log("=" * 60)
         log(f"Running test case '{name}'")
         log("=" * 60)
         case = argparse.Namespace(clients=args.clients, **params)
-        if run_case(case) == 0:
-            log(f" - '{name}': Success")
-        else:
-            log(f" - '{name}': Failure")
-            failed.append(name)
+        start = time.time()
+        try:
+            rc = run_case(case)
+        except Exception:
+            reporter.add_case(name, False, time.time() - start, traceback.format_exc())
+            log(f" - '{name}': Failure (exception)")
+            continue
+        passed = rc == 0
+        reporter.add_case(name, passed, time.time() - start,
+                          "" if passed else "test reported failure (see log output)")
+        log(f" - '{name}': {'Success' if passed else 'Failure'}")
 
+    reporter.write()
     log("=" * 60)
-    if failed:
-        log(f"*** FAILURE: {len(failed)} of {len(cases)} test case(s) failed: "
-            + ", ".join(failed))
+    if reporter.num_failed:
+        log(f"*** FAILURE: {reporter.num_failed} of {reporter.num_run} test case(s) failed")
         return 1
-    log(f"*** SUCCESS: all {len(cases)} test case(s) passed")
+    log(f"*** SUCCESS: all {reporter.num_run} test case(s) passed")
     return 0
 
 

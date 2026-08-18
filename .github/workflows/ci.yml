@@ -630,6 +630,14 @@ jobs:
         shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
         run: python build\jenkins_stuff\run_test.py --test slow-tests
 
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: slow-results-${{ matrix.platform }}-${{ matrix.arch }}
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
   # Multicomputer dose tests = the node under test (Server_0, the "master") on one
   # runner talking to three debian slave nodes (Server_1 seed + Client_0 + Client_1)
   # on another, joined by an accountless/secretless WireGuard overlay punched between
@@ -960,15 +968,15 @@ jobs:
           path: run-*/dose_test_output
           if-no-files-found: ignore
 
-  # Aggregate every test job's junit results into one report. The build and
-  # dose-tests jobs each upload their *.junit.xml as artifacts; this job pulls
-  # them all and publishes a single Check run + run-summary page + PR comment,
-  # so the pass/fail status of all ~35 test jobs - and the details of any
-  # failure - are visible from one place instead of clicking each job's own
+  # Aggregate every test job's junit results into one report. The build,
+  # dose-tests and slow-tests jobs each upload their *.junit.xml as artifacts;
+  # this job pulls them all and publishes a single Check run + run-summary page +
+  # PR comment, so the pass/fail status of all ~35 test jobs - and the details of
+  # any failure - are visible from one place instead of clicking each job's own
   # report. Runs on always() so it still reports when some test job failed.
   test-summary:
     name: Test summary
-    needs: [build, dose-tests, multicomputer-master, multicomputer-slaves]
+    needs: [build, dose-tests, slow-tests, multicomputer-master, multicomputer-slaves]
     if: always()
     runs-on: ubuntu-latest
     # checks: write to create the Check run; pull-requests: write so the action

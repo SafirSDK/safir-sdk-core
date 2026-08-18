@@ -9,4 +9,5 @@ SAFIR_INSTALL_PYTHON_MODULE(
   python/testenv.py
   python/output.py
   python/communication_test_support.py
+  python/junit.py
   COMPONENT TestSuite)

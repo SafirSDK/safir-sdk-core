@@ -35,10 +35,13 @@
 import os
 import re
 import sys
+import glob
 import time
+import shutil
 import signal
 import argparse
 import subprocess
+import xml.etree.ElementTree as ET
 
 #This relies on the fact that we're installed in the bin directory on both linux and windows.
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
@@ -181,10 +184,44 @@ def reap_process_group(proc):
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-def run_driver(name, timeout):
+def count_junit_failures(junit_dir):
+    """Return (num_files, num_failed_cases) across every *.junit.xml a driver
+    wrote into junit_dir. A file we can't parse is counted as one failure (a
+    malformed report is itself a problem worth surfacing)."""
+    files = glob.glob(os.path.join(junit_dir, "*.junit.xml"))
+    failed = 0
+    for path in files:
+        try:
+            root = ET.parse(path).getroot()
+        except ET.ParseError:
+            log("*** Could not parse junit file '%s'; treating as a failure." % path)
+            failed += 1
+            continue
+        #The file's root is a <testsuite> (our JUnitReporter writes one per
+        #driver). Count both failures and errors; fall back to counting child
+        #<failure>/<error> elements if the attributes are absent.
+        suites = [root] if root.tag == "testsuite" else root.findall("testsuite")
+        for suite in suites:
+            f = suite.get("failures")
+            e = suite.get("errors")
+            if f is not None or e is not None:
+                failed += int(f or 0) + int(e or 0)
+            else:
+                failed += len(suite.findall(".//failure")) + len(suite.findall(".//error"))
+    return (len(files), failed)
+
+
+def run_driver(name, timeout, junit_root):
     """Run a single driver, streaming its output, killing it if it exceeds
-    timeout seconds. Returns (status, duration) where status is one of
-    "OK", "FAILED", "TIMEOUT"."""
+    timeout seconds. Returns (status, duration) where status is one of:
+      "OK"      - ran and every test case passed,
+      "FAILED"  - ran and produced junit with one or more failing cases
+                  (a test-case failure: carried by the junit, not an infra error),
+      "ERROR"   - could not run, or ran but wrote no junit / crashed after all
+                  cases passed (an infra failure that should fail the CI job),
+      "TIMEOUT" - exceeded its timeout and was killed (an infra failure).
+    Each driver gets its own junit subdirectory (via SAFIR_SLOW_TEST_JUNIT_DIR)
+    so we can attribute the reports it writes back to it."""
     log("=" * 70)
     log("Running slow test: %s (timeout %d s)" % (name, timeout))
     log("=" * 70)
@@ -193,7 +230,15 @@ def run_driver(name, timeout):
     if script is None:
         log("*** Could not find driver '%s' on the PATH. Is the TestSuite "
             "component installed?" % name)
-        return ("FAILED", 0.0)
+        return ("ERROR", 0.0)
+
+    #Give this driver a fresh, empty junit directory so a report left over from
+    #a previous run can never be mistaken for this run's result.
+    junit_dir = os.path.join(junit_root, name)
+    shutil.rmtree(junit_dir, ignore_errors=True)
+    os.makedirs(junit_dir, exist_ok=True)
+    env = dict(os.environ)
+    env["SAFIR_SLOW_TEST_JUNIT_DIR"] = junit_dir
 
     #Invoke through the current interpreter rather than by bare name: on windows
     #cmd.exe launches a '.py' file asynchronously and returns 0 immediately,
@@ -203,6 +248,7 @@ def run_driver(name, timeout):
     start = time.time()
     proc = subprocess.Popen(
         [sys.executable, script],
+        env=env,
         start_new_session=(os.name == "posix"))
     timed_out = False
     try:
@@ -229,16 +275,35 @@ def run_driver(name, timeout):
         log("*** '%s' TIMED OUT after %.1f s (limit %d s) and was killed."
             % (name, duration, timeout))
         return ("TIMEOUT", duration)
-    if result != 0:
-        log("*** '%s' failed with return code %d" % (name, result))
+
+    #Classify from the junit the driver wrote, not from its exit code alone: a
+    #test-case failure must stay green at the job level (the junit carries it),
+    #while a driver that produced no junit, or exited badly with an all-passing
+    #report, really did fall over and should fail the job.
+    num_files, num_failed = count_junit_failures(junit_dir)
+    if name == ODBC_DRIVER and num_files == 0:
+        #The odbc backend test is not part of the junit-emitting slow suite proper
+        #(it needs a database and only runs via --include-odbc), so it writes no
+        #junit; fall back to its exit code.
+        return ("OK", duration) if result == 0 else ("FAILED", duration)
+    if num_files == 0:
+        log("*** '%s' produced no junit report (exit code %s) - treating as an error."
+            % (name, result))
+        return ("ERROR", duration)
+    if num_failed > 0:
+        log("*** '%s': %d test case(s) failed (see junit report)." % (name, num_failed))
         return ("FAILED", duration)
+    if result != 0:
+        log("*** '%s' exited with code %d despite an all-passing report - treating "
+            "as an error." % (name, result))
+        return ("ERROR", duration)
     return ("OK", duration)
 
 
-def run(drivers):
+def run(drivers, junit_root):
     results = []
     for name in drivers:
-        status, duration = run_driver(name, timeout_for(name))
+        status, duration = run_driver(name, timeout_for(name), junit_root)
         results.append((name, status, duration))
     return results
 
@@ -316,12 +381,30 @@ def main():
             log("--ignore-multicast-check given: running them anyway.")
             log("=" * 70)
 
-    results = run(drivers)
-    print_summary(results)
+    #Each driver's JUnit report is written under here, in a per-driver subdir.
+    #CI uploads these (**/*.junit.xml) into the consolidated test report.
+    junit_root = os.path.abspath(os.path.join(os.getcwd(), "slow_test_junit"))
 
-    failed = [name for name, status, _ in results if status != "OK"]
+    results = run(drivers, junit_root)
+    print_summary(results)
+    log("JUnit reports written under %s" % junit_root)
+
+    #Two distinct signals, mirroring run_dose_tests:
+    #  * a test-case FAILURE is carried by the junit; on its own it must not fail
+    #    the CI job (exit 1 - run_test.py treats this as green + a red junit),
+    #  * an ERROR/TIMEOUT is a real infra failure (a driver that couldn't run,
+    #    crashed, or hung) and must fail the job (exit 2).
+    errored = [name for name, status, _ in results if status in ("ERROR", "TIMEOUT")]
+    failed = [name for name, status, _ in results if status == "FAILED"]
+    if errored:
+        log("*** ERROR: %d of %d slow test driver(s) failed to run: %s"
+            % (len(errored), len(results), ", ".join(errored)))
+        if failed:
+            log("    (%d further driver(s) had test-case failures: %s)"
+                % (len(failed), ", ".join(failed)))
+        return 2
     if failed:
-        log("*** FAILURE: %d of %d slow test(s) failed: %s"
+        log("*** FAILURE: %d of %d slow test(s) had failing test cases: %s"
             % (len(failed), len(results), ", ".join(failed)))
         return 1
     log("*** SUCCESS: all %d slow test(s) passed" % len(results))

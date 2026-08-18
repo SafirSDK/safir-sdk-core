@@ -39,6 +39,7 @@ except ImportError:
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
 from testenv import TestEnvInstalled, log
+from junit import JUnitReporter
 
 #The test-only and production binaries we launch are installed in bin, on the PATH.
 SENDER = "tracer_backdoor_sender"
@@ -54,13 +55,14 @@ os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(
 os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(
     install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
 
-failed_tests = set()
+reporter = JUnitReporter("run_tracer_backdoor_tests")
 
 @contextmanager
 def test_case(name):
-    global failed_tests
-
     env = None
+    start = time.time()
+    ok = True
+    failure_text = ""
     try:
         log("=== Start: " + name + " ===")
         #This test does not use dope; signal_persistence_ready stands in for dope_main.
@@ -69,11 +71,13 @@ def test_case(name):
         yield env
 
     except Exception as e:
-        failed_tests.add(name)
+        ok = False
+        failure_text = traceback.format_exc()
         logging.exception('Got exception')
         log(e)
         log("*** Test failed: " + name)
     finally:
+        reporter.add_case(name, ok, time.time() - start, failure_text)
         log("--- Finished: " + name + " ---")
         time.sleep(1.0)
         if env is not None:
@@ -582,13 +586,15 @@ if __name__ == "__main__":
         "via the Safir.Application.TracerStatus entity, over stdout and the UDP "
         "tracer, driven through a safir_web websocket connection.").parse_args()
 
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    finally:
+        reporter.write()
 
     log("=" * 60)
-    if len(failed_tests) > 0:
-        for failed in failed_tests:
-            log("*** FAILURE: " + failed)
-        log(f"*** FAILURE: {len(failed_tests)} tracer_backdoor test case(s) failed")
+    if reporter.num_failed > 0:
+        log(f"*** FAILURE: {reporter.num_failed} of {reporter.num_run} "
+            "tracer_backdoor test case(s) failed")
         sys.exit(1)
     log("*** SUCCESS: all tracer_backdoor test cases passed")
     sys.exit(0)

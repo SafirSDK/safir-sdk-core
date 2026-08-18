@@ -36,6 +36,7 @@ parser.parse_args()
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
 from testenv import TestEnvInstalled, TestEnvStopper, log
+from junit import JUnitReporter
 
 #The system tools we launch are installed in bin, which is on the PATH.
 SYSTEM_PICTURE_LISTENER = "system_picture_listener"
@@ -207,105 +208,112 @@ def waitForProcessExit(node):
 
 envs = dict()
 
-#start all nodes
-log("Starting nodes 0,1,2")
 
-try:
-    envs[0] = startNode("0")
-    envs[1] = startNode("1")
-    envs[2] = startNode("2")
-except:
-    log("Error: Failed to start nodes 0,1,2")
-    killNodeProcesses()
-    sys.exit(1)
+def run_test():
+    #start all nodes
+    log("Starting nodes 0,1,2")
 
-#make Server_0 has connection to the other two
-log("Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
-checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
-
-#stop node two
-log("Stopping node 2 from System_0")
-stopNode("0", readconnectedNodeId('0', "Server_2"))
-
-#make sure Server_0 has connection to Server_1 only
-log("Checking that Server_0 has connection to ['Server_0', 'Server_1']")
-checkConnectionToNodes("0", ['Server_0', 'Server_1'])
-
-waitForProcessExit(2)
-
-#restart node 2
-try:
-    log("Starting node 2")
-    envs[2] = startNode("2")
-except:
-    log("Error: Failed to start node 2")
-    killNodeProcesses()
-    sys.exit(1)
-
-#make sure Server_0 has connection to the other two
-log("Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
-checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
-
-#stop the whole system via safir_control_cli from node 0, note that System_1 is started with the "ignore-control-cmd" flag
-#which will make it not stop. The other nodes will add the current incarnation id to the blacklist and stop
-#when we start the other two again they shall not join System_1
-log("Stopping the system from Server_0, Server_0 should not go down due to being started with --ignore-control-cmd")
-stopSystem('0')
-
-log("Checking that Server_0 has only to itself")
-checkConnectionToNodes("0", ['Server_0'])
-
-waitForProcessExit(1)
-waitForProcessExit(2)
-
-#start Server_1 and Server_2 again
-try:
-    log("Starting Server_1 and Server_2")
-    envs[1] = startNode("1")
-    envs[2] = startNode("2")
-except:
-    log("Error: Failed to start Server_1 and Server_2")
-    killNodeProcesses()
-    sys.exit(1)
-
-log("Checking that Server_0 has only to itself")
-checkConnectionToNodes("0", ['Server_0'])
-
-log("Checking that Server_1 has connection to ['Server_1', 'Server_2']")
-checkConnectionToNodes("1", ['Server_1', 'Server_2'])
-
-#hard kill Server_0 and restart it, see that it joins Server_1 and Server_2 again
-log("Hardkill Server_0")
-envs[0].killprocs()
-
-waitForProcessExit(0)
-
-try:
-    log("Starting Server_0")
-    envs[0] = startNode("0")
-except Exception as e:
-    log("Error: Failed to start Server_0. Exception " + str(e))
-    killNodeProcesses()
-    sys.exit(1)
-
-#make sure Server_0 has connection to the other two
-checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
-
-log("Stopping node 1 from System_1")
-stopNode("1", readconnectedNodeId('0', "Server_1"))
-
-#make sure Server_0 has connection to Server_2 only
-log("Checking that Server_0 has connection to ['Server_0', 'Server_2']")
-checkConnectionToNodes("0", ['Server_0', 'Server_2'])
-
-#end the test
-log("Ending test, stopping all nodes")
-
-killNodeProcesses()
-
-for env in envs:
-    if not envs[env].ReturnCodesOk():
-        log("Error: Some process exited with an unexpected value")
+    try:
+        envs[0] = startNode("0")
+        envs[1] = startNode("1")
+        envs[2] = startNode("2")
+    except:
+        log("Error: Failed to start nodes 0,1,2")
+        killNodeProcesses()
         sys.exit(1)
 
-sys.exit(0)
+    #make Server_0 has connection to the other two
+    log("Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
+    checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
+
+    #stop node two
+    log("Stopping node 2 from System_0")
+    stopNode("0", readconnectedNodeId('0', "Server_2"))
+
+    #make sure Server_0 has connection to Server_1 only
+    log("Checking that Server_0 has connection to ['Server_0', 'Server_1']")
+    checkConnectionToNodes("0", ['Server_0', 'Server_1'])
+
+    waitForProcessExit(2)
+
+    #restart node 2
+    try:
+        log("Starting node 2")
+        envs[2] = startNode("2")
+    except:
+        log("Error: Failed to start node 2")
+        killNodeProcesses()
+        sys.exit(1)
+
+    #make sure Server_0 has connection to the other two
+    log("Checking that Server_0 has connection to ['Server_0', 'Server_1', 'Server_2']")
+    checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
+
+    #stop the whole system via safir_control_cli from node 0, note that System_1 is started with the "ignore-control-cmd" flag
+    #which will make it not stop. The other nodes will add the current incarnation id to the blacklist and stop
+    #when we start the other two again they shall not join System_1
+    log("Stopping the system from Server_0, Server_0 should not go down due to being started with --ignore-control-cmd")
+    stopSystem('0')
+
+    log("Checking that Server_0 has only to itself")
+    checkConnectionToNodes("0", ['Server_0'])
+
+    waitForProcessExit(1)
+    waitForProcessExit(2)
+
+    #start Server_1 and Server_2 again
+    try:
+        log("Starting Server_1 and Server_2")
+        envs[1] = startNode("1")
+        envs[2] = startNode("2")
+    except:
+        log("Error: Failed to start Server_1 and Server_2")
+        killNodeProcesses()
+        sys.exit(1)
+
+    log("Checking that Server_0 has only to itself")
+    checkConnectionToNodes("0", ['Server_0'])
+
+    log("Checking that Server_1 has connection to ['Server_1', 'Server_2']")
+    checkConnectionToNodes("1", ['Server_1', 'Server_2'])
+
+    #hard kill Server_0 and restart it, see that it joins Server_1 and Server_2 again
+    log("Hardkill Server_0")
+    envs[0].killprocs()
+
+    waitForProcessExit(0)
+
+    try:
+        log("Starting Server_0")
+        envs[0] = startNode("0")
+    except Exception as e:
+        log("Error: Failed to start Server_0. Exception " + str(e))
+        killNodeProcesses()
+        sys.exit(1)
+
+    #make sure Server_0 has connection to the other two
+    checkConnectionToNodes("0", ['Server_0', 'Server_1', 'Server_2'])
+
+    log("Stopping node 1 from System_1")
+    stopNode("1", readconnectedNodeId('0', "Server_1"))
+
+    #make sure Server_0 has connection to Server_2 only
+    log("Checking that Server_0 has connection to ['Server_0', 'Server_2']")
+    checkConnectionToNodes("0", ['Server_0', 'Server_2'])
+
+    #end the test
+    log("Ending test, stopping all nodes")
+
+    killNodeProcesses()
+
+    for env in envs:
+        if not envs[env].ReturnCodesOk():
+            log("Error: Some process exited with an unexpected value")
+            sys.exit(1)
+
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    reporter = JUnitReporter("run_incarnation_and_control_tests")
+    sys.exit(reporter.run_single("incarnation_and_control", run_test))

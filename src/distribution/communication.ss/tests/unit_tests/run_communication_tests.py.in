@@ -25,6 +25,7 @@
 ###############################################################################
 import os
 import sys
+import time
 import argparse
 import subprocess
 
@@ -32,6 +33,7 @@ import subprocess
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
 from testenv import log
+from junit import JUnitReporter
 
 #The test binary is installed in bin, which is on the PATH. It hosts several
 #test suites, each selected by passing its name as the single argument. The
@@ -52,24 +54,26 @@ SUITES = (
 )
 
 
-def run():
-    failed = []
+def run(reporter):
     for suite in SUITES:
         log("=" * 60)
         log("Running communication test suite: " + suite)
+        start = time.time()
         result = subprocess.call((COMMUNICATION_UNIT_TESTS, suite))
+        reporter.add_case(suite, result == 0, time.time() - start,
+                          "" if result == 0 else "exited with code %d" % result)
         if result != 0:
             log("*** Suite '%s' failed with return code %d" % (suite, result))
-            failed.append(suite)
-    return failed
 
 
 def main():
-    failed = run()
+    reporter = JUnitReporter("run_communication_tests")
+    run(reporter)
+    reporter.write()
     log("=" * 60)
-    if failed:
-        log("*** FAILURE: %d communication test suite(s) failed: %s"
-            % (len(failed), ", ".join(failed)))
+    if reporter.num_failed:
+        log("*** FAILURE: %d of %d communication test suite(s) failed"
+            % (reporter.num_failed, reporter.num_run))
         return 1
     log("*** SUCCESS: all communication test suites passed")
     return 0

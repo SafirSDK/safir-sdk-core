@@ -32,6 +32,7 @@ import argparse
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
 from testenv import TestEnvInstalled, TestEnvStopper, log
+from junit import JUnitReporter
 
 #The test-only binary we launch is installed in bin, which is on the PATH.
 BASIC_OPERATIONS = "basic_operations"
@@ -45,7 +46,7 @@ os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(
     install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
 
 
-def main():
+def run_test():
     env = TestEnvInstalled()
 
     with TestEnvStopper(env):
@@ -69,4 +70,5 @@ if __name__ == "__main__":
         description="System-level test that exercises basic Dob operations while "
         "the shared memory is driven into its low-memory degradation levels, "
         "verifying the system stays healthy and shuts down cleanly.").parse_args()
-    sys.exit(main())
+    reporter = JUnitReporter("run_lowmem_basic_operations_tests")
+    sys.exit(reporter.run_single("lowmem_basic_operations", run_test))

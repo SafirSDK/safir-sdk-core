@@ -79,6 +79,16 @@ refuses to run them if it is missing (override with `--ignore-multicast-check`;
 a typical dev-host fix is `sudo ip route add 239.0.0.0/8 dev lo`). The dose tests
 are a separate installed suite (`run_dose_tests`).
 
+Each driver writes a JUnit report (`<driver>.junit.xml`, one `<testcase>` per
+named case) via the shared `JUnitReporter` in
+`src/tests/test_support/python/junit.py`; `run_slow_tests` gives every driver its
+own report directory (`SAFIR_SLOW_TEST_JUNIT_DIR`) and, like `run_dose_tests`,
+distinguishes a *test-case* failure (exit 1 — carried by the junit, CI job stays
+green, the "Test results" check goes red) from an *infra* failure (a driver that
+couldn't run, crashed, or hung → exit 2, fails the job). In CI the `slow-tests`
+job uploads the reports so they feed the same consolidated `test-summary` Check
+as the ctest and dose suites.
+
 ### Windows Defender false positives
 
 Defender has flagged a freshly built `safir_control.exe` as

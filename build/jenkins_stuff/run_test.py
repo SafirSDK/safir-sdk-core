@@ -603,8 +603,17 @@ def run_slow_test_suite():
     else:
         result = nice_call(["run_slow_tests"] + arguments)
 
-    if result != 0:
-        raise SetupError("Slow test suite failed. Returncode = " + str(result))
+    #run_slow_tests distinguishes test-case failures from infra failures (like
+    #run_dose_tests does): exit 1 means some test cases failed, which are carried
+    #by the uploaded junit and turn the consolidated "Test results" check red -
+    #the job itself stays green, so we don't raise. Exit 2 (or any other
+    #non-zero) means a driver couldn't run, crashed, or hung: a real failure that
+    #must fail the job.
+    if result == 1:
+        log("Slow test suite reported test-case failures; see the junit report. "
+            "Not failing the job (the test report carries the result).")
+    elif result != 0:
+        raise SetupError("Slow test suite failed to run. Returncode = " + str(result))
 
 
 def run_test_slave(slave_type):
