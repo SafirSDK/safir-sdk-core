@@ -206,6 +206,66 @@ Jenkins; cosmetic ALINK `A99999` .dll.policy warnings are dropped).
 **Newly practical:** a DOPE ODBC test job — hosted runners ship databases
 preinstalled, so it's far more tractable than under Jenkins (abandoned there).
 
+### Cutting a Release
+
+Releases are cut by **pushing a version tag**; the `release` job in
+`.github/workflows/ci.yml` does the rest. The tag trigger is
+`['[0-9]*.[0-9]*.[0-9]*']`, which matches both bare (`7.4.3`) and suffixed
+(`7.4.3-alpha4`) versions.
+
+**Manual steps** (all of them; nothing else needs editing for a PATCH/SUFFIX
+bump):
+
+1. **`VERSION.txt`** — bump `MAJOR`/`MINOR`/`PATCH`/`SUFFIX`. Use the **dash**
+   form for pre-releases (`SUFFIX=-alpha4`); empty `SUFFIX` for a stable
+   release. Any API change must bump `MAJOR`, which is the `SOVERSION`.
+2. **`build/packaging/debian/changelog`** — add a stanza at the top using the
+   **tilde** form (`safir-sdk-core (7.4.3~alpha4-1) UNRELEASED; urgency=medium`).
+   Debian needs `~` so pre-releases sort before the stable version;
+   `DebianPackager.build` in `build/safir_build_common.py` is the single place
+   that translates dash → tilde, and this file must match it.
+3. **`CHANGES.txt`** — for a stable release, add the release notes section
+   (date, summary, list of fixed issues). Alphas have not carried one.
+4. Commit, then `git tag <version>` and `git push origin <version>`. **The tag
+   must point at the bump commit itself.** `read_version()` in
+   `build/safir_build_common.py` appends a `git describe` hash to the version
+   for pre-release `SUFFIX`es *unless* HEAD sits exactly on a tag — that check
+   is what keeps the hash out of release artifact names (e.g. the Windows
+   installer filename). Tag a later commit and every asset gets a dirty
+   `7.4.3-alpha4-...-g<sha>` name.
+
+The `installcligac` caveat in `VERSION.txt`'s comments only bites on a
+**MAJOR.MINOR** bump — those `Policy.7.4.*` filenames encode MAJOR.MINOR only,
+so a PATCH or SUFFIX change leaves `build/packaging/debian/*.installcligac`
+alone.
+
+**What the `release` job then does automatically:** builds the full matrix,
+bundles each Linux platform's `.deb` set into one
+`safir-sdk-core_<ver>_<arch>-<distro>.debs.tar.bz2` (translating the `.deb`
+tilde back to a dash and dropping the `-1` debian revision, so asset names match
+the old manual releases), copies the Windows `.exe` installers as-is, and
+creates the GitHub release with `--generate-notes`. A tag containing a `-`
+automatically gets `--prerelease`.
+
+**Two things it deliberately does not do:**
+- **It creates a *draft*.** Publishing is a manual click in the GitHub UI, after
+  reviewing assets and generated notes. A re-run of an existing release just
+  re-uploads assets with `--clobber`.
+- **It does not wait for tests.** The job is `needs: build` only, so assets are
+  cut as soon as packaging succeeds. Check the test jobs yourself before
+  publishing the draft, or add test gating to `needs`.
+
+**Known deltas from the pre-GHA manual releases:** GHA publishes arm64
+ubuntu-noble `.deb`s (Jenkins could not build them) but **no x86
+debian-trixie** `.deb`s — see "No 32-bit (x86) on GHA" above. There is also no
+NuGet publishing step in CI.
+
+**Conventions observed so far, in case they matter:** the 7.4.3 alphas were
+tagged off a private feature branch, not `master`, so tagging off `master` is
+*not* an established rule. Note also that `7.4.3-alpha1` was tagged locally but
+never pushed and has no release — it predates the working automation, so the
+first release actually cut this way was `7.4.3-alpha2`.
+
 ### Shared Library ABI Classification
 
 Every non-imported `SHARED` library defined in the tree must be classified by
