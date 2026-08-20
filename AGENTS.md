@@ -91,30 +91,45 @@ as the ctest and dose suites.
 
 ### Windows Defender false positives
 
-Defender has flagged a freshly built `safir_control.exe` as
-`Exploit:Win64/Facupel!dha`, failing `TryStart_safir` with `OSError [WinError
-225]` (`ERROR_VIRUS_INFECTED`, raised by `CreateProcess` — the binary never
-runs, so this is not a code fault). Seen 2026-08-17 on a vs2022 development
-build.
+Since 2026-08-17 Defender flags **Debug-built** `safir_control.exe` as
+`Exploit:Win64/Facupel!dha`. `CreateProcess` then refuses to start the image, so
+`TryStart_safir` fails with `OSError [WinError 225]` (`ERROR_VIRUS_INFECTED`).
+The binary never runs, so this is not a code fault.
 
-Confirmed a reputation/behaviour false positive, not a compromised Conan
-package: `conan cache check-integrity "*"` passed, a Defender scan of the cache
-and build tree was clean, and no other binary was flagged (16 targets link the
-same breakpad/boost code). Our Windows binaries trip heuristics because they
-install a breakpad exception handler (`lluf_crash_reporter`) and spawn hidden
-child processes (`ControlApp.cpp`) while unsigned and with no hash reputation.
+**Scope: the `PACKAGE_TYPE = DebugOnly` Jenkins rows only** — the sole
+configuration that builds a Debug `safir_control.exe` and runs ctest against it.
+In a `Full` Windows build the Debug pass builds only the `safir_dual_abi_libs`
+target and skips tests altogether (`safir_build_common.py:562-565`, `:608-617`),
+so the package ships RelWithDebInfo executables plus debug dual-ABI *libraries*,
+never debug executables. The published 7.4.2 installer was checked and is clean,
+so **users are unaffected**. GHA is unaffected too, but only because it builds
+`Full` alone — see the DebugOnly item under Migration status.
 
-**Decision: no action taken.** Detection keys on the file hash, so every build
-is a new unknown binary and this could recur on any Windows build, but it is
-rare enough not to chase. Whether the GHA vs2022/vs2026 rows are exposed is
-unverified: they have never hit it, and we have not checked whether Defender's
-real-time protection is active on those images (`Get-MpComputerStatus` on a
-Windows row would settle it). Note that nothing in CI disables Defender
-antivirus — the `netsh advfirewall` call in the multicomputer jobs turns off the
-Defender *firewall*, a different component. If it recurs: verify the cache as
-above, then `Add-MpPreference -ExclusionPath <workspace>` on that machine.
-Authenticode-signing released binaries is the real fix if end users start
-hitting it.
+**Confirmed a false positive, not a compromised dependency.** Decisive test:
+`safir_control`'s sources are byte-identical between 7.4.2 and HEAD, both pin
+`boost/1.86.0`, and 7.4.2 built cleanly when it was released — so nothing changed
+on our side and Defender's rule set did. It reproduces on two separate build
+machines, on a private branch, on develop and on master. VirusTotal returns a
+single detection across the whole engine set, Microsoft only. `conan cache
+check-integrity "*"` passed and a Defender scan of the cache and build tree was
+clean. The exe's entire content is its own three translation units plus static
+`Boost::filesystem`/`Boost::program_options` (every Safir library it links is
+SHARED), and ~30 other targets link that same static boost without being
+flagged. The rule is presumably reacting to an unsigned binary that spawns a
+hidden child process (`ControlApp.cpp`) and installs a console control handler
+(`TerminateHandler.cpp`).
+
+**Decision: reported to Microsoft as an incorrect detection on 2026-08-20**
+(<https://www.microsoft.com/en-us/wdsi/filesubmission>); otherwise treated as low
+priority, since it costs one Jenkins axis on a system being retired, with no user
+or GHA impact. If Microsoft revises the rule, the detection simply stops firing
+after a definitions update — re-run a `DebugOnly` Windows build to confirm. No
+workaround was applied; `Add-MpPreference -ExclusionPath <workspace>` on the
+affected agent is available if the red builds get in the way. To re-settle this
+if it recurs, rebuild an older tag whose release build was clean: the same
+sources flagged today means Defender changed, not us. Note that nothing in CI
+disables Defender antivirus — the `netsh advfirewall` call in the multicomputer
+jobs turns off the Defender *firewall*, a different component.
 
 ### CI/CD
 
@@ -177,7 +192,9 @@ Jenkins; cosmetic ALINK `A99999` .dll.policy warnings are dropped).
   gate (GitHub has no "unstable" state); enforce later via a `quality-gates`
   block on the Quality Monitor job.
 - **`PACKAGE_TYPE = DebugOnly` not built on GHA** (only Full) — the Windows
-  debug-runtime-only packaging path is unexercised.
+  debug-runtime-only packaging path is unexercised. Adding it will also surface
+  the Windows Defender false positive, which currently only fires on that axis
+  (see "Windows Defender false positives" above).
 - **No 32-bit (x86) on GHA**; Jenkins still keeps debian-trixie × x86. Confirm
   this is an intentional drop, not a silent one.
 - **Generic ctest output not archived** — GHA keeps only JUnit XML + the dose
