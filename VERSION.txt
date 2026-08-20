@@ -5,7 +5,7 @@
 MAJOR=7
 MINOR=4
 PATCH=3
-SUFFIX=-alpha3
+SUFFIX=-alpha4
 
 #Set the SUFFIX to empty string for stable releases (but keep the equal sign).
 #If the SUFFIX is used for alpha or beta tags, start it with a dash (-),
