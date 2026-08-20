@@ -166,6 +166,36 @@ pushes, `render-docs` renders the guides, and `workflow-lint` runs zizmor.
   platform, change a runner label, or bump a container image / `--shm-size`,
   update **every** job. (A `fromJSON`-from-setup-job generator was considered and
   rejected — churn is low and the indirection hurts readability more.)
+- **The paired multicomputer jobs are not co-scheduled — never assume they start
+  together.** `multicomputer-master` and `multicomputer-slaves` become eligible
+  at the same moment but queue for runners independently, and on a busy pool one
+  side has been seen starting **30 minutes** after the other. Both sides must
+  therefore tolerate arbitrary skew, and their `timeout-minutes` has to cover
+  `peer-wait-minutes` *plus* the ~20-minute suite (hence 55, not the old 30,
+  which a healthy run had already been observed using 27 of).
+
+#### Known multicomputer overlay failure modes
+
+Both of these bit on the 7.4.3-alpha4 run and are now mitigated in
+`.github/actions/wireguard-overlay`; the symptoms are worth recognising because
+neither implicates the code under test.
+
+- **`Timed out waiting for peer endpoint`** — scheduling skew, as above. The wait
+  is now a wall-clock window (`peer-wait-minutes`, default 25) instead of a fixed
+  120×5s, and it polls the peer's job status so a peer that has *already
+  finished* aborts the wait immediately rather than burning the window. Passing
+  `peer-job-name` is what enables that; it must match the peer job's `name:`
+  exactly, and if it doesn't match (or the jobs API can't be read) the poll
+  silently falls back to plain waiting — so a rename degrades the optimisation
+  without breaking the tunnel.
+- **`[WinError 10013] ... forbidden by its access permissions` from every STUN
+  server** — not a network problem. It is `bind()` failing on the Windows master
+  because the UDP port sits in the dynamic range (49152+) and WinNAT/Hyper-V had
+  reserved it; the bind fails before a packet is sent, so trying more STUN
+  servers cannot help. `wg-ports` is now a candidate list defaulting to ports
+  *below* 49152, and WireGuard listens on whichever one actually bound. The
+  Windows side also dumps `netsh int ipv4 show excludedportrange udp` up front,
+  since that evidence is unrecoverable after the fact.
 
 **Jenkins** (`Jenkinsfile`) matrix: platforms ubuntu-noble / debian-trixie /
 vs2022 / vs2026; amd64 (plus x86 on debian-trixie); `PACKAGE_TYPE` axis Full
@@ -233,6 +263,14 @@ bump):
    is what keeps the hash out of release artifact names (e.g. the Windows
    installer filename). Tag a later commit and every asset gets a dirty
    `7.4.3-alpha4-...-g<sha>` name.
+
+**Push the tag on its own, not together with the branch.** The tag push carries
+the commits anyway, so `git push origin <branch> <tag>` gains nothing and starts
+*two* full matrix runs — the `concurrency` group is keyed on `github.ref`, so a
+branch ref and a tag ref never share it. That happened on 7.4.3-alpha4 and the
+two runs starved each other of runners: paired multicomputer jobs ended up
+starting 30 minutes apart, and four of them failed in the overlay rendezvous.
+Push the branch separately once the tag run has the runners it needs.
 
 The `installcligac` caveat in `VERSION.txt`'s comments only bites on a
 **MAJOR.MINOR** bump — those `Policy.7.4.*` filenames encode MAJOR.MINOR only,

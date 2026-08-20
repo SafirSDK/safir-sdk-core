@@ -22,13 +22,37 @@ inputs:
   peer-allowed-ips:
     description: allowed-ips for the peer, e.g. "10.68.0.0/24".
     required: true
-  wg-port:
-    description: Fixed UDP port WireGuard listens on (also the STUN source port).
+  wg-ports:
+    description: >
+      Comma-separated candidate UDP ports WireGuard may listen on (also the STUN
+      source port); the first one this runner can actually bind wins. Keep the
+      candidates BELOW 49152: ports in the Windows dynamic range can be reserved
+      by WinNAT/Hyper-V, and binding one then fails with WSAEACCES regardless of
+      which STUN server is asked. See the comments in stun.py.
     required: false
-    default: "51820"
+    default: "31820,41820,21820,51820"
   github-token:
     description: Token used by gh for the artifact-based rendezvous.
     required: true
+  peer-job-name:
+    description: >
+      Display name of the peer's job in this run (e.g.
+      "multicomputer-slaves-debian (for vs2022 master)"). Optional, and purely an
+      optimisation: it lets the endpoint poll notice that the peer job has
+      already finished and give up straight away, instead of waiting out the
+      whole peer-wait-minutes window for an endpoint that will never appear. If
+      it is empty, or the jobs API can't be read, the poll just waits.
+    required: false
+    default: ""
+  peer-wait-minutes:
+    description: >
+      How long to wait for the peer job to publish its endpoint. This has to
+      absorb runner-scheduling skew: the two jobs become eligible at the same
+      moment but are queued independently, and when the runner pool is busy one
+      side has been seen starting over 30 minutes after the other. Keep the
+      consuming jobs' timeout-minutes comfortably above this plus the test time.
+    required: false
+    default: "25"
   verify-peer-ip:
     description: >
       If set, after bringing wg0 up, loop-ping this peer address until the
@@ -61,10 +85,17 @@ runs:
 
     # Shared: Git Bash on Windows runs this same script. wg.exe isn't on PATH on
     # Windows and the interpreter is `python` (not python3), so resolve both per OS.
+    # On Windows, dump the reserved UDP ranges up front: when a bind fails with
+    # WSAEACCES this is the evidence for why, and it is invisible after the fact.
+    - name: Show excluded UDP port ranges (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: netsh int ipv4 show excludedportrange udp
+
     - name: Generate keys and discover public endpoint via STUN
       shell: bash
       env:
-        WG_PORT: ${{ inputs.wg-port }}
+        WG_PORTS: ${{ inputs.wg-ports }}
       run: |
         set -euo pipefail
         umask 077
@@ -76,8 +107,19 @@ runs:
         "$WG" genkey > priv.key
         "$WG" pubkey < priv.key > pub.key
         echo "Public key: $(cat pub.key)"
-        mapped="$("$PY" "$GITHUB_ACTION_PATH/stun.py" "$WG_PORT")"
-        echo "Mapped (public) endpoint: $mapped"
+        # stun.py prints "<public-ip>:<public-port> <local-port>": it walks the
+        # candidate ports and reports which one it managed to bind, so WireGuard
+        # is configured to listen on that same port rather than on a fixed guess.
+        # Command substitution, not process substitution: under `set -e` this
+        # aborts the step if stun.py exits non-zero (a `read < <(...)` would
+        # silently succeed with empty values and configure a broken tunnel).
+        stun_out="$("$PY" "$GITHUB_ACTION_PATH/stun.py" "$WG_PORTS")"
+        read -r mapped chosen_port <<< "$stun_out"
+        echo "Mapped (public) endpoint: $mapped (local UDP port $chosen_port)"
+        # Handed to the tunnel steps through a file rather than GITHUB_ENV: the
+        # value never leaves this action, and writing to GITHUB_ENV trips
+        # zizmor's github-env audit for no benefit here.
+        echo "$chosen_port" > wg_port.txt
         echo "$(cat pub.key) $mapped" > endpoint.txt
         echo "endpoint.txt: $(cat endpoint.txt)"
 
@@ -93,6 +135,8 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github-token }}
         PEER_ROLE: ${{ inputs.peer-role }}
+        PEER_JOB_NAME: ${{ inputs.peer-job-name }}
+        PEER_WAIT_MINUTES: ${{ inputs.peer-wait-minutes }}
       run: |
         set -uo pipefail
         # python's zipfile (vs `unzip`) keeps this identical on Git Bash, which
@@ -101,38 +145,84 @@ runs:
         mkdir -p peer
         name="endpoint-${PEER_ROLE}"
         api="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts"
+        jobs_api="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs"
+
         # 'gh run download' only sees artifacts of a COMPLETED run, so it can't
         # fetch a sibling job's artifact mid-run. The raw artifacts REST API lists
         # them as soon as they upload, so poll that and pull the zip directly.
-        for i in $(seq 1 120); do
+        try_fetch() {
           url="$(gh api "$api" --paginate \
                    --jq ".artifacts[] | select(.name==\"$name\" and .expired==false) | .archive_download_url" \
                  2>/dev/null | head -n1)"
-          if [ -n "$url" ]; then
+          [ -n "$url" ] || return 1
+          gh api "$url" > peer/endpoint.zip 2>/dev/null || return 1
+          "$PY" -c "import zipfile; zipfile.ZipFile('peer/endpoint.zip').extractall('peer')" || return 1
+          return 0
+        }
+
+        # Empty when the name wasn't supplied or the jobs API can't be read; the
+        # caller treats that as "no information" and simply keeps waiting.
+        peer_status() {
+          [ -n "$PEER_JOB_NAME" ] || return 0
+          gh api "$jobs_api" --paginate \
+            --jq ".jobs[] | select(.name==\"$PEER_JOB_NAME\") | .status" 2>/dev/null | head -n1
+        }
+
+        # Wall-clock deadline rather than a fixed attempt count: what we are
+        # absorbing is how long the peer job sits in the runner queue, which is
+        # a duration, and it decouples the budget from the poll interval.
+        deadline=$(( $(date +%s) + PEER_WAIT_MINUTES * 60 ))
+        i=0
+        while :; do
+          i=$((i + 1))
+          if try_fetch; then
             echo "Found $name on attempt $i"
-            if gh api "$url" > peer/endpoint.zip 2>/dev/null; then
-              "$PY" -c "import zipfile; zipfile.ZipFile('peer/endpoint.zip').extractall('peer')"
+            echo "Peer endpoint:"; cat peer/endpoint.txt
+            exit 0
+          fi
+
+          status="$(peer_status)"
+          if [ "$status" = "completed" ]; then
+            # The peer will never publish now. Re-check once in case it uploaded
+            # and finished inside the window between our two queries above.
+            if try_fetch; then
+              echo "Found $name on the final check after the peer job completed"
               echo "Peer endpoint:"; cat peer/endpoint.txt
               exit 0
             fi
+            echo "Peer job '$PEER_JOB_NAME' has already completed without" \
+                 "publishing an endpoint - giving up now instead of waiting out" \
+                 "the remaining window."
+            exit 1
           fi
-          echo "peer endpoint not ready yet (attempt $i) ..."
+
+          now="$(date +%s)"
+          [ "$now" -lt "$deadline" ] || break
+          # One line per ~30s, not per poll: at this window length a line per
+          # 5s poll buries the rest of the log.
+          if [ $((i % 6)) -eq 1 ]; then
+            echo "peer endpoint not ready yet (attempt $i, peer job" \
+                 "${status:-unknown}, $(( (deadline - now) / 60 ))m left) ..."
+          fi
           sleep 5
         done
-        echo "Timed out waiting for peer endpoint"; exit 1
+        echo "Timed out after ${PEER_WAIT_MINUTES}m waiting for peer endpoint" \
+             "(peer job status: ${status:-unknown})"
+        exit 1
 
     - name: Bring up the WireGuard tunnel (Linux)
       if: runner.os == 'Linux'
       shell: bash
       env:
-        WG_PORT: ${{ inputs.wg-port }}
         WG_ADDRESS: ${{ inputs.wg-address }}
         PEER_ALLOWED_IPS: ${{ inputs.peer-allowed-ips }}
       run: |
         set -euo pipefail
+        # The port the STUN step actually managed to bind, not the first candidate.
+        WG_PORT="$(cat wg_port.txt)"
         peer_pub="$(awk '{print $1}' peer/endpoint.txt)"
         peer_endpoint="$(awk '{print $2}' peer/endpoint.txt)"
-        echo "Peer pubkey=$peer_pub endpoint=$peer_endpoint"
+        echo "Peer pubkey=$peer_pub endpoint=$peer_endpoint listen-port=$WG_PORT"
 
         sudo ip link add wg0 type wireguard
         sudo wg set wg0 private-key priv.key listen-port "$WG_PORT"
@@ -159,14 +249,15 @@ runs:
       if: runner.os == 'Windows'
       shell: bash
       env:
-        WG_PORT: ${{ inputs.wg-port }}
         WG_ADDRESS: ${{ inputs.wg-address }}
         PEER_ALLOWED_IPS: ${{ inputs.peer-allowed-ips }}
       run: |
         set -euo pipefail
+        # The port the STUN step actually managed to bind, not the first candidate.
+        WG_PORT="$(cat wg_port.txt)"
         peer_pub="$(awk '{print $1}' peer/endpoint.txt)"
         peer_endpoint="$(awk '{print $2}' peer/endpoint.txt)"
-        echo "Peer pubkey=$peer_pub endpoint=$peer_endpoint"
+        echo "Peer pubkey=$peer_pub endpoint=$peer_endpoint listen-port=$WG_PORT"
         cat > wg0.conf <<EOF
         [Interface]
         PrivateKey = $(cat priv.key)
