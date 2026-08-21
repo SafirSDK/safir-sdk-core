@@ -142,7 +142,15 @@ master/develop/feature/private branches and on pull requests. A matrix builds
 and packages across ubuntu-noble (amd64 + arm64), debian-trixie, vs2022 and
 vs2026; there is no Debian-labelled runner, so debian-trixie builds inside a
 `debian:13` container on ubuntu-latest (with `--shm-size`, because dose_main
-needs a 100 MB `/dev/shm`). Each row runs `build/build.py --jenkins`; downstream
+needs a 100 MB `/dev/shm`).
+
+Every runner here is GitHub-hosted; this project has no self-hosted runners. In
+particular **`windows-2025-vs2026` is a normal GitHub-hosted image**, despite the
+unusual-looking label — do not read it as self-hosted, and do not "simplify" it
+to a plain `windows-2025`: the suffixed label is what selects the image carrying
+the VS2026 toolchain.
+
+Each row runs `build/build.py --jenkins`; downstream
 jobs install the package and run the example builds, the dose test suites
 (standalone, multinode, and multicomputer — the last joins two runners over an
 accountless WireGuard overlay so a native node talks to three debian slave
