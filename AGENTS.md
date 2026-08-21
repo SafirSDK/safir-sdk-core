@@ -318,6 +318,69 @@ ABI flavor in its `CMakeLists.txt`, or CMake configuration fails with a
 
 A newly added SHARED library must call exactly one of these.
 
+### Windows installer size, and the two things that look wrong but aren't
+
+The VS2022 installer roughly halved between 7.4.2 (333 MB) and 7.4.3-alpha4
+(173 MB), unpacked 1989 MB → 1174 MB. Two settled findings, both **Decision: no
+action taken**.
+
+**1. Third-party debug info is intentionally absent from the shipped PDBs.**
+`CMakeLists.txt` installs conan dependencies with `-s build_type=Release` when
+`CMAKE_BUILD_TYPE=RelWithDebInfo` (Safir's own code stays RelWithDebInfo).
+Previously ConanCenter had no RelWithDebInfo binaries, so `--build=missing`
+built Qt/protobuf/abseil from source *with* debug info, and because they are
+statically linked all of it landed in Safir's PDBs — the six Qt GUI app PDBs
+alone were 854 MB, now 127 MB. The tradeoff is that Qt/protobuf/abseil frames
+in breakpad crash dumps can no longer be symbolized. We are not in the business
+of debugging third-party libraries, so this is accepted, not a regression.
+Verify with `llvm-pdbutil dump --modules <pdb> | grep -oE 'objects-[A-Za-z]+'`
+— `objects-Release` is correct, `objects-RelWithDebInfo` means the split broke.
+
+**2. `icuuc.dll` in a Qt binary's imports is not a missing dependency.**
+Qt ≥ 6.9 (7.4.2 used 6.10.1) links the ICU that ships *in Windows* — 1703 added
+`icuuc.dll`/`icuin.dll` as system DLLs and 1903 only *added* the combined
+`icu.dll` beside them, it did not replace them. So nothing needs bundling, and
+`find <installer> -iname '*icu*'` correctly returns nothing. The only
+consequence is a Windows 10 1703+ floor. Qt is currently pinned to the 6.8 LTS
+(`qt/[>=6.8 <6.9]`) which does not import ICU at all; if that pin is ever
+raised, expect the import to reappear — and expect ~3.6 MB per GUI binary of
+`qtimezonelocale.cpp.obj` CLDR tables to come back with it, which is where the
+6 × 4 MB of `.exe` growth in 7.4.2 came from.
+
+### Debian `-dbg` package size: dwz, not the conan Release split
+
+The `safir-sdk-core-dbg` package shrank between 7.4.2 and 7.4.3-alpha4 (noble
+184 → 145 MB, trixie 237 → 216 MB) while every other package grew slightly. The
+cause is **`dh_dwz`**, which entered the default debhelper sequence at compat 12
+and became active when `build/packaging/debian/compat` (level 10) was deleted in
+favour of `debhelper-compat (= 13)` in `debian/control`. dwz dedups DWARF across
+binaries into a shared multifile. **Decision: no action taken — keep it on.**
+
+Do *not* attribute this to the Windows conan `-s build_type=Release` mechanism
+above; that has no measurable effect on the Debian packages. `debian/rules`
+clears `CFLAGS` and `CPPFLAGS` but not `CXXFLAGS`, so `-g` still reaches
+dependency builds, and protobuf compile units with full DWARF are present in
+both versions. Qt on Linux is the distro's shared Qt6, so the Qt-specific
+Windows findings never applied here at all.
+
+Verify dwz is doing its job:
+```
+readelf -S <file>.debug | grep gnu_debugaltlink        # present => dwz ran
+ls usr/lib/debug/.dwz/*/                               # the shared multifiles
+readelf --debug-dump=info <file>.debug | grep -c DW_TAG_partial_unit
+```
+Partial units are dwz output; a count of 0 alongside a missing
+`.gnu_debugaltlink` means dwz silently stopped running.
+
+Two consequences worth knowing. The per-binary `.debug` files are now useless
+without `/usr/lib/debug/.dwz/…`, so a single `.debug` file cherry-picked out of
+the package has a broken symbol table — ship or copy the whole `-dbg` package.
+And the gain is much smaller on newer gcc: dwz only touches
+`.debug_info`/`.debug_abbrev`/`.debug_str`, and `.debug_line`/`_loclists`/
+`_rnglists` grew 22–47% on trixie (gcc 14) versus 5–10% on noble (gcc 13),
+partly from the C++17 → C++20 move in `CMakeLists.txt`. Expect the reduction to
+keep eroding as the toolchain advances; that is normal, not a broken build.
+
 ## Architecture
 
 ### The Dob (Distributed Objects)
