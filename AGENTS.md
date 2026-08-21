@@ -202,6 +202,14 @@ vs2022 / vs2026; amd64 (plus x86 on debian-trixie); `PACKAGE_TYPE` axis Full
 (both MSVC-runtime flavours) and DebugOnly. Stages: Build + Unit Test,
 Standalone, Multinode, Multicomputer (cpp only, debian-trixie), Build Examples.
 
+Jenkins' remaining job is a coarse "does enough still work" cross-check against
+GHA, guarding against GHA somehow producing a fundamentally different binary. No
+Jenkins-built binary is shipped to anyone any more. So partial Jenkins failures
+are acceptable evidence, and Jenkins is deliberately *not* kept at feature parity
+with GHA: it has no slow-tests stage, and the tests migrated into the TestSuite
+component (see Running Tests) therefore run on GHA only. **Decision: no action
+taken** — do not add a slow-tests stage to the `Jenkinsfile`.
+
 #### Migration status (reference — kept until Jenkins is retired)
 
 **Moved over:** build+package on all platforms (incl. native arm64, which
