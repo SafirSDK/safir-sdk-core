@@ -51,12 +51,12 @@ single most likely thing you'll see.
 | `215-huge_service` | multicomputer dose (overlay) | any | **high** | Huge round-trip occasionally not delivered |
 | `Communication_ResetTest` | ctest | **Windows only** | med | Reset/re-discovery UDP flake; deep-dive below |
 | `518-huge_entity` | multicomputer dose (overlay) | any | low | Same huge-message family as 215 |
-| `syslog_output` | multinode dose | any | low | Intermittent |
+| `syslog_output` | multinode dose | any | low | Canary — fails on any unexpected syslog; read its body |
 | `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | low | "Pending registration" family |
 | `155-pending_service_registration_same_node` | dose | any | low | "Pending registration" family |
 | `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | low | Light-node detach/reattach |
 | `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | low | Communication flake, newly visible via slow-suite junit |
-| `safir_control.0.returncode` | multinode dose | **Windows** | low | Genuine `safir_control` exit 1; **fails the job** |
+| `safir_control.0.returncode` | multinode dose | **Windows** | low | `safir_control` exit 1; **fails the job**; overload→Coordinator crash |
 
 ### Job-level / infra flakes (red job, not a test-case failure)
 
@@ -105,17 +105,52 @@ a single bad run. Dob node comms are UDP unicast.
 **If it recurs:** look at the huge-service round-trip retransmit/timeout over the
 overlay. Otherwise a re-run should pass. `518-huge_entity` is the same family.
 
-### `safir_control.0.returncode` (Windows)
+### `safir_control.0.returncode` + `syslog_output` (correlated; overload-triggered)
 
-Seen 1/34 on multinode `vs2022` (run 32461278855, 2026-08-21). The junit says only
-`Process exited with return code 1, expected 0` — a genuine intermittent
-`safir_control` exit. Because the dose runner treats a bad `safir_control`
-returncode as infra, this **reddens the job**, not just the Check.
+Seen together on multinode `vs2022` (run 32461278855 = CI #132, 2026-08-21). The
+`safir_control.0.returncode` junit says only `Process exited with return code 1,
+expected 0`; because the dose runner treats a bad `safir_control` *process*
+returncode as infra, this one **reddens the job**, not just the Check.
 
 **This is NOT the Windows Defender false positive** documented in AGENTS.md. That
 one is DebugOnly (`WinError 225`, the image never starts) and, per AGENTS.md, never
-hits GHA because GHA builds `Full` only. Don't conflate the two: here the process
-started and ran, then exited nonzero. Root cause not yet isolated.
+hits GHA (which builds `Full` only). Here the process started, ran, then exited
+nonzero.
+
+**Root cause on #132, from the `syslog_output` capture** (this is why you always
+read the syslog body — see below). The syslog tells the whole story in order:
+1. `Boost.Asio latency for 'SpRawHandler' is at 5583 ms … 7902 ms … your system is
+   overloaded` — the GHA runner stalled for **5–8 seconds**.
+2. For ~4 minutes, `Excessive retransmits (67) to node Server_0(999999) … excluding
+   it!` from the other nodes — under the stall, UDP acks to `Server_0` were lost,
+   so the reliability layer excluded it.
+3. `CTRL: Caught 'std::exception' … 'Dead node was already defined as alive in last
+   state!'. CTRL: Exiting due to error!` — node 0's `safir_control` threw out of
+   `io_context.run()` and exited 1. **That is the `safir_control.0.returncode`**,
+   and all of the above landing in syslog is what failed `syslog_output`.
+
+The exception is a `std::logic_error` at
+`src/distribution/system_picture.ss/src/Coordinator.h:781` — a "sanity check" that
+fires when a `SystemStateMessage` lists the same node id as both alive and dead. It
+sits next to the node **resurrection** logic (~L745-758). So the chain is: overload
+→ mass exclusion of a node → an exclude/resurrect sequence yields a self-
+contradictory last-state → the sanity check **aborts the whole node** instead of
+reconciling it.
+
+**Classification:** the *trigger* is runner overload (environmental, not our
+workflow) → deferred. But this is more than a lost packet: it exposes a **latent
+robustness gap** — `Coordinator` treats an inconsistent last-state as fatal under
+heavy exclude/resurrect churn. If node-exclusion-under-load recurs, the real fix is
+to make that path non-fatal / reconcile the exclude+resurrect race rather than
+`throw`.
+
+### `syslog_output` is a canary — read its body
+
+`syslog_output` fails whenever *anything* unexpected reaches syslog during a run,
+so it is not one bug but a detector. Its junit `<failure>` body quotes the actual
+syslog lines, which frequently explain a *co-occurring* failure in the same run
+(as with `safir_control.0.returncode` on #132 above). Always read the body before
+dismissing it; the content differs run to run.
 
 ### `Communication_ResetTest` — deep dive (Windows only)
 
