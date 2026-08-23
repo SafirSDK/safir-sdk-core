@@ -57,6 +57,7 @@ single most likely thing you'll see.
 | `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | low | Light-node detach/reattach |
 | `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | low | Communication flake, newly visible via slow-suite junit |
 | `safir_control.0.returncode` | multinode dose | **Windows** | low | `safir_control` exit 1; **fails the job**; overload→Coordinator crash |
+| `run_restart_nodes_tests` (hang) | slow suite | any | low | Hangs at startup → TIMEOUT → **fails the job** |
 
 ### Job-level / infra flakes (red job, not a test-case failure)
 
@@ -81,6 +82,23 @@ these so you don't hunt for a nonexistent test regression:
   test-case failure and it's *not* the overlay rendezvous, read the job log — it
   may be a real regression in the CI wiring, which is exactly the class we do
   fix now.
+
+### `run_restart_nodes_tests` hang (slow suite → TIMEOUT → red job)
+
+Seen on CI #134 (run 32637686999, slow-tests `ubuntu-noble-amd64`). The driver
+normally runs ~550 s; here it printed `Launching node 0` and then produced **no
+further output for the full 30 minutes** until the umbrella's per-driver timeout
+(1800 s) killed it. So it hung **at startup — node 0 never progressed** — rather
+than deadlocking mid-test. A TIMEOUT is classified as infra (umbrella exit 2), so
+it **reddens the slow-tests job**, not just the "Test results" Check.
+
+The 1800 s timeout is deliberately generous (~3.3× the observed runtime) and did
+its job: it killed the hung driver and reported it against its own name instead of
+letting the global CI job timeout kill every driver blind — so **don't "fix" this
+by shortening or lengthening the timeout.** Root cause not yet isolated (node 0
+launched, then silence — a dose_main/safir_control startup or system-formation
+hang is the likely area). Pre-existing, environment-tolerant behaviour, not caused
+by the migration; defer.
 
 ### `215-huge_service` (+ the huge-message family)
 
