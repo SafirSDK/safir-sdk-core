@@ -79,6 +79,11 @@ refuses to run them if it is missing (override with `--ignore-multicast-check`;
 a typical dev-host fix is `sudo ip route add 239.0.0.0/8 dev lo`). The dose tests
 are a separate installed suite (`run_dose_tests`).
 
+Known intermittent test failures — which tests flake, why, and how to tell a
+flake from a regression — are catalogued in [TEST_STATUS.md](TEST_STATUS.md). A
+single red CI run is usually a known flake; check there before treating it as a
+regression.
+
 Each driver writes a JUnit report (`<driver>.junit.xml`, one `<testcase>` per
 named case) via the shared `JUnitReporter` in
 `src/tests/test_support/python/junit.py`; `run_slow_tests` gives every driver its
