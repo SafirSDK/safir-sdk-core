@@ -329,7 +329,6 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/SafirSdkCoreVersion.h
 
 set(CTEST_FULL_OUTPUT 1)
 ENABLE_TESTING()
-configure_file(CTestCustom.cmake . COPYONLY)
 set_property (GLOBAL PROPERTY USE_FOLDERS True)
 
 # Trigger Conan provider early by finding a package we need

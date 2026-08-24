@@ -1,14 +1,16 @@
-ADD_TEST(NAME dope_file_backend_test 
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_file_backend_test.py
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir-control $<TARGET_FILE:safir_control>
-  --dose-main $<TARGET_FILE:dose_main>
-  --dope-main $<TARGET_FILE:dope_main>
-  --entity-owner $<TARGET_FILE:entity_owner>
-  --dope-bin2xml $<TARGET_FILE:dope_bin2xml>)
+#This test is slow and system-level, so it is not run as part of ctest. Instead
+#the driver script and its config are installed into the TestSuite component and
+#run against an installed package, just like the dope odbc backend test. The
+#production binaries the test drives (safir_control, dose_main, dope_main,
+#safir_show_config, dope_bin2xml) are all found on the PATH in bin, as is the
+#test-only binary entity_owner that is installed by the parent CMakeLists. The
+#DopeTest dou types are provided by the installed DopeTest test-suite library
+#(see src/dope/dope_test_dou.ss).
+configure_file(run_dope_file_backend_test.py.in
+  "${CMAKE_CURRENT_BINARY_DIR}/run_dope_file_backend_test.py" @ONLY)
+SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/run_dope_file_backend_test.py
+  COMPONENT TestSuite)
 
-
-#Long timeouts are needed on slow machines.
-SET_SAFIR_TEST_PROPERTIES(TEST dope_file_backend_test 
-  TIMEOUT 3600
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+INSTALL(DIRECTORY test_config
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/dope/file_backend
+  COMPONENT TestSuite)

@@ -128,11 +128,16 @@ SET_SAFIR_TEST_PROPERTIES(TEST RawHandler_test)
 add_test(NAME RawChanges_test COMMAND RawChanges_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RawChanges_test)
 
-add_test(NAME ElectionHandler_test COMMAND ElectionHandler_test)
-SET_SAFIR_TEST_PROPERTIES(TEST ElectionHandler_test TIMEOUT 2400)
+#ElectionHandler_test is slow (both variants take ~50s), so it is not run as part
+#of ctest. Instead the self-contained Boost.Test binary and a thin driver script
+#that runs both variants are installed into the TestSuite component and run against
+#an installed package, just like the other migrated slow tests.
+SAFIR_INSTALL(TARGETS ElectionHandler_test COMPONENT TestSuite)
 
-add_test(NAME ElectionHandler_test_with_overflows COMMAND ElectionHandler_test -- --overflows)
-SET_SAFIR_TEST_PROPERTIES(TEST ElectionHandler_test_with_overflows TIMEOUT 2400)
+configure_file(run_election_handler_tests.py.in
+  "${CMAKE_CURRENT_BINARY_DIR}/run_election_handler_tests.py" @ONLY)
+SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/run_election_handler_tests.py
+  COMPONENT TestSuite)
 
 add_test(NAME Coordinator_test COMMAND Coordinator_test)
 SET_SAFIR_TEST_PROPERTIES(TEST Coordinator_test)

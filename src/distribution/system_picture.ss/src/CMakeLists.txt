@@ -38,4 +38,9 @@ target_link_libraries(system_picture_listener PRIVATE
   Boost::program_options)
 
 SAFIR_INSTALL(TARGETS system_picture)
-SAFIR_INSTALL(TARGETS system_picture_listener COMPONENT Development)
+#system_picture_listener is a runtime diagnostic CLI, so it belongs in the Tools
+#component (not Development). It also needs to be present for the installed
+#TestSuite: the incarnation_and_control test drives it, and the testsuite package
+#Depends on the tools package, so shipping it in Tools makes it available there
+#without duplicating the binary across two packages.
+SAFIR_INSTALL(TARGETS system_picture_listener COMPONENT Tools)

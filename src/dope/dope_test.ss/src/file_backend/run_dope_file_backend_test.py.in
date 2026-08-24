@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+###############################################################################
+#
+# Copyright Saab AB, 2012-2013, 2026 (http://safirsdkcore.com)
+#
+# Created by: Lars Hagstrom (lars@foldspace.nu)
+#
+###############################################################################
+#
+# This file is part of Safir SDK Core.
+#
+# Safir SDK Core is free software: you can redistribute it and/or modify
+# it under the terms of version 3 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# Safir SDK Core is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+#
+###############################################################################
+import subprocess
+import os
+import time
+import sys
+import shutil
+import glob
+import argparse
+import re
+import configparser
+from io import StringIO
+
+#This relies on the fact that we're installed in the bin directory on both linux and windows.
+install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
+from testenv import TestEnvInstalled, TestEnvStopper, log
+from junit import JUnitReporter
+
+#The test-only binary we launch is installed in bin, which is on the PATH, as are
+#the production binaries safir_show_config and dope_bin2xml.
+ENTITY_OWNER = "entity_owner"
+
+#Set up to use our own test configuration and point the typesystem at the
+#installed dou files. The last part of each path is baked in by cmake during
+#configuration/installation.
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(
+    install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@", "dope", "file_backend", "test_config")
+os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(
+    install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
+
+
+def remove(filename, retries):
+    for _ in range(retries):
+        try:
+            os.remove(filename)
+            break
+        except:
+            time.sleep(0.1)
+
+
+def rmdir(directory):
+    if os.path.exists(directory):
+        try:
+            shutil.rmtree(directory)
+        except OSError:
+            log("Failed to remove directory, will retry")
+            time.sleep(0.2)
+            shutil.rmtree(directory)
+
+
+def run():
+    env = None
+    try:
+        config_str = subprocess.check_output(("safir_show_config", "--locations"), universal_newlines=True)
+        #ConfigParser wants a section header so add a dummy one.
+        config_str = '[root]\n' + config_str
+        config = configparser.ConfigParser()
+        config.read_file(StringIO(config_str))
+
+        file_storage_path = os.path.join(config.get('root', 'lock_file_directory'), "..", "persistence")
+
+        rmdir(file_storage_path)
+
+        log("Find out how many entities entity_owner will set")
+        num_str = subprocess.check_output((ENTITY_OWNER, "num"), universal_newlines=True)
+        NUM_SMALL = int(re.search(r"NUM_SMALL = ([0-9]+)", num_str).group(1))
+        NUM_BIG = int(re.search(r"NUM_BIG = ([0-9]+)", num_str).group(1))
+        log("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
+
+        log("Set a bunch of entities")
+        env = TestEnvInstalled()
+        with TestEnvStopper(env):
+            env.launchProcess("entity_owner", (ENTITY_OWNER, "set")).wait()
+            while (len(glob.glob(os.path.join(file_storage_path, "DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG):
+                time.sleep(0.1)
+                if not env.ProcessDied():
+                    log("Some process exited with an unexpected value")
+                    return 1
+
+        syslog_output = env.Syslog()
+        if len(syslog_output) != 0:
+            log("Unexpected syslog output:\n" + syslog_output)
+            return 1
+
+        if not env.ReturnCodesOk():
+            log("Some process exited with an unexpected value")
+            return 1
+
+        log("See if dope loads them at startup")
+        env = TestEnvInstalled()
+        with TestEnvStopper(env):
+            env.launchProcess("entity_owner", (ENTITY_OWNER, "accept")).wait()
+
+        syslog_output = env.Syslog()
+        if len(syslog_output) != 0:
+            log("Unexpected syslog output:\n" + syslog_output)
+            return 1
+
+        if not env.ReturnCodesOk():
+            log("Some process exited with an unexpected value")
+            return 1
+
+        output = env.Output("entity_owner")
+        if output.count("OnInjectedNewEntity") != NUM_SMALL + NUM_BIG:
+            log("could not find the right number of 'OnInjectedNewEntity' in output")
+            log(output)
+            return 1
+
+        if output.count("<DopeTest.SmallEntity>") != NUM_SMALL:
+            log("could not find the right number of 'DopeTest.SmallEntity' in output")
+            return 1
+
+        if output.count("Correct string!") != NUM_SMALL or output.count("Incorrect string!") != 0:
+            log("Unicode string check failed")
+            return 1
+
+        if output.count("<DopeTest.BigEntity>") != NUM_BIG:
+            log("could not find the right number of 'DopeTest.BigEntity' in output")
+            return 1
+
+        if len(glob.glob(os.path.join(file_storage_path, "DopeTest.*.xml"))) != 0:
+            log("Unexpected xml files found!")
+            return 1
+
+        log("Convert binaries to xml")
+
+        #files are automatically chosen by parameter setting
+        subprocess.call("dope_bin2xml")
+
+        if len(glob.glob(os.path.join(file_storage_path, "DopeTest.*.xml"))) != NUM_SMALL + NUM_BIG:
+            log("dope_bin2xml appears to have failed")
+            return 1
+
+        #remove bin files to check that dope can load xml
+        for f in glob.glob(os.path.join(file_storage_path, "DopeTest.*.bin")):
+            remove(f, NUM_BIG)
+
+        log("Check that dope can load xml")
+
+        env = TestEnvInstalled()
+        with TestEnvStopper(env):
+            env.launchProcess("entity_owner", (ENTITY_OWNER, "accept")).wait()
+
+        syslog_output = env.Syslog()
+        if len(syslog_output) != 0:
+            log("Unexpected syslog output:\n" + syslog_output)
+            return 1
+
+        if not env.ReturnCodesOk():
+            log("Some process exited with an unexpected value")
+            return 1
+
+        output = env.Output("entity_owner")
+        if output.count("OnInjectedNewEntity") != NUM_SMALL + NUM_BIG:
+            log("could not find the right number of 'OnInjectedNewEntity' in output")
+            log(output)
+            return 1
+
+        if output.count("<DopeTest.SmallEntity>") != NUM_SMALL:
+            log("could not find the right number of 'DopeTest.SmallEntity' in output")
+            return 1
+
+        if output.count("Correct string!") != NUM_SMALL or output.count("Incorrect string!") != 0:
+            log("Unicode string check failed")
+            return 1
+
+        if output.count("<DopeTest.BigEntity>") != NUM_BIG:
+            log("could not find the right number of 'DopeTest.BigEntity' in output")
+            return 1
+
+        if len(glob.glob(os.path.join(file_storage_path, "DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG:
+            log("Unexpected bin files found!")
+            return 1
+
+        if len(glob.glob(os.path.join(file_storage_path, "DopeTest.*.xml"))) != 0:
+            log("Unexpected bin files found!")
+            return 1
+
+        log("update the entities")
+
+        env = TestEnvInstalled()
+        with TestEnvStopper(env):
+            #Remove all bin files (that have been loaded by dope by now), so
+            #that we can wait for all entities to be written again.
+            #Since dope will be writing the files a while after everything has
+            #started (it will get them from dose) we need to stay here
+            #for a while and check for files reappearing. Hacky, but good enough.
+            while (len(glob.glob(os.path.join(file_storage_path, "DopeTest.*.bin"))) != 0):
+                for f in glob.glob(os.path.join(file_storage_path, "DopeTest.*.bin")):
+                    remove(f, NUM_BIG)
+                time.sleep(10)
+
+            env.launchProcess("entity_owner", (ENTITY_OWNER, "update")).wait()
+
+            while (len(glob.glob(os.path.join(file_storage_path, "DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG):
+                time.sleep(0.1)
+
+        #The above removing of files while dope is writing them may cause
+        #some logs to be generated, which is expected. We try to get rid
+        #of them to not generate false negatives.
+        syslog_output = env.Syslog()
+        syslog_output_filtered = ""
+        for line in syslog_output.splitlines():
+            if line.find("boost::filesystem::permissions") == -1:
+                syslog_output_filtered += line
+        if len(syslog_output_filtered) != 0:
+            log("Unexpected syslog output:\n" + syslog_output_filtered)
+            return 1
+
+        if not env.ReturnCodesOk():
+            log("Some process exited with an unexpected value")
+            return 1
+
+        log("Load them again and check output")
+        env = TestEnvInstalled()
+        with TestEnvStopper(env):
+            env.launchProcess("entity_owner", (ENTITY_OWNER, "accept")).wait()
+
+        syslog_output = env.Syslog()
+        if len(syslog_output) != 0:
+            log("Unexpected syslog output:\n" + syslog_output)
+            return 1
+
+        if not env.ReturnCodesOk():
+            log("Some process exited with an unexpected value")
+            return 1
+
+        output = env.Output("entity_owner")
+        if output.count("name is changed") != NUM_SMALL:
+            log("could not find the right number of updated SmallEntity in output")
+            return 1
+
+        if output.count("99999999") != NUM_BIG:
+            log("could not find the right number of updated BigEntity in output")
+            return 1
+
+        rmdir(file_storage_path)
+
+    except:
+        log("Unexpected exception!")
+        if env is not None:
+            syslog_output = env.Syslog()
+            if len(syslog_output) != 0:
+                log("syslog output:\n" + syslog_output)
+        raise
+
+    return 0
+
+
+def main():
+    result = run()
+    log("=" * 60)
+    if result != 0:
+        log("*** FAILURE: dope file backend test failed")
+    else:
+        log("*** SUCCESS: dope file backend test passed")
+    return result
+
+
+if __name__ == "__main__":
+    argparse.ArgumentParser(
+        description="System-level test that exercises the DOPE 'File' persistence "
+        "backend: it verifies entities are written to disk, reloaded on restart, "
+        "converted between binary and xml storage, and updated correctly.").parse_args()
+    reporter = JUnitReporter("run_dope_file_backend_test")
+    sys.exit(reporter.run_single("dope_file_backend", main))

@@ -20,7 +20,6 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  SAFIR_SKIP_SLOW_TESTS: "1"
   # Multicomputer overlay address plan (10.68.x.y so the existing 1*.*68.*.* .dou
   # bind pattern matches with NO config change). Each master/slaves pair is an
   # isolated point-to-point tunnel, so all four pairs reuse the same addresses

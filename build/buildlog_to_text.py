@@ -73,10 +73,6 @@ _MSVC_RE = re.compile(r"^(?P<path>(?:[A-Za-z]:)?[^()]+)\(\d+(?:,\d+)?\):\s+(?:wa
 # CMake diagnostics: "CMake Warning|Error [(dev)] [at <path>:<line> (<func>)]:".
 _CMAKE_RE = re.compile(r"^CMake (?:Warning|Error)(?: \(dev\))?(?:\s+at\s+(?P<path>.+?):\d+\s+\([^)]*\))?:")
 
-# CTestCustom.cmake emits a harmless MESSAGE warning on every build; Jenkins
-# excluded it explicitly (excludeFile('CTestCustom.cmake')), so we do too.
-_CTEST_CUSTOM = "CTestCustom.cmake"
-
 # The .NET assembly linker warns once per generated assembly that a path in the
 # resource name is dropped. These are cosmetic and deliberately not reported.
 _ALINK_RE = re.compile(r"^ALINK: warning ")
@@ -135,8 +131,6 @@ def _under_checkout(path):
 def _process_cmake_line(normalised, cmake):
     """Return the kept/relativised CMake-warning line, or None to drop it."""
     cmake_path = cmake.group("path")
-    if cmake_path and os.path.basename(cmake_path) == _CTEST_CUSTOM:
-        return None
     # Relativise the "CMake Warning at <path>:<line>" location so the downstream
     # tool can link it to source after a fresh checkout.
     return _relativise(normalised) if cmake_path else normalised

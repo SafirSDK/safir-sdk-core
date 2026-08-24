@@ -1,14 +1,15 @@
-ADD_TEST(NAME Incarnation_And_Control_Tests
-  COMMAND ${Python3_EXECUTABLE}
-  ${CMAKE_CURRENT_SOURCE_DIR}/incarnation_and_control_tests.py
-  --safir-control $<TARGET_FILE:safir_control>
-  --dose_main $<TARGET_FILE:dose_main>
-  --dope_main $<TARGET_FILE:dope_main>
-  --system_picture_listener $<TARGET_FILE:system_picture_listener>
-  --safir_control_cli $<TARGET_FILE:safir_control_cli>
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  )
+#These tests are slow and system-level, so they are not run as part of ctest.
+#Instead the driver script and its config are installed into the TestSuite
+#component and run against an installed package, just like the dose tests (see
+#src/tests/dose_test.ss). The production binaries the test drives (safir_control,
+#dose_main, dope_main, system_picture_listener, safir_control_cli,
+#safir_show_config) are all found on the PATH in bin.
+configure_file(run_incarnation_and_control_tests.py.in
+  "${CMAKE_CURRENT_BINARY_DIR}/run_incarnation_and_control_tests.py" @ONLY)
 
-SET_SAFIR_TEST_PROPERTIES(TEST Incarnation_And_Control_Tests
-  TIMEOUT 1200
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/run_incarnation_and_control_tests.py
+  COMPONENT TestSuite)
+
+INSTALL(DIRECTORY test_config
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/incarnation_and_control
+  COMPONENT TestSuite)

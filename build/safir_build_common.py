@@ -940,13 +940,6 @@ class DebianPackager():
             options += " nocheck"
         command += ("--set-envvar", "DEB_BUILD_OPTIONS=" + options)
 
-        #Pass along a few select environment variables to debuild, since by default no environment
-        #is passed over to the build process by debuild.
-        for var in ("SAFIR_SKIP_SLOW_TESTS",):
-            val = os.environ.get(var)
-            if val is not None:
-                command += ("--set-envvar", var + "=" + val)
-
         #Inject the git revision so debian/rules can pass it on to cmake.
         for key, val in (git_info or {}).items():
             command += ("--set-envvar", key + "=" + val)

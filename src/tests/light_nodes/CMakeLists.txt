@@ -1,36 +1,19 @@
-ADD_TEST(NAME light_nodes_clear_state
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/light_nodes_clear_state.py
-  --safir-control $<TARGET_FILE:safir_control>
-  --dose_main $<TARGET_FILE:dose_main>
-  --dope_main $<TARGET_FILE:dope_main>
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir_web $<TARGET_FILE:safir_web>)
+#These tests are slow and system-level, so they are not run as part of ctest.
+#Instead the driver scripts and their config are installed into the TestSuite
+#component and run against an installed package, just like the dose tests (see
+#src/tests/dose_test.ss). The production binaries the tests drive (safir_control,
+#dose_main, dope_main, safir_show_config, safir_web) are all found on the PATH in
+#bin. The DoseTest dou types are provided by the installed DoseTest test-suite
+#library (see src/tests/dose_test_dou.ss).
+foreach(script
+    run_light_nodes_clear_state_tests
+    run_light_nodes_keep_state_tests
+    run_light_nodes_smart_sync_tests)
+  configure_file(${script}.py.in "${CMAKE_CURRENT_BINARY_DIR}/${script}.py" @ONLY)
+  SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/${script}.py
+    COMPONENT TestSuite)
+endforeach()
 
-SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_clear_state
-  TIMEOUT 3000
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
-
-
-ADD_TEST(NAME light_nodes_keep_state
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/light_nodes_keep_state.py
-  --safir-control $<TARGET_FILE:safir_control>
-  --dose_main $<TARGET_FILE:dose_main>
-  --dope_main $<TARGET_FILE:dope_main>
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir_web $<TARGET_FILE:safir_web>)
-
-SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_keep_state
-  TIMEOUT 3000
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
-
-ADD_TEST(NAME light_nodes_smart_sync
-  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/light_nodes_smart_sync.py
-  --safir-control $<TARGET_FILE:safir_control>
-  --dose_main $<TARGET_FILE:dose_main>
-  --dope_main $<TARGET_FILE:dope_main>
-  --safir-show-config $<TARGET_FILE:safir_show_config>
-  --safir_web $<TARGET_FILE:safir_web>)
-
-SET_SAFIR_TEST_PROPERTIES(TEST light_nodes_smart_sync
-  TIMEOUT 3000
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+INSTALL(DIRECTORY test_config
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/light_nodes
+  COMPONENT TestSuite)

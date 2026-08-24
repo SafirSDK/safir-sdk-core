@@ -27,26 +27,14 @@ target_link_libraries(communication_unit_tests PRIVATE
   # Resolver.h calls GetAdaptersAddresses() on Windows.
   $<$<PLATFORM_ID:Windows>:iphlpapi>)
 
-ADD_TEST(NAME Communication_MessageQueueTest COMMAND communication_unit_tests MessageQueueTest)
-SET_SAFIR_TEST_PROPERTIES(TEST Communication_MessageQueueTest TIMEOUT 360)
+#These tests are slow and system-level, so they are not run as part of ctest.
+#Instead the self-contained binary and a thin driver script that runs all of its
+#test suites are installed into the TestSuite component and run against an
+#installed package, just like the other migrated slow tests. The binary uses only
+#stub send policies or unicast loopback sockets, so it needs no runtime config.
+SAFIR_INSTALL(TARGETS communication_unit_tests COMPONENT TestSuite)
 
-ADD_TEST(NAME Communication_HeartbeatSenderTest COMMAND communication_unit_tests HeartbeatSenderTest)
-SET_SAFIR_TEST_PROPERTIES(TEST Communication_HeartbeatSenderTest TIMEOUT 360)
-
-ADD_TEST(NAME Communication_DataReceiverTest COMMAND communication_unit_tests DataReceiverTest)
-SET_SAFIR_TEST_PROPERTIES(TEST Communication_DataReceiverTest TIMEOUT 360)
-
-ADD_TEST(NAME Communication_DataSenderTest COMMAND communication_unit_tests DataSenderTest)
-SET_SAFIR_TEST_PROPERTIES(TEST Communication_DataSenderTest TIMEOUT 360)
-
-ADD_TEST(NAME Communication_DeliveryHandlerTest COMMAND communication_unit_tests DeliveryHandlerTest)
-SET_SAFIR_TEST_PROPERTIES(TEST Communication_DeliveryHandlerTest TIMEOUT 360)
-
-ADD_TEST(NAME Communication_DiscovererTest COMMAND communication_unit_tests DiscovererTest)
-SET_SAFIR_TEST_PROPERTIES(TEST Communication_DiscovererTest TIMEOUT 360)
-
-ADD_TEST(NAME Communication_AllocatorTest COMMAND communication_unit_tests AllocatorTest)
-SET_SAFIR_TEST_PROPERTIES(TEST Communication_AllocatorTest TIMEOUT 360)
-
-ADD_TEST(NAME Communication_ResolverTest COMMAND communication_unit_tests ResolverTest)
-SET_SAFIR_TEST_PROPERTIES(TEST Communication_ResolverTest TIMEOUT 360)
+configure_file(run_communication_tests.py.in
+  "${CMAKE_CURRENT_BINARY_DIR}/run_communication_tests.py" @ONLY)
+SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/run_communication_tests.py
+  COMPONENT TestSuite)

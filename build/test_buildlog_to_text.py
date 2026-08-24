@@ -92,12 +92,6 @@ class SanitizeTest(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertIn("W: safir-sdk-core-dev: no-manual-page", out)
         self.assertIn("dh_cligacpolicy: warning:", out)
 
-    def test_ctest_custom_cmake_warning_dropped(self):
-        # Jenkins excluded CTestCustom.cmake explicitly; this fires every build.
-        log = _pre("CMake Warning at " + CHECKOUT + "/tmp/safir-sdk-core_7.4.3~alpha3/obj-x86_64-linux-gnu/"
-                   "CTestCustom.cmake:3 (MESSAGE):")
-        self.assertEqual(buildlog_to_text.sanitize(log), "")
-
     def test_cmake_warning_kept_and_relativised(self):
         log = _pre("CMake Warning at " + CHECKOUT + "/src/dose/CMakeLists.txt:12 (message):")
         out = buildlog_to_text.sanitize(log)

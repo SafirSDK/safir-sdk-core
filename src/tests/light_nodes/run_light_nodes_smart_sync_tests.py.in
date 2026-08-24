@@ -23,52 +23,69 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, sys, argparse, socket, glob, logging, uuid, time
+import os, sys, argparse, socket, glob, logging, uuid, time, traceback
 import asyncio, json, websockets
 from contextlib import contextmanager
-from testenv import TestEnv, TestEnvStopper, log
-from communication_test_support import async_set_network_state as set_network_state, check_multicast_loopback
 
-failed_tests = set()
+#This relies on the fact that we're installed in the bin directory on both linux and windows.
+install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_PYTHON@"))
+from testenv import TestEnvInstalled, TestEnvStopper, log
+from communication_test_support import async_set_network_state as set_network_state, check_multicast_loopback
+from junit import JUnitReporter
+
+#The safir_web binary we launch is installed in bin, which is on the PATH.
+SAFIR_WEB = "safir_web"
+
+#Set up to use our own test configuration and point the typesystem at the
+#installed dou files. The last part of each path is baked in by cmake during
+#configuration/installation.
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(
+    install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@", "light_nodes", "test_config")
+os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(
+    install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
+
+reporter = JUnitReporter("run_light_nodes_smart_sync_tests")
 # ===================================================================
 # Helpers
 # ===================================================================
 @contextmanager
 def test_case(name):
-    global failed_tests
     log_dir = os.path.normpath(os.path.join(os.getcwd(), "test_output", "smart_sync", name))
     for f in glob.glob(os.path.join(log_dir, "*")): os.remove(f)
     os.environ["LLL_LOGDIR"] = log_dir
 
+    start = time.time()
+    ok = True
+    failure_text = ""
     try:
         log("=== Start: " + name + " ===")
         log("logdir: " + log_dir)
         yield
     except Exception as e:
-        failed_tests.add(name)
+        ok = False
+        failure_text = traceback.format_exc()
         logging.exception('Got exception')
         log(e)
         log("*** Test failed: " + name)
     finally:
+        reporter.add_case(name, ok, time.time() - start, failure_text)
         log("--- Finished: " + name + " ---")
 
 @contextmanager
-def launch_node(args, safir_instance, node_id, start_dope=False):
+def launch_node(safir_instance, node_id, start_dope=False):
     try:
         session_id = str(uuid.uuid4())
         os.environ["SAFIR_COM_NETWORK_SIMULATION"] = session_id # Enable network simulation
         os.environ["SAFIR_INSTANCE"] = str(safir_instance)
         log("--- Launching node", str(node_id))
-        env = TestEnv(args.safir_control,
-                    args.dose_main,
-                    args.dope_main if start_dope or safir_instance == 1 else None,
-                    args.safir_show_config,
+        env = TestEnvInstalled(with_dope = start_dope or safir_instance == 1,
                     start_syslog_server = True if safir_instance == 1 else False,
                     ignore_control_cmd = True if safir_instance == 1 else False,
                     wait_for_persistence = safir_instance < 3 or safir_instance >= 9,
                     force_node_id = node_id)
         env.session_id = session_id
-        env.launchProcess("safir_web", args.safir_web)
+        env.launchProcess("safir_web", SAFIR_WEB)
 
         yield env
     finally:
@@ -76,14 +93,12 @@ def launch_node(args, safir_instance, node_id, start_dope=False):
         env.killprocs()
 
 def parse_arguments():
-    parser = argparse.ArgumentParser("test script")
-    parser.add_argument("--safir-control", required=True)
-    parser.add_argument("--dose_main", required=True)
-    parser.add_argument("--dope_main", required=True)
-    parser.add_argument("--safir-show-config", required=True)
-    parser.add_argument("--safir_web", required=True)
-    arguments = parser.parse_args()
-    return arguments
+    parser = argparse.ArgumentParser(
+        description="Light-node system test (smart-sync variant): starts normal "
+        "and light Safir nodes and exercises the smart synchronisation behaviour "
+        "between them across detach/reattach and restart scenarios. Nodes are "
+        "driven via safir_control and observed through a safir_web websocket client.")
+    return parser.parse_args()
 
 # Read json method
 def method(msg):
@@ -309,11 +324,11 @@ class SafirApp:
 # ===================================================================
 # Test cases
 # ===================================================================
-async def two_normal_one_light_detach_reattach_light(args):
+async def two_normal_one_light_detach_reattach_light():
     with test_case("two_normal_one_light_detach_reattach_light"),\
-        launch_node(args, safir_instance=1, node_id=1) as node1,\
-        launch_node(args, safir_instance=2, node_id=2) as node2,\
-        launch_node(args, safir_instance=5, node_id=5) as node5:
+        launch_node(safir_instance=1, node_id=1) as node1,\
+        launch_node(safir_instance=2, node_id=2) as node2,\
+        launch_node(safir_instance=5, node_id=5) as node5:
 
         app1 = SafirApp(safir_instance=1, node_id=1)
         app2 = SafirApp(safir_instance=2, node_id=2)
@@ -406,11 +421,11 @@ async def two_normal_one_light_detach_reattach_light(args):
 
         await asyncio.gather(app1.stop(), app5.stop())
 
-async def two_normal_one_light_kill_one_normal_while_light_is_detached(args):
+async def two_normal_one_light_kill_one_normal_while_light_is_detached():
     with test_case("two_normal_one_light_kill_one_normal_while_light_is_detached"),\
-        launch_node(args, safir_instance=1, node_id=1) as node1,\
-        launch_node(args, safir_instance=2, node_id=2) as node2,\
-        launch_node(args, safir_instance=5, node_id=5) as node5:
+        launch_node(safir_instance=1, node_id=1) as node1,\
+        launch_node(safir_instance=2, node_id=2) as node2,\
+        launch_node(safir_instance=5, node_id=5) as node5:
 
         app1 = SafirApp(safir_instance=1, node_id=1)
         app2 = SafirApp(safir_instance=2, node_id=2)
@@ -509,11 +524,11 @@ async def two_normal_one_light_kill_one_normal_while_light_is_detached(args):
 
         await asyncio.gather(app1.stop(), app5.stop())
 
-async def one_normal_two_light_detach_reattach_one_light_big_pool(args):
+async def one_normal_two_light_detach_reattach_one_light_big_pool():
     with test_case("one_normal_two_light_detach_reattach_one_light_big_pool"),\
-        launch_node(args, safir_instance=1, node_id=1) as node1,\
-        launch_node(args, safir_instance=5, node_id=5) as node5,\
-        launch_node(args, safir_instance=6, node_id=6) as node6:
+        launch_node(safir_instance=1, node_id=1) as node1,\
+        launch_node(safir_instance=5, node_id=5) as node5,\
+        launch_node(safir_instance=6, node_id=6) as node6:
 
         app1 = SafirApp(safir_instance=1, node_id=1)
         app5 = SafirApp(safir_instance=5, node_id=5)
@@ -586,10 +601,10 @@ async def one_normal_two_light_detach_reattach_one_light_big_pool(args):
 
         await asyncio.gather(app1.stop(), app5.stop(), app6.stop())
 
-async def one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications(args):
+async def one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications():
     with test_case("one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications"),\
-        launch_node(args, safir_instance=1, node_id=1) as node1,\
-        launch_node(args, safir_instance=5, node_id=5) as node5:
+        launch_node(safir_instance=1, node_id=1) as node1,\
+        launch_node(safir_instance=5, node_id=5) as node5:
 
         app1 = SafirApp(safir_instance=1, node_id=1)
         app5 = SafirApp(safir_instance=5, node_id=5)
@@ -669,10 +684,10 @@ async def one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_not
 
         await asyncio.gather(app1.stop(), app5.stop())
 
-async def lightnode_attaches_to_new_system_after_detached(args):
+async def lightnode_attaches_to_new_system_after_detached():
     with test_case("lightnode_attaches_to_new_system_after_detached"),\
-        launch_node(args, safir_instance=1, node_id=1) as node1,\
-        launch_node(args, safir_instance=5, node_id=5) as node5:
+        launch_node(safir_instance=1, node_id=1) as node1,\
+        launch_node(safir_instance=5, node_id=5) as node5:
 
         app1 = SafirApp(safir_instance=1, node_id=1)
         app5 = SafirApp(safir_instance=5, node_id=5)
@@ -717,7 +732,7 @@ async def lightnode_attaches_to_new_system_after_detached(args):
 
         # Start a new normal node
         log("--- start node2")
-        with launch_node(args, safir_instance=2, node_id=2, start_dope=True) as node2:
+        with launch_node(safir_instance=2, node_id=2, start_dope=True) as node2:
             app2 = SafirApp(safir_instance=2, node_id=2)
             await app2.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.GlobalEntity", "handlerId": "APP2"}, "id": 107}')
             await app2.send('{"method": "setEntity", "params": {"entity": {"_DouType": "DoseTest.GlobalEntity", "Info": "version2"}, "instanceId": 22, "handlerId": "APP2"}, "id": 104}')
@@ -741,9 +756,9 @@ async def lightnode_attaches_to_new_system_after_detached(args):
 
         await app5.stop()
 
-async def lightnode_switch_to_new_system(args):
+async def lightnode_switch_to_new_system():
     with test_case("lightnode_switch_to_new_system"),\
-         launch_node(args, safir_instance=9, node_id=9, start_dope=True) as system2:
+         launch_node(safir_instance=9, node_id=9, start_dope=True) as system2:
         app2 = SafirApp(safir_instance=9, node_id=9)
         await app2.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.SynchronousPermanentEntity", "handlerId": "qwer", "injectionHandler":true}, "id": 103}')
         initialRegApp2 = [("Safir.Dob.NodeInfo:9", "Registered"),
@@ -753,8 +768,8 @@ async def lightnode_switch_to_new_system(args):
         await set_network_state(False, system2.session_id)
         #system 2 is now started, but with network off.
 
-        with launch_node(args, safir_instance=1, node_id=1, start_dope=True) as system1,\
-             launch_node(args, safir_instance=5, node_id=5) as lightnode:
+        with launch_node(safir_instance=1, node_id=1, start_dope=True) as system1,\
+             launch_node(safir_instance=5, node_id=5) as lightnode:
 
             app1 = SafirApp(safir_instance=1, node_id=1)
             await app1.send('{"method": "registerEntityHandler", "params": {"typeId": "DoseTest.SynchronousPermanentEntity", "handlerId": "asdf", "injectionHandler":true}, "id": 103}')
@@ -783,17 +798,22 @@ async def lightnode_switch_to_new_system(args):
 # ===========================================
 # main
 # ===========================================
-async def main(args):
+async def main():
     check_multicast_loopback()
-    await lightnode_switch_to_new_system(args)
-    await two_normal_one_light_detach_reattach_light(args)
-    await two_normal_one_light_kill_one_normal_while_light_is_detached(args)
-    await one_normal_two_light_detach_reattach_one_light_big_pool(args)
-    await one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications(args)
-    await lightnode_attaches_to_new_system_after_detached(args)
+    await lightnode_switch_to_new_system()
+    await two_normal_one_light_detach_reattach_light()
+    await two_normal_one_light_kill_one_normal_while_light_is_detached()
+    await one_normal_two_light_detach_reattach_one_light_big_pool()
+    await one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications()
+    await lightnode_attaches_to_new_system_after_detached()
 
 if __name__ == "__main__":
-    asyncio.run(main(parse_arguments()))
-    for failed in failed_tests:
-        log("*** Failed: ", failed)
-    sys.exit(1 if len(failed_tests) > 0 else 0)
+    parse_arguments()
+    try:
+        asyncio.run(main())
+    finally:
+        reporter.write()
+    for c in reporter.cases:
+        if not c["passed"]:
+            log("*** Failed: ", c["name"])
+    sys.exit(1 if reporter.num_failed > 0 else 0)

@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import subprocess, sys, time, signal
+import subprocess, sys, time, signal, shutil
 import syslog_server
 from threading import Thread
 from queue import Queue, Empty
@@ -55,10 +55,13 @@ class TestEnv:
     """
     safir_control: full path to safir_control
     dose_main: full path to dose_main
-    dope_main: full path to dope_main
+    dope_main: full path to dope_main (or None for no dope_main)
     safir_show_config: full path to safir_show_config
 
-    If the exes are in the PATH, its okay to just use exe names.
+    The binary paths are always passed explicitly. Tests run from a build tree
+    via ctest pass the full $<TARGET_FILE:...> paths. Tests run against an
+    installed package should use TestEnvInstalled instead, which resolves the
+    binaries from the PATH and forwards them here.
     """
     def __init__(self,
                  safir_control,
@@ -242,3 +245,31 @@ class TestEnv:
             return False
 
         return proc[0].poll() is None
+
+
+def _resolve_installed_binary(name):
+    path = shutil.which(name)
+    if path is None:
+        raise Exception(
+            f"Could not find '{name}' on the PATH. Tests that run against an "
+            f"installed package expect the Safir binaries to be in bin, on the PATH.")
+    return path
+
+
+class TestEnvInstalled(TestEnv):
+    """A TestEnv for tests that run against an installed package, where the
+    production binaries (safir_control, dose_main, dope_main, safir_show_config)
+    live in bin, on the PATH. Resolves each binary by name from the PATH (failing
+    fast with a clear error if one is missing) and forwards to TestEnv. Pass
+    with_dope=False for a system without dope_main. Pass dope_main_name to run a
+    stand-in for dope_main (e.g. "signal_persistence_ready" for tests where dope is
+    not involved). All other keyword arguments (start_syslog_server,
+    ignore_control_cmd, ...) are passed straight through.
+    """
+    def __init__(self, with_dope=True, dope_main_name="dope_main", **kwargs):
+        super().__init__(
+            safir_control=_resolve_installed_binary("safir_control"),
+            dose_main=_resolve_installed_binary("dose_main"),
+            dope_main=_resolve_installed_binary(dope_main_name) if with_dope else None,
+            safir_show_config=_resolve_installed_binary("safir_show_config"),
+            **kwargs)

@@ -88,32 +88,18 @@ BOOST_AUTO_TEST_CASE(update_current)
 
 BOOST_AUTO_TEST_CASE(wrap_around)
 {
-    LamportClock clock(1000);
-    const LamportTimestamp first = clock.GetNewTimestamp();
-
-    //run clock a bit into the first half of the timestamps
-    for (unsigned long i = 0; i <0x0fffffff;++i)
-    {
-        clock.GetNewTimestamp();
-    }
-
-    const LamportTimestamp beginningOfFirstHalf = clock.GetNewTimestamp();
-
-    //run clock into beginning of second half
-    for (unsigned long i = 0; i <0x7ffffff0;++i)
-    {
-        clock.GetNewTimestamp();
-    }
-
-    const LamportTimestamp beginningOfSecondHalf = clock.GetNewTimestamp();
-
-    //run clock until it has wrapped.
-    for (unsigned long i = 0; i <0x7fffff00;++i)
-    {
-        clock.GetNewTimestamp();
-    }
-
-    const LamportTimestamp wrapped = clock.GetNewTimestamp();
+    //This case verifies the wrap-aware LamportTimestamp comparison at four raw
+    //clock positions: the start, the beginning of the first half, the beginning
+    //of the second half, and a value reached after the clock has wrapped past
+    //0xffffffff. These are exactly the counter values that GetNewTimestamp would
+    //land on if the clock were advanced there step by step (0x0fffffff, then
+    //0x7ffffff0, then 0x7fffff00 increments), but we construct them directly to
+    //avoid running the clock through billions of iterations.
+    const int64_t nodeId = 1000;
+    const LamportTimestamp first              = LamportTimestamp::MakeTimestamp(0x00000001, nodeId);
+    const LamportTimestamp beginningOfFirstHalf  = LamportTimestamp::MakeTimestamp(0x10000001, nodeId);
+    const LamportTimestamp beginningOfSecondHalf = LamportTimestamp::MakeTimestamp(0x8ffffff2, nodeId);
+    const LamportTimestamp wrapped             = LamportTimestamp::MakeTimestamp(0x0ffffef3, nodeId);
 
     BOOST_CHECK(first < beginningOfFirstHalf);
     BOOST_CHECK(beginningOfFirstHalf < beginningOfSecondHalf);

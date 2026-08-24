@@ -1,0 +1,3 @@
+run_light_nodes_clear_state_tests.py
+run_light_nodes_keep_state_tests.py
+run_light_nodes_smart_sync_tests.py
