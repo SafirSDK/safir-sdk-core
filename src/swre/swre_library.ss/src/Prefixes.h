@@ -242,88 +242,100 @@ public:
             return;
         }
 
-        if (m_timer == nullptr)
+        // UpdateEntity is called both from the io_context thread, by the Dob
+        // callbacks below, and from application threads, by Add and Enable via
+        // the Tracer constructor. Asio timers are unsafe to share between
+        // threads, so hop onto the io_context thread before touching m_timer.
+        boost::asio::post(m_ioContext, [this]
         {
-            m_timer = std::make_unique<boost::asio::steady_timer>(m_ioContext);
-        }
-
-        m_timer->cancel();
-        m_timer->expires_after(std::chrono::milliseconds(40));
-        m_timer->async_wait([this](const boost::system::error_code& error)
-        {
-            if (error || m_stop)
+            if (m_stop)
             {
                 return;
             }
 
-            try
+            if (m_timer == nullptr)
             {
-                Safir::Application::TracerStatusPtr entity;
-                bool created = false;
+                m_timer = std::make_unique<boost::asio::steady_timer>(m_ioContext);
+            }
+
+            m_timer->cancel();
+            m_timer->expires_after(std::chrono::milliseconds(40));
+            m_timer->async_wait([this](const boost::system::error_code& error)
+            {
+                if (error || m_stop)
+                {
+                    return;
+                }
+
                 try
                 {
-                    entity = std::static_pointer_cast<Safir::Application::TracerStatus>(m_connection.Read(GetMyEntityId()).GetEntity());
-                    created = true;
-                }
-                catch (const Safir::Dob::NotFoundException&)
-                {
-                    entity = Safir::Application::TracerStatus::Create();
-                }
-
-                if (entity->ProgramName().IsNull() || entity->ProgramName() != m_programName)
-                {
-                    entity->ProgramName() = m_programName;
-                }
-
-                if (entity->NodeName().IsNull() || entity->NodeName() != Safir::Dob::ThisNodeParameters::Name())
-                {
-                    entity->NodeName() = Safir::Dob::ThisNodeParameters::Name();
-                }
-
-                std::unique_lock<std::mutex> lck(m_prefixSearchLock);
-                for (const auto& prefix: m_prefixes)
-                {
-                    auto findIt = entity->Prefixes().find(prefix.m_prefix);
-                    if (findIt == entity->Prefixes().end())
+                    Safir::Application::TracerStatusPtr entity;
+                    bool created = false;
+                    try
                     {
-                        entity->Prefixes().Insert(prefix.m_prefix, prefix.m_isEnabled);
+                        entity = std::static_pointer_cast<Safir::Application::TracerStatus>(m_connection.Read(GetMyEntityId()).GetEntity());
+                        created = true;
                     }
-                    else if (findIt->second.IsNull() || findIt->second.GetVal() != prefix.m_isEnabled)
+                    catch (const Safir::Dob::NotFoundException&)
                     {
-                        findIt->second.SetVal(prefix.m_isEnabled);
+                        entity = Safir::Application::TracerStatus::Create();
+                    }
+
+                    if (entity->ProgramName().IsNull() || entity->ProgramName() != m_programName)
+                    {
+                        entity->ProgramName() = m_programName;
+                    }
+
+                    if (entity->NodeName().IsNull() || entity->NodeName() != Safir::Dob::ThisNodeParameters::Name())
+                    {
+                        entity->NodeName() = Safir::Dob::ThisNodeParameters::Name();
+                    }
+
+                    std::unique_lock<std::mutex> lck(m_prefixSearchLock);
+                    for (const auto& prefix: m_prefixes)
+                    {
+                        auto findIt = entity->Prefixes().find(prefix.m_prefix);
+                        if (findIt == entity->Prefixes().end())
+                        {
+                            entity->Prefixes().Insert(prefix.m_prefix, prefix.m_isEnabled);
+                        }
+                        else if (findIt->second.IsNull() || findIt->second.GetVal() != prefix.m_isEnabled)
+                        {
+                            findIt->second.SetVal(prefix.m_isEnabled);
+                        }
+                    }
+
+                    lck.unlock();
+
+                    if (entity->LogToStdout().IsNull())
+                    {
+                        entity->LogToStdout() = m_logToStdout.load(std::memory_order_relaxed);
+                    }
+
+                    if (entity->LogToSafirLogging().IsNull())
+                    {
+                        entity->LogToSafirLogging() = m_logToSafirLogging.load(std::memory_order_relaxed);
+                    }
+
+                    if (entity->LogToTracer().IsNull())
+                    {
+                        entity->LogToTracer() = m_logToTracer.load(std::memory_order_relaxed);
+                    }
+
+                    if (!created)
+                    {
+                        m_connection.CreateRequest(entity,GetMyEntityId().GetInstanceId(), Safir::Dob::Typesystem::HandlerId(), this);
+                    }
+                    else if (entity->IsChanged())
+                    {
+                        m_connection.UpdateRequest(entity,GetMyEntityId().GetInstanceId(), this);
                     }
                 }
-
-                lck.unlock();
-
-                if (entity->LogToStdout().IsNull())
+                catch (const Safir::Dob::LowMemoryException&)
                 {
-                    entity->LogToStdout() = m_logToStdout.load(std::memory_order_relaxed);
+                    return;
                 }
-
-                if (entity->LogToSafirLogging().IsNull())
-                {
-                    entity->LogToSafirLogging() = m_logToSafirLogging.load(std::memory_order_relaxed);
-                }
-
-                if (entity->LogToTracer().IsNull())
-                {
-                    entity->LogToTracer() = m_logToTracer.load(std::memory_order_relaxed);
-                }
-
-                if (!created)
-                {
-                    m_connection.CreateRequest(entity,GetMyEntityId().GetInstanceId(), Safir::Dob::Typesystem::HandlerId(), this);
-                }
-                else if (entity->IsChanged())
-                {
-                    m_connection.UpdateRequest(entity,GetMyEntityId().GetInstanceId(), this);
-                }
-            }
-            catch (const Safir::Dob::LowMemoryException&)
-            {
-                return;
-            }
+            });
         });
     }
 
