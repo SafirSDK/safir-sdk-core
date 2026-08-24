@@ -45,141 +45,285 @@ To build an external user dou-project, use `dobmake_batch.py` (installed as
 directly (see BUILD.Linux.txt / BUILD.Windows.txt).
 
 ### Running Tests
+
+There are two categories of tests, run two different ways.
+
+**Fast tests — CTest.**
 ```bash
 # Run all tests via CTest (after building)
 ctest
-
-# Skip slow tests (recommended for quick iterations)
-SAFIR_SKIP_SLOW_TESTS=1 ctest
 ```
+Every ctest test now runs by default; there is no longer a skip switch. The
+hours-long, multi-process "population 1" cases were moved into the installed slow
+suite (below). A handful of shorter multi-process tests still run inline in ctest
+(WebSocket component/stress, performance_test, sate_script, RawHandler_test,
+StopHandler_test) — they were in the old skip list but are cheap enough (~15 s
+each) to keep here.
 
-Slow tests skipped by `SAFIR_SKIP_SLOW_TESTS`: LowLevelLogger, Communication tests, ElectionHandler tests, DOPE backend tests, restart/light node tests, WebSocket tests, system picture tests, Incarnation_And_Control_Tests, sate_script.
+**Slow system tests — the installed TestSuite.** The big "population 1"
+system-level tests (system picture, incarnation/control, light/restart nodes,
+lowmem, DOPE none/file backends, tracer backdoor, election handler,
+communication) have been
+moved out of ctest into the TestSuite install component, so they run against an
+*installed* package the way the dose suite does — a hours-long case is not
+really a unit test. Run the whole set with a single command after installing:
+```bash
+make install            # or: ninja install
+run_slow_tests          # runs the whole slow suite; see run_slow_tests --list / --help
+```
+`run_tracer_backdoor_tests` needs the `websockets` pip package; the odbc DOPE
+backend needs a database and is opt-in (`run_slow_tests --include-odbc`, or in
+CI `run_test.py --test database`). Some tests (system picture, light nodes) need
+working multicast loopback on the host; `run_slow_tests` checks this up front and
+refuses to run them if it is missing (override with `--ignore-multicast-check`;
+a typical dev-host fix is `sudo ip route add 239.0.0.0/8 dev lo`). The dose tests
+are a separate installed suite (`run_dose_tests`).
+
+Known intermittent test failures — which tests flake, why, and how to tell a
+flake from a regression — are catalogued in [TEST_STATUS.md](TEST_STATUS.md). A
+single red CI run is usually a known flake; check there before treating it as a
+regression.
+
+Each driver writes a JUnit report (`<driver>.junit.xml`, one `<testcase>` per
+named case) via the shared `JUnitReporter` in
+`src/tests/test_support/python/junit.py`; `run_slow_tests` gives every driver its
+own report directory (`SAFIR_SLOW_TEST_JUNIT_DIR`) and, like `run_dose_tests`,
+distinguishes a *test-case* failure (exit 1 — carried by the junit, CI job stays
+green, the "Test results" check goes red) from an *infra* failure (a driver that
+couldn't run, crashed, or hung → exit 2, fails the job). In CI the `slow-tests`
+job uploads the reports so they feed the same consolidated `test-summary` Check
+as the ctest and dose suites.
+
+### Windows Defender false positives
+
+Since 2026-08-17 Defender flags **Debug-built** `safir_control.exe` as
+`Exploit:Win64/Facupel!dha`. `CreateProcess` then refuses to start the image, so
+`TryStart_safir` fails with `OSError [WinError 225]` (`ERROR_VIRUS_INFECTED`).
+The binary never runs, so this is not a code fault.
+
+**Scope: the `PACKAGE_TYPE = DebugOnly` Jenkins rows only** — the sole
+configuration that builds a Debug `safir_control.exe` and runs ctest against it.
+In a `Full` Windows build the Debug pass builds only the `safir_dual_abi_libs`
+target and skips tests altogether (`safir_build_common.py:562-565`, `:608-617`),
+so the package ships RelWithDebInfo executables plus debug dual-ABI *libraries*,
+never debug executables. The published 7.4.2 installer was checked and is clean,
+so **users are unaffected**. GHA is unaffected too, but only because it builds
+`Full` alone — see the DebugOnly item under Migration status.
+
+**Confirmed a false positive, not a compromised dependency.** Decisive test:
+`safir_control`'s sources are byte-identical between 7.4.2 and HEAD, both pin
+`boost/1.86.0`, and 7.4.2 built cleanly when it was released — so nothing changed
+on our side and Defender's rule set did. It reproduces on two separate build
+machines, on a private branch, on develop and on master. VirusTotal returns a
+single detection across the whole engine set, Microsoft only. `conan cache
+check-integrity "*"` passed and a Defender scan of the cache and build tree was
+clean. The exe's entire content is its own three translation units plus static
+`Boost::filesystem`/`Boost::program_options` (every Safir library it links is
+SHARED), and ~30 other targets link that same static boost without being
+flagged. The rule is presumably reacting to an unsigned binary that spawns a
+hidden child process (`ControlApp.cpp`) and installs a console control handler
+(`TerminateHandler.cpp`).
+
+**Decision: reported to Microsoft as an incorrect detection on 2026-08-20**
+(<https://www.microsoft.com/en-us/wdsi/filesubmission>); otherwise treated as low
+priority, since it costs one Jenkins axis on a system being retired, with no user
+or GHA impact. If Microsoft revises the rule, the detection simply stops firing
+after a definitions update — re-run a `DebugOnly` Windows build to confirm. No
+workaround was applied; `Add-MpPreference -ExclusionPath <workspace>` on the
+affected agent is available if the red builds get in the way. To re-settle this
+if it recurs, rebuild an older tag whose release build was clean: the same
+sources flagged today means Defender changed, not us. Note that nothing in CI
+disables Defender antivirus — the `netsh advfirewall` call in the multicomputer
+jobs turns off the Defender *firewall*, a different component.
 
 ### CI/CD
 
-Two CI systems run against the repository.
+Two CI systems run against the repository: **GitHub Actions** (the target CI)
+and **Jenkins** (`Jenkinsfile`, still the canonical release build). The goal is
+for GitHub Actions to fully replace Jenkins.
 
 **GitHub Actions** (`.github/workflows/ci.yml`) runs on pushes to
 master/develop/feature/private branches and on pull requests. A matrix builds
 and packages across ubuntu-noble (amd64 + arm64), debian-trixie, vs2022 and
-vs2026. There is no Debian-labelled runner, so the debian-trixie row builds
-inside a `debian:13` container on the ubuntu-latest host (with `--shm-size`,
-because dose_main needs a 100 MB `/dev/shm`). Each row runs
-`build/build.py --jenkins`, then downstream jobs install the produced package
-and run the example builds and the dose test suites (standalone, multinode, and
-multicomputer). The multicomputer run joins two hosted runners over an
-accountless WireGuard overlay (`.github/actions/wireguard-overlay`), so the node
-under test on a native runner talks to three debian slave containers on a
-second runner. Every job uploads its JUnit results as artifacts; a final
-`test-summary` job aggregates them into one GitHub Check (via
-`EnricoMi/publish-unit-test-result-action`). A `release` job drafts a GitHub
-release with the installers on version-tag pushes. A `workflow-lint` job runs
-zizmor over the workflow/action files (see the migration notes below). The whole
-workflow runs with `SAFIR_SKIP_SLOW_TESTS=1`.
+vs2026; there is no Debian-labelled runner, so debian-trixie builds inside a
+`debian:13` container on ubuntu-latest (with `--shm-size`, because dose_main
+needs a 100 MB `/dev/shm`).
 
-**Jenkins** (`Jenkinsfile`) is the canonical release build. Matrix build across:
-- **Platforms**: ubuntu-noble, debian-trixie, vs2022, vs2026
-- **Architectures**: amd64 (x86 dropped for most platforms)
-- **Package types** (`PACKAGE_TYPE` axis): Full (ships both Debug and RelWithDebInfo MSVC-runtime flavours), DebugOnly
+Every runner here is GitHub-hosted; this project has no self-hosted runners. In
+particular **`windows-2025-vs2026` is a normal GitHub-hosted image**, despite the
+unusual-looking label — do not read it as self-hosted, and do not "simplify" it
+to a plain `windows-2025`: the suffixed label is what selects the image carrying
+the VS2026 toolchain.
 
-Test stages:
-1. Build and Unit Test
-2. Standalone Tests
-3. Multinode Tests
-4. Multicomputer Tests (cpp only, requires debian-trixie)
-5. Build Examples
+Each row runs `build/build.py --jenkins`; downstream
+jobs install the package and run the example builds, the dose test suites
+(standalone, multinode, and multicomputer — the last joins two runners over an
+accountless WireGuard overlay so a native node talks to three debian slave
+containers), and the installed slow-test suite. A `test-summary` job aggregates
+JUnit results into one Check, a `release` job drafts a release on version-tag
+pushes, `render-docs` renders the guides, and `workflow-lint` runs zizmor.
 
-### Jenkins → GitHub Actions migration status
+**Rules when editing CI** (ignore either and the build breaks or rots silently):
+- **`.github/` changes → run `zizmor .github/` and keep it clean before
+  committing** (the `workflow-lint` job fails otherwise). Deliberate exceptions
+  are inline `# zizmor: ignore[<rule>]` comments with a rationale; third-party
+  actions must be hash-pinned (`unpinned-uses` policy in `.github/zizmor.yml`),
+  first-party `actions/*` may float on major tags.
+- **The platform matrix is duplicated — keep every copy in sync.** GitHub
+  Actions has no YAML anchors, so `build`, `build-examples`, `dose-tests`,
+  `slow-tests`, `multicomputer-master` and `multicomputer-slaves` each spell out
+  their own `strategy.matrix` (`build`≡`build-examples`, keyed on platform
+  without the arch suffix and carrying `conan_home`; `dose-tests`≡`slow-tests`,
+  using a combined `ubuntu-noble-amd64` token + separate `platform_name`; the
+  multicomputer jobs are a debian-less 4-platform subset). When you add/rename a
+  platform, change a runner label, or bump a container image / `--shm-size`,
+  update **every** job. (A `fromJSON`-from-setup-job generator was considered and
+  rejected — churn is low and the indirection hurts readability more.)
+- **The paired multicomputer jobs are not co-scheduled — never assume they start
+  together.** `multicomputer-master` and `multicomputer-slaves` become eligible
+  at the same moment but queue for runners independently, and on a busy pool one
+  side has been seen starting **30 minutes** after the other. Both sides must
+  therefore tolerate arbitrary skew, and their `timeout-minutes` has to cover
+  `peer-wait-minutes` *plus* the ~20-minute suite (hence 55, not the old 30,
+  which a healthy run had already been observed using 27 of).
 
-The goal is for GitHub Actions to fully replace Jenkins as the canonical CI.
-What has moved over so far:
-- Build and package across all platforms (incl. native arm64, which Jenkins
-  does not do).
-- Unit tests (run by `build.py --jenkins` via ctest), **minus the slow tests** —
-  see below.
-- The standalone, multinode and multicomputer dose test suites.
-- Build Examples.
-- Drafting a GitHub release with installers on version-tag pushes.
-- Documentation rendering (User's Guide + Requirements Specification, HTML +
-  PDF), via a standalone `render-docs` job on ubuntu-latest. It runs the
-  asciidoctor/dia/dblatex toolchain directly (no container) and uploads the
-  rendered docs as an artifact.
-- Workflow security hardening with [zizmor](https://github.com/woodruffw/zizmor),
-  wired in as the `workflow-lint` job (runs `zizmor .github/`, version pinned).
-  **Whenever you edit anything under `.github/` (workflows or composite
-  actions), re-run `zizmor .github/` and keep it clean before committing** — the
-  CI job will fail otherwise. Deliberate exceptions are recorded as inline
-  `# zizmor: ignore[<rule>]` comments with a rationale, plus the `unpinned-uses`
-  policy in `.github/zizmor.yml` (third-party actions must be hash-pinned;
-  first-party `actions/*` may float on major tags).
-- **Build-warnings analysis**, via a `warnings-summary` job that replaces
-  Jenkins' `archive_and_analyze()`. Each build/examples/docs job uploads its log
-  as a `buildlog-*` artifact; `build/buildlog_to_text.py` unwraps it and **drops
-  warnings from Conan dependency builds** — both by path (dependency/system
-  paths outside the checkout) and by stripping the whole `conan install` …
-  `Finalizing install` section (where dependency CMake/Boost/meson warnings have
-  relative paths indistinguishable from ours) — leaving only our own tree's
-  diagnostics, paths made repo-relative for source links.
-  `build/packaging_to_sarif.py` extracts the `.deb` packaging warnings (lintian
-  plus the `dpkg-*`/`dh_*` tooling warnings) to SARIF, since the analysis tool
-  has no parser for them. [Quality
-  Monitor](https://github.com/uhafner/quality-monitor) — same `analysis-model`
-  parsers as the Jenkins warnings-ng plugin — then publishes one "Build warnings"
-  Check with source-linked annotations covering GCC, MSBuild, CMake, Java,
-  Doxygen and the packaging warnings. lintian was silently absent from the Linux
-  builds (it is only a `devscripts` *recommends*, dropped by
-  `--no-install-recommends`); it is now installed in `setup-build-env` so
-  `debuild` runs it as it does on Jenkins. (ALINK `A99999` .dll.policy
-  resource-path warnings from the .NET assembly linker are deliberately not
-  collected — they are cosmetic.)
+#### Known multicomputer overlay failure modes
 
-Not yet migrated / still missing on GitHub Actions:
-- **The full ("slow") unit tests.** GHA runs with `SAFIR_SKIP_SLOW_TESTS=1`, so
-  the slow tests listed under *Running Tests* above never run there. The
-  intended fix is to **break the slow tests out into a separate test suite that
-  is launched on its own, the way the dose test suites are** — rather than
-  leaving multi-hour cases inside the unit-test run (a unit test that takes
-  hours is not really a unit test). This is a sizeable undertaking and has not
-  been started.
-- **The build-warnings quality gate.** Jenkins applied a quality gate
-  (`threshold: 1, TOTAL → unstable`) so a single new warning marked the build
-  unstable. The GHA `warnings-summary` job (above) reports the warnings but sets
-  no quality gate, because GitHub has no "unstable" build state — the Check goes
-  green and the warnings are informational. Enforcing a gate would mean either
-  failing the job outright (stricter than Jenkins ever was) or publishing a
-  neutral Check via the Checks API; a gate can be turned on later by adding a
-  `quality-gates` block to the job's Quality Monitor config.
+Both of these bit on the 7.4.3-alpha4 run and are now mitigated in
+`.github/actions/wireguard-overlay`; the symptoms are worth recognising because
+neither implicates the code under test.
 
-Deliberate-or-pending coverage differences (decide before retiring Jenkins):
-- **`PACKAGE_TYPE = DebugOnly`.** Jenkins runs a `Full × DebugOnly` axis across
-  Build, Test suite and Build examples; GHA only ever builds and tests `Full`
-  (the default). The DebugOnly path — chiefly the Windows debug-runtime-only
-  packaging — is not exercised on GHA.
-- **32-bit (x86) builds.** Jenkins still keeps `debian-trixie` × `x86` in its
-  matrix (x86 is dropped only for ubuntu/vs2022/vs2026), gated on an x86 agent
-  being online. GHA has no x86 at all. This may be an intentional drop, but it
-  should be a conscious decision rather than a silent omission.
-- **Generic unit-test output.** Jenkins zips `**/test_output/**` from the
-  unit-test stage; GHA archives only JUnit XML plus the dose `dose_test_output`,
-  so non-dose ctest output is not captured.
-- **Conan cache-save warnings.** Every build/examples job ends with a
-  `##[warning]Cache save failed … Unable to reserve cache with key … another
-  job may be creating this cache`. This is benign and pre-dates the warnings
-  work: the Conan cache key (`conan-v2-<platform>-<arch>-<hash>`) only changes
-  when dependencies change, and GitHub cache keys are write-once — so the first
-  run on a branch saves the cache and every later run with unchanged deps is
-  rejected because the key already exists (it is *not* a race between matrix
-  rows; each platform has its own key). Harmless, but the yellow annotation is
-  noisy. It cannot be filtered by the warnings pipeline (it is a runner
-  annotation, never written to `buildlog.html`); silencing it would mean making
-  the cache step save only on a miss (e.g. skip save when the restore was an
-  exact hit). Left as a follow-up.
+- **`Timed out waiting for peer endpoint`** — scheduling skew, as above. The wait
+  is now a wall-clock window (`peer-wait-minutes`, default 25) instead of a fixed
+  120×5s, and it polls the peer's job status so a peer that has *already
+  finished* aborts the wait immediately rather than burning the window. Passing
+  `peer-job-name` is what enables that; it must match the peer job's `name:`
+  exactly, and if it doesn't match (or the jobs API can't be read) the poll
+  silently falls back to plain waiting — so a rename degrades the optimisation
+  without breaking the tunnel.
+- **`[WinError 10013] ... forbidden by its access permissions` from every STUN
+  server** — not a network problem. It is `bind()` failing on the Windows master
+  because the UDP port sits in the dynamic range (49152+) and WinNAT/Hyper-V had
+  reserved it; the bind fails before a packet is sent, so trying more STUN
+  servers cannot help. `wg-ports` is now a candidate list defaulting to ports
+  *below* 49152, and WireGuard listens on whichever one actually bound. The
+  Windows side also dumps `netsh int ipv4 show excludedportrange udp` up front,
+  since that evidence is unrecoverable after the fact.
 
-Opportunities the GHA setup newly makes practical:
-- **DOPE ODBC tests.** These have not run in Jenkins for a long time, because
-  maintaining a database setup for them was abandoned. GitHub-hosted runners
-  ship with databases preinstalled, so reintroducing an ODBC test job is much
-  more tractable now than it was under Jenkins.
+**Jenkins** (`Jenkinsfile`) matrix: platforms ubuntu-noble / debian-trixie /
+vs2022 / vs2026; amd64 (plus x86 on debian-trixie); `PACKAGE_TYPE` axis Full
+(both MSVC-runtime flavours) and DebugOnly. Stages: Build + Unit Test,
+Standalone, Multinode, Multicomputer (cpp only, debian-trixie), Build Examples.
+
+Jenkins' remaining job is a coarse "does enough still work" cross-check against
+GHA, guarding against GHA somehow producing a fundamentally different binary. No
+Jenkins-built binary is shipped to anyone any more. So partial Jenkins failures
+are acceptable evidence, and Jenkins is deliberately *not* kept at feature parity
+with GHA: it has no slow-tests stage, and the tests migrated into the TestSuite
+component (see Running Tests) therefore run on GHA only. **Decision: no action
+taken** — do not add a slow-tests stage to the `Jenkinsfile`.
+
+#### Migration status (reference — kept until Jenkins is retired)
+
+**Moved over:** build+package on all platforms (incl. native arm64, which
+Jenkins can't do); ctest unit tests (via `build.py --jenkins`); the slow tests
+(now the `slow-tests` job across the full matrix, each driver wall-clock-timed,
+so `SAFIR_SKIP_SLOW_TESTS` is gone); standalone/multinode/multicomputer dose
+suites; Build Examples; release drafting; doc rendering (`render-docs`, runs the
+asciidoctor/dia/dblatex toolchain directly); zizmor hardening (`workflow-lint`);
+build-warnings analysis (`warnings-summary`: `buildlog_to_text.py` drops
+Conan-dependency warnings by path and by stripping the `conan install` …
+`Finalizing install` block, `packaging_to_sarif.py` extracts lintian/dpkg/dh
+warnings to SARIF, and Quality Monitor publishes one source-linked Check;
+lintian is now installed in `setup-build-env` so `debuild` runs it as on
+Jenkins; cosmetic ALINK `A99999` .dll.policy warnings are dropped).
+
+**Pending / decide before retiring Jenkins:**
+- **No build-warnings quality gate.** `warnings-summary` reports but does not
+  gate (GitHub has no "unstable" state); enforce later via a `quality-gates`
+  block on the Quality Monitor job.
+- **`PACKAGE_TYPE = DebugOnly` not built on GHA** (only Full) — the Windows
+  debug-runtime-only packaging path is unexercised. Adding it will also surface
+  the Windows Defender false positive, which currently only fires on that axis
+  (see "Windows Defender false positives" above).
+- **No 32-bit (x86) on GHA**; Jenkins still keeps debian-trixie × x86. Confirm
+  this is an intentional drop, not a silent one.
+- **Generic ctest output not archived** — GHA keeps only JUnit XML + the dose
+  `dose_test_output`, not `**/test_output/**`.
+- **Benign Conan "Cache save failed … another job may be creating this cache"
+  annotation** on every build (write-once cache key already saved; harmless but
+  noisy, can't be filtered as it's a runner annotation). Fix = save-on-miss-only.
+
+**Newly practical:** a DOPE ODBC test job — hosted runners ship databases
+preinstalled, so it's far more tractable than under Jenkins (abandoned there).
+
+### Cutting a Release
+
+Releases are cut by **pushing a version tag**; the `release` job in
+`.github/workflows/ci.yml` does the rest. The tag trigger is
+`['[0-9]*.[0-9]*.[0-9]*']`, which matches both bare (`7.4.3`) and suffixed
+(`7.4.3-alpha4`) versions.
+
+**Manual steps** (all of them; nothing else needs editing for a PATCH/SUFFIX
+bump):
+
+1. **`VERSION.txt`** — bump `MAJOR`/`MINOR`/`PATCH`/`SUFFIX`. Use the **dash**
+   form for pre-releases (`SUFFIX=-alpha4`); empty `SUFFIX` for a stable
+   release. Any API change must bump `MAJOR`, which is the `SOVERSION`.
+2. **`build/packaging/debian/changelog`** — add a stanza at the top using the
+   **tilde** form (`safir-sdk-core (7.4.3~alpha4-1) UNRELEASED; urgency=medium`).
+   Debian needs `~` so pre-releases sort before the stable version;
+   `DebianPackager.build` in `build/safir_build_common.py` is the single place
+   that translates dash → tilde, and this file must match it.
+3. **`CHANGES.txt`** — for a stable release, add the release notes section
+   (date, summary, list of fixed issues). Alphas have not carried one.
+4. Commit, then `git tag <version>` and `git push origin <version>`. **The tag
+   must point at the bump commit itself.** `read_version()` in
+   `build/safir_build_common.py` appends a `git describe` hash to the version
+   for pre-release `SUFFIX`es *unless* HEAD sits exactly on a tag — that check
+   is what keeps the hash out of release artifact names (e.g. the Windows
+   installer filename). Tag a later commit and every asset gets a dirty
+   `7.4.3-alpha4-...-g<sha>` name.
+
+**Push the tag on its own, not together with the branch.** The tag push carries
+the commits anyway, so `git push origin <branch> <tag>` gains nothing and starts
+*two* full matrix runs — the `concurrency` group is keyed on `github.ref`, so a
+branch ref and a tag ref never share it. That happened on 7.4.3-alpha4 and the
+two runs starved each other of runners: paired multicomputer jobs ended up
+starting 30 minutes apart, and four of them failed in the overlay rendezvous.
+Push the branch separately once the tag run has the runners it needs.
+
+The `installcligac` caveat in `VERSION.txt`'s comments only bites on a
+**MAJOR.MINOR** bump — those `Policy.7.4.*` filenames encode MAJOR.MINOR only,
+so a PATCH or SUFFIX change leaves `build/packaging/debian/*.installcligac`
+alone.
+
+**What the `release` job then does automatically:** builds the full matrix,
+bundles each Linux platform's `.deb` set into one
+`safir-sdk-core_<ver>_<arch>-<distro>.debs.tar.bz2` (translating the `.deb`
+tilde back to a dash and dropping the `-1` debian revision, so asset names match
+the old manual releases), copies the Windows `.exe` installers as-is, and
+creates the GitHub release with `--generate-notes`. A tag containing a `-`
+automatically gets `--prerelease`.
+
+**Two things it deliberately does not do:**
+- **It creates a *draft*.** Publishing is a manual click in the GitHub UI, after
+  reviewing assets and generated notes. A re-run of an existing release just
+  re-uploads assets with `--clobber`.
+- **It does not wait for tests.** The job is `needs: build` only, so assets are
+  cut as soon as packaging succeeds. Check the test jobs yourself before
+  publishing the draft, or add test gating to `needs`.
+
+**Known deltas from the pre-GHA manual releases:** GHA publishes arm64
+ubuntu-noble `.deb`s (Jenkins could not build them) but **no x86
+debian-trixie** `.deb`s — see "No 32-bit (x86) on GHA" above. There is also no
+NuGet publishing step in CI.
+
+**Conventions observed so far, in case they matter:** the 7.4.3 alphas were
+tagged off a private feature branch, not `master`, so tagging off `master` is
+*not* an established rule. Note also that `7.4.3-alpha1` was tagged locally but
+never pushed and has no release — it predates the working automation, so the
+first release actually cut this way was `7.4.3-alpha2`.
 
 ### Shared Library ABI Classification
 
@@ -194,6 +338,69 @@ ABI flavor in its `CMakeLists.txt`, or CMake configuration fails with a
   loaders (JNI, `dlopen`).
 
 A newly added SHARED library must call exactly one of these.
+
+### Windows installer size, and the two things that look wrong but aren't
+
+The VS2022 installer roughly halved between 7.4.2 (333 MB) and 7.4.3-alpha4
+(173 MB), unpacked 1989 MB → 1174 MB. Two settled findings, both **Decision: no
+action taken**.
+
+**1. Third-party debug info is intentionally absent from the shipped PDBs.**
+`CMakeLists.txt` installs conan dependencies with `-s build_type=Release` when
+`CMAKE_BUILD_TYPE=RelWithDebInfo` (Safir's own code stays RelWithDebInfo).
+Previously ConanCenter had no RelWithDebInfo binaries, so `--build=missing`
+built Qt/protobuf/abseil from source *with* debug info, and because they are
+statically linked all of it landed in Safir's PDBs — the six Qt GUI app PDBs
+alone were 854 MB, now 127 MB. The tradeoff is that Qt/protobuf/abseil frames
+in breakpad crash dumps can no longer be symbolized. We are not in the business
+of debugging third-party libraries, so this is accepted, not a regression.
+Verify with `llvm-pdbutil dump --modules <pdb> | grep -oE 'objects-[A-Za-z]+'`
+— `objects-Release` is correct, `objects-RelWithDebInfo` means the split broke.
+
+**2. `icuuc.dll` in a Qt binary's imports is not a missing dependency.**
+Qt ≥ 6.9 (7.4.2 used 6.10.1) links the ICU that ships *in Windows* — 1703 added
+`icuuc.dll`/`icuin.dll` as system DLLs and 1903 only *added* the combined
+`icu.dll` beside them, it did not replace them. So nothing needs bundling, and
+`find <installer> -iname '*icu*'` correctly returns nothing. The only
+consequence is a Windows 10 1703+ floor. Qt is currently pinned to the 6.8 LTS
+(`qt/[>=6.8 <6.9]`) which does not import ICU at all; if that pin is ever
+raised, expect the import to reappear — and expect ~3.6 MB per GUI binary of
+`qtimezonelocale.cpp.obj` CLDR tables to come back with it, which is where the
+6 × 4 MB of `.exe` growth in 7.4.2 came from.
+
+### Debian `-dbg` package size: dwz, not the conan Release split
+
+The `safir-sdk-core-dbg` package shrank between 7.4.2 and 7.4.3-alpha4 (noble
+184 → 145 MB, trixie 237 → 216 MB) while every other package grew slightly. The
+cause is **`dh_dwz`**, which entered the default debhelper sequence at compat 12
+and became active when `build/packaging/debian/compat` (level 10) was deleted in
+favour of `debhelper-compat (= 13)` in `debian/control`. dwz dedups DWARF across
+binaries into a shared multifile. **Decision: no action taken — keep it on.**
+
+Do *not* attribute this to the Windows conan `-s build_type=Release` mechanism
+above; that has no measurable effect on the Debian packages. `debian/rules`
+clears `CFLAGS` and `CPPFLAGS` but not `CXXFLAGS`, so `-g` still reaches
+dependency builds, and protobuf compile units with full DWARF are present in
+both versions. Qt on Linux is the distro's shared Qt6, so the Qt-specific
+Windows findings never applied here at all.
+
+Verify dwz is doing its job:
+```
+readelf -S <file>.debug | grep gnu_debugaltlink        # present => dwz ran
+ls usr/lib/debug/.dwz/*/                               # the shared multifiles
+readelf --debug-dump=info <file>.debug | grep -c DW_TAG_partial_unit
+```
+Partial units are dwz output; a count of 0 alongside a missing
+`.gnu_debugaltlink` means dwz silently stopped running.
+
+Two consequences worth knowing. The per-binary `.debug` files are now useless
+without `/usr/lib/debug/.dwz/…`, so a single `.debug` file cherry-picked out of
+the package has a broken symbol table — ship or copy the whole `-dbg` package.
+And the gain is much smaller on newer gcc: dwz only touches
+`.debug_info`/`.debug_abbrev`/`.debug_str`, and `.debug_line`/`_loclists`/
+`_rnglists` grew 22–47% on trixie (gcc 14) versus 5–10% on noble (gcc 13),
+partly from the C++17 → C++20 move in `CMakeLists.txt`. Expect the reduction to
+keep eroding as the toolchain advances; that is normal, not a broken build.
 
 ## Architecture
 
