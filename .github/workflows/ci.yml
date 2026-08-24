@@ -536,6 +536,108 @@ jobs:
           path: '**/*.junit.xml'
           if-no-files-found: ignore
 
+  # Run the slow, system-level test suite (system picture, incarnation/control,
+  # light/restart nodes, lowmem, DOPE none/file backends, tracer backdoor,
+  # election handler, communication) against the installed SDK package. These
+  # were moved out of ctest into the TestSuite component; the flow matches
+  # dose-tests - install the testsuite package via run_test.py, which then drives
+  # run_slow_tests. The odbc DOPE backend is not included (it needs a database; it
+  # runs under --test database). Runs on the same platform matrix as dose-tests
+  # now that the suite has proven stable on ubuntu-noble amd64.
+  slow-tests:
+    name: slow-tests-${{ matrix.platform }}-${{ matrix.arch }}
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    # The suite is long: system_picture alone is ~40 min, and a known-flaky
+    # light-node subtest can burn a 10 min timeout. Give generous headroom over an
+    # observed healthy run; revisit once we have more timing data.
+    timeout-minutes: 150
+
+    container:
+      image: ${{ matrix.container }}
+      options: ${{ matrix.container_options }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-noble-amd64, ubuntu-noble-arm64, debian-trixie-amd64, vs2022, vs2026]
+        include:
+          - platform: ubuntu-noble-amd64
+            platform_name: ubuntu-noble
+            arch: amd64
+            runner: ubuntu-24.04
+          - platform: ubuntu-noble-arm64
+            platform_name: ubuntu-noble
+            arch: arm64
+            runner: ubuntu-24.04-arm
+          - platform: debian-trixie-amd64
+            platform_name: debian-trixie
+            arch: amd64
+            runner: ubuntu-latest
+            container: debian:13
+            # The light/restart-node tests run several safir_control nodes at
+            # once, each mapping its own shared memory in /dev/shm (~100 MB Dob
+            # distribution + 10 MB typesystem per node). The default 64 MB is far
+            # too small, so the extra nodes fail to map their shared memory and
+            # the system never forms. Native runners have a large /dev/shm; give
+            # the container comparable headroom (tmpfs only uses what it needs).
+            container_options: --shm-size=2g
+          - platform: vs2022
+            platform_name: vs2022
+            arch: amd64
+            runner: windows-2022
+          - platform: vs2026
+            platform_name: vs2026
+            arch: amd64
+            runner: windows-2025-vs2026
+
+    steps:
+      - name: Bootstrap Debian container
+        # Same as the build/dose-tests jobs: the bare debian:13 image needs
+        # git/sudo/ca-certs before checkout and before the shared setup runs sudo
+        # apt-get.
+        if: ${{ matrix.container != '' }}
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends sudo ca-certificates git
+          git config --global --add safe.directory '*'
+
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up test environment
+        # Same lean test-only setup as dose-tests: a Python venv (with websockets,
+        # which run_tracer_backdoor_tests needs) and a JRE. The SDK's own runtime
+        # deps come in via apt when run_test.py installs the .deb.
+        uses: ./.github/actions/setup-test-env
+
+      - name: Download SDK package
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-${{ matrix.platform_name }}-${{ matrix.arch }}
+          path: package-download
+
+      - name: Stage installer at repo root
+        uses: ./.github/actions/stage-installer
+
+      - name: Run slow tests (Linux)
+        if: runner.os == 'Linux'
+        run: python build/jenkins_stuff/run_test.py --test slow-tests
+
+      - name: Run slow tests (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
+        run: python build\jenkins_stuff\run_test.py --test slow-tests
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: slow-results-${{ matrix.platform }}-${{ matrix.arch }}
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
   # Multicomputer dose tests = the node under test (Server_0, the "master") on one
   # runner talking to three debian slave nodes (Server_1 seed + Client_0 + Client_1)
   # on another, joined by an accountless/secretless WireGuard overlay punched between
@@ -866,15 +968,15 @@ jobs:
           path: run-*/dose_test_output
           if-no-files-found: ignore
 
-  # Aggregate every test job's junit results into one report. The build and
-  # dose-tests jobs each upload their *.junit.xml as artifacts; this job pulls
-  # them all and publishes a single Check run + run-summary page + PR comment,
-  # so the pass/fail status of all ~35 test jobs - and the details of any
-  # failure - are visible from one place instead of clicking each job's own
+  # Aggregate every test job's junit results into one report. The build,
+  # dose-tests and slow-tests jobs each upload their *.junit.xml as artifacts;
+  # this job pulls them all and publishes a single Check run + run-summary page +
+  # PR comment, so the pass/fail status of all ~35 test jobs - and the details of
+  # any failure - are visible from one place instead of clicking each job's own
   # report. Runs on always() so it still reports when some test job failed.
   test-summary:
     name: Test summary
-    needs: [build, dose-tests, multicomputer-master, multicomputer-slaves]
+    needs: [build, dose-tests, slow-tests, multicomputer-master, multicomputer-slaves]
     if: always()
     runs-on: ubuntu-latest
     # checks: write to create the Check run; pull-requests: write so the action

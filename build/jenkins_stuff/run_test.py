@@ -299,14 +299,26 @@ class DebianInstaller():
         #treats an argument as a local .deb only if it contains a path
         #separator, so the globbed filenames are prefixed with "./".
         local_packages = [os.path.join(".", pkg) for pkg in packages]
-        proc = subprocess.Popen(["sudo", "apt-get", "install", "--yes"] + local_packages,
+        #Stream apt-get's output line by line (rather than buffering it and only
+        #printing on failure) so a slow or stuck install is diagnosable from the
+        #log with per-line timestamps - a silent multi-minute stall here once ate
+        #the whole CI job timeout with no clue as to whether it was a download, a
+        #dpkg lock, or a postinst. DPkg::Lock::Timeout makes a held lock fail after
+        #a couple of minutes instead of hanging indefinitely, and a noninteractive
+        #frontend keeps a debconf prompt from blocking on stdin forever. The env
+        #assignment is passed as a sudo argument rather than via Popen's env=,
+        #because sudo's default env_reset would otherwise strip it before apt-get.
+        proc = subprocess.Popen(["sudo", "DEBIAN_FRONTEND=noninteractive",
+                                 "apt-get", "install", "--yes",
+                                 "-o", "DPkg::Lock::Timeout=120"] + local_packages,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 encoding="utf-8")
-        output = proc.communicate()[0]
+        for line in proc.stdout:
+            log("apt-get:", line.rstrip())
+        proc.wait()
         if proc.returncode != 0:
-            raise SetupError("Failed to run apt-get install. returncode = " + str(proc.returncode) + "\nOutput:\n" +
-                             output)
+            raise SetupError("Failed to run apt-get install. returncode = " + str(proc.returncode))
 
     def check_installation(self):
         log("Running safir_show_config to test that exes can be run")
@@ -568,6 +580,42 @@ def run_test_suite(kind):
         raise SetupError("Test suite failed. Returncode = " + str(result))
 
 
+def run_slow_test_suite():
+    log("Launching slow test suite")
+    #Run every test and report real results rather than letting the up-front
+    #multicast loopback check refuse the whole suite: this orchestrator path is
+    #used by CI, where we want the actual per-test outcomes (the check still runs
+    #and logs its diagnostic, it just doesn't block). The refuse-by-default
+    #behaviour is for the direct, dev-facing run_slow_tests invocation.
+    arguments = ["--ignore-multicast-check"]
+    if sys.platform == "win32":
+        #Invoke the installed script through the current interpreter rather than
+        #by bare name, and search PATH by hand, for the same reasons as in
+        #run_test_suite() above (async .py launch / .PY not in PATHEXT).
+        script = next(
+            (os.path.join(d, "run_slow_tests.py")
+             for d in os.environ.get("PATH", "").split(os.pathsep)
+             if os.path.isfile(os.path.join(d, "run_slow_tests.py"))),
+            None)
+        if script is None:
+            raise SetupError("Could not find run_slow_tests.py on PATH")
+        result = nice_call([sys.executable, script] + arguments, shell=False)
+    else:
+        result = nice_call(["run_slow_tests"] + arguments)
+
+    #run_slow_tests distinguishes test-case failures from infra failures (like
+    #run_dose_tests does): exit 1 means some test cases failed, which are carried
+    #by the uploaded junit and turn the consolidated "Test results" check red -
+    #the job itself stays green, so we don't raise. Exit 2 (or any other
+    #non-zero) means a driver couldn't run, crashed, or hung: a real failure that
+    #must fail the job.
+    if result == 1:
+        log("Slow test suite reported test-case failures; see the junit report. "
+            "Not failing the job (the test report carries the result).")
+    elif result != 0:
+        raise SetupError("Slow test suite failed to run. Returncode = " + str(result))
+
+
 def run_test_slave(slave_type):
     command = ["run_dose_tests", "--jenkins", "--slave", slave_type]
     log(f"Launching Multinode test slave using command {' '.join(command)}")
@@ -692,7 +740,7 @@ def parse_command_line():
     parser.add_argument(
         "--test",
         "-t",
-        choices=["standalone-tests", "multinode-tests", "multicomputer-tests", "build-examples", "database"],
+        choices=["standalone-tests", "multinode-tests", "multicomputer-tests", "slow-tests", "build-examples", "database"],
         help="Which test to perform")
 
     parser.add_argument("--slave",
@@ -739,6 +787,8 @@ def main():
             run_test_suite(kind="multinode")
         if args.test == "multicomputer-tests":
             run_test_suite(kind="multicomputer")
+        if args.test == "slow-tests":
+            run_slow_test_suite()
         elif args.test == "build-examples":
             build_examples()
         elif args.test == "database":
