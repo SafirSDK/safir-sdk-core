@@ -662,7 +662,18 @@ jobs:
     needs: [build, dose-tests]
     if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    # The suite itself takes ~20 min; the rest is headroom for the overlay
+    # rendezvous, which waits out however long the paired job sits in the runner
+    # queue (wireguard-overlay's peer-wait-minutes). The old 30 was too tight
+    # even when nothing went wrong - a healthy run has been observed using 27 of
+    # it - and left no room at all for scheduling skew.
+    timeout-minutes: 55
+    permissions:
+      contents: read
+      # The overlay rendezvous reads this run's artifacts and jobs via the REST
+      # API. A job-level block replaces the workflow default, so contents is
+      # re-granted here for actions/checkout.
+      actions: read
     strategy:
       fail-fast: false
       matrix:
@@ -711,6 +722,9 @@ jobs:
           peer-allowed-ips: 10.68.0.0/16
           verify-peer-ip: 10.68.1.2
           github-token: ${{ github.token }}
+          # Must match multicomputer-slaves' `name:` exactly - it is how the
+          # endpoint poll spots a peer that has already given up.
+          peer-job-name: multicomputer-slaves-debian (for ${{ matrix.platform }} master)
 
       # The Windows runner's Defender Firewall default-blocks inbound traffic to
       # new (unsigned) programs, so the slaves' Dob discovery/data UDP - and ICMP -
@@ -813,7 +827,11 @@ jobs:
     needs: [build, dose-tests]
     if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # See the matching comment on multicomputer-master; keep the two in step.
+    timeout-minutes: 55
+    permissions:
+      contents: read
+      actions: read
     strategy:
       fail-fast: false
       matrix:
@@ -849,6 +867,9 @@ jobs:
           peer-allowed-ips: ${{ env.MASTER_ADDR }}/32
           verify-peer-ip: ${{ env.MASTER_ADDR }}
           github-token: ${{ github.token }}
+          # Must match multicomputer-master's `name:` exactly - it is how the
+          # endpoint poll spots a peer that has already given up.
+          peer-job-name: multicomputer-master-${{ matrix.platform }}
 
       # Routing master <-> the three container IPs across wg0 + a docker bridge:
       # the master reaches all three containers bidirectionally at every datagram
