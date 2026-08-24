@@ -31,6 +31,7 @@
 #include "edit_button_delegate.h"
 #include "enabled_checkbox_delegate.h"
 #include <QSortFilterProxyModel>
+#include <QCollator>
 #include <QSignalBlocker>
 
 namespace {
@@ -41,7 +42,11 @@ namespace {
 class AppSortFilterProxyModel : public QSortFilterProxyModel
 {
 public:
-    using QSortFilterProxyModel::QSortFilterProxyModel;
+    explicit AppSortFilterProxyModel(QObject* parent = nullptr)
+        : QSortFilterProxyModel(parent)
+    {
+        m_collator.setCaseSensitivity(Qt::CaseInsensitive);
+    }
 
 protected:
     void sort(int column,
@@ -55,6 +60,24 @@ protected:
         }
         QSortFilterProxyModel::sort(column, order);
     }
+
+    /* The built in sorting can be case insensitive or locale aware, but not
+     * both: setSortCaseSensitivity is ignored as soon as setSortLocaleAware is
+     * on, and locale aware comparison falls back to code point order when the
+     * program runs in the C locale, which puts every capitalised name in a
+     * block of its own again. A collator gives us both, in every locale.
+     *
+     * Only the two name columns are sortable, so the operands are always
+     * strings.
+     */
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override
+    {
+        return m_collator.compare(left.data(sortRole()).toString(),
+                                  right.data(sortRole()).toString()) < 0;
+    }
+
+private:
+    QCollator m_collator;
 };
 
 } // namespace
@@ -92,6 +115,13 @@ void AppsWidget::Initialize(Safir::Dob::Connection& dobConnection)
 
     ui->appsView->setModel(proxyModel);
     ui->appsView->setSortingEnabled(true);
+
+    // Sort by program name to begin with. setSortingEnabled only sorts by
+    // whatever the header already has as its sort indicator, which is none,
+    // so without this the applications appear in the order their entities
+    // happen to arrive from the Dob.
+    ui->appsView->sortByColumn(TracerStatusModel::ProgramNameColumn,
+                               Qt::AscendingOrder);
 
     // Clear sort indicator for the Enabled / Edit columns whenever they
     // receive a sort indicator (covers both user clicks and programmatic calls)

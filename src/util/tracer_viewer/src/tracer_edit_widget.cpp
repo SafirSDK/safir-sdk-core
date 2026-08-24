@@ -33,10 +33,44 @@
 #include <QCloseEvent>
 #include <QLineEdit>
 #include <QTableWidgetItem>
+#include <QCollator>
 #include <Safir/Dob/ResponseProxy.h>
 #include "common.h"
 #include <unordered_map>
 
+namespace
+{
+    /* Table item that sorts the way a human reads, rather than by code point,
+     * so that prefixes differing only in case stay together and prefixes with
+     * non-ascii characters end up where they are expected to be. Note that
+     * localeAwareCompare would not do: it degrades to code point order when
+     * the program runs in the C locale.
+     */
+    class PrefixItem : public QTableWidgetItem
+    {
+    public:
+        using QTableWidgetItem::QTableWidgetItem;
+
+        bool operator<(const QTableWidgetItem& other) const override
+        {
+            return Collator().compare(text(), other.text()) < 0;
+        }
+
+    private:
+        // Sorting only ever happens on the GUI thread, so one shared collator
+        // is enough. Building one is not cheap enough to do per comparison.
+        static const QCollator& Collator()
+        {
+            static const QCollator collator = []
+            {
+                QCollator c;
+                c.setCaseSensitivity(Qt::CaseInsensitive);
+                return c;
+            }();
+            return collator;
+        }
+    };
+}
 
 TracerEditWidget::TracerEditWidget(Safir::Dob::Connection& dobConnection,
                                    const std::int64_t instanceId,
@@ -127,7 +161,7 @@ void TracerEditWidget::Refresh(const Safir::Application::TracerStatusConstPtr& s
         const QString key = QString::fromStdWString(kv.first);
         const bool enabled = kv.second.GetVal();
 
-        auto* keyItem = new QTableWidgetItem(key);
+        auto* keyItem = new PrefixItem(key);
         keyItem->setFlags(keyItem->flags() & ~Qt::ItemIsEditable);
         ui->prefixesTable->setItem(row, TracerEditWidget::PrefixColumn, keyItem);
 
