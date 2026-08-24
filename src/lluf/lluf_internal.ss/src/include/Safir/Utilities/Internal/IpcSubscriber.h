@@ -76,6 +76,7 @@ namespace Internal
               m_callback(onRecvData),
               m_msgSize(0),
               m_connected(false),
+              m_generation(0),
               m_msgRecvBuffer(1500)  // Start with a small buffer size
         {
         }
@@ -107,10 +108,8 @@ namespace Internal
 
             boost::asio::dispatch(m_strand, [this, selfHandle]()
                               {
-                                  if (m_stream.is_open())
-                                  {
-                                      m_stream.close();
-                                  }
+                                  CloseStream();
+
                                   m_connectRetryTimer.cancel();
 
                                   DisconnectEvent();
@@ -118,6 +117,27 @@ namespace Internal
         }
 
     private:
+
+        // Close the current stream and invalidate every asynchronous operation that
+        // belongs to it. Must only be called from the strand.
+        //
+        // The generation bump is what makes a fast Disconnect/Connect cycle safe: a
+        // read (or connect retry) that was issued on the old stream can still have a
+        // completion in flight when the stream is closed, and on Windows that
+        // completion is delivered via the io completion port at an arbitrary later
+        // point. If the user has reconnected in the meantime, such a stale completion
+        // would otherwise be mistaken for an error on the *new* stream, closing it and
+        // reporting a spurious disconnect. Handlers capture the generation that was
+        // current when they were issued and drop out if it no longer matches.
+        void CloseStream()
+        {
+            if (m_stream.is_open())
+            {
+                m_stream.close();
+            }
+
+            ++m_generation;
+        }
 
         void DisconnectEvent()
         {
@@ -200,7 +220,7 @@ namespace Internal
                             {
                                 // Probably the publisher is not up and running. Keep on trying.
 
-                                m_stream.close();
+                                CloseStream();
 
                                 Reconnect();
                             }
@@ -217,12 +237,20 @@ namespace Internal
         void ReadHeader()
         {
             auto selfHandle(this->shared_from_this());
+            const auto generation = m_generation;
 
             boost::asio::async_read(m_stream,
                                     boost::asio::buffer(&m_msgSize, sizeof(m_msgSize)),
                                     Safir::Utilities::Internal::WrapInStrand(m_strand,
-                                        [this, selfHandle](boost::system::error_code ec, size_t /*length*/)
+                                        [this, selfHandle, generation](boost::system::error_code ec, size_t /*length*/)
                                         {
+                                            if (generation != m_generation)
+                                            {
+                                                // A completion belonging to a stream that has since been
+                                                // closed. See CloseStream.
+                                                return;
+                                            }
+
                                             if (!m_connected)
                                             {
                                                 return;
@@ -239,7 +267,7 @@ namespace Internal
                                             }
                                             else
                                             {
-                                                m_stream.close();
+                                                CloseStream();
 
                                                 DisconnectedFromPublisherEvent();
 
@@ -252,6 +280,7 @@ namespace Internal
         void ReadMsg()
         {
             auto selfHandle(this->shared_from_this());
+            const auto generation = m_generation;
 
             if (m_msgRecvBuffer.size() < m_msgSize)
             {
@@ -264,8 +293,15 @@ namespace Internal
             boost::asio::async_read(m_stream,
                                     boost::asio::buffer(m_msgRecvBuffer.data(), m_msgSize),
                                     Safir::Utilities::Internal::WrapInStrand(m_strand,
-                                        [this, selfHandle](boost::system::error_code ec, size_t /*length*/)
+                                        [this, selfHandle, generation](boost::system::error_code ec, size_t /*length*/)
                                         {
+                                            if (generation != m_generation)
+                                            {
+                                                // A completion belonging to a stream that has since been
+                                                // closed. See CloseStream.
+                                                return;
+                                            }
+
                                             if (!m_connected)
                                             {
                                                 return;
@@ -284,7 +320,7 @@ namespace Internal
                                             }
                                             else
                                             {
-                                                m_stream.close();
+                                                CloseStream();
 
                                                 DisconnectedFromPublisherEvent();
 
@@ -297,12 +333,21 @@ namespace Internal
         void Reconnect()
         {
             auto selfHandle(this->shared_from_this());
+            const auto generation = m_generation;
 
             m_connectRetryTimer.expires_from_now(boost::posix_time::seconds(1));
 
             m_connectRetryTimer.async_wait(boost::asio::bind_executor(m_strand,
-                        [this, selfHandle](const boost::system::error_code&)
+                        [this, selfHandle, generation](const boost::system::error_code&)
                         {
+                            if (generation != m_generation)
+                            {
+                                // The retry belongs to a stream that has since been closed,
+                                // e.g. by a Disconnect that cancelled this timer. A Connect
+                                // that comes after that drives its own connection attempt.
+                                return;
+                            }
+
                             ConnectInternal();
                         }));
         }
@@ -318,6 +363,11 @@ namespace Internal
         const RecvDataCallback                                              m_callback;
         std::uint32_t                                                       m_msgSize;
         std::atomic<bool>                                                   m_connected;
+
+        // Identifies the currently open stream. Only ever read and written from the
+        // strand, so it needs no synchronization of its own. See CloseStream.
+        std::uint64_t                                                       m_generation;
+
         std::vector<char>                                                   m_msgRecvBuffer;
     };
 
