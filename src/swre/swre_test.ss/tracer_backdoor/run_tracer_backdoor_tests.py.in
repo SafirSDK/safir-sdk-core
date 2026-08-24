@@ -261,10 +261,14 @@ class SafirApp:
 
 class TracerReceiver(asyncio.DatagramProtocol):
     """
-    Small helper that listens for tracer UDP datagrams on port 49500.
+    Small helper that listens for tracer UDP datagrams on port 39500.
     Received (data, addr) tuples are queued so tests can await them.
+
+    The port and group below must match the defaults in
+    Safir.Application.TracerParameters, since that is what the applications
+    under test send to.
     """
-    def __init__(self, loop: asyncio.AbstractEventLoop | None = None, port: int = 49500):
+    def __init__(self, loop: asyncio.AbstractEventLoop | None = None, port: int = 39500):
         # Resolve the currently running loop automatically if none supplied
         self._loop = loop or asyncio.get_running_loop()
         self._port = port

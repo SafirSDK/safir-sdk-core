@@ -62,7 +62,7 @@ namespace {
     struct Args
     {
         std::string          group        = "224.11.11.12";
-        unsigned short       port         = 49500;
+        unsigned short       port         = 39500;
         std::string          bindAddr     = "0.0.0.0";
         std::vector<std::string> joinAddrs{ "0.0.0.0", "127.0.0.1" };
         boost::optional<int64_t> filterInc;
@@ -86,7 +86,7 @@ namespace {
         desc.add_options()
             ("help,h", "Show help")
             ("group,g",      po::value<std::string>(&a.group)->default_value("224.11.11.12"), "Multicast group")
-            ("port,p",       po::value<unsigned short>(&a.port)->default_value(49500),        "UDP port")
+            ("port,p",       po::value<unsigned short>(&a.port)->default_value(39500),        "UDP port")
             ("bind-address,B",  po::value<std::string>(&a.bindAddr)->default_value("0.0.0.0"), "Local address to bind socket")
             ("join-addresses,J", po::value<std::vector<std::string>>()->multitoken(),          "Addresses to send multicast join (space or comma separated)")
             ("incarnation-id,i", po::value<std::int64_t>(), "Only datagrams whose incarnation id matches this number")
