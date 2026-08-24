@@ -6,6 +6,27 @@ QLabel#ConnectedLabelDisconnected {
     color: darkred;
 }
 
+QLabel#SocketStatusLabelOk {
+    color: darkgreen;
+}
+
+QLabel#SocketStatusLabelFallback {
+    color: darkorange;
+    font-weight: bold;
+}
+
+/*
+A failed bind or multicast join means that no tracer output at all will ever
+reach the viewer, so make it stand out as much as possible.
+*/
+QLabel#SocketStatusLabelError {
+    color: #FFFFFF;
+    background-color: #C0392B;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0px 6px;
+}
+
 QFrame#StatusBarSeparator {
     background-color:#FAFAFA;
     border: 0px;

@@ -98,6 +98,7 @@ private:
     void BuildUi();
     void SetupToolBarActions();
     void SetupStatusBar();
+    void ApplySocketStatus();
     void WireSignals();
     void StartStatsTimer();
     void StartDobConnection();

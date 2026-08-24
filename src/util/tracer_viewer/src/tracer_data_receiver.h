@@ -45,6 +45,14 @@ class TracerDataReceiver : public QObject
 {
     Q_OBJECT
 public:
+    // Outcome of the socket setup performed in the constructor.
+    enum class SocketStatus
+    {
+        Ok,        // bound and joined the multicast group as intended
+        Fallback,  // joined, but only on fallback interfaces
+        Error      // no data will ever be received
+    };
+
     explicit TracerDataReceiver();
     ~TracerDataReceiver() override;
 
@@ -66,8 +74,13 @@ public:
 
 public:
     // Query after construction; the values never change.
+    SocketStatus   socketStatus()        const noexcept { return m_status; }
     const QString& socketStatusText()    const noexcept { return m_statusText; }
     const QString& socketStatusTooltip() const noexcept { return m_statusTip; }
+
+    // Full explanation of a SocketStatus::Error, suitable for a dialog. Empty
+    // unless socketStatus() is Error.
+    const QString& socketStatusDetail()  const noexcept { return m_statusDetail; }
 
 private slots:
     void processPendingDatagrams();
@@ -124,6 +137,8 @@ private:
     // ------------------------------------------------------------------
     // Immutable status reported to GUI
     // ------------------------------------------------------------------
-    QString m_statusText  = QStringLiteral("Tracer: --");
-    QString m_statusTip   = QString();
+    SocketStatus m_status  = SocketStatus::Error;
+    QString m_statusText   = QStringLiteral("Tracer: --");
+    QString m_statusTip    = QString();
+    QString m_statusDetail = QString();
 };

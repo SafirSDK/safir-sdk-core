@@ -258,11 +258,26 @@ TracerDataReceiver::TracerDataReceiver()
                    << "using address" << bindAddress.toString()
                    << ":" << m_socket->errorString();
 
+        m_status     = SocketStatus::Error;
         m_statusText = QStringLiteral("Tracer: ERROR");
         m_statusTip  = QStringLiteral("Bind failed for %1:%2\nReason: %3")
                            .arg(bindAddress.toString())
                            .arg(port)
                            .arg(m_socket->errorString());
+
+        // Note: the socket is bound in shared mode, so other tracer viewers or
+        // safir_tracer_listener instances are never the cause of this failure.
+        m_statusDetail = QStringLiteral("Could not bind UDP port %1 on %2.\n\n"
+                                        "Reason: %3\n\n"
+                                        "The port is bound in shared mode, so other tracer viewers or "
+                                        "safir_tracer_listener instances do not prevent this. The port is "
+                                        "instead either reserved by the operating system or held "
+                                        "exclusively by some other program.\n\n"
+                                        "Either stop that other program, or change the parameter "
+                                        "Safir.Application.TracerParameters.Port.")
+                             .arg(port)
+                             .arg(bindAddress.toString())
+                             .arg(m_socket->errorString());
         return;
     }
 
@@ -288,13 +303,26 @@ TracerDataReceiver::TracerDataReceiver()
         qWarning() << "TracerDataReceiver: Failed to join multicast group"
                    << groupAddress.toString() << ":" << m_socket->errorString();
 
+        m_status     = SocketStatus::Error;
         m_statusText = QStringLiteral("Tracer: ERROR");
         m_statusTip  = QStringLiteral("Failed to join %1:%2 on all reasonable interfaces.")
                            .arg(groupAddress.toString())
                            .arg(port);
+
+        m_statusDetail =
+            QStringLiteral("UDP port %1 was bound successfully, but no network interface "
+                           "accepted a join of the multicast group %2.\n\n"
+                           "Reason: %3\n\n"
+                           "Check that at least one network interface is up and that it allows "
+                           "multicast, and that the group address in "
+                           "Safir.Application.TracerParameters is a valid multicast address.")
+                .arg(port)
+                .arg(groupAddress.toString())
+                .arg(m_socket->errorString());
         return;
     }
 
+    m_status     = fallbackMode ? SocketStatus::Fallback : SocketStatus::Ok;
     m_statusText = fallbackMode ? QStringLiteral("Tracer: FALLBACK")
                                 : QStringLiteral("Tracer: OK");
 

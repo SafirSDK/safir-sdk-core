@@ -350,8 +350,49 @@ void TracerViewerMainWindow::WireSignals()
     // ------------------------------------------------------------------
     // Set initial socket status label (value never changes afterwards)
     // ------------------------------------------------------------------
+    ApplySocketStatus();
+}
+
+void TracerViewerMainWindow::ApplySocketStatus()
+{
+    const auto status = m_dataReceiver->socketStatus();
+
     m_socketStatusLabel->setText(m_dataReceiver->socketStatusText());
     m_socketStatusLabel->setToolTip(m_dataReceiver->socketStatusTooltip());
+
+    switch (status)
+    {
+    case TracerDataReceiver::SocketStatus::Error:
+        m_socketStatusLabel->setObjectName("SocketStatusLabelError");
+        break;
+    case TracerDataReceiver::SocketStatus::Fallback:
+        m_socketStatusLabel->setObjectName("SocketStatusLabelFallback");
+        break;
+    case TracerDataReceiver::SocketStatus::Ok:
+        m_socketStatusLabel->setObjectName("SocketStatusLabelOk");
+        break;
+    }
+
+    style()->unpolish(m_socketStatusLabel);
+    style()->polish(m_socketStatusLabel);
+
+    if (status != TracerDataReceiver::SocketStatus::Error)
+    {
+        return;
+    }
+
+    // The viewer will never receive a single trace log entry in this state, so
+    // make sure the user cannot possibly miss it. Deferred until the event loop
+    // is running, so that the dialog appears on top of the main window.
+    QTimer::singleShot(0, this, [this]
+    {
+        QMessageBox box(this);
+        box.setIcon(QMessageBox::Critical);
+        box.setWindowTitle(tr("Tracer output unavailable"));
+        box.setText(tr("The tracer viewer will not receive any output."));
+        box.setInformativeText(m_dataReceiver->socketStatusDetail());
+        box.exec();
+    });
 }
 
 void TracerViewerMainWindow::StartStatsTimer()
