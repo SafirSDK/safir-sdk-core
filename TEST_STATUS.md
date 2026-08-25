@@ -75,8 +75,9 @@ therefore countable; the rest were cancelled or died before the tests. 31 of tho
 matrix). Update both columns when you see a fresh occurrence; an entry whose
 last-seen keeps receding is a candidate for the dormant list.
 
-`215-huge_service` dominates: 22 of 85, more than twice everything else combined,
-so a lone `215-huge_service` red is by far the single most likely thing you'll see.
+`215-huge_service` dominates: 22 of 85, more than everything else in the table
+combined, so a lone `215-huge_service` red is by far the single most likely thing
+you'll see.
 Its rate is also **rising** — 11 of 58 runs in June, 11 of 25 in August — which is
 worth watching rather than assuming it is stationary.
 
@@ -86,18 +87,22 @@ and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it
 | Test | Where | Platform | Seen | Last seen | Character |
 |---|---|---|---|---|---|
 | `215-huge_service` | multicomputer dose (overlay) | any | **22/85** | 2026-08-25 (32828816218) | Huge round-trip occasionally not delivered |
-| `syslog_output` | multinode dose | any | 10/85 | 2026-08-21 (32461278855) | Canary — fails on any unexpected syslog; read its body |
 | `518-huge_entity` | multicomputer dose (overlay) | any | 3/85 | 2026-08-20 (32348188649) | Same huge-message family as 215 |
 | `155-pending_service_registration_same_node` | dose | any | 3/85 | 2026-08-20 (32348188649) | "Pending registration" family |
 | `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | 2/85 | 2026-08-21 (32461278855) | Light-node detach/reattach |
 | `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/85 | 2026-08-18 (32143455257) | "Pending registration" family |
 | `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | 1/85 | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
-| `safir_control.0.returncode` | multinode dose | **Windows** | 1/85 | 2026-08-21 (32461278855) | `safir_control` exit 1; **fails the job**; overload→Coordinator crash (#613) |
 | `run_restart_nodes_tests` (hang) | slow suite | any | n/a | 2026-08-23 (32637686999) | Hangs at startup → TIMEOUT → **fails the job**; job-level, not in the junit counts |
 
-`syslog_output` is second on that list but its occurrences cluster in June (8 of 58
-runs) and have thinned since (2 of 25 in August). It is a detector rather than one
-bug, so its rate tracks whatever else is going wrong on the runners.
+**Two names that used to appear in this table are deliberately absent:
+`syslog_output` and `safir_control.0.returncode`.** Neither is a test. They are the
+two channels through which a *product* error gets reported at all — "nothing was
+logged" and "the node process exited 0" — so a red there says an error occurred,
+not that a flaky test flaked. Counting them alongside real tests produces a number
+that describes nothing (the ten `syslog_output` reds were at least three unrelated
+defects) and, worse, implies the standard response of re-running. Each occurrence
+has to be classified on the *content* of what was reported. See "Errors reported
+through `syslog_output` and `safir_control.0.returncode`" below.
 
 ### Job-level / infra flakes (red job, not a test-case failure)
 
@@ -166,7 +171,57 @@ a single bad run. Dob node comms are UDP unicast.
 **If it recurs:** look at the huge-service round-trip retransmit/timeout over the
 overlay. Otherwise a re-run should pass. `518-huge_entity` is the same family.
 
-### `safir_control.0.returncode` + `syslog_output` (correlated; overload-triggered)
+## Errors reported through `syslog_output` and `safir_control.0.returncode`
+
+**These two are not tests and not flakes.** `syslog_output` asserts that nothing
+unexpected reached syslog during a run; `safir_control.0.returncode` asserts that
+the node process exited 0. They are how a product error in *any* subsystem becomes
+visible to CI at all, which means a red here can be anything from an overloaded
+runner to a genuine bug, and the failures grouped under one of these names have
+nothing to do with each other beyond the channel they arrived on.
+
+So there is no "known flake" answer for them. **Classify every occurrence by the
+content of the `<failure>` body** — it quotes the actual log lines — and treat it
+as whatever that content says it is. The two also correlate: a fatal error usually
+lands in syslog *and* kills the process, so one incident reddens both (a
+`safir_control` process exit is treated as infra by the dose runner and fails the
+whole job, while `syslog_output` is a carried assertion).
+
+### What has actually been reported this way
+
+All 10 `syslog_output` occurrences in the scan window were pulled from the run
+artifacts and read. Two are the same commit built twice (`6744f0de5a`), leaving
+nine distinct failures in three unrelated groups:
+
+| Reported error | Count | Severity | Source |
+|---|---|---|---|
+| `Boost.Asio latency for 'SpRawHandler' is at N ms … your system is overloaded` | 6 | Warning | `AsioLatencyMonitor.h` |
+| `One or more items seem to be stuck in WaitingStates!` | 2 | Warning | `dose_main.ss/src/WaitingStates.cpp:255` |
+| `DOSE_MAIN: Got a request that was neither sent to or from this node!` | 1 | Error | `dose_main.ss/src/RequestHandler.cpp:571` |
+
+**Runner overload (6).** Observed 1391-7902 ms, on vs2026 standalone and multinode
+and on ubuntu-noble multinode. Environmental, and on its own the one case here that
+genuinely warrants a re-run. But it is also the first link in the #132 chain, where
+a 5-8 s stall cascaded into four minutes of `Excessive retransmits … excluding it!`
+and then the `Coordinator` throw that killed the node (#613, and the single
+`safir_control.0.returncode` occurrence in the window). Note how big the stall was
+and whether anything follows it.
+
+**Stuck in WaitingStates (2).** From `SanityCheck()`, when an item is still queued
+on two consecutive checks. Both occurrences were the same job — multinode
+`ubuntu-noble-arm64`, `java-cpp-dotnet-java-cpp` — and both quote `TracerStatus`
+and `MirroredNodeInfo` states. The message says it can be ignored if the system was
+artificially stopped, which is plausible at test teardown, but nobody has confirmed
+that is what happened here. Unclassified.
+
+**Misrouted request (1).** A request reached `dose_main` with neither endpoint
+local: sender on node 66666, receiver `Server_1.888888`, multinode
+`ubuntu-noble-amd64`. Logged at **Error**, then the handler returns `true` and
+carries on with a comment saying it causes no problems but is unexpected. This is
+not an overload symptom and not flakiness — it is a product code path reporting
+something it did not expect.
+
+### The #132 incident in full (overload → exclusion → node death)
 
 Seen together on multinode `vs2022` (run 32461278855 = CI #132, 2026-08-21). The
 `safir_control.0.returncode` junit says only `Process exited with return code 1,
@@ -179,7 +234,7 @@ hits GHA (which builds `Full` only). Here the process started, ran, then exited
 nonzero.
 
 **Root cause on #132, from the `syslog_output` capture** (this is why you always
-read the syslog body — see below). The syslog tells the whole story in order:
+read the syslog body). The syslog tells the whole story in order:
 1. `Boost.Asio latency for 'SpRawHandler' is at 5583 ms … 7902 ms … your system is
    overloaded` — the GHA runner stalled for **5–8 seconds**.
 2. For ~4 minutes, `Excessive retransmits (67) to node Server_0(999999) … excluding
@@ -199,8 +254,8 @@ contradictory last-state → the sanity check **aborts the whole node** instead 
 reconciling it.
 
 **Classification:** the *trigger* is runner overload (environmental, not our
-workflow) → deferred. But this is more than a lost packet: it exposes a **latent
-robustness gap** — `Coordinator` treats an inconsistent last-state as fatal under
+workflow) → nothing to fix there. But the incident is more than a lost packet: it
+exposes a **latent robustness gap** — `Coordinator` treats an inconsistent last-state as fatal under
 heavy exclude/resurrect churn, so one bad state message kills the node. That part
 is a real product bug and is tracked as **#613**, which also records why the fix is
 not decided yet: we have the exception but not the state that caused it.
@@ -210,42 +265,6 @@ compact one-line dump of every `node_info` entry (index, id, name, alive/dead) p
 `m_resurrectingNodes` into the system log, and the full state at `lllog(1)`. **If
 you see this failure again, grab that line** — it is the missing evidence #613 is
 waiting for.
-
-### `syslog_output` is a canary — read its body
-
-`syslog_output` fails whenever *anything* unexpected reaches syslog during a run,
-so it is not one bug but a detector. Its junit `<failure>` body quotes the actual
-syslog lines, which frequently explain a *co-occurring* failure in the same run
-(as with `safir_control.0.returncode` on #132 above). Always read the body before
-dismissing it; the content differs run to run.
-
-**Observed variants.** All 10 occurrences in the scan window were pulled from the
-run artifacts and read (two of them are the same commit built twice, so 9 distinct
-failures). It is *not* always the latency warning:
-
-| Variant | Count | Where seen |
-|---|---|---|
-| `Boost.Asio latency for 'SpRawHandler' is at N ms … your system is overloaded` | 6 | vs2026 standalone and multinode, ubuntu-noble multinode |
-| `One or more items seem to be stuck in WaitingStates!` | 2 | multinode `ubuntu-noble-arm64`, `java-cpp-dotnet-java-cpp` |
-| `DOSE_MAIN: Got a request that was neither sent to or from this node!` | 1 | multinode `ubuntu-noble-amd64`, `dotnet-java-cpp-dotnet-java` |
-
-- **Latency** (Warning, `AsioLatencyMonitor.h`) is the common case and is normally
-  just an overloaded runner. Observed 1391-7902 ms. Benign on its own — but it is
-  also the first link in the #132 chain, where an 5-8 s stall cascaded into node
-  exclusion and the `Coordinator` throw (#613). Read how large the stall was and
-  whether anything follows it.
-- **WaitingStates** (Warning, `dose_main.ss/src/WaitingStates.cpp:255`) fires from
-  `SanityCheck()` when an item is still queued on two consecutive checks. Both
-  occurrences were the same job and both quote `TracerStatus` and
-  `MirroredNodeInfo` states. The message itself says it can be ignored if the
-  system was artificially stopped, which is plausible at test teardown — but that
-  is an assumption, not something anyone has confirmed here.
-- **Misrouted request** (Error, `dose_main.ss/src/RequestHandler.cpp:571`) fires
-  when a request reaches `dose_main` with neither endpoint local. The code returns
-  `true` and carries on, with a comment saying it causes no problems but is
-  unexpected. Seen once, sender on node 66666 and receiver `Server_1.888888`.
-  Unlike the other two this is not an overload symptom, and it is the one worth
-  understanding if it recurs.
 
 ## Fixed / dormant
 
