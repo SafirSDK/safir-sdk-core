@@ -226,22 +226,24 @@ All three ids belong to this suite: `run_dose_tests.py.in:46-49` assigns
 this is not traffic from outside the system — it is a request between two of the
 suite's own nodes arriving at a third.
 
-**Leading hypothesis: crosstalk between testcases, or simply a delayed message.**
-Those node ids are fixed for a whole dose run and reused by every testcase in it,
-so a straggler datagram from an earlier testcase would arrive during a later one
-still carrying ids that look perfectly valid. That would explain both the routing
-and why it has happened exactly once.
+**Nobody has diagnosed this.** It has been seen once, nothing has been
+investigated, and the notes above are just what the log line and the surrounding
+code say. Everything below is guesswork from reading that one line.
 
-**Probably harmless.** `RequestHandler::DistributeRequest` logs and then returns
-`true` — "Always OK, request not for us" — so the request is dropped and nothing
-else happens. If the message really is a leftover addressed to a node that is no
-longer part of the running system, dropping it is the correct behaviour and the
-only real consequence is the log line, which then fails `syslog_output`.
+Two things it *might* be: crosstalk between testcases, or simply a delayed message.
+The node ids are fixed for a whole dose run and reused by every testcase in it, so
+a straggler from an earlier testcase would arrive during a later one still carrying
+ids that look valid. That is a guess, not a finding — it has not been checked
+against the run.
 
-**Needs data before anyone diagnoses it.** One occurrence, no reproduction, and a
-plausible benign explanation. If it recurs, capture which testcase was running and
-what ran immediately before it — that is what would confirm or kill the crosstalk
-theory. Deliberately not filed as an issue.
+It may well be harmless: `RequestHandler::DistributeRequest` logs and then returns
+`true` — "Always OK, request not for us" — so the request is dropped. If it is a
+leftover addressed to a node that is no longer part of the running system, dropping
+it is the right thing to do and the log line is the only consequence.
+
+If it recurs, capturing which testcase was running and what ran immediately before
+would be a reasonable place to start. Deliberately not filed as an issue: one
+occurrence and no reproduction.
 
 ### The #132 incident in full (overload → exclusion → node death)
 
