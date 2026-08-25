@@ -214,12 +214,34 @@ and `MirroredNodeInfo` states. The message says it can be ignored if the system 
 artificially stopped, which is plausible at test teardown, but nobody has confirmed
 that is what happened here. Unclassified.
 
-**Misrouted request (1).** A request reached `dose_main` with neither endpoint
-local: sender on node 66666, receiver `Server_1.888888`, multinode
-`ubuntu-noble-amd64`. Logged at **Error**, then the handler returns `true` and
-carries on with a comment saying it causes no problems but is unexpected. This is
-not an overload symptom and not flakiness — it is a product code path reporting
-something it did not expect.
+**Misrouted request (1).** Seen once, multinode `ubuntu-noble-amd64`,
+`dotnet-java-cpp-dotnet-java`. A request reached node 0's `dose_main` with neither
+endpoint local — sender connection on node **66666**, receiver
+`Server_1.888888;0;safir_control_status;main#8` — so it was neither sent to nor
+from the node that logged it. `senderFound=1`, i.e. node 0 did know the sender
+connection.
+
+All three ids belong to this suite: `run_dose_tests.py.in:46-49` assigns
+`server-0: 999999`, `server-1: 888888`, `client-0: 77777`, `client-1: 66666`. So
+this is not traffic from outside the system — it is a request between two of the
+suite's own nodes arriving at a third.
+
+**Leading hypothesis: crosstalk between testcases, or simply a delayed message.**
+Those node ids are fixed for a whole dose run and reused by every testcase in it,
+so a straggler datagram from an earlier testcase would arrive during a later one
+still carrying ids that look perfectly valid. That would explain both the routing
+and why it has happened exactly once.
+
+**Probably harmless.** `RequestHandler::DistributeRequest` logs and then returns
+`true` — "Always OK, request not for us" — so the request is dropped and nothing
+else happens. If the message really is a leftover addressed to a node that is no
+longer part of the running system, dropping it is the correct behaviour and the
+only real consequence is the log line, which then fails `syslog_output`.
+
+**Needs data before anyone diagnoses it.** One occurrence, no reproduction, and a
+plausible benign explanation. If it recurs, capture which testcase was running and
+what ran immediately before it — that is what would confirm or kill the crosstalk
+theory. Deliberately not filed as an issue.
 
 ### The #132 incident in full (overload → exclusion → node death)
 
