@@ -40,9 +40,10 @@ was closed as fixed in June while this file still listed it as flaky in August.
   uncovers a genuine defect in the product, that gets an issue on its own merits,
   scheduled or not; burying a real bug in a file called "known flaky tests" reads
   as won't-fix. Rule of thumb: *the test is unreliable* → this file. *The product
-  is wrong* → an issue, linked from here. The `Coordinator.h:781` fatal throw is
-  the worked example: **#613**. The `DataReceiver.h` missing `AsyncReceive` re-arm
-  is a second candidate, not yet filed (still under discussion).
+  is wrong* → an issue, linked from here. Both worked examples came out of flake
+  investigations and are now filed on their own merits: **#613** (Coordinator
+  aborts the node on an inconsistent state) and **#614** (a receive error
+  permanently kills a Communication read loop).
 - **Closed historical issues:** #396 (`syslog_output` / Boost.Asio latency) and
   #397 (`361-inject_update_and_delete_for_existing_entity`) were closed on
   2026-08-25 under this policy and point here.
@@ -258,14 +259,12 @@ retransmitting its unacked window forever (`Retransmit MultiReceiver …` /
 one new file per run. Classify a captured run by the internal timestamp span
 (first vs last `[HH:MM:SS]`), **not** by file size (passing runs range 13–46 MB).
 
-**Still open from that investigation** (never proven to cause a specific failure,
-but a genuine robustness gap): in
-`src/distribution/communication.ss/src/DataReceiver.h`, the `AsyncReceive`
-completion handler, on any error other than `operation_aborted`, logs "Read
-failed…" and **returns without re-arming `AsyncReceive`** — permanently killing
-that node's receive loop. A transient Windows UDP error (`WSAECONNRESET` 10054
-from a prior ICMP port-unreachable, `WSAENOBUFS` 10055 under loopback load) would
-trip it, and `SIO_UDP_CONNRESET` is not set on the recv socket anywhere.
+**One unrelated defect was found during that investigation** and is now tracked as
+**#614**: `DataReceiver`'s `AsyncReceive` completion handler returns without
+re-arming on any error other than `operation_aborted`, which would permanently kill
+that socket's read loop. It was a candidate explanation for the Mode A signature,
+but was never confirmed and is not what actually caused it. No occurrence has ever
+been observed; #614 says a repro comes first.
 
 > The code-level line references above were accurate as of the 2026-06/07
 > investigation; verify against current source before acting on them.
