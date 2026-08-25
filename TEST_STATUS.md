@@ -67,29 +67,37 @@ and read the `*.junit.xml`. Note the dose junit `time="0"` is a hardcoded litera
 
 ## Known flaky tests
 
-Frequency is rough and drifts. **Last seen** is the most recent run that actually
-failed the test, from a scan of the last 40 `ci.yml` runs (2026-06-28 → 2026-08-25)
-— so "last seen" older than 2026-06-28 just means "not in the scanned window".
-Update it when you see a fresh occurrence; an entry whose last-seen keeps receding
-is a candidate for the dormant list.
+**Seen** and **Last seen** come from a scan of the 100 most recent `ci.yml` runs
+(2026-06-16 → 2026-08-25), of which **85 produced a "Test results" Check** and are
+therefore countable; the rest were cancelled or died before the tests. 31 of those
+85 runs — a bit over a third — had at least one failing test case. Counts are per
+*run*, not per test execution (one run covers ~34 dose executions across the
+matrix). Update both columns when you see a fresh occurrence; an entry whose
+last-seen keeps receding is a candidate for the dormant list.
 
-`215-huge_service` is by far the most common — 10 of the ~25 runs in that window,
-so a lone `215-huge_service` red is the single most likely thing you'll see.
+`215-huge_service` dominates: 22 of 85, more than twice everything else combined,
+so a lone `215-huge_service` red is by far the single most likely thing you'll see.
+Its rate is also **rising** — 11 of 58 runs in June, 11 of 25 in August — which is
+worth watching rather than assuming it is stationary.
 
 `Communication_ResetTest` used to head this list; it was **fixed on 2026-06-30**
 and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it.
 
-| Test | Where | Platform | Freq | Last seen | Character |
+| Test | Where | Platform | Seen | Last seen | Character |
 |---|---|---|---|---|---|
-| `215-huge_service` | multicomputer dose (overlay) | any | **high** | 2026-08-24 (32742752685) | Huge round-trip occasionally not delivered |
-| `518-huge_entity` | multicomputer dose (overlay) | any | low | 2026-08-20 (32348189223) | Same huge-message family as 215 |
-| `syslog_output` | multinode dose | any | low | 2026-08-21 (32461278855) | Canary — fails on any unexpected syslog; read its body |
-| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | low | 2026-08-18 (32143455257) | "Pending registration" family |
-| `155-pending_service_registration_same_node` | dose | any | low | 2026-08-20 (32348189223) | "Pending registration" family |
-| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | low | 2026-08-21 (32461278855) | Light-node detach/reattach |
-| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | low | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
-| `safir_control.0.returncode` | multinode dose | **Windows** | low | 2026-08-21 (32461278855) | `safir_control` exit 1; **fails the job**; overload→Coordinator crash |
-| `run_restart_nodes_tests` (hang) | slow suite | any | low | 2026-08-23 (32637686999) | Hangs at startup → TIMEOUT → **fails the job** |
+| `215-huge_service` | multicomputer dose (overlay) | any | **22/85** | 2026-08-25 (32828816218) | Huge round-trip occasionally not delivered |
+| `syslog_output` | multinode dose | any | 10/85 | 2026-08-21 (32461278855) | Canary — fails on any unexpected syslog; read its body |
+| `518-huge_entity` | multicomputer dose (overlay) | any | 3/85 | 2026-08-20 (32348188649) | Same huge-message family as 215 |
+| `155-pending_service_registration_same_node` | dose | any | 3/85 | 2026-08-20 (32348188649) | "Pending registration" family |
+| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | 2/85 | 2026-08-21 (32461278855) | Light-node detach/reattach |
+| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/85 | 2026-08-18 (32143455257) | "Pending registration" family |
+| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | 1/85 | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
+| `safir_control.0.returncode` | multinode dose | **Windows** | 1/85 | 2026-08-21 (32461278855) | `safir_control` exit 1; **fails the job**; overload→Coordinator crash (#613) |
+| `run_restart_nodes_tests` (hang) | slow suite | any | n/a | 2026-08-23 (32637686999) | Hangs at startup → TIMEOUT → **fails the job**; job-level, not in the junit counts |
+
+`syslog_output` is second on that list but its occurrences cluster in June (8 of 58
+runs) and have thinned since (2 of 25 in August). It is a detector rather than one
+bug, so its rate tracks whatever else is going wrong on the runners.
 
 ### Job-level / infra flakes (red job, not a test-case failure)
 
@@ -135,9 +143,12 @@ by the migration; defer.
 ### `215-huge_service` (+ the huge-message family)
 
 Intermittent failure in the **multicomputer** dose suite over the WireGuard
-overlay. First seen 2026-08-16 (run 31953726975, `ubuntu-noble-arm64` master):
-aggregation reported "1 out of 34 runs failed"; the workflow still concluded
-`success`, only the "Test results" Check went red.
+overlay. First seen **2026-06-25** (run 28167281373, on
+`private/github-actions-multicomputer-tests-squashed`) — i.e. it has been failing
+since the multicomputer suite first ran on GHA, not since August as this file
+previously claimed. A typical occurrence: aggregation reports "1 out of 34 runs
+failed", the workflow still concludes `success`, and only the "Test results" Check
+goes red.
 
 **Signature:** the huge `ComplexGlobalService` request never reaches Partner 0 /
 Consumer 0 (`OnServiceRequest` missing) and Partner 2 / Consumer 1 never gets the
@@ -220,9 +231,12 @@ recurrence as the same old bug waking up.
 `src/distribution/communication.ss/tests/reset_test/main.cpp`. A long-standing
 intermittent, exclusively on Windows (vs2019/vs2022/vs2026); it never failed once
 across 69 clean Linux executions. Fixed in **37fd610245f** (issue **#434**, closed
-2026-06-30). Last observed failure: run 28340817399, 2026-06-29 — the day before
-the fix. No occurrence in any run since, so **do not treat a `Communication_ResetTest`
-red as a known flake**; investigate it as new.
+2026-06-30). It failed in 6 of the 85 countable runs in the scan window, **every
+one of them before the fix**: first 2026-06-24 (28093636002), last 28340817399 on
+2026-06-29, the day before the fix. Nothing since, so **do not treat a
+`Communication_ResetTest` red as a known flake**; investigate it as new. Note that
+several of those 6 were reported as ctest *errors* rather than failures — that is
+the Mode B teardown timeout below, not an assertion.
 
 There were two independent bugs, matching the two failure modes seen in the logs:
 
