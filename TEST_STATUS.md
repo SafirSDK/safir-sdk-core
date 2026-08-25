@@ -219,6 +219,34 @@ syslog lines, which frequently explain a *co-occurring* failure in the same run
 (as with `safir_control.0.returncode` on #132 above). Always read the body before
 dismissing it; the content differs run to run.
 
+**Observed variants.** All 10 occurrences in the scan window were pulled from the
+run artifacts and read (two of them are the same commit built twice, so 9 distinct
+failures). It is *not* always the latency warning:
+
+| Variant | Count | Where seen |
+|---|---|---|
+| `Boost.Asio latency for 'SpRawHandler' is at N ms … your system is overloaded` | 6 | vs2026 standalone and multinode, ubuntu-noble multinode |
+| `One or more items seem to be stuck in WaitingStates!` | 2 | multinode `ubuntu-noble-arm64`, `java-cpp-dotnet-java-cpp` |
+| `DOSE_MAIN: Got a request that was neither sent to or from this node!` | 1 | multinode `ubuntu-noble-amd64`, `dotnet-java-cpp-dotnet-java` |
+
+- **Latency** (Warning, `AsioLatencyMonitor.h`) is the common case and is normally
+  just an overloaded runner. Observed 1391-7902 ms. Benign on its own — but it is
+  also the first link in the #132 chain, where an 5-8 s stall cascaded into node
+  exclusion and the `Coordinator` throw (#613). Read how large the stall was and
+  whether anything follows it.
+- **WaitingStates** (Warning, `dose_main.ss/src/WaitingStates.cpp:255`) fires from
+  `SanityCheck()` when an item is still queued on two consecutive checks. Both
+  occurrences were the same job and both quote `TracerStatus` and
+  `MirroredNodeInfo` states. The message itself says it can be ignored if the
+  system was artificially stopped, which is plausible at test teardown — but that
+  is an assumption, not something anyone has confirmed here.
+- **Misrouted request** (Error, `dose_main.ss/src/RequestHandler.cpp:571`) fires
+  when a request reaches `dose_main` with neither endpoint local. The code returns
+  `true` and carries on, with a comment saying it causes no problems but is
+  unexpected. Seen once, sender on node 66666 and receiver `Server_1.888888`.
+  Unlike the other two this is not an overload symptom, and it is the one worth
+  understanding if it recurs.
+
 ## Fixed / dormant
 
 Kept here because these were long-standing, well-known reds. For a **fixed** one, a
