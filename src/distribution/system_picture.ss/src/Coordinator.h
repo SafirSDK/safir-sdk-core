@@ -31,6 +31,7 @@
 #include <limits>
 #include <map>
 #include <set>
+#include <sstream>
 #include <memory>
 #include <functional>
 #include "ElectionHandler.h"
@@ -609,6 +610,57 @@ namespace SP
             return changes;
         }
 
+        //Build a compact, single line description of the last state. The multi-line
+        //operator<< is nicer to read, but a system log entry has to be one line, and
+        //short enough that it doesn't get truncated on its way to syslog.
+        std::wstring StateSummary() const
+        {
+            std::wostringstream out;
+            out << "me=" << m_id
+                << " elected=" << m_stateMessage.elected_id()
+                << " election=" << m_stateMessage.election_id()
+                << (m_stateMessage.is_detached() ? " detached" : "")
+                << " nodes=[";
+
+            for (int i = 0; i < m_stateMessage.node_info_size(); ++i)
+            {
+                const auto& node = m_stateMessage.node_info(i);
+                out << (i == 0 ? "" : ", ")
+                    << i << ":" << node.id() << "/" << node.name().c_str()
+                    << (node.is_dead() ? "/dead" : "/alive");
+            }
+            out << "]";
+
+            if (!m_resurrectingNodes.empty())
+            {
+                out << " resurrecting=[";
+                bool first = true;
+                for (const auto& resurrectInfo: m_resurrectingNodes)
+                {
+                    out << (first ? "" : ", ") << resurrectInfo.first << ":" << resurrectInfo.second;
+                    first = false;
+                }
+                out << "]";
+            }
+
+            return out.str();
+        }
+
+        //Report a broken invariant in the last state, just before throwing. The state
+        //that caused it is the only thing that can explain how the inconsistency was
+        //produced, and it is otherwise only logged at lllog level 9, which is never
+        //enabled in the field. Note that the last state may have been produced by
+        //another node, so this is not necessarily a local bug.
+        void LogStateInconsistency(const char* const problem, const int64_t nodeId) const
+        {
+            SEND_SYSTEM_LOG(Alert,
+                            << "Inconsistent SystemState: " << problem
+                            << " (node " << nodeId << "). " << StateSummary());
+
+            lllog(1) << m_logPrefix << "Inconsistent SystemState: " << problem
+                     << " (node " << nodeId << ")\n" << m_stateMessage << std::endl;
+        }
+
         bool ResurrectNodes()
         {
             CheckStrand();
@@ -772,12 +824,15 @@ namespace SP
                     const bool res = lastDeadNodes.insert(m_stateMessage.node_info(i).id()).second;
                     if (!res)
                     {
+                        LogStateInconsistency("duplicate dead node", m_stateMessage.node_info(i).id());
                         throw std::logic_error("Duplicate dead node in last state! Not good at all!");
                     }
 
                     //check that it's not in live nodes! (This is just a sanity check, really)
                     if (lastLiveNodes.find(m_stateMessage.node_info(i).id()) != lastLiveNodes.end())
                     {
+                        LogStateInconsistency("dead node was already defined as alive",
+                                              m_stateMessage.node_info(i).id());
                         throw std::logic_error("Dead node was already defined as alive in last state!");
                     }
                 }
@@ -789,6 +844,7 @@ namespace SP
                                                                          m_stateMessage.mutable_node_info(i))).second;
                     if (!res)
                     {
+                        LogStateInconsistency("duplicate live node", m_stateMessage.node_info(i).id());
                         throw std::logic_error("Duplicate live node in last state! Not good at all!");
                     }
 
@@ -796,6 +852,8 @@ namespace SP
                     if (lastDeadNodes.find(m_stateMessage.node_info(i).id()) != lastDeadNodes.end() &&
                         m_resurrectingNodes.find(m_stateMessage.node_info(i).id()) != m_resurrectingNodes.end())
                     {
+                        LogStateInconsistency("live node was already defined as dead",
+                                              m_stateMessage.node_info(i).id());
                         throw std::logic_error("Live node was already defined as dead in last state!");
                     }
                 }
@@ -803,6 +861,7 @@ namespace SP
 
             if (lastDeadNodes.find(m_id) != lastDeadNodes.end())
             {
+                LogStateInconsistency("we are dead in the last state", m_id);
                 throw std::logic_error("We're dead in the last state! Not good at all!");
             }
 
