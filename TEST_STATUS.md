@@ -10,8 +10,9 @@ update this file rather than keeping the notes local.
 
 **A single red CI run is usually a known flake, not your change.** The tests below
 fail intermittently for reasons unrelated to the GitHub Actions migration. The
-standing decision (2026-08-23) is to **defer all such flakiness to post-merge
-issues** and *not* gate the branch on it. The only flakiness worth fixing now is
+standing decision (2026-08-23) is to **defer all such flakiness** and *not* gate
+the branch on it; it is catalogued here rather than in issues (see the next
+section). The only flakiness worth fixing now is
 anything caused by our own workflow/refactoring (a bug in the CI logic, driver
 scripts, or test wiring we wrote) — pre-existing test flakiness that merely now
 runs on GHA is not a blocker.
@@ -21,6 +22,30 @@ When a run goes red, classify each failure before reacting:
   treat it as a regression.
 - **Workflow/refactoring defect** → fix now.
 - **Runner-environment quirk** → usually defer, but name it.
+
+## Where flakiness is tracked: here, not in GitHub issues
+
+**Decided 2026-08-25: this file is the only record of known test flakiness. Do not
+open a GitHub issue for a flaky test.** An open issue and an entry here mean
+different things — an open issue is a claim that someone intends to do the work,
+while an entry here is a statement of a known condition. Keeping both never stays
+in sync: the diagnosis ends up in one place and the other rots silently. That is
+exactly what happened to #396 and #397, which sat open for four years while the
+real triage state accumulated here, and to `Communication_ResetTest`, whose issue
+was closed as fixed in June while this file still listed it as flaky in August.
+
+- **Raise an issue when we decide to investigate or fix a specific flake** — then
+  the open issue means something. Link it from the entry below.
+- **Exception — a real product bug is not flakiness.** If diagnosing a flake
+  uncovers a genuine defect in the product, that gets an issue on its own merits,
+  scheduled or not; burying a real bug in a file called "known flaky tests" reads
+  as won't-fix. Rule of thumb: *the test is unreliable* → this file. *The product
+  is wrong* → an issue, linked from here. The `Coordinator.h:781` fatal throw is
+  the worked example: **#613**. The `DataReceiver.h` missing `AsyncReceive` re-arm
+  is a second candidate, not yet filed (still under discussion).
+- **Closed historical issues:** #396 (`syslog_output` / Boost.Asio latency) and
+  #397 (`361-inject_update_and_delete_for_existing_entity`) were closed on
+  2026-08-25 under this policy and point here.
 
 ## How CI signals a failure
 
@@ -41,23 +66,29 @@ and read the `*.junit.xml`. Note the dose junit `time="0"` is a hardcoded litera
 
 ## Known flaky tests
 
-Frequency below is from the last ~10 branch runs (as of 2026-08-23); it drifts, so
-treat it as rough. `215-huge_service` is by far the most common — it turned up in
-roughly 5 of the last 8 full-matrix runs, so a lone `215-huge_service` red is the
-single most likely thing you'll see.
+Frequency is rough and drifts. **Last seen** is the most recent run that actually
+failed the test, from a scan of the last 40 `ci.yml` runs (2026-06-28 → 2026-08-25)
+— so "last seen" older than 2026-06-28 just means "not in the scanned window".
+Update it when you see a fresh occurrence; an entry whose last-seen keeps receding
+is a candidate for the dormant list.
 
-| Test | Where | Platform | Freq | Character |
-|---|---|---|---|---|
-| `215-huge_service` | multicomputer dose (overlay) | any | **high** | Huge round-trip occasionally not delivered |
-| `Communication_ResetTest` | ctest | **Windows only** | med | Reset/re-discovery UDP flake; deep-dive below |
-| `518-huge_entity` | multicomputer dose (overlay) | any | low | Same huge-message family as 215 |
-| `syslog_output` | multinode dose | any | low | Canary — fails on any unexpected syslog; read its body |
-| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | low | "Pending registration" family |
-| `155-pending_service_registration_same_node` | dose | any | low | "Pending registration" family |
-| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | low | Light-node detach/reattach |
-| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | low | Communication flake, newly visible via slow-suite junit |
-| `safir_control.0.returncode` | multinode dose | **Windows** | low | `safir_control` exit 1; **fails the job**; overload→Coordinator crash |
-| `run_restart_nodes_tests` (hang) | slow suite | any | low | Hangs at startup → TIMEOUT → **fails the job** |
+`215-huge_service` is by far the most common — 10 of the ~25 runs in that window,
+so a lone `215-huge_service` red is the single most likely thing you'll see.
+
+`Communication_ResetTest` used to head this list; it was **fixed on 2026-06-30**
+and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it.
+
+| Test | Where | Platform | Freq | Last seen | Character |
+|---|---|---|---|---|---|
+| `215-huge_service` | multicomputer dose (overlay) | any | **high** | 2026-08-24 (32742752685) | Huge round-trip occasionally not delivered |
+| `518-huge_entity` | multicomputer dose (overlay) | any | low | 2026-08-20 (32348189223) | Same huge-message family as 215 |
+| `syslog_output` | multinode dose | any | low | 2026-08-21 (32461278855) | Canary — fails on any unexpected syslog; read its body |
+| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | low | 2026-08-18 (32143455257) | "Pending registration" family |
+| `155-pending_service_registration_same_node` | dose | any | low | 2026-08-20 (32348189223) | "Pending registration" family |
+| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | low | 2026-08-21 (32461278855) | Light-node detach/reattach |
+| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | low | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
+| `safir_control.0.returncode` | multinode dose | **Windows** | low | 2026-08-21 (32461278855) | `safir_control` exit 1; **fails the job**; overload→Coordinator crash |
+| `run_restart_nodes_tests` (hang) | slow suite | any | low | 2026-08-23 (32637686999) | Hangs at startup → TIMEOUT → **fails the job** |
 
 ### Job-level / infra flakes (red job, not a test-case failure)
 
@@ -158,9 +189,15 @@ reconciling it.
 **Classification:** the *trigger* is runner overload (environmental, not our
 workflow) → deferred. But this is more than a lost packet: it exposes a **latent
 robustness gap** — `Coordinator` treats an inconsistent last-state as fatal under
-heavy exclude/resurrect churn. If node-exclusion-under-load recurs, the real fix is
-to make that path non-fatal / reconcile the exclude+resurrect race rather than
-`throw`.
+heavy exclude/resurrect churn, so one bad state message kills the node. That part
+is a real product bug and is tracked as **#613**, which also records why the fix is
+not decided yet: we have the exception but not the state that caused it.
+
+The sanity checks now call `LogStateInconsistency()` before throwing, which puts a
+compact one-line dump of every `node_info` entry (index, id, name, alive/dead) plus
+`m_resurrectingNodes` into the system log, and the full state at `lllog(1)`. **If
+you see this failure again, grab that line** — it is the missing evidence #613 is
+waiting for.
 
 ### `syslog_output` is a canary — read its body
 
@@ -170,75 +207,86 @@ syslog lines, which frequently explain a *co-occurring* failure in the same run
 (as with `safir_control.0.returncode` on #132 above). Always read the body before
 dismissing it; the content differs run to run.
 
-### `Communication_ResetTest` — deep dive (Windows only)
+## Fixed / dormant
+
+Kept here because these were long-standing, well-known reds. For a **fixed** one, a
+new occurrence is a **regression**, not the old flake, and the notes say where to
+look. A **dormant** one was never fixed — it simply stopped appearing, so treat a
+recurrence as the same old bug waking up.
+
+### `Communication_ResetTest` — FIXED 2026-06-30 (was Windows-only)
 
 `src/distribution/communication.ss/tests/reset_test/main.cpp`. A long-standing
-intermittent, **exclusively on Windows** (vs2022/vs2026/vs2019); across 69 clean
-Linux executions (debian-trixie, ubuntu-noble amd64/arm64) it never once failed.
-Reproduced locally on a Windows dev box within ~2–18 runs of
-`while ctest . -R Communication_ResetTest --output-on-failure`; never on Linux.
+intermittent, exclusively on Windows (vs2019/vs2022/vs2026); it never failed once
+across 69 clean Linux executions. Fixed in **37fd610245f** (issue **#434**, closed
+2026-06-30). Last observed failure: run 28340817399, 2026-06-29 — the day before
+the fix. No occurrence in any run since, so **do not treat a `Communication_ResetTest`
+red as a known flake**; investigate it as new.
 
-`lllog` level 9 is already enabled for this test
+There were two independent bugs, matching the two failure modes seen in the logs:
+
+**Mode A — data never arrives** (`recvCount(3)==0`, `BOOST_CHECK` fails).
+Real bug in the Reset path, in `DeliveryHandler::Start()`: it zeroed
+`m_numberOfUndeliveredMessages`. That counter is incremented on `m_receiveStrand`
+and decremented from a lambda on `m_deliverStrand`, and the two strands are not
+synchronised across `Stop`/`Start`. Zeroing on `Start` races with in-flight
+decrements posted before `Stop`, which then underflow the unsigned counter to
+`UINT_MAX` and **permanently freeze the reader** — hence a full 60 s of zero
+received data. The fix simply stops resetting the counter (with a comment
+explaining why). This is production code, but `Reset()` is not used by any real
+code path, so no shipped behaviour was ever affected.
+
+**Mode B — teardown deadlock** (ctest 180 s TIMEOUT, not an assertion). A pure
+test-harness bug: `reset_test/Receiver.h` and `Sender.h` called
+`m_com.Stop(); m_work.reset(); m_io.restart(); m_threads.join_all();`.
+`io_context::restart()` is only valid once the context has fully stopped, and here
+it ran while the workers were still inside `run()`. That races benignly on Linux
+but on Windows/IOCP could wedge a worker so `run()` never returned, so
+`join_all()` hung and the next node's `Stop()` was never reached. Fixed by
+dropping `restart()` — these objects are not reused.
+
+Log fingerprints, if you ever need them again: Mode A shows either no
+`OnNewNode Sender_3` at all (discovery handshake lost) or `OnNewNode` followed by
+`recvCount(3)` stuck at 0; Mode B shows unequal Stop counts (e.g. `Stop Sender_2`×2
+vs `Stop Sender_3`×1), the wedged node going silent, and a surviving node
+retransmitting its unacked window forever (`Retransmit MultiReceiver …` /
+`Cant remove seq …`) — that storm is a symptom, not the cause.
+
+`lllog` level 9 is enabled for this test
 (`src/tests/test_support/test_config/logging.ini`); logs land per-process in
 `<build>/.../tests/reset_test/test_output/Communication_ResetTest/<procname>-<pid>.txt`,
 one new file per run. Classify a captured run by the internal timestamp span
 (first vs last `[HH:MM:SS]`), **not** by file size (passing runs range 13–46 MB).
 
-There are **two independent failure modes**, both Windows-only:
+**Still open from that investigation** (never proven to cause a specific failure,
+but a genuine robustness gap): in
+`src/distribution/communication.ss/src/DataReceiver.h`, the `AsyncReceive`
+completion handler, on any error other than `operation_aborted`, logs "Read
+failed…" and **returns without re-arming `AsyncReceive`** — permanently killing
+that node's receive loop. A transient Windows UDP error (`WSAECONNRESET` 10054
+from a prior ICMP port-unreachable, `WSAENOBUFS` 10055 under loopback load) would
+trip it, and `SIO_UDP_CONNRESET` is not set on the recv socket anywhere.
 
-**Mode A — data never arrives** (`recvCount(3)==0`, `BOOST_CHECK` fails). After
-`receiver.Reset(seed3, 3)`, node1 delivering any of node3's data hinges on two
-fragile single-packet handshakes completing within 60 s over Windows loopback UDP:
-1. *Discovery* — node1↔node3 NodeInfo round-trips so node1 fires
-   `OnNewNode(Sender_3)` → `IncludeNode(3)`.
-2. *WELCOME gating* — in `DeliveryHandler.h`, a `NodeInfo` starts with
-   `ackedMultiReceiverChannel.welcome = UINT64_MAX`, and `HandleAckedMessage`
-   drops every acked multi-receiver message with `seqNo < ch.welcome`. All of the
-   sender's app data (toId=0, guaranteed → acked multi-receiver) lands on this
-   channel, so node1 discards 100% of node3's data until it receives node3's single
-   Welcome (`DataSender::PostWelcome`, sent once on `IncludeNode`), which sets
-   `ch.welcome = seqNo`.
+> The code-level line references above were accurate as of the 2026-06/07
+> investigation; verify against current source before acting on them.
 
-   Sub-signature A1: `OnNewNode Sender_3` never fires (handshake 1 fails).
-   Sub-signature A2: it fires, but `recvCount(3)` stays 0 (handshake 2 never
-   completes — Welcome never sent or never arrives; reproduced locally as the
-   multicast delivery path dropping the Welcome while the unicast case in the same
-   process passed).
+### `361-inject_update_and_delete_for_existing_entity` — dormant, NOT fixed
 
-   **Latent robustness bug, prime suspect for a permanent 60 s of zero:** in
-   `src/distribution/communication.ss/src/DataReceiver.h`, the `AsyncReceive`
-   completion handler, on any error other than `operation_aborted`, logs "Read
-   failed…" and **returns without re-arming `AsyncReceive`** — permanently killing
-   the node's receive loop (deaf forever). A transient Windows UDP error
-   (`WSAECONNRESET` 10054 from a prior ICMP port-unreachable, `WSAENOBUFS` 10055
-   under loopback load) would trip this; `SIO_UDP_CONNRESET` is not set on the recv
-   socket anywhere. Not yet proven for a specific captured signature.
+`src/tests/dose_test.ss/testcases/361-inject_update_and_delete_for_existing_entity.xml`.
+Reported as issue **#397** (2022-08-30, closed 2026-08-25 under the tracking policy
+above). Standalone and multinode dose, seen on Jenkins on `cpp-dotnet-java` and
+`dotnet-java-cpp`.
 
-**Mode B — teardown deadlock** (ctest 180 s TIMEOUT, not an assertion). Data flows
-fine; the hang is purely in teardown. `CommunicationImpl::Stop()` is fully
-asynchronous (posts stops to strands and returns). The actual thread-join is in the
-*test wrappers* (`reset_test/Receiver.h`, `Sender.h`):
-`m_com.Stop(); m_work.reset(); m_io.restart(); m_threads.join_all();`. One node's
-wrapper `Stop()` enters but `m_threads.join_all()` never returns (an io worker never
-returns from `m_io.run()`), so the next node's `Stop()` is never called. Fingerprint
-in the log: unequal Stop counts (e.g. `Stop Sender_2`×2 but `Stop Sender_3`×1), the
-wedged node goes silent, and a still-running node retransmits its unacked window to
-the dead peer forever (`Retransmit MultiReceiver …` / `Cant remove seq …`) — that
-storm is a symptom, not the cause. The wedged node varies across runs.
+**Signature:** a race between the injection and the read-back. Either the entity is
+not there yet — `Caught Exception in ExecuteAction: Safir.Dob.NotFoundException`
+where the expected output has a full `Read entity` block — or it is there but stale,
+showing `First inject` where `Second inject` was expected. Both partners diff
+identically.
 
-**Prime suspect:** the wrapper calls `m_io.restart()` **before**
-`m_threads.join_all()`, i.e. while the workers are still inside `run()`.
-`io_context::restart()` is only valid after the context has fully stopped; calling
-it mid-run races benignly on Linux but on Windows/IOCP can wedge a worker so
-`run()` never returns. **Likely fix:** `join_all()` first, then `restart()` only if
-reusing — or drop `restart()` (these objects aren't reused). This is a
-test-harness bug, independent of the Mode-A data-loss bug.
-
-**Do not "fix" this by loosening the 60 s assertions** — the failures are real
-Windows flakiness in the Reset/re-discovery/data path. Suggested confirmation
-(Windows only): run with COM `lllog` 8–9, capture the signature, then test the two
-candidate fixes (re-arm `AsyncReceive` on non-fatal errors + set
-`SIO_UDP_CONNRESET`; and reorder `join_all()`/`restart()`).
-
-> The code-level line references in this deep-dive were accurate as of the
-> 2026-06/07 investigation; verify against current source before acting on them.
+**Status: not fixed.** 94c1b94da (2022-08-30) added sleeps after the injections to
+absorb slow-VM timing; the test failed again six days later with the same race, so
+that fix is known **not** to have held. It has simply not been observed since —
+zero occurrences across the last 40 `ci.yml` runs (2026-06-28 → 2026-08-25), and
+nothing on GHA at all. Likely the faster runners hide it rather than the race being
+gone. If it reappears, do not reach for more sleeps: the real question is what
+guarantees the injected update has reached partner 0 before the read-back runs.
