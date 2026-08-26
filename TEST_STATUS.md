@@ -121,6 +121,46 @@ these so you don't hunt for a nonexistent test regression:
   runners (e.g. a tag run and a branch run at once) — see AGENTS.md → "Cutting a
   Release" on pushing the tag on its own. Seen on runs 32348188649 (the
   7.4.3-alpha4 tag) and 32457868482.
+- **Third-party package fetches in "Set up build environment."** A whole matrix
+  leg dies before it builds anything, taking every job that depends on it with it.
+  The failure is always in step 4 and always someone else's download:
+  - **CI #148** (run 32874768890, `vs2022-amd64`): `choco install nsis
+    doxygen.install graphviz dia dejavufonts gzip` hung **45 minutes** pulling
+    doxygen 1.18.0 from `sourceforge.net`, hit chocolatey's default 2700 s
+    execution timeout, and exited 127. Graphviz wobbled in the same step
+    ("Attempt to use original download file name failed") but recovered; only
+    doxygen actually failed.
+  - **CI #145** (run 32872859767, `ubuntu-noble-arm64`): `apt` 404s on
+    `openjdk-21` (`21.0.12+8-1~24.04_arm64.deb` no longer on ports.ubuntu.com —
+    the archive had moved to a newer point release while the runner image's
+    index was stale), exit 100.
+
+  Recognising it: the "Test results" Check stays **green but tiny** — #148 shows
+  228 tests / 4 files against a normal ~9193 — because the downstream dose,
+  multicomputer and slow jobs are *skipped*, not failed. A small green Check next
+  to a red run is the fingerprint. Don't read the shrunken test counts as a
+  signal, and don't conclude a flake got fixed because it's absent from a run
+  where most of the matrix never executed.
+
+  It recurred the same evening — **CI #149** (run 32897163638) lost *both* legs at
+  once: the same apt 404 byte-for-byte on `ubuntu-noble-arm64`, and doxygen from
+  sourceforge again on `vs2022-amd64`, this time failing in ~9 minutes with
+  `Received an unexpected EOF or 0 bytes from the transport stream` instead of
+  timing out. Three occurrences across three consecutive runs retired the "bad
+  day" theory.
+
+  **Fixed 2026-08-26** by retrying every package install in
+  `.github/actions/setup-build-env` (see `retry.sh` there), not just the one that
+  had hurt us before. If a fetch fails now it is retried for about two hours
+  before the job gives up, so **a red setup step means a genuine outage, not a
+  blip** — read the log rather than re-running. Note the apt case needs
+  `update`+`install` retried *together*: the 404 was for a version the stale
+  index still advertised, so retrying `install` alone would ask for the same
+  missing filename every time.
+
+  What was *not* done: the packages are still fetched from third-party mirrors on
+  every run. Caching or self-hosting them is the only thing that would make this
+  independent of someone else's uptime; retrying just rides the outage out.
 - **Not everything red is a flake.** A `slow-tests` job once failed with all
   tests passing (run 31795493619) because of a genuine setup bug (a missing
   `system_picture_listener`), fixed immediately after. If a job dies with no

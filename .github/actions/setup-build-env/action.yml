@@ -64,70 +64,85 @@ runs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        sudo apt-get update -qq
+        source "${GITHUB_ACTION_PATH}/retry.sh"
+        # update and install are retried together, not separately: the failure
+        # we hit was a 404 for a package version the index still advertised
+        # after the mirror had moved on, and re-running install alone would ask
+        # for the same missing filename forever. Only a fresh update fixes it.
+        # Acquire::Retries covers transient archive fetches, but per Launchpad
+        # #310262 it does not apply to the index files, hence both.
+        #
         # The compilers, CMake/Ninja, JDK, Boost/unixODBC and Qt that both the
         # SDK build and the examples build need. python3-apt backs run_test.py's
         # DebianInstaller (it calls apt.cache.Cache() to decide whether the SDK
         # is already installed); the examples build crashes without it.
         # mono-devel supplies the C# compiler (mcs); without it FindCSharp sets
         # CSHARP_FOUND=false and the C# example apps are silently skipped.
-        sudo apt-get install -y --no-install-recommends \
-          python3 python3-venv python3-pip pipx python-is-python3 python3-distro python3-apt \
-          build-essential g++ cmake \
-          default-jdk mono-devel \
-          libboost-all-dev unixodbc-dev \
-          qt6-base-dev qt6-websockets-dev qt6-base-private-dev qt6-svg-dev \
-          ninja-build python3-websocket
+        install_linux_prerequisites() {
+          sudo apt-get update -qq &&
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 \
+            python3 python3-venv python3-pip pipx python-is-python3 python3-distro python3-apt \
+            build-essential g++ cmake \
+            default-jdk mono-devel \
+            libboost-all-dev unixodbc-dev \
+            qt6-base-dev qt6-websockets-dev qt6-base-private-dev qt6-svg-dev \
+            ninja-build python3-websocket
+        }
+        retry "Linux prerequisites" install_linux_prerequisites
 
     - name: Install Linux documentation and packaging tools
       if: runner.os == 'Linux' && inputs.docs-and-packaging == 'true'
       shell: bash
       run: |
+        source "${GITHUB_ACTION_PATH}/retry.sh"
         # Only the SDK build renders the shipped docs and builds the .deb; the
         # examples build needs none of this.
         # lintian is only a 'recommends' of devscripts, so --no-install-recommends
         # drops it; without it debuild silently skips the lintian check that the
         # warnings-summary job collects (and that Jenkins ran). List it explicitly.
-        sudo apt-get install -y --no-install-recommends \
-          doxygen graphviz \
-          dia dblatex texlive-font-utils ghostscript \
-          devscripts debhelper fakeroot lintian \
-          asciidoctor cli-common-dev
+        install_linux_docs_tools() {
+          sudo apt-get update -qq &&
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 \
+            doxygen graphviz \
+            dia dblatex texlive-font-utils ghostscript \
+            devscripts debhelper fakeroot lintian \
+            asciidoctor cli-common-dev
+        }
+        retry "Linux documentation and packaging tools" install_linux_docs_tools
 
     - name: Install Windows prerequisites
       if: runner.os == 'Windows' && inputs.docs-and-packaging == 'true'
       shell: bash
       run: |
+        source "${GITHUB_ACTION_PATH}/retry.sh"
         # doxygen/graphviz/asciidoctorj/dia render the documentation that the
         # Windows packages must ship (see BUILD.Windows.txt); without them the
         # build silently skips docs. dejavufonts/gzip back the doc generation.
         # asciidoctorj is the JVM asciidoctor and needs Java at build time - the
         # "Set up Java (Windows)" step below puts it on PATH before the build.
-        choco install nsis doxygen.install graphviz dia dejavufonts gzip --no-progress -y
-        # asciidoctorj's choco package fetches its zip from search.maven.org,
-        # which intermittently returns 403 (rate-limit/block) - it fails on one
-        # build and succeeds on the next with no change. A fixed 30s retry over
-        # 5 attempts (~2min) was not enough: the 403 has persisted across all of
-        # them. Retry with exponential backoff (capped at 15min) so we ride out
-        # a rate-limit window of roughly 2 hours before failing the whole job.
-        max_attempts=13
-        delay=30
-        max_delay=900
-        for attempt in $(seq 1 "$max_attempts"); do
-          if choco install asciidoctorj --no-progress -y; then
-            break
-          fi
-          if [ "$attempt" -eq "$max_attempts" ]; then
-            echo "asciidoctorj install failed after $attempt attempts"
-            exit 1
-          fi
-          echo "asciidoctorj install attempt $attempt failed; retrying in ${delay}s..."
-          sleep "$delay"
-          delay=$((delay * 2))
-          if [ "$delay" -gt "$max_delay" ]; then
-            delay=$max_delay
-          fi
-        done
+        #
+        # Both installs are retried. doxygen.install downloads its installer
+        # from sourceforge, which has both hung until chocolatey's own 2700s
+        # timeout and returned an immediate EOF; asciidoctorj fetches its zip
+        # from search.maven.org, which rate-limits with 403 for long stretches.
+        # choco has no built-in download retry (chocolatey/choco#385, #1853),
+        # so the wrapper is the only thing standing between us and a red run.
+        # From the second attempt on we add -f, because choco can leave a failed
+        # package looking installed and then skip it on the next try
+        # (chocolatey/choco#1027). Not on the first attempt: forcing a reinstall
+        # of something that is already fine just means downloading it again.
+        force_on_retry() { [ "${RETRY_ATTEMPT:-1}" -gt 1 ] && echo "-f"; }
+
+        install_windows_prerequisites() {
+          choco install nsis doxygen.install graphviz dia dejavufonts gzip \
+            --no-progress -y $(force_on_retry)
+        }
+        retry "Windows prerequisites" install_windows_prerequisites
+
+        install_asciidoctorj() {
+          choco install asciidoctorj --no-progress -y $(force_on_retry)
+        }
+        retry "asciidoctorj" install_asciidoctorj
         # choco installs NSIS but does not put it on PATH. windows-2022 shipped
         # NSIS on PATH already; windows-2025-vs2026 does not, so makensis was not
         # found during packaging. Add it explicitly for the later build step.

@@ -169,6 +169,17 @@ pushes, `render-docs` renders the guides, and `workflow-lint` runs zizmor.
   are inline `# zizmor: ignore[<rule>]` comments with a rationale; third-party
   actions must be hash-pinned (`unpinned-uses` policy in `.github/zizmor.yml`),
   first-party `actions/*` may float on major tags.
+- **Every package install goes through the `retry` wrapper.** Each one fetches
+  from a third party we do not control (the Ubuntu archive, chocolatey,
+  sourceforge, maven), and a failure there kills a whole matrix leg in "Set up
+  build environment" before anything is compiled, skipping every dependent job.
+  `.github/actions/setup-build-env/retry.sh` defines `retry`; source it and pass
+  a function, do not add a bare `apt-get install` or `choco install`. One policy
+  for all of them — 13 attempts, 30s doubling to a 15-minute cap, ~2 hours total
+  — deliberately uniform so there is a single number to reason about. On Linux
+  retry `update`+`install` as one unit: a stale-index 404 is not fixed by
+  re-running `install`. See TEST_STATUS.md → "Third-party package fetches" for
+  the failures that prompted this.
 - **The platform matrix is duplicated — keep every copy in sync.** GitHub
   Actions has no YAML anchors, so `build`, `build-examples`, `dose-tests`,
   `slow-tests`, `multicomputer-master` and `multicomputer-slaves` each spell out
