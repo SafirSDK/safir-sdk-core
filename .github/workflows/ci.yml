@@ -420,9 +420,15 @@ jobs:
     needs: build
     runs-on: ${{ matrix.runner }}
     # A dose run that hangs (e.g. a partner that never connects) would otherwise
-    # sit until the 6-hour default. 30 min is comfortably above an observed
-    # healthy run; revisit once we have more timing data.
-    timeout-minutes: 30
+    # sit until the 6-hour default. The timing data the old 30 min asked for
+    # arrived on CI #150: multinode ubuntu-noble-arm64 runs 27 min every time,
+    # so 30 left 9% of headroom, and two of its three language combos were
+    # killed at testcase 9999 - the last one in the suite - having done all the
+    # work and reported none of it. 60 is ~2.2x the observed runtime, matching
+    # how the slow-suite driver timeout was picked (1800s against ~550s). A
+    # timeout only has to be tight enough to beat the 6-hour default: a genuine
+    # hang does not finish in 45 minutes either, so buying margin costs nothing.
+    timeout-minutes: 60
 
     container:
       image: ${{ matrix.container }}

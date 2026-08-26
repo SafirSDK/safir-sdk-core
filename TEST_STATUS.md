@@ -161,6 +161,34 @@ these so you don't hunt for a nonexistent test regression:
   What was *not* done: the packages are still fetched from third-party mirrors on
   every run. Caching or self-hosting them is the only thing that would make this
   independent of someone else's uptime; retrying just rides the outage out.
+- **A job timeout reports as `cancelled`, not `failure`.** GitHub kills a job that
+  exceeds `timeout-minutes` with `##[error]The operation was canceled.`, so the
+  *run* ends up "cancelled" and looks like somebody pressed the button. Check the
+  job duration against its `timeout-minutes` before assuming a human or a newer
+  push cancelled it.
+
+  Seen on **CI #150** (run 32950883682): two of the three
+  `multinode-ubuntu-noble-arm64` jobs were killed at exactly 30m16s, both at
+  testcase **9999** — the last one in the suite, so they had done all the work and
+  reported none of it. Everything else in the run was green.
+
+  **Cause: no margin, on arm64 only.** Observed dose-tests durations (CI #150,
+  worst case per platform):
+
+  | Platform | standalone | multinode |
+  |---|---|---|
+  | ubuntu-noble-**arm64** | **27 min** | **28 min** |
+  | ubuntu-noble-amd64 | 17 | 19 |
+  | debian-trixie-amd64 | 18 | 18 |
+  | vs2022 / vs2026 | 18 | 18-19 |
+
+  arm64 is ~1.5x slower than everything else and had been running 27 min against a
+  30 min limit — 9% of headroom — in every recent run (#136, #137, #144). Raised
+  to 60 min on 2026-08-26 (~2.2x observed), matching how the slow-suite driver
+  timeout was picked. **If an arm64 dose job times out again, do not just raise
+  the number**: 60 is now over twice the runtime, so a job hitting it is hanging,
+  which is exactly what the timeout is for. For reference the slow-tests jobs run
+  72-73 min against their 150 (2.1x), so they have the same kind of margin.
 - **Not everything red is a flake.** A `slow-tests` job once failed with all
   tests passing (run 31795493619) because of a genuine setup bug (a missing
   `system_picture_listener`), fixed immediately after. If a job dies with no
