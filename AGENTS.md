@@ -171,15 +171,27 @@ pushes, `render-docs` renders the guides, and `workflow-lint` runs zizmor.
   first-party `actions/*` may float on major tags.
 - **Every package install goes through the `retry` wrapper.** Each one fetches
   from a third party we do not control (the Ubuntu archive, chocolatey,
-  sourceforge, maven), and a failure there kills a whole matrix leg in "Set up
-  build environment" before anything is compiled, skipping every dependent job.
-  `.github/actions/setup-build-env/retry.sh` defines `retry`; source it and pass
-  a function, do not add a bare `apt-get install` or `choco install`. One policy
-  for all of them — 13 attempts, 30s doubling to a 15-minute cap, ~2 hours total
-  — deliberately uniform so there is a single number to reason about. On Linux
-  retry `update`+`install` as one unit: a stale-index 404 is not fixed by
-  re-running `install`. See TEST_STATUS.md → "Third-party package fetches" for
-  the failures that prompted this.
+  sourceforge, maven, PyPI), and a failure there kills a whole matrix leg in its
+  setup step before anything is compiled or tested, skipping every dependent job.
+  `.github/actions/retry.sh` defines `retry`; source it as
+  `"${GITHUB_ACTION_PATH}/../retry.sh"` and pass a *function*, and do not add a
+  bare `apt-get install`, `choco install` or `pip install`. It lives one level
+  above the actions because `GITHUB_ACTION_PATH` resolves to the directory of the
+  action doing the sourcing, so a shared helper cannot sit inside any one of
+  them. One policy for all of them — 13 attempts, 30s doubling to a 15-minute
+  cap, ~2 hours total — deliberately uniform so there is a single number to
+  reason about. On Linux retry `update`+`install` as one unit: a stale-index 404
+  is not fixed by re-running `install`. See TEST_STATUS.md → "Third-party package
+  fetches" for the failures that prompted this.
+
+  Covered so far: `setup-build-env` (apt, choco, pip) and `setup-test-env` (apt,
+  pip). **Still bare**, and worth wrapping if they ever bite: the four Debian
+  container bootstraps and the multicomputer slave container in `ci.yml` (they
+  run *before* checkout, or inside a `docker run` string, so they cannot source
+  the helper as-is), the docs-toolchain install in the `render-docs` job, and
+  `wireguard-overlay`'s apt/choco — that last one needs thought rather than a
+  copy-paste, since a long retry on one side of the overlay eats into the peer's
+  `peer-wait-minutes` on the other.
 - **The platform matrix is duplicated — keep every copy in sync.** GitHub
   Actions has no YAML anchors, so `build`, `build-examples`, `dose-tests`,
   `slow-tests`, `multicomputer-master` and `multicomputer-slaves` each spell out

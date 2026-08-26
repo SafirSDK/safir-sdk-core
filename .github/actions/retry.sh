@@ -1,4 +1,8 @@
-# Shared retry wrapper for the package installs in this action.
+# Shared retry wrapper for the package installs in this repo's composite
+# actions. Lives one level above them so every action can source it as
+# "${GITHUB_ACTION_PATH}/../retry.sh" - GITHUB_ACTION_PATH resolves to the
+# directory of the action doing the sourcing, so a shared helper cannot live
+# inside any one of them.
 #
 # Every install here fetches from a third party we do not control - the Ubuntu
 # archive, community.chocolatey.org, sourceforge.net, search.maven.org - and any
@@ -21,7 +25,7 @@
 # where a 5 x 30s retry was not nearly enough.
 #
 # Usage:
-#   source "${GITHUB_ACTION_PATH}/retry.sh"
+#   source "${GITHUB_ACTION_PATH}/../retry.sh"
 #   install_foo() { some-package-manager install a b c; }
 #   retry "foo packages" install_foo
 #
