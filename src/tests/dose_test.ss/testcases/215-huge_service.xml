@@ -299,9 +299,27 @@
         </Watt64ArrayMember>
       </Object>
     </DoseTest.Action>
+    <!-- Wait for the round trip to actually happen rather than sleeping for a
+         pessimistic fixed time. The request is ~10Mb (the sequencer fills the null
+         BinaryMember), and over the multicomputer overlay it has taken well over the
+         20 seconds this testcase used to sleep for, which is what made
+         215-huge_service the most frequent flake in CI. Waiting instead means the
+         testcase normally costs a couple of seconds rather than 20, and still
+         tolerates a slow transfer. The timeouts only exist so that a lost request
+         fails the testcase in the usual way, with missing output, instead of hanging
+         the run; they are matched to the 120 second request timeout that
+         DoseTest.ComplexGlobalService declares in its RequestTimeoutProperty. -->
     <DoseTest.Action index="1">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>60</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnServiceRequest</WaitForCallbackId>
+      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>2</Partner>
+      <WaitForCallbackId>OnResponse</WaitForCallbackId>
+      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>
