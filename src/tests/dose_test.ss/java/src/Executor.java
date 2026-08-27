@@ -602,7 +602,11 @@ class Executor implements
         }
 
         if (action.waitForCallbackId().isNull()) {
-            System.out.println("WaitForCallback action without a WaitForCallbackId!");
+            // Deliberately logged through the Logger rather than to stdout: the Logger
+            // is the output that gets diffed against the expected results, so a
+            // testcase with a malformed wait in it fails loudly instead of quietly not
+            // waiting.
+            Logger.instance().println("WaitForCallback action without a WaitForCallbackId!");
             m_actionReceiver.actionHandled();
             return;
         }
@@ -629,18 +633,14 @@ class Executor implements
             return;
         }
 
-        // Default to a minute if the testcase did not say. Long, because the point of
-        // the timeout is only to turn a hang into an ordinary test failure.
-        double timeout = action.waitForCallbackTimeout().isNull() ? 60.0 : action.waitForCallbackTimeout().getVal();
-
-        System.out.println("WaitForCallback: waiting up to " + timeout + " seconds for " +
-                           callback + " occurrence " + occurrence +
+        System.out.println("WaitForCallback: waiting up to " + WAIT_FOR_CALLBACK_TIMEOUT_SECONDS +
+                           " seconds for " + callback + " occurrence " + occurrence +
                            " (seen " + m_callbackCounts.get(callback) + ")");
 
         m_isWaitingForCallback = true;
         m_waitingForCallback = callback;
         m_waitingForOccurrence = occurrence;
-        m_waitForCallbackDeadline = System.currentTimeMillis() + (long)(timeout * 1000.0);
+        m_waitForCallbackDeadline = System.currentTimeMillis() + WAIT_FOR_CALLBACK_TIMEOUT_SECONDS * 1000L;
     }
 
     /**
@@ -957,6 +957,12 @@ class Executor implements
     // happened since the last Reset; the count is what lets a wait be satisfied by a
     // callback that arrived before the wait action did, which is the normal case when
     // nothing is slow.
+    // How long a WaitForCallback waits before giving up. Not a testcase level knob on
+    // purpose: it is only an anti-hang backstop, and a wait that succeeds never gets
+    // near it, so there is nothing for a testcase to tune. Comfortably more than
+    // double the longest Sleep any of these waits replaced.
+    private static final int WAIT_FOR_CALLBACK_TIMEOUT_SECONDS = 60;
+
     java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, Integer> m_callbackCounts;
     private boolean m_isWaitingForCallback = false;
     private com.saabgroup.safir.dob.CallbackId m_waitingForCallback;

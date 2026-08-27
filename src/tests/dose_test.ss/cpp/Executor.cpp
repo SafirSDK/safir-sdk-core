@@ -297,6 +297,15 @@ Executor::ExecuteCallbackActions(const Safir::Dob::CallbackId::Enumeration callb
 }
 
 
+namespace
+{
+    //How long a WaitForCallback waits before giving up. Not a testcase level knob on
+    //purpose: it is only an anti-hang backstop, and a wait that succeeds never gets
+    //near it, so there is nothing for a testcase to tune. Comfortably more than
+    //double the longest Sleep any of these waits replaced.
+    const int WaitForCallbackTimeoutSeconds = 60;
+}
+
 void Executor::NotifyCallback(const Safir::Dob::CallbackId::Enumeration callback)
 {
     ++m_callbackCounts.at(callback);
@@ -323,7 +332,10 @@ void Executor::BeginWaitForCallback(const DoseTest::ActionPtr& action)
 
     if (action->WaitForCallbackId().IsNull())
     {
-        std::wcout << "WaitForCallback action without a WaitForCallbackId!" << std::endl;
+        //Deliberately logged through lout rather than to the console: lout is the
+        //output that gets diffed against the expected results, so a testcase with a
+        //malformed wait in it fails loudly instead of quietly not waiting.
+        lout << "WaitForCallback action without a WaitForCallbackId!" << std::endl;
         m_actionReceiver.SendAck();
         return;
     }
@@ -354,15 +366,8 @@ void Executor::BeginWaitForCallback(const DoseTest::ActionPtr& action)
         return;
     }
 
-    //Default to a minute if the testcase did not say. Long, because the point of
-    //the timeout is only to turn a hang into an ordinary test failure - if we are
-    //waiting this long the testcase has already failed, we are just deciding how
-    //long to take about admitting it.
-    const double timeout = action->WaitForCallbackTimeout().IsNull()
-        ? 60.0
-        : action->WaitForCallbackTimeout().GetVal();
-
-    std::wcout << "WaitForCallback: waiting up to " << timeout << " seconds for "
+    std::wcout << "WaitForCallback: waiting up to " << WaitForCallbackTimeoutSeconds
+         << " seconds for "
          << Safir::Dob::CallbackId::ToString(callback) << " occurrence " << occurrence
          << " (seen " << m_callbackCounts.at(callback) << ")" << std::endl;
 
@@ -370,8 +375,7 @@ void Executor::BeginWaitForCallback(const DoseTest::ActionPtr& action)
     m_waitingForCallback = callback;
     m_waitingForOccurrence = occurrence;
 
-    m_waitForCallbackTimer.expires_after
-        (std::chrono::milliseconds(static_cast<std::int64_t>(timeout * 1000)));
+    m_waitForCallbackTimer.expires_after(std::chrono::seconds(WaitForCallbackTimeoutSeconds));
     m_waitForCallbackTimer.async_wait([this](const boost::system::error_code& error)
     {
         if (!error && m_isWaitingForCallback)

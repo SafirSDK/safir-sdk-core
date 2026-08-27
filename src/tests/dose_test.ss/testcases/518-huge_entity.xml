@@ -319,20 +319,17 @@
       <ActionKind>WaitForCallback</ActionKind>
       <Partner>2</Partner>
       <WaitForCallbackId>OnCreateRequest</WaitForCallbackId>
-      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
     <DoseTest.Action index="2">
       <ActionKind>WaitForCallback</ActionKind>
       <Partner>1</Partner>
       <WaitForCallbackId>OnResponse</WaitForCallbackId>
       <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
-      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
     <DoseTest.Action index="3">
       <ActionKind>WaitForCallback</ActionKind>
       <Partner>0</Partner>
       <WaitForCallbackId>OnNewEntity</WaitForCallbackId>
-      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
     <DoseTest.Action index="4">
       <ActionKind>UpdateRequest</ActionKind>
@@ -625,20 +622,17 @@
       <ActionKind>WaitForCallback</ActionKind>
       <Partner>2</Partner>
       <WaitForCallbackId>OnUpdateRequest</WaitForCallbackId>
-      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
     <DoseTest.Action index="6">
       <ActionKind>WaitForCallback</ActionKind>
       <Partner>1</Partner>
       <WaitForCallbackId>OnResponse</WaitForCallbackId>
       <WaitForCallbackOccurrence>2</WaitForCallbackOccurrence>
-      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
     <DoseTest.Action index="7">
       <ActionKind>WaitForCallback</ActionKind>
       <Partner>0</Partner>
       <WaitForCallbackId>OnUpdatedEntity</WaitForCallbackId>
-      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
     <DoseTest.Action index="8">
       <ActionKind>DeleteRequest</ActionKind>
@@ -655,20 +649,17 @@
       <ActionKind>WaitForCallback</ActionKind>
       <Partner>2</Partner>
       <WaitForCallbackId>OnDeleteRequest</WaitForCallbackId>
-      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
     <DoseTest.Action index="10">
       <ActionKind>WaitForCallback</ActionKind>
       <Partner>1</Partner>
       <WaitForCallbackId>OnResponse</WaitForCallbackId>
       <WaitForCallbackOccurrence>3</WaitForCallbackOccurrence>
-      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
     <DoseTest.Action index="11">
       <ActionKind>WaitForCallback</ActionKind>
       <Partner>0</Partner>
       <WaitForCallbackId>OnDeletedEntity</WaitForCallbackId>
-      <WaitForCallbackTimeout>120</WaitForCallbackTimeout>
     </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>

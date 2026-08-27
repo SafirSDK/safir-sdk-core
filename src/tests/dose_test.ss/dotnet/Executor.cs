@@ -311,7 +311,11 @@ namespace dose_test_dotnet
 
             if (action.WaitForCallbackId.IsNull())
             {
-                System.Console.WriteLine("WaitForCallback action without a WaitForCallbackId!");
+                // Deliberately logged through the Logger rather than to the console:
+                // the Logger is the output that gets diffed against the expected
+                // results, so a testcase with a malformed wait in it fails loudly
+                // instead of quietly not waiting.
+                Logger.Instance.WriteLine("WaitForCallback action without a WaitForCallbackId!");
                 m_actionReceiver.ActionHandled();
                 return;
             }
@@ -339,18 +343,14 @@ namespace dose_test_dotnet
                 return;
             }
 
-            // Default to a minute if the testcase did not say. Long, because the point
-            // of the timeout is only to turn a hang into an ordinary test failure.
-            double timeout = action.WaitForCallbackTimeout.IsNull() ? 60.0 : action.WaitForCallbackTimeout.Val;
-
-            System.Console.WriteLine("WaitForCallback: waiting up to " + timeout +
+            System.Console.WriteLine("WaitForCallback: waiting up to " + WaitForCallbackTimeoutSeconds +
                                       " seconds for " + callback + " occurrence " + occurrence +
                                       " (seen " + m_callbackCounts[callback] + ")");
 
             m_isWaitingForCallback = true;
             m_waitingForCallback = callback;
             m_waitingForOccurrence = occurrence;
-            m_waitForCallbackDeadline = System.DateTime.UtcNow.AddSeconds(timeout);
+            m_waitForCallbackDeadline = System.DateTime.UtcNow.AddSeconds(WaitForCallbackTimeoutSeconds);
         }
 
         /// <summary>
@@ -850,6 +850,12 @@ namespace dose_test_dotnet
         // happened since the last Reset; the count is what lets a wait be satisfied by
         // a callback that arrived before the wait action did, which is the normal case
         // when nothing is slow.
+        // How long a WaitForCallback waits before giving up. Not a testcase level knob
+        // on purpose: it is only an anti-hang backstop, and a wait that succeeds never
+        // gets near it, so there is nothing for a testcase to tune. Comfortably more
+        // than double the longest Sleep any of these waits replaced.
+        const int WaitForCallbackTimeoutSeconds = 60;
+
         Dictionary<Safir.Dob.CallbackId.Enumeration, int> m_callbackCounts;
         bool m_isWaitingForCallback = false;
         Safir.Dob.CallbackId.Enumeration m_waitingForCallback;
