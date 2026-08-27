@@ -197,12 +197,20 @@ private:
 
     void SleepyTime(const DoseTest::ActionEnum::Enumeration actionKind)
     {
-        //ARM tends to be slow, so we give tests there some extra time
-#if defined(__arm__) || defined(__aarch64__)
-        const int multiplier = 4;
-#else
-        const int multiplier = 1;
-#endif
+        //These pauses let each action's effects propagate and the system settle
+        //before the next action is sent. They are unconditional, and there are a
+        //lot of them: ~855 heavy and ~812 light actions across the suite, so
+        //roughly 150 seconds per dose run.
+        //
+        //There used to be a 4x multiplier here for ARM, from when the ARM tests
+        //ran on a BeagleBone Black. They now run on a GitHub-hosted arm64
+        //runner, which is not slow: across recent runs it built the SDK in
+        //30-37 min against 39-42 for the amd64 runner, i.e. it is if anything
+        //the faster machine. The multiplier was costing ~7.6 min of pure sleep
+        //on every arm64 dose run - most of why those jobs sat at 27-28 min
+        //against 17-19 elsewhere, close enough to the old 30 min job timeout to
+        //trip it. If arm64 ever does need more settling time again, bring back a
+        //multiplier with a measurement to justify it rather than a guess.
         switch (actionKind)
         {
         case DoseTest::ActionEnum::CreateRequest:
@@ -225,10 +233,10 @@ private:
         case DoseTest::ActionEnum::UnregisterHandler:
         case DoseTest::ActionEnum::UpdateRequest:
         case DoseTest::ActionEnum::ResumePostponed:
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(140 * multiplier));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(140));
             break;
         default:
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(40 * multiplier));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(40));
             break;
         }
     }
