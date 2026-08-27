@@ -20,6 +20,24 @@
             <type>Int32</type>
         </member>
         <member>
+            <summary>
+                The callback that a WaitForCallback action waits for. Separate from
+                ActionCallback, which means something else entirely: an action carrying
+                ActionCallback is registered to be run when that callback happens.
+            </summary>
+            <name>WaitForCallbackId</name>
+            <type>Safir.Dob.CallbackId</type>
+        </member>
+        <member>
+            <summary>
+                How long a WaitForCallback action waits before giving up and
+                acknowledging anyway, so a missed callback shows up as the usual
+                missing-output diff rather than a hung test run.
+            </summary>
+            <name>WaitForCallbackTimeout</name>
+            <type>Second64</type>
+        </member>
+        <member>
             <name>PrintString</name>
             <type>String</type>
             <maxLength>5000</maxLength>

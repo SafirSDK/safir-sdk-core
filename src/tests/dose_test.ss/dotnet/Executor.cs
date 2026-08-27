@@ -49,6 +49,12 @@ namespace dose_test_dotnet
             m_controlConnectionName = m_identifier + "_control";
             m_testConnectionName = "partner_test_connection";
             m_callbackActions = new Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>>();
+            m_callbackCounts = new Dictionary<Safir.Dob.CallbackId.Enumeration, int>();
+            foreach (Safir.Dob.CallbackId.Enumeration cb in
+                     System.Enum.GetValues(typeof(Safir.Dob.CallbackId.Enumeration)))
+            {
+                m_callbackCounts[cb] = 0;
+            }
             foreach (Safir.Dob.CallbackId.Enumeration cb in Enum.GetValues(typeof(Safir.Dob.CallbackId.Enumeration)))
             {
                 m_callbackActions.Add(cb, new List<DoseTest.Action>());
@@ -137,18 +143,36 @@ namespace dose_test_dotnet
                         DoseTest.Action action = m_actionReceiver.getData();
                         bool actionAfterAck = action.ActionKind.Val == DoseTest.ActionEnum.Enumeration.Sleep;
 
+                        // A WaitForCallback action is acknowledged later, by
+                        // EndWaitForCallback, once the callback it names has happened
+                        // or its timeout has expired.
+                        bool deferAck = action.ActionKind.Val == DoseTest.ActionEnum.Enumeration.WaitForCallback;
+
                         if (!actionAfterAck)
                         {
                             HandleAction(action);
                         }
 
-                        m_actionReceiver.ActionHandled();
+                        // Note that for a deferred ack the acknowledgement may already
+                        // have been sent from inside the action above, if the callback
+                        // had already happened.
+                        if (!deferAck)
+                        {
+                            m_actionReceiver.ActionHandled();
+                        }
 
                         if (actionAfterAck)
                         {
                             HandleAction(action);
                         }
                         break;
+                }
+
+                // The wait handles above time out once a second, which is where a
+                // WaitForCallback that is never going to be satisfied gets given up on.
+                if (m_isWaitingForCallback && System.DateTime.UtcNow >= m_waitForCallbackDeadline)
+                {
+                    EndWaitForCallback("TIMED OUT");
                 }
             }
 
@@ -252,10 +276,116 @@ namespace dose_test_dotnet
 
         #endregion
 
+        /// <summary>
+        /// Called for every callback delivered to this partner, from both the
+        /// executor's own callbacks and its consumers'. Counts them, and completes a
+        /// pending WaitForCallback if this is the one it was waiting for.
+        /// </summary>
+        private void NotifyCallback(Safir.Dob.CallbackId.Enumeration callback)
+        {
+            m_callbackCounts[callback] = m_callbackCounts[callback] + 1;
+
+            if (m_isWaitingForCallback && callback == m_waitingForCallback)
+            {
+                EndWaitForCallback("callback arrived");
+            }
+        }
+
+        /// <summary>
+        /// Start withholding the acknowledgement of a WaitForCallback action.
+        /// Acknowledges immediately if the callback has already been seen in this
+        /// testcase, which is the common case when the system is keeping up.
+        /// </summary>
+        private void BeginWaitForCallback(DoseTest.Action action)
+        {
+            if (!m_isActive)
+            {
+                // An inactive partner has no consumers to deliver anything to, so
+                // waiting could only ever time out.
+                System.Console.WriteLine("WaitForCallback: partner is not active, not waiting");
+                m_actionReceiver.ActionHandled();
+                return;
+            }
+
+            if (action.WaitForCallbackId.IsNull())
+            {
+                System.Console.WriteLine("WaitForCallback action without a WaitForCallbackId!");
+                m_actionReceiver.ActionHandled();
+                return;
+            }
+
+            Safir.Dob.CallbackId.Enumeration callback = action.WaitForCallbackId.Val;
+
+            // If it has already happened we are done, and the testcase does not pay
+            // for the wait at all. Without this the wait would be a race: the callback
+            // the sequencer is asking us to wait for has usually arrived before the
+            // sequencer gets round to sending the wait, and we would then sit here
+            // until the timeout waiting for a second one that is never coming.
+            if (m_callbackCounts[callback] > 0)
+            {
+                System.Console.WriteLine("WaitForCallback: " + callback +
+                                          " has already happened " + m_callbackCounts[callback] +
+                                          " time(s) in this testcase, not waiting");
+                m_actionReceiver.ActionHandled();
+                return;
+            }
+
+            // Default to a minute if the testcase did not say. Long, because the point
+            // of the timeout is only to turn a hang into an ordinary test failure.
+            double timeout = action.WaitForCallbackTimeout.IsNull() ? 60.0 : action.WaitForCallbackTimeout.Val;
+
+            System.Console.WriteLine("WaitForCallback: waiting up to " + timeout +
+                                      " seconds for " + callback);
+
+            m_isWaitingForCallback = true;
+            m_waitingForCallback = callback;
+            m_waitForCallbackDeadline = System.DateTime.UtcNow.AddSeconds(timeout);
+        }
+
+        /// <summary>
+        /// Stop waiting and acknowledge, whether because the callback arrived or
+        /// because we gave up. Acknowledging either way matters: a wait that gives up
+        /// must not hold up the sequencer, since the missing callback shows up as
+        /// missing output in the testcase diff, which is a test failure rather than a
+        /// hung run.
+        /// </summary>
+        private void EndWaitForCallback(string reason)
+        {
+            System.Console.WriteLine("WaitForCallback: done waiting for " +
+                                      m_waitingForCallback + " (" + reason + ")");
+            m_isWaitingForCallback = false;
+            m_actionReceiver.ActionHandled();
+        }
+
+        /// <summary>
+        /// Forget the callbacks seen so far. Called on Reset, so each testcase starts
+        /// from a clean count, in step with the consumers being recreated.
+        /// </summary>
+        private void ResetCallbackCounts()
+        {
+            if (m_isWaitingForCallback)
+            {
+                // Cannot normally happen: the sequencer is blocked on the
+                // acknowledgement we are withholding, so it cannot have sent a Reset.
+                System.Console.WriteLine("WaitForCallback: Reset while still waiting!");
+                EndWaitForCallback("Reset");
+            }
+
+            foreach (Safir.Dob.CallbackId.Enumeration cb in
+                     System.Enum.GetValues(typeof(Safir.Dob.CallbackId.Enumeration)))
+            {
+                m_callbackCounts[cb] = 0;
+            }
+        }
+
         private void ExecuteAction(DoseTest.Action action)
         {
             switch (action.ActionKind.Val)
             {
+
+                case DoseTest.ActionEnum.Enumeration.WaitForCallback:
+                    BeginWaitForCallback(action);
+                    break;
 
                 case DoseTest.ActionEnum.Enumeration.Reset:
                     if (m_isActive)
@@ -284,7 +414,7 @@ namespace dose_test_dotnet
 
                         for (int i = 0; i < 3; ++i)
                         {
-                            m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString);
+                            m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString, NotifyCallback);
                         }
 
                         if (oldCons != null)//avoid warning...
@@ -297,6 +427,8 @@ namespace dose_test_dotnet
                         {
                             cbActions.Value.Clear();
                         }
+
+                        ResetCallbackCounts();
                     }
                     break;
 
@@ -309,7 +441,7 @@ namespace dose_test_dotnet
                         m_consumers = new Consumer[3];
                         for (int i = 0; i < 3; ++i)
                         {
-                            m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString);
+                            m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString, NotifyCallback);
                         }
                     }
                     break;
@@ -330,7 +462,7 @@ namespace dose_test_dotnet
                         m_consumers = new Consumer[3];
                         for (int i = 0; i < 3; ++i)
                         {
-                            m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString);
+                            m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString, NotifyCallback);
                         }
 
                         // Restore stopHandler
@@ -493,6 +625,8 @@ namespace dose_test_dotnet
 
         void ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration callback)
         {
+            NotifyCallback(callback);
+
             foreach (DoseTest.Action action in m_callbackActions[callback])
             {
                 ExecuteAction(action);
@@ -698,6 +832,15 @@ namespace dose_test_dotnet
 
 
         Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> m_callbackActions;
+
+        // WaitForCallback state. m_callbackCounts is how many times each callback has
+        // happened since the last Reset; the count is what lets a wait be satisfied by
+        // a callback that arrived before the wait action did, which is the normal case
+        // when nothing is slow.
+        Dictionary<Safir.Dob.CallbackId.Enumeration, int> m_callbackCounts;
+        bool m_isWaitingForCallback = false;
+        Safir.Dob.CallbackId.Enumeration m_waitingForCallback;
+        System.DateTime m_waitForCallbackDeadline;
         #endregion
 
         #region Helpers

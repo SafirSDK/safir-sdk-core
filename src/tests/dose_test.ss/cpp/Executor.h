@@ -34,6 +34,7 @@
 #include "Consumer.h"
 #include <boost/function.hpp>
 #include "ActionReceiver.h"
+#include <boost/asio/steady_timer.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -134,6 +135,24 @@ private:
     void AddCallbackAction(DoseTest::ActionPtr action);
     void ExecuteCallbackActions(const Safir::Dob::CallbackId::Enumeration callback);
 
+    /** Called for every callback delivered to this partner, from both the
+        executor's own callbacks and its consumers'. Counts them, and completes a
+        pending WaitForCallback if this is the one it was waiting for. */
+    void NotifyCallback(const Safir::Dob::CallbackId::Enumeration callback);
+
+    /** Start withholding the acknowledgement of a WaitForCallback action.
+        Acknowledges immediately if the callback has already been seen in this
+        testcase, which is the common case when the system is keeping up. */
+    void BeginWaitForCallback(const DoseTest::ActionPtr& action);
+
+    /** Stop waiting and acknowledge, whether because the callback arrived or
+        because we gave up. */
+    void EndWaitForCallback(const std::wstring& reason);
+
+    /** Forget the callbacks seen so far. Called on Reset, so each testcase starts
+        from a clean count, in step with the consumers being recreated. */
+    void ResetCallbackCounts();
+
     void DispatchControlConnection();
     void DispatchTestConnection();
 
@@ -160,6 +179,15 @@ private:
     Dispatcher m_controlDispatcher;
 
     ActionReceiver m_actionReceiver;
+
+    //WaitForCallback state. m_callbackCounts is how many times each callback has
+    //happened since the last Reset; the count is what lets a wait be satisfied by a
+    //callback that arrived before the wait action did, which is the normal case
+    //when nothing is slow.
+    std::vector<int> m_callbackCounts;
+    bool m_isWaitingForCallback;
+    Safir::Dob::CallbackId::Enumeration m_waitingForCallback;
+    boost::asio::steady_timer m_waitForCallbackTimer;
 
     typedef std::vector<DoseTest::ActionPtr> Actions;
     typedef std::vector<Actions> CallbackActions;
