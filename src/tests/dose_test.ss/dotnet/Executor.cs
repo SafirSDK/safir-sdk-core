@@ -174,6 +174,12 @@ namespace dose_test_dotnet
                 {
                     EndWaitForCallback("TIMED OUT");
                 }
+
+                if (m_ackPending)
+                {
+                    m_ackPending = false;
+                    m_actionReceiver.ActionHandled();
+                }
             }
 
             //we apparently have to close the connection to not leave a dispatch thread running in the bg.
@@ -305,7 +311,7 @@ namespace dose_test_dotnet
                 // An inactive partner has no consumers to deliver anything to, so
                 // waiting could only ever time out.
                 System.Console.WriteLine("WaitForCallback: partner is not active, not waiting");
-                m_actionReceiver.ActionHandled();
+                DeferAck();
                 return;
             }
 
@@ -316,7 +322,7 @@ namespace dose_test_dotnet
                 // results, so a testcase with a malformed wait in it fails loudly
                 // instead of quietly not waiting.
                 Logger.Instance.WriteLine("WaitForCallback action without a WaitForCallbackId!");
-                m_actionReceiver.ActionHandled();
+                DeferAck();
                 return;
             }
 
@@ -339,7 +345,7 @@ namespace dose_test_dotnet
                 System.Console.WriteLine("WaitForCallback: " + callback +
                                           " has already happened " + m_callbackCounts[callback] +
                                           " time(s), need " + occurrence + ", not waiting");
-                m_actionReceiver.ActionHandled();
+                DeferAck();
                 return;
             }
 
@@ -367,7 +373,22 @@ namespace dose_test_dotnet
                                       ", seen " + m_callbackCounts[m_waitingForCallback] +
                                       " (" + reason + ")");
             m_isWaitingForCallback = false;
-            m_actionReceiver.ActionHandled();
+            DeferAck();
+        }
+
+        /// <summary>
+        /// Acknowledge a WaitForCallback action, but not until we are back in the main
+        /// loop. This is normally reached from inside a Dob callback, and Dob is not
+        /// necessarily done acting on that callback when it hands control back to us:
+        /// an injection, for instance, is only committed to the real entity state after
+        /// the injection handler's callback has returned. Holding the acknowledgement
+        /// until the dispatch has finished means a testcase that waits for a callback
+        /// and then reads something back is not racing the tail of the very dispatch it
+        /// waited for.
+        /// </summary>
+        private void DeferAck()
+        {
+            m_ackPending = true;
         }
 
         /// <summary>
@@ -855,6 +876,10 @@ namespace dose_test_dotnet
         // gets near it, so there is nothing for a testcase to tune. Comfortably more
         // than double the longest Sleep any of these waits replaced.
         const int WaitForCallbackTimeoutSeconds = 60;
+
+        // Set when a WaitForCallback has been satisfied (or given up on) and flushed at
+        // the bottom of the main loop. See DeferAck.
+        private bool m_ackPending;
 
         Dictionary<Safir.Dob.CallbackId.Enumeration, int> m_callbackCounts;
         bool m_isWaitingForCallback = false;

@@ -427,8 +427,10 @@ instead. The partner withholds the three-byte `"ok"` the sequencer is already
 blocking on, so no sequencer change was needed, and acknowledges when the callback
 arrives or after a 60 s backstop. Five testcases were converted — `215`, `518`,
 `517`, `009` and `369` — removing **260 s of sleeping per dose run** (659 → 399).
+`361` was converted later for reliability only, keeping its sleeps (see its section
+below), so it does not change that budget.
 
-Two things about it are worth knowing before touching it:
+Three things about it are worth knowing before touching it:
 
 - **Occurrences are numbered, not consumed.** `WaitForCallbackOccurrence` says
   *which* occurrence to wait for, counted per testcase. A testcase with several
@@ -439,6 +441,18 @@ Two things about it are worth knowing before touching it:
 - **The counts live on the Executor, not the Consumer**, and are cleared only by
   `Reset`. `369` closes and reopens a partner three times mid-testcase; per-Consumer
   counts would be wiped each time and every occurrence number in it would be wrong.
+- **The acknowledgement is deferred to the partner's event loop**, not written from
+  inside the callback that satisfied the wait — `boost::asio::post` in C++, an
+  `m_ackPending` flag flushed at the bottom of the main loop in C# and Java. This is
+  not tidiness. Dob is not necessarily finished acting on a callback when it returns
+  to the app: an injection is only committed to the real entity state *after* the
+  injection handler's callback returns (`dose_controller.cpp`, `AcceptInjection`
+  runs well below `InvokeOnInjectedUpdatedEntityCb`). Acknowledging from inside the
+  callback would release the sequencer while the partner was still upstream of that
+  commit, so a testcase that waits for a callback and then reads the result back
+  would be racing the tail of the very dispatch it waited for. Added 2026-08-27 for
+  `361`; if it is ever reverted, that whole class of wait-then-read conversion
+  silently becomes unsound.
 
 What is left in the 399 s mostly cannot be converted: sleeps that exist to show
 that *nothing further* arrives have no event to wait for, `430`/`431` are testcases
@@ -509,7 +523,7 @@ been observed; #614 says a repro comes first.
 > The code-level line references above were accurate as of the 2026-06/07
 > investigation; verify against current source before acting on them.
 
-### `361-inject_update_and_delete_for_existing_entity` — dormant, NOT fixed
+### `361-inject_update_and_delete_for_existing_entity` — dormant, race narrowed 2026-08-27
 
 `src/tests/dose_test.ss/testcases/361-inject_update_and_delete_for_existing_entity.xml`.
 Reported as issue **#397** (2022-08-30, closed 2026-08-25 under the tracking policy
@@ -522,10 +536,37 @@ where the expected output has a full `Read entity` block — or it is there but 
 showing `First inject` where `Second inject` was expected. Both partners diff
 identically.
 
-**Status: not fixed.** 94c1b94da (2022-08-30) added sleeps after the injections to
-absorb slow-VM timing; the test failed again six days later with the same race, so
-that fix is known **not** to have held. It has simply not been observed since —
-zero occurrences across the last 40 `ci.yml` runs (2026-06-28 → 2026-08-25), and
-nothing on GHA at all. Likely the faster runners hide it rather than the race being
-gone. If it reappears, do not reach for more sleeps: the real question is what
-guarantees the injected update has reached partner 0 before the read-back runs.
+**History.** 94c1b94da (2022-08-30) added sleeps after the injections to absorb
+slow-VM timing; the test failed again six days later with the same race, so that
+fix is known **not** to have held. It has not been observed since — zero
+occurrences across the last 40 `ci.yml` runs (2026-06-28 → 2026-08-25), and nothing
+on GHA at all. Likely the faster runners hide it rather than the race being gone.
+
+**Changed 2026-08-27: each 1 s sleep now has a `WaitForCallback` in front of it.**
+Note what the sleep was actually covering. Partners 0 and 1 are on the same node in
+*every* configuration, so the injection reaching the handler is not a network hop —
+it is partner 0 being *scheduled*, and on a CI machine running fifteen partner
+processes a partner can easily go a second without running. That is a delay a fixed
+sleep cannot bound and a wait can, so each injection is now followed by a wait on
+partner 0 for its `OnInjected{New,Updated,Deleted}Entity`.
+
+**This is a narrowing, not a fix, and the sleeps stay on purpose.** The read-backs
+are on partners 1 and 2, and partner 2 is on a *different* node in the multinode
+configuration (`run_dose_tests.py.in`, the "start second node" block). Once partner
+0 has accepted the injection the state still has to be distributed back to partner
+2's node, and partner 2 has no subscription in this testcase, so there is no
+callback on it to wait for. The retained 1 s now covers only that distribution
+instead of being spent waiting for partner 0 to be scheduled — which is most likely
+where it was going. Closing the remainder properly would mean subscribing on
+partner 2 and waiting for `OnUpdatedEntity`, which adds entity-callback blocks to
+partner 2's expected output and changes what the testcase demonstrates; that was
+judged not worth it for a flake nobody has seen in four years.
+
+**None of this is confirmed by CI, and cannot be.** With zero recent occurrences
+there is no red to turn green — a green run here is not evidence. It is a reasoned
+improvement, and if the failure does reappear the diagnosis above is the thing to
+re-examine, not the sleep length.
+
+Converting this testcase is also what forced the acknowledgement to be deferred to
+the partner's event loop rather than sent from inside the callback; see "Waiting
+instead of sleeping" above for why a wait-then-read is unsound without it.

@@ -24,6 +24,27 @@
       </Object>
       <TimestampDelta>10</TimestampDelta>
     </DoseTest.Action>
+    <!-- Wait for the injection to reach the handler on partner 0 instead of
+         assuming a second is enough for it to be scheduled. That scheduling delay,
+         not any network delay, is what this sleep was really covering: partners 0
+         and 1 are on the same node in every configuration, and on a loaded CI
+         machine running fifteen partner processes a partner can easily go a second
+         without running. The read-backs below are what this races, and the race is
+         what makes this testcase flaky.
+
+         The Sleep that follows is not redundant. Partner 2 is on a different node
+         in the multinode configuration and has no subscription here, so there is no
+         callback on it to wait for: once partner 0 has accepted the injection
+         the state still has to be distributed back to partner 2's node before it
+         can read it. What the wait buys is that this second now covers only that
+         distribution, instead of being spent waiting for partner 0 to be
+         scheduled. -->
+    <DoseTest.Action>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnInjectedNewEntity</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
+    </DoseTest.Action>
     <DoseTest.Action>
       <ActionKind>Sleep</ActionKind>
       <SleepDuration>1</SleepDuration>
@@ -57,6 +78,14 @@
       </Object>
       <TimestampDelta>20</TimestampDelta>
     </DoseTest.Action>
+    <!-- As above: wait for partner 0, then let the Sleep cover only the
+         distribution back to partner 2's node. -->
+    <DoseTest.Action>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnInjectedUpdatedEntity</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
+    </DoseTest.Action>
     <DoseTest.Action>
       <ActionKind>Sleep</ActionKind>
       <SleepDuration>1</SleepDuration>
@@ -89,6 +118,14 @@
         <instanceId>654321</instanceId>
       </EntityId>
       <TimestampDelta>30</TimestampDelta>
+    </DoseTest.Action>
+    <!-- As above: wait for partner 0, then let the Sleep cover only the
+         distribution back to partner 2's node. -->
+    <DoseTest.Action>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnInjectedDeletedEntity</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
     </DoseTest.Action>
     <DoseTest.Action>
       <ActionKind>Sleep</ActionKind>

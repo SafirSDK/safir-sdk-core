@@ -187,6 +187,11 @@ class Executor implements
             if (m_isWaitingForCallback && System.currentTimeMillis() >= m_waitForCallbackDeadline) {
                 endWaitForCallback("TIMED OUT");
             }
+
+            if (m_ackPending) {
+                m_ackPending = false;
+                m_actionReceiver.actionHandled();
+            }
         }
     }
 
@@ -597,7 +602,7 @@ class Executor implements
             // An inactive partner has no consumers to deliver anything to, so waiting
             // could only ever time out.
             System.out.println("WaitForCallback: partner is not active, not waiting");
-            m_actionReceiver.actionHandled();
+            deferAck();
             return;
         }
 
@@ -607,7 +612,7 @@ class Executor implements
             // testcase with a malformed wait in it fails loudly instead of quietly not
             // waiting.
             Logger.instance().println("WaitForCallback action without a WaitForCallbackId!");
-            m_actionReceiver.actionHandled();
+            deferAck();
             return;
         }
 
@@ -629,7 +634,7 @@ class Executor implements
             System.out.println("WaitForCallback: " + callback + " has already happened " +
                                m_callbackCounts.get(callback) + " time(s), need " +
                                occurrence + ", not waiting");
-            m_actionReceiver.actionHandled();
+            deferAck();
             return;
         }
 
@@ -655,7 +660,20 @@ class Executor implements
                            ", seen " + m_callbackCounts.get(m_waitingForCallback) +
                            " (" + reason + ")");
         m_isWaitingForCallback = false;
-        m_actionReceiver.actionHandled();
+        deferAck();
+    }
+
+    /**
+     * Acknowledge a WaitForCallback action, but not until we are back in the main
+     * loop. This is normally reached from inside a Dob callback, and Dob is not
+     * necessarily done acting on that callback when it hands control back to us: an
+     * injection, for instance, is only committed to the real entity state after the
+     * injection handler's callback has returned. Holding the acknowledgement until the
+     * dispatch has finished means a testcase that waits for a callback and then reads
+     * something back is not racing the tail of the very dispatch it waited for.
+     */
+    private void deferAck() {
+        m_ackPending = true;
     }
 
     /**
@@ -968,4 +986,8 @@ class Executor implements
     private com.saabgroup.safir.dob.CallbackId m_waitingForCallback;
     private int m_waitingForOccurrence = 1;
     private long m_waitForCallbackDeadline;
+
+    // Set when a WaitForCallback has been satisfied (or given up on) and flushed at the
+    // bottom of the main loop. See deferAck.
+    private boolean m_ackPending = false;
 }

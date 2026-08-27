@@ -133,6 +133,15 @@ public:
      * the Executor calls this when the awaited callback arrives (or the wait times
      * out). The sequencer is sitting in a blocking read of that acknowledgement,
      * so withholding it is what makes it wait.
+     *
+     * The acknowledgement is posted rather than written straight away. This is
+     * normally called from inside a Dob callback, and Dob is not necessarily done
+     * acting on that callback when it hands control back to us: an injection, for
+     * instance, is only committed to the real entity state after the injection
+     * handler's callback has returned. Posting holds the acknowledgement until the
+     * partner is back in its event loop, so that a testcase which waits for a
+     * callback and then reads something back is not racing the tail of the very
+     * dispatch it waited for.
      */
     void SendAck()
     {
@@ -142,7 +151,7 @@ public:
             return;
         }
         m_ackOutstanding = false;
-        WriteOk();
+        boost::asio::post(m_ioContext, [this]{WriteOk();});
     }
 
     short Port() const
@@ -240,6 +249,14 @@ private:
 
     void WriteOk()
     {
+        if (m_socket == NULL)
+        {
+            //Can only happen for a posted acknowledgement whose socket went away
+            //before it ran. Nothing to acknowledge to any more.
+            std::wcout << "not writing ok, socket is gone" << std::endl;
+            return;
+        }
+
         try
         {
             std::wcout << "writing ok" << std::endl;
