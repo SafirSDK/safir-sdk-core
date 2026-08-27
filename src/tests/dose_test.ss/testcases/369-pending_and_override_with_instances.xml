@@ -49,6 +49,11 @@
       <Handler>DEFAULT_HANDLER</Handler>
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
+    <!-- Stays a sleep on purpose. It follows the pending registration on partner 2,
+         and a pending registration that cannot complete yet produces no callback at
+         all - that is what makes it pending - so there is no event to wait for. The
+         wait here is for the pending registration to have reached the system before
+         partner 1 closes below. -->
     <DoseTest.Action index="3">
       <ActionKind>Sleep</ActionKind>
       <SleepDuration>10</SleepDuration>
@@ -57,9 +62,14 @@
       <ActionKind>Close</ActionKind>
       <Partner>1</Partner>
     </DoseTest.Action>
+    <!-- Wait for the injection handover to finish. OnInitialInjectionsDone is the
+         right callback to wait for because it is the last of its group: the completed
+         or revoked registration and the injected entity both precede it. -->
     <DoseTest.Action index="5">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>10</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>2</Partner>
+      <WaitForCallbackId>OnInitialInjectionsDone</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
     </DoseTest.Action>
     <DoseTest.Action index="6">
       <ActionKind>Open</ActionKind>
@@ -73,17 +83,27 @@
       <Handler>DEFAULT_HANDLER</Handler>
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
+    <!-- Wait for the injection handover to finish. OnInitialInjectionsDone is the
+         right callback to wait for because it is the last of its group: the completed
+         or revoked registration and the injected entity both precede it. -->
     <DoseTest.Action index="8">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>10</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>1</Partner>
+      <WaitForCallbackId>OnInitialInjectionsDone</WaitForCallbackId>
+      <WaitForCallbackOccurrence>2</WaitForCallbackOccurrence>
     </DoseTest.Action>
     <DoseTest.Action index="9">
       <ActionKind>Close</ActionKind>
       <Partner>1</Partner>
     </DoseTest.Action>
+    <!-- Wait for the injection handover to finish. OnInitialInjectionsDone is the
+         right callback to wait for because it is the last of its group: the completed
+         or revoked registration and the injected entity both precede it. -->
     <DoseTest.Action index="10">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>10</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>2</Partner>
+      <WaitForCallbackId>OnInitialInjectionsDone</WaitForCallbackId>
+      <WaitForCallbackOccurrence>2</WaitForCallbackOccurrence>
     </DoseTest.Action>
     <DoseTest.Action index="11">
       <ActionKind>Open</ActionKind>
@@ -97,22 +117,34 @@
       <Handler>DEFAULT_HANDLER</Handler>
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
+    <!-- Wait for the injection handover to finish. OnInitialInjectionsDone is the
+         right callback to wait for because it is the last of its group: the completed
+         or revoked registration and the injected entity both precede it. -->
     <DoseTest.Action index="13">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>10</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>1</Partner>
+      <WaitForCallbackId>OnInitialInjectionsDone</WaitForCallbackId>
+      <WaitForCallbackOccurrence>3</WaitForCallbackOccurrence>
     </DoseTest.Action>
     <DoseTest.Action index="14">
       <ActionKind>Close</ActionKind>
       <Partner>1</Partner>
     </DoseTest.Action>
+    <!-- Wait for the injection handover to finish. OnInitialInjectionsDone is the
+         right callback to wait for because it is the last of its group: the completed
+         or revoked registration and the injected entity both precede it. -->
     <DoseTest.Action index="15">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>10</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>2</Partner>
+      <WaitForCallbackId>OnInitialInjectionsDone</WaitForCallbackId>
+      <WaitForCallbackOccurrence>3</WaitForCallbackOccurrence>
     </DoseTest.Action>
     <DoseTest.Action index="16">
       <ActionKind>Open</ActionKind>
       <Partner>1</Partner>
     </DoseTest.Action>
+    <!-- Stays a sleep on purpose: opening a connection produces no test-visible
+         callback, so there is nothing to wait for before registering below. -->
     <DoseTest.Action index="17">
       <ActionKind>Sleep</ActionKind>
       <SleepDuration>10</SleepDuration>
@@ -125,9 +157,14 @@
       <Handler>DEFAULT_HANDLER</Handler>
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
+    <!-- Wait for the injection handover to finish. OnInitialInjectionsDone is the
+         right callback to wait for because it is the last of its group: the completed
+         or revoked registration and the injected entity both precede it. -->
     <DoseTest.Action index="19">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>10</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>1</Partner>
+      <WaitForCallbackId>OnInitialInjectionsDone</WaitForCallbackId>
+      <WaitForCallbackOccurrence>4</WaitForCallbackOccurrence>
     </DoseTest.Action>
     <DoseTest.Action index="20">
       <ActionKind>UnsubscribeRegistration</ActionKind>
