@@ -181,12 +181,14 @@ private:
     ActionReceiver m_actionReceiver;
 
     //WaitForCallback state. m_callbackCounts is how many times each callback has
-    //happened since the last Reset; the count is what lets a wait be satisfied by a
-    //callback that arrived before the wait action did, which is the normal case
-    //when nothing is slow.
+    //happened since the last Reset, and a wait is the condition that the count has
+    //reached the occurrence asked for. Counting rather than waiting for the next one
+    //is what lets a wait be satisfied by a callback that arrived before the wait
+    //action did, which is the normal case when nothing is slow.
     std::vector<int> m_callbackCounts;
     bool m_isWaitingForCallback;
     Safir::Dob::CallbackId::Enumeration m_waitingForCallback;
+    int m_waitingForOccurrence;
     boost::asio::steady_timer m_waitForCallbackTimer;
 
     typedef std::vector<DoseTest::ActionPtr> Actions;

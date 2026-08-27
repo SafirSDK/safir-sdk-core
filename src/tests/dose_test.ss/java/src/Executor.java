@@ -580,7 +580,9 @@ class Executor implements
     void notifyCallback(com.saabgroup.safir.dob.CallbackId callback) {
         m_callbackCounts.put(callback, m_callbackCounts.get(callback) + 1);
 
-        if (m_isWaitingForCallback && callback == m_waitingForCallback) {
+        if (m_isWaitingForCallback &&
+            callback == m_waitingForCallback &&
+            m_callbackCounts.get(callback) >= m_waitingForOccurrence) {
             endWaitForCallback("callback arrived");
         }
     }
@@ -607,15 +609,22 @@ class Executor implements
 
         com.saabgroup.safir.dob.CallbackId callback = action.waitForCallbackId().getVal();
 
-        // If it has already happened we are done, and the testcase does not pay for
-        // the wait at all. Without this the wait would be a race: the callback the
-        // sequencer is asking us to wait for has usually arrived before the sequencer
-        // gets round to sending the wait, and we would then sit here until the
-        // timeout waiting for a second one that is never coming.
-        if (m_callbackCounts.get(callback) > 0) {
+        // Which occurrence of the callback to wait for, counting per testcase. A
+        // testcase with several phases sees the same callback once per phase, so its
+        // waits ask for occurrence 1, 2, 3 and each waits for its own. Nothing is
+        // consumed and no state is mutated - the wait is simply the condition "this
+        // has happened at least this many times" - so a wait means the same thing
+        // however many other waits the testcase has.
+        int occurrence = action.waitForCallbackOccurrence().isNull() ? 1 : action.waitForCallbackOccurrence().getVal();
+
+        // If it has happened often enough already we are done, and the testcase does
+        // not pay for the wait at all. Without this the wait would be a race: the
+        // callback the sequencer is asking us to wait for has usually arrived before
+        // the sequencer gets round to sending the wait.
+        if (m_callbackCounts.get(callback) >= occurrence) {
             System.out.println("WaitForCallback: " + callback + " has already happened " +
-                                      m_callbackCounts.get(callback) +
-                                      " time(s) in this testcase, not waiting");
+                               m_callbackCounts.get(callback) + " time(s), need " +
+                               occurrence + ", not waiting");
             m_actionReceiver.actionHandled();
             return;
         }
@@ -624,10 +633,13 @@ class Executor implements
         // the timeout is only to turn a hang into an ordinary test failure.
         double timeout = action.waitForCallbackTimeout().isNull() ? 60.0 : action.waitForCallbackTimeout().getVal();
 
-        System.out.println("WaitForCallback: waiting up to " + timeout + " seconds for " + callback);
+        System.out.println("WaitForCallback: waiting up to " + timeout + " seconds for " +
+                           callback + " occurrence " + occurrence +
+                           " (seen " + m_callbackCounts.get(callback) + ")");
 
         m_isWaitingForCallback = true;
         m_waitingForCallback = callback;
+        m_waitingForOccurrence = occurrence;
         m_waitForCallbackDeadline = System.currentTimeMillis() + (long)(timeout * 1000.0);
     }
 
@@ -639,7 +651,9 @@ class Executor implements
      */
     private void endWaitForCallback(String reason) {
         System.out.println("WaitForCallback: done waiting for " + m_waitingForCallback +
-                                  " (" + reason + ")");
+                           " occurrence " + m_waitingForOccurrence +
+                           ", seen " + m_callbackCounts.get(m_waitingForCallback) +
+                           " (" + reason + ")");
         m_isWaitingForCallback = false;
         m_actionReceiver.actionHandled();
     }
@@ -946,5 +960,6 @@ class Executor implements
     java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, Integer> m_callbackCounts;
     private boolean m_isWaitingForCallback = false;
     private com.saabgroup.safir.dob.CallbackId m_waitingForCallback;
+    private int m_waitingForOccurrence = 1;
     private long m_waitForCallbackDeadline;
 }

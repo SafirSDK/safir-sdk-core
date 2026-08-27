@@ -66,6 +66,7 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_callbackCounts(Safir::Dob::CallbackId::Size(), 0),
     m_isWaitingForCallback(false),
     m_waitingForCallback(Safir::Dob::CallbackId::OnDoDispatch),
+    m_waitingForOccurrence(1),
     m_waitForCallbackTimer(m_ioContext),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0)
@@ -300,7 +301,9 @@ void Executor::NotifyCallback(const Safir::Dob::CallbackId::Enumeration callback
 {
     ++m_callbackCounts.at(callback);
 
-    if (m_isWaitingForCallback && callback == m_waitingForCallback)
+    if (m_isWaitingForCallback &&
+        callback == m_waitingForCallback &&
+        m_callbackCounts.at(callback) >= m_waitingForOccurrence)
     {
         EndWaitForCallback(L"callback arrived");
     }
@@ -327,16 +330,26 @@ void Executor::BeginWaitForCallback(const DoseTest::ActionPtr& action)
 
     const Safir::Dob::CallbackId::Enumeration callback = action->WaitForCallbackId().GetVal();
 
-    //If it has already happened we are done, and the testcase does not pay for the
-    //wait at all. Without this the wait would be a race: the callback that the
-    //sequencer is asking us to wait for has usually arrived before the sequencer
-    //gets round to sending the wait, and we would then sit here until the timeout
-    //waiting for a second one that is never coming.
-    if (m_callbackCounts.at(callback) > 0)
+    //Which occurrence of the callback to wait for, counting per testcase. A
+    //testcase with several phases sees the same callback once per phase, so its
+    //waits ask for occurrence 1, 2, 3 and each waits for its own. Nothing is
+    //consumed and no state is mutated - the wait is simply the condition "this has
+    //happened at least this many times" - so a wait means the same thing however
+    //many other waits the testcase has, which is what makes it readable on its own.
+    const int occurrence = action->WaitForCallbackOccurrence().IsNull()
+        ? 1
+        : action->WaitForCallbackOccurrence().GetVal();
+
+    //If it has happened often enough already we are done, and the testcase does not
+    //pay for the wait at all. Without this the wait would be a race: the callback
+    //the sequencer is asking us to wait for has usually arrived before the
+    //sequencer gets round to sending the wait, and we would sit here until the
+    //timeout waiting for a repeat that is never coming.
+    if (m_callbackCounts.at(callback) >= occurrence)
     {
         std::wcout << "WaitForCallback: " << Safir::Dob::CallbackId::ToString(callback)
              << " has already happened " << m_callbackCounts.at(callback)
-             << " time(s) in this testcase, not waiting" << std::endl;
+             << " time(s), need " << occurrence << ", not waiting" << std::endl;
         m_actionReceiver.SendAck();
         return;
     }
@@ -350,10 +363,12 @@ void Executor::BeginWaitForCallback(const DoseTest::ActionPtr& action)
         : action->WaitForCallbackTimeout().GetVal();
 
     std::wcout << "WaitForCallback: waiting up to " << timeout << " seconds for "
-         << Safir::Dob::CallbackId::ToString(callback) << std::endl;
+         << Safir::Dob::CallbackId::ToString(callback) << " occurrence " << occurrence
+         << " (seen " << m_callbackCounts.at(callback) << ")" << std::endl;
 
     m_isWaitingForCallback = true;
     m_waitingForCallback = callback;
+    m_waitingForOccurrence = occurrence;
 
     m_waitForCallbackTimer.expires_after
         (std::chrono::milliseconds(static_cast<std::int64_t>(timeout * 1000)));
@@ -371,6 +386,8 @@ void Executor::EndWaitForCallback(const std::wstring& reason)
 {
     std::wcout << "WaitForCallback: done waiting for "
          << Safir::Dob::CallbackId::ToString(m_waitingForCallback)
+         << " occurrence " << m_waitingForOccurrence
+         << ", seen " << m_callbackCounts.at(m_waitingForCallback)
          << " (" << reason << ")" << std::endl;
 
     m_isWaitingForCallback = false;

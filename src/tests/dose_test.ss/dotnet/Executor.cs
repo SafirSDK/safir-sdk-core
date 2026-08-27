@@ -285,7 +285,9 @@ namespace dose_test_dotnet
         {
             m_callbackCounts[callback] = m_callbackCounts[callback] + 1;
 
-            if (m_isWaitingForCallback && callback == m_waitingForCallback)
+            if (m_isWaitingForCallback &&
+                callback == m_waitingForCallback &&
+                m_callbackCounts[callback] >= m_waitingForOccurrence)
             {
                 EndWaitForCallback("callback arrived");
             }
@@ -316,16 +318,23 @@ namespace dose_test_dotnet
 
             Safir.Dob.CallbackId.Enumeration callback = action.WaitForCallbackId.Val;
 
-            // If it has already happened we are done, and the testcase does not pay
-            // for the wait at all. Without this the wait would be a race: the callback
-            // the sequencer is asking us to wait for has usually arrived before the
-            // sequencer gets round to sending the wait, and we would then sit here
-            // until the timeout waiting for a second one that is never coming.
-            if (m_callbackCounts[callback] > 0)
+            // Which occurrence of the callback to wait for, counting per testcase. A
+            // testcase with several phases sees the same callback once per phase, so
+            // its waits ask for occurrence 1, 2, 3 and each waits for its own. Nothing
+            // is consumed and no state is mutated - the wait is simply the condition
+            // "this has happened at least this many times" - so a wait means the same
+            // thing however many other waits the testcase has.
+            int occurrence = action.WaitForCallbackOccurrence.IsNull() ? 1 : action.WaitForCallbackOccurrence.Val;
+
+            // If it has happened often enough already we are done, and the testcase
+            // does not pay for the wait at all. Without this the wait would be a race:
+            // the callback the sequencer is asking us to wait for has usually arrived
+            // before the sequencer gets round to sending the wait.
+            if (m_callbackCounts[callback] >= occurrence)
             {
                 System.Console.WriteLine("WaitForCallback: " + callback +
                                           " has already happened " + m_callbackCounts[callback] +
-                                          " time(s) in this testcase, not waiting");
+                                          " time(s), need " + occurrence + ", not waiting");
                 m_actionReceiver.ActionHandled();
                 return;
             }
@@ -335,10 +344,12 @@ namespace dose_test_dotnet
             double timeout = action.WaitForCallbackTimeout.IsNull() ? 60.0 : action.WaitForCallbackTimeout.Val;
 
             System.Console.WriteLine("WaitForCallback: waiting up to " + timeout +
-                                      " seconds for " + callback);
+                                      " seconds for " + callback + " occurrence " + occurrence +
+                                      " (seen " + m_callbackCounts[callback] + ")");
 
             m_isWaitingForCallback = true;
             m_waitingForCallback = callback;
+            m_waitingForOccurrence = occurrence;
             m_waitForCallbackDeadline = System.DateTime.UtcNow.AddSeconds(timeout);
         }
 
@@ -352,7 +363,9 @@ namespace dose_test_dotnet
         private void EndWaitForCallback(string reason)
         {
             System.Console.WriteLine("WaitForCallback: done waiting for " +
-                                      m_waitingForCallback + " (" + reason + ")");
+                                      m_waitingForCallback + " occurrence " + m_waitingForOccurrence +
+                                      ", seen " + m_callbackCounts[m_waitingForCallback] +
+                                      " (" + reason + ")");
             m_isWaitingForCallback = false;
             m_actionReceiver.ActionHandled();
         }
@@ -840,6 +853,7 @@ namespace dose_test_dotnet
         Dictionary<Safir.Dob.CallbackId.Enumeration, int> m_callbackCounts;
         bool m_isWaitingForCallback = false;
         Safir.Dob.CallbackId.Enumeration m_waitingForCallback;
+        int m_waitingForOccurrence = 1;
         System.DateTime m_waitForCallbackDeadline;
         #endregion
 
