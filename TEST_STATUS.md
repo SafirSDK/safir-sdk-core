@@ -76,20 +76,19 @@ failing test case. Counts are per
 matrix). Update both columns when you see a fresh occurrence; an entry whose
 last-seen keeps receding is a candidate for the dormant list.
 
-`215-huge_service` dominates: 23 of 87, more than everything else in the table
-combined, so a lone `215-huge_service` red is by far the single most likely thing
-you'll see.
-Its rate is also **rising** — 11 of 58 runs in June, 12 of 27 in August — which is
-worth watching rather than assuming it is stationary. Under investigation on
-`private/dose-test-huge-object-flakiness` (from 2026-08-27).
+`215-huge_service` dominated this list — 23 of 87, more than everything else in it
+combined, and its rate was rising (11 of 58 runs in June, 12 of 27 in August). It
+was **fixed on 2026-08-27**, so those counts are the historical record rather than
+a prediction. Until several full-matrix runs have gone by without it, treat its
+absence as unconfirmed rather than proven.
 
 `Communication_ResetTest` used to head this list; it was **fixed on 2026-06-30**
 and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it.
 
 | Test | Where | Platform | Seen | Last seen | Character |
 |---|---|---|---|---|---|
-| `215-huge_service` | multicomputer dose (overlay) | any | **22/85** | 2026-08-25 (32828816218) | Huge round-trip occasionally not delivered |
-| `518-huge_entity` | multicomputer dose (overlay) | any | 3/87 | 2026-08-20 (32348188649) | Same huge-message family as 215 |
+| `215-huge_service` | multicomputer dose (overlay) | any | **23/87** | 2026-08-26 (32999608623) | **Believed fixed 2026-08-27** — the sleep it raced is gone; see below |
+| `518-huge_entity` | multicomputer dose (overlay) | any | 3/87 | 2026-08-20 (32348188649) | Same family as 215, **fixed the same way 2026-08-27** |
 | `155-pending_service_registration_same_node` | dose | any | 3/87 | 2026-08-20 (32348188649) | "Pending registration" family |
 | `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | 2/87 | 2026-08-21 (32461278855) | Light-node detach/reattach |
 | `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/87 | 2026-08-18 (32143455257) | "Pending registration" family |
@@ -251,8 +250,8 @@ raised from the 7 s default for exactly this reason — but it can never be reac
 The action after the sleep is `Reset`, and the partner log shows `Performing Reset`
 → `Calling Close` → `Calling Open`: the connection is torn down when the sleep
 expires, abandoning anything in flight. So the real budget for a 10 MB round trip
-was the **20 s** sleep, while its siblings `009` and `518` had 30 s. Raised to 60 s
-on 2026-08-27; raising the `.dom` timeout would do nothing.
+was the **20 s** sleep, while its siblings `009` and `518` had 30 s. Raising the
+`.dom` timeout would have done nothing.
 
 **Evidence it is slow rather than lost.** Testcase duration on run 32999608623,
 measured from `Running testcase:` timestamps in the job logs:
@@ -275,12 +274,26 @@ read the absence as proof of loss. Note also that keeping state alive to catch l
 callbacks is **not** an option: the fresh state `Reset` provides is part of the test
 strategy, and weakening it would trade this flake for order-dependent ones.
 
-**Still unexplained:** *why* the transfer was ~4x slower on that run. The raised
-sleep buys margin; it does not diagnose the overlay. If the rate keeps climbing,
-that is the thing to chase.
+**Fixed 2026-08-27 by removing the deadline** rather than enlarging it. The
+testcase no longer sleeps at all: it waits for the callbacks it actually needs
+(`OnServiceRequest` on partner 0, `OnResponse` on partner 2) using the
+`WaitForCallback` action added the same day. The round trip now has 60 s to
+complete instead of 20, and normally costs a couple of seconds rather than the
+whole sleep. `518-huge_entity`, `517-complex_entity`, `009-huge_message` and
+`369-pending_and_override_with_instances` were converted the same way.
 
-**If it recurs:** look at the huge-service round-trip retransmit/timeout over the
-overlay. `518-huge_entity` is the same family.
+**This flake cannot recur in the same form** — there is no fixed window left for a
+slow transfer to overrun. What can still happen is the 60 s backstop expiring, and
+it looks quite different: the partner's `.output.txt` says `WaitForCallback: done
+waiting for OnServiceRequest occurrence 1 (TIMED OUT)`, while the junit diff is the
+same missing-output one as before. **If you see that, don't go hunting for a lost
+message** — it means a 10 MB round trip took over a minute. The answer is either to
+raise `WaitForCallbackTimeoutSeconds` (one constant, in the three partner
+Executors) or to find out what the overlay is doing.
+
+**Still unexplained:** *why* the transfer was ~4x slower on the run that failed.
+Waiting for the callback tolerates that; it does not diagnose it. If the huge tests
+start timing out, that is the thing to chase.
 
 ## Errors reported through `syslog_output` and `safir_control.0.returncode`
 
@@ -400,6 +413,37 @@ compact one-line dump of every `node_info` entry (index, id, name, alive/dead) p
 `m_resurrectingNodes` into the system log, and the full state at `lllog(1)`. **If
 you see this failure again, grab that line** — it is the missing evidence #613 is
 waiting for.
+
+## Waiting instead of sleeping
+
+Testcases used to wait only by sleeping, and those sleeps were unconditional: 659 s
+of them per dose run, paid whether or not anything was slow. Worse, a sleep was
+also the *deadline* for whatever it waited for, because the `Reset` that follows
+closes the connection and abandons anything still in flight. That is what made
+`215-huge_service` the most frequent flake in CI.
+
+The `WaitForCallback` action (added 2026-08-27) lets a testcase wait for the event
+instead. The partner withholds the three-byte `"ok"` the sequencer is already
+blocking on, so no sequencer change was needed, and acknowledges when the callback
+arrives or after a 60 s backstop. Five testcases were converted — `215`, `518`,
+`517`, `009` and `369` — removing **260 s of sleeping per dose run** (659 → 399).
+
+Two things about it are worth knowing before touching it:
+
+- **Occurrences are numbered, not consumed.** `WaitForCallbackOccurrence` says
+  *which* occurrence to wait for, counted per testcase. A testcase with several
+  phases sees the same callback once per phase — `518` gets three `OnResponse` —
+  and without the number every wait after the first is satisfied by the first
+  phase's callback, waits for nothing, and still passes. The failure is invisible
+  in the test output, so this is not an optimisation to simplify away.
+- **The counts live on the Executor, not the Consumer**, and are cleared only by
+  `Reset`. `369` closes and reopens a partner three times mid-testcase; per-Consumer
+  counts would be wiped each time and every occurrence number in it would be wrong.
+
+What is left in the 399 s mostly cannot be converted: sleeps that exist to show
+that *nothing further* arrives have no event to wait for, `430`/`431` are testcases
+whose whole point is a slow subscriber, and `815` waits on dope writing persistence,
+which produces no partner callback.
 
 ## Fixed / dormant
 
