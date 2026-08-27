@@ -301,7 +301,7 @@
     </DoseTest.Action>
     <DoseTest.Action index="1">
       <ActionKind>Sleep</ActionKind>
-      <SleepDuration>20</SleepDuration>
+      <SleepDuration>60</SleepDuration>
     </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>

@@ -68,18 +68,20 @@ and read the `*.junit.xml`. Note the dose junit `time="0"` is a hardcoded litera
 ## Known flaky tests
 
 **Seen** and **Last seen** come from a scan of the 100 most recent `ci.yml` runs
-(2026-06-16 → 2026-08-25), of which **85 produced a "Test results" Check** and are
-therefore countable; the rest were cancelled or died before the tests. 31 of those
-85 runs — a bit over a third — had at least one failing test case. Counts are per
+(2026-06-16 → 2026-08-26) plus every run since, of which **87 produced a "Test
+results" Check** and are therefore countable; the rest were cancelled or died
+before the tests. 32 of those 87 runs — a bit over a third — had at least one
+failing test case. Counts are per
 *run*, not per test execution (one run covers ~34 dose executions across the
 matrix). Update both columns when you see a fresh occurrence; an entry whose
 last-seen keeps receding is a candidate for the dormant list.
 
-`215-huge_service` dominates: 22 of 85, more than everything else in the table
+`215-huge_service` dominates: 23 of 87, more than everything else in the table
 combined, so a lone `215-huge_service` red is by far the single most likely thing
 you'll see.
-Its rate is also **rising** — 11 of 58 runs in June, 11 of 25 in August — which is
-worth watching rather than assuming it is stationary.
+Its rate is also **rising** — 11 of 58 runs in June, 12 of 27 in August — which is
+worth watching rather than assuming it is stationary. Under investigation on
+`private/dose-test-huge-object-flakiness` (from 2026-08-27).
 
 `Communication_ResetTest` used to head this list; it was **fixed on 2026-06-30**
 and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it.
@@ -87,11 +89,11 @@ and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it
 | Test | Where | Platform | Seen | Last seen | Character |
 |---|---|---|---|---|---|
 | `215-huge_service` | multicomputer dose (overlay) | any | **22/85** | 2026-08-25 (32828816218) | Huge round-trip occasionally not delivered |
-| `518-huge_entity` | multicomputer dose (overlay) | any | 3/85 | 2026-08-20 (32348188649) | Same huge-message family as 215 |
-| `155-pending_service_registration_same_node` | dose | any | 3/85 | 2026-08-20 (32348188649) | "Pending registration" family |
-| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | 2/85 | 2026-08-21 (32461278855) | Light-node detach/reattach |
-| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/85 | 2026-08-18 (32143455257) | "Pending registration" family |
-| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | 1/85 | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
+| `518-huge_entity` | multicomputer dose (overlay) | any | 3/87 | 2026-08-20 (32348188649) | Same huge-message family as 215 |
+| `155-pending_service_registration_same_node` | dose | any | 3/87 | 2026-08-20 (32348188649) | "Pending registration" family |
+| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | 2/87 | 2026-08-21 (32461278855) | Light-node detach/reattach |
+| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/87 | 2026-08-18 (32143455257) | "Pending registration" family |
+| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | 1/87 | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
 | `run_restart_nodes_tests` (hang) | slow suite | any | n/a | 2026-08-23 (32637686999) | Hangs at startup → TIMEOUT → **fails the job**; job-level, not in the junit counts |
 
 **Two names that used to appear in this table are deliberately absent:
@@ -236,8 +238,49 @@ as the largest, most timing-sensitive round-trip (huge fragmented request *plus*
 response leg), so it's the one most likely to lose a fragment or miss its window on
 a single bad run. Dob node comms are UDP unicast.
 
+**What the payload actually is:** the testcase XML contains no huge data. The
+Sequencer fills any *null* `BinaryMember` with **10 MB** before sending
+(`Sequencer.cpp:64-80`), which is exactly why the "huge" tests omit the member and
+their "complex" siblings (`214`, `517`) include an empty `<BinaryMember/>` and stay
+small.
+
+**The binding deadline is the testcase `Sleep`, not the request timeout** (found
+2026-08-27, run 32999608623). `DoseTest.ComplexGlobalService` declares a **120 s**
+request timeout (`dose_test_dou.ss/data/DoseTest.ComplexGlobalService-Safir.Dob.RequestTimeoutProperty.dom`),
+raised from the 7 s default for exactly this reason — but it can never be reached.
+The action after the sleep is `Reset`, and the partner log shows `Performing Reset`
+→ `Calling Close` → `Calling Open`: the connection is torn down when the sleep
+expires, abandoning anything in flight. So the real budget for a 10 MB round trip
+was the **20 s** sleep, while its siblings `009` and `518` had 30 s. Raised to 60 s
+on 2026-08-27; raising the `.dom` timeout would do nothing.
+
+**Evidence it is slow rather than lost.** Testcase duration on run 32999608623,
+measured from `Running testcase:` timestamps in the job logs:
+
+| platform | 215 → 300 |
+|---|---|
+| vs2022 | 22.7 s |
+| ubuntu-noble-amd64 | 22.0 s |
+| ubuntu-noble-arm64 | 22.8 s |
+| **vs2026 (the failure)** | **28.1 s** |
+
+A passing run is 20 s sleep + ~2 s overhead; the failing one spent ~8 s of non-sleep
+time, i.e. the transfer was labouring and the window closed on it.
+
+**Why "the message was lost" was the obvious reading.** `Reset` deletes the
+consumers and deregisters the handler, so a late request has nowhere to land and is
+never logged — the teardown destroys the evidence. Partner 0's log genuinely shows
+no `OnServiceRequest`, but that is equally consistent with "arrived at 21 s". Do not
+read the absence as proof of loss. Note also that keeping state alive to catch late
+callbacks is **not** an option: the fresh state `Reset` provides is part of the test
+strategy, and weakening it would trade this flake for order-dependent ones.
+
+**Still unexplained:** *why* the transfer was ~4x slower on that run. The raised
+sleep buys margin; it does not diagnose the overlay. If the rate keeps climbing,
+that is the thing to chase.
+
 **If it recurs:** look at the huge-service round-trip retransmit/timeout over the
-overlay. Otherwise a re-run should pass. `518-huge_entity` is the same family.
+overlay. `518-huge_entity` is the same family.
 
 ## Errors reported through `syslog_output` and `safir_control.0.returncode`
 
