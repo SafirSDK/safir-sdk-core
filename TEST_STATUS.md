@@ -160,6 +160,28 @@ these so you don't hunt for a nonexistent test regression:
     (2026-08-28): `vs2026-amd64` finished "Set up build environment" and the
     whole matrix ran, after this same step had eaten six hours and been
     cancelled on the two runs before it.
+  - **Run 33176126427** (`multinode-ubuntu-noble-amd64-amd64-java-cpp-dotnet-java-cpp`),
+    2026-08-28: 58 jobs green, one cancelled at exactly its 60-minute
+    `timeout-minutes` in "Set up test environment". `packages.microsoft.com`
+    served **403 Forbidden** for the `azure-cli` and `ubuntu/24.04/prod` indexes
+    for about an hour. We install nothing from either — they are preinstalled in
+    the hosted Ubuntu runner image — but `apt-get update` fails if *any*
+    configured repo is unreachable, so the retry wrapper kept re-running
+    `update`+`install` (correctly, by the Linux rule) through 8 attempts and 46
+    minutes until the job clock ran out. No other Linux job in the run saw it, so
+    it was a transient regional 403 on one runner. Two fixes, both now in:
+    the setup actions **delete any source list mentioning
+    `packages.microsoft.com`** before updating, and the retry budget is now
+    per-context so it can no longer exceed the job's timeout (see below).
+
+  **The invariant this taught us:** a job's retry budget must be *smaller* than
+  its `timeout-minutes`. The wrapper's whole point is to fail legibly — "failed
+  after N attempts in Ns, giving up" — but a 2-hour budget inside a 60-minute job
+  can never reach that line. The job is killed mid-retry instead, and that is
+  reported as **cancelled**. Budgets are now 2700s by default and 7200s in
+  `setup-build-env`, and `build`/`build-examples` carry explicit
+  `timeout-minutes` purely to keep the inequality true. **If you change a
+  `timeout-minutes`, check it against the budget.**
 
   Recognising it: the "Test results" Check stays **green but tiny** — #148 shows
   228 tests / 4 files against a normal ~9193 — because the downstream dose,

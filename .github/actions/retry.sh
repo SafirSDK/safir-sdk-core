@@ -19,10 +19,40 @@
 # We are an open source repo and GHA minutes are free, so the trade is
 # deliberately lopsided: wait a long time rather than fail and be diagnosed.
 #
-# Policy (same for every install, on purpose - one number to reason about):
-# two hours of wall clock, or 13 attempts, whichever runs out first. Attempts
-# are spaced 30s doubling to a 15 minute cap. The two hour figure comes from the
-# asciidoctorj 403, where a 5 x 30s retry was not nearly enough.
+# Policy: a wall clock budget, or 13 attempts, whichever runs out first.
+# Attempts are spaced 30s doubling to a 15 minute cap.
+#
+# THE INVARIANT: the budget must always be less than the timeout-minutes of the
+# job doing the retrying, with room to spare for the work the job still has to
+# do. Break it and the give-up path below becomes unreachable: the job dies
+# mid-retry and GitHub reports that as "cancelled", which reads like a human
+# pressed a button and hides the actual cause. That is not hypothetical - it is
+# what happened to run 33176126427, where a 2 hour budget in a 60 minute job
+# turned a transient packages.microsoft.com 403 into a cancelled dose leg.
+#
+# So the budget is per context rather than one global number, because the
+# contexts genuinely differ and pretending otherwise is what broke:
+#
+#   - Default 2700s (45 min), which fits inside every job that retries today
+#     (dose-tests 60, multicomputer 55). A dose leg exists to run ~14 minutes of
+#     tests, so waiting hours on a package mirror to get there is out of
+#     proportion; a legible failure sooner is worth more.
+#   - setup-build-env raises it to 7200s (2 hours) via RETRY_BUDGET_SECONDS,
+#     because build gates the whole matrix - waiting there can save re-running
+#     everything downstream. The two hour figure comes from the asciidoctorj
+#     403, where a 5 x 30s retry was not nearly enough. That is also why build
+#     now carries an explicit timeout-minutes: without one it inherits GitHub's
+#     6 hour default, and the invariant above has nothing to hold it to.
+#
+# If you change a timeout-minutes, check this. If you add a caller, set
+# RETRY_BUDGET_SECONDS or inherit the 45 minute default.
+#
+# The budget is per retry() call, not per job, so a job with several calls could
+# in theory exceed it several times over. The timeouts above are sized for one
+# stuck source, which is every failure we have actually seen - two unrelated
+# package hosts down for hours in the same job is a run that is lost regardless.
+# If that ever stops being true, make the deadline job-wide (compute it once and
+# carry it in GITHUB_ENV) rather than inflating the timeouts.
 #
 # The deadline is wall clock, not the sum of the sleeps, because the sleeps are
 # the small half. A hung install costs whatever its own timeout is - chocolatey
@@ -58,7 +88,7 @@ retry() {
     shift
 
     local max_attempts=13
-    local budget=7200
+    local budget=${RETRY_BUDGET_SECONDS:-2700}
     local delay=30
     local max_delay=900
     local started elapsed remaining attempt

@@ -65,6 +65,11 @@ runs:
       shell: bash
       run: |
         source "${GITHUB_ACTION_PATH}/../retry.sh"
+        # Two hours rather than the 45 minute default: build gates the whole
+        # matrix, so waiting here can save re-running everything downstream.
+        # The build job's timeout-minutes is sized to stay above it - see the
+        # invariant in retry.sh before changing either.
+        export RETRY_BUDGET_SECONDS=7200
         # update and install are retried together, not separately: the failure
         # we hit was a 404 for a package version the index still advertised
         # after the mirror had moved on, and re-running install alone would ask
@@ -78,6 +83,19 @@ runs:
         # is already installed); the examples build crashes without it.
         # mono-devel supplies the C# compiler (mcs); without it FindCSharp sets
         # CSHARP_FOUND=false and the C# example apps are silently skipped.
+        # apt-get update fails the whole command if ANY configured repo is
+        # unreachable, including ones we never install from. The GitHub Ubuntu
+        # runner image ships azure-cli and microsoft-prod source lists, and on
+        # 2026-08-28 packages.microsoft.com served 403 Forbidden for both for
+        # about an hour, which is all it took to lose a dose leg (run
+        # 33176126427) to an outage in software this repo does not use. Drop
+        # them by content rather than by filename, since the image renames them
+        # from time to time. Failures here are ignored: not finding anything to
+        # remove is the normal case.
+        sudo find /etc/apt/sources.list.d -type f \
+             -exec grep -lF packages.microsoft.com {} + 2>/dev/null \
+          | xargs -r sudo rm -f || true
+
         install_linux_prerequisites() {
           sudo apt-get update -qq &&
           sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 \
@@ -95,6 +113,11 @@ runs:
       shell: bash
       run: |
         source "${GITHUB_ACTION_PATH}/../retry.sh"
+        # Two hours rather than the 45 minute default: build gates the whole
+        # matrix, so waiting here can save re-running everything downstream.
+        # The build job's timeout-minutes is sized to stay above it - see the
+        # invariant in retry.sh before changing either.
+        export RETRY_BUDGET_SECONDS=7200
         # Only the SDK build renders the shipped docs and builds the .deb; the
         # examples build needs none of this.
         # lintian is only a 'recommends' of devscripts, so --no-install-recommends
@@ -115,6 +138,11 @@ runs:
       shell: bash
       run: |
         source "${GITHUB_ACTION_PATH}/../retry.sh"
+        # Two hours rather than the 45 minute default: build gates the whole
+        # matrix, so waiting here can save re-running everything downstream.
+        # The build job's timeout-minutes is sized to stay above it - see the
+        # invariant in retry.sh before changing either.
+        export RETRY_BUDGET_SECONDS=7200
         # doxygen/graphviz/asciidoctorj/dia render the documentation that the
         # Windows packages must ship (see BUILD.Windows.txt); without them the
         # build silently skips docs. dejavufonts backs the doc generation too -
@@ -199,6 +227,11 @@ runs:
       shell: bash
       run: |
         source "${GITHUB_ACTION_PATH}/../retry.sh"
+        # Two hours rather than the 45 minute default: build gates the whole
+        # matrix, so waiting here can save re-running everything downstream.
+        # The build job's timeout-minutes is sized to stay above it - see the
+        # invariant in retry.sh before changing either.
+        export RETRY_BUDGET_SECONDS=7200
         install_python_requirements() {
           python -m pip install --upgrade pip &&
           pip install -r build/requirements.txt
