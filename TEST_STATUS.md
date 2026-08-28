@@ -322,6 +322,28 @@ message** — it means a 10 MB round trip took over a minute. The answer is eith
 raise `WaitForCallbackTimeoutSeconds` (one constant, in the three partner
 Executors) or to find out what the overlay is doing.
 
+**Confirmed slow, not lost** (run 33163796206, 2026-08-28). The partner output
+shows the wait *actually blocking* on all four multicomputer legs — vs2022,
+vs2026, ubuntu-noble-amd64 and ubuntu-noble-arm64 — and on all four it is the
+same one:
+
+```
+WaitForCallback: waiting up to 60 seconds for OnServiceRequest occurrence 1 (seen 0)
+WaitForCallback: done waiting for OnServiceRequest occurrence 1, seen 1 (callback arrived)
+```
+
+Every other wait in the whole suite printed `has already happened N time(s),
+need N, not waiting` — satisfied by a callback that had arrived before the wait
+action did. So the 10 MB service request over the overlay is the *only* thing in
+the dose suite slow enough to make the sequencer stop, and it is slow enough
+every time, on every platform. That is the strongest evidence yet that the
+request was always arriving and the old 20 s sleep was simply the wrong budget
+for it: the transfer that 215 raced is not an occasional straggler, it is
+routinely the slowest thing in the run.
+
+It also means this wait is load-bearing rather than decorative, so if the
+mechanism is ever weakened, 215 is where it will show up first.
+
 **Still unexplained:** *why* the transfer was ~4x slower on the run that failed.
 Waiting for the callback tolerates that; it does not diagnose it. If the huge tests
 start timing out, that is the thing to chase.
