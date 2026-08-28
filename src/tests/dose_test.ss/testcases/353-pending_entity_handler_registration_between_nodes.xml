@@ -22,11 +22,35 @@
       <Handler>DEFAULT_HANDLER</Handler>
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
+    <!-- These two replace a 0.5 second sleep, and they are not the same wait: the
+         sleep was covering two different things that finish independently, on two
+         different nodes.
+
+         Partner 2's own pending registration wins DEFAULT_HANDLER (nobody holds it)
+         and completes locally, ending in OnInitialInjectionsDone. That has to happen
+         before partner 2 unregisters below, or the unregister lands on a
+         registration that has not finished being made. -->
     <DoseTest.Action index="1">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>0.5</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>2</Partner>
+      <WaitForCallbackId>OnInitialInjectionsDone</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
     </DoseTest.Action>
+    <!-- Separately, the registration has to reach partner 0's node, and here that is
+         a real network hop rather than a formality - partners 0 and 2 are on
+         different nodes in the multinode configuration, which is the whole point of
+         this testcase. Partner 0's OnRegistered is the direct observation that it
+         arrived. It matters because if partner 0 registers below while its node
+         still believes DEFAULT_HANDLER is free, partner 0 wins the registration
+         outright rather than going pending, and the chain this testcase checks never
+         happens. Half a second was only ever a guess at a cross-node delay. -->
     <DoseTest.Action index="2">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnRegistered</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
       <ActionKind>RegisterEntityHandlerPending</ActionKind>
       <Partner>0</Partner>
       <Consumer>1</Consumer>
@@ -34,14 +58,30 @@
       <Handler>DEFAULT_HANDLER</Handler>
       <InstanceIdPolicy>RequestorDecidesInstanceId</InstanceIdPolicy>
     </DoseTest.Action>
-    <DoseTest.Action index="3">
+    <DoseTest.Action index="4">
       <ActionKind>UnregisterHandler</ActionKind>
       <Partner>2</Partner>
       <Consumer>1</Consumer>
       <TypeId>DoseTest.GlobalEntity</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="4">
+    <!-- New, and the reason this testcase flaked. There was nothing at all between
+         the unregister above and the unsubscribe below, so the entire remaining
+         chain - OnUnregistered, then partner 0's pending registration completing,
+         then OnRegistered, then OnInitialInjectionsDone - was racing the
+         unsubscribe, with a cross-node hop in the middle of it. Losing that race
+         drops callbacks off the end of partner 0's output and fails the diff.
+
+         OnInitialInjectionsDone is the last of the four, so one wait covers all of
+         them. It is partner 0's first and only one in this testcase; partner 2's,
+         waited for above, is counted separately because the counts are per partner. -->
+    <DoseTest.Action index="5">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnInitialInjectionsDone</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
+    </DoseTest.Action>
+    <DoseTest.Action index="6">
       <ActionKind>UnsubscribeRegistration</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>

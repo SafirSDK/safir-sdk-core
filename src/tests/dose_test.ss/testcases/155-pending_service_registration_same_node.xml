@@ -21,25 +21,60 @@
       <TypeId>DoseTest.GlobalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
+    <!-- Nobody holds DEFAULT_HANDLER yet, so partner 1's pending registration wins
+         it immediately. Both of the waits below are for that to have fully landed
+         before partner 0 registers, and neither was here before: the ordering was
+         simply assumed.
+
+         It is not a safe assumption, and getting it wrong does not produce a
+         timing wobble, it produces a different test. If partner 0 registers while
+         its own node still believes DEFAULT_HANDLER is free, partner 0 wins the
+         registration outright instead of going pending, and the OnUnregistered /
+         OnCompletedRegistration / OnRegistered chain this testcase exists to check
+         never happens at all. That is the shape of the "pending registration"
+         flake family. -->
     <DoseTest.Action index="1">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>1</Partner>
+      <WaitForCallbackId>OnCompletedRegistration</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
+    </DoseTest.Action>
+    <!-- Partner 1 knowing it owns the handler is not the same as partner 0 knowing
+         it, and it is partner 0's view that decides what the next action does. -->
+    <DoseTest.Action index="2">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnRegistered</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
       <ActionKind>RegisterServiceHandlerPending</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>
       <TypeId>DoseTest.GlobalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="2">
+    <DoseTest.Action index="4">
       <ActionKind>UnregisterHandler</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
       <TypeId>DoseTest.GlobalService</TypeId>
       <Handler>DEFAULT_HANDLER</Handler>
     </DoseTest.Action>
-    <DoseTest.Action index="3">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>2</SleepDuration>
+    <!-- Replaces a 2 second sleep. The unregister above releases the handler,
+         partner 0's pending registration then completes, and the second
+         OnRegistered is the last event in that chain - so waiting for it waits for
+         exactly the thing the sleep was guessing at. The sleep was also a deadline
+         and not just a delay: the UnsubscribeRegistration below stops partner 0
+         hearing anything further, so a chain that took longer than two seconds lost
+         its last callback and failed the output diff. -->
+    <DoseTest.Action index="5">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnRegistered</WaitForCallbackId>
+      <WaitForCallbackOccurrence>2</WaitForCallbackOccurrence>
     </DoseTest.Action>
-    <DoseTest.Action index="4">
+    <DoseTest.Action index="6">
       <ActionKind>UnsubscribeRegistration</ActionKind>
       <Partner>0</Partner>
       <Consumer>0</Consumer>
