@@ -532,6 +532,29 @@ safir_control_cli --help
 
 ## Code Style
 
+### Copyright Headers
+
+Source files carry a `Copyright Saab AB, <years> (http://safirsdkcore.com)` line
+in their header comment. **When you make a non-trivial change to a file, add the
+current year to that line.** Trivial changes - a typo, reflowing a comment,
+whitespace - do not count.
+
+The years are a list of ranges, and the current year is folded into it:
+
+- `2023-2025` becomes `2023-2026` - the range already ends at last year, so
+  extend it rather than starting a new entry.
+- `2025` becomes `2025-2026`, for the same reason.
+- `2003-2018` becomes `2003-2018, 2026` - there is a gap, so append a new entry.
+- `2013, 2024` becomes `2013, 2024, 2026`.
+
+Separate entries with a comma and a space. Both `, 2026` and `,2026` occur in
+the tree; the spaced form is the more common one and is what new entries should
+use. Leave the existing entries in a header alone, however they are punctuated -
+this is not a reformatting exercise.
+
+Files with no such header (DOU files, test case XML, CMake, YAML, Markdown) do
+not get one added.
+
 ### Python
 - Formatter: YAPF with PEP8 base style, 120 character line limit
 - Linter: PyLint (score threshold: 10.0)
