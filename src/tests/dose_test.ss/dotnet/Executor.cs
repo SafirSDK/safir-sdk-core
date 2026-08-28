@@ -676,6 +676,28 @@ namespace dose_test_dotnet
                 return;
             }
 
+            // A WaitForCallback is always partner scoped, so it is handled here rather
+            // than in the routing below. It is the only action whose acknowledgement is
+            // withheld (see the main loop), which means it is also the only action that
+            // hangs the sequencer rather than being quietly ignored if the routing drops
+            // it - and every branch below can drop an action: a consumer's ExecuteAction
+            // ignores action kinds it has no case for, and both consumer branches
+            // require m_isActive.
+            if (action.ActionKind.Val == DoseTest.ActionEnum.Enumeration.WaitForCallback)
+            {
+                if (!action.Consumer.IsNull())
+                {
+                    // Through the Logger, like the missing-Id case in
+                    // BeginWaitForCallback: a testcase that asks for something we cannot
+                    // honour should fail the output diff rather than pass with the
+                    // member silently ignored.
+                    Logger.Instance.WriteLine
+                        ("WaitForCallback is partner scoped, ignoring the Consumer member");
+                }
+                BeginWaitForCallback(action);
+                return;
+            }
+
             if (action.Consumer.IsNull())
             {//No consumer set, meant for the executor.
                 if (action.ActionCallback.IsNull()) //it is a normal action
@@ -867,10 +889,6 @@ namespace dose_test_dotnet
 
         Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> m_callbackActions;
 
-        // WaitForCallback state. m_callbackCounts is how many times each callback has
-        // happened since the last Reset; the count is what lets a wait be satisfied by
-        // a callback that arrived before the wait action did, which is the normal case
-        // when nothing is slow.
         // How long a WaitForCallback waits before giving up. Not a testcase level knob
         // on purpose: it is only an anti-hang backstop, and a wait that succeeds never
         // gets near it, so there is nothing for a testcase to tune. Comfortably more
@@ -881,6 +899,10 @@ namespace dose_test_dotnet
         // the bottom of the main loop. See DeferAck.
         private bool m_ackPending;
 
+        // WaitForCallback state. m_callbackCounts is how many times each callback has
+        // happened since the last Reset; the count is what lets a wait be satisfied by
+        // a callback that arrived before the wait action did, which is the normal case
+        // when nothing is slow.
         Dictionary<Safir.Dob.CallbackId.Enumeration, int> m_callbackCounts;
         bool m_isWaitingForCallback = false;
         Safir.Dob.CallbackId.Enumeration m_waitingForCallback;

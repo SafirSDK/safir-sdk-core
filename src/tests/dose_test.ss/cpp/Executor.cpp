@@ -97,6 +97,26 @@ void Executor::HandleAction(DoseTest::ActionPtr action)
         return;
     }
 
+    //A WaitForCallback is always partner scoped, so it is handled here rather than
+    //in the routing below. It is the only action whose acknowledgement is withheld
+    //(see ActionReceiver::HandleRead), which means it is also the only action that
+    //hangs the sequencer rather than being quietly ignored if the routing drops it -
+    //and every branch below can drop an action: a consumer's ExecuteAction ignores
+    //action kinds it has no case for, and both consumer branches require m_isActive.
+    if (action->ActionKind() == DoseTest::ActionEnum::WaitForCallback)
+    {
+        if (!action->Consumer().IsNull())
+        {
+            //Through lout, like the missing-Id case in BeginWaitForCallback: a
+            //testcase that asks for something we cannot honour should fail the
+            //output diff rather than pass with the member silently ignored.
+            lout << "WaitForCallback is partner scoped, ignoring the Consumer member"
+                 << std::endl;
+        }
+        BeginWaitForCallback(action);
+        return;
+    }
+
     if (action->Consumer().IsNull())
     {//No consumer set, meant for the executor.
         std::wcout << "No consumer set, meant for the executor" << std::endl;

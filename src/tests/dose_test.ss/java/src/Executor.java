@@ -408,6 +408,25 @@ class Executor implements
             return;
         }
 
+        // A WaitForCallback is always partner scoped, so it is handled here rather than
+        // in the routing below. It is the only action whose acknowledgement is withheld
+        // (see the main loop), which means it is also the only action that hangs the
+        // sequencer rather than being quietly ignored if the routing drops it - and
+        // every branch below can drop an action: a consumer's executeAction ignores
+        // action kinds it has no case for, and both consumer branches require
+        // m_isActive.
+        if (action.actionKind().getVal() == com.saabgroup.dosetest.ActionEnum.WAIT_FOR_CALLBACK) {
+            if (!action.consumer().isNull()) {
+                // Through the Logger, like the missing-Id case in beginWaitForCallback:
+                // a testcase that asks for something we cannot honour should fail the
+                // output diff rather than pass with the member silently ignored.
+                Logger.instance().println
+                    ("WaitForCallback is partner scoped, ignoring the Consumer member");
+            }
+            beginWaitForCallback(action);
+            return;
+        }
+
         if (action.consumer().isNull()) {//No consumer set, meant for the executor.
             if (action.actionCallback().isNull()) //it is a normal action
             {
@@ -971,16 +990,16 @@ class Executor implements
     private String m_multicastNic = null;
     java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, java.util.Vector<com.saabgroup.dosetest.Action>> m_callbackActions;
 
-    // WaitForCallback state. m_callbackCounts is how many times each callback has
-    // happened since the last Reset; the count is what lets a wait be satisfied by a
-    // callback that arrived before the wait action did, which is the normal case when
-    // nothing is slow.
     // How long a WaitForCallback waits before giving up. Not a testcase level knob on
     // purpose: it is only an anti-hang backstop, and a wait that succeeds never gets
     // near it, so there is nothing for a testcase to tune. Comfortably more than
     // double the longest Sleep any of these waits replaced.
     private static final int WAIT_FOR_CALLBACK_TIMEOUT_SECONDS = 60;
 
+    // WaitForCallback state. m_callbackCounts is how many times each callback has
+    // happened since the last Reset; the count is what lets a wait be satisfied by a
+    // callback that arrived before the wait action did, which is the normal case when
+    // nothing is slow.
     java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, Integer> m_callbackCounts;
     private boolean m_isWaitingForCallback = false;
     private com.saabgroup.safir.dob.CallbackId m_waitingForCallback;

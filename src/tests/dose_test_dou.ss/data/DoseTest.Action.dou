@@ -25,6 +25,11 @@
                 ActionCallback, which means something else entirely: an action carrying
                 ActionCallback is registered to be run when that callback happens.
 
+                Only meaningful for the callbacks the Dob delivers to a consumer.
+                OnDoDispatch and OnStopOrder are counted too, but the executor runs
+                the dispatch callback actions for itself and for each of its three
+                consumers, so an OnDoDispatch count goes up by four per dispatch and
+                waiting on it would not mean what it says.
             </summary>
             <name>WaitForCallbackId</name>
             <type>Safir.Dob.CallbackId</type>
