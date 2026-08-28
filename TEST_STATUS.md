@@ -135,13 +135,34 @@ these so you don't hunt for a nonexistent test regression:
     `openjdk-21` (`21.0.12+8-1~24.04_arm64.deb` no longer on ports.ubuntu.com —
     the archive had moved to a newer point release while the runner image's
     index was stale), exit 100.
+  - **Run 33111295598** (`vs2026-amd64`), 2026-08-27: the retry wrapper caused
+    this one, so read it before touching `retry.sh`. sourceforge 404'd
+    `doxygen.install` on attempt 1 — an ordinary transient — so attempt 2 re-ran
+    the whole `choco install` batch with `-f`. That forced a reinstall of
+    `dejavufonts`, which had installed fine 90 seconds earlier, and its install
+    script ends in a flagless `Shell.Application` `CopyHere` into the Fonts
+    folder. With the fonts already present that raises an overwrite confirmation
+    dialog, and a runner has no desktop to answer it, so every attempt from 2 on
+    hung for choco's full 2700 s. The step got through 7 of its 13 attempts
+    before the job hit GitHub's default 6-hour limit. Two lessons, both now
+    fixed: the "~2 hour" budget bounded only the *sleeps* (45 min of the six
+    hours) while unbounded attempt time did the rest, and batching independent
+    packages meant one package's failure changed how the others were installed.
+    Packages are now retried one at a time, with `--execution-timeout 600`, and
+    the budget is wall clock.
 
   Recognising it: the "Test results" Check stays **green but tiny** — #148 shows
   228 tests / 4 files against a normal ~9193 — because the downstream dose,
   multicomputer and slow jobs are *skipped*, not failed. A small green Check next
   to a red run is the fingerprint. Don't read the shrunken test counts as a
   signal, and don't conclude a flake got fixed because it's absent from a run
-  where most of the matrix never executed.
+  where most of the matrix never executed. In 33111295598 the Check reported
+  plain **success** with no dose, slow or multicomputer results at all.
+
+  Note also that a job killed by a *timeout* — GitHub's 6-hour default for
+  `build`, which has no `timeout-minutes` of its own — is reported as
+  **cancelled**, not failed. A run that says "cancelled" without anyone having
+  cancelled it is a job that ran out of time.
 
   It recurred the same evening — **CI #149** (run 32897163638) lost *both* legs at
   once: the same apt 404 byte-for-byte on `ubuntu-noble-arm64`, and doxygen from

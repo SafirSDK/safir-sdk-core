@@ -117,32 +117,53 @@ runs:
         source "${GITHUB_ACTION_PATH}/../retry.sh"
         # doxygen/graphviz/asciidoctorj/dia render the documentation that the
         # Windows packages must ship (see BUILD.Windows.txt); without them the
-        # build silently skips docs. dejavufonts/gzip back the doc generation.
-        # asciidoctorj is the JVM asciidoctor and needs Java at build time - the
-        # "Set up Java (Windows)" step below puts it on PATH before the build.
+        # build silently skips docs. dejavufonts backs the doc generation too -
+        # dia rasterises the users guide diagrams to PNG at build time
+        # (docs/users_guide/CMakeLists.txt), so the fonts have to be on the
+        # machine, they are not just a stylesheet fallback. asciidoctorj is the
+        # JVM asciidoctor and needs Java at build time - the "Set up Java
+        # (Windows)" step below puts it on PATH before the build.
         #
-        # Both installs are retried. doxygen.install downloads its installer
-        # from sourceforge, which has both hung until chocolatey's own 2700s
-        # timeout and returned an immediate EOF; asciidoctorj fetches its zip
-        # from search.maven.org, which rate-limits with 403 for long stretches.
-        # choco has no built-in download retry (chocolatey/choco#385, #1853),
-        # so the wrapper is the only thing standing between us and a red run.
+        # Every package is retried SEPARATELY, one choco invocation each. That
+        # costs a few seconds of choco startup per package and is worth it,
+        # because retry granularity has to match failure granularity. These
+        # fetch from third parties that fail independently: doxygen.install and
+        # dia download installers from sourceforge, which has both hung until
+        # chocolatey's 2700s timeout and returned an immediate EOF, and
+        # asciidoctorj fetches its zip from search.maven.org, which rate-limits
+        # with 403 for long stretches. choco has no built-in download retry
+        # (chocolatey/choco#385, #1853), so this wrapper is the only thing
+        # standing between us and a red run.
+        #
         # From the second attempt on we add -f, because choco can leave a failed
         # package looking installed and then skip it on the next try
         # (chocolatey/choco#1027). Not on the first attempt: forcing a reinstall
         # of something that is already fine just means downloading it again.
+        #
+        # Installing them as one batch is what broke run 33111295598, and the
+        # failure is worth remembering because retrying caused it. sourceforge
+        # 404'd doxygen.install on attempt 1, so attempt 2 re-ran the WHOLE
+        # batch with -f, which forced a reinstall of dejavufonts - a package
+        # that had just installed fine seconds earlier. Its install script ends
+        # in a Shell.Application CopyHere into the Fonts folder with no flags,
+        # and with the fonts now already present that raises an overwrite
+        # confirmation dialog. On a runner there is no desktop to answer it, so
+        # it hung for choco's full 2700s, every attempt, until the job hit the
+        # six hour limit and every downstream test job was skipped. Per-package
+        # retries mean -f only ever re-forces the package that actually failed.
         force_on_retry() { [ "${RETRY_ATTEMPT:-1}" -gt 1 ] && echo "-f"; }
 
-        install_windows_prerequisites() {
-          choco install nsis doxygen.install graphviz dia dejavufonts gzip \
-            --no-progress -y $(force_on_retry)
+        # --execution-timeout well below choco's 2700s default, so a hung
+        # install costs minutes rather than three quarters of an hour. The whole
+        # batch installs in about 75s when nothing is wrong, so this is roughly
+        # an order of magnitude of headroom for the slowest single package.
+        install_choco_package() {
+          choco install "$1" --no-progress -y --execution-timeout 600 $(force_on_retry)
         }
-        retry "Windows prerequisites" install_windows_prerequisites
 
-        install_asciidoctorj() {
-          choco install asciidoctorj --no-progress -y $(force_on_retry)
-        }
-        retry "asciidoctorj" install_asciidoctorj
+        for package in nsis doxygen.install graphviz dia dejavufonts gzip asciidoctorj; do
+          retry "chocolatey package ${package}" install_choco_package "${package}"
+        done
         # choco installs NSIS but does not put it on PATH. windows-2022 shipped
         # NSIS on PATH already; windows-2025-vs2026 does not, so makensis was not
         # found during packaging. Add it explicitly for the later build step.
