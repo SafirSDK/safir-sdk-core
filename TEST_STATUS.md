@@ -68,31 +68,38 @@ and read the `*.junit.xml`. Note the dose junit `time="0"` is a hardcoded litera
 ## Known flaky tests
 
 **Seen** and **Last seen** come from a scan of the 100 most recent `ci.yml` runs
-(2026-06-16 → 2026-08-26) plus every run since, of which **87 produced a "Test
+(2026-06-16 → 2026-08-26) plus every run since, of which **88 produced a "Test
 results" Check** and are therefore countable; the rest were cancelled or died
-before the tests. 32 of those 87 runs — a bit over a third — had at least one
+before the tests. 32 of those 88 runs — a bit over a third — had at least one
 failing test case. Counts are per
 *run*, not per test execution (one run covers ~34 dose executions across the
 matrix). Update both columns when you see a fresh occurrence; an entry whose
 last-seen keeps receding is a candidate for the dormant list.
 
-`215-huge_service` dominated this list — 23 of 87, more than everything else in it
+`215-huge_service` dominated this list — 23 of 88, more than everything else in it
 combined, and its rate was rising (11 of 58 runs in June, 12 of 27 in August). It
 was **fixed on 2026-08-27**, so those counts are the historical record rather than
 a prediction. Until several full-matrix runs have gone by without it, treat its
 absence as unconfirmed rather than proven.
+
+**Clean full-matrix runs since the fix: 1** — run 33163796206 (2026-08-28), 59 of
+60 jobs green and one skipped, all 30 dose legs and all 8 multicomputer legs
+included. Increment this when you see another; it is the only evidence that will
+turn "believed fixed" into "fixed". One run is weak evidence on its own: at the
+historical 23-in-88 rate a single clean run would happen about three times in four
+anyway.
 
 `Communication_ResetTest` used to head this list; it was **fixed on 2026-06-30**
 and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it.
 
 | Test | Where | Platform | Seen | Last seen | Character |
 |---|---|---|---|---|---|
-| `215-huge_service` | multicomputer dose (overlay) | any | **23/87** | 2026-08-26 (32999608623) | **Believed fixed 2026-08-27** — the sleep it raced is gone; see below |
-| `518-huge_entity` | multicomputer dose (overlay) | any | 3/87 | 2026-08-20 (32348188649) | Same family as 215, **fixed the same way 2026-08-27** |
-| `155-pending_service_registration_same_node` | dose | any | 3/87 | 2026-08-20 (32348188649) | "Pending registration" family |
-| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | 2/87 | 2026-08-21 (32461278855) | Light-node detach/reattach |
-| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/87 | 2026-08-18 (32143455257) | "Pending registration" family |
-| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | 1/87 | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
+| `215-huge_service` | multicomputer dose (overlay) | any | **23/88** | 2026-08-26 (32999608623) | **Believed fixed 2026-08-27** — the sleep it raced is gone; see below |
+| `518-huge_entity` | multicomputer dose (overlay) | any | 3/88 | 2026-08-20 (32348188649) | Same family as 215, **fixed the same way 2026-08-27** |
+| `155-pending_service_registration_same_node` | dose | any | 3/88 | 2026-08-20 (32348188649) | "Pending registration" family |
+| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | 2/88 | 2026-08-21 (32461278855) | Light-node detach/reattach |
+| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/88 | 2026-08-18 (32143455257) | "Pending registration" family |
+| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | 1/88 | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
 | `run_restart_nodes_tests` (hang) | slow suite | any | n/a | 2026-08-23 (32637686999) | Hangs at startup → TIMEOUT → **fails the job**; job-level, not in the junit counts |
 
 **Two names that used to appear in this table are deliberately absent:
@@ -149,7 +156,10 @@ these so you don't hunt for a nonexistent test regression:
     hours) while unbounded attempt time did the rest, and batching independent
     packages meant one package's failure changed how the others were installed.
     Packages are now retried one at a time, with `--execution-timeout 600`, and
-    the budget is wall clock.
+    the budget is wall clock. **Confirmed fixed** by run 33163796206
+    (2026-08-28): `vs2026-amd64` finished "Set up build environment" and the
+    whole matrix ran, after this same step had eaten six hours and been
+    cancelled on the two runs before it.
 
   Recognising it: the "Test results" Check stays **green but tiny** — #148 shows
   228 tests / 4 files against a normal ~9193 — because the downstream dose,
@@ -451,7 +461,7 @@ arrives or after a 60 s backstop. Five testcases were converted — `215`, `518`
 `361` was converted later for reliability only, keeping its sleeps (see its section
 below), so it does not change that budget.
 
-Three things about it are worth knowing before touching it:
+Four things about it are worth knowing before touching it:
 
 - **Occurrences are numbered, not consumed.** `WaitForCallbackOccurrence` says
   *which* occurrence to wait for, counted per testcase. A testcase with several
@@ -474,11 +484,43 @@ Three things about it are worth knowing before touching it:
   would be racing the tail of the very dispatch it waited for. Added 2026-08-27 for
   `361`; if it is ever reverted, that whole class of wait-then-read conversion
   silently becomes unsound.
+- **A `WaitForCallback` is intercepted in `HandleAction` before the consumer
+  routing**, in all three partner languages. It is the one action whose ack is
+  withheld, so it is also the one action that *hangs the sequencer* if the routing
+  drops it, rather than being quietly ignored — and every branch below can drop it:
+  a consumer's `ExecuteAction` ignores kinds it has no case for, and both consumer
+  branches are gated on `m_isActive`. Authoring a wait with a `<Consumer>` or an
+  `ActionCallback` set therefore used to cost ten minutes of watchdog and produce no
+  explanation. It now logs `WaitForCallback is partner scoped, ignoring the Consumer
+  member` through `lout`/`Logger`, so it fails the output diff in seconds, the same
+  way a missing `WaitForCallbackId` already did. Added 2026-08-27.
 
 What is left in the 399 s mostly cannot be converted: sleeps that exist to show
 that *nothing further* arrives have no event to wait for, `430`/`431` are testcases
 whose whole point is a slow subscriber, and `815` waits on dope writing persistence,
 which produces no partner callback.
+
+**Measured effect**, dose job wall clock, run 32999608623 (2026-08-26, before) vs
+run 33163796206 (2026-08-28, after), all 30 legs:
+
+| platform | before | after |
+|---|---|---|
+| ubuntu-noble-**arm64** | 27-28 min | **13-14 min** |
+| ubuntu-noble-amd64, debian-trixie, vs2022, vs2026 | 18-20 min | 14-15 min |
+
+The ~4.5 min every platform gained is the 260 s of removed sleeping, which lands
+within seconds of the predicted figure. The further ~9 min on arm64 is the separate
+retirement of the sequencer's 4x ARM multiplier (`Sequencer/ActionSender.h`), which
+had been predicted to be worth 7.6 min — so slightly better than the arithmetic,
+not worse. arm64 is now the *fastest* dose platform rather than the slowest, which
+is the point the multiplier's retirement rested on: it dated from a BeagleBone
+Black, and the GitHub-hosted arm64 runner is not a slow machine.
+
+Both dose jobs have `timeout-minutes: 55`, so the margin went from roughly 2x to
+roughly 4x. **The risk of the multiplier's removal runs the other way**: arm64 now
+gets 140/40 ms of settling between actions instead of 560/160 ms. If arm64-only
+flakiness appears, suspect that first, and reinstate a smaller multiplier with a
+measurement behind it rather than the old guess. Run 33163796206 showed none.
 
 ## Fixed / dormant
 
