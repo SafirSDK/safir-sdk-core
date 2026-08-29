@@ -325,6 +325,34 @@ Jenkins; cosmetic ALINK `A99999` .dll.policy warnings are dropped).
 **Newly practical:** a DOPE ODBC test job — hosted runners ship databases
 preinstalled, so it's far more tractable than under Jenkins (abandoned there).
 
+### Git and Branch History
+
+**Keep `develop` linear. Do not create merge commits.** A feature branch lands
+as its commits placed directly on top of `develop` — fast-forward, rebase, or a
+hand-built branch off the current tip — never behind a `Merge branch '...'`
+commit.
+
+This is not written anywhere else, and the log will actively mislead you if you
+go looking: `develop` has 260 merge commits among its 6429, so a query like
+`git log --merges -5` happily returns five of them and reads like proof that
+merging is normal here. It is not. **They are all from 2016-2017; the most
+recent is 52a25b9ed, 2017-09-04.** There are none in the last 200 commits. If
+you want to check the convention rather than assume it, ask a question that has
+dates in it:
+
+```bash
+git log --first-parent -200 --format='%h %cs %p %s' develop   # >1 parent = a merge
+git log --merges -1 --format='%h %cs %s' develop              # when was the last one
+```
+
+**Land a branch as a small number of clear commits, not its working history.**
+The development history of a branch — the false starts, the fixes to the fixes,
+the "record what CI said" commits — is not what belongs on `develop`. Rewrite it
+into commits that each do one intelligible thing and each leave the tree
+building. Splitting by theme works well: infrastructure separately from the
+change it enables, a new mechanism separately from the code that starts using
+it, so a bisect landing between them still compiles.
+
 ### Cutting a Release
 
 Releases are cut by **pushing a version tag**; the `release` job in
@@ -561,6 +589,29 @@ safir_control_cli --help
   - Outputs: stdout, Safir Logging, Tracer UDP protocol
 
 ## Code Style
+
+### Copyright Headers
+
+Source files carry a `Copyright Saab AB, <years> (http://safirsdkcore.com)` line
+in their header comment. **When you make a non-trivial change to a file, add the
+current year to that line.** Trivial changes - a typo, reflowing a comment,
+whitespace - do not count.
+
+The years are a list of ranges, and the current year is folded into it:
+
+- `2023-2025` becomes `2023-2026` - the range already ends at last year, so
+  extend it rather than starting a new entry.
+- `2025` becomes `2025-2026`, for the same reason.
+- `2003-2018` becomes `2003-2018, 2026` - there is a gap, so append a new entry.
+- `2013, 2024` becomes `2013, 2024, 2026`.
+
+Separate entries with a comma and a space. Both `, 2026` and `,2026` occur in
+the tree; the spaced form is the more common one and is what new entries should
+use. Leave the existing entries in a header alone, however they are punctuated -
+this is not a reformatting exercise.
+
+Files with no such header (DOU files, test case XML, CMake, YAML, Markdown) do
+not get one added.
 
 ### Python
 - Formatter: YAPF with PEP8 base style, 120 character line limit
