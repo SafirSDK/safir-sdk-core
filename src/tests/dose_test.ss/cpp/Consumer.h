@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -47,9 +47,15 @@ class Consumer:
     public Safir::Application::Backdoor
 {
 public:
+    /**
+     * callbackNotifier is called whenever a callback is delivered to this
+     * consumer, so the Executor can count callbacks and satisfy a pending
+     * WaitForCallback action.
+     */
     Consumer(const int consumerNumber,
              const std::wstring & connectionName,
-             const std::wstring & instance);
+             const std::wstring & instance,
+             const std::function<void(const Safir::Dob::CallbackId::Enumeration)>& callbackNotifier);
 
     Consumer(const Consumer&) = delete;
     Consumer& operator=(const Consumer&) = delete;
@@ -113,6 +119,7 @@ private:
     Safir::Dob::SecondaryConnection     m_connection;
     Safir::Application::BackdoorKeeper m_backdoorKeeper;
 
+    const std::function<void(const Safir::Dob::CallbackId::Enumeration)> m_callbackNotifier;
     const int                           m_consumerNumber;
     const std::wstring                  m_connectionName;
     const std::wstring                  m_connectionInstance;

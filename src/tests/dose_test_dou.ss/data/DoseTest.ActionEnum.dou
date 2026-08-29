@@ -15,6 +15,12 @@
     <value>InhibitDispatch</value>
     <value>Print</value>
 
+    <!-- Withhold the action acknowledgement until the callback named by
+         WaitForCallbackId has happened on this partner, or WaitForCallbackTimeout
+         seconds have passed. Lets a testcase wait for an actual event instead of
+         sleeping for a fixed, pessimistic time. -->
+    <value>WaitForCallback</value>
+
     <!-- **** Executor and Consumer Actions **** -->
     <value>ResetCallbackActions</value>
 

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -152,8 +152,10 @@ namespace
 
 Consumer::Consumer(int consumerNumber,
                    const std::wstring & connectionName,
-                   const std::wstring & instance):
+                   const std::wstring & instance,
+                   const std::function<void(const Safir::Dob::CallbackId::Enumeration)>& callbackNotifier):
     m_backdoorKeeper(m_connection),
+    m_callbackNotifier(callbackNotifier),
     m_consumerNumber(consumerNumber),
     m_connectionName(connectionName),
     m_connectionInstance(instance),
@@ -170,6 +172,10 @@ void Consumer::AddCallbackAction(DoseTest::ActionPtr action)
 
 void Consumer::ExecuteCallbackActions(const Safir::Dob::CallbackId::Enumeration callback)
 {
+    //Every callback delivered to this consumer passes through here, which makes it
+    //the one place the Executor needs to hear about to satisfy a WaitForCallback.
+    m_callbackNotifier(callback);
+
     for (Actions::iterator it = m_callbackActions[callback].begin();
          it != m_callbackActions[callback].end(); ++it)
     {

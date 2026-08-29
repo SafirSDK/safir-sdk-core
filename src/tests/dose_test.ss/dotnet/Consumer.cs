@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Henrik Sundberg / sthesu
 *
@@ -47,10 +47,16 @@ namespace dose_test_dotnet
 
         private const string PREFIX = "Consumer ";
 
+        /// <summary>
+        /// callbackNotifier is called for every callback delivered to this consumer,
+        /// so the Executor can count callbacks and satisfy a pending WaitForCallback.
+        /// </summary>
         public Consumer(int consumerNumber,
                         string connectionName,
-                        string instance)
+                        string instance,
+                        System.Action<Safir.Dob.CallbackId.Enumeration> callbackNotifier)
         {
+            m_callbackNotifier = callbackNotifier;
             Interlocked.Increment(ref instanceCount);
             m_backdoorKeeper = new Safir.Application.BackdoorKeeper(m_connection);
 
@@ -160,6 +166,10 @@ namespace dose_test_dotnet
 
         public void ExecuteCallbackActions(Safir.Dob.CallbackId.Enumeration callback)
         {
+            // Every callback delivered to this consumer passes through here, which
+            // makes it the one place the Executor needs to hear about.
+            m_callbackNotifier(callback);
+
             foreach (DoseTest.Action action in m_callbackActions[callback])
             {
                 DoseTest.ActionEnum.Enumeration actionKind = action.ActionKind.Val;
@@ -1206,6 +1216,8 @@ namespace dose_test_dotnet
         }
 
         #region Private data members
+
+        private readonly System.Action<Safir.Dob.CallbackId.Enumeration> m_callbackNotifier;
 
         private Safir.Dob.SecondaryConnection m_connection = new Safir.Dob.SecondaryConnection();
 

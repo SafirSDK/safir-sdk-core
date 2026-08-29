@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -50,6 +50,10 @@ class Executor implements
         m_controlConnectionName = m_identifier + "_control";
         m_testConnectionName = "partner_test_connection";
         m_callbackActions = new java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, java.util.Vector<com.saabgroup.dosetest.Action>>(com.saabgroup.safir.dob.CallbackId.class);
+        m_callbackCounts = new java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, Integer>(com.saabgroup.safir.dob.CallbackId.class);
+        for (com.saabgroup.safir.dob.CallbackId cb : com.saabgroup.safir.dob.CallbackId.values()) {
+            m_callbackCounts.put(cb, 0);
+        }
         for (com.saabgroup.safir.dob.CallbackId cb : com.saabgroup.safir.dob.CallbackId.values()) {
             m_callbackActions.put(cb, new java.util.Vector<com.saabgroup.dosetest.Action>());
         }
@@ -96,7 +100,20 @@ class Executor implements
                        !m_synchronizer.StopOrder &&
                        m_synchronizer.ReceivedAction == null)
                 {
-                    m_synchronizer.wait();
+                    // Normally we wait indefinitely for something to happen. While a
+                    // WaitForCallback is outstanding we have a deadline to keep, so
+                    // bound the wait and break out when it passes - the giving up
+                    // itself is done below, outside the lock.
+                    if (m_isWaitingForCallback) {
+                        long remaining = m_waitForCallbackDeadline - System.currentTimeMillis();
+                        if (remaining <= 0) {
+                            break;
+                        }
+                        m_synchronizer.wait(remaining);
+                    }
+                    else {
+                        m_synchronizer.wait();
+                    }
                 }
                 DispatchControl = m_synchronizer.DispatchControl;
                 DispatchTest = m_synchronizer.DispatchTest;
@@ -125,11 +142,17 @@ class Executor implements
             if (ReceivedAction != null) {
                 boolean immediateAck = ReceivedAction.actionKind().getVal() == com.saabgroup.dosetest.ActionEnum.SLEEP;
 
+                // A WaitForCallback action is acknowledged later, by endWaitForCallback,
+                // once the callback it names has happened or its timeout has expired.
+                boolean deferAck = ReceivedAction.actionKind().getVal() == com.saabgroup.dosetest.ActionEnum.WAIT_FOR_CALLBACK;
+
                 if (immediateAck) {
                     m_actionReceiver.actionHandled();
                 }
                 HandleAction(ReceivedAction);
-                if (!immediateAck) {
+                // Note that for a deferred ack the acknowledgement may already have been
+                // sent from inside the action above, if the callback had already happened.
+                if (!immediateAck && !deferAck) {
                     m_actionReceiver.actionHandled();
                 }
 
@@ -159,6 +182,15 @@ class Executor implements
                 Logger.instance().println("Got stop order");
                 executeCallbackActions(com.saabgroup.safir.dob.CallbackId.ON_STOP_ORDER);
                 m_isDone = true;
+            }
+
+            if (m_isWaitingForCallback && System.currentTimeMillis() >= m_waitForCallbackDeadline) {
+                endWaitForCallback("TIMED OUT");
+            }
+
+            if (m_ackPending) {
+                m_ackPending = false;
+                m_actionReceiver.actionHandled();
             }
         }
     }
@@ -203,10 +235,12 @@ class Executor implements
                     m_consumers = new Consumer[3];
 
                     for (int i = 0; i < 3; ++i) {
-                        m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString);
+                        m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString, this::notifyCallback);
                     }
 
                     oldCons = null;
+
+                    resetCallbackCounts();
 
                     for (com.saabgroup.safir.dob.CallbackId callback : com.saabgroup.safir.dob.CallbackId.values()) {
                         m_callbackActions.get(callback).clear();
@@ -231,7 +265,7 @@ class Executor implements
                     // restore consumers
                     m_consumers = new Consumer[3];
                     for (int i = 0; i < 3; ++i) {
-                        m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString);
+                        m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString, this::notifyCallback);
                     }
                 }
                 break;
@@ -274,7 +308,7 @@ class Executor implements
                     // Restore consumers
                     m_consumers = new Consumer[3];
                     for (int i = 0; i < 3; ++i) {
-                        m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString);
+                        m_consumers[i] = new Consumer(i, m_testConnectionName, m_instanceString, this::notifyCallback);
                     }
 
                     // Restore stopHandler
@@ -335,6 +369,10 @@ class Executor implements
                 }
                 break;
 
+            case WAIT_FOR_CALLBACK:
+                beginWaitForCallback(action);
+                break;
+
             case SLEEP: {
                 if (m_isActive) {
                     System.out.println("Sleeping " + action.sleepDuration().getVal() + " seconds");
@@ -357,6 +395,8 @@ class Executor implements
     }
 
     void executeCallbackActions(com.saabgroup.safir.dob.CallbackId callback) {
+        notifyCallback(callback);
+
         for (com.saabgroup.dosetest.Action action : m_callbackActions.get(callback)) {
             executeAction(action);
         }
@@ -365,6 +405,25 @@ class Executor implements
     public void HandleAction(com.saabgroup.dosetest.Action action) {
         if (!action.partner().isNull() && (action.partner().getVal().getRawValue() != m_instance)) {
             // Not meant for this partner
+            return;
+        }
+
+        // A WaitForCallback is always partner scoped, so it is handled here rather than
+        // in the routing below. It is the only action whose acknowledgement is withheld
+        // (see the main loop), which means it is also the only action that hangs the
+        // sequencer rather than being quietly ignored if the routing drops it - and
+        // every branch below can drop an action: a consumer's executeAction ignores
+        // action kinds it has no case for, and both consumer branches require
+        // m_isActive.
+        if (action.actionKind().getVal() == com.saabgroup.dosetest.ActionEnum.WAIT_FOR_CALLBACK) {
+            if (!action.consumer().isNull()) {
+                // Through the Logger, like the missing-Id case in beginWaitForCallback:
+                // a testcase that asks for something we cannot honour should fail the
+                // output diff rather than pass with the member silently ignored.
+                Logger.instance().println
+                    ("WaitForCallback is partner scoped, ignoring the Consumer member");
+            }
+            beginWaitForCallback(action);
             return;
         }
 
@@ -535,6 +594,122 @@ class Executor implements
         result.result().setVal(Logger.instance().toString());
         Logger.instance().clear();
         responseSender.send(result);
+    }
+
+    /**
+     * Called for every callback delivered to this partner, from both the executor's
+     * own callbacks and its consumers'. Counts them, and completes a pending
+     * WaitForCallback if this is the one it was waiting for.
+     */
+    void notifyCallback(com.saabgroup.safir.dob.CallbackId callback) {
+        m_callbackCounts.put(callback, m_callbackCounts.get(callback) + 1);
+
+        if (m_isWaitingForCallback &&
+            callback == m_waitingForCallback &&
+            m_callbackCounts.get(callback) >= m_waitingForOccurrence) {
+            endWaitForCallback("callback arrived");
+        }
+    }
+
+    /**
+     * Start withholding the acknowledgement of a WaitForCallback action.
+     * Acknowledges immediately if the callback has already been seen in this
+     * testcase, which is the common case when the system is keeping up.
+     */
+    private void beginWaitForCallback(com.saabgroup.dosetest.Action action) {
+        if (!m_isActive) {
+            // An inactive partner has no consumers to deliver anything to, so waiting
+            // could only ever time out.
+            System.out.println("WaitForCallback: partner is not active, not waiting");
+            deferAck();
+            return;
+        }
+
+        if (action.waitForCallbackId().isNull()) {
+            // Deliberately logged through the Logger rather than to stdout: the Logger
+            // is the output that gets diffed against the expected results, so a
+            // testcase with a malformed wait in it fails loudly instead of quietly not
+            // waiting.
+            Logger.instance().println("WaitForCallback action without a WaitForCallbackId!");
+            deferAck();
+            return;
+        }
+
+        com.saabgroup.safir.dob.CallbackId callback = action.waitForCallbackId().getVal();
+
+        // Which occurrence of the callback to wait for, counting per testcase. A
+        // testcase with several phases sees the same callback once per phase, so its
+        // waits ask for occurrence 1, 2, 3 and each waits for its own. Nothing is
+        // consumed and no state is mutated - the wait is simply the condition "this
+        // has happened at least this many times" - so a wait means the same thing
+        // however many other waits the testcase has.
+        int occurrence = action.waitForCallbackOccurrence().isNull() ? 1 : action.waitForCallbackOccurrence().getVal();
+
+        // If it has happened often enough already we are done, and the testcase does
+        // not pay for the wait at all. Without this the wait would be a race: the
+        // callback the sequencer is asking us to wait for has usually arrived before
+        // the sequencer gets round to sending the wait.
+        if (m_callbackCounts.get(callback) >= occurrence) {
+            System.out.println("WaitForCallback: " + callback + " has already happened " +
+                               m_callbackCounts.get(callback) + " time(s), need " +
+                               occurrence + ", not waiting");
+            deferAck();
+            return;
+        }
+
+        System.out.println("WaitForCallback: waiting up to " + WAIT_FOR_CALLBACK_TIMEOUT_SECONDS +
+                           " seconds for " + callback + " occurrence " + occurrence +
+                           " (seen " + m_callbackCounts.get(callback) + ")");
+
+        m_isWaitingForCallback = true;
+        m_waitingForCallback = callback;
+        m_waitingForOccurrence = occurrence;
+        m_waitForCallbackDeadline = System.currentTimeMillis() + WAIT_FOR_CALLBACK_TIMEOUT_SECONDS * 1000L;
+    }
+
+    /**
+     * Stop waiting and acknowledge, whether because the callback arrived or because
+     * we gave up. Acknowledging either way matters: a wait that gives up must not
+     * hold up the sequencer, since the missing callback shows up as missing output in
+     * the testcase diff, which is a test failure rather than a hung run.
+     */
+    private void endWaitForCallback(String reason) {
+        System.out.println("WaitForCallback: done waiting for " + m_waitingForCallback +
+                           " occurrence " + m_waitingForOccurrence +
+                           ", seen " + m_callbackCounts.get(m_waitingForCallback) +
+                           " (" + reason + ")");
+        m_isWaitingForCallback = false;
+        deferAck();
+    }
+
+    /**
+     * Acknowledge a WaitForCallback action, but not until we are back in the main
+     * loop. This is normally reached from inside a Dob callback, and Dob is not
+     * necessarily done acting on that callback when it hands control back to us: an
+     * injection, for instance, is only committed to the real entity state after the
+     * injection handler's callback has returned. Holding the acknowledgement until the
+     * dispatch has finished means a testcase that waits for a callback and then reads
+     * something back is not racing the tail of the very dispatch it waited for.
+     */
+    private void deferAck() {
+        m_ackPending = true;
+    }
+
+    /**
+     * Forget the callbacks seen so far. Called on Reset, so each testcase starts from
+     * a clean count, in step with the consumers being recreated.
+     */
+    private void resetCallbackCounts() {
+        if (m_isWaitingForCallback) {
+            // Cannot normally happen: the sequencer is blocked on the acknowledgement
+            // we are withholding, so it cannot have sent us a Reset.
+            System.out.println("WaitForCallback: Reset while still waiting!");
+            endWaitForCallback("Reset");
+        }
+
+        for (com.saabgroup.safir.dob.CallbackId cb : com.saabgroup.safir.dob.CallbackId.values()) {
+            m_callbackCounts.put(cb, 0);
+        }
     }
 
     private class Synchronizer {
@@ -814,4 +989,24 @@ class Executor implements
     private ActionReceiver m_actionReceiver;
     private String m_multicastNic = null;
     java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, java.util.Vector<com.saabgroup.dosetest.Action>> m_callbackActions;
+
+    // How long a WaitForCallback waits before giving up. Not a testcase level knob on
+    // purpose: it is only an anti-hang backstop, and a wait that succeeds never gets
+    // near it, so there is nothing for a testcase to tune. Comfortably more than
+    // double the longest Sleep any of these waits replaced.
+    private static final int WAIT_FOR_CALLBACK_TIMEOUT_SECONDS = 60;
+
+    // WaitForCallback state. m_callbackCounts is how many times each callback has
+    // happened since the last Reset; the count is what lets a wait be satisfied by a
+    // callback that arrived before the wait action did, which is the normal case when
+    // nothing is slow.
+    java.util.EnumMap<com.saabgroup.safir.dob.CallbackId, Integer> m_callbackCounts;
+    private boolean m_isWaitingForCallback = false;
+    private com.saabgroup.safir.dob.CallbackId m_waitingForCallback;
+    private int m_waitingForOccurrence = 1;
+    private long m_waitForCallbackDeadline;
+
+    // Set when a WaitForCallback has been satisfied (or given up on) and flushed at the
+    // bottom of the main loop. See deferAck.
+    private boolean m_ackPending = false;
 }

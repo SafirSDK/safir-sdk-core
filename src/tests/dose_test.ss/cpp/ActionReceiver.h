@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2012-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -125,6 +125,35 @@ public:
         Close();
     }
 
+    /**
+     * Acknowledge the action that is currently being waited on.
+     *
+     * Normally HandleRead acknowledges an action as soon as it has been performed.
+     * A WaitForCallback action instead leaves the acknowledgement outstanding and
+     * the Executor calls this when the awaited callback arrives (or the wait times
+     * out). The sequencer is sitting in a blocking read of that acknowledgement,
+     * so withholding it is what makes it wait.
+     *
+     * The acknowledgement is posted rather than written straight away. This is
+     * normally called from inside a Dob callback, and Dob is not necessarily done
+     * acting on that callback when it hands control back to us: an injection, for
+     * instance, is only committed to the real entity state after the injection
+     * handler's callback has returned. Posting holds the acknowledgement until the
+     * partner is back in its event loop, so that a testcase which waits for a
+     * callback and then reads something back is not racing the tail of the very
+     * dispatch it waited for.
+     */
+    void SendAck()
+    {
+        if (!m_ackOutstanding)
+        {
+            std::wcout << "SendAck called with no acknowledgement outstanding!" << std::endl;
+            return;
+        }
+        m_ackOutstanding = false;
+        boost::asio::post(m_ioContext, [this]{WriteOk();});
+    }
+
     short Port() const
     {
         return m_port;
@@ -179,22 +208,25 @@ private:
 
             const bool actionAfterAck = action->ActionKind() == DoseTest::ActionEnum::Sleep;
 
+            //A WaitForCallback action is acknowledged later, by SendAck, once the
+            //callback it names has happened or its timeout has expired.
+            const bool deferAck = action->ActionKind() == DoseTest::ActionEnum::WaitForCallback;
+
             std::wcout << "Got actionAfterAck = " << actionAfterAck << std::endl;
 
             if (!actionAfterAck)
             {
                 std::wcout << "Performing action" << std::endl;
+                m_ackOutstanding = deferAck;
                 m_actionCallback(action);
             }
 
-            try
+            //Note that the acknowledgement may already have been sent from inside
+            //the action above: the Executor acknowledges a WaitForCallback straight
+            //away if the callback it asks for has already happened in this testcase.
+            if (!deferAck)
             {
-                std::wcout << "writing ok" << std::endl;
-                boost::asio::write(*m_socket, boost::asio::buffer("ok", 3));
-            }
-            catch (const boost::system::system_error&)
-            {
-                std::wcout << "writing failed" << std::endl;
+                WriteOk();
             }
 
             //start next receive
@@ -215,6 +247,27 @@ private:
         }
     }
 
+    void WriteOk()
+    {
+        if (m_socket == NULL)
+        {
+            //Can only happen for a posted acknowledgement whose socket went away
+            //before it ran. Nothing to acknowledge to any more.
+            std::wcout << "not writing ok, socket is gone" << std::endl;
+            return;
+        }
+
+        try
+        {
+            std::wcout << "writing ok" << std::endl;
+            boost::asio::write(*m_socket, boost::asio::buffer("ok", 3));
+        }
+        catch (const boost::system::system_error&)
+        {
+            std::wcout << "writing failed" << std::endl;
+        }
+    }
+
 private:
     boost::asio::io_context& m_ioContext;
     boost::shared_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
@@ -224,6 +277,7 @@ private:
     enum {BLOB_HEADER_SIZE = 16};
 
     short m_port;
+    bool m_ackOutstanding = false;
     const boost::function<void(const DoseTest::ActionPtr&)> m_actionCallback;
     const int m_instance;
 };

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -44,6 +44,9 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
+#include <algorithm>
+#include <chrono>
+#include <cstdint>
 
 using namespace std::placeholders;
 
@@ -60,6 +63,11 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_testDispatcher([this]{DispatchTestConnection();}, m_ioContext),
     m_controlDispatcher([this]{DispatchControlConnection();}, m_ioContext),
     m_actionReceiver(m_ioContext, [this](const auto& action){HandleAction(action);},m_instance),
+    m_callbackCounts(Safir::Dob::CallbackId::Size(), 0),
+    m_isWaitingForCallback(false),
+    m_waitingForCallback(Safir::Dob::CallbackId::OnDoDispatch),
+    m_waitingForOccurrence(1),
+    m_waitForCallbackTimer(m_ioContext),
     m_callbackActions(Safir::Dob::CallbackId::Size()),
     m_defaultContext(0)
 {
@@ -86,6 +94,26 @@ void Executor::HandleAction(DoseTest::ActionPtr action)
     {
         // Not meant for this partner
         std::wcout << "Got action that was not meant for this partner!" << std::endl;
+        return;
+    }
+
+    //A WaitForCallback is always partner scoped, so it is handled here rather than
+    //in the routing below. It is the only action whose acknowledgement is withheld
+    //(see ActionReceiver::HandleRead), which means it is also the only action that
+    //hangs the sequencer rather than being quietly ignored if the routing drops it -
+    //and every branch below can drop an action: a consumer's ExecuteAction ignores
+    //action kinds it has no case for, and both consumer branches require m_isActive.
+    if (action->ActionKind() == DoseTest::ActionEnum::WaitForCallback)
+    {
+        if (!action->Consumer().IsNull())
+        {
+            //Through lout, like the missing-Id case in BeginWaitForCallback: a
+            //testcase that asks for something we cannot honour should fail the
+            //output diff rather than pass with the member silently ignored.
+            lout << "WaitForCallback is partner scoped, ignoring the Consumer member"
+                 << std::endl;
+        }
+        BeginWaitForCallback(action);
         return;
     }
 
@@ -161,7 +189,10 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 std::vector<ConsumerPtr> newConsumers;
                 for (int i = 0; i < 3; ++i)
                 {
-                    newConsumers.push_back(ConsumerPtr(new Consumer(i,m_testConnectionName,m_instanceString)));
+                    newConsumers.push_back(ConsumerPtr(new Consumer(i,
+                                                                    m_testConnectionName,
+                                                                    m_instanceString,
+                                                                    [this](const auto callback){NotifyCallback(callback);})));
                 }
                 std::wcout << "Swapping consumers" << std::endl;
                 m_consumers.swap(newConsumers);
@@ -172,6 +203,8 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 std::wcout << "Clearing callback actions" << std::endl;
                 std::for_each(m_callbackActions.begin(),m_callbackActions.end(),
                               [](auto& action){action.clear();});
+
+                ResetCallbackCounts();
             }
             std::wcout << "Reset complete" << std::endl;
         }
@@ -231,6 +264,12 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
         }
         break;
 
+    case DoseTest::ActionEnum::WaitForCallback:
+        {
+            BeginWaitForCallback(action);
+        }
+        break;
+
     case DoseTest::ActionEnum::Sleep:
         {
             if (m_isActive)
@@ -268,11 +307,134 @@ Executor::AddCallbackAction(DoseTest::ActionPtr action)
 void
 Executor::ExecuteCallbackActions(const Safir::Dob::CallbackId::Enumeration callback)
 {
+    NotifyCallback(callback);
+
     for (Actions::iterator it = m_callbackActions[callback].begin();
          it != m_callbackActions[callback].end(); ++it)
     {
         ExecuteAction(*it);
     }
+}
+
+
+namespace
+{
+    //How long a WaitForCallback waits before giving up. Not a testcase level knob on
+    //purpose: it is only an anti-hang backstop, and a wait that succeeds never gets
+    //near it, so there is nothing for a testcase to tune. Comfortably more than
+    //double the longest Sleep any of these waits replaced.
+    const int WaitForCallbackTimeoutSeconds = 60;
+}
+
+void Executor::NotifyCallback(const Safir::Dob::CallbackId::Enumeration callback)
+{
+    ++m_callbackCounts.at(callback);
+
+    if (m_isWaitingForCallback &&
+        callback == m_waitingForCallback &&
+        m_callbackCounts.at(callback) >= m_waitingForOccurrence)
+    {
+        EndWaitForCallback(L"callback arrived");
+    }
+}
+
+
+void Executor::BeginWaitForCallback(const DoseTest::ActionPtr& action)
+{
+    if (!m_isActive)
+    {
+        //An inactive partner has no consumers to deliver anything to, so waiting
+        //could only ever time out.
+        std::wcout << "WaitForCallback: partner is not active, not waiting" << std::endl;
+        m_actionReceiver.SendAck();
+        return;
+    }
+
+    if (action->WaitForCallbackId().IsNull())
+    {
+        //Deliberately logged through lout rather than to the console: lout is the
+        //output that gets diffed against the expected results, so a testcase with a
+        //malformed wait in it fails loudly instead of quietly not waiting.
+        lout << "WaitForCallback action without a WaitForCallbackId!" << std::endl;
+        m_actionReceiver.SendAck();
+        return;
+    }
+
+    const Safir::Dob::CallbackId::Enumeration callback = action->WaitForCallbackId().GetVal();
+
+    //Which occurrence of the callback to wait for, counting per testcase. A
+    //testcase with several phases sees the same callback once per phase, so its
+    //waits ask for occurrence 1, 2, 3 and each waits for its own. Nothing is
+    //consumed and no state is mutated - the wait is simply the condition "this has
+    //happened at least this many times" - so a wait means the same thing however
+    //many other waits the testcase has, which is what makes it readable on its own.
+    const int occurrence = action->WaitForCallbackOccurrence().IsNull()
+        ? 1
+        : action->WaitForCallbackOccurrence().GetVal();
+
+    //If it has happened often enough already we are done, and the testcase does not
+    //pay for the wait at all. Without this the wait would be a race: the callback
+    //the sequencer is asking us to wait for has usually arrived before the
+    //sequencer gets round to sending the wait, and we would sit here until the
+    //timeout waiting for a repeat that is never coming.
+    if (m_callbackCounts.at(callback) >= occurrence)
+    {
+        std::wcout << "WaitForCallback: " << Safir::Dob::CallbackId::ToString(callback)
+             << " has already happened " << m_callbackCounts.at(callback)
+             << " time(s), need " << occurrence << ", not waiting" << std::endl;
+        m_actionReceiver.SendAck();
+        return;
+    }
+
+    std::wcout << "WaitForCallback: waiting up to " << WaitForCallbackTimeoutSeconds
+         << " seconds for "
+         << Safir::Dob::CallbackId::ToString(callback) << " occurrence " << occurrence
+         << " (seen " << m_callbackCounts.at(callback) << ")" << std::endl;
+
+    m_isWaitingForCallback = true;
+    m_waitingForCallback = callback;
+    m_waitingForOccurrence = occurrence;
+
+    m_waitForCallbackTimer.expires_after(std::chrono::seconds(WaitForCallbackTimeoutSeconds));
+    m_waitForCallbackTimer.async_wait([this](const boost::system::error_code& error)
+    {
+        if (!error && m_isWaitingForCallback)
+        {
+            EndWaitForCallback(L"TIMED OUT");
+        }
+    });
+}
+
+
+void Executor::EndWaitForCallback(const std::wstring& reason)
+{
+    std::wcout << "WaitForCallback: done waiting for "
+         << Safir::Dob::CallbackId::ToString(m_waitingForCallback)
+         << " occurrence " << m_waitingForOccurrence
+         << ", seen " << m_callbackCounts.at(m_waitingForCallback)
+         << " (" << reason << ")" << std::endl;
+
+    m_isWaitingForCallback = false;
+    m_waitForCallbackTimer.cancel();
+
+    //Acknowledge either way. A wait that gives up must not hold up the sequencer:
+    //the missing callback will show up as missing output in the testcase diff,
+    //which is a test failure rather than a hung run.
+    m_actionReceiver.SendAck();
+}
+
+
+void Executor::ResetCallbackCounts()
+{
+    if (m_isWaitingForCallback)
+    {
+        //Cannot normally happen: the sequencer is blocked on the acknowledgement we
+        //are withholding, so it cannot have sent us a Reset.
+        std::wcout << "WaitForCallback: Reset while still waiting!" << std::endl;
+        EndWaitForCallback(L"Reset");
+    }
+
+    std::fill(m_callbackCounts.begin(), m_callbackCounts.end(), 0);
 }
 
 

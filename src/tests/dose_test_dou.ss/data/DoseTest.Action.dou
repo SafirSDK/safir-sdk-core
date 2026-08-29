@@ -20,6 +20,37 @@
             <type>Int32</type>
         </member>
         <member>
+            <summary>
+                The callback that a WaitForCallback action waits for. Separate from
+                ActionCallback, which means something else entirely: an action carrying
+                ActionCallback is registered to be run when that callback happens.
+
+                Only meaningful for the callbacks the Dob delivers to a consumer.
+                OnDoDispatch and OnStopOrder are counted too, but the executor runs
+                the dispatch callback actions for itself and for each of its three
+                consumers, so an OnDoDispatch count goes up by four per dispatch and
+                waiting on it would not mean what it says.
+            </summary>
+            <name>WaitForCallbackId</name>
+            <type>Safir.Dob.CallbackId</type>
+        </member>
+        <member>
+            <summary>
+                Which occurrence of WaitForCallbackId to wait for, counting from 1 and
+                counted per testcase (the count restarts at each Reset). Defaults to 1.
+
+                A testcase that goes through several phases will see the same callback
+                once per phase - 518-huge_entity gets three OnResponses - so its waits
+                say 1, 2 and 3 and each waits for its own. Nothing is consumed and no
+                state is mutated: the condition is simply that the callback has now
+                happened at least this many times, so a wait means the same thing no
+                matter which other waits the testcase does or does not have, and can be
+                read on its own.
+            </summary>
+            <name>WaitForCallbackOccurrence</name>
+            <type>Int32</type>
+        </member>
+        <member>
             <name>PrintString</name>
             <type>String</type>
             <maxLength>5000</maxLength>

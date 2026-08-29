@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2006-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -41,10 +41,16 @@ class Consumer implements
 
     private final String PREFIX = "Consumer ";
 
+    /**
+     * callbackNotifier is called for every callback delivered to this consumer, so
+     * the Executor can count callbacks and satisfy a pending WaitForCallback.
+     */
     public Consumer(int consumerNumber,
                     String connectionName,
-                    String instance)
+                    String instance,
+                    java.util.function.Consumer<com.saabgroup.safir.dob.CallbackId> callbackNotifier)
     {
+        m_callbackNotifier = callbackNotifier;
         m_cleanable = ResourceHelper.register(this,() -> {
                 instanceCount.decrementAndGet();
             });
@@ -154,6 +160,10 @@ class Consumer implements
 
     public void executeCallbackActions(com.saabgroup.safir.dob.CallbackId callback)
     {
+        // Every callback delivered to this consumer passes through here, which makes
+        // it the one place the Executor needs to hear about.
+        m_callbackNotifier.accept(callback);
+
         for (com.saabgroup.dosetest.Action action : m_callbackActions.get(callback))
         {
             com.saabgroup.dosetest.ActionEnum actionKind = action.actionKind().getVal();
@@ -1243,6 +1253,7 @@ class Consumer implements
 
     private com.saabgroup.safir.application.BackdoorKeeper m_backdoorKeeper = new com.saabgroup.safir.application.BackdoorKeeper(m_connection);
     private final int m_consumerNumber;
+    private final java.util.function.Consumer<com.saabgroup.safir.dob.CallbackId> m_callbackNotifier;
     private final String m_connectionName;
     private final String m_connectionInstance;
 
