@@ -1151,11 +1151,25 @@
 
       </Object>
     </DoseTest.Action>
+    <!-- Create: the handler on partner 2 takes the request, partner 1 gets its
+         response, and the subscriber on partner 0 sees the entity appear. -->
     <DoseTest.Action index="1">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>20</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>2</Partner>
+      <WaitForCallbackId>OnCreateRequest</WaitForCallbackId>
     </DoseTest.Action>
     <DoseTest.Action index="2">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>1</Partner>
+      <WaitForCallbackId>OnResponse</WaitForCallbackId>
+      <WaitForCallbackOccurrence>1</WaitForCallbackOccurrence>
+    </DoseTest.Action>
+    <DoseTest.Action index="3">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnNewEntity</WaitForCallbackId>
+    </DoseTest.Action>
+    <DoseTest.Action index="4">
       <ActionKind>UpdateRequest</ActionKind>
       <Partner>1</Partner>
       <Consumer>1</Consumer>
@@ -2245,11 +2259,24 @@
 
       </Object>
     </DoseTest.Action>
-    <DoseTest.Action index="3">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>20</SleepDuration>
+    <!-- Update: same three, for the update. -->
+    <DoseTest.Action index="5">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>2</Partner>
+      <WaitForCallbackId>OnUpdateRequest</WaitForCallbackId>
     </DoseTest.Action>
-    <DoseTest.Action index="4">
+    <DoseTest.Action index="6">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>1</Partner>
+      <WaitForCallbackId>OnResponse</WaitForCallbackId>
+      <WaitForCallbackOccurrence>2</WaitForCallbackOccurrence>
+    </DoseTest.Action>
+    <DoseTest.Action index="7">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnUpdatedEntity</WaitForCallbackId>
+    </DoseTest.Action>
+    <DoseTest.Action index="8">
       <ActionKind>DeleteRequest</ActionKind>
       <Partner>1</Partner>
       <Consumer>2</Consumer>
@@ -2259,9 +2286,22 @@
         <instanceId>0</instanceId>
       </EntityId>
     </DoseTest.Action>
-    <DoseTest.Action index="5">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>20</SleepDuration>
+    <!-- Delete: same three, for the delete. -->
+    <DoseTest.Action index="9">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>2</Partner>
+      <WaitForCallbackId>OnDeleteRequest</WaitForCallbackId>
+    </DoseTest.Action>
+    <DoseTest.Action index="10">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>1</Partner>
+      <WaitForCallbackId>OnResponse</WaitForCallbackId>
+      <WaitForCallbackOccurrence>3</WaitForCallbackOccurrence>
+    </DoseTest.Action>
+    <DoseTest.Action index="11">
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnDeletedEntity</WaitForCallbackId>
     </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>

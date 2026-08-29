@@ -79,6 +79,18 @@ refuses to run them if it is missing (override with `--ignore-multicast-check`;
 a typical dev-host fix is `sudo ip route add 239.0.0.0/8 dev lo`). The dose tests
 are a separate installed suite (`run_dose_tests`).
 
+**Writing a dose testcase: wait, don't sleep.** A `Sleep` in a testcase is not
+just slow, it is a *deadline* — the `Reset` that ends a testcase closes the
+connection and abandons anything still in flight, so whatever the sleep was
+covering has exactly that long to happen. That is what made `215-huge_service`
+the most frequent flake in CI. Use the `WaitForCallback` action instead: it names
+a callback and an occurrence number and blocks the sequencer until the partner
+sees it, with a 60 s backstop. It is partner-scoped, so give it a `<Partner>` and
+no `<Consumer>`, and count occurrences per testcase, not per phase. Sleeps that
+exist to prove *nothing further* arrives are the legitimate remaining use. See
+TEST_STATUS.md → "Waiting instead of sleeping" for the semantics and the reasons
+they are what they are.
+
 Known intermittent test failures — which tests flake, why, and how to tell a
 flake from a regression — are catalogued in [TEST_STATUS.md](TEST_STATUS.md). A
 single red CI run is usually a known flake; check there before treating it as a

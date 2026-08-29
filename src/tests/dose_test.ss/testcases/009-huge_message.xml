@@ -300,9 +300,17 @@
         </Watt64ArrayMember>
       </Object>
     </DoseTest.Action>
+    <!-- Wait for the subscriber on partner 0 to actually get the message rather
+         than sleeping for a fixed time. The message is ~10Mb, because the sequencer
+         fills the null BinaryMember, so how long it takes depends on the machine and
+         the network. A wait that is never satisfied gives up after a fixed backstop
+         (see the partners' WaitForCallbackTimeoutSeconds) so that a message that
+         never arrives fails the testcase with the usual missing output instead of
+         hanging. -->
     <DoseTest.Action index="1">
-      <ActionKind>Sleep</ActionKind>
-      <SleepDuration>30</SleepDuration>
+      <ActionKind>WaitForCallback</ActionKind>
+      <Partner>0</Partner>
+      <WaitForCallbackId>OnMessage</WaitForCallbackId>
     </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>

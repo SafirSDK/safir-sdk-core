@@ -68,30 +68,39 @@ and read the `*.junit.xml`. Note the dose junit `time="0"` is a hardcoded litera
 ## Known flaky tests
 
 **Seen** and **Last seen** come from a scan of the 100 most recent `ci.yml` runs
-(2026-06-16 → 2026-08-25), of which **85 produced a "Test results" Check** and are
-therefore countable; the rest were cancelled or died before the tests. 31 of those
-85 runs — a bit over a third — had at least one failing test case. Counts are per
+(2026-06-16 → 2026-08-26) plus every run since, of which **89 produced a "Test
+results" Check** and are therefore countable; the rest were cancelled or died
+before the tests. 32 of those 89 runs — a bit over a third — had at least one
+failing test case. Counts are per
 *run*, not per test execution (one run covers ~34 dose executions across the
 matrix). Update both columns when you see a fresh occurrence; an entry whose
 last-seen keeps receding is a candidate for the dormant list.
 
-`215-huge_service` dominates: 22 of 85, more than everything else in the table
-combined, so a lone `215-huge_service` red is by far the single most likely thing
-you'll see.
-Its rate is also **rising** — 11 of 58 runs in June, 11 of 25 in August — which is
-worth watching rather than assuming it is stationary.
+`215-huge_service` dominated this list — 23 of 89, more than everything else in it
+combined, and its rate was rising (11 of 58 runs in June, 12 of 27 in August). It
+was **fixed on 2026-08-27**, so those counts are the historical record rather than
+a prediction. Until several full-matrix runs have gone by without it, treat its
+absence as unconfirmed rather than proven.
+
+**Clean full-matrix runs since the fix: 2** — runs 33163796206 and 33225373571
+(2026-08-28 and 2026-08-29), each 59 of 60 jobs green with one skipped, all 30
+dose legs and all 8 multicomputer legs included. Increment this when you see
+another; it is the only evidence that will turn "believed fixed" into "fixed".
+Two is still thin: at the historical 23-in-89 rate, two consecutive clean runs
+happen a bit better than half the time by chance alone. Somewhere around five
+starts being hard to explain away.
 
 `Communication_ResetTest` used to head this list; it was **fixed on 2026-06-30**
 and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it.
 
 | Test | Where | Platform | Seen | Last seen | Character |
 |---|---|---|---|---|---|
-| `215-huge_service` | multicomputer dose (overlay) | any | **22/85** | 2026-08-25 (32828816218) | Huge round-trip occasionally not delivered |
-| `518-huge_entity` | multicomputer dose (overlay) | any | 3/85 | 2026-08-20 (32348188649) | Same huge-message family as 215 |
-| `155-pending_service_registration_same_node` | dose | any | 3/85 | 2026-08-20 (32348188649) | "Pending registration" family |
-| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | 2/85 | 2026-08-21 (32461278855) | Light-node detach/reattach |
-| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/85 | 2026-08-18 (32143455257) | "Pending registration" family |
-| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | 1/85 | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
+| `215-huge_service` | multicomputer dose (overlay) | any | **23/89** | 2026-08-26 (32999608623) | **Believed fixed 2026-08-27** — the sleep it raced is gone; see below |
+| `518-huge_entity` | multicomputer dose (overlay) | any | 3/89 | 2026-08-20 (32348188649) | Same family as 215, **fixed the same way 2026-08-27** |
+| `155-pending_service_registration_same_node` | dose | any | 3/89 | 2026-08-20 (32348188649) | "Pending registration" family, **converted to waits 2026-08-28** — see below |
+| `2007-lightnode_limited_entity_on_normal_node` | multicomputer dose | any | 2/89 | 2026-08-21 (32461278855) | Light-node detach/reattach |
+| `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/89 | 2026-08-18 (32143455257) | "Pending registration" family, **converted to waits 2026-08-28** — see below |
+| `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | 1/89 | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
 | `run_restart_nodes_tests` (hang) | slow suite | any | n/a | 2026-08-23 (32637686999) | Hangs at startup → TIMEOUT → **fails the job**; job-level, not in the junit counts |
 
 **Two names that used to appear in this table are deliberately absent:
@@ -282,8 +291,85 @@ as the largest, most timing-sensitive round-trip (huge fragmented request *plus*
 response leg), so it's the one most likely to lose a fragment or miss its window on
 a single bad run. Dob node comms are UDP unicast.
 
-**If it recurs:** look at the huge-service round-trip retransmit/timeout over the
-overlay. Otherwise a re-run should pass. `518-huge_entity` is the same family.
+**What the payload actually is:** the testcase XML contains no huge data. The
+Sequencer fills any *null* `BinaryMember` with **10 MB** before sending
+(`Sequencer.cpp:64-80`), which is exactly why the "huge" tests omit the member and
+their "complex" siblings (`214`, `517`) include an empty `<BinaryMember/>` and stay
+small.
+
+**The binding deadline is the testcase `Sleep`, not the request timeout** (found
+2026-08-27, run 32999608623). `DoseTest.ComplexGlobalService` declares a **120 s**
+request timeout (`dose_test_dou.ss/data/DoseTest.ComplexGlobalService-Safir.Dob.RequestTimeoutProperty.dom`),
+raised from the 7 s default for exactly this reason — but it can never be reached.
+The action after the sleep is `Reset`, and the partner log shows `Performing Reset`
+→ `Calling Close` → `Calling Open`: the connection is torn down when the sleep
+expires, abandoning anything in flight. So the real budget for a 10 MB round trip
+was the **20 s** sleep, while its siblings `009` and `518` had 30 s. Raising the
+`.dom` timeout would have done nothing.
+
+**Evidence it is slow rather than lost.** Testcase duration on run 32999608623,
+measured from `Running testcase:` timestamps in the job logs:
+
+| platform | 215 → 300 |
+|---|---|
+| vs2022 | 22.7 s |
+| ubuntu-noble-amd64 | 22.0 s |
+| ubuntu-noble-arm64 | 22.8 s |
+| **vs2026 (the failure)** | **28.1 s** |
+
+A passing run is 20 s sleep + ~2 s overhead; the failing one spent ~8 s of non-sleep
+time, i.e. the transfer was labouring and the window closed on it.
+
+**Why "the message was lost" was the obvious reading.** `Reset` deletes the
+consumers and deregisters the handler, so a late request has nowhere to land and is
+never logged — the teardown destroys the evidence. Partner 0's log genuinely shows
+no `OnServiceRequest`, but that is equally consistent with "arrived at 21 s". Do not
+read the absence as proof of loss. Note also that keeping state alive to catch late
+callbacks is **not** an option: the fresh state `Reset` provides is part of the test
+strategy, and weakening it would trade this flake for order-dependent ones.
+
+**Fixed 2026-08-27 by removing the deadline** rather than enlarging it. The
+testcase no longer sleeps at all: it waits for the callbacks it actually needs
+(`OnServiceRequest` on partner 0, `OnResponse` on partner 2) using the
+`WaitForCallback` action added the same day. The round trip now has 60 s to
+complete instead of 20, and normally costs a couple of seconds rather than the
+whole sleep. `518-huge_entity`, `517-complex_entity`, `009-huge_message` and
+`369-pending_and_override_with_instances` were converted the same way.
+
+**This flake cannot recur in the same form** — there is no fixed window left for a
+slow transfer to overrun. What can still happen is the 60 s backstop expiring, and
+it looks quite different: the partner's `.output.txt` says `WaitForCallback: done
+waiting for OnServiceRequest occurrence 1 (TIMED OUT)`, while the junit diff is the
+same missing-output one as before. **If you see that, don't go hunting for a lost
+message** — it means a 10 MB round trip took over a minute. The answer is either to
+raise `WaitForCallbackTimeoutSeconds` (one constant, in the three partner
+Executors) or to find out what the overlay is doing.
+
+**Confirmed slow, not lost** (run 33163796206, 2026-08-28). The partner output
+shows the wait *actually blocking* on all four multicomputer legs — vs2022,
+vs2026, ubuntu-noble-amd64 and ubuntu-noble-arm64 — and on all four it is the
+same one:
+
+```
+WaitForCallback: waiting up to 60 seconds for OnServiceRequest occurrence 1 (seen 0)
+WaitForCallback: done waiting for OnServiceRequest occurrence 1, seen 1 (callback arrived)
+```
+
+Every other wait in the whole suite printed `has already happened N time(s),
+need N, not waiting` — satisfied by a callback that had arrived before the wait
+action did. So the 10 MB service request over the overlay is the *only* thing in
+the dose suite slow enough to make the sequencer stop, and it is slow enough
+every time, on every platform. That is the strongest evidence yet that the
+request was always arriving and the old 20 s sleep was simply the wrong budget
+for it: the transfer that 215 raced is not an occasional straggler, it is
+routinely the slowest thing in the run.
+
+It also means this wait is load-bearing rather than decorative, so if the
+mechanism is ever weakened, 215 is where it will show up first.
+
+**Still unexplained:** *why* the transfer was ~4x slower on the run that failed.
+Waiting for the callback tolerates that; it does not diagnose it. If the huge tests
+start timing out, that is the thing to chase.
 
 ## Errors reported through `syslog_output` and `safir_control.0.returncode`
 
@@ -404,6 +490,120 @@ compact one-line dump of every `node_info` entry (index, id, name, alive/dead) p
 you see this failure again, grab that line** — it is the missing evidence #613 is
 waiting for.
 
+## Waiting instead of sleeping
+
+Testcases used to wait only by sleeping, and those sleeps were unconditional: 659 s
+of them per dose run, paid whether or not anything was slow. Worse, a sleep was
+also the *deadline* for whatever it waited for, because the `Reset` that follows
+closes the connection and abandons anything still in flight. That is what made
+`215-huge_service` the most frequent flake in CI.
+
+The `WaitForCallback` action (added 2026-08-27) lets a testcase wait for the event
+instead. The partner withholds the three-byte `"ok"` the sequencer is already
+blocking on, so no sequencer change was needed, and acknowledges when the callback
+arrives or after a 60 s backstop. Five testcases were converted for time — `215`,
+`518`, `517`, `009` and `369` — removing **260 s of sleeping per dose run**
+(659 → 399). Three more were converted for reliability, where the point was never
+the seconds: `361` (which keeps its sleeps, see its section below), and `155` and
+`353`, which between them gave back another 2.5 s.
+
+Four things about it are worth knowing before touching it:
+
+- **Occurrences are numbered, not consumed.** `WaitForCallbackOccurrence` says
+  *which* occurrence to wait for, counted per testcase. A testcase with several
+  phases sees the same callback once per phase — `518` gets three `OnResponse` —
+  and without the number every wait after the first is satisfied by the first
+  phase's callback, waits for nothing, and still passes. The failure is invisible
+  in the test output, so this is not an optimisation to simplify away.
+- **The counts live on the Executor, not the Consumer**, and are cleared only by
+  `Reset`. `369` closes and reopens a partner three times mid-testcase; per-Consumer
+  counts would be wiped each time and every occurrence number in it would be wrong.
+- **The acknowledgement is deferred to the partner's event loop**, not written from
+  inside the callback that satisfied the wait — `boost::asio::post` in C++, an
+  `m_ackPending` flag flushed at the bottom of the main loop in C# and Java. This is
+  not tidiness. Dob is not necessarily finished acting on a callback when it returns
+  to the app: an injection is only committed to the real entity state *after* the
+  injection handler's callback returns (`dose_controller.cpp`, `AcceptInjection`
+  runs well below `InvokeOnInjectedUpdatedEntityCb`). Acknowledging from inside the
+  callback would release the sequencer while the partner was still upstream of that
+  commit, so a testcase that waits for a callback and then reads the result back
+  would be racing the tail of the very dispatch it waited for. Added 2026-08-27 for
+  `361`; if it is ever reverted, that whole class of wait-then-read conversion
+  silently becomes unsound.
+- **A `WaitForCallback` is intercepted in `HandleAction` before the consumer
+  routing**, in all three partner languages. It is the one action whose ack is
+  withheld, so it is also the one action that *hangs the sequencer* if the routing
+  drops it, rather than being quietly ignored — and every branch below can drop it:
+  a consumer's `ExecuteAction` ignores kinds it has no case for, and both consumer
+  branches are gated on `m_isActive`. Authoring a wait with a `<Consumer>` or an
+  `ActionCallback` set therefore used to cost ten minutes of watchdog and produce no
+  explanation. It now logs `WaitForCallback is partner scoped, ignoring the Consumer
+  member` through `lout`/`Logger`, so it fails the output diff in seconds, the same
+  way a missing `WaitForCallbackId` already did. Added 2026-08-27.
+
+What is left in the 399 s mostly cannot be converted: sleeps that exist to show
+that *nothing further* arrives have no event to wait for, `430`/`431` are testcases
+whose whole point is a slow subscriber, and `815` waits on dope writing persistence,
+which produces no partner callback.
+
+**Measured effect**, dose job wall clock, run 32999608623 (2026-08-26, before) vs
+run 33163796206 (2026-08-28, after), all 30 legs:
+
+| platform | before | after |
+|---|---|---|
+| ubuntu-noble-**arm64** | 27-28 min | **13-14 min** |
+| ubuntu-noble-amd64, debian-trixie, vs2022, vs2026 | 18-20 min | 14-15 min |
+
+The ~4.5 min every platform gained is the 260 s of removed sleeping, which lands
+within seconds of the predicted figure. The further ~9 min on arm64 is the separate
+retirement of the sequencer's 4x ARM multiplier (`Sequencer/ActionSender.h`), which
+had been predicted to be worth 7.6 min — so slightly better than the arithmetic,
+not worse. arm64 is now the *fastest* dose platform rather than the slowest, which
+is the point the multiplier's retirement rested on: it dated from a BeagleBone
+Black, and the GitHub-hosted arm64 runner is not a slow machine.
+
+Both dose jobs have `timeout-minutes: 55`, so the margin went from roughly 2x to
+roughly 4x. **The risk of the multiplier's removal runs the other way**: arm64 now
+gets 140/40 ms of settling between actions instead of 560/160 ms. If arm64-only
+flakiness appears, suspect that first, and reinstate a smaller multiplier with a
+measurement behind it rather than the old guess. Run 33163796206 showed none.
+
+### The two pending-registration conversions (`155`, `353`), 2026-08-28
+
+These are the "pending registration" family in the table above, and converting
+them turned up something the sleeps were hiding: **the sleep was not the only
+race, and in `353` it was not even the important one.**
+
+A pending registration only stays pending if the registering node already knows
+somebody else holds the handler. Both testcases register a handler on one
+partner, then register the *same* handler pending on another and expect the
+second to queue behind the first. Nothing enforced the ordering — `155` had no
+wait at all between the two registrations, and `353` had 0.5 s. Lose that race
+and the second partner wins the handler outright instead of going pending, and
+the whole OnUnregistered → OnCompletedRegistration → OnRegistered chain the
+testcase exists to check never happens. That does not read as a timing wobble in
+the output; it reads as a different test.
+
+`353` also had **nothing whatsoever** between the unregister and the
+`UnsubscribeRegistration` that ends it, so the entire completion chain — four
+callbacks, with a cross-node hop in the middle — was racing the unsubscribe that
+stops partner 0 hearing any of it.
+
+Both now wait on the actual events, on the partner that observes them, and both
+wait for the *last* callback in a chain rather than the first. `155` waits for
+partner 1's `OnCompletedRegistration`, then partner 0's `OnRegistered`
+occurrence 1, and finally `OnRegistered` occurrence 2 in place of the old 2 s
+sleep. `353` waits for partner 2's `OnInitialInjectionsDone`, then partner 0's
+`OnRegistered`, and adds a trailing wait for partner 0's
+`OnInitialInjectionsDone` where there had been nothing.
+
+Note `353` needs *two* waits where the sleep was one, because the sleep was
+covering two things that finish independently on two different nodes: partner 2's
+own registration completing locally, and that registration reaching partner 0.
+A single wait on either one does not imply the other.
+
+First green CI run: 33225373571 (2026-08-29), all 30 dose legs.
+
 ## Fixed / dormant
 
 Kept here because these were long-standing, well-known reds. For a **fixed** one, a
@@ -468,7 +668,7 @@ been observed; #614 says a repro comes first.
 > The code-level line references above were accurate as of the 2026-06/07
 > investigation; verify against current source before acting on them.
 
-### `361-inject_update_and_delete_for_existing_entity` — dormant, NOT fixed
+### `361-inject_update_and_delete_for_existing_entity` — dormant, race narrowed 2026-08-27
 
 `src/tests/dose_test.ss/testcases/361-inject_update_and_delete_for_existing_entity.xml`.
 Reported as issue **#397** (2022-08-30, closed 2026-08-25 under the tracking policy
@@ -481,10 +681,37 @@ where the expected output has a full `Read entity` block — or it is there but 
 showing `First inject` where `Second inject` was expected. Both partners diff
 identically.
 
-**Status: not fixed.** 94c1b94da (2022-08-30) added sleeps after the injections to
-absorb slow-VM timing; the test failed again six days later with the same race, so
-that fix is known **not** to have held. It has simply not been observed since —
-zero occurrences across the last 40 `ci.yml` runs (2026-06-28 → 2026-08-25), and
-nothing on GHA at all. Likely the faster runners hide it rather than the race being
-gone. If it reappears, do not reach for more sleeps: the real question is what
-guarantees the injected update has reached partner 0 before the read-back runs.
+**History.** 94c1b94da (2022-08-30) added sleeps after the injections to absorb
+slow-VM timing; the test failed again six days later with the same race, so that
+fix is known **not** to have held. It has not been observed since — zero
+occurrences across the last 40 `ci.yml` runs (2026-06-28 → 2026-08-25), and nothing
+on GHA at all. Likely the faster runners hide it rather than the race being gone.
+
+**Changed 2026-08-27: each 1 s sleep now has a `WaitForCallback` in front of it.**
+Note what the sleep was actually covering. Partners 0 and 1 are on the same node in
+*every* configuration, so the injection reaching the handler is not a network hop —
+it is partner 0 being *scheduled*, and on a CI machine running fifteen partner
+processes a partner can easily go a second without running. That is a delay a fixed
+sleep cannot bound and a wait can, so each injection is now followed by a wait on
+partner 0 for its `OnInjected{New,Updated,Deleted}Entity`.
+
+**This is a narrowing, not a fix, and the sleeps stay on purpose.** The read-backs
+are on partners 1 and 2, and partner 2 is on a *different* node in the multinode
+configuration (`run_dose_tests.py.in`, the "start second node" block). Once partner
+0 has accepted the injection the state still has to be distributed back to partner
+2's node, and partner 2 has no subscription in this testcase, so there is no
+callback on it to wait for. The retained 1 s now covers only that distribution
+instead of being spent waiting for partner 0 to be scheduled — which is most likely
+where it was going. Closing the remainder properly would mean subscribing on
+partner 2 and waiting for `OnUpdatedEntity`, which adds entity-callback blocks to
+partner 2's expected output and changes what the testcase demonstrates; that was
+judged not worth it for a flake nobody has seen in four years.
+
+**None of this is confirmed by CI, and cannot be.** With zero recent occurrences
+there is no red to turn green — a green run here is not evidence. It is a reasoned
+improvement, and if the failure does reappear the diagnosis above is the thing to
+re-examine, not the sleep length.
+
+Converting this testcase is also what forced the acknowledgement to be deferred to
+the partner's event loop rather than sent from inside the callback; see "Waiting
+instead of sleeping" above for why a wait-then-read is unsound without it.
