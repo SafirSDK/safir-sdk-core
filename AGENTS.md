@@ -178,11 +178,44 @@ pushes, `render-docs` renders the guides, and `workflow-lint` runs zizmor.
   bare `apt-get install`, `choco install` or `pip install`. It lives one level
   above the actions because `GITHUB_ACTION_PATH` resolves to the directory of the
   action doing the sourcing, so a shared helper cannot sit inside any one of
-  them. One policy for all of them — 13 attempts, 30s doubling to a 15-minute
-  cap, ~2 hours total — deliberately uniform so there is a single number to
-  reason about. On Linux retry `update`+`install` as one unit: a stale-index 404
-  is not fixed by re-running `install`. See TEST_STATUS.md → "Third-party package
-  fetches" for the failures that prompted this.
+  them. The policy is **a wall-clock budget, or 13 attempts, whichever runs out
+  first**, spaced 30s doubling to a 15-minute cap. The budget is wall clock
+  rather than the sum of the sleeps because a hung install costs whatever its own
+  timeout is, which dwarfs the sleeps; bounding the sleeps let run 33111295598
+  spend six hours in one setup step.
+- **THE INVARIANT: a job's retry budget must be smaller than its
+  `timeout-minutes`, with room for the work the job still has to do.** Break it
+  and the give-up path is unreachable — the job is killed mid-retry, and GitHub
+  reports that as **cancelled**, which reads like somebody pressed a button and
+  hides the real cause. Run 33176126427 lost a dose leg exactly that way: a 2-hour
+  budget inside a 60-minute job, retrying a `packages.microsoft.com` 403 until the
+  clock ran out. **If you change a `timeout-minutes`, check this.** The budget is
+  therefore per context, set through `RETRY_BUDGET_SECONDS`: 2700s (45 min) by
+  default, which fits every test job, and 7200s in `setup-build-env` because
+  `build` gates the whole matrix and waiting there can save re-running everything
+  downstream. `build` and `build-examples` carry explicit `timeout-minutes` for
+  no other reason than to keep the inequality true — without one they inherit
+  GitHub's 6-hour default and nothing holds them to it.
+- **Do not let `apt-get update` fail on repos we never install from.** It fails
+  the whole command if *any* configured repo is unreachable, and the hosted Ubuntu
+  images ship `azure-cli` and `microsoft-prod` source lists that have nothing to do
+  with this build. Both setup actions delete any source list mentioning
+  `packages.microsoft.com` before updating, matched by content rather than
+  filename because the images rename them.
+- **Retry each package separately, and keep the retried unit as small as the
+  thing that fails.** Anything conditioned on `RETRY_ATTEMPT` — notably the `-f`
+  that `setup-build-env` adds to `choco` from the second attempt on — applies to
+  the whole unit, so batching independent packages means one package's transient
+  failure changes how all the others are installed next time round. That is what
+  broke run 33111295598: a sourceforge 404 on `doxygen.install` made attempt 2
+  re-run the batch with `-f`, forcing a reinstall of `dejavufonts`, whose install
+  script does a flagless `Shell.Application` `CopyHere` into the Fonts folder —
+  which, with the fonts already installed by attempt 1, waits forever on an
+  overwrite dialog that no runner can answer. Also pass `choco` an
+  `--execution-timeout` well under its 2700s default so a hang costs minutes.
+  The Linux exception: retry `update`+`install` as one unit, because a
+  stale-index 404 is not fixed by re-running `install`. See TEST_STATUS.md →
+  "Third-party package fetches" for the failures that prompted all this.
 
   Covered so far: `setup-build-env` (apt, choco, pip) and `setup-test-env` (apt,
   pip). **Still bare**, and worth wrapping if they ever bite: the four Debian

@@ -65,6 +65,15 @@ jobs:
     name: ${{ matrix.platform }}-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
 
+    # Required by the invariant in retry.sh: a job that retries must time out
+    # LATER than its retry budget, or the give-up path is unreachable and the
+    # job is killed mid-retry instead - which GitHub reports as "cancelled" and
+    # nobody can diagnose. setup-build-env budgets 7200s (2h), the slowest build
+    # observed is vs2026 at 67 min, so 4 hours clears both with room. Without
+    # this the job inherited GitHub's 6 hour default, which is how run
+    # 33111295598 managed to spend six hours in a single setup step.
+    timeout-minutes: 240
+
     # Most rows run directly on the host runner. The Debian row sets
     # matrix.container to a Debian image so the build runs against Debian's real
     # toolchain/libs; an empty image here means "no container" (run on host).
@@ -286,6 +295,10 @@ jobs:
     name: examples-${{ matrix.platform }}-${{ matrix.arch }}
     needs: build
     runs-on: ${{ matrix.runner }}
+
+    # Same invariant as build: setup-build-env's 7200s budget plus ~7 minutes of
+    # actual work. See retry.sh.
+    timeout-minutes: 150
 
     container:
       image: ${{ matrix.container }}

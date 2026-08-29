@@ -134,13 +134,59 @@ these so you don't hunt for a nonexistent test regression:
     `openjdk-21` (`21.0.12+8-1~24.04_arm64.deb` no longer on ports.ubuntu.com —
     the archive had moved to a newer point release while the runner image's
     index was stale), exit 100.
+  - **Run 33111295598** (`vs2026-amd64`), 2026-08-27: the retry wrapper caused
+    this one, so read it before touching `retry.sh`. sourceforge 404'd
+    `doxygen.install` on attempt 1 — an ordinary transient — so attempt 2 re-ran
+    the whole `choco install` batch with `-f`. That forced a reinstall of
+    `dejavufonts`, which had installed fine 90 seconds earlier, and its install
+    script ends in a flagless `Shell.Application` `CopyHere` into the Fonts
+    folder. With the fonts already present that raises an overwrite confirmation
+    dialog, and a runner has no desktop to answer it, so every attempt from 2 on
+    hung for choco's full 2700 s. The step got through 7 of its 13 attempts
+    before the job hit GitHub's default 6-hour limit. Two lessons, both now
+    fixed: the "~2 hour" budget bounded only the *sleeps* (45 min of the six
+    hours) while unbounded attempt time did the rest, and batching independent
+    packages meant one package's failure changed how the others were installed.
+    Packages are now retried one at a time, with `--execution-timeout 600`, and
+    the budget is wall clock. **Confirmed fixed** by run 33163796206
+    (2026-08-28): `vs2026-amd64` finished "Set up build environment" and the
+    whole matrix ran, after this same step had eaten six hours and been
+    cancelled on the two runs before it.
+  - **Run 33176126427** (`multinode-ubuntu-noble-amd64-amd64-java-cpp-dotnet-java-cpp`),
+    2026-08-28: 58 jobs green, one cancelled at exactly its 60-minute
+    `timeout-minutes` in "Set up test environment". `packages.microsoft.com`
+    served **403 Forbidden** for the `azure-cli` and `ubuntu/24.04/prod` indexes
+    for about an hour. We install nothing from either — they are preinstalled in
+    the hosted Ubuntu runner image — but `apt-get update` fails if *any*
+    configured repo is unreachable, so the retry wrapper kept re-running
+    `update`+`install` (correctly, by the Linux rule) through 8 attempts and 46
+    minutes until the job clock ran out. No other Linux job in the run saw it, so
+    it was a transient regional 403 on one runner. Two fixes, both now in:
+    the setup actions **delete any source list mentioning
+    `packages.microsoft.com`** before updating, and the retry budget is now
+    per-context so it can no longer exceed the job's timeout (see below).
+
+  **The invariant this taught us:** a job's retry budget must be *smaller* than
+  its `timeout-minutes`. The wrapper's whole point is to fail legibly — "failed
+  after N attempts in Ns, giving up" — but a 2-hour budget inside a 60-minute job
+  can never reach that line. The job is killed mid-retry instead, and that is
+  reported as **cancelled**. Budgets are now 2700s by default and 7200s in
+  `setup-build-env`, and `build`/`build-examples` carry explicit
+  `timeout-minutes` purely to keep the inequality true. **If you change a
+  `timeout-minutes`, check it against the budget.**
 
   Recognising it: the "Test results" Check stays **green but tiny** — #148 shows
   228 tests / 4 files against a normal ~9193 — because the downstream dose,
   multicomputer and slow jobs are *skipped*, not failed. A small green Check next
   to a red run is the fingerprint. Don't read the shrunken test counts as a
   signal, and don't conclude a flake got fixed because it's absent from a run
-  where most of the matrix never executed.
+  where most of the matrix never executed. In 33111295598 the Check reported
+  plain **success** with no dose, slow or multicomputer results at all.
+
+  Note also that a job killed by a *timeout* — GitHub's 6-hour default for
+  `build`, which has no `timeout-minutes` of its own — is reported as
+  **cancelled**, not failed. A run that says "cancelled" without anyone having
+  cancelled it is a job that ran out of time.
 
   It recurred the same evening — **CI #149** (run 32897163638) lost *both* legs at
   once: the same apt 404 byte-for-byte on `ubuntu-noble-arm64`, and doxygen from
