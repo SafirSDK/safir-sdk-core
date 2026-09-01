@@ -1,4 +1,48 @@
 -----------------------------------------------------------------------------------------------------------------------
+2026-09-02 version 7.4.3
+-----------------------------------------------------------------------------------------------------------------------
+
+The biggest change in this release is that the builds have been moved from Jenkins to
+GitHub Actions. This means that we no longer have to maintain our own build machines, and
+that a lot more platform combinations get built and tested on every change than before.
+As a small side effect of this we now also build for 64 bit ARM (aarch64) Linux. There is
+a downside to this too: we no longer provide 32 bit (x86) Debian packages.
+
+It is now possible to run nodes over layer 3 only network interfaces on Linux, such as
+WireGuard or OpenVPN in TUN mode. Previously the address resolver silently skipped such
+interfaces, so safir_control would fail to resolve its own address and never start. The
+Windows interface enumeration has been modernized at the same time.
+
+Note that the default port for the Tracer has changed from 49500 to 39500. The old port is
+inside the dynamic port range on Windows, which meant that it could already be in use by
+something else. If you have configured the port explicitly you are not affected, and if
+you never cared about the port everything should just work the same as before.
+
+Apart from that this release is mostly bugfixes, with the Tracer and TracerViewer that were
+introduced in 7.4 getting most of the attention.
+
+This release fixes the following issues (see http://safirsdkcore.com for details):
+
+#604 Use GitHub Actions for builds
+#605 Add support for building on ARM - if it is really easy with GitHub Actions
+#601 Use upstream qt-advanced-docking-system conan package instead of rolling our own
+#598 Debian packages do not create the tmpfiles stuff
+#606 Resolver ignores L3-only interfaces (WireGuard, OpenVPN TUN) on Linux
+#607 Resolver: modernize Windows interface enumeration (SIO_GET_INTERFACE_LIST -> GetAdaptersAddresses)
+#612 Change Tracer default port from 49500 to something that is not in the Windows dynamic port range
+#610 TracerStatus entity not always updated properly
+#609 TracerView left side list view is not sorted at startup
+#608 TracerViewer bind error should be highlighted in red
+#599 TracerBackdoor is not shut down correctly if Stop is called immediately after Start
+#596 Tracer prefixes do not always appear in the TracerViewer
+#588 safir_web: ERROR log on close frame during large write
+#587 safir_web: generates spurious logs on hard disconnect from client
+#602 SharedMemorySize of values over 2047 Mb fail
+#597 make safir_show_config --version able to run even if it cant find the config files
+#442 Ipc tests sometimes fail in Jenkins
+#434 Communication_ResetTest sometimes fails in Jenkins
+
+-----------------------------------------------------------------------------------------------------------------------
 2026-04-27 version 7.4.2
 -----------------------------------------------------------------------------------------------------------------------
 

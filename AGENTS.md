@@ -314,8 +314,12 @@ Jenkins; cosmetic ALINK `A99999` .dll.policy warnings are dropped).
   debug-runtime-only packaging path is unexercised. Adding it will also surface
   the Windows Defender false positive, which currently only fires on that axis
   (see "Windows Defender false positives" above).
-- **No 32-bit (x86) on GHA**; Jenkins still keeps debian-trixie × x86. Confirm
-  this is an intentional drop, not a silent one.
+- **No 32-bit (x86) on GHA**; Jenkins still keeps debian-trixie × x86. This is
+  a **confirmed intentional drop**, not an oversight — decided 2026-09 and
+  announced in the 7.4.3 release notes, so users are told rather than left to
+  discover it. 7.4.2 was the last release to ship an x86 `.deb`. It could be
+  picked up again, but that is considered unlikely; do not treat it as a gap to
+  be closed. (32-bit *Windows* is a separate, earlier drop — #560 in 7.4.1.)
 - **Generic ctest output not archived** — GHA keeps only JUnit XML + the dose
   `dose_test_output`, not `**/test_output/**`.
 - **Benign Conan "Cache save failed … another job may be creating this cache"
@@ -380,6 +384,12 @@ bump):
    is what keeps the hash out of release artifact names (e.g. the Windows
    installer filename). Tag a later commit and every asset gets a dirty
    `7.4.3-alpha4-...-g<sha>` name.
+5. **For a stable release, merge to `master` afterwards.** The procedure is
+   *tag off `develop`, then merge `develop` into `master`* — which is always a
+   fast-forward, since `develop` only ever moves ahead of `master`. This is why
+   every stable tag is reachable from `master` and why `master`'s tip is the
+   most recent stable release commit. Skip it and `master` silently falls a
+   release behind. Alphas are not merged to `master`.
 
 **Push the tag on its own, not together with the branch.** The tag push carries
 the commits anyway, so `git push origin <branch> <tag>` gains nothing and starts
@@ -412,14 +422,25 @@ automatically gets `--prerelease`.
 
 **Known deltas from the pre-GHA manual releases:** GHA publishes arm64
 ubuntu-noble `.deb`s (Jenkins could not build them) but **no x86
-debian-trixie** `.deb`s — see "No 32-bit (x86) on GHA" above. There is also no
-NuGet publishing step in CI.
+debian-trixie** `.deb`s — see "No 32-bit (x86) on GHA" above. That is the only
+delta.
 
-**Conventions observed so far, in case they matter:** the 7.4.3 alphas were
-tagged off a private feature branch, not `master`, so tagging off `master` is
-*not* an established rule. Note also that `7.4.3-alpha1` was tagged locally but
-never pushed and has no release — it predates the working automation, so the
-first release actually cut this way was `7.4.3-alpha2`.
+**NuGet is not a delta, despite appearances.** There is CPack NuGet packaging
+in the tree (`src/cmake/NuGetPackaging.cmake`, an `EXCLUDE_FROM_ALL` `NuGet`
+install component, `docs/nuget-readme.md`), and no CI step that publishes it —
+but Jenkins never published one either, and no release has ever carried a
+`.nupkg`. It is the unfinished start of #554 (Modernize dotnet interfaces,
+milestone 7.5), whose own notes lean towards shipping nupkgs *in the installer*
+rather than uploading them, so a publishing step may never be the right end
+state. Nothing was lost in the migration.
+
+**Conventions, and one that is easy to get backwards:** you never tag `master`
+directly — tags are cut off `develop` and `master` is fast-forwarded to them
+afterwards (step 5). Alphas are looser: the 7.4.3 alphas were tagged off a
+private feature branch and never merged to `master` at all. Note also that
+`7.4.3-alpha1` was tagged locally but never pushed and has no release — it
+predates the working automation, so the first release actually cut this way was
+`7.4.3-alpha2`.
 
 ### Shared Library ABI Classification
 
