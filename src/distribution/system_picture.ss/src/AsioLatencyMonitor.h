@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -42,16 +42,28 @@ namespace Dob
 {
 namespace Internal
 {
+    /**
+     * Warns when a periodic timer handler runs late, i.e. when the io_context
+     * is not able to dispatch work on time.
+     *
+     * Note what this does and does not measure. The handler is bound to a
+     * strand that this class owns and that nothing else ever posts to, so
+     * there is never anything queued ahead of it: what is measured is the
+     * scheduling latency of the io_context as a whole, not the backlog of any
+     * particular strand. On a multi-threaded io_context an individual strand
+     * can be far behind while this monitor stays silent, so do not read a
+     * quiet monitor as "no queue is backed up".
+     */
     class AsioLatencyMonitor
     {
     public:
         explicit AsioLatencyMonitor(const std::string& identifier,
                                     const std::chrono::steady_clock::duration& warningThreshold,
-                                    boost::asio::io_context::strand& strand)
+                                    boost::asio::io_context& ioContext)
             : m_identifier(identifier)
             , m_tolerance(warningThreshold)
-            , m_strand(strand)
-            , m_timer(m_strand.context())
+            , m_strand(ioContext)
+            , m_timer(ioContext)
             , m_stop(false)
         {
             ScheduleTimer();
@@ -75,32 +87,55 @@ namespace Internal
             }
 
             m_timer.expires_after(std::chrono::seconds(1));
-            m_timer.async_wait([this](const boost::system::error_code& error)
-                               {
-                                   if (error || m_stop)
-                                   {
-                                       return;
-                                   }
 
-                                   const auto latency = std::chrono::duration_cast<std::chrono::milliseconds>
-                                       (std::chrono::steady_clock::now() - m_timer.expiry());
+            //The handler must run in m_strand so that it is serialized against the
+            //cancel() that Stop() posts there. Without that, an in-flight handler
+            //can call expires_after()/async_wait() on m_timer while another thread
+            //of the io_context is calling cancel() on it, which is undefined
+            //behaviour.
+            m_timer.async_wait(boost::asio::bind_executor
+                               (m_strand,
+                                [this](const boost::system::error_code& error)
+                                {
+                                    if (error || m_stop)
+                                    {
+                                        return;
+                                    }
 
-                                   if (latency > m_tolerance)
-                                   {
-                                       SEND_SYSTEM_LOG(Warning, << "Boost.Asio latency for '"
-                                                       << m_identifier.c_str() << "' is at " << latency.count()
-                                                       << " ms. If this happens a lot your system is overloaded and may start misbehaving.");
-                                   }
+                                    const auto latency = std::chrono::duration_cast<std::chrono::milliseconds>
+                                        (std::chrono::steady_clock::now() - m_timer.expiry());
 
-                                   //schedule next latency check
-                                   ScheduleTimer();
-                               });
+                                    if (latency > m_tolerance)
+                                    {
+                                        const auto threshold = std::chrono::duration_cast
+                                            <std::chrono::milliseconds>(m_tolerance).count();
+
+                                        //Report what was measured and what it puts at risk, but
+                                        //do not guess at a cause: this cannot tell an overloaded
+                                        //machine from a long-running handler or a descheduled
+                                        //virtual machine.
+                                        SEND_SYSTEM_LOG(Warning, << "Event loop latency for '"
+                                                        << m_identifier.c_str() << "' is "
+                                                        << latency.count() << " ms, over the "
+                                                        << threshold << " ms threshold. Timers and "
+                                                        << "heartbeats are running late; if this "
+                                                        << "persists, nodes may be falsely "
+                                                        << "considered dead.");
+                                    }
+
+                                    //schedule next latency check
+                                    ScheduleTimer();
+                                }));
 
         }
 
         const std::string m_identifier;
         const std::chrono::steady_clock::duration m_tolerance;
-        boost::asio::io_context::strand& m_strand;
+
+        //Private on purpose: it exists to serialize operations on m_timer, and
+        //because nothing else posts to it the monitor keeps measuring the
+        //io_context rather than some queue's backlog. Do not post other work here.
+        boost::asio::io_context::strand m_strand;
         boost::asio::steady_timer m_timer;
 
         std::atomic<bool> m_stop;

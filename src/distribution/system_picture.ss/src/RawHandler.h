@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2012, 2022, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -129,7 +129,7 @@ namespace SP
             , m_id(id)
             , m_isLightNode(nodeTypes.at(nodeTypeId).isLightNode)
             , m_nodeTypes(nodeTypes)
-            , m_latencyMonitor("SpRawHandler",CalculateLatencyWarningThreshold(nodeTypes),m_strand)
+            , m_latencyMonitor("io_context",CalculateLatencyWarningThreshold(nodeTypes),m_strand.context())
             , m_checkDeadNodesTimer()
             , m_master(master)
             , m_validateJoinSystemCallback(validateJoinSystemCallback)
