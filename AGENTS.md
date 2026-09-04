@@ -384,12 +384,43 @@ bump):
    is what keeps the hash out of release artifact names (e.g. the Windows
    installer filename). Tag a later commit and every asset gets a dirty
    `7.4.3-alpha4-...-g<sha>` name.
-5. **For a stable release, merge to `master` afterwards.** The procedure is
-   *tag off `develop`, then merge `develop` into `master`* — which is always a
-   fast-forward, since `develop` only ever moves ahead of `master`. This is why
-   every stable tag is reachable from `master` and why `master`'s tip is the
-   most recent stable release commit. Skip it and `master` silently falls a
-   release behind. Alphas are not merged to `master`.
+5. **For a stable release, put the `CHANGES.txt` section into the draft's
+   release notes.** The `release` job creates the draft with `--generate-notes`,
+   which yields nothing but a `**Full Changelog**: <compare link>` line. Replace
+   that with the release's own `CHANGES.txt` section, copied verbatim: start at
+   the prose, drop the separator/date header, end at the last `#NNN` line, and
+   do not keep the generated compare link (7.4.2 and 7.4.3 both look like this).
+
+   ```sh
+   gh release edit <version> --notes-file <extracted-section>
+   ```
+
+   Do this *before* publishing, while it is still a draft. Verify the working
+   tree's `CHANGES.txt` matches the tag first (`git diff <version> --
+   CHANGES.txt`) so the notes describe what was actually released rather than a
+   later edit. Alphas skip this — they carry no `CHANGES.txt` section at all
+   (step 3), so the generated compare link is all they get.
+6. **For a stable release, fast-forward `master` onto the tag afterwards.**
+   Tags are cut off `develop`; `master` then moves up to *the tag*:
+
+   ```sh
+   git push origin <version>:master        # or: git merge --ff-only <version>
+   ```
+
+   **Onto the tag, not onto `develop`'s tip.** Those are the same commit only
+   until the next-cycle bump lands, which is usually the very next commit on
+   `develop` (step 7) — after that, "merge `develop` into `master`" would carry
+   an unreleased alpha bump onto `master`. Every stable tag is reachable from
+   `master`, and `master`'s tip is exactly the most recent stable release
+   commit; keep it that way. Skip this and `master` silently falls a release
+   behind. Alphas are not merged to `master`.
+7. **Then open the next cycle on `develop`:** bump `PATCH` and set
+   `SUFFIX=-alpha1` in `VERSION.txt`, and add the matching `~alpha1` stanza to
+   the debian changelog. No `CHANGES.txt` entry — alphas do not carry one.
+   Commit as "Prepare for next release cycle". `64e3218cb` is the template, but
+   note it predates the current convention and used `SUFFIX=~alpha1`:
+   `VERSION.txt` now wants the dash form (`-alpha1`), with the tilde appearing
+   only in the debian changelog.
 
 **Push the tag on its own, not together with the branch.** The tag push carries
 the commits anyway, so `git push origin <branch> <tag>` gains nothing and starts
@@ -436,7 +467,7 @@ state. Nothing was lost in the migration.
 
 **Conventions, and one that is easy to get backwards:** you never tag `master`
 directly — tags are cut off `develop` and `master` is fast-forwarded to them
-afterwards (step 5). Alphas are looser: the 7.4.3 alphas were tagged off a
+afterwards (step 6). Alphas are looser: the 7.4.3 alphas were tagged off a
 private feature branch and never merged to `master` at all. Note also that
 `7.4.3-alpha1` was tagged locally but never pushed and has no release — it
 predates the working automation, so the first release actually cut this way was
