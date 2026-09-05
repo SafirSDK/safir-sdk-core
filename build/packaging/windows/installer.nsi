@@ -322,13 +322,6 @@ FunctionEnd
     !error "STUDIO needs to be defined on command line. Expected to be 2010 or 2012 etc"
   !endif
 
-  ;Check for debugonly
-  !ifdef DEBUGONLY
-    !define debugonlyStr "-DebugOnly"
-  !else
-    !define debugonlyStr ""
-  !endif
-
   ;Check for VERSION
   !ifdef VERSION
     !define versionStr "-${VERSION}"
@@ -338,7 +331,7 @@ FunctionEnd
 
   ;Name and file
   Name "Safir SDK Core"
-  OutFile "SafirSDKCore${versionStr}-VS${STUDIO}-${nameBitwidth}${debugonlyStr}.exe"
+  OutFile "SafirSDKCore${versionStr}-VS${STUDIO}-${nameBitwidth}.exe"
 
   !define StartMenuDir "$SMPROGRAMS\Safir SDK Core"
 
@@ -475,7 +468,7 @@ Section "Runtime" SecRuntime
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
                    "Publisher" "Saab AB"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
-                   "DisplayVersion" "${VERSION}-VS${STUDIO}-${nameBitwidth}${debugonlyStr}"
+                   "DisplayVersion" "${VERSION}-VS${STUDIO}-${nameBitwidth}"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
                    "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \

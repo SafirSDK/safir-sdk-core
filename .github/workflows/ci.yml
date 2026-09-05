@@ -457,11 +457,6 @@ jobs:
       # $WORKSPACE/temp; on Jenkins WORKSPACE is the build workspace. github.workspace
       # is the GHA equivalent, so reuse it. Safir creates the subdirs itself.
       WORKSPACE: ${{ github.workspace }}
-      # run_test.py's run_test_suite() reads $JOB_NAME to detect 32-bit-on-64
-      # ("32on64") Jenkins jobs and drop the Java partner. We are never that, so
-      # any value without "32on64" both satisfies the lookup (it would KeyError if
-      # unset) and keeps all partners enabled.
-      JOB_NAME: ${{ github.workflow }}-${{ matrix.kind }}
 
     # kind x languages x platform = 2 x 3 x 5 = 30 jobs. kind/languages/platform
     # are real cross-product axes; the include entries only attach the coupled
@@ -795,19 +790,16 @@ jobs:
           exit 1
 
       # Same entrypoint as the standalone/multinode dose tests: run_test.py installs
-      # the staged package and runs the suite. SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES=1
-      # tells it NOT to launch the slaves via JenkinsController - the slaves job
-      # starts them as containers instead; the master still sends STOP over the
-      # network (--stop-slaves). Windows invokes run_test.py via cmd, matching how
-      # the standalone/multinode Windows dose tests run it.
+      # the staged package and runs the suite. The slaves are started as containers
+      # by the slaves job; the master only sends STOP over the network at the end
+      # (--stop-slaves). Windows invokes run_test.py via cmd, matching how the
+      # standalone/multinode Windows dose tests run it.
       - name: Run multicomputer master (Linux)
         if: runner.os == 'Linux'
         shell: bash
         env:
           WORKSPACE: ${{ github.workspace }}
           LANGUAGES: cpp-cpp-cpp-cpp-cpp
-          JOB_NAME: ${{ github.workflow }}-multicomputer-master
-          SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES: "1"
         run: python build/jenkins_stuff/run_test.py --test multicomputer-tests
 
       - name: Run multicomputer master (Windows)
@@ -816,8 +808,6 @@ jobs:
         env:
           WORKSPACE: ${{ github.workspace }}
           LANGUAGES: cpp-cpp-cpp-cpp-cpp
-          JOB_NAME: ${{ github.workflow }}-multicomputer-master
-          SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES: "1"
         run: python build\jenkins_stuff\run_test.py --test multicomputer-tests
 
       - name: Upload test results
@@ -936,7 +926,7 @@ jobs:
             docker run -d --name "$name" --network safirnet --ip "$ip" \
               --add-host "core-multicomputer-test-server-1-slave:${SERVER_1_ADDR}" \
               --shm-size=2g \
-              -e LANGUAGES="$LANGUAGES" -e JOB_NAME="multicomputer-$role" \
+              -e LANGUAGES="$LANGUAGES" \
               -v "$PWD/run-$role":/work -w /work debian:13 \
               bash -c "set -e
                 apt-get update -qq

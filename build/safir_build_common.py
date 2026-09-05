@@ -533,13 +533,6 @@ class BuilderBase(object):
     def __handle_command_line_arguments(self):
         self.configs = self.arguments.configs
 
-        self.debug_only = False
-        if self.arguments.jenkins:
-            if os.environ.get("PACKAGE_TYPE") == "DebugOnly":
-                LOGGER.log("Using Config 'DebugOnly', building everything in Debug only.")
-                self.configs = ("Debug", )
-                self.debug_only = True
-
         self.stagedir = os.path.join(os.getcwd(), "stage") if self.arguments.package else None
 
         self.install_prefix = None  #derived classes can override if arguments.package is true
@@ -560,7 +553,6 @@ class BuilderBase(object):
         # identical between the two passes and gets overwritten, so building it twice is
         # wasted work. See src/cmake/SafirLibraryAbi.cmake.
         dual_abi_pair = (self.arguments.package
-                         and not self.debug_only
                          and self._supports_dual_abi_fast_path()
                          and set(self.configs) == {"Debug", "RelWithDebInfo"})
 
@@ -839,9 +831,6 @@ class VisualStudioBuilder(BuilderBase):
         command = ("makensis", "/DARCH=" + arch, "/DSTUDIO=" + self.arguments.use_studio.replace("vs",""),
                    "/DVERSION=" + version_string)
 
-        if self.debug_only:
-            command += ("/DDEBUGONLY", )
-
         command += (os.path.join("build", "packaging", "windows", "installer.nsi"), )
 
         self._run_command(command, "Packaging ")
@@ -874,11 +863,6 @@ class DebianPackager():
             die("Could not find conan executable")
 
         self.noclean = arguments.package_noclean and os.path.exists("tmp")
-
-        if self.arguments.jenkins:
-            if os.environ.get("PACKAGE_TYPE") == "DebugOnly":
-                LOGGER.log("Using Config 'DebugOnly', building everything in Debug only.")
-                self.arguments.configs = ("Debug", )
 
     @staticmethod
     def can_use():
