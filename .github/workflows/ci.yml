@@ -704,11 +704,15 @@ jobs:
           conan-home: /home/runner/.conan2
           cache-key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
 
+      # Deliberately NOT named packages-*: the release job globs that prefix and
+      # would bundle these Debug .debs into a release asset (and because release
+      # only `needs: build`, whether this artifact existed yet would be a race).
+      # These packages exist to feed the two debug test jobs below, nothing else.
       - name: Upload packages
         uses: actions/upload-artifact@v6
         if: always()
         with:
-          name: packages-debug-ubuntu-noble-amd64
+          name: debug-packages-ubuntu-noble-amd64
           path: tmp/*.deb
           if-no-files-found: ignore
 
@@ -771,7 +775,7 @@ jobs:
       - name: Download SDK package
         uses: actions/download-artifact@v8
         with:
-          name: packages-debug-ubuntu-noble-amd64
+          name: debug-packages-ubuntu-noble-amd64
           path: package-download
 
       - name: Stage installer at repo root
@@ -812,7 +816,7 @@ jobs:
       - name: Download SDK package
         uses: actions/download-artifact@v8
         with:
-          name: packages-debug-ubuntu-noble-amd64
+          name: debug-packages-ubuntu-noble-amd64
           path: package-download
 
       - name: Stage installer at repo root

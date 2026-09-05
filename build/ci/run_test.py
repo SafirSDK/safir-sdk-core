@@ -27,8 +27,6 @@ import os
 import glob
 import sys
 import subprocess
-import re
-import platform
 import argparse
 import signal
 import socket

@@ -316,7 +316,11 @@ are deleting.
   `src/cmake/SafirCompilerSettings.cmake`. It is ABI-safe, so a Debug build still
   links against the release-built Conan Boost; `_GLIBCXX_DEBUG` is **not** and
   would break that. It is written without a value to match dpkg-buildflags' form,
-  so a duplicate definition is identical rather than a mismatch warning.
+  so a duplicate definition is identical rather than a mismatch warning — and a
+  duplicate is likely: distributions increasingly turn this on as a hardening
+  default (NixOS' `libcxxhardeningfast` does, and Debian may well too), so on the
+  packaging build this may already be a no-op. It still matters for a plain cmake
+  Debug build on a distribution that does not.
 - **The dose rows run `java-cpp-dotnet-java-cpp`, not the all-cpp combo, and this
   is load-bearing.** `dose_java_jni` has no `ADD_TEST` anywhere, so its 27 asserts
   — over half of all the asserts in the tree — are reachable *only* from a Java
