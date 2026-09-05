@@ -31,8 +31,12 @@ pipx install "conan>=2.5.0"
 # safir_build_common.py.
 build/build.py
 
-# Jenkins-style build (more verbose, obeys the build-matrix variables)
-build/build.py --jenkins
+# More verbose (verbosity >= 2 also sets cmake's VERBOSE=1)
+build/build.py --verbose --verbose
+
+# Debug build. This is what CI's build-debug job runs; it turns on asserts,
+# LeveledLock's lock-order checking and _GLIBCXX_ASSERTIONS.
+build/build.py --config Debug
 
 # Manual CMake build (for other Linux distributions)
 cmake . -DCMAKE_BUILD_TYPE=Release
@@ -113,14 +117,15 @@ Since 2026-08-17 Defender flags **Debug-built** `safir_control.exe` as
 `TryStart_safir` fails with `OSError [WinError 225]` (`ERROR_VIRUS_INFECTED`).
 The binary never runs, so this is not a code fault.
 
-**Scope: the `PACKAGE_TYPE = DebugOnly` Jenkins rows only** — the sole
-configuration that builds a Debug `safir_control.exe` and runs ctest against it.
-In a `Full` Windows build the Debug pass builds only the `safir_dual_abi_libs`
-target and skips tests altogether (`safir_build_common.py:562-565`, `:608-617`),
-so the package ships RelWithDebInfo executables plus debug dual-ABI *libraries*,
-never debug executables. The published 7.4.2 installer was checked and is clean,
-so **users are unaffected**. GHA is unaffected too, but only because it builds
-`Full` alone — see the DebugOnly item under Migration status.
+**Scope: Windows Debug builds only** — the sole configuration that builds a
+Debug `safir_control.exe` and runs ctest against it. That configuration is not
+built anywhere today: in a Windows packaging build the Debug pass builds only the
+`safir_dual_abi_libs` target and skips tests altogether, so the package ships
+RelWithDebInfo executables plus debug dual-ABI *libraries*, never debug
+executables. The published 7.4.2 installer was checked and is clean, so **users
+are unaffected**, and CI is unaffected because its Debug job is Linux-only. This
+is the blocker anyone adding a Windows Debug row has to solve first — see "Debug
+coverage" under CI/CD.
 
 **Confirmed a false positive, not a compromised dependency.** Decisive test:
 `safir_control`'s sources are byte-identical between 7.4.2 and HEAD, both pin
@@ -138,11 +143,12 @@ hidden child process (`ControlApp.cpp`) and installs a console control handler
 
 **Decision: reported to Microsoft as an incorrect detection on 2026-08-20**
 (<https://www.microsoft.com/en-us/wdsi/filesubmission>); otherwise treated as low
-priority, since it costs one Jenkins axis on a system being retired, with no user
-or GHA impact. If Microsoft revises the rule, the detection simply stops firing
-after a definitions update — re-run a `DebugOnly` Windows build to confirm. No
-workaround was applied; `Add-MpPreference -ExclusionPath <workspace>` on the
-affected agent is available if the red builds get in the way. To re-settle this
+priority, since nothing currently builds the affected configuration. If Microsoft
+revises the rule, the detection simply stops firing after a definitions update —
+build Windows with `--configs Debug` to confirm. No workaround was applied;
+`Add-MpPreference -ExclusionPath <workspace>` is the obvious lever if a Windows
+Debug job is ever added (hosted Windows runners are elevated, so it should be
+available — untested). To re-settle this
 if it recurs, rebuild an older tag whose release build was clean: the same
 sources flagged today means Defender changed, not us. Note that nothing in CI
 disables Defender antivirus — the `netsh advfirewall` call in the multicomputer
@@ -150,12 +156,12 @@ jobs turns off the Defender *firewall*, a different component.
 
 ### CI/CD
 
-Two CI systems run against the repository: **GitHub Actions** (the target CI)
-and **Jenkins** (`Jenkinsfile`, still the canonical release build). The goal is
-for GitHub Actions to fully replace Jenkins.
+**GitHub Actions** (`.github/workflows/ci.yml`) is the only CI system. Jenkins
+was retired in 7.4.4 (#615) and every trace of it has been removed from the
+tree; if you find a stale reference, delete it rather than restoring anything.
 
-**GitHub Actions** (`.github/workflows/ci.yml`) runs on pushes to
-master/develop/feature/private branches and on pull requests. A matrix builds
+The workflow runs on pushes to master/develop/feature/private branches and on
+pull requests. A matrix builds
 and packages across ubuntu-noble (amd64 + arm64), debian-trixie, vs2022 and
 vs2026; there is no Debian-labelled runner, so debian-trixie builds inside a
 `debian:13` container on ubuntu-latest (with `--shm-size`, because dose_main
@@ -167,13 +173,16 @@ unusual-looking label — do not read it as self-hosted, and do not "simplify" i
 to a plain `windows-2025`: the suffixed label is what selects the image carrying
 the VS2026 toolchain.
 
-Each row runs `build/build.py --jenkins`; downstream
+Each row runs `build/build.py --verbose`; downstream
 jobs install the package and run the example builds, the dose test suites
 (standalone, multinode, and multicomputer — the last joins two runners over an
 accountless WireGuard overlay so a native node talks to three debian slave
-containers), and the installed slow-test suite. A `test-summary` job aggregates
-JUnit results into one Check, a `release` job drafts a release on version-tag
-pushes, `render-docs` renders the guides, and `workflow-lint` runs zizmor.
+containers), and the installed slow-test suite. Alongside those,
+`build-debug` / `debug-dose-tests` / `debug-slow-tests` do the same on
+ubuntu-noble amd64 in **Debug** — see "Debug coverage" below. A `test-summary`
+job aggregates JUnit results into one Check, a `release` job drafts a release on
+version-tag pushes, `render-docs` renders the guides, and `workflow-lint` runs
+zizmor.
 
 **Rules when editing CI** (ignore either and the build breaks or rots silently):
 - **`.github/` changes → run `zizmor .github/` and keep it clean before
@@ -278,56 +287,75 @@ neither implicates the code under test.
   Windows side also dumps `netsh int ipv4 show excludedportrange udp` up front,
   since that evidence is unrecoverable after the fact.
 
-**Jenkins** (`Jenkinsfile`) matrix: platforms ubuntu-noble / debian-trixie /
-vs2022 / vs2026; amd64 (plus x86 on debian-trixie); `PACKAGE_TYPE` axis Full
-(both MSVC-runtime flavours) and DebugOnly. Stages: Build + Unit Test,
-Standalone, Multinode, Multicomputer (cpp only, debian-trixie), Build Examples.
+#### Debug coverage (`build-debug` and friends)
 
-Jenkins' remaining job is a coarse "does enough still work" cross-check against
-GHA, guarding against GHA somehow producing a fundamentally different binary. No
-Jenkins-built binary is shipped to anyone any more. So partial Jenkins failures
-are acceptable evidence, and Jenkins is deliberately *not* kept at feature parity
-with GHA: it has no slow-tests stage, and the tests migrated into the TestSuite
-component (see Running Tests) therefore run on GHA only. **Decision: no action
-taken** — do not add a slow-tests stage to the `Jenkinsfile`.
+Every other job builds RelWithDebInfo, which defines `NDEBUG`. Three things
+vanish under it, so **without a Debug job they run nowhere at all**:
 
-#### Migration status (reference — kept until Jenkins is retired)
+- the ~50 `assert()` calls in the source tree;
+- `LeveledLock`'s lock-**order** checking. The deadlock detector is
+  `#if !defined(NDEBUG) && !defined(DOSE_NO_LOCK_CHECKING)`, so it is absent from
+  every binary we otherwise build, test or ship;
+- the `NDEBUG`-guarded cases in `leveled_lock_test` (about half the file) and
+  `ElectionHandler_test`.
 
-**Moved over:** build+package on all platforms (incl. native arm64, which
-Jenkins can't do); ctest unit tests (via `build.py --jenkins`); the slow tests
-(now the `slow-tests` job across the full matrix, each driver wall-clock-timed,
-so `SAFIR_SKIP_SLOW_TESTS` is gone); standalone/multinode/multicomputer dose
-suites; Build Examples; release drafting; doc rendering (`render-docs`, runs the
-asciidoctor/dia/dblatex toolchain directly); zizmor hardening (`workflow-lint`);
-build-warnings analysis (`warnings-summary`: `buildlog_to_text.py` drops
-Conan-dependency warnings by path and by stripping the `conan install` …
-`Finalizing install` block, `packaging_to_sarif.py` extracts lintian/dpkg/dh
-warnings to SARIF, and Quality Monitor publishes one source-linked Check;
-lintian is now installed in `setup-build-env` so `debuild` runs it as on
-Jenkins; cosmetic ALINK `A99999` .dll.policy warnings are dropped).
+Jenkins' `PACKAGE_TYPE = DebugOnly` axis covered this until it was retired.
+Nothing covered it in between, so the Debug jobs are a **restoration**, not a new
+idea. If you are tempted to delete them to save CI time, that is the coverage you
+are deleting.
 
-**Pending / decide before retiring Jenkins:**
+**Decisions worth not relitigating:**
+
+- **Linux only, on purpose.** Every `assert()` is in platform-neutral code — the
+  three files matching both `assert(` and `_MSC_VER` only do so because of
+  `#pragma warning(push/pop)`. A Windows Debug row would add no assert coverage,
+  only MSVC's checked iterators, and it would first have to get past the Defender
+  false positive that eats Debug `safir_control.exe` (above). Chase that class of
+  bug with a sanitiser job instead.
+- **`_GLIBCXX_ASSERTIONS`** is set for GNU/Clang Debug builds in
+  `src/cmake/SafirCompilerSettings.cmake`. It is ABI-safe, so a Debug build still
+  links against the release-built Conan Boost; `_GLIBCXX_DEBUG` is **not** and
+  would break that. It is written without a value to match dpkg-buildflags' form,
+  so a duplicate definition is identical rather than a mismatch warning.
+- **The dose rows run `java-cpp-dotnet-java-cpp`, not the all-cpp combo, and this
+  is load-bearing.** `dose_java_jni` has no `ADD_TEST` anywhere, so its 27 asserts
+  — over half of all the asserts in the tree — are reachable *only* from a Java
+  partner in the dose suite. The dotnet interop has no asserts at all.
+- **Debug slowness is fixed with config-conditional constants**, never by
+  loosening a timeout globally. See `ElectionHandler_test.cpp`'s `numNodes` or
+  `ControlApp`'s `#if defined(_MSC_VER) && !defined(NDEBUG)` termination timeout
+  for the established pattern: Release keeps its tight values.
+- The Debug build log is uploaded as `debug-buildlog-*`, deliberately **not**
+  `buildlog-*`: `warnings-summary` globs the latter, and this is a `noopt` build
+  whose warning set differs systematically from the optimised ones.
+
+**Known gap:** no Debug testing on Windows, so MSVC's checked iterators and debug
+CRT heap are unexercised. Accepted, per the reasoning above.
+
+**Newly practical:** a DOPE ODBC test job — hosted runners ship databases
+preinstalled, so it's far more tractable than it used to be (abandoned
+pre-migration).
+
+#### Known gaps and accepted drops
+
+These outlived the Jenkins migration and are still true. They are recorded so
+nobody re-discovers them as bugs.
+
 - **No build-warnings quality gate.** `warnings-summary` reports but does not
   gate (GitHub has no "unstable" state); enforce later via a `quality-gates`
   block on the Quality Monitor job.
-- **`PACKAGE_TYPE = DebugOnly` not built on GHA** (only Full) — the Windows
-  debug-runtime-only packaging path is unexercised. Adding it will also surface
-  the Windows Defender false positive, which currently only fires on that axis
-  (see "Windows Defender false positives" above).
-- **No 32-bit (x86) on GHA**; Jenkins still keeps debian-trixie × x86. This is
-  a **confirmed intentional drop**, not an oversight — decided 2026-09 and
-  announced in the 7.4.3 release notes, so users are told rather than left to
-  discover it. 7.4.2 was the last release to ship an x86 `.deb`. It could be
-  picked up again, but that is considered unlikely; do not treat it as a gap to
-  be closed. (32-bit *Windows* is a separate, earlier drop — #560 in 7.4.1.)
-- **Generic ctest output not archived** — GHA keeps only JUnit XML + the dose
+- **No 32-bit (x86) anywhere.** This is a **confirmed intentional drop**, not an
+  oversight — decided 2026-09 and announced in the 7.4.3 release notes, so users
+  are told rather than left to discover it. 7.4.2 was the last release to ship an
+  x86 `.deb`. It could be picked up again, but that is considered unlikely; do
+  not treat it as a gap to be closed. (32-bit *Windows* is a separate, earlier
+  drop — #560 in 7.4.1.)
+- **No Debug testing on Windows** — see "Debug coverage" above.
+- **Generic ctest output not archived** — CI keeps only JUnit XML + the dose
   `dose_test_output`, not `**/test_output/**`.
 - **Benign Conan "Cache save failed … another job may be creating this cache"
   annotation** on every build (write-once cache key already saved; harmless but
   noisy, can't be filtered as it's a runner annotation). Fix = save-on-miss-only.
-
-**Newly practical:** a DOPE ODBC test job — hosted runners ship databases
-preinstalled, so it's far more tractable than under Jenkins (abandoned there).
 
 ### Git and Branch History
 
@@ -452,15 +480,15 @@ automatically gets `--prerelease`.
   publishing the draft, or add test gating to `needs`.
 
 **Known deltas from the pre-GHA manual releases:** GHA publishes arm64
-ubuntu-noble `.deb`s (Jenkins could not build them) but **no x86
-debian-trixie** `.deb`s — see "No 32-bit (x86) on GHA" above. That is the only
+ubuntu-noble `.deb`s (the old Jenkins build could not) but **no x86
+debian-trixie** `.deb`s — see "Known gaps and accepted drops" above. That is the only
 delta.
 
 **NuGet is not a delta, despite appearances.** There is CPack NuGet packaging
 in the tree (`src/cmake/NuGetPackaging.cmake`, an `EXCLUDE_FROM_ALL` `NuGet`
 install component, `docs/nuget-readme.md`), and no CI step that publishes it —
-but Jenkins never published one either, and no release has ever carried a
-`.nupkg`. It is the unfinished start of #554 (Modernize dotnet interfaces,
+but the pre-GHA release process never published one either, and no release has
+ever carried a `.nupkg`. It is the unfinished start of #554 (Modernize dotnet interfaces,
 milestone 7.5), whose own notes lean towards shipping nupkgs *in the installer*
 rather than uploading them, so a publishing step may never be the right end
 state. Nothing was lost in the migration.

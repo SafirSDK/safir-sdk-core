@@ -213,14 +213,13 @@ jobs:
           if-no-files-found: ignore
 
   # Render the shipped documentation (User's Guide + Requirements Specification,
-  # HTML + PDF) the way Jenkins' "Render documentation" stage does. This is a
+  # HTML + PDF). This is a
   # standalone docs build: docs/CMakeLists.txt only builds the asciidoctor
   # documents when there is no parent project, so it needs just the doc toolchain
   # (asciidoctor/dia/dblatex/texlive/ghostscript) plus cmake/ninja - no compilers,
   # Qt, Boost or Conan. The output (HTML/PDF) is distro-independent, so it runs
   # straight on ubuntu-latest rather than in a debian container. No `needs`: it is
-  # independent of the build artifacts and runs in parallel, as its own stage does
-  # in Jenkins.
+  # independent of the build artifacts, so it runs in parallel with them.
   render-docs:
     name: Render documentation
     runs-on: ubuntu-latest
@@ -237,7 +236,7 @@ jobs:
             asciidoctor dia dblatex texlive-font-utils ghostscript
 
       - name: Render documentation
-        # Mirrors Jenkins render_documentation(): standalone in-source docs build.
+        # Standalone in-source docs build.
         # Tee to buildlog.txt so the warnings-summary job can scan the doxygen and
         # cmake output for warnings.
         run: |
@@ -285,12 +284,11 @@ jobs:
           path: buildlog.txt
           if-no-files-found: ignore
 
-  # Build the example apps against the SDK package the build job produced. This
-  # mirrors the Jenkins "Build examples" stage: it installs the package
-  # system-wide and uses dobmake-batch (via run_test.py) to compile the example
-  # apps on top of the installed SDK - the real-world check that a user can build
-  # against an installed Safir SDK Core. On Windows that includes Debug apps,
-  # where the MSVC per-config runtime split matters.
+  # Build the example apps against the SDK package the build job produced: it
+  # installs the package system-wide and uses dobmake-batch (via run_test.py) to
+  # compile the example apps on top of the installed SDK - the real-world check
+  # that a user can build against an installed Safir SDK Core. On Windows that
+  # includes Debug apps, where the MSVC per-config runtime split matters.
   build-examples:
     name: examples-${{ matrix.platform }}-${{ matrix.arch }}
     needs: build
@@ -422,11 +420,11 @@ jobs:
 
   # Run the big dose test suite (243 testcases) against the installed SDK package,
   # in both the "standalone" (one node) and "multinode" (four nodes, all on this
-  # one machine) configurations. This mirrors the Jenkins "Test suite" stage. The
-  # flow matches build-examples: install the testsuite package via run_test.py,
-  # which then drives run_dose_tests with the partner languages from $LANGUAGES.
-  # The multicomputer config is intentionally NOT run here - it needs separate
-  # slave *machines* (Jenkins agents), which hosted GitHub runners can't provide.
+  # one machine) configurations. The flow matches build-examples: install the
+  # testsuite package via run_test.py, which then drives run_dose_tests with the
+  # partner languages from $LANGUAGES. The multicomputer config is deliberately
+  # not run here - it needs separate slave *machines*, which one hosted runner
+  # cannot provide; see the multicomputer-master/slaves pair below.
   dose-tests:
     name: ${{ matrix.kind }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.languages }}
     needs: build
@@ -1237,8 +1235,7 @@ jobs:
 
   # Collect the compiler/cmake/doxygen/lintian warnings from every build and
   # publish one consolidated "Build warnings" Check with source-linked
-  # annotations - the GitHub-Actions replacement for Jenkins' warnings-ng
-  # analysis (archive_and_analyze in the Jenkinsfile). Each build/examples/docs
+  # annotations. Each build/examples/docs
   # job uploads its log as a buildlog-* artifact; buildlog_to_text.py unwraps it
   # and DROPS warnings from Conan dependency builds (only our own tree's
   # diagnostics survive), and lintian_to_sarif.py extracts the .deb packaging

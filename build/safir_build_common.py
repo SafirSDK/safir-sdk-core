@@ -27,7 +27,7 @@
 
 This module is imported by the two entry-point scripts that live alongside it:
   * build.py        - builds and packages the Safir SDK Core source tree
-                      (used by Jenkins and developers).
+                      (used by CI and developers).
   * dobmake_batch.py - builds an external user dou-project (installed into the
                       SDK as 'dobmake-batch' and driven by the dobmake GUI).
 

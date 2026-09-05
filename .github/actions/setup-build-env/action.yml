@@ -122,7 +122,7 @@ runs:
         # examples build needs none of this.
         # lintian is only a 'recommends' of devscripts, so --no-install-recommends
         # drops it; without it debuild silently skips the lintian check that the
-        # warnings-summary job collects (and that Jenkins ran). List it explicitly.
+        # warnings-summary job collects. List it explicitly.
         install_linux_docs_tools() {
           sudo apt-get update -qq &&
           sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 \
