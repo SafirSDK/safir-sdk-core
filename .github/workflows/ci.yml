@@ -651,6 +651,188 @@ jobs:
           path: '**/*.junit.xml'
           if-no-files-found: ignore
 
+  # ---------------------------------------------------------------------------
+  # Debug coverage.
+  #
+  # Every other job in this workflow builds RelWithDebInfo, which defines NDEBUG.
+  # That compiles out three things entirely: the ~50 assert() calls in the source
+  # (37 of them in the Java JNI layer), LeveledLock's lock-ORDER checking - the
+  # deadlock detector is `#if !defined(NDEBUG)`, so it is absent from every binary
+  # we otherwise ship or test - and the NDEBUG-guarded cases in leveled_lock_test
+  # and ElectionHandler_test. Until Jenkins was retired its PACKAGE_TYPE=DebugOnly
+  # axis covered this; nothing did afterwards.
+  #
+  # Deliberately Linux-only. All the assert() calls are in platform-neutral code
+  # (the files that contain both assert( and _MSC_VER only do so because of
+  # #pragma warning push/pop), so a Windows Debug row would add no assert coverage
+  # - only MSVC's checked iterators, which are better chased with a sanitiser job.
+  # It would also have to solve the Windows Defender false positive first, which
+  # eats Debug safir_control.exe (see AGENTS.md).
+  build-debug:
+    name: debug-ubuntu-noble-amd64
+    runs-on: ubuntu-24.04
+    # Same retry.sh invariant as the release build: must outlast
+    # setup-build-env's 7200s budget. Debug is slower to build than
+    # RelWithDebInfo, so keep the full 4 hours rather than trimming.
+    timeout-minutes: 240
+
+    env:
+      CONAN_HOME: /home/runner/.conan2
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up build environment
+        id: setup-build-env
+        uses: ./.github/actions/setup-build-env
+        with:
+          platform: ubuntu-noble
+          conan-home: /home/runner/.conan2
+
+      # --config Debug is all that PACKAGE_TYPE=DebugOnly ever did: it makes the
+      # Debian packager build and ctest a single Debug configuration (and pass
+      # "noopt" through DEB_BUILD_OPTIONS). The unit tests run as part of this
+      # step, so this job is what recovers the assert and lock-checking coverage;
+      # the dose and slow jobs below extend it to the integration suites.
+      - name: Build and package (Debug)
+        run: python build/build.py --verbose --config Debug
+
+      - name: Trim and save Conan cache
+        if: always()
+        uses: ./.github/actions/save-conan-cache
+        with:
+          conan-home: /home/runner/.conan2
+          cache-key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: packages-debug-ubuntu-noble-amd64
+          path: tmp/*.deb
+          if-no-files-found: ignore
+
+      # Deliberately NOT named buildlog-*: warnings-summary globs that prefix, and
+      # this is a noopt build whose warning set differs systematically from the
+      # optimised ones (-Wmaybe-uninitialized and friends are optimisation
+      # dependent). Folding it into the "Build warnings" check would double-report
+      # annotations on the same lines from two configurations. Kept as an artifact
+      # because it is still what you read when this build breaks.
+      - name: Upload build log
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: debug-buildlog-ubuntu-noble-amd64
+          path: buildlog.html
+          if-no-files-found: ignore
+
+      # Named *results-* so test-summary's download pattern picks it up: a firing
+      # assert reaches the junit and turns the "Test results" check red. debuild
+      # runs ctest with a leading "-" in debian/rules, so it cannot fail the job
+      # itself - the check is the signal, exactly as for the release builds.
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: test-results-debug-ubuntu-noble-amd64
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
+  # The dose suites against the Debug package. One language combo rather than the
+  # three the release matrix runs: dose_java_jni has no ADD_TEST anywhere, so its
+  # 27 asserts are reachable ONLY from a Java partner here, which makes a Java-
+  # bearing combo mandatory. The dotnet interop has no asserts at all, so the
+  # remaining combos would add runtime and no coverage.
+  debug-dose-tests:
+    name: debug-${{ matrix.kind }}-ubuntu-noble-amd64
+    needs: build-debug
+    runs-on: ubuntu-24.04
+    # Roughly double the 60 min the release dose rows get. Debug is slower and
+    # the assertions add work; revisit once there is real timing data.
+    timeout-minutes: 120
+
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [standalone, multinode]
+
+    env:
+      LANGUAGES: java-cpp-dotnet-java-cpp
+      WORKSPACE: ${{ github.workspace }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up test environment
+        uses: ./.github/actions/setup-test-env
+
+      - name: Download SDK package
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-debug-ubuntu-noble-amd64
+          path: package-download
+
+      - name: Stage installer at repo root
+        uses: ./.github/actions/stage-installer
+        with:
+          deb-only: "true"
+
+      - name: Run dose tests
+        run: python build/ci/run_test.py --test ${{ matrix.kind }}-tests
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: dose-results-debug-${{ matrix.kind }}-ubuntu-noble-amd64
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
+  # The slow suite against the Debug package. This is where StartupSynchronizer,
+  # the communication DeliveryHandler/Discoverer asserts and any real lock-order
+  # violation are most likely to be hit, since these tests run many nodes for a
+  # long time.
+  debug-slow-tests:
+    name: debug-slow-tests-ubuntu-noble-amd64
+    needs: build-debug
+    runs-on: ubuntu-24.04
+    # The release slow suite gets 150 min; Debug needs materially more headroom.
+    timeout-minutes: 300
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up test environment
+        uses: ./.github/actions/setup-test-env
+
+      - name: Download SDK package
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-debug-ubuntu-noble-amd64
+          path: package-download
+
+      - name: Stage installer at repo root
+        uses: ./.github/actions/stage-installer
+        with:
+          deb-only: "true"
+
+      - name: Run slow tests
+        run: python build/ci/run_test.py --test slow-tests
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: slow-results-debug-ubuntu-noble-amd64
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
   # Multicomputer dose tests = the node under test (Server_0, the "master") on one
   # runner talking to three debian slave nodes (Server_1 seed + Client_0 + Client_1)
   # on another, joined by an accountless/secretless WireGuard overlay punched between
@@ -1005,7 +1187,8 @@ jobs:
   # report. Runs on always() so it still reports when some test job failed.
   test-summary:
     name: Test summary
-    needs: [build, dose-tests, slow-tests, multicomputer-master, multicomputer-slaves]
+    needs: [build, dose-tests, slow-tests, multicomputer-master, multicomputer-slaves,
+            build-debug, debug-dose-tests, debug-slow-tests]
     if: always()
     runs-on: ubuntu-latest
     # checks: write to create the Check run; pull-requests: write so the action

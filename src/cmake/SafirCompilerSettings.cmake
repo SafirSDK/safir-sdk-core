@@ -23,6 +23,17 @@ if (UNIX)
   #make sure we get the correct posix version
   add_compile_definitions(_POSIX_C_SOURCE=200809L)
 
+  #Turn on libstdc++'s cheap precondition checks in Debug builds: bounds checking
+  #on vector::operator[], front/back on empty containers, and similar. This is the
+  #closest thing GCC has to the checked iterators MSVC gives us for free in Debug,
+  #and unlike _GLIBCXX_DEBUG it does NOT change the ABI, so a Debug build still
+  #links against release-built dependencies such as the Conan Boost.
+  #
+  #Written without a value to match the form Debian's dpkg-buildflags uses, so if
+  #the packaging build already passes it we get an identical redefinition rather
+  #than a mismatch warning.
+  add_compile_definitions($<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Debug>>:_GLIBCXX_ASSERTIONS>)
+
 endif ()
 
 if (MSVC)
