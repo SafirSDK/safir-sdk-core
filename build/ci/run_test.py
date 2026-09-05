@@ -302,7 +302,7 @@ class DebianInstaller():
 def run_test_suite(kind):
     log("Launching test suite")
     arguments = [
-        "--jenkins",
+        "--ci",
     ]
     if kind == "multinode":
         arguments += ("--multinode", )
@@ -376,7 +376,7 @@ def run_slow_test_suite():
 
 
 def run_test_slave(slave_type):
-    command = ["run_dose_tests", "--jenkins", "--slave", slave_type]
+    command = ["run_dose_tests", "--ci", "--slave", slave_type]
     log(f"Launching Multinode test slave using command {' '.join(command)}")
     result = nice_call(command)
 
@@ -448,7 +448,7 @@ def build_examples():
                 None)
             if script is None:
                 raise SetupError("Could not find dobmake-batch.py on PATH")
-            cmd = [sys.executable, script, "--verbose", "--jenkins", "--skip-tests"]
+            cmd = [sys.executable, script, "--verbose", "--verbose", "--skip-tests"]
             cmd += ("--use-studio", os.environ["BUILD_PLATFORM"])
             cmd += ("--arch", os.environ["BUILD_ARCH"])
             cmd += ("--configs", ) + configs
@@ -463,7 +463,7 @@ def build_examples():
             #Linux dobmake-batch only takes a single --config, so build each
             #config in turn.
             for config in configs:
-                cmd = ["dobmake-batch", "--verbose", "--jenkins", "--skip-tests"]
+                cmd = ["dobmake-batch", "--verbose", "--verbose", "--skip-tests"]
                 cmd += ("--config", config)
                 if installdir is not None:
                     cmd += ("--install", installdir)

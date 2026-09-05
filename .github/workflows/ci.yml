@@ -172,12 +172,12 @@ jobs:
 
       - name: Build and package (Linux)
         if: runner.os == 'Linux'
-        run: python build/build.py --jenkins
+        run: python build/build.py --verbose
 
       - name: Build and package (Windows)
         if: runner.os == 'Windows'
         shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
-        run: python build\build.py --jenkins --use-studio ${{ matrix.studio }} --arch amd64
+        run: python build\build.py --verbose --use-studio ${{ matrix.studio }} --arch amd64
 
       - name: Trim and save Conan cache
         if: always()
@@ -307,13 +307,12 @@ jobs:
     env:
       CONAN_HOME: ${{ matrix.conan_home }}
       # examples/CMakeLists.txt switches VehicleAppCpp to an old Conan Boost 1.79
-      # when JENKINS_HOME is set, exactly like the Jenkins examples build - this
-      # verifies the SDK works against a user-chosen Boost. run_test.py itself
-      # does not read this variable, so it has no other effect.
-      JENKINS_HOME: "1"
+      # when this is set - it verifies the SDK works against a user-chosen Boost
+      # rather than whatever the system happens to ship. run_test.py itself does
+      # not read this variable, so it has no other effect.
+      SAFIR_EXAMPLES_USE_CONAN: "1"
       # run_test.py's build_examples() forwards these to dobmake-batch on Windows
-      # (--use-studio / --arch). PACKAGE_TYPE is left unset and defaults to Full,
-      # so the examples are built in Debug + Release + RelWithDebInfo.
+      # (--use-studio / --arch).
       BUILD_PLATFORM: ${{ matrix.platform }}
       BUILD_ARCH: ${{ matrix.arch }}
 
@@ -404,7 +403,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python build/jenkins_stuff/run_test.py --test build-examples 2>&1 | tee buildlog.txt
+          python build/ci/run_test.py --test build-examples 2>&1 | tee buildlog.txt
 
       - name: Trim and save Conan cache
         if: always()
@@ -448,14 +447,14 @@ jobs:
       options: ${{ matrix.container_options }}
 
     env:
-      # run_test.py passes --jenkins to run_dose_tests, which then reads the
+      # run_test.py passes --ci to run_dose_tests, which then reads the
       # partner-language assignment from $LANGUAGES (5 dash-separated languages,
       # one per partner). This is what makes each matrix row a distinct
       # cross-language interop run.
       LANGUAGES: ${{ matrix.languages }}
-      # run_dose_tests --jenkins puts its temp area (lock files, crash dumps) at
-      # $WORKSPACE/temp; on Jenkins WORKSPACE is the build workspace. github.workspace
-      # is the GHA equivalent, so reuse it. Safir creates the subdirs itself.
+      # run_dose_tests --ci puts its temp area (lock files, crash dumps) at
+      # $WORKSPACE/temp, so point WORKSPACE at the checkout. Safir creates the
+      # subdirs itself.
       WORKSPACE: ${{ github.workspace }}
 
     # kind x languages x platform = 2 x 3 x 5 = 30 jobs. kind/languages/platform
@@ -535,12 +534,12 @@ jobs:
 
       - name: Run dose tests (Linux)
         if: runner.os == 'Linux'
-        run: python build/jenkins_stuff/run_test.py --test ${{ matrix.kind }}-tests
+        run: python build/ci/run_test.py --test ${{ matrix.kind }}-tests
 
       - name: Run dose tests (Windows)
         if: runner.os == 'Windows'
         shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
-        run: python build\jenkins_stuff\run_test.py --test ${{ matrix.kind }}-tests
+        run: python build\ci\run_test.py --test ${{ matrix.kind }}-tests
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
@@ -637,12 +636,12 @@ jobs:
 
       - name: Run slow tests (Linux)
         if: runner.os == 'Linux'
-        run: python build/jenkins_stuff/run_test.py --test slow-tests
+        run: python build/ci/run_test.py --test slow-tests
 
       - name: Run slow tests (Windows)
         if: runner.os == 'Windows'
         shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
-        run: python build\jenkins_stuff\run_test.py --test slow-tests
+        run: python build\ci\run_test.py --test slow-tests
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
@@ -800,7 +799,7 @@ jobs:
         env:
           WORKSPACE: ${{ github.workspace }}
           LANGUAGES: cpp-cpp-cpp-cpp-cpp
-        run: python build/jenkins_stuff/run_test.py --test multicomputer-tests
+        run: python build/ci/run_test.py --test multicomputer-tests
 
       - name: Run multicomputer master (Windows)
         if: runner.os == 'Windows'
@@ -808,7 +807,7 @@ jobs:
         env:
           WORKSPACE: ${{ github.workspace }}
           LANGUAGES: cpp-cpp-cpp-cpp-cpp
-        run: python build\jenkins_stuff\run_test.py --test multicomputer-tests
+        run: python build\ci\run_test.py --test multicomputer-tests
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
@@ -945,7 +944,7 @@ jobs:
                 python -m pip install --quiet --upgrade pip
                 pip install --quiet -r build/requirements.txt
                 export WORKSPACE=/work
-                python build/jenkins_stuff/run_test.py --slave $role"
+                python build/ci/run_test.py --slave $role"
           }
           start_slave server-1 "${SERVER_1_ADDR}" server-1
           start_slave client-0 "${CLIENT_0_ADDR}" client-0

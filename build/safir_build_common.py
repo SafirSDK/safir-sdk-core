@@ -437,10 +437,6 @@ def add_common_arguments(parser):
 
     parser.add_argument("--skip-tests", action="store_true", help="Skip running the unit tests")
 
-    parser.add_argument("--jenkins",
-                        action="store_true",
-                        help="Increase verbosity and obey build matrix variables.")
-
     parser.add_argument("--verbose",
                         "-v",
                         action="count",
@@ -496,8 +492,6 @@ def finalize_arguments(arguments):
         if not hasattr(arguments, attr):
             setattr(arguments, attr, default)
 
-    if arguments.jenkins:
-        arguments.verbose += 1
     if arguments.verbose >= 2:
         os.environ["VERBOSE"] = "1"
     if arguments.package_noclean:
