@@ -422,7 +422,7 @@ jobs:
   # in both the "standalone" (one node) and "multinode" (four nodes, all on this
   # one machine) configurations. The flow matches build-examples: install the
   # testsuite package via run_test.py, which then drives run_dose_tests with the
-  # partner languages from $LANGUAGES. The multicomputer config is deliberately
+  # partner languages from $SAFIR_TEST_LANGUAGES. The multicomputer config is deliberately
   # not run here - it needs separate slave *machines*, which one hosted runner
   # cannot provide; see the multicomputer-master/slaves pair below.
   dose-tests:
@@ -446,14 +446,14 @@ jobs:
 
     env:
       # run_test.py passes --ci to run_dose_tests, which then reads the
-      # partner-language assignment from $LANGUAGES (5 dash-separated languages,
-      # one per partner). This is what makes each matrix row a distinct
+      # partner-language assignment from $SAFIR_TEST_LANGUAGES (5 dash-separated
+      # languages, one per partner). This is what makes each matrix row a distinct
       # cross-language interop run.
-      LANGUAGES: ${{ matrix.languages }}
-      # run_dose_tests --ci puts its temp area (lock files, crash dumps) at
-      # $WORKSPACE/temp, so point WORKSPACE at the checkout. Safir creates the
-      # subdirs itself.
-      WORKSPACE: ${{ github.workspace }}
+      SAFIR_TEST_LANGUAGES: ${{ matrix.languages }}
+      # Where the suite puts its lock files, crash dumps and logs. Inside the
+      # checkout so the "Upload test results" step can collect them; run_dose_tests
+      # respects this if we set it, and Safir creates the subdirs itself.
+      SAFIR_TEST_TEMP: ${{ github.workspace }}/temp
 
     # kind x languages x platform = 2 x 3 x 5 = 30 jobs. kind/languages/platform
     # are real cross-product axes; the include entries only attach the coupled
@@ -761,8 +761,8 @@ jobs:
         kind: [standalone, multinode]
 
     env:
-      LANGUAGES: java-cpp-dotnet-java-cpp
-      WORKSPACE: ${{ github.workspace }}
+      SAFIR_TEST_LANGUAGES: java-cpp-dotnet-java-cpp
+      SAFIR_TEST_TEMP: ${{ github.workspace }}/temp
 
     steps:
       - uses: actions/checkout@v5
@@ -981,16 +981,16 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         env:
-          WORKSPACE: ${{ github.workspace }}
-          LANGUAGES: cpp-cpp-cpp-cpp-cpp
+          SAFIR_TEST_TEMP: ${{ github.workspace }}/temp
+          SAFIR_TEST_LANGUAGES: cpp-cpp-cpp-cpp-cpp
         run: python build/ci/run_test.py --test multicomputer-tests
 
       - name: Run multicomputer master (Windows)
         if: runner.os == 'Windows'
         shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
         env:
-          WORKSPACE: ${{ github.workspace }}
-          LANGUAGES: cpp-cpp-cpp-cpp-cpp
+          SAFIR_TEST_TEMP: ${{ github.workspace }}/temp
+          SAFIR_TEST_LANGUAGES: cpp-cpp-cpp-cpp-cpp
         run: python build\ci\run_test.py --test multicomputer-tests
 
       - name: Upload test results
@@ -1094,7 +1094,7 @@ jobs:
       - name: Launch the three debian slave nodes
         shell: bash
         env:
-          LANGUAGES: cpp-cpp-cpp-cpp-cpp
+          SAFIR_TEST_LANGUAGES: cpp-cpp-cpp-cpp-cpp
         run: |
           set -euo pipefail
           start_slave() {
@@ -1109,7 +1109,8 @@ jobs:
             docker run -d --name "$name" --network safirnet --ip "$ip" \
               --add-host "core-multicomputer-test-server-1-slave:${SERVER_1_ADDR}" \
               --shm-size=2g \
-              -e LANGUAGES="$LANGUAGES" \
+              -e SAFIR_TEST_LANGUAGES="$SAFIR_TEST_LANGUAGES" \
+              -e SAFIR_TEST_TEMP=/work/temp \
               -v "$PWD/run-$role":/work -w /work debian:13 \
               bash -c "set -e
                 apt-get update -qq
@@ -1127,7 +1128,6 @@ jobs:
                 . .venv/bin/activate
                 python -m pip install --quiet --upgrade pip
                 pip install --quiet -r build/requirements.txt
-                export WORKSPACE=/work
                 python build/ci/run_test.py --slave $role"
           }
           start_slave server-1 "${SERVER_1_ADDR}" server-1
