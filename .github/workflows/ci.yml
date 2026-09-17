@@ -688,6 +688,13 @@ jobs:
         with:
           platform: ubuntu-noble
           conan-home: /home/runner/.conan2
+          # Its own cache, NOT the ubuntu-noble release build's. The Conan
+          # profile carries build_type (see conan_provider.cmake), so a Debug
+          # build resolves different package IDs entirely. Sharing the key would
+          # mean each job restoring the other's useless binaries, and - since
+          # actions/cache keys are write-once - whichever finished first would
+          # own the key and leave the other permanently uncached.
+          conan-cache-prefix: conan-debug-v1
 
       # --config Debug is all that PACKAGE_TYPE=DebugOnly ever did: it makes the
       # Debian packager build and ctest a single Debug configuration (and pass
