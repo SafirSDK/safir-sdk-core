@@ -135,9 +135,15 @@ namespace ToolSupport
                 {
                     if (src.first == nullptr)
                     {
+                        //ReadFiles already found this file unparsable, and threw the
+                        //exception away. Re-read it purely to recover the message and
+                        //the line number for the error below. The resulting tree is
+                        //not used - and if the read unexpectedly succeeds we still have
+                        //no tree to parse, so the file is invalid to us either way.
                         try
                         {
-                            boost::property_tree::read_xml(src.second, *(src.first), boost::property_tree::xml_parser::no_comments);
+                            boost::property_tree::ptree unused;
+                            boost::property_tree::read_xml(src.second, unused, boost::property_tree::xml_parser::no_comments);
                         }
                         catch (const boost::property_tree::xml_parser_error& err)
                         {
@@ -145,6 +151,8 @@ namespace ToolSupport
                             ss<<err.message()<<". Line: "<<err.line();
                             throw ParseError("Invalid XML", ss.str(), src.second, 10);
                         }
+
+                        throw ParseError("Invalid XML", "The file could not be read", src.second, 10);
                     }
 
                     try
