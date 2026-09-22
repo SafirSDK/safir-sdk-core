@@ -123,10 +123,19 @@ runs:
         echo "$(cat pub.key) $mapped" > endpoint.txt
         echo "endpoint.txt: $(cat endpoint.txt)"
 
+    # The run ATTEMPT is part of the name, not decoration. Artifacts are scoped to
+    # the run id, which a re-run does not change, so a re-run of a failed job
+    # publishes a second artifact alongside the first under the same name. The
+    # fetch below then has two same-named artifacts to choose between, and the
+    # stale one points at a runner that no longer exists: both sides configure a
+    # dead peer, send handshakes into the void and time out. Observed on run
+    # 35312741704, where `gh run rerun --failed` of the multicomputer pair failed
+    # this way on both sides ("0 B received"). Keying on the attempt means a
+    # re-run simply cannot see the previous attempt's endpoints.
     - name: Publish my endpoint
       uses: actions/upload-artifact@v6
       with:
-        name: endpoint-${{ inputs.my-role }}
+        name: endpoint-${{ inputs.my-role }}-attempt${{ github.run_attempt }}
         path: endpoint.txt
         retention-days: 1
 
@@ -143,7 +152,7 @@ runs:
         # has no unzip.
         if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
         mkdir -p peer
-        name="endpoint-${PEER_ROLE}"
+        name="endpoint-${PEER_ROLE}-attempt${GITHUB_RUN_ATTEMPT}"
         api="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts"
         jobs_api="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs"
 

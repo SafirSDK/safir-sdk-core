@@ -276,9 +276,9 @@ downloads. This restored what the retired Jenkins pipeline archived as
 
 #### Known multicomputer overlay failure modes
 
-Both of these bit on the 7.4.3-alpha4 run and are now mitigated in
-`.github/actions/wireguard-overlay`; the symptoms are worth recognising because
-neither implicates the code under test.
+All three of these are mitigated in `.github/actions/wireguard-overlay`; the
+symptoms are worth recognising because none of them implicates the code under
+test. The first two bit on the 7.4.3-alpha4 run.
 
 - **`Timed out waiting for peer endpoint`** — scheduling skew, as above. The wait
   is now a wall-clock window (`peer-wait-minutes`, default 25) instead of a fixed
@@ -296,6 +296,24 @@ neither implicates the code under test.
   *below* 49152, and WireGuard listens on whichever one actually bound. The
   Windows side also dumps `netsh int ipv4 show excludedportrange udp` up front,
   since that evidence is unrecoverable after the fact.
+- **Both sides report `0 B received` and time out waiting for a handshake, on a
+  *re-run*** — the rendezvous artifacts are scoped to the run **id**, which
+  `gh run rerun` does not change, so a re-run used to publish a second
+  `endpoint-<role>` artifact next to the first. The fetch picked between two
+  same-named artifacts with `head -n1` and could get the previous attempt's,
+  whose runner no longer exists; both sides then configured a dead peer and sent
+  handshakes into the void. Seen on run 35312741704, where `gh run rerun --failed`
+  of the multicomputer pair failed this way symmetrically. The artifact name now
+  carries `github.run_attempt`, so an attempt cannot see an earlier one's
+  endpoints. **Before that fix, `gh run rerun --failed` was simply unsound for
+  the multicomputer pair** — the only reliable re-test was a fresh run. It is
+  sound now **only when both halves of a pair failed**, which is the normal case
+  since they fail together. If just one half failed, its re-run has no peer: the
+  jobs API lists the other half as already `completed` (verified on the attempt-2
+  job list of run 35312741704), so the poll gives up within seconds with "has
+  already completed without publishing an endpoint" rather than hanging — a fast
+  and clear failure, but the only way to re-test that pair is to re-run the whole
+  workflow.
 
 #### Debug coverage (`build-debug` and friends)
 
