@@ -30,7 +30,7 @@ warnings has no parser for the Debian packaging tools and no user-defined-regex
 option, so we extract their findings ourselves and hand them on in the
 tool-agnostic SARIF format it can ingest. Two kinds of line are collected:
 
-* lintian, mirroring the regex the Jenkins warnings-ng setup used::
+* lintian, mirroring the regex the old warnings-ng setup used::
 
       W: safir-sdk-core-dev: no-manual-page [usr/bin/safir_build_common.py]
       E: safir-sdk-core: some-tag some explanatory text
@@ -51,7 +51,7 @@ import os
 import re
 import sys
 
-# lintian: mirrors the Jenkins parser regex (^(E|W): pkg: tag msg), with the
+# lintian: mirrors the warnings-ng parser regex (^(E|W): pkg: tag msg), with the
 # package/tag character classes widened to match real Debian names (digits, '.',
 # '+'). The remainder is the message, which may end with a "[path]" locator.
 _LINTIAN_RE = re.compile(r"^(?P<severity>[EW]): (?P<pkg>[a-z0-9.+-]+): (?P<tag>[a-z0-9.+-]+)(?: (?P<msg>.*))?$")
@@ -94,7 +94,7 @@ def _parse_line(line):
         msg = match.group("msg") or ""
         location = _LOCATION_RE.search(msg)
         # Prefer the in-package path as the location; fall back to the package
-        # name (what the Jenkins parser used) when lintian gives no path.
+        # name (what that parser used) when lintian gives no path.
         uri = location.group(1) if location else match.group("pkg")
         return {
             "tool": "lintian",

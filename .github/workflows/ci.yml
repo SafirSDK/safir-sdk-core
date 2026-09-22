@@ -172,12 +172,12 @@ jobs:
 
       - name: Build and package (Linux)
         if: runner.os == 'Linux'
-        run: python build/build.py --jenkins
+        run: python build/build.py --verbose
 
       - name: Build and package (Windows)
         if: runner.os == 'Windows'
         shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
-        run: python build\build.py --jenkins --use-studio ${{ matrix.studio }} --arch amd64
+        run: python build\build.py --verbose --use-studio ${{ matrix.studio }} --arch amd64
 
       - name: Trim and save Conan cache
         if: always()
@@ -212,15 +212,26 @@ jobs:
           path: '**/*.junit.xml'
           if-no-files-found: ignore
 
+      # The raw per-process logs the ctest drivers leave behind (every driver that
+      # keeps output does so in a directory named exactly test_output). The junit
+      # above says WHICH case failed; this is what you read to find out WHY. Named
+      # *-output-* so test-summary's *results-* download leaves it alone.
+      - name: Archive test output
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: test-output-${{ matrix.platform }}-${{ matrix.arch }}
+          path: '**/test_output/**'
+          if-no-files-found: ignore
+
   # Render the shipped documentation (User's Guide + Requirements Specification,
-  # HTML + PDF) the way Jenkins' "Render documentation" stage does. This is a
+  # HTML + PDF). This is a
   # standalone docs build: docs/CMakeLists.txt only builds the asciidoctor
   # documents when there is no parent project, so it needs just the doc toolchain
   # (asciidoctor/dia/dblatex/texlive/ghostscript) plus cmake/ninja - no compilers,
   # Qt, Boost or Conan. The output (HTML/PDF) is distro-independent, so it runs
   # straight on ubuntu-latest rather than in a debian container. No `needs`: it is
-  # independent of the build artifacts and runs in parallel, as its own stage does
-  # in Jenkins.
+  # independent of the build artifacts, so it runs in parallel with them.
   render-docs:
     name: Render documentation
     runs-on: ubuntu-latest
@@ -237,7 +248,7 @@ jobs:
             asciidoctor dia dblatex texlive-font-utils ghostscript
 
       - name: Render documentation
-        # Mirrors Jenkins render_documentation(): standalone in-source docs build.
+        # Standalone in-source docs build.
         # Tee to buildlog.txt so the warnings-summary job can scan the doxygen and
         # cmake output for warnings.
         run: |
@@ -285,12 +296,11 @@ jobs:
           path: buildlog.txt
           if-no-files-found: ignore
 
-  # Build the example apps against the SDK package the build job produced. This
-  # mirrors the Jenkins "Build examples" stage: it installs the package
-  # system-wide and uses dobmake-batch (via run_test.py) to compile the example
-  # apps on top of the installed SDK - the real-world check that a user can build
-  # against an installed Safir SDK Core. On Windows that includes Debug apps,
-  # where the MSVC per-config runtime split matters.
+  # Build the example apps against the SDK package the build job produced: it
+  # installs the package system-wide and uses dobmake-batch (via run_test.py) to
+  # compile the example apps on top of the installed SDK - the real-world check
+  # that a user can build against an installed Safir SDK Core. On Windows that
+  # includes Debug apps, where the MSVC per-config runtime split matters.
   build-examples:
     name: examples-${{ matrix.platform }}-${{ matrix.arch }}
     needs: build
@@ -307,13 +317,12 @@ jobs:
     env:
       CONAN_HOME: ${{ matrix.conan_home }}
       # examples/CMakeLists.txt switches VehicleAppCpp to an old Conan Boost 1.79
-      # when JENKINS_HOME is set, exactly like the Jenkins examples build - this
-      # verifies the SDK works against a user-chosen Boost. run_test.py itself
-      # does not read this variable, so it has no other effect.
-      JENKINS_HOME: "1"
+      # when this is set - it verifies the SDK works against a user-chosen Boost
+      # rather than whatever the system happens to ship. run_test.py itself does
+      # not read this variable, so it has no other effect.
+      SAFIR_EXAMPLES_USE_CONAN: "1"
       # run_test.py's build_examples() forwards these to dobmake-batch on Windows
-      # (--use-studio / --arch). PACKAGE_TYPE is left unset and defaults to Full,
-      # so the examples are built in Debug + Release + RelWithDebInfo.
+      # (--use-studio / --arch).
       BUILD_PLATFORM: ${{ matrix.platform }}
       BUILD_ARCH: ${{ matrix.arch }}
 
@@ -404,7 +413,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python build/jenkins_stuff/run_test.py --test build-examples 2>&1 | tee buildlog.txt
+          python build/ci/run_test.py --test build-examples 2>&1 | tee buildlog.txt
 
       - name: Trim and save Conan cache
         if: always()
@@ -423,11 +432,11 @@ jobs:
 
   # Run the big dose test suite (243 testcases) against the installed SDK package,
   # in both the "standalone" (one node) and "multinode" (four nodes, all on this
-  # one machine) configurations. This mirrors the Jenkins "Test suite" stage. The
-  # flow matches build-examples: install the testsuite package via run_test.py,
-  # which then drives run_dose_tests with the partner languages from $LANGUAGES.
-  # The multicomputer config is intentionally NOT run here - it needs separate
-  # slave *machines* (Jenkins agents), which hosted GitHub runners can't provide.
+  # one machine) configurations. The flow matches build-examples: install the
+  # testsuite package via run_test.py, which then drives run_dose_tests with the
+  # partner languages from $SAFIR_TEST_LANGUAGES. The multicomputer config is deliberately
+  # not run here - it needs separate slave *machines*, which one hosted runner
+  # cannot provide; see the multicomputer-master/slaves pair below.
   dose-tests:
     name: ${{ matrix.kind }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.languages }}
     needs: build
@@ -448,20 +457,15 @@ jobs:
       options: ${{ matrix.container_options }}
 
     env:
-      # run_test.py passes --jenkins to run_dose_tests, which then reads the
-      # partner-language assignment from $LANGUAGES (5 dash-separated languages,
-      # one per partner). This is what makes each matrix row a distinct
+      # run_test.py passes --ci to run_dose_tests, which then reads the
+      # partner-language assignment from $SAFIR_TEST_LANGUAGES (5 dash-separated
+      # languages, one per partner). This is what makes each matrix row a distinct
       # cross-language interop run.
-      LANGUAGES: ${{ matrix.languages }}
-      # run_dose_tests --jenkins puts its temp area (lock files, crash dumps) at
-      # $WORKSPACE/temp; on Jenkins WORKSPACE is the build workspace. github.workspace
-      # is the GHA equivalent, so reuse it. Safir creates the subdirs itself.
-      WORKSPACE: ${{ github.workspace }}
-      # run_test.py's run_test_suite() reads $JOB_NAME to detect 32-bit-on-64
-      # ("32on64") Jenkins jobs and drop the Java partner. We are never that, so
-      # any value without "32on64" both satisfies the lookup (it would KeyError if
-      # unset) and keeps all partners enabled.
-      JOB_NAME: ${{ github.workflow }}-${{ matrix.kind }}
+      SAFIR_TEST_LANGUAGES: ${{ matrix.languages }}
+      # Where the suite puts its lock files, crash dumps and logs. Inside the
+      # checkout so the "Archive test output" step can collect them; run_dose_tests
+      # respects this if we set it, and Safir creates the subdirs itself.
+      SAFIR_TEST_TEMP: ${{ github.workspace }}/temp
 
     # kind x languages x platform = 2 x 3 x 5 = 30 jobs. kind/languages/platform
     # are real cross-product axes; the include entries only attach the coupled
@@ -540,12 +544,12 @@ jobs:
 
       - name: Run dose tests (Linux)
         if: runner.os == 'Linux'
-        run: python build/jenkins_stuff/run_test.py --test ${{ matrix.kind }}-tests
+        run: python build/ci/run_test.py --test ${{ matrix.kind }}-tests
 
       - name: Run dose tests (Windows)
         if: runner.os == 'Windows'
         shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
-        run: python build\jenkins_stuff\run_test.py --test ${{ matrix.kind }}-tests
+        run: python build\ci\run_test.py --test ${{ matrix.kind }}-tests
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
@@ -553,6 +557,23 @@ jobs:
         with:
           name: dose-results-${{ matrix.kind }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.languages }}
           path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
+      # dose_test_output holds each partner's and safir_control's stdout/stderr
+      # (*.output.txt); temp is $SAFIR_TEST_TEMP, where the lock files, logs and any
+      # crash dumps land. A testcase diff only tints the "Test results" check and
+      # the junit carries just the diff, so this is the only place the surrounding
+      # output survives. always(): a hung run killed by the timeout is exactly
+      # when it is needed. Named *-output-* so test-summary's *results-* download
+      # leaves it alone.
+      - name: Archive test output
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: dose-output-${{ matrix.kind }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.languages }}
+          path: |
+            dose_test_output
+            temp
           if-no-files-found: ignore
 
   # Run the slow, system-level test suite (system picture, incarnation/control,
@@ -642,12 +663,12 @@ jobs:
 
       - name: Run slow tests (Linux)
         if: runner.os == 'Linux'
-        run: python build/jenkins_stuff/run_test.py --test slow-tests
+        run: python build/ci/run_test.py --test slow-tests
 
       - name: Run slow tests (Windows)
         if: runner.os == 'Windows'
         shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
-        run: python build\jenkins_stuff\run_test.py --test slow-tests
+        run: python build\ci\run_test.py --test slow-tests
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
@@ -656,6 +677,267 @@ jobs:
           name: slow-results-${{ matrix.platform }}-${{ matrix.arch }}
           path: '**/*.junit.xml'
           if-no-files-found: ignore
+
+      # The slow drivers write their per-node logs under test_output in the
+      # working directory (run_test.py runs them from the checkout root). Same
+      # reasoning as the dose-tests archive step.
+      - name: Archive test output
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: slow-output-${{ matrix.platform }}-${{ matrix.arch }}
+          path: '**/test_output/**'
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # Debug coverage.
+  #
+  # Every other job in this workflow builds RelWithDebInfo, which defines NDEBUG.
+  # That compiles out three things entirely: the ~50 assert() calls in the source
+  # (37 of them in the Java JNI layer), LeveledLock's lock-ORDER checking - the
+  # deadlock detector is `#if !defined(NDEBUG)`, so it is absent from every binary
+  # we otherwise ship or test - and the NDEBUG-guarded cases in leveled_lock_test
+  # and ElectionHandler_test. Until Jenkins was retired its PACKAGE_TYPE=DebugOnly
+  # axis covered this; nothing did afterwards.
+  #
+  # Deliberately ubuntu-noble amd64 only: no Debug row on Windows, arm64 or
+  # debian-trixie. What Debug adds is platform-neutral code that behaves the same
+  # on every row, so another Linux row would re-run the same checks for another
+  # ~35 minutes with nothing significant to gain. A Windows row would add only
+  # MSVC's checked iterators (all the assert() calls are in platform-neutral code;
+  # the files that contain both assert( and _MSC_VER only do so because of
+  # #pragma warning push/pop), which are better chased with a sanitiser job, and
+  # it would also have to solve the Windows Defender false positive first, which
+  # eats Debug safir_control.exe (see AGENTS.md, "Debug coverage").
+  build-debug:
+    name: debug-ubuntu-noble-amd64
+    runs-on: ubuntu-24.04
+    # Same retry.sh invariant as the release build: must outlast
+    # setup-build-env's 7200s budget. Debug is slower to build than
+    # RelWithDebInfo, so keep the full 4 hours rather than trimming.
+    timeout-minutes: 240
+
+    env:
+      CONAN_HOME: /home/runner/.conan2
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up build environment
+        id: setup-build-env
+        uses: ./.github/actions/setup-build-env
+        with:
+          platform: ubuntu-noble
+          conan-home: /home/runner/.conan2
+          # Its own cache, NOT the ubuntu-noble release build's. The Conan
+          # profile carries build_type (see conan_provider.cmake), so a Debug
+          # build resolves different package IDs entirely. Sharing the key would
+          # mean each job restoring the other's useless binaries, and - since
+          # actions/cache keys are write-once - whichever finished first would
+          # own the key and leave the other permanently uncached.
+          conan-cache-prefix: conan-debug-v1
+
+      # --config Debug is all that PACKAGE_TYPE=DebugOnly ever did: it makes the
+      # Debian packager build and ctest a single Debug configuration (and pass
+      # "noopt" through DEB_BUILD_OPTIONS). The unit tests run as part of this
+      # step, so this job is what recovers the assert and lock-checking coverage;
+      # the dose and slow jobs below extend it to the integration suites.
+      - name: Build and package (Debug)
+        run: python build/build.py --verbose --config Debug
+
+      - name: Trim and save Conan cache
+        if: always()
+        uses: ./.github/actions/save-conan-cache
+        with:
+          conan-home: /home/runner/.conan2
+          cache-key: ${{ steps.setup-build-env.outputs.cache-primary-key }}
+
+      # Deliberately NOT named packages-*: the release job globs that prefix and
+      # would bundle these Debug .debs into a release asset (and because release
+      # only `needs: build`, whether this artifact existed yet would be a race).
+      # These packages exist to feed the two debug test jobs below, nothing else.
+      - name: Upload packages
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: debug-packages-ubuntu-noble-amd64
+          path: tmp/*.deb
+          if-no-files-found: ignore
+
+      # Deliberately NOT named buildlog-*: warnings-summary globs that prefix, and
+      # this is a noopt build whose warning set differs systematically from the
+      # optimised ones (-Wmaybe-uninitialized and friends are optimisation
+      # dependent). Folding it into the "Build warnings" check would double-report
+      # annotations on the same lines from two configurations. Kept as an artifact
+      # because it is still what you read when this build breaks.
+      - name: Upload build log
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: debug-buildlog-ubuntu-noble-amd64
+          path: buildlog.html
+          if-no-files-found: ignore
+
+      # Named *results-* so test-summary's download pattern picks it up, the same
+      # as every other job's junit.
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: test-results-debug-ubuntu-noble-amd64
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
+      # Same as the release build's archive step; matters more here, since a
+      # failure below stops the job and this is where the assert message is.
+      - name: Archive test output
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: debug-test-output-ubuntu-noble-amd64
+          path: '**/test_output/**'
+          if-no-files-found: ignore
+
+      # Unlike everywhere else in this workflow, a test failure here fails the
+      # JOB rather than only reddening the "Test results" check. See
+      # build/ci/check_junit.py for why the Debug jobs are the exception.
+      # Deliberately placed after the upload above so the junit is archived even
+      # when this step is what fails the job, and with no `if: always()` - a build
+      # that failed has already failed the job and left no junit to read.
+      - name: Fail the job on Debug test failures
+        run: python build/ci/check_junit.py
+
+  # The dose suites against the Debug package. One language combo rather than the
+  # three the release matrix runs: dose_java_jni has no ADD_TEST anywhere, so its
+  # 27 asserts are reachable ONLY from a Java partner here, which makes a Java-
+  # bearing combo mandatory. The dotnet interop has no asserts at all, so the
+  # remaining combos would add runtime and no coverage.
+  debug-dose-tests:
+    name: debug-${{ matrix.kind }}-ubuntu-noble-amd64
+    needs: build-debug
+    runs-on: ubuntu-24.04
+    # ~3x the observed runtime, which is how the release dose timeout was picked
+    # (60 min against ~27). Both suites have landed at 13.8-14.7 min across two
+    # runs - Debug here is actually faster than release on the arm64 row - so the
+    # 120 min this started with was guesswork and far too generous.
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [standalone, multinode]
+
+    env:
+      SAFIR_TEST_LANGUAGES: java-cpp-dotnet-java-cpp
+      SAFIR_TEST_TEMP: ${{ github.workspace }}/temp
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up test environment
+        uses: ./.github/actions/setup-test-env
+
+      - name: Download SDK package
+        uses: actions/download-artifact@v8
+        with:
+          name: debug-packages-ubuntu-noble-amd64
+          path: package-download
+
+      - name: Stage installer at repo root
+        uses: ./.github/actions/stage-installer
+        with:
+          deb-only: "true"
+
+      - name: Run dose tests
+        run: python build/ci/run_test.py --test ${{ matrix.kind }}-tests
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: dose-results-debug-${{ matrix.kind }}-ubuntu-noble-amd64
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
+      # Same as the release dose-tests archive step.
+      - name: Archive test output
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: dose-output-debug-${{ matrix.kind }}-ubuntu-noble-amd64
+          path: |
+            dose_test_output
+            temp
+          if-no-files-found: ignore
+
+      # Same hard-fail policy as build-debug. run_dose_tests returns 0 on testcase
+      # diffs, so without this the JNI asserts and any LeveledLock ordering
+      # violation - the things this job exists to exercise - would only tint a
+      # check. Runs after the upload so the junit is kept either way.
+      - name: Fail the job on Debug test failures
+        run: python build/ci/check_junit.py
+
+  # The slow suite against the Debug package. This is where StartupSynchronizer,
+  # the communication DeliveryHandler/Discoverer asserts and any real lock-order
+  # violation are most likely to be hit, since these tests run many nodes for a
+  # long time.
+  debug-slow-tests:
+    name: debug-slow-tests-ubuntu-noble-amd64
+    needs: build-debug
+    runs-on: ubuntu-24.04
+    # Observed 79.4 and 79.6 min across two runs, so ~2.2x that, matching how the
+    # release slow suite's 150 min was picked. Debug costs this suite much less
+    # than the 300 min originally guessed.
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up test environment
+        uses: ./.github/actions/setup-test-env
+
+      - name: Download SDK package
+        uses: actions/download-artifact@v8
+        with:
+          name: debug-packages-ubuntu-noble-amd64
+          path: package-download
+
+      - name: Stage installer at repo root
+        uses: ./.github/actions/stage-installer
+        with:
+          deb-only: "true"
+
+      - name: Run slow tests
+        run: python build/ci/run_test.py --test slow-tests
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: slow-results-debug-ubuntu-noble-amd64
+          path: '**/*.junit.xml'
+          if-no-files-found: ignore
+
+      # Same as the release slow-tests archive step.
+      - name: Archive test output
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: slow-output-debug-ubuntu-noble-amd64
+          path: '**/test_output/**'
+          if-no-files-found: ignore
+
+      # Same hard-fail policy as build-debug. run_slow_tests reports testcase
+      # failures through its exit code, but run_test.py deliberately does not
+      # raise on them, so the junit is again the only place the result survives.
+      - name: Fail the job on Debug test failures
+        run: python build/ci/check_junit.py
 
   # Multicomputer dose tests = the node under test (Server_0, the "master") on one
   # runner talking to three debian slave nodes (Server_1 seed + Client_0 + Client_1)
@@ -795,30 +1077,25 @@ jobs:
           exit 1
 
       # Same entrypoint as the standalone/multinode dose tests: run_test.py installs
-      # the staged package and runs the suite. SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES=1
-      # tells it NOT to launch the slaves via JenkinsController - the slaves job
-      # starts them as containers instead; the master still sends STOP over the
-      # network (--stop-slaves). Windows invokes run_test.py via cmd, matching how
-      # the standalone/multinode Windows dose tests run it.
+      # the staged package and runs the suite. The slaves are started as containers
+      # by the slaves job; the master only sends STOP over the network at the end
+      # (--stop-slaves). Windows invokes run_test.py via cmd, matching how the
+      # standalone/multinode Windows dose tests run it.
       - name: Run multicomputer master (Linux)
         if: runner.os == 'Linux'
         shell: bash
         env:
-          WORKSPACE: ${{ github.workspace }}
-          LANGUAGES: cpp-cpp-cpp-cpp-cpp
-          JOB_NAME: ${{ github.workflow }}-multicomputer-master
-          SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES: "1"
-        run: python build/jenkins_stuff/run_test.py --test multicomputer-tests
+          SAFIR_TEST_TEMP: ${{ github.workspace }}/temp
+          SAFIR_TEST_LANGUAGES: cpp-cpp-cpp-cpp-cpp
+        run: python build/ci/run_test.py --test multicomputer-tests
 
       - name: Run multicomputer master (Windows)
         if: runner.os == 'Windows'
         shell: cmd # zizmor: ignore[misfeature] - cmd is intentional here (invokes build.py the same way the Windows build does); the tip only notes cmd limits static analysis
         env:
-          WORKSPACE: ${{ github.workspace }}
-          LANGUAGES: cpp-cpp-cpp-cpp-cpp
-          JOB_NAME: ${{ github.workflow }}-multicomputer-master
-          SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES: "1"
-        run: python build\jenkins_stuff\run_test.py --test multicomputer-tests
+          SAFIR_TEST_TEMP: ${{ github.workspace }}/temp
+          SAFIR_TEST_LANGUAGES: cpp-cpp-cpp-cpp-cpp
+        run: python build\ci\run_test.py --test multicomputer-tests
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
@@ -831,14 +1108,17 @@ jobs:
       # The whole dose_test_output dir holds the per-process stdout/stderr and the
       # partnerN.txt results - the only place the master node's own startup output
       # lands, so it's what we need when the node never reaches production (sequencer
-      # stuck in connection.Open). always() so a hung run killed by the timeout still
+      # stuck in connection.Open). temp is $SAFIR_TEST_TEMP (logs, crash dumps), as
+      # in the dose-tests job. always() so a hung run killed by the timeout still
       # archives it.
       - name: Archive dose_test_output (master)
         uses: actions/upload-artifact@v6
         if: always()
         with:
           name: dose-output-master-${{ matrix.platform }}
-          path: dose_test_output
+          path: |
+            dose_test_output
+            temp
           if-no-files-found: ignore
 
   multicomputer-slaves:
@@ -921,7 +1201,7 @@ jobs:
       - name: Launch the three debian slave nodes
         shell: bash
         env:
-          LANGUAGES: cpp-cpp-cpp-cpp-cpp
+          SAFIR_TEST_LANGUAGES: cpp-cpp-cpp-cpp-cpp
         run: |
           set -euo pipefail
           start_slave() {
@@ -936,7 +1216,8 @@ jobs:
             docker run -d --name "$name" --network safirnet --ip "$ip" \
               --add-host "core-multicomputer-test-server-1-slave:${SERVER_1_ADDR}" \
               --shm-size=2g \
-              -e LANGUAGES="$LANGUAGES" -e JOB_NAME="multicomputer-$role" \
+              -e SAFIR_TEST_LANGUAGES="$SAFIR_TEST_LANGUAGES" \
+              -e SAFIR_TEST_TEMP=/work/temp \
               -v "$PWD/run-$role":/work -w /work debian:13 \
               bash -c "set -e
                 apt-get update -qq
@@ -954,8 +1235,7 @@ jobs:
                 . .venv/bin/activate
                 python -m pip install --quiet --upgrade pip
                 pip install --quiet -r build/requirements.txt
-                export WORKSPACE=/work
-                python build/jenkins_stuff/run_test.py --slave $role"
+                python build/ci/run_test.py --slave $role"
           }
           start_slave server-1 "${SERVER_1_ADDR}" server-1
           start_slave client-0 "${CLIENT_0_ADDR}" client-0
@@ -1016,7 +1296,8 @@ jobs:
   # report. Runs on always() so it still reports when some test job failed.
   test-summary:
     name: Test summary
-    needs: [build, dose-tests, slow-tests, multicomputer-master, multicomputer-slaves]
+    needs: [build, dose-tests, slow-tests, multicomputer-master, multicomputer-slaves,
+            build-debug, debug-dose-tests, debug-slow-tests]
     if: always()
     runs-on: ubuntu-latest
     # checks: write to create the Check run; pull-requests: write so the action
@@ -1065,11 +1346,10 @@ jobs:
 
   # Collect the compiler/cmake/doxygen/lintian warnings from every build and
   # publish one consolidated "Build warnings" Check with source-linked
-  # annotations - the GitHub-Actions replacement for Jenkins' warnings-ng
-  # analysis (archive_and_analyze in the Jenkinsfile). Each build/examples/docs
+  # annotations. Each build/examples/docs
   # job uploads its log as a buildlog-* artifact; buildlog_to_text.py unwraps it
   # and DROPS warnings from Conan dependency builds (only our own tree's
-  # diagnostics survive), and lintian_to_sarif.py extracts the .deb packaging
+  # diagnostics survive), and packaging_to_sarif.py extracts the .deb packaging
   # warnings (Quality Monitor has no lintian parser). Runs on always() so it
   # reports even when a build failed. Summary-only: no quality-gates are set, so
   # the Check shows the warnings but the job stays green (GitHub has no

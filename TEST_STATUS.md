@@ -60,8 +60,48 @@ exit 1, carried by junit; an *infra* failure is exit 2 and fails the job).
 The dose runner treats a nonzero `safir_control` *process* exit as an infra
 failure, not a carried assertion, so it fails the whole job.
 
+### The Debug jobs opt out of all of that — and this may need softening
+
+`build-debug`, `debug-dose-tests` and `debug-slow-tests` run
+`build/ci/check_junit.py` as their last step, which **fails the job if any junit
+below the workspace records a failure or error**. No exemptions: not for the
+flakes catalogued below, not for `syslog_output`, not for anything.
+
+The reasoning is that these are the only builds where `assert()`, `LeveledLock`'s
+lock-order checking and `_GLIBCXX_ASSERTIONS` exist at all, so a failure there is
+a class of bug nothing else in CI can observe. #616 sat undetected for three
+years, and the likeliest explanation is a red DebugOnly row nobody was obliged to
+act on. A check that is easy to live with is a check that gets lived with.
+
+**But that argument cuts against the deferral policy above, and the policy is
+probably the one that should win if they ever really collide.** Nothing in the
+Debug jobs is immune to the flakiness catalogued here — they run the same dose
+and slow suites as everything else, just built differently. A hard-failing job
+turns every flake into something that blocks, which is precisely the
+infinite-flakiness-research trap the deferral policy exists to avoid.
+
+**So treat the hard fail as provisional.** If it starts costing more in re-runs
+and triage than it earns in real findings, soften it rather than grinding through
+flake investigations. In rough order of how much it gives up:
+
+1. Exempt the known-flaky names below, and `syslog_output` (the most likely first
+   offender: it is a carried assertion everywhere else, and this is the one place
+   it becomes a hard stop).
+2. Keep the hard fail only on `build-debug` — the unit tests, which have no
+   catalogued flakes and are where the assert and lock-checking coverage mostly
+   lives — and let the dose and slow Debug jobs signal through the check like
+   their release counterparts.
+3. Drop it entirely and rely on the "Test results" check, accepting the failure
+   mode it was meant to prevent.
+
+Do not read a red Debug job as automatically more serious than a red check. Read
+the junit first: an assertion message from libstdc++ or a `SoftwareViolation` from
+`LeveledLock` is the real thing, and a name from the table below probably is not.
+
 To audit per-platform outcomes, download the `*-results-*` artifacts from the run
-and read the `*.junit.xml`. Note the dose junit `time="0"` is a hardcoded literal
+and read the `*.junit.xml`. The surrounding process output is in the matching
+`*-output-*` artifact: `dose_test_output/*.output.txt` and `temp/` (logs, crash
+dumps) for the dose jobs, `test_output/` for the build and slow-test jobs. Note the dose junit `time="0"` is a hardcoded literal
 (`src/tests/dose_test.ss/run_dose_tests.py.in:307-308`), never measured — "took
 0s" carries no information.
 

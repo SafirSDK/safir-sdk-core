@@ -25,7 +25,7 @@
 ###############################################################################
 """Build and package the safir-sdk-core source tree.
 
-This is the entry point used by Jenkins and by anyone producing the
+This is the entry point used by CI and by anyone producing the
 installation packages. Building and packaging is the only thing it does - there
 is no separate "build without packaging" mode here. To build an external user
 dou-project use dobmake_batch.py instead (installed as dobmake-batch); to just

@@ -1,4 +1,4 @@
-#This is here to allow the jenkins build scripts to exclude this from
+#This is here to allow the CI build scripts to exclude this from
 #32on64 builds on 64 bit machines that do not have a 32bit Qt.
 if (NOT "$ENV{SAFIR_SKIP_QT}" STREQUAL "")
   message(STATUS "Skipping the VehicleMmiCppQt example since the SAFIR_SKIP_QT env variable was set.")

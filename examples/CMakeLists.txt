@@ -5,7 +5,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0")
   cmake_policy(SET CMP0167 NEW)
 endif()
 
-if (DEFINED ENV{JENKINS_HOME} OR SAFIR_EXAMPLES_USE_CONAN)
+if (DEFINED ENV{SAFIR_EXAMPLES_USE_CONAN} OR SAFIR_EXAMPLES_USE_CONAN)
   set (CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/../src/cmake/conan_provider.cmake)
 endif()
 
@@ -24,14 +24,14 @@ set(CMAKE_CXX_STANDARD 17)
 # If you don't have Boost installed VehicleAppCpp will use an alternative method
 # of achieving the same thing.
 #
-# When we build these examples through Jenkins - as a check that the SDK has been
+# When we build these examples in CI - as a check that the SDK has been
 # properly built and can actually be used to compile applications on top of - we need to
 # get hold of a reasonable copy of Boost. In fact we want an old Boost, so that we can
 # verify that the user can use whatever version of Boost they like. To get hold of Boost
 # we use Conan. For more information on conan, visit https://conan.io.
 #
 
-if (DEFINED ENV{JENKINS_HOME} OR SAFIR_EXAMPLES_USE_CONAN)
+if (DEFINED ENV{SAFIR_EXAMPLES_USE_CONAN} OR SAFIR_EXAMPLES_USE_CONAN)
 
   write_file(${CMAKE_SOURCE_DIR}/conanfile.txt
     "[requires]\n"

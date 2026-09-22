@@ -27,13 +27,8 @@ import os
 import glob
 import sys
 import subprocess
-import re
-import platform
 import argparse
 import signal
-import tempfile
-import urllib.request
-import time
 import socket
 import datetime
 
@@ -160,34 +155,6 @@ class WindowsInstaller():
 
         self.development_installed = development
 
-    def __setup_debug_runtime(self):
-        #we get out of here immediately if we're not running debug.
-        if os.environ.get("PACKAGE_TYPE") != "DebugOnly":
-            return
-
-        #build machines should have debug runtime on them
-        if platform.node().find("-build") != -1:
-            return
-
-        #Work out studio version and bitness from installer name
-        match = re.search(r"SafirSDKCore-.*-VS([0-9]*)-([0-9]*)bit-DebugOnly.exe", self.installer)
-        vs_version = match.group(1)
-        width = match.group(2)
-
-        if width == "32":
-            arch = "x86"
-        elif width == "64":
-            arch = "x64"
-
-        debugcrt_path = os.path.join("c:", os.sep, "debug-runtimes", "vs" + vs_version, arch)
-
-        log("Adding", debugcrt_path, "to the PATH")
-
-        if not os.path.isdir(debugcrt_path):
-            raise SetupError("The debug runtime directory seems to be missing: " + debugcrt_path)
-
-        os.environ["PATH"] += os.pathsep + debugcrt_path
-
     def check_installation(self):
         if not os.path.isdir(self.installpath):
             raise SetupError("Installation directory does not exist!")
@@ -215,7 +182,6 @@ class WindowsInstaller():
 
         os.environ["PATH"] += os.pathsep + binpath
 
-        self.__setup_debug_runtime()
 
         log("Running safir_show_config to test that exes can be run")
         proc = subprocess.Popen(("safir_show_config", "--locations", "--typesystem", "--logging"),
@@ -331,250 +297,41 @@ class DebianInstaller():
             raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" +
                              output)
 
-class JenkinsInterface:
-    def __init__(self):
-        self.server = os.environ.get("JENKINS_URL_OVERRIDE")
-        if self.server is None:
-            self.server = os.environ.get("JENKINS_URL")
-            if self.server is None:
-                log("No JENKINS_URL found")
-                sys.exit(1)
-        self.user = os.environ.get("JENKINS_USER")
-        if self.user is None:
-            log("No JENKINS_USER found, defaulting to 'jenkins'")
-            self.user = "jenkins"
-        log("Using jenkins server", self.server)
-        log("Using jenkins user", self.user)
-
-        self.log_level = os.environ.get("JENKINS_CLI_LOGGING")
-        if self.log_level is None:
-            self.log_level = "OFF"
-
-        cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
-        self.tempdir = tempfile.TemporaryDirectory()
-        log(f"Downloading jenkins-cli.jar using url {cliurl}")
-        self.clijar = os.path.join(self.tempdir.name, "jenkins-cli.jar")
-        urllib.request.urlretrieve(cliurl, self.clijar)
-        log(f"Successfully downloaded to{self.clijar}")
-
-    def __run_command(self, cmd, inp=None, name=None):
-        args = list()
-
-        args += ("java", "-jar", self.clijar, "-s", self.server, "-logger", self.log_level, "-ssh", "-user", self.user)
-
-        if type(cmd) is str:
-            args.append(cmd)
-        else:
-            args += cmd
-
-        if name is None:
-            log(f"Running command {' '.join(args)}")
-        else:
-            log(f"Running {name}")
-
-
-        proc = subprocess.Popen(args,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                encoding = "utf-8",
-                                stdin=None if inp is None else subprocess.PIPE)
-        res = proc.communicate(inp)
-        if proc.returncode == 0:
-            return res[0]
-        else:
-            log(res[0])
-            raise Exception(f"Failed to run jenkins command '{' '.join(args)}'")
-
-    def __run_groovy(self, name, script):
-        return self.__run_command(("groovy", "=", name), inp=script)
-
-    def help(self):
-        return self.__run_command("help")
-
-    def who_am_i(self):
-        return self.__run_command("who-am-i")
-
-    def list_jobs(self):
-        output = self.__run_groovy("list_jobs",
-                                   "import hudson.model.*\n" +
-                                   "for(item in Hudson.instance.items) {println(item.name)}")
-        jobs = output.splitlines()
-        return jobs
-
-    def __to_bool(self, output, on_error):
-        output = output.strip()
-        if output not in ("true", "false"):
-            log("Unexpected boolean value: '{0}' was not found in {1}. Treating as {2}".format(
-                output, ("true", "false"), on_error))
-            return on_error
-        return output == "true"
-
-    def is_building(self, job, on_error):
-        script = """
-                 import hudson.model.*
-                 item = Hudson.instance.getItemByFullName("JOB_NAME")
-                 println(item.isBuilding())
-                 """
-        script = script.replace("JOB_NAME", job)
-        output = self.__run_groovy("is_building", script)
-        return self.__to_bool(output, on_error)
-
-    def is_restarting(self):
-        script = """
-                 import hudson.model.*
-                 println(Hudson.instance.isQuietingDown())
-                 """
-        output = self.__run_groovy("is_restarting", script)
-        return self.__to_bool(output, True)
-
-    def wait_for_job(self, job, duration=None):
-        if duration is None:
-            while self.is_building(job, True):
-                time.sleep(1.0)
-        else:
-            future = time.time() + duration
-            while time.time() < future and self.is_building(job, True):
-                time.sleep(1.0)
-
-    def build(self, job, parameters = None):
-        command = ("build", job, "-w")
-        if parameters is not None:
-            for key,value in parameters.items():
-                command += ("-p", f"{key}={value}")
-        self.__run_command(command)
-        while not self.is_building(job, False):
-            time.sleep(1.0)
-
-    def cancel_job(self, job):
-        script = """
-                 import hudson.model.*
-                 item = Hudson.instance.getItemByFullName("JOB_NAME")
-                 executor = item.getLastBuild().getExecutor()
-                 if (executor != null)
-                 {
-                   executor.interrupt()
-                 }
-                 """
-        script = script.replace("JOB_NAME", job)
-        self.__run_groovy("cancel_job", script)
-
-    def get_console_output(self, job):
-        script = """
-                 import hudson.model.*
-                 item = Hudson.instance.getItemByFullName("JOB_NAME")
-                 build = item.getLastBuild()
-                 text = build.getLogText()
-                 println ("text length " + text.length())
-                 println(build.getLog())
-                 println ("end log")
-                 """
-        script = script.replace("JOB_NAME", job)
-        log(self.__run_groovy("get_console_output",script))
-
-class JenkinsController:
-    def __init__(self, slave_role):
-        self.interface = JenkinsInterface()
-        self.slave_role = slave_role
-        self.job_name = "multicomputer-test-slaves/multicomputer-test-" + slave_role
-        auth = self.interface.who_am_i()
-        if auth.find("authenticated") == -1:
-            log("Failed to authenticate using ssh keys, please check that keys are set up correctly")
-            log(auth)
-            sys.exit(1)
-
-    def is_restarting(self):
-        if self.interface.is_restarting():
-            log(" !! Jenkins is restarting")
-            return True
-        else:
-            return False
-
-    def start_slave(self):
-        log(" * Starting slave")
-        #wait for any previous run to complete
-        self.interface.wait_for_job(self.job_name)
-
-        # Get the build number and the job name for the slave to copy artifacts from
-        # from Jenkins environment variables
-        parameters = {"SOURCE_PROJECT" : os.environ.get("JOB_NAME"),
-                      "SOURCE_BUILD_NUMBER" : os.environ.get("BUILD_NUMBER"),
-                      "BUILD_IDENTIFIER" : "debian-trixie-amd64-Full",
-                      "SLAVE_ROLE": self.slave_role}
-        self.interface.build(self.job_name, parameters)
-
-    def __stop_slave(self):
-        try:
-            self.interface.wait_for_job(self.job_name, 60)
-            self.interface.cancel_job(self.job_name)
-            self.interface.wait_for_job(self.job_name)
-        except Exception as exc:
-            log("Failed to stop slave!", exc)
-
-    def close(self):
-        self.__stop_slave()
-
 def run_test_suite(kind):
     log("Launching test suite")
     arguments = [
-        "--jenkins",
+        "--ci",
     ]
-    try:
-        server_1 = None
-        client_0 = None
-        client_1 = None
+    if kind == "multinode":
+        arguments += ("--multinode", )
+    if kind == "multicomputer":
+        #The slave nodes are launched as independent containers by the CI
+        #workflow, not by this script. The Dob-level coordination is unchanged:
+        #the master still sends STOP over the network via --stop-slaves.
+        arguments += ("--multicomputer", "--stop-slaves")
 
-        if os.environ["JOB_NAME"].find("32on64") != -1:
-            arguments += ("--no-java", )
-        if kind == "multinode":
-            arguments += ("--multinode", )
-        if kind == "multicomputer":
-            # On GitHub Actions the slaves are launched as independent containers
-            # by the workflow, not as Jenkins jobs - so skip JenkinsController
-            # entirely. The Dob-level coordination is unchanged: the master still
-            # sends STOP over the network via --stop-slaves.
-            if os.environ.get("SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES") == "1":
-                log("SAFIR_MULTICOMPUTER_EXTERNAL_SLAVES=1: slaves launched externally, skipping JenkinsController")
-            else:
-                server_1 = JenkinsController("server-1")
-                client_0 = JenkinsController("client-0")
-                client_1 = JenkinsController("client-1")
-                if server_1.is_restarting():
-                    log("Jenkins is restarting, exiting quickly...")
-                    return
-                server_1.start_slave()
-                client_0.start_slave()
-                client_1.start_slave()
-            arguments += ("--multicomputer", "--stop-slaves")
-
-        log(f"Launching test suite with arguments {arguments}")
-        if sys.platform == "win32":
-            #Invoke the installed script through the current interpreter rather
-            #than by bare name via shell=True: cmd.exe launches a ".py" file
-            #through its file association *asynchronously* and returns 0
-            #immediately without waiting, so the suite never runs and the step
-            #falsely succeeds (no output, no junit). Search PATH by hand because
-            #shutil.which only matches a bare name whose extension is in PATHEXT,
-            #and ".PY" is not in PATHEXT on the CI runner. Same workaround as
-            #build_examples().
-            script = next(
-                (os.path.join(d, "run_dose_tests.py")
-                 for d in os.environ.get("PATH", "").split(os.pathsep)
-                 if os.path.isfile(os.path.join(d, "run_dose_tests.py"))),
-                None)
-            if script is None:
-                raise SetupError("Could not find run_dose_tests.py on PATH")
-            result = nice_call([sys.executable, script] + arguments, shell=False)
-        else:
-            result = nice_call([
-                "run_dose_tests",
-            ] + arguments)
-    finally:
-        if server_1 is not None:
-            server_1.close()
-        if client_0 is not None:
-            client_0.close()
-        if client_1 is not None:
-            client_1.close()
+    log(f"Launching test suite with arguments {arguments}")
+    if sys.platform == "win32":
+        #Invoke the installed script through the current interpreter rather
+        #than by bare name via shell=True: cmd.exe launches a ".py" file
+        #through its file association *asynchronously* and returns 0
+        #immediately without waiting, so the suite never runs and the step
+        #falsely succeeds (no output, no junit). Search PATH by hand because
+        #shutil.which only matches a bare name whose extension is in PATHEXT,
+        #and ".PY" is not in PATHEXT on the CI runner. Same workaround as
+        #build_examples().
+        script = next(
+            (os.path.join(d, "run_dose_tests.py")
+             for d in os.environ.get("PATH", "").split(os.pathsep)
+             if os.path.isfile(os.path.join(d, "run_dose_tests.py"))),
+            None)
+        if script is None:
+            raise SetupError("Could not find run_dose_tests.py on PATH")
+        result = nice_call([sys.executable, script] + arguments, shell=False)
+    else:
+        result = nice_call([
+            "run_dose_tests",
+        ] + arguments)
 
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
@@ -617,7 +374,7 @@ def run_slow_test_suite():
 
 
 def run_test_slave(slave_type):
-    command = ["run_dose_tests", "--jenkins", "--slave", slave_type]
+    command = ["run_dose_tests", "--ci", "--slave", slave_type]
     log(f"Launching Multinode test slave using command {' '.join(command)}")
     result = nice_call(command)
 
@@ -657,25 +414,12 @@ def build_examples():
                                                                  os.path.join(olddir, "inst")))
     #We don't test the dous_2 and dous_3 builds, since it is just too fiddly to get automated.
 
-    #PACKAGE_TYPE is a Jenkins matrix axis value (Full or DebugOnly), not a CMake
-    #config. It tells us which installation package the examples get built
-    #against, so it determines which app configs we expect to be able to build.
-    #We build the examples in every such config to guard against cmake
+    #The installation package ships both MSVC runtime flavours, so Debug,
+    #Release and RelWithDebInfo apps can all link against it. We build the
+    #examples in every one of those configs to guard against cmake
     #config/export mismatches - it has happened that e.g. Release code could not
     #be built against a RelWithDebInfo install, and we don't want to regress.
-    #
-    #  DebugOnly package -> ships only the debug MSVC runtime flavour, so only a
-    #                       Debug app can link it.
-    #  Full package      -> ships both runtime flavours, so Debug, Release and
-    #                       RelWithDebInfo apps all link.
-    #
-    #This gives the combinations (app config x package type) that we expect to
-    #work: Debug x DebugOnly, and Debug / Release / RelWithDebInfo x Full.
-    package_type = os.environ.get("PACKAGE_TYPE", "Full")
-    if package_type == "DebugOnly":
-        configs = ("Debug", )
-    else:
-        configs = ("Debug", "Release", "RelWithDebInfo")
+    configs = ("Debug", "Release", "RelWithDebInfo")
 
     for (builddir, installdir) in dirs:
         os.chdir(builddir)
@@ -702,7 +446,7 @@ def build_examples():
                 None)
             if script is None:
                 raise SetupError("Could not find dobmake-batch.py on PATH")
-            cmd = [sys.executable, script, "--verbose", "--jenkins", "--skip-tests"]
+            cmd = [sys.executable, script, "--verbose", "--verbose", "--skip-tests"]
             cmd += ("--use-studio", os.environ["BUILD_PLATFORM"])
             cmd += ("--arch", os.environ["BUILD_ARCH"])
             cmd += ("--configs", ) + configs
@@ -717,7 +461,7 @@ def build_examples():
             #Linux dobmake-batch only takes a single --config, so build each
             #config in turn.
             for config in configs:
-                cmd = ["dobmake-batch", "--verbose", "--jenkins", "--skip-tests"]
+                cmd = ["dobmake-batch", "--verbose", "--verbose", "--skip-tests"]
                 cmd += ("--config", config)
                 if installdir is not None:
                     cmd += ("--install", installdir)

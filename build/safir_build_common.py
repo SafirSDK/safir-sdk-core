@@ -27,7 +27,7 @@
 
 This module is imported by the two entry-point scripts that live alongside it:
   * build.py        - builds and packages the Safir SDK Core source tree
-                      (used by Jenkins and developers).
+                      (used by CI and developers).
   * dobmake_batch.py - builds an external user dou-project (installed into the
                       SDK as 'dobmake-batch' and driven by the dobmake GUI).
 
@@ -437,10 +437,6 @@ def add_common_arguments(parser):
 
     parser.add_argument("--skip-tests", action="store_true", help="Skip running the unit tests")
 
-    parser.add_argument("--jenkins",
-                        action="store_true",
-                        help="Increase verbosity and obey build matrix variables.")
-
     parser.add_argument("--verbose",
                         "-v",
                         action="count",
@@ -496,8 +492,6 @@ def finalize_arguments(arguments):
         if not hasattr(arguments, attr):
             setattr(arguments, attr, default)
 
-    if arguments.jenkins:
-        arguments.verbose += 1
     if arguments.verbose >= 2:
         os.environ["VERBOSE"] = "1"
     if arguments.package_noclean:
@@ -533,13 +527,6 @@ class BuilderBase(object):
     def __handle_command_line_arguments(self):
         self.configs = self.arguments.configs
 
-        self.debug_only = False
-        if self.arguments.jenkins:
-            if os.environ.get("PACKAGE_TYPE") == "DebugOnly":
-                LOGGER.log("Using Config 'DebugOnly', building everything in Debug only.")
-                self.configs = ("Debug", )
-                self.debug_only = True
-
         self.stagedir = os.path.join(os.getcwd(), "stage") if self.arguments.package else None
 
         self.install_prefix = None  #derived classes can override if arguments.package is true
@@ -560,7 +547,6 @@ class BuilderBase(object):
         # identical between the two passes and gets overwritten, so building it twice is
         # wasted work. See src/cmake/SafirLibraryAbi.cmake.
         dual_abi_pair = (self.arguments.package
-                         and not self.debug_only
                          and self._supports_dual_abi_fast_path()
                          and set(self.configs) == {"Debug", "RelWithDebInfo"})
 
@@ -839,9 +825,6 @@ class VisualStudioBuilder(BuilderBase):
         command = ("makensis", "/DARCH=" + arch, "/DSTUDIO=" + self.arguments.use_studio.replace("vs",""),
                    "/DVERSION=" + version_string)
 
-        if self.debug_only:
-            command += ("/DDEBUGONLY", )
-
         command += (os.path.join("build", "packaging", "windows", "installer.nsi"), )
 
         self._run_command(command, "Packaging ")
@@ -874,11 +857,6 @@ class DebianPackager():
             die("Could not find conan executable")
 
         self.noclean = arguments.package_noclean and os.path.exists("tmp")
-
-        if self.arguments.jenkins:
-            if os.environ.get("PACKAGE_TYPE") == "DebugOnly":
-                LOGGER.log("Using Config 'DebugOnly', building everything in Debug only.")
-                self.arguments.configs = ("Debug", )
 
     @staticmethod
     def can_use():

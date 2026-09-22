@@ -81,12 +81,12 @@ def mkdir(newdir):
 class Parameters:
     def __init__(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument("--jenkins",
+        parser.add_argument("--ci",
                           action="store_true",
-                          dest="jenkins",
+                          dest="ci",
                           default=False,
-                          help="Set up the needed environment variables for a Jenkins automated build," +
-                          "and respect the langX matrix variables")
+                          help="Set up the needed environment variables for an automated CI build, " +
+                          "and respect the SAFIR_TEST_LANGUAGES environment variable.")
         parser.add_argument("--multinode",
                           action="store_true",
                           dest="multinode",
@@ -130,31 +130,31 @@ class Parameters:
                           dest="lang0",
                           default="cpp",
                           help="Which partner 0 to run."
-                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
+                          "If --ci is specified the SAFIR_TEST_LANGUAGES environment variable will override this.")
         parser.add_argument("--lang1",
                           action="store",
                           dest="lang1",
                           default="cpp",
                           help="Which partner 1 to run."
-                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
+                          "If --ci is specified the SAFIR_TEST_LANGUAGES environment variable will override this.")
         parser.add_argument("--lang2",
                           action="store",
                           dest="lang2",
                           default="cpp",
                           help="Which partner 2 to run."
-                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
+                          "If --ci is specified the SAFIR_TEST_LANGUAGES environment variable will override this.")
         parser.add_argument("--lang3",
                           action="store",
                           dest="lang3",
                           default="cpp",
                           help="Which partner 3 to run."
-                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
+                          "If --ci is specified the SAFIR_TEST_LANGUAGES environment variable will override this.")
         parser.add_argument("--lang4",
                           action="store",
                           dest="lang4",
                           default="cpp",
                           help="Which partner 4 to run."
-                          "If --jenkins is specified the LANGUAGES environment variable will override this.")
+                          "If --ci is specified the SAFIR_TEST_LANGUAGES environment variable will override this.")
         parser.add_argument("--single-testcase", action="store", help="Run only a single testcase.")
         parser.add_argument("--first-testcase", action="store", help="Sets the first testcase to be run.")
         parser.add_argument("--last-testcase", action="store", help="Sets the last testcase to be run.")
@@ -186,13 +186,13 @@ class Parameters:
             log("Don't specify both --single-testcase and either --first-testcase or --last-testcase")
             sys.exit(1)
 
-        if options.jenkins:
+        if options.ci:
             #Get env variables if they're set
-            langs = os.environ.get("LANGUAGES")
+            langs = os.environ.get("SAFIR_TEST_LANGUAGES")
             if langs is not None:
                 splitlangs = langs.split("-")
                 if len(splitlangs) != 5:
-                    raise Exception("Invalid format of LANGUAGES environment variable: " + langs)
+                    raise Exception("Invalid format of SAFIR_TEST_LANGUAGES environment variable: " + langs)
                 self.lang0 = splitlangs[0]
                 self.lang1 = splitlangs[1]
                 self.lang2 = splitlangs[2]
@@ -219,22 +219,22 @@ class Parameters:
             config = "multicomputer"
 
         #set the SAFIR_TEST_TEMP variable, it's used in the test configuration to resolv the temp area
-        #were we store logs, crash dumps and IPC files. We want it to be inside the workspace when run on jenkins and
-        #in the location lluf resolvs @{TEMP} when not run in jenkins. (/tmp for linux and %TEMP% or %TMP% on windows)
-        if options.jenkins:
-            os.environ["SAFIR_TEST_TEMP"] = os.path.join(os.environ["WORKSPACE"], "temp")
+        #were we store logs, crash dumps and IPC files. A caller that cares where this
+        #goes - CI wants it inside the checkout, so the logs and crash dumps can be
+        #collected afterwards - just sets SAFIR_TEST_TEMP itself and we leave it alone.
+        #Otherwise use the same place lluf resolvs @{TEMP} to (/tmp on linux, %TEMP% or
+        #%TMP% on windows).
+        if os.environ.get("SAFIR_TEST_TEMP"):
+            log("Using the SAFIR_TEST_TEMP set by our caller:", os.environ["SAFIR_TEST_TEMP"])
+        elif platform.system() == 'Linux':
+            os.environ["SAFIR_TEST_TEMP"] = "/tmp"
+        elif os.environ.get("TEMP"):
+            os.environ["SAFIR_TEST_TEMP"] = os.environ["TEMP"]
+        elif os.environ.get("TMP"):
+            os.environ["SAFIR_TEST_TEMP"] = os.environ["TMP"]
         else:
-            if platform.system() == 'Linux':
-                os.environ["SAFIR_TEST_TEMP"] = "/tmp"
-            else:
-                if os.environ["TEMP"] is not None:
-                    os.environ["SAFIR_TEST_TEMP"] = os.environ["TEMP"]
-                else:
-                    if os.environ["TMP"] is not None:
-                        os.environ["SAFIR_TEST_TEMP"] = os.environ["TMP"]
-                    else:
-                        log("Could not resolve %TEMP% or %TMP")
-                        sys.exit(1)
+            log("Could not resolve %TEMP% or %TMP%")
+            sys.exit(1)
 
         #Set up to use our own test configuration
         os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory, "dose", "test_config", config)
