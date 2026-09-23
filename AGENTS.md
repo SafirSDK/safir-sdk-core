@@ -164,7 +164,7 @@ The workflow runs on pushes to master/develop/feature/private branches and on
 pull requests. A matrix builds
 and packages across ubuntu-noble (amd64 + arm64), debian-trixie, vs2022 and
 vs2026; there is no Debian-labelled runner, so debian-trixie builds inside a
-`debian:13` container on ubuntu-latest (with `--shm-size`, because dose_main
+`debian:13` container on an ubuntu-24.04 host (with `--shm-size`, because dose_main
 needs a 100 MB `/dev/shm`).
 
 Every runner here is GitHub-hosted; this project has no self-hosted runners. In
@@ -266,6 +266,17 @@ downloads. This restored what the retired Jenkins pipeline archived as
   platform, change a runner label, or bump a container image / `--shm-size`,
   update **every** job. (A `fromJSON`-from-setup-job generator was considered and
   rejected — churn is low and the indirection hurts readability more.)
+- **Pin the Ubuntu release wherever the host OS matters; `ubuntu-latest` only
+  where it does not.** Pinned to `ubuntu-24.04`: the native noble jobs, the
+  debian-trixie container rows (they still get the host's kernel, Docker and
+  `/dev/shm`), `render-docs` (installs the docs toolchain from the host's apt,
+  so a new release can silently change the rendered output) and
+  `multicomputer-slaves` (host apt, `modprobe wireguard`, iptables and a Docker
+  bridge). `workflow-lint`, `test-summary`, `warnings-summary` and `release`
+  stay on `ubuntu-latest` **deliberately**: they only run actions and `gh`, so
+  pinning them would only add a label to bump by hand. Decided when GitHub
+  announced `ubuntu-latest` moving to Ubuntu 26 from 2026-10-19; when 24.04 is
+  retired, bump the pinned jobs together.
 - **The paired multicomputer jobs are not co-scheduled — never assume they start
   together.** `multicomputer-master` and `multicomputer-slaves` become eligible
   at the same moment but queue for runners independently, and on a busy pool one

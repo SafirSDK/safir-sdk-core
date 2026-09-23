@@ -77,7 +77,7 @@ jobs:
     # Most rows run directly on the host runner. The Debian row sets
     # matrix.container to a Debian image so the build runs against Debian's real
     # toolchain/libs; an empty image here means "no container" (run on host).
-    # GitHub has no Debian-labelled runner, so a container on ubuntu-latest is
+    # GitHub has no Debian-labelled runner, so a container on ubuntu-24.04 is
     # the only way to get a genuine Debian build. The object form is needed so we
     # can pass --shm-size: Docker defaults /dev/shm to 64 MB, but dose_main
     # creates a 100 MB managed_shared_memory there and quick_exit(1)s if it can't,
@@ -112,14 +112,14 @@ jobs:
             conan_home: /home/runner/.conan2
 
           # No Debian runner exists, so build inside a Debian container on the
-          # ubuntu-latest host. Runs as root (the container's default user):
+          # ubuntu-24.04 host. Runs as root (the container's default user):
           # writes to $GITHUB_ENV/$GITHUB_PATH and the mounted workspace all work
           # without UID juggling, and root-owned files are correct for a system
           # .deb anyway (lintian's root-owner warnings are cosmetic). CONAN_HOME
           # is /root/.conan2 because there is no /home/runner inside the container.
           - platform: debian-trixie
             arch: amd64
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
             container: debian:13
             container_options: --shm-size=200m
             conan_home: /root/.conan2
@@ -230,11 +230,11 @@ jobs:
   # documents when there is no parent project, so it needs just the doc toolchain
   # (asciidoctor/dia/dblatex/texlive/ghostscript) plus cmake/ninja - no compilers,
   # Qt, Boost or Conan. The output (HTML/PDF) is distro-independent, so it runs
-  # straight on ubuntu-latest rather than in a debian container. No `needs`: it is
+  # straight on ubuntu-24.04 rather than in a debian container. No `needs`: it is
   # independent of the build artifacts, so it runs in parallel with them.
   render-docs:
     name: Render documentation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
         with:
@@ -347,7 +347,7 @@ jobs:
 
           - platform: debian-trixie
             arch: amd64
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
             container: debian:13
             container_options: --shm-size=200m
             conan_home: /root/.conan2
@@ -492,7 +492,7 @@ jobs:
           - platform: debian-trixie-amd64
             platform_name: debian-trixie
             arch: amd64
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
             container: debian:13
             # The multinode tests run four safir_control nodes at once, each
             # with its own shared memory in /dev/shm: ~100 MB Dob distribution
@@ -613,7 +613,7 @@ jobs:
           - platform: debian-trixie-amd64
             platform_name: debian-trixie
             arch: amd64
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
             container: debian:13
             # The light/restart-node tests run several safir_control nodes at
             # once, each mapping its own shared memory in /dev/shm (~100 MB Dob
@@ -1125,7 +1125,7 @@ jobs:
     name: multicomputer-slaves-debian (for ${{ matrix.platform }} master)
     needs: [build, dose-tests]
     if: ${{ !cancelled() && needs.build.result == 'success' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # See the matching comment on multicomputer-master; keep the two in step.
     timeout-minutes: 55
     permissions:
