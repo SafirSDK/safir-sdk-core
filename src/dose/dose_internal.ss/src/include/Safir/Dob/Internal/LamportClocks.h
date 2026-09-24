@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -29,7 +29,6 @@
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <atomic>
 #include <memory>
-#include <boost/core/ignore_unused.hpp>
 
 namespace Safir
 {
@@ -45,7 +44,7 @@ namespace Internal
     public:
         // A default initialized timestamp will always be older than one that is acquired with GetNewTimestamp,
         // since the first timestamp GetNewTimestamp will return will be 1.
-    LamportTimestamp(): m_clock(0), m_nodeId(0) {} //NOLINT
+    LamportTimestamp(): m_clock(0), m_padding(0), m_nodeId(0) {} //NOLINT
 
         bool operator < (const LamportTimestamp& other) const
         {
@@ -77,11 +76,14 @@ namespace Internal
         }
 
     private:
+        //m_padding is set explicitly in both constructors: a timestamp is copied
+        //verbatim into distribution messages, so leaving it unset would send
+        //uninitialised bytes on the wire (and GCC warns about the read).
         LamportTimestamp(const uint32_t clock, const int64_t nodeId)
             : m_clock(clock)
+            , m_padding(0)
             , m_nodeId(nodeId)
         {
-            boost::ignore_unused(m_padding);
         }
 
         uint32_t GetClock() const { return m_clock;}
