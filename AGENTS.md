@@ -57,6 +57,16 @@ There are two categories of tests, run two different ways.
 # Run all tests via CTest (after building)
 ctest
 ```
+**Never pass `-j` to ctest.** The suite cannot run concurrently: tests reuse
+singleton resources across processes, so parallel jobs collide rather than
+interleave. The logging/tracer/swreport tests all bind one syslog receiver port
+and the Dob tests share the type-system shared memory under `/dev/shm/SAFIR_*`;
+other cases share fixed ports, `SAFIR_INSTANCE` numbers and temp directories.
+`ctest -j2` is already enough to produce message-count mismatches and "no such
+type or member defined" failures that have nothing to do with the code, and they
+read as real bugs. Nothing in CMake enforces this yet — no test carries
+`RUN_SERIAL` or `RESOURCE_LOCK` — so it is on whoever runs the suite.
+
 Every ctest test now runs by default; there is no longer a skip switch. The
 hours-long, multi-process "population 1" cases were moved into the installed slow
 suite (below). A handful of shorter multi-process tests still run inline in ctest
@@ -109,6 +119,246 @@ green, the "Test results" check goes red) from an *infra* failure (a driver that
 couldn't run, crashed, or hung → exit 2, fails the job). In CI the `slow-tests`
 job uploads the reports so they feed the same consolidated `test-summary` Check
 as the ctest and dose suites.
+
+### Sanitizer builds (ASan + UBSan)
+
+`-DSAFIR_SANITIZER=address,undefined` (or `thread`; the value goes straight to
+`-fsanitize=`) is a cache option in `src/cmake/SafirCompilerSettings.cmake`. It is
+for a plain cmake/ninja tree, not `build.py` — a sanitized `.deb` is pointless:
+
+```bash
+SAFIR_DONT_BUILD_JAVA=1 cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+      -DSAFIR_SANITIZER=address,undefined -DCMAKE_INSTALL_PREFIX=$HOME/install-asan <source>
+ninja                                        # SAFIR_DONT_BUILD_JAVA: see the Java note below
+ASAN_OPTIONS=detect_container_overflow=0:verify_asan_link_order=0 \
+      UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 \
+      ctest -E java --output-on-failure        # sequentially - never -j
+ninja install
+export PATH=$HOME/install-asan/bin:$PATH LD_LIBRARY_PATH=$HOME/install-asan/lib
+export SAFIR_TEST_CONFIG_OVERRIDE=\
+$HOME/install-asan/share/doc/safir-sdk-core/example_configuration   # see below
+ASAN_OPTIONS=detect_container_overflow=0:verify_asan_link_order=0 \
+      UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=0 \
+      run_dose_tests --no-java                 # halt_on_error=0: see the bullet below
+ASAN_OPTIONS=detect_container_overflow=0:verify_asan_link_order=0 \
+      UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=0 \
+      run_slow_tests
+```
+
+**The dose and slow suites expect to be run from an installed package**, which is
+what normally puts a configuration on the machine. A `cmake --install` into a private
+prefix does not: it installs no `/etc/safir-sdk-core`, and `ConfigReader` looks only
+in `/etc/safir-sdk-core` and `~/.config/safir-sdk-core`, never under the install
+prefix. Use `SAFIR_TEST_CONFIG_OVERRIDE` to run them from a private prefix:
+
+```bash
+export SAFIR_TEST_CONFIG_OVERRIDE=\
+$HOME/install-asan/share/doc/safir-sdk-core/example_configuration
+```
+
+Without it, any driver that does not set the variable itself dies in `ConfigReader`
+with `Failed to load configuration` — an abort (`return code -6`) or a caught
+exception that looks exactly like a sanitizer finding while having nothing to do with
+sanitizers. Of the slow suite's twelve drivers exactly two are in that position, and
+the export fixes both: `run_communication_tests` (all 8 suites) and
+`run_election_handler_tests` (all cases), verified under ASan+UBSan with zero reports
+and nothing written outside the run.
+
+Do **not** instead copy the example config into `~/.config/safir-sdk-core`. It works,
+but it is a global fallback picked up by *every* Safir process the account runs, so it
+silently changes unrelated runs later with nothing in the repo to explain why. The env
+var is scoped to the shell you run the suite in.
+
+Every other driver — system_picture, light_nodes, dope, restart_nodes,
+incarnation_and_control, lowmem, tracer_backdoor, and `run_dose_tests` too — sets
+`SAFIR_TEST_CONFIG_OVERRIDE` itself, to its own `test_data/<name>/test_config`, plus
+`SAFIR_TEST_SUITE_DOU_DIRECTORY` to the installed `share/safir-sdk-core/dou`. Those
+override anything you export and are unaffected either way, so if one of them fails,
+config is not the reason — check that both of those installed paths exist and then
+look elsewhere.
+
+Run the three suites one at a time and never overlapping — the same shared ports,
+`/dev/shm` names and `SAFIR_INSTANCE` numbers that make ctest serial-only apply
+across suites too. Two of them at once produces a flood of unrelated-looking
+failures (`CTRL: Exiting due to error!` from every `safir_control`). Worth knowing
+if you drive this from a script: killing a wedged *stage* does not kill the driver
+script, which cheerfully moves on to its next stage, so a suite you thought you had
+stopped can still be running an hour later. Check before starting anything — but
+check by executable, not by command line, for the reason under "Orphaned processes"
+below. `pgrep -f install-asan/bin/` will tell you the machine is idle when it is not.
+
+The first full run (2026-09-22) found and fixed a use-after-free in the Linux
+`ProcessMonitor` (posted handler captured an iterator into a local `std::set`), a
+dangling pointer in the DOU parser's `ParseKey` (`StringToHash` returns a pointer
+into the string it is given, and it was given a `substr` temporary), uninitialised
+`keyType`/`memberType`/`typeId` fields in the local type descriptions that were
+copied into shared memory and read back for every parameter, and a `shared_ptr`
+cycle in `ControlCmdSender::SendCmd` that leaked a timer and two callbacks per
+command sent. A second run (2026-09-23, rebased onto `develop`) added a misaligned
+load in `DataReceiver::ValidCrc`: the crc sits at the end of the datagram, so its
+offset is the message length, which is not a multiple of 4 for every message — it
+is read with `memcpy` now. That one only fires for messages of the wrong length,
+so expect findings of this kind to come and go between runs rather than reproduce
+on demand.
+
+Running the *dose* suite under sanitizers then found a fifth, which ctest never
+reaches: `PendingRegistration`'s service-registration constructor was the only one
+of the three that left `isInjectionHandler` unset, and the copy constructor reads
+it. These objects live in shared memory, so the load picked up whatever was in the
+page — UBSan reported `load of value 16, which is not a valid value for type
+'bool'`. The lesson is that each suite reaches code the others do not; a green
+ctest says nothing about the dose or slow suites.
+
+The *slow* suite then found a sixth, in test code: the receive callback in
+`system_picture_component_test_node.cpp` validated the delivered buffer and
+returned without freeing it, leaking one buffer per message received. Communication
+hands ownership over when it delivers — `DeliveryHandler` drops its own reference as
+soon as the delivery is posted (`rd.Clear()`, "release reference to data") and only
+cleans up what it still holds in `Stop()`, so the receiver must free through the
+deallocator it registered. The existing receivers show the idioms: `MessageHandler`
+calls `DistributionData::DropReference`, `RemoteSubscriber` wraps the pointer in a
+`SharedConstCharArray`, and the `regression_test`/`communication_test` receivers
+`delete[]` it directly. If you write a new `SetDataReceiver` callback, free the
+buffer.
+
+The same mistake turned out to exist in shipping code, and is the seventh finding:
+`StopHandler`'s *stop notification* receiver (`StopHandler.h`) took the buffer,
+ignored it because the notification carries no payload worth reading, and returned
+without freeing it — one byte leaked per notification, in `safir_control` on every
+node. Its neighbour twenty lines up, the stop *order* receiver, gets this right by
+wrapping the pointer in a `SharedConstCharArray`; the notification receiver now does
+the same. It only shows up in suites that stop nodes and then check their exit codes,
+which is why ctest and the dose suite never saw it.
+
+**Changing who frees the buffer is a change to the unit tests too.** The mocks that
+drive these receivers do not implement the deallocator — `StopHandler_test`'s mock
+Communication just stores the callback and calls it — so the buffer a test hands over
+has to be allocated the way the real deallocator expects. Making the notification
+receiver free its buffer is what proved this: a `static const char[1]` handed to it —
+which is what you reach for when you think nobody will free it — then goes through
+`delete[]`, and the test dies inside the free. Run `ctest -R <the handler>_test`
+after touching a receiver; the slow suite will not tell you about this.
+
+Where the slow suite stands under sanitizers (2026-09-24, this machine): with the
+leaks above fixed and `SAFIR_TEST_CONFIG_OVERRIDE` exported, eleven of the twelve
+drivers pass with zero sanitizer reports — `run_system_picture_component_tests` at 52
+cases, `run_incarnation_and_control_tests` at 1, `run_light_nodes_keep_state_tests` at
+4, `run_light_nodes_clear_state_tests` and `run_light_nodes_smart_sync_tests` at 6
+each, plus `run_communication_tests`, `run_election_handler_tests`,
+`run_lowmem_basic_operations_tests`, both dope backends and `run_tracer_backdoor_tests`.
+
+`run_restart_nodes_tests` is the one that does not finish, and it is a capacity
+problem rather than a defect: it brings up 11 nodes, an instrumented `dose_main` is
+about 0.7 GB RSS, and on a 15 GB 4-core box that means ~14 GB used, under 2 GB
+available and a load average around 7. It sits on `dose_main is waiting for
+persistence data` and makes no progress; it emits **no sanitizer report** before
+timing out. It passes in 589 s on a plain Release build of the same tree, so there is
+nothing to chase in the code — either run it on a bigger machine or don't run it
+under sanitizers.
+
+Things that look like findings but are not, and how the run is set up to avoid them:
+
+- **Java cannot host ASan.** The JVM maps its heap where ASan's shadow memory has
+  to go, so a Java process that loads a sanitized JNI library aborts with `Shadow
+  memory range interleaves with an existing memory mapping` before any test code
+  runs. Configure with `SAFIR_DONT_BUILD_JAVA=1` (or `ctest -E java`); this is not
+  fixable from our side.
+- **.NET needs `verify_asan_link_order=0`, and then works.** `mono` is an
+  uninstrumented host that `dlopen`s our instrumented libraries, so ASan complains
+  that its runtime "does not come first in initial library list" and every
+  `*_dotnet` test fails at startup. Unlike the JVM there is no shadow-memory
+  conflict, so disabling the check is enough — all six `*_dotnet` tests pass. Leave
+  this option out of `ASAN_OPTIONS` and you get six failures that look like real
+  breakage but are pure link order.
+- **Parallel ctest failures.** Not a sanitizer effect at all — the suite is
+  serial-only in every build; see "Running Tests" above.
+- **Orphaned processes from an earlier run, and this is the expensive one.** A driver
+  that times out or fails leaves nodes behind — `run_restart_nodes_tests` timing out
+  under sanitizers orphaned 11 `dose_main` and 2 `safir_control`. They keep holding
+  their `SAFIR_INSTANCE`, so the next driver that reuses that instance number cannot
+  initialise, and if you clear `/dev/shm` while they are alive you delete the named
+  semaphore they created. That produces
+
+  ```
+  It appears that Create failed in some other process for 'SAFIR_DOTS_INITIALIZATION_<n>'
+  ```
+
+  in the *new* process, which surfaces as `safir_control`/`safir_web` exiting with
+  code 20 and, for the light-node drivers, a refused websocket on
+  `ws://localhost:16675`. It looks like a broken build. It is not.
+
+  **Do not clean up with `pkill -f '<prefix>/bin/'`.** Several Safir processes are
+  launched with a bare `argv[0]` — `safir_web`, `RequestSender`,
+  `WaitingStatesOwner` — so a pattern anchored on the install path never matches
+  them and they survive every cleanup while looking absent to `pgrep`. Match on the
+  executable instead, which catches them however they were invoked and cannot match
+  the shell doing the killing:
+
+  ```bash
+  for p in /proc/[0-9]*; do
+      case "$(readlink $p/exe 2>/dev/null)" in "$PREFIX"*) kill "${p#/proc/}";; esac
+  done
+  ```
+
+  Kill first, verify nothing is left, and only then clear `/dev/shm` and the lock
+  directory. This cost a full day once: 18 `RequestSender` processes from a failed
+  restart_nodes run stayed alive for 20 hours holding instances 2..10, and made five
+  drivers look permanently broken under sanitizers when all five were fine.
+- **When in doubt, build the same tree without sanitizers.** A plain
+  `-DCMAKE_BUILD_TYPE=Release` tree and a second install prefix costs about 35 min of
+  build on a 4-core box and 128 MB on disk, and it separates "the sanitizer found
+  something" from "this environment cannot run this suite" in one run. Worth it before
+  spending hours on a suspected finding.
+- **`detect_container_overflow=0`** is needed because the statically linked Conan
+  Boost is uninstrumented and mixes with instrumented code on the same containers,
+  a known false-positive source.
+- **UBSan reports and continues by default, and for the multi-process suites it
+  should stay that way.** `halt_on_error=1` is right for ctest, where stopping at
+  the first finding is what you want. It is actively harmful for the dose and slow
+  suites: a partner that aborts at its own report leaves `dose_test_sequencer`
+  waiting forever on a peer that will never reply, so the run hangs with no
+  diagnosis and everything after the first finding goes unexplored. That is exactly
+  what happened on the first dose run under sanitizers — four "Reading reply
+  failed:End of file" lines, then nothing, for a single uninitialised `bool`. Use
+  `halt_on_error=0` there and collect the findings afterwards.
+- **In the slow suite one leak fails everything.** Each system-picture component
+  test decides its verdict as literally `node.returncode == 0`, and a sanitizer that
+  reports at exit sets that returncode non-zero. So the single leaked buffer above
+  failed all 43 cases in `run_system_picture_component_tests` — 43 red tests, one
+  cause, and none of them a timing flake. Before chasing slow-suite failures under
+  sanitizers, check whether the nodes merely exited non-zero on a report:
+  `grep -c "exited with error code" <log>` against the report files. Conversely a
+  leak anywhere in a node hides every real failure behind it, which is why it is
+  worth fixing test-code leaks rather than suppressing them.
+- **Where the reports actually land.** `log_path=<dir>/x` in `ASAN_OPTIONS` and
+  `UBSAN_OPTIONS` writes one report file per process, which is how to see anything
+  from `dose_main`/`dope_main` children whose stderr a driver swallows. It is not
+  the whole story for the dose suite: `run_dose_tests` already redirects each
+  partner's stdout and stderr to `dose_test_output/<name>.output.txt`, and that is
+  where the partner reports turned up — the `log_path` directory stayed empty for
+  them. Check both, and grep the `.output.txt` files for `runtime error` rather
+  than trusting a green-looking driver.
+- **The deliberate-crash tests** (`CrashReporter_*`, `DynamicLibraryLoader`) pass
+  `handle_segv=0:handle_sigfpe=0:handle_sigill=0:handle_abort=0` to their children
+  themselves, so the child dies of the signal the test expects instead of ASan
+  turning it into exit code 1. `simple_crash_test` additionally forces
+  `halt_on_error=0` for its child, because the crasher provokes its signals with
+  deliberate undefined behaviour (a null store, a division by zero) and UBSan would
+  otherwise abort at its own report *before* the signal under test is raised — the
+  symptom is `CrashReporter did not call callback!`. Nothing to do when adding a
+  sanitizer job.
+- **A sanitizer abort mid-test leaves `safir_control`/`dose_main`/`dope_main`
+  running**, and they keep `/dev/shm/SAFIR_*` alive with whatever DOU set that test
+  had loaded. Every later Dob test then fails with `There is no such type or member
+  defined`, the ExternalTimeProvider tests return the wrong time, and
+  `start_fails_with_parser_errors` sees a configuration check succeed. That is
+  stale state, not a bug: kill the leftovers and remove `/dev/shm/SAFIR_*` and
+  `/dev/shm/sem.*SAFIR*` before re-running.
+
+There is no sanitizer CI job yet. If one is added, model it on `build-debug` but
+drive cmake/ninja/ctest directly, exclude Java, and run the all-C++ dose combination.
+On hosted `ubuntu-24.04` runners TSan (and sometimes ASan) needs
+`sudo sysctl vm.mmap_rnd_bits=28` first.
 
 ### Windows Defender false positives
 
