@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <cstring>
 #include <memory>
 #include <functional>
 #include <boost/chrono.hpp>
@@ -231,7 +232,13 @@ namespace Com
         {
             boost::crc_32_type crc;
             crc.process_bytes(static_cast<const void*>(buf), size-sizeof(uint32_t));
-            uint32_t checksum=*reinterpret_cast<const uint32_t*>(buf+size-sizeof(uint32_t));
+            //The crc sits at the end of the datagram, so its offset is the message
+            //length - which is not a multiple of 4 for every message. Reading it
+            //through a uint32_t* is therefore a misaligned load (UBSan caught it);
+            //copy it out instead. The sender already writes it from a local uint32_t
+            //as a separate buffer, so there is nothing to change on that side.
+            uint32_t checksum;
+            memcpy(&checksum, buf+size-sizeof(uint32_t), sizeof(checksum));
             return checksum==crc.checksum();
         }
 
