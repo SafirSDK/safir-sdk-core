@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -31,6 +31,7 @@
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <mutex>
 #include <thread>
 
 namespace Safir
@@ -40,23 +41,41 @@ namespace Dob
 namespace Internal
 {
 
+namespace
+{
+    //The Initialize functions below overwrite the m_instance pointers of the shared
+    //memory singletons, which other threads read without a lock through Instance().
+    //Controller::Connect calls InitializeDoseInternalFromApp for every connection, so
+    //without this a second connection in a process rewrites the pointers while the
+    //first one is using them. The value written is always the same, so it has not
+    //caused any trouble, but it is a data race all the same.
+    //The flag is shared by both functions so that dose_main, which runs the dose_main
+    //variant at startup and then opens connections of its own, does not rewrite the
+    //pointers either. If the initialization throws, the flag is left unset and the
+    //next caller tries again.
+    std::once_flag initializeOnce;
+}
+
 void InitializeDoseInternalFromDoseMain(const int64_t nodeId)
 {
-    lllog(1) << "Initializing dose_internal from dose_main" << std::endl;
-    Connections::Initialize(true,nodeId);
-    ContextSharedTable::Initialize();
-    LowMemoryOperationsTable::Initialize();
-    MessageTypes::Initialize(true);
-    ServiceTypes::Initialize(true,nodeId);
-    InjectionKindTable::Initialize();
-    EntityTypes::Initialize(true,nodeId);
+    std::call_once(initializeOnce, [nodeId]
+    {
+        lllog(1) << "Initializing dose_internal from dose_main" << std::endl;
+        Connections::Initialize(true,nodeId);
+        ContextSharedTable::Initialize();
+        LowMemoryOperationsTable::Initialize();
+        MessageTypes::Initialize(true);
+        ServiceTypes::Initialize(true,nodeId);
+        InjectionKindTable::Initialize();
+        EntityTypes::Initialize(true,nodeId);
 
-    auto sem = SharedMemoryObject::GetSharedMemory().find_or_construct<boost::interprocess::interprocess_semaphore>
-        ("InitializationGateKeeper")(0);
+        auto sem = SharedMemoryObject::GetSharedMemory().find_or_construct<boost::interprocess::interprocess_semaphore>
+            ("InitializationGateKeeper")(0);
 
-    sem->post();
+        sem->post();
 
-    lllog(1) << "Initialization complete" << std::endl;
+        lllog(1) << "Initialization complete" << std::endl;
+    });
 }
 
 void InitializeDoseInternalFromApp()
@@ -79,14 +98,17 @@ void InitializeDoseInternalFromApp()
     }
     sem->post();
 
-    lllog(1) << "Connecting to dose_internal from app" << std::endl;
-    Connections::Initialize(false,0);
-    ContextSharedTable::Initialize();
-    LowMemoryOperationsTable::Initialize();
-    MessageTypes::Initialize(false);
-    ServiceTypes::Initialize(false,0);
-    InjectionKindTable::Initialize();
-    EntityTypes::Initialize(false,0);
+    std::call_once(initializeOnce, []
+    {
+        lllog(1) << "Connecting to dose_internal from app" << std::endl;
+        Connections::Initialize(false,0);
+        ContextSharedTable::Initialize();
+        LowMemoryOperationsTable::Initialize();
+        MessageTypes::Initialize(false);
+        ServiceTypes::Initialize(false,0);
+        InjectionKindTable::Initialize();
+        EntityTypes::Initialize(false,0);
+    });
 }
 
 }
