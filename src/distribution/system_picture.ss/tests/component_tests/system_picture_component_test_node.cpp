@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012,2014,2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2012,2014,2022,2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -35,6 +35,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -486,6 +487,13 @@ public:
                                                               const char* data,
                                                               const size_t size)
         {
+            //Communication hands over ownership of the buffer when it delivers it - it
+            //drops its own reference as soon as the delivery is posted, and only cleans
+            //up what it still holds in Stop(). Freeing it is therefore up to us, using
+            //the deallocator registered below. Take it with a unique_ptr so the throwing
+            //paths below release it too.
+            const std::unique_ptr<const char[]> dataOwner(data);
+
             if (size != DATA_SIZE)
             {
                 throw std::logic_error("Received incorrectly sized data!");
