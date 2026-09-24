@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Jonas Thor / stjth
 *
@@ -80,11 +80,13 @@ namespace Utilities
             }
         }
 
-        for(std::set<pid_t>::const_iterator it = missingPids.begin();
-            it != missingPids.end(); ++it)
+        for (const pid_t pid : missingPids)
         {
-            m_monitoredPids.erase(*it);
-            boost::asio::post(m_io, [this,it]{m_callback(*it);});
+            m_monitoredPids.erase(pid);
+            //Copy the pid into the handler: missingPids is a local that is gone by the
+            //time the posted handler runs, so capturing an iterator into it would be a
+            //use-after-free (ASan caught exactly that).
+            boost::asio::post(m_io, [this,pid]{m_callback(pid);});
         }
 
     }
