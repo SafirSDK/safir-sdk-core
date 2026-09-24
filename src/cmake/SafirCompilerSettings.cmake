@@ -34,6 +34,25 @@ if (UNIX)
   #than a mismatch warning.
   add_compile_definitions($<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Debug>>:_GLIBCXX_ASSERTIONS>)
 
+  #Sanitizer builds. SAFIR_SANITIZER is passed straight to -fsanitize=, so it
+  #takes the compiler's own spelling: "address,undefined" (the pair that can
+  #share one build) or "thread" (which cannot be combined with address).
+  #Frame pointers are kept so the reports have usable stacks, and
+  #_FORTIFY_SOURCE is turned off under address because the fortified libc
+  #wrappers bypass ASan's interceptors and hide exactly the overflows it is
+  #there to find. Recovery is left at the compiler default, so UBSan reports
+  #and continues unless UBSAN_OPTIONS=halt_on_error=1 is set; a test run that
+  #should fail on the first finding wants that in its environment.
+  set(SAFIR_SANITIZER "" CACHE STRING
+    "Value for -fsanitize= (e.g. address,undefined or thread); empty for a normal build")
+  if (SAFIR_SANITIZER)
+    add_compile_options(-fsanitize=${SAFIR_SANITIZER} -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=${SAFIR_SANITIZER})
+    if (SAFIR_SANITIZER MATCHES "address")
+      add_compile_options(-U_FORTIFY_SOURCE)
+    endif()
+  endif()
+
 endif ()
 
 if (MSVC)
