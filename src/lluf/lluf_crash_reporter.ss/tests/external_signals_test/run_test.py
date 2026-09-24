@@ -33,13 +33,15 @@ def parse_arguments():
 
 args = parse_arguments()
 
-# The sleeper is meant to die of a crash signal. AddressSanitizer installs its own
-# handler for those and turns the death into exit code 1 with a report, which is
-# not what is under test here, so tell it to leave the crash signals alone. In a
-# build without sanitizers the variable is simply ignored.
+# The sleeper is meant to die of a crash signal. AddressSanitizer and
+# ThreadSanitizer install their own handlers for those and turn the death into exit
+# code 1 or 66 with a report, which is not what is under test here, so tell them to
+# leave the crash signals alone. In a build without sanitizers the variables are
+# simply ignored.
 child_env = dict(os.environ)
-child_env["ASAN_OPTIONS"] = ":".join(
-    filter(None, [child_env.get("ASAN_OPTIONS"), "handle_segv=0:handle_sigfpe=0:handle_sigill=0:handle_abort=0"]))
+for sanitizer_options in ("ASAN_OPTIONS", "TSAN_OPTIONS"):
+    child_env[sanitizer_options] = ":".join(
+        filter(None, [child_env.get(sanitizer_options), "handle_segv=0:handle_sigfpe=0:handle_sigill=0:handle_abort=0"]))
 
 print("stdout isatty:", sys.stdout.isatty())
 print("stderr isatty:", sys.stderr.isatty())
