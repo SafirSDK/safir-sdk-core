@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2023 (http://safirsdkcore.com)
+* Copyright Saab AB, 2008-2023, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -37,6 +37,7 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/ConnectionQueueId.h>
 #include <Safir/Dob/CallbackId.h>
+#include <atomic>
 #include <unordered_map>
 #include "Postponer.h"
 
@@ -296,7 +297,11 @@ namespace Internal
         void SendRequest(const DistributionData& request,
                          const ConsumerId& consumer);
 
-        bool m_isConnected;
+        //Atomic because ControllerTable::GetNamedController reads it, through NameIsEqual,
+        //for every controller in the process while their owners may be opening or
+        //closing them in other threads. Connect writes the name parts before setting
+        //it, so a reader that sees true also sees the names.
+        std::atomic<bool> m_isConnected;
 
         //Pointer to our connection instance in shared memory
         ConnectionPtr m_connection;
