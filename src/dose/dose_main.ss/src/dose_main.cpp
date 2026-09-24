@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -51,6 +51,13 @@
 void CheckThreadCount()
 {
 #if defined(linux) || defined(__linux) || defined(__linux__)
+    //ThreadSanitizer starts a background thread of its own the first time a process
+    //creates a thread, and dose_main always does.
+#if defined(__SANITIZE_THREAD__)
+    const int expectedThreads = 2;
+#else
+    const int expectedThreads = 1;
+#endif
     for (int i = 0;; ++i)
     {
         std::ifstream t("/proc/" + boost::lexical_cast<std::string>(getpid()) + "/status");
@@ -72,12 +79,12 @@ void CheckThreadCount()
 
         const auto threads = boost::lexical_cast<int>(what[1]);
 
-        if (threads == 1)
+        if (threads == expectedThreads)
         {
             return;
         }
 
-        if (threads != 1 && i > 10)
+        if (i > 10)
         {
             throw std::logic_error("Unexpected number of threads in dose_main when exiting: " + what[1]);
         }
