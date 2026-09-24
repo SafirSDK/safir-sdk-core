@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2023 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2023, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -482,8 +482,11 @@ namespace ToolSupport
                     // typeId
                     result.key.int64=SerializationUtils::StringToTypeIdUnchecked(val.substr(0, sep));
 
-                    // instanceId
-                    auto instanceId = SerializationUtils::StringToHash(val.substr(sep+2));
+                    // instanceId. StringToHash returns a pointer into the string it was
+                    // given, so that string has to outlive the use of instanceId.second;
+                    // passing the substr temporary directly left it dangling (found by ASan).
+                    const std::string instanceIdStr = val.substr(sep+2);
+                    auto instanceId = SerializationUtils::StringToHash(instanceIdStr);
                     result.key.hash=instanceId.first; // instance number
                     if (instanceId.second) // instance string
                         result.key.str=instanceId.second;
