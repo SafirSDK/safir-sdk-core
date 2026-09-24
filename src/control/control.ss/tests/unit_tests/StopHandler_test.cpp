@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -737,6 +737,9 @@ BOOST_AUTO_TEST_CASE( receive_stop_notification )
                    {
                        BOOST_CHECK(communication.setDataReceiverCalls.size() == 2);
 
+                       //The receiver owns the buffer once it has been delivered, as with the real
+                       //Communication, and frees it through the deallocator it registered, so
+                       //allocate it the way that deallocator expects.
                        communication.setDataReceiverCalls[1].first(1234, 1111, new char[1], 1);
                    });
 
