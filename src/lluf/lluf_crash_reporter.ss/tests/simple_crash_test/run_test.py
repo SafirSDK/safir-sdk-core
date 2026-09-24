@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2012-2013,2023 (http://safirsdkcore.com)
+# Copyright Saab AB, 2012-2013,2023, 2026 (http://safirsdkcore.com)
 #
 # Created by: Lars Hagstrom (lars.hagstrom@consoden.se)
 #
@@ -33,9 +33,27 @@ def parse_arguments():
 
 args = parse_arguments()
 
+# The crasher is meant to die of a crash signal. AddressSanitizer installs its own
+# handler for those and turns the death into exit code 1 with a report, which is
+# not what is under test here, so tell it to leave the crash signals alone. In a
+# build without sanitizers the variable is simply ignored.
+child_env = dict(os.environ)
+child_env["ASAN_OPTIONS"] = ":".join(
+    filter(None, [child_env.get("ASAN_OPTIONS"), "handle_segv=0:handle_sigfpe=0:handle_sigill=0:handle_abort=0"]))
+
+# The crasher provokes its signals by committing deliberate undefined behaviour: a
+# store through a null pointer for SIGSEGV, a division by zero for SIGFPE. UBSan
+# reports those correctly, and under halt_on_error=1 it aborts at the report - before
+# the signal that is actually under test is ever raised. Force it off for the child;
+# the last assignment wins in the sanitizer flag parser, so this overrides whatever
+# the suite was run with.
+child_env["UBSAN_OPTIONS"] = ":".join(
+    filter(None, [child_env.get("UBSAN_OPTIONS"), "halt_on_error=0"]))
+
 
 def run_crasher(reason):
-    crasher = subprocess.Popen((args.crasher_exe, reason), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    crasher = subprocess.Popen((args.crasher_exe, reason), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                               env=child_env)
     result = crasher.communicate()[0].decode("ascii")
     print("Testing signal", reason)
     if result.find("callback") == -1:

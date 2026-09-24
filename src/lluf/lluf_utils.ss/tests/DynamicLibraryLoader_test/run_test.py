@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2011-2013 (http://safirsdkcore.com)
+# Copyright Saab AB, 2011-2013, 2026 (http://safirsdkcore.com)
 #
 # Created by: Lars Hagstrom (lars@foldspace.nu)
 #
@@ -33,26 +33,34 @@ parser.add_argument("--test-exe-4", required=True)
 
 arguments = parser.parse_args()
 
-result = subprocess.call(arguments.test_exe_1)
+# These children are meant to die of a crash signal. AddressSanitizer installs its
+# own handler for those and turns the death into exit code 1 with a report, which
+# is not what is under test here, so tell it to leave the crash signals alone. In a
+# build without sanitizers the variable is simply ignored.
+child_env = dict(os.environ)
+child_env["ASAN_OPTIONS"] = ":".join(
+    filter(None, [child_env.get("ASAN_OPTIONS"), "handle_segv=0:handle_sigfpe=0:handle_sigill=0:handle_abort=0"]))
+
+result = subprocess.call(arguments.test_exe_1, env=child_env)
 
 if result != 0:
     print("test1 Failure")
     sys.exit(1)
 
-result = subprocess.call(arguments.test_exe_2)
+result = subprocess.call(arguments.test_exe_2, env=child_env)
 
 if result != -11 and result != 1234:  #SIGSEGV and ACCESSVIOL exit codes
     print("test2 Failure")
     print("Got returncode", result)
     sys.exit(1)
 
-result = subprocess.call(arguments.test_exe_3)
+result = subprocess.call(arguments.test_exe_3, env=child_env)
 
 if result != 0:
     print("test3 Failure")
     sys.exit(1)
 
-result = subprocess.call(arguments.test_exe_4)
+result = subprocess.call(arguments.test_exe_4, env=child_env)
 
 if result != 0:
     print("test4 Failure")
