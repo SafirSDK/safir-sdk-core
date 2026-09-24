@@ -65,6 +65,10 @@ public:
 
         m_work.emplace(m_ioContext.get_executor());
         m_ioContext.run();
+        //A stop order stops the io_context with the connection still open. Close it
+        //here, since the members are destroyed in reverse order and the dispatcher
+        //and io_context would otherwise go while the Dob can still call OnDoDispatch.
+        m_connection.Close();
         return 0;
     }
 
