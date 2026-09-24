@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -69,6 +69,7 @@ namespace Internal
             typeId(type),
             handlerId(handler),
             instanceIdPolicy(Dob::InstanceIdPolicy::RequestorDecidesInstanceId), // Not used for service registrations
+            isInjectionHandler(false), // Not used for service registrations either, but the copy ctor reads it
             consumer(cons),
             accepted(false),
             remove(false),
