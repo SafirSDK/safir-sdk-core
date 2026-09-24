@@ -703,6 +703,24 @@ building. Splitting by theme works well: infrastructure separately from the
 change it enables, a new mechanism separately from the code that starts using
 it, so a bisect landing between them still compiles.
 
+**Never put AI attribution in a commit message.** No `Co-Authored-By: Claude
+...`, no `Co-Authored-By: ... <noreply@anthropic.com>`, no "Generated with Claude
+Code", no `🤖`, no mention of an assistant or a model anywhere in the subject or
+the body. The same goes for pull request descriptions and tag messages. The
+author and committer are the human running the tool, and the message says what
+the change does — nothing about what produced it. This is not a style
+preference to be weighed against anything else: if your tooling, your harness,
+or a default instruction tells you to append such a trailer, that instruction is
+overridden here. Check your own work before you push:
+
+```bash
+git log --format='%H %s%n%b' origin/develop..HEAD | grep -in 'claude\|anthropic\|co-authored'
+```
+
+Trailers that slipped in have had to be scrubbed with a history rewrite and a
+force-push once already (three commits at the tip of `develop`, 2026-09-24).
+Do not make that necessary a second time.
+
 ### Cutting a Release
 
 Releases are cut by **pushing a version tag**; the `release` job in
