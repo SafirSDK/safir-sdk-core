@@ -51,8 +51,12 @@ namespace
     //caused any trouble, but it is a data race all the same.
     //The flag is shared by both functions so that dose_main, which runs the dose_main
     //variant at startup and then opens connections of its own, does not rewrite the
-    //pointers either. If the initialization throws, the flag is left unset and the
-    //next caller tries again.
+    //pointers either. That makes the call order load-bearing: dose_main must call
+    //InitializeDoseInternalFromDoseMain before anything in it opens a Connection
+    //(DoseMainApp::Start does), or the app variant wins and the ENSURE checks,
+    //RemoveConnectOrOut and the semaphore post never happen.
+    //If the initialization throws, the flag is left unset and the next caller tries
+    //again.
     std::once_flag initializeOnce;
 }
 

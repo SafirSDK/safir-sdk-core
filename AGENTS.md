@@ -417,7 +417,10 @@ Same cache option, `-DSAFIR_SANITIZER=thread`. What is different from ASan:
 - **dose_main's exit check counts threads**, and TSan starts a background thread of
   its own after the first `pthread_create`. `CheckThreadCount` allows for it under
   `__SANITIZE_THREAD__`; before that, `dose_main` exited 1 at every stop, which failed
-  `safir_control`'s returncode and the dose suite's syslog check.
+  `safir_control`'s returncode and the dose suite's syslog check. That macro is GCC's;
+  clang defines nothing and wants `__has_feature(thread_sanitizer)` instead. The whole
+  recipe here assumes GCC (`libtsan` comes from `gcc -print-file-name`), so a clang TSan
+  build would fail this check first.
 - **ctest's dotnet tests need the preload too.** Without it they fail at startup;
   run them with `LD_PRELOAD=$(gcc -print-file-name=libtsan.so.2)` in the environment
   of `ctest -R dotnet` (ctest runs the test drivers through python, not a shell, so
@@ -464,6 +467,11 @@ with C++ and with dotnet partners):
 - **sate (Qt) reports — false positive.** A `QString` released on a pool thread and
   destroyed on the GUI thread, synchronised inside uninstrumented Qt (futex-based
   mutexes).
+- **Accepted residual in the `m_isConnected` fix:** a reader in
+  `GetNamedController` that saw the flag true just before the owner disconnected and
+  reconnected the same controller can still compare against name parts being
+  rewritten. The window needs a disconnect *and* a reconnect to fit inside one string
+  compare on another thread; not worth a lock on the hot path.
 - **Not fixed, worth knowing:** `Initialize.cpp`'s comment claims
   `std::this_thread::sleep_for` is an interruption point. Only
   `boost::this_thread::sleep_for` is, so `dosemon`'s `interrupt()` + `join()` cannot
@@ -527,6 +535,38 @@ point after the C call, and that call may have run a callback that left a Throwa
 pending. `-Xcheck:jni` does not flag that one, since several C++ frames sit between
 the `CallStaticVoidMethod` and the array access, so do not expect a warning count to
 tell you whether it is in place.
+
+**Not fixed, low priority:** on that same path dose_dll's dispatcher sees the callback
+fail, calls `LibraryExceptions::Throw()` with nothing set, and the resulting "no
+exception set" `SoftwareViolationException` is caught by `DoseC_Dispatch` and stored in
+the thread's `ExceptionKeeper` slot, where nobody reads it because the JVM rethrows
+the Java `Error` first. The slot is per thread and every path that reads it does a
+`Set` first, so the stale entry is overwritten before it can be delivered. It would
+only surface if someone added a `Throw()` without a preceding `Set`, which is a bug
+in its own right.
+
+### Review of the tier-1 fixes (2026-09-25)
+
+Every fix from the TSan, Valgrind and `-Xcheck:jni` passes was reviewed commit by
+commit against the surrounding code, not just the diff, and all of them fix real
+defects. Three of them rest on invariants that the diffs do not show and that must
+be kept when the code around them changes:
+
+- **`Initialize.cpp` makes call order load-bearing.** The dose_main and app variants
+  share one `once_flag`, so whichever runs first wins. `DoseMainApp::Start` calls
+  `InitializeDoseInternalFromDoseMain` before it constructs any handler that opens a
+  `Connection`. If a connection ever gets opened earlier in dose_main, the app variant
+  runs instead, silently: no `ENSURE` that the tables are empty, no
+  `RemoveConnectOrOut`, and the `InitializationGateKeeper` semaphore is never posted, so
+  every app hangs in connect.
+- **The atomic `m_isConnected` protects the name parts only by ordering.** `Connect` is
+  the only writer of `m_connectionNameCommonPart`/`InstancePart` and writes them before
+  the flag; `NameIsEqual` must keep testing the flag before touching the strings.
+  A second writer, or a check the other way round, brings the race back.
+- **The JNI guards rely on the JVM rethrowing at native return.** `GetJArray` and
+  `SetJArray` skip the out-array when an exception is pending. Java code after a
+  native call must therefore never assume the out-array was written, and the C++ entry
+  points must not add JNI calls after the C call without the same `ExceptionCheck`.
 
 There is no sanitizer CI job yet. If one is added, model it on `build-debug` but
 drive cmake/ninja/ctest directly, exclude Java, and run the all-C++ dose combination.
@@ -891,8 +931,11 @@ git log --format='%H %s%n%b' origin/develop..HEAD | grep -in 'claude\|anthropic\
 ```
 
 Trailers that slipped in have had to be scrubbed with a history rewrite and a
-force-push once already (three commits at the tip of `develop`, 2026-09-24).
-Do not make that necessary a second time.
+force-push once already (three commits at the tip of `develop`, 2026-09-24), and
+once more on `private/tier1-fixes` (2026-09-25), where an agent that had not read
+this far obeyed its harness default. The rule is therefore repeated in `CLAUDE.md`,
+which is loaded on every session, so that reading all of this file is not a
+precondition for getting it right.
 
 ### Cutting a Release
 
