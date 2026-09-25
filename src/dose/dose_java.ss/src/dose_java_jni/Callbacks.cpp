@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2009-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2009-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagstrom / stlrha
 *
@@ -66,6 +66,13 @@ jmethodID Callbacks::m_onNotMessageOverflow;
 bool GetJArray(JNIEnv * _env,
                jbooleanArray array)
 {
+    //The callback may have let a Throwable through (Callbacks.java only catches
+    //Exception). JNI must not be used with an exception pending, so report failure
+    //and leave the exception for the JVM to rethrow when we return to Java.
+    if (_env->ExceptionCheck())
+    {
+        return false;
+    }
     jboolean isCopy;
     jboolean * arrayElems = _env->GetBooleanArrayElements(array, &isCopy);
     assert(_env->GetArrayLength(array) == 1);
