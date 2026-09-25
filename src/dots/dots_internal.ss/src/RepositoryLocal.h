@@ -84,8 +84,10 @@ namespace ToolSupport
             };
         } val;
 
-        ValueDefinition() : kind(ValueKind) {val.referenced=NULL;}
-        ValueDefinition(ValueDefinitionKind k) : kind(k) {val.referenced=NULL;}
+        //GetHashedValue and GetHashedKey take hash==0 to mean "not hashed yet", and a
+        //plain string value (which a hashed type can valueRef) never sets it.
+        ValueDefinition() : kind(ValueKind) {val.referenced=NULL; val.hash=0; key.hash=0;}
+        ValueDefinition(ValueDefinitionKind k) : kind(k) {val.referenced=NULL; val.hash=0; key.hash=0;}
     };
 
     typedef std::vector<ValueDefinition> ParameterValues;
