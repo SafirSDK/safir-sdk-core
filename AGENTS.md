@@ -521,7 +521,12 @@ checking exceptions … from CallStaticVoidMethodV", about 1,660 of them. It cam
 right after every Java callback. That is illegal with an exception pending, and
 `Callbacks.java` only catches `Exception`, so an `Error` could leave one pending.
 **Fixed:** `GetJArray` now checks `ExceptionCheck()` first and reports failure. With
-the fix the full suite has zero warnings.
+the fix the full suite has zero warnings. The `SetJArray` overloads in
+`dose_java_jni.cpp` got the same guard: they write the out-array of every native entry
+point after the C call, and that call may have run a callback that left a Throwable
+pending. `-Xcheck:jni` does not flag that one, since several C++ frames sit between
+the `CallStaticVoidMethod` and the array access, so do not expect a warning count to
+tell you whether it is in place.
 
 There is no sanitizer CI job yet. If one is added, model it on `build-debug` but
 drive cmake/ninja/ctest directly, exclude Java, and run the all-C++ dose combination.

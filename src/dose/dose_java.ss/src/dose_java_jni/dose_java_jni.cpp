@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2009-2013, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2009-2013, 2022, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagstrom / stlrha
 *
@@ -45,11 +45,22 @@
 //
 //    use these to set the first element of an array
 //    will assert on arraylength == 1
+//
+//    A Java callback invoked from inside the call we are reporting on may
+//    have let a Throwable through (Callbacks.java only catches Exception),
+//    which leaves it pending on this thread. JNI must not be used with an
+//    exception pending, so in that case the out array is left untouched.
+//    The JVM rethrows the Throwable as soon as the native method returns,
+//    so the Java caller never reads the array anyway.
 // ----------------------------------------------------------------------
 void SetJArray(JNIEnv * _env,
                jbooleanArray array,
                const bool toValue)
 {
+    if (_env->ExceptionCheck())
+    {
+        return;
+    }
     jboolean isCopy;
     jboolean * arrayElems = _env->GetBooleanArrayElements(array, &isCopy);
     assert(_env->GetArrayLength(array) == 1);
@@ -66,6 +77,10 @@ void SetJArray(JNIEnv * _env,
                jintArray array,
                const DotsC_Int32 toValue)
 {
+    if (_env->ExceptionCheck())
+    {
+        return;
+    }
     jboolean isCopy = false;
     jint * arrayElems = _env->GetIntArrayElements(array, &isCopy);
     assert(_env->GetArrayLength(array) == 1);
@@ -81,6 +96,10 @@ void SetJArray(JNIEnv * _env,
                jlongArray array,
                const DotsC_Int64 toValue)
 {
+    if (_env->ExceptionCheck())
+    {
+        return;
+    }
     jboolean isCopy = false;
     jlong * arrayElems = _env->GetLongArrayElements(array, &isCopy);
     assert(_env->GetArrayLength(array) == 1);
@@ -94,6 +113,10 @@ void SetJArray(JNIEnv * _env,
 
 void SetJArray(JNIEnv * _env, jobjectArray array, const jobject obj)
 {
+    if (_env->ExceptionCheck())
+    {
+        return;
+    }
     assert(_env->GetArrayLength(array) == 1);
     _env->SetObjectArrayElement(array, 0 , obj);
 }
