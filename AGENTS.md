@@ -524,6 +524,21 @@ process names, then waits out its timeout — kill it), `tracer_syslog_forward` 
 (fixed deadlock timeout), and the `CrashReporter_*` tests that raise a signal
 (breakpad and valgrind both want it). Everything else passes.
 
+`build/sanitizers/valgrind_ctest.py` does all of the above. It kills leftovers and
+clears `/dev/shm` between tests, and writes one report per process plus a
+`summary.tsv`:
+
+```bash
+build/sanitizers/valgrind_ctest.py --build ~/build-plain --out ~/vg \
+    -E 'java|dotnet|websocket_component_test'   # ~50 min
+build/sanitizers/group_reports.py --src $PWD --show 3 ~/vg/logs
+```
+
+`group_reports.py` works the same way on ASan/UBSan `log_path` files, TSan output
+and the dose suite's `*.output.txt` files. It collapses thousands of reports into
+one line per kind plus the first frames in our code. Pass `--src` for the source
+tree the build was configured from.
+
 Findings from the first pass (2026-09-25):
 
 - **Fixed:** `ValueDefinition` left `hash` uninitialised, and
