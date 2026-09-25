@@ -2,6 +2,21 @@
 
 This file provides guidance to AI agents when working with code in this repository.
 
+## Working with the maintainer
+
+- **Knowledge goes in this file, not in per-agent memory.** The maintainer works from
+  several machines and several agents, and a local memory file is lost to all of
+  them.
+- **Push back.** If a proposed approach is wrong, or there is a clearly better one,
+  say so first and give the trade-off. Do that before implementing what was asked.
+- **Record "no action" decisions here.** When an investigation ends in "do
+  nothing", write down the fact and an explicit **Decision: no action taken**, so
+  the next agent doesn't reopen it. File it by what the fact is about, not by where
+  it happened; for example, a Defender false positive goes under Running Tests, not
+  under a CI appendix that will later be deleted. Keep it short: include the
+  command that verifies it, and cut the story. Mark anything you haven't verified
+  as unverified.
+
 ## Project Overview
 
 Safir SDK Core is a middleware and platform for creating distributed soft real-time systems. It provides scalable, reliable, and portable data distribution for real-time and information systems, developed over 25+ years at Saab. The SDK supports multi-language development (C++, C#, Java).
@@ -55,6 +70,21 @@ changes the command line of every TU and ninja rebuilds the whole tree. When you
 keep a long-lived build tree for testing (sanitizers, valgrind), configure it with
 a fixed `-DSAFIR_GIT_REVISION=dev`, or test fixes from a separate worktree.
 
+To check a fix that touches only one shared library, don't rebuild the tree.
+1. Take the object's compile command from `ninja -C <build> -t commands <obj>`, point
+   the source path at the fixed checkout, and compile to a scratch directory.
+2. Take the library's link command the same way and relink it there with that
+   object swapped in. Add the `.so.N` symlinks.
+3. Put that directory first in `LD_LIBRARY_PATH`.
+
+Java finds JNI libraries through `LD_LIBRARY_PATH` too. Confirm which copy was
+loaded with `JAVA_TOOL_OPTIONS=-Xlog:library=info` (Java) or `LD_DEBUG=libs`
+(native). This keeps the build tree untouched.
+
+Patching objects inside a build tree and letting ninja relink is worse. Ninja also
+relinks every library downstream, and those have to be relinked again when you
+restore the originals.
+
 ### Running Tests
 
 There are two categories of tests, run two different ways.
@@ -72,7 +102,10 @@ other cases share fixed ports, `SAFIR_INSTANCE` numbers and temp directories.
 `ctest -j2` is already enough to produce message-count mismatches and "no such
 type or member defined" failures that have nothing to do with the code, and they
 read as real bugs. Nothing in CMake enforces this yet — no test carries
-`RUN_SERIAL` or `RESOURCE_LOCK` — so it is on whoever runs the suite.
+`RUN_SERIAL` or `RESOURCE_LOCK` — so it is on whoever runs the suite. The same
+applies *between* suites: ctest, `run_dose_tests` and `run_slow_tests` share the same
+shared memory and ports, so run only one at a time. Between runs, kill the leftover
+processes and clear `/dev/shm` (see the orphaned-process bullet under Sanitizer builds).
 
 Every ctest test now runs by default; there is no longer a skip switch. The
 hours-long, multi-process "population 1" cases were moved into the installed slow
@@ -544,6 +577,15 @@ the Java `Error` first. The slot is per thread and every path that reads it does
 `Set` first, so the stale entry is overwritten before it can be delivered. It would
 only surface if someone added a `Throw()` without a preceding `Set`, which is a bug
 in its own right.
+
+Wall-clock times on a 4-core, 15 GB machine (2026-09-25), for planning:
+
+| Run | Time |
+|---|---|
+| ctest under ASan or TSan | 5–6 min |
+| ctest under Valgrind, java/dotnet excluded | ~50 min |
+| Dose suite (C++, dotnet or Java partners), under ASan, TSan or `-Xcheck:jni` | ~13 min |
+| Slow suite under ASan without `restart_nodes` | ~60 min, of which `system_picture` takes ~35 |
 
 ### Review of the tier-1 fixes (2026-09-25)
 
