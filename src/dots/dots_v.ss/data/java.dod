@@ -1,6 +1,6 @@
 @@-------------------------------------------------------------------------------
 @@--
-@@--  Copyright Saab AB, 2005-2015 (http://safirsdkcore.com)
+@@--  Copyright Saab AB, 2005-2015, 2026 (http://safirsdkcore.com)
 @@--
 @@--  Created by: Henrik Sundberg / sthesu
 @@--
@@ -567,7 +567,10 @@ public class @_CLASS_@
     }
 
 
-    private static boolean isInit = false;
+@@-- volatile so that a thread that sees the flag set also sees the indexes init()
+@@-- wrote before it. Two threads running init() at once is harmless, they write the
+@@-- same values.
+    private static volatile boolean isInit = false;
 
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
@@ -1430,7 +1433,8 @@ public class @_CLASS_@
         }
     }
 
-    private static boolean m_isInitialized = false;
+@@-- volatile for the same reason as isInit above.
+    private static volatile boolean m_isInitialized = false;
 
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
