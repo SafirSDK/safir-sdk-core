@@ -1,6 +1,6 @@
 @@-------------------------------------------------------------------------------
 @@--
-@@-- Copyright Saab AB, 2005-2013,2015,2022-2023 (http://safirsdkcore.com)
+@@-- Copyright Saab AB, 2005-2013,2015,2022-2023,2026 (http://safirsdkcore.com)
 @@--
 @@-- Created by: Henrik Sundberg / sthesu
 @@--
@@ -144,6 +144,8 @@ Type:Watt64:Float64:"Safir::Dob::Typesystem::Si64::Watt":""
 #include <precompiled_header_for_cpp.h>
 
 #include <@_REPLACE_ALL(\./\/):UNIT_@.h>
+#include <atomic>
+#include <mutex>
 
 @@TABLE@@
 namespace @_NAMESPACEV_@
@@ -162,14 +164,18 @@ namespace @_NAMESPACEV_@
         static void Init()  __attribute__ ((unused));
 #endif
 
-        static bool isInitialised = false;
+@@-- The first use of the type may happen on several threads at once, so the indexes
+@@-- are filled in under a once_flag, and isInitialised is atomic so that a thread that
+@@-- sees it set also sees the indexes. See the class section below.
+        static std::atomic<bool> isInitialised{false};
+        static std::once_flag initOnce;
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
         static Safir::Dob::Typesystem::MemberIndex g_@_LOWER:MEMBER_@MemberIndex = -1;
 @@END_IF@@
 @@END_TABLE@@
 
-        static void Init()
+        static void DoInit()
         {
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
@@ -177,6 +183,11 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_TABLE@@
             isInitialised = true;
+        }
+
+        static void Init()
+        {
+            std::call_once(initOnce, DoInit);
         }
     }}
 
@@ -457,6 +468,8 @@ namespace @_NAMESPACEV_@
 @@--
 #include <precompiled_header_for_cpp.h>
 #include <@_REPLACE_ALL(\./\/):UNIT_@.h>
+#include <atomic>
+#include <mutex>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -495,7 +508,14 @@ namespace @_NAMESPACEV_@
             Safir::Dob::Typesystem::ObjectFactory::Instance().RegisterClass(@_CLASS_@::ClassTypeId, classChecksum, CreateObject);
 
 
-        static bool isInitialised = false;
+@@-- The first object of a type can be created on several threads at once - a
+@@-- process with connections on two threads, like dope_main with its tracer backdoor,
+@@-- gets the same message on both. A plain bool here was a data race: two threads
+@@-- could both run Init and write the indexes concurrently, and a third could see
+@@-- the flag set without the indexes. Hence the once_flag, and the atomic that keeps
+@@-- the check at every call site cheap.
+        static std::atomic<bool> isInitialised{false};
+        static std::once_flag initOnce;
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
         static Safir::Dob::Typesystem::ParameterIndex g_@_LOWER:PARAMETER_@ParameterIndex=-1;
@@ -513,7 +533,7 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_TABLE@@
 
-        static void Init()
+        static void DoInit()
         {
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
@@ -533,6 +553,11 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_TABLE@@
             isInitialised = true;
+        }
+
+        static void Init()
+        {
+            std::call_once(initOnce, DoInit);
         }
     }}
 
