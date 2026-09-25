@@ -48,6 +48,13 @@ To build an external user dou-project, use `dobmake_batch.py` (installed as
 `dobmake-batch`). To just build the source tree as a developer, use cmake/ninja
 directly (see BUILD.Linux.txt / BUILD.Windows.txt).
 
+**A reconfigure after a commit rebuilds everything.** CMake puts `git describe`
+into `-DSAFIR_SDK_CORE_VERSION=...` on every compile command, so the first cmake
+re-run after `HEAD` moves (a changed `CMakeLists.txt` is enough to trigger one)
+changes the command line of every TU and ninja rebuilds the whole tree. When you
+keep a long-lived build tree for testing (sanitizers, valgrind), configure it with
+a fixed `-DSAFIR_GIT_REVISION=dev`, or test fixes from a separate worktree.
+
 ### Running Tests
 
 There are two categories of tests, run two different ways.
@@ -354,6 +361,167 @@ Things that look like findings but are not, and how the run is set up to avoid t
   `start_fails_with_parser_errors` sees a configuration check succeed. That is
   stale state, not a bug: kill the leftovers and remove `/dev/shm/SAFIR_*` and
   `/dev/shm/sem.*SAFIR*` before re-running.
+
+#### Widened ASan/UBSan options (2026-09-25)
+
+A second pass added `-fsanitize=float-cast-overflow,float-divide-by-zero,bounds-strict`
+to the build and `strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:alloc_dealloc_mismatch=1`
+to `ASAN_OPTIONS`. ctest: 106 of 107 pass with no report. The one failure is not a finding
+and is why **`strict_init_order` stays off**: `tracer_cpp`'s sender has a global
+`Tracer` whose constructor reaches into `libdots_kernel.so`, and `strict_init_order=1`
+reports every read of another module's dynamically initialised global from a static
+initialiser — even when, as here, the other module is a shared library that ELF has
+already initialised. With `strict_init_order=0` (and `check_initialization_order=1`
+still on) the test passes with no report. There is no real ordering problem across
+our shared libraries; the option only makes sense for statically linked code.
+The all-C++ dose suite under the widened options (with `strict_init_order` off and
+`halt_on_error=0`) passes with no ASan or UBSan report in any partner or node.
+The slow suite without `run_restart_nodes_tests` (`run_slow_tests -k '^(?!.*restart_nodes)'`,
+same options) also passes, 11 of 11, with no report.
+
+### ThreadSanitizer builds
+
+Same cache option, `-DSAFIR_SANITIZER=thread`. What is different from ASan:
+
+- **`sudo sysctl vm.mmap_rnd_bits=28`** first, or every instrumented binary dies at
+  startup with `FATAL: ThreadSanitizer: unexpected memory mapping`. Put it back to 32
+  afterwards.
+- **Build with `-g1`** (`-DCMAKE_CXX_FLAGS_RELWITHDEBINFO="-O2 -g1 -DNDEBUG"`) if
+  disk is tight: line tables are all TSan's reports need, and the tree plus install
+  stays small enough to keep next to an ASan tree on a 48 GB disk. The build prints about 3700
+  `-Wtsan` "`atomic_thread_fence` is not supported" warnings from asio and libstdc++
+  headers; they are expected, and they are also why a handful of asio-internal
+  reports cannot be trusted.
+- **`TSAN_OPTIONS=exitcode=0`** for ctest as well as the dose and slow suites, for the
+  same reason as `halt_on_error=0` under ASan: a process with a report exits 66 at
+  the end, which fails every returncode check behind it. In ctest without it,
+  `TryStart_safir`, `stop_orders_at_exit` and all five `websocket_*` tests fail with
+  `dose_main has exited with status code 66`, caused by the known shm and LeveledLock
+  reports below; with it they pass. Add `log_path=<dir>/tsan` to get one report
+  file per process.
+- **.NET: preload the runtime into mono, and do not run a shell with it.** mono is
+  uninstrumented, so it cannot `dlopen` our TSan libraries unless
+  `LD_PRELOAD=$(gcc -print-file-name=libtsan.so.2)` puts the runtime in first (the
+  counterpart of `verify_asan_link_order=0`). But `/bin/sh` and `bash` *segfault*
+  with libtsan preloaded, and the installed `dose_test_dotnet` is a shell script, so
+  preloading around it kills every dotnet partner at startup with an empty output
+  file. That looks like a shutdown crash in the returncode summary (`-11`) and made
+  the first TSan dose run look like it had covered dotnet when it had not. Exec mono
+  directly: `exec env LD_PRELOAD=... /usr/bin/mono <prefix>/lib/safir-sdk-core/dose_test_dotnet.exe "$@"`.
+  With that, the all-dotnet dose combination passes under TSan. Reports from inside
+  mono's own threads (SGen workers, the thread pool, JIT-compiled `memcpy`) are noise:
+  managed locks are invisible to TSan.
+- **The deliberate-crash tests** needed the same `handle_*` options in
+  `TSAN_OPTIONS` that they already passed in `ASAN_OPTIONS`; their harnesses now
+  set both.
+- **dose_main's exit check counts threads**, and TSan starts a background thread of
+  its own after the first `pthread_create`. `CheckThreadCount` allows for it under
+  `__SANITIZE_THREAD__`; before that, `dose_main` exited 1 at every stop, which failed
+  `safir_control`'s returncode and the dose suite's syslog check.
+- **ctest's dotnet tests need the preload too.** Without it they fail at startup;
+  run them with `LD_PRELOAD=$(gcc -print-file-name=libtsan.so.2)` in the environment
+  of `ctest -R dotnet` (ctest runs the test drivers through python, not a shell, so
+  the shell crash above does not bite). Java is excluded (`-E java`), as under ASan.
+
+**TSan cannot see synchronisation that goes through another process**, and the Dob
+is built on exactly that: connections, queues and entity state live in the
+`SAFIR_DOSE_SHARED_MEMORY` segment and are handed between processes under
+interprocess mutexes and POSIX semaphores, very often with `dose_main` as the other
+side. TSan's happens-before is per process, so a hand-off like the connect handshake
+(`ConnectRequest::Set` → semaphore → dose_main → `m_connectLock` →
+`ConnectResponse::GetAndClear`) shows up as a race on both ends. Treat any report
+whose location is in that segment as unproven until you have found the in-process
+path. A suppressions file with `race:SAFIR_DOSE_SHARED_MEMORY` (it matches the
+location's module) removes most of them, but not the ones TSan attributes to
+`global '<null>'` inside the segment; add frame suppressions such as
+`race:Safir::Dob::Internal::ConnectRequest` / `ConnectResponse` for those. The
+trade-off is that a real in-process race on shm data is hidden too.
+
+Findings and decisions from the first TSan pass (2026-09-25; ctest, the dose suite
+with C++ and with dotnet partners):
+
+- **Fixed:** the `dose_internal` singletons' `Initialize` functions rewrote their
+  `m_instance` pointers on every `Connect` in the process while other threads read
+  them (`std::call_once` now); `Controller::m_isConnected` was read by other threads
+  through `ControllerTable::GetNamedController` (atomic now); the generated C++ DOU
+  code initialised its member indexes behind a plain `bool` on first use of a type
+  (`std::call_once` plus an atomic flag in `cpp-cpp.dod`; the C# and Java templates
+  got `volatile` for the same pattern); the reset test's senders and the
+  performance-test apps had test-code races at shutdown.
+- **`SharedMemoryHolder::GetMemoryLevel` races with every allocation — accepted.**
+  It reads the segment's free-memory counter with `get_free_memory()` without the
+  allocator's lock, on every Dob call. That is formally a data race, but it is a
+  single aligned word read for a heuristic (the low-memory level), boost gives no
+  locked accessor, and taking the segment mutex on every call to fix a heuristic is
+  not worth it. Suppress with `race:SharedMemoryHolder::GetMemoryLevel`.
+- **LeveledLock lock-order inversion reports — false positive.** The inverted pairs
+  are always taken under the owning type's master lock, which TSan's deadlock
+  detector does not model. Suppress with `deadlock:Safir::Dob::Internal::StateContainer::`.
+- **Breakpad crash callbacks call `SEND_SYSTEM_LOG` from signal context** —
+  a real async-signal-safety problem by the letter, but it only runs while the
+  process is already crashing and its purpose is to get a last log line out.
+  Recorded, not changed.
+- **sate (Qt) reports — false positive.** A `QString` released on a pool thread and
+  destroyed on the GUI thread, synchronised inside uninstrumented Qt (futex-based
+  mutexes).
+- **Not fixed, worth knowing:** `Initialize.cpp`'s comment claims
+  `std::this_thread::sleep_for` is an interruption point. Only
+  `boost::this_thread::sleep_for` is, so `dosemon`'s `interrupt()` + `join()` cannot
+  get a thread out of the wait for dose_main.
+
+### Valgrind memcheck
+
+Useful mainly for what ASan cannot see: **uninitialised reads**. Run it on a plain
+(`-O2 -g1`, not sanitized) tree, one ctest test at a time, with
+`--trace-children=yes` so the binaries the python drivers start are checked, and
+`--trace-children-skip=*python*,*/java,*/mono,/bin/*,/usr/bin/*` (a JVM or mono
+under memcheck is noise and very slow). Exclude the java and dotnet tests; they
+only check the managed code. Under valgrind every checked process is named
+`valgrind.bin`, and it is much slower, so these fail for reasons that are
+not findings: `ProcessInfo` (process name), `websocket_component_test` (compares
+process names, then waits out its timeout — kill it), `tracer_syslog_forward` test 5
+(fixed deadlock timeout), and the `CrashReporter_*` tests that raise a signal
+(breakpad and valgrind both want it). Everything else passes.
+
+Findings from the first pass (2026-09-25):
+
+- **Fixed:** `ValueDefinition` left `hash` uninitialised, and
+  `GetHashedValue`/`GetHashedKey` use `hash==0` to mean "plain string, hash it
+  now" — so an InstanceId/ChannelId/HandlerId/EntityId parameter whose `valueRef`
+  points at a String parameter returned stack garbage as its hash. The
+  communication `MessageHeader` sent its two padding fields uninitialised on every
+  datagram.
+- **The Dob's shared memory gives valgrind the same blind spot as TSan.** Each
+  process's valgrind tracks definedness only for its own writes. When process A
+  frees a shm block that held uninitialised bytes (struct padding copied from a
+  stack temporary is enough), and dose_main or another app reuses and fully writes
+  that block, A still sees the old "uninitialised" state when it reads it. That
+  is where all of `dose_main`'s thousands of reports in `same_safir_instance` and
+  the websocket tests come from: they sit in the boost segment manager
+  (`SharedMemoryObject.h` allocate/deallocate, `block_header::alloc_type`), in
+  `DistributionData`, or in reads of shm objects written by the peer
+  (`Dispatcher::InvokeOnResponseCb`), and the origin is always a stack frame in
+  the reporting process. Treat a report whose data lives in shm as unproven, as
+  under TSan.
+- **Not ours:** a Qt SIMD over-read inside `QTextStream::readAll` (sate), glibc's
+  resolver `res_init` leak, and the deliberate jump into an unloaded library in
+  `DynamicLibraryLoader_test2`.
+
+### Java: `-Xcheck:jni`
+
+Run the dose suite with Java partners on a plain install, with
+`JAVA_TOOL_OPTIONS=-Xcheck:jni` (it gets to every JVM the suite starts), e.g.
+`run_dose_tests --lang0 java --lang1 cpp --lang2 dotnet --lang3 java --lang4 cpp`.
+Findings end up in `dose_test_output/dose_test_java.*.output.txt`. Grep them for
+`WARNING in native` and `FATAL`. The suite passes either way, because warnings don't fail it.
+
+The first pass (2026-09-25) found one warning kind and no FATALs: "JNI call made without
+checking exceptions … from CallStaticVoidMethodV", about 1,660 of them. It came from
+`GetJArray` in `dose_java_jni/Callbacks.cpp`, which called `GetBooleanArrayElements`
+right after every Java callback. That is illegal with an exception pending, and
+`Callbacks.java` only catches `Exception`, so an `Error` could leave one pending.
+**Fixed:** `GetJArray` now checks `ExceptionCheck()` first and reports failure. With
+the fix the full suite has zero warnings.
 
 There is no sanitizer CI job yet. If one is added, model it on `build-debug` but
 drive cmake/ninja/ctest directly, exclude Java, and run the all-C++ dose combination.
