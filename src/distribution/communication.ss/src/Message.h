@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -195,11 +195,13 @@ namespace Com
             ,sendMethod(sendMethod_)
             ,deliveryGuarantee(deliveryGuarantee_)
             ,ackNow(0)
+            ,padding(0)
             ,totalContentSize(static_cast<uint32_t>(totalContentSize_))
             ,fragmentContentSize(static_cast<uint32_t>(fragmentContentSize_))
             ,numberOfFragments(numberOfFragments_)
             ,fragmentNumber(fragmentNumber_)
             ,fragmentOffset(static_cast<uint32_t>(fragmentOffset_))
+            ,padding2(0)
         {
         }
 
