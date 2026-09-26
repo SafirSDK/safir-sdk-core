@@ -84,8 +84,11 @@ namespace ToolSupport
             };
         } val;
 
-        ValueDefinition() : kind(ValueKind) {val.referenced=NULL;}
-        ValueDefinition(ValueDefinitionKind k) : kind(k) {val.referenced=NULL;}
+        //hash is a member in its own right, not part of the union below it, and
+        //GetHashedValue/GetHashedKey read hash==0 as "not hashed yet". The unions are
+        //zeroed through their widest member, which a pointer is not on 32-bit.
+        ValueDefinition() : kind(ValueKind) {val.int64=0; val.hash=0; key.int64=0; key.hash=0;}
+        ValueDefinition(ValueDefinitionKind k) : kind(k) {val.int64=0; val.hash=0; key.int64=0; key.hash=0;}
     };
 
     typedef std::vector<ValueDefinition> ParameterValues;
