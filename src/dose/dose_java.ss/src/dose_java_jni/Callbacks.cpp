@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2009-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2009-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagstrom / stlrha
 *
@@ -66,14 +66,19 @@ jmethodID Callbacks::m_onNotMessageOverflow;
 bool GetJArray(JNIEnv * _env,
                jbooleanArray array)
 {
-    jboolean isCopy;
-    jboolean * arrayElems = _env->GetBooleanArrayElements(array, &isCopy);
+    //The callback may have let a Throwable through - Callbacks.java only catches
+    //Exception - and JNI may not be used with one pending. Report failure and leave it
+    //pending, for the JVM to deal with when the thread returns to Java or detaches.
+    if (_env->ExceptionCheck())
+    {
+        return false;
+    }
+    jboolean * arrayElems = _env->GetBooleanArrayElements(array, NULL);
     assert(_env->GetArrayLength(array) == 1);
     const bool value = arrayElems[0] == JNI_TRUE;
-    if (isCopy == JNI_TRUE)
-    {
-        _env->ReleaseBooleanArrayElements(array, arrayElems, 0);
-    }
+    //Release is required whether or not the JVM gave us a copy - when it hands back a
+    //direct pointer instead, the Get/Release pair is what brackets the pinned region.
+    _env->ReleaseBooleanArrayElements(array, arrayElems, 0);
     return value;
 }
 
