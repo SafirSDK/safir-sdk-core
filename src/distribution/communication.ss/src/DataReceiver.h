@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <cstring>
 #include <memory>
 #include <functional>
 #include <boost/chrono.hpp>
@@ -178,8 +179,12 @@ namespace Com
 
         unsigned int m_runCount = 0;
         std::chrono::time_point<std::chrono::steady_clock> m_lastMcRecv;
-        char m_bufferUnicast[Parameters::ReceiveBufferSize];
-        char m_bufferMulticast[Parameters::ReceiveBufferSize];
+        //Aligned because HandleReceive reads the datagram header straight out of
+        //these through a CommonHeader*, and that needs int64_t alignment which a
+        //plain char array does not promise. Adding a small member above them would
+        //otherwise be enough to start returning misaligned headers.
+        alignas(int64_t) char m_bufferUnicast[Parameters::ReceiveBufferSize];
+        alignas(int64_t) char m_bufferMulticast[Parameters::ReceiveBufferSize];
 
         void AsyncReceive(char* buf, boost::asio::ip::udp::socket* socket)
         {
@@ -231,7 +236,13 @@ namespace Com
         {
             boost::crc_32_type crc;
             crc.process_bytes(static_cast<const void*>(buf), size-sizeof(uint32_t));
-            uint32_t checksum=*reinterpret_cast<const uint32_t*>(buf+size-sizeof(uint32_t));
+            //The crc sits at the end of the datagram, so its offset is the message
+            //length - which is not a multiple of 4 for every message. Reading it
+            //through a uint32_t* would therefore be a misaligned load, so copy it
+            //out instead. The sender writes it from a local uint32_t as its own
+            //scatter-gather buffer, so there is nothing to match on that side.
+            uint32_t checksum;
+            memcpy(&checksum, buf+size-sizeof(uint32_t), sizeof(checksum));
             return checksum==crc.checksum();
         }
 
