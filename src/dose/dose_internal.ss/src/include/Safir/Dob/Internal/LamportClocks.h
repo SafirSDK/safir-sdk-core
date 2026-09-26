@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -29,7 +29,6 @@
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <atomic>
 #include <memory>
-#include <boost/core/ignore_unused.hpp>
 
 namespace Safir
 {
@@ -45,7 +44,7 @@ namespace Internal
     public:
         // A default initialized timestamp will always be older than one that is acquired with GetNewTimestamp,
         // since the first timestamp GetNewTimestamp will return will be 1.
-    LamportTimestamp(): m_clock(0), m_nodeId(0) {} //NOLINT
+    LamportTimestamp(): m_clock(0), m_padding(0), m_nodeId(0) {} //NOLINT
 
         bool operator < (const LamportTimestamp& other) const
         {
@@ -79,9 +78,9 @@ namespace Internal
     private:
         LamportTimestamp(const uint32_t clock, const int64_t nodeId)
             : m_clock(clock)
+            , m_padding(0)
             , m_nodeId(nodeId)
         {
-            boost::ignore_unused(m_padding);
         }
 
         uint32_t GetClock() const { return m_clock;}
@@ -91,6 +90,10 @@ namespace Internal
         friend DOSE_INTERNAL_API std::wostream& operator << (std::wostream& out, const LamportTimestamp& timestamp);
 
         uint32_t m_clock;
+        //Structural, not slack: under pack(4) this is what puts m_nodeId at offset 8
+        //and makes the timestamp 16 bytes. Both constructors set it, because a
+        //timestamp is copied verbatim into distribution messages - left unset, these
+        //four bytes go out on the wire uninitialised.
         uint32_t m_padding;
         int64_t m_nodeId;
         //Note: size is checked in DistributionData.cpp
