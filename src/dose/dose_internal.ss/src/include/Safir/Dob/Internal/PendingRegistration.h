@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2007-2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -69,34 +69,17 @@ namespace Internal
             typeId(type),
             handlerId(handler),
             instanceIdPolicy(Dob::InstanceIdPolicy::RequestorDecidesInstanceId), // Not used for service registrations
+            isInjectionHandler(false), // Not used for service registrations either, but copy and assignment read it
             consumer(cons),
             accepted(false),
             remove(false),
             id(0)
         {}
 
-        PendingRegistration(const PendingRegistration& other):
-            typeId(other.typeId),
-            handlerId(other.handlerId),
-            instanceIdPolicy(other.instanceIdPolicy),
-            isInjectionHandler(other.isInjectionHandler),
-            consumer(other.consumer),
-            accepted(other.accepted),
-            remove(other.remove),
-            id(other.id) {}
-
-        PendingRegistration& operator=(const PendingRegistration& other)
-        {
-            typeId = other.typeId;
-            handlerId = other.handlerId;
-            instanceIdPolicy = other.instanceIdPolicy;
-            isInjectionHandler = other.isInjectionHandler;
-            consumer = other.consumer;
-            accepted = other.accepted;
-            remove = other.remove;
-            id = other.id;
-            return *this;
-        }
+        //Copy and assignment are left to the compiler. Spelling them out member by
+        //member only creates a place to forget a field, and a forgotten field there
+        //goes missing silently on every copy - and these are copied a lot, since the
+        //PendingRegistrationVector accessors return by value.
 
         Dob::Typesystem::TypeId typeId;
         ShmHandlerId handlerId;
