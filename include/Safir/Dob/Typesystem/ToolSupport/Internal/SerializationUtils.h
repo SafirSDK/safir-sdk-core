@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -161,6 +161,16 @@ namespace SerializationUtils
     }
 
 
+    /**
+     * Hash a string id. Returns the hash, and - when the input was a name rather
+     * than a number - a pointer to the string it was given, which is the shape
+     * BlobWriter::WriteValue and WriteKey take for hashed types. A null second
+     * means the input was already a number.
+     *
+     * Because second is str.c_str(), str has to outlive every use of it. Passing a
+     * temporary leaves it dangling, so the rvalue overload is deleted rather than
+     * left to fail at runtime: bind the string to a named variable and pass that.
+     */
     inline std::pair<DotsC_Int64, const char*> StringToHash(const std::string& str)
     {
         std::pair<DotsC_Int64, const char*> result(0, static_cast<const char*>(NULL));
@@ -176,6 +186,13 @@ namespace SerializationUtils
         return result;
     }
 
+    inline std::pair<DotsC_Int64, const char*> StringToHash(const std::string&&) = delete;
+
+    /**
+     * Like StringToHash, this hands the instance string back to the caller as a
+     * pointer into inst, so inst has to outlive the returned pair. The rvalue
+     * overload is deleted for the same reason.
+     */
     template <class RepT>
     std::pair<bool /*valid*/, std::pair<DotsC_EntityId, const char*>> StringToEntityId(const RepT* repository, const std::string& type, const std::string& inst)
     {
@@ -186,6 +203,9 @@ namespace SerializationUtils
         eid.instanceId = instanceId.first;
         return std::make_pair(tid.first, std::make_pair(eid, instanceId.second));
     }
+
+    template <class RepT>
+    std::pair<bool /*valid*/, std::pair<DotsC_EntityId, const char*>> StringToEntityId(const RepT* repository, const std::string& type, const std::string&& inst) = delete;
 
     inline bool StringToBoolean(const std::string& val)
     {

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2023 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2023, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -475,15 +475,16 @@ namespace ToolSupport
                 break;
             case EntityIdMemberType:
                 {
-                    size_t sep=val.find(", ");
-                    result.key.int64=LlufId_Generate64(val.substr(0, sep).c_str());
-                    result.key.str=val.substr(sep+2);
+                    const size_t sep=val.find(", ");
 
-                    // typeId
+                    // typeId. Not LlufId_Generate64 on the name: a type id written as a
+                    // number is that number, and only a name is hashed.
                     result.key.int64=SerializationUtils::StringToTypeIdUnchecked(val.substr(0, sep));
 
-                    // instanceId
-                    auto instanceId = SerializationUtils::StringToHash(val.substr(sep+2));
+                    // instanceId. StringToHash returns a pointer into the string it was
+                    // given, so that string has to outlive the use of instanceId.second.
+                    const std::string instanceIdStr = val.substr(sep+2);
+                    auto instanceId = SerializationUtils::StringToHash(instanceIdStr);
                     result.key.hash=instanceId.first; // instance number
                     if (instanceId.second) // instance string
                         result.key.str=instanceId.second;
