@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com/)
+* Copyright Saab AB, 2015, 2026 (http://safirsdkcore.com/)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -200,10 +200,14 @@ namespace
                              Safir::Utilities::Internal::WrapInStrand(m_strand,
                                                                        [this]()
                                                                        {
-                                                                           if (m_connectedCallback != nullptr && m_connectedCallback.get() != nullptr)
+                                                                           // Copy the pointer before invoking: the callback resets
+                                                                           // m_connectedCallback from inside done(), and this local copy is
+                                                                           // what keeps the function object alive until it has returned.
+                                                                           const auto callback = m_connectedCallback;
+                                                                           if (callback != nullptr)
                                                                            {
                                                                                // Invoke the current per-send callback.
-                                                                               (*m_connectedCallback)();
+                                                                               (*callback)();
                                                                            }
                                                                        }),
                              nullptr)
@@ -250,9 +254,6 @@ namespace
                                       timer->expires_after(timeout);
 
                                       // Common finish helper, must be called on m_strand.
-                                      // We capture a shared_ptr copy of the *new* connected
-                                      // callback below to ensure it stays alive at least
-                                      // until done() has executed.
                                       auto done = [this, cb, timer](const std::error_code& ec)
                                       {
                                           // Per-send lifetime: stop accepting and close the
@@ -270,7 +271,10 @@ namespace
                                           m_hasActiveSend = false;
                                       };
 
-                                      //we need to make sure to keep a copy of the callback until done() is finished.
+                                      // Owned by m_connectedCallback. The subscriberConnectedCb takes its
+                                      // own copy before invoking it, and that copy is what keeps it alive
+                                      // across the call - so this callback must not capture itself, which
+                                      // would be a cycle nothing can break.
                                       auto perSendCallback = std::make_shared<std::function<void()>>();
 
                                       // Timeout path: if timer expires before a subscriber
@@ -279,7 +283,7 @@ namespace
                                       timer->async_wait(
                                           boost::asio::bind_executor(
                                               m_strand,
-                                              [this, done, perSendCallback](const boost::system::error_code& ec)
+                                              [done](const boost::system::error_code& ec)
                                               {
                                                   if (ec == boost::asio::error::operation_aborted)
                                                   {
@@ -295,7 +299,7 @@ namespace
                                       // same strand, so ordering with respect to the above
                                       // setup is well-defined.
                                       *perSendCallback =
-                                          [this, cmdAction, nodeId, timer, done, perSendCallback]()
+                                          [this, cmdAction, nodeId, timer, done]()
                                           {
                                               // Serialize and send the command.
                                               auto data = SerializeCmd(cmdAction, nodeId);
