@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2004-2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -100,9 +100,13 @@ namespace ToolSupport
     {
     public:
         MemberDescriptionLocal()
-            :collectionType(SingleValueCollectionType)
+            :memberType(ObjectMemberType)
+            ,collectionType(SingleValueCollectionType)
+            ,keyType(Int32MemberType)
             ,arraySize(1)
             ,maxLength(INT32_MAX)
+            ,typeId(0)
+            ,keyTypeId(0)
         {
         }
 
@@ -136,6 +140,7 @@ namespace ToolSupport
     {
     public:
         PropertyDescriptionLocal()
+            :typeId(0)
         {
         }
 
@@ -161,7 +166,8 @@ namespace ToolSupport
     {
     public:
         ExceptionDescriptionLocal()
-            :base(NULL)
+            :typeId(0)
+            ,base(NULL)
         {
         }
 
@@ -185,9 +191,18 @@ namespace ToolSupport
     class ParameterDescriptionLocal : public ParameterDescription
     {
     public:
+        //Every field gets a value here, even the ones that are only meaningful for
+        //some parameters: keyType, for one, is read for every parameter when the
+        //description is copied into shared memory and when DotsC_GetParameterInfo
+        //reports it, and loading an enum that holds no valid value is undefined.
         ParameterDescriptionLocal()
-            :collectionType(SingleValueCollectionType)
+            :classTypeId(0)
+            ,memberType(ObjectMemberType)
+            ,collectionType(SingleValueCollectionType)
+            ,keyType(Int32MemberType)
             ,hidden(false)
+            ,typeId(0)
+            ,keyTypeId(0)
         {
         }
 
@@ -312,6 +327,8 @@ namespace ToolSupport
     {
     public:
         EnumDescriptionLocal()
+            :typeId(0)
+            ,checksum(0)
         {
         }
 
@@ -340,6 +357,10 @@ namespace ToolSupport
     {
     public:
         MemberMappingLocal()
+            :kind(MappedToNull)
+            ,propertyMemberIndex(0)
+            ,paramRef(NULL)
+            ,paramIndex(0)
         {
         }
 
@@ -362,6 +383,8 @@ namespace ToolSupport
     {
     public:
         PropertyMappingDescriptionLocal()
+            :property(NULL)
+            ,class_(NULL)
         {
         }
 
@@ -416,6 +439,9 @@ namespace ToolSupport
     {
     public:
         ClassDescriptionLocal()
+            :typeId(0)
+            ,base(NULL)
+            ,checksum(0)
         {
         }
 
