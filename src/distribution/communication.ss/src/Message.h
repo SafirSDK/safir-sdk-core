@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013-2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013-2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -171,6 +171,10 @@ namespace Com
         uint8_t sendMethod;
         uint8_t deliveryGuarantee;
         uint8_t ackNow;
+        //Under pack(1) these two are the only thing keeping the layout aligned: padding
+        //puts the 32-bit fields on a 4-byte boundary and padding2 rounds the header to
+        //56, so whatever follows it starts aligned. They are real bytes on the wire and
+        //are covered by the crc, so the constructor has to set them.
         uint8_t padding;
         uint32_t totalContentSize;
         uint32_t fragmentContentSize;
@@ -195,11 +199,13 @@ namespace Com
             ,sendMethod(sendMethod_)
             ,deliveryGuarantee(deliveryGuarantee_)
             ,ackNow(0)
+            ,padding(0)
             ,totalContentSize(static_cast<uint32_t>(totalContentSize_))
             ,fragmentContentSize(static_cast<uint32_t>(fragmentContentSize_))
             ,numberOfFragments(numberOfFragments_)
             ,fragmentNumber(fragmentNumber_)
             ,fragmentOffset(static_cast<uint32_t>(fragmentOffset_))
+            ,padding2(0)
         {
         }
 
