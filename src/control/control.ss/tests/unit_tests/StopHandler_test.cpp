@@ -737,6 +737,9 @@ BOOST_AUTO_TEST_CASE( receive_stop_notification )
                    {
                        BOOST_CHECK(communication.setDataReceiverCalls.size() == 2);
 
+                       //Once delivered the buffer belongs to the receiver, which frees it with
+                       //delete[] just as it does under the real Communication, so it has to be
+                       //allocated with new[]. This mock discards the deallocator entirely.
                        communication.setDataReceiverCalls[1].first(1234, 1111, new char[1], 1);
                    });
 

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -162,9 +162,15 @@ namespace Control
             communication.SetDataReceiver(Safir::Utilities::Internal::WrapInStrand(m_strand,
                                           [this](const int64_t from,
                                                  const int64_t /*nodeTypeId*/,
-                                                 const char* const /*data*/,
+                                                 const char* const data,
                                                  const size_t /*size*/)
                                           {
+                                              //The notification carries nothing we need to read, but
+                                              //Communication hands the buffer over all the same, and the
+                                              //allocator registered below is new char[] - so taking
+                                              //ownership here is what frees it. The stop order receiver
+                                              //above does the same, passing ownership on to its handler.
+                                              const Safir::Utilities::Internal::SharedConstCharArray owner(data);
                                               HandleStopNotificationFromExternalNode(from);
                                           }),
                                           m_stopNotificationMsgTypeId,
