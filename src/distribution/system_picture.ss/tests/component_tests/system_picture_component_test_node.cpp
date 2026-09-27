@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012,2014,2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2012,2014,2022,2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -35,6 +35,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -486,6 +487,12 @@ public:
                                                               const char* data,
                                                               const size_t size)
         {
+            //Communication hands the buffer over when it delivers it, and only cleans up
+            //what it still holds in Stop(), so freeing it is ours to do. The allocator
+            //registered below is new char[], which unique_ptr<const char[]> matches;
+            //taking it here covers the throwing paths below too.
+            const std::unique_ptr<const char[]> dataOwner(data);
+
             if (size != DATA_SIZE)
             {
                 throw std::logic_error("Received incorrectly sized data!");

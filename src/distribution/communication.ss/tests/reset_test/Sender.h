@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2022, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@gmail.com
 *
@@ -26,6 +26,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include <future>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <Safir/Dob/Internal/Communication.h>
@@ -51,6 +52,7 @@ public:
         :m_io()
         ,m_nodeTypeId(nodeTypeId)
         ,m_work(boost::asio::make_work_guard(m_io))
+        ,m_strand(m_io.get_executor())
         ,m_sendTimer(m_io)
         ,m_com(Com::controlModeTag,
                m_io,
@@ -92,13 +94,22 @@ public:
         m_sendToNodeType = sendToNodeType;
         m_com.Start();
         m_sendTimer.expires_after(std::chrono::milliseconds(25));
-        m_sendTimer.async_wait([this](const boost::system::error_code& ec){OnSendTimer(ec);});
+        m_sendTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& ec){OnSendTimer(ec);}));
     }
 
     void Stop()
     {
-        m_running = false;
-        m_sendTimer.cancel();
+        //OnSendTimer runs on one of the io threads and rearms the timer, so once the
+        //timer is armed it and m_running belong to the strand the handler runs on.
+        std::promise<void> stopped;
+        boost::asio::post(m_strand, [this, &stopped]
+        {
+            m_running = false;
+            m_sendTimer.cancel();
+            stopped.set_value();
+        });
+        stopped.get_future().wait();
+
         m_com.Stop();
         m_work.reset();
         m_threads.join_all();
@@ -113,6 +124,7 @@ private:
     boost::asio::io_context m_io;
     int64_t m_nodeTypeId;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_work;
+    boost::asio::strand<boost::asio::io_context::executor_type> m_strand;
     boost::asio::steady_timer m_sendTimer;
     Com::Communication m_com;
     boost::thread_group m_threads;
@@ -126,8 +138,10 @@ private:
         m_com.IncludeNode(nodeId);
     }
 
-    void OnReceiveData(int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char* /*data*/, size_t /*size*/)
+    void OnReceiveData(int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char* data, size_t /*size*/)
     {
+        //Nothing here needs the content, but the buffer is ours once it is delivered.
+        delete[] data;
     }
 
     void OnGotReceiveFrom(int64_t /*fromNodeId*/, bool /*isMulticast*/, bool /*isDuplicate*/)
@@ -158,7 +172,7 @@ private:
         }
 
         m_sendTimer.expires_after(std::chrono::milliseconds(5));
-        m_sendTimer.async_wait([this](const boost::system::error_code& ec){OnSendTimer(ec);});
+        m_sendTimer.async_wait(boost::asio::bind_executor(m_strand, [this](const boost::system::error_code& ec){OnSendTimer(ec);}));
     }
 
 };
