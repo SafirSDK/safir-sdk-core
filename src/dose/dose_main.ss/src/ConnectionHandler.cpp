@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2015 (http://safirsdkcore.com)
+* Copyright Saab AB, 2015, 2026 (http://safirsdkcore.com)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -100,8 +100,11 @@ namespace
 
         m_communication.SetDataReceiver([this](int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char *data, size_t /*size*/)
         {
+            //The buffer belongs to us once it has been delivered, on every path out of
+            //here and not just the one that goes on to use it.
             if (!m_running)
             {
+                DistributionData::DropReference(data);
                 return;
             }
 
@@ -109,6 +112,7 @@ namespace
             {
                 if (!m_running)
                 {
+                    DistributionData::DropReference(data);
                     return;
                 }
 
