@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2012-2013,2023 (http://safirsdkcore.com)
+# Copyright Saab AB, 2012-2013,2023, 2026 (http://safirsdkcore.com)
 #
 # Created by: Lars Hagstrom (lars.hagstrom@consoden.se)
 #
@@ -26,12 +26,24 @@
 import subprocess, os, time, sys, re, signal
 import argparse
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='unit test script')
     parser.add_argument("--sleeper-exe", help="The test executable", required=True)
     return parser.parse_args()
 
+
 args = parse_arguments()
+
+# The sleeper is meant to die of a crash signal. AddressSanitizer and
+# ThreadSanitizer install their own handlers for those and turn the death into exit
+# code 1 or 66 with a report, which is not what is under test here, so tell them to
+# leave the crash signals alone. In a build without sanitizers the variables are
+# simply ignored.
+crash_signal_flags = "handle_segv=0:handle_sigfpe=0:handle_sigill=0:handle_abort=0"
+child_env = dict(os.environ)
+for sanitizer_options in ("ASAN_OPTIONS", "TSAN_OPTIONS"):
+    child_env[sanitizer_options] = ":".join(filter(None, [child_env.get(sanitizer_options), crash_signal_flags]))
 
 print("stdout isatty:", sys.stdout.isatty())
 print("stderr isatty:", sys.stderr.isatty())
@@ -50,7 +62,11 @@ def test_signal_internal(reason, expectCallback, expectedReturncode):
     global errors
     print("Testing signal", str(reason) + ":")
     cf = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
-    sleeper = subprocess.Popen(args.sleeper_exe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, creationflags=cf)
+    sleeper = subprocess.Popen(args.sleeper_exe,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT,
+                               creationflags=cf,
+                               env=child_env)
     line = sleeper.stdout.readline().decode("ascii")
     if not line.startswith("Started"):
         print("Strange starting line:", line)

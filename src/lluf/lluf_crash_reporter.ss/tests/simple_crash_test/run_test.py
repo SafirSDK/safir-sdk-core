@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# Copyright Saab AB, 2012-2013,2023 (http://safirsdkcore.com)
+# Copyright Saab AB, 2012-2013,2023, 2026 (http://safirsdkcore.com)
 #
 # Created by: Lars Hagstrom (lars.hagstrom@consoden.se)
 #
@@ -26,16 +26,39 @@
 import subprocess, os, time, sys, re
 import argparse
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='unit test script')
     parser.add_argument("--crasher-exe", help="The test executable", required=True)
     return parser.parse_args()
 
+
 args = parse_arguments()
+
+# The crasher is meant to die of a crash signal. AddressSanitizer and
+# ThreadSanitizer install their own handlers for those and turn the death into exit
+# code 1 or 66 with a report, which is not what is under test here, so tell them to
+# leave the crash signals alone. In a build without sanitizers the variables are
+# simply ignored.
+crash_signal_flags = "handle_segv=0:handle_sigfpe=0:handle_sigill=0:handle_abort=0"
+child_env = dict(os.environ)
+for sanitizer_options in ("ASAN_OPTIONS", "TSAN_OPTIONS"):
+    child_env[sanitizer_options] = ":".join(filter(None, [child_env.get(sanitizer_options), crash_signal_flags]))
+
+# The crasher provokes its signals by committing deliberate undefined behaviour: a
+# store through a null pointer for SIGSEGV, a division by zero for SIGFPE. UBSan
+# reports those correctly, and under halt_on_error=1 it aborts at the report - before
+# the signal that is actually under test is ever raised. Force it off for the child;
+# the last assignment wins in the sanitizer flag parser, so this overrides whatever
+# the suite was run with.
+child_env["UBSAN_OPTIONS"] = ":".join(filter(None, [child_env.get("UBSAN_OPTIONS"), "halt_on_error=0"]))
 
 
 def run_crasher(reason):
-    crasher = subprocess.Popen((args.crasher_exe, reason), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    crasher = subprocess.Popen((args.crasher_exe, reason),
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT,
+                               env=child_env)
     result = crasher.communicate()[0].decode("ascii")
     print("Testing signal", reason)
     if result.find("callback") == -1:
