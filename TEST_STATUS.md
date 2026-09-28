@@ -142,6 +142,7 @@ and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it
 | `353-pending_entity_handler_registration_between_nodes` | multicomputer dose | any | 1/89 | 2026-08-18 (32143455257) | "Pending registration" family, **converted to waits 2026-08-28** — see below |
 | `HeartbeatSenderTest` | slow suite (`run_communication_tests`) | Windows | 1/89 | 2026-08-18 (32143455257) | Communication flake, newly visible via slow-suite junit |
 | `run_restart_nodes_tests` (hang) | slow suite | any | n/a | 2026-08-23 (32637686999) | Hangs at startup → TIMEOUT → **fails the job**; job-level, not in the junit counts |
+| `run_light_nodes_smart_sync_tests` (hang) | Debug slow suite | Linux (Debug only, so far) | 1/3 | 2026-09-28 (36418968450) | Hangs in one case → TIMEOUT → **fails the job**; not in the junit counts. Did not reproduce in 20 local runs; attribution open, see below |
 
 **Two names that used to appear in this table are deliberately absent:
 `syslog_output` and `safir_control.0.returncode`.** Neither is a test. They are the
@@ -307,6 +308,88 @@ by shortening or lengthening the timeout.** Root cause not yet isolated (node 0
 launched, then silence — a dose_main/safir_control startup or system-formation
 hang is the likely area). Pre-existing, environment-tolerant behaviour, not caused
 by the migration; defer.
+
+### `run_light_nodes_smart_sync_tests` hang (Debug slow suite → TIMEOUT → red job)
+
+Seen once, on run 36418968450 (`private/startup-synchronizer-review`,
+`debug-slow-tests-ubuntu-noble-amd64`). **Attribution is genuinely open** — read
+the numbers below before assuming either way.
+
+What happened: cases 1-4 passed with their usual timings (73/57/58/94 s), then case
+5, `one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications`,
+hung and was killed at the driver's 1200 s budget. The job took 93 min instead of
+the usual 80, which is exactly that budget minus the case's normal ~56 s. Inside
+the case: node 1 came up and connected to the DOB normally; node 5 (the light node)
+launched, and its `safir_web` then **never accepted a connection** —
+`ws://localhost:16675` refused for 45 s. Nine minutes later `wait_for_node_state`
+timed out with node 5's pool empty. The driver moved on to kill node 5 and was
+still waiting for its `safir_control` to die 5 minutes later when the umbrella
+killed the driver. A `safir_control` that ignores SIGTERM that long is stuck before
+its asio signal handling is running, i.e. somewhere in early startup.
+
+Evidence on both sides:
+
+- **Against it being a regression:** the same commit passed on re-run of the same
+  job (77 min, all 12 drivers, smart_sync 6/6 in 402 s), so it is not
+  deterministic. The **release** slow suite passed the driver on all five platforms
+  in the same run (ubuntu amd64/arm64, debian-trixie, vs2022, vs2026), case 5
+  included at 56 s. 62 of 64 jobs were green (the other non-green was the expected
+  `Publish release` skip).
+- **For it being a regression:** the run carried the StartupSynchronizer rework
+  (#618), and `debug-slow-tests` had passed **12/12** before that, across `develop`
+  and four private branches since 2026-09-17.
+
+Why those numbers settle nothing: 0 failures in 12 runs is perfectly consistent
+with a pre-existing flake of up to ~10% (0.9^12 ≈ 0.28). Fisher on 0/12 versus the
+1-in-3 seen on that branch gives p ≈ 0.14. So **more samples are the only thing
+that will separate the two stories** — watch this driver in the Debug slow job and
+update the count above.
+
+Samples taken so far, for whoever picks this up:
+
+- On the branch that first saw it, `debug-slow-tests` then went **1 failure in 3
+  runs**: the original, a re-run of the same job on the same commit (passed, 77
+  min, all 12 drivers, smart_sync 6/6 in 402 s), and a second push (passed, 12/12
+  drivers, smart_sync 6/6 in 392 s).
+- It did **not reproduce in 20 local runs** of the driver on a Debug build pinned
+  to 4 cores to imitate a runner - 10 with the reworked StartupSynchronizer and 10
+  with the previous one, interleaved round by round so machine drift could not land
+  on one arm. All 20 passed 6/6, in 360-381 s. Seven further local runs (release
+  build, and Debug before the A/B) were also clean. So the A/B that was supposed to
+  settle attribution returned **no signal, because the hang never occurred** - a
+  weak negative, not an exoneration. It does rule out anything deterministic, and
+  anything frequent enough to show at roughly 1-in-10 on that hardware.
+
+If you want to try reproducing it, the harness used is straightforward to rebuild:
+loop the driver, watch its output for a silence longer than any legitimate wait
+(240 s is comfortable - normal gaps are 40-60 s and the CI stall showed a
+nine-minute one), and on a stall capture `/proc/locks` with each holder resolved
+against the lock files by inode, every process's `/proc/<pid>/wchan`, and gdb
+backtraces of `safir_control`, `dose_main` and `safir_web` *before* killing
+anything. `/proc/locks` is the single most useful file here: it names the mode
+(READ/WRITE), the inode and the pid, so "is somebody holding the users lock
+exclusively, and who" is one lookup rather than an inference.
+
+Why it is Debug-only so far is the most interesting clue: Debug is the only
+configuration where `LeveledLock`'s order checking is compiled in, and
+`LeveledLockHelper::Instance()` reaches its state through `GetSharedMemory()` →
+`SharedMemoryHolder::Instance()` → `StartupSynchronizer::Start()`. So in Debug the
+DOSE shared-memory initialisation can be triggered *from inside a lock
+acquisition*, a context that does not exist in release. A process blocked there
+while holding a DOB lock is the right shape for this stall. Note that the old
+StartupSynchronizer blocked at the same point (`lock_sharable`), so this is not by
+itself evidence that the rework introduced it.
+
+**The diagnostics you will want are not in the artifacts, and that is structural.**
+The driver writes each case's node output when it tears the environment down, and
+this failure kills it *during* teardown, so the failing case's logs are exactly
+what gets lost. The `slow-output-*` artifact for that run contains only the first
+driver's output. Anyone chasing this should reproduce locally instead: the driver
+needs multicast loopback on 239.6.6.6:16666 (it flips `NetworkEnabled` via
+DebugCommandServer, and case 5 uses it four times), so a host without a route for
+239.0.0.0/8 cannot run it at all — it aborts in the up-front precheck. With that in
+place, `gdb` on the stuck `safir_control` answers in seconds what CI can only hint
+at.
 
 ### `215-huge_service` (+ the huge-message family)
 
