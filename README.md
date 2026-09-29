@@ -7,6 +7,10 @@ tell a flake from a real regression.** It carries no source code at all.
   occurrence. Never rewritten, only added to.
 - [`ANALYSIS.md`](ANALYSIS.md) — the policy, how to read a red CI run, the working
   theories for each live flake, and post-mortems of the ones that were fixed.
+- [`AGENTS.md`](AGENTS.md) — orientation for AI agents that arrive here mid-task:
+  what this branch is, what it is not, and the handful of operations performed on
+  it. Not to be confused with the repository's own `AGENTS.md` on `develop`, which
+  covers building and testing the actual code.
 
 ## When CI goes red, what do I do?
 
@@ -141,9 +145,10 @@ line never conflicts in a way that needs thought.
   clone of the repository, which is decent insurance, but a force-push or a
   "delete stale branches" sweep would take it. Branch protection is the fix if
   that matters to you; it is not enabled today.
-- **`AGENTS.md` is referenced in `ANALYSIS.md` and does not live here.** It is on
-  `develop`: `git show origin/develop:AGENTS.md`. Same for any source path
-  mentioned in the analysis.
+- **Two files are called `AGENTS.md`.** The one in this branch is the orientation
+  card for agents working *here*. The one `ANALYSIS.md` cites — build commands,
+  architecture, the overlay notes — is the repository's, on `develop`:
+  `git show origin/develop:AGENTS.md`. Same for any source path in the analysis.
 - **Known gap:** nothing on `develop` points at this branch yet. Until
   `TEST_STATUS.md` is removed and `AGENTS.md` gains a pointer, this branch is only
   discoverable if you already know it exists.

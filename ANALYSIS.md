@@ -10,9 +10,10 @@ Where the text below says a flake is "catalogued below" or names "the table", th
 per-test counts it means now live in `LEDGER.md` — as an append-only log of
 occurrences, plus the historical aggregate counts as they stood when this moved.
 
-References to `AGENTS.md` and to source paths point at the code, which is not on
-this branch. Read them with `git show origin/develop:AGENTS.md` or on `develop` in
-the usual way.
+References below to `AGENTS.md` mean **the repository's** `AGENTS.md`, on
+`develop` — not the short orientation file of the same name in this branch. It and
+every source path mentioned here live with the code:
+`git show origin/develop:AGENTS.md`.
 
 ## Contents
 
