@@ -22,6 +22,13 @@ Format, space-aligned for reading but only the field order matters:
   one line; long-form goes in `ANALYSIS.md`. If there is an evidence bundle, say
   `evidence/<dir>`.
 
+**One line per test per run.** If the same test fails on three platforms in one
+run, that is one line, with the spread recorded in the `NOTE` ("3 of 8
+multicomputer legs"). A run is the unit because that is how flakiness is
+experienced — one red run is one event to triage — and because the old counts were
+per run too, so the history above and the lines below mean the same thing. Two
+different tests failing in one run are two lines.
+
 Useful queries:
 
     grep -c 215-huge_service LEDGER.md              # how many times

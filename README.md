@@ -8,6 +8,43 @@ tell a flake from a real regression.** It carries no source code at all.
 - [`ANALYSIS.md`](ANALYSIS.md) — the policy, how to read a red CI run, the working
   theories for each live flake, and post-mortems of the ones that were fixed.
 
+## When CI goes red, what do I do?
+
+This is the whole workflow. Everything else in this file is detail.
+
+1. **Identify what failed.** A red *job* and a red "Test results" *check* mean
+   different things — see `ANALYSIS.md` → "How CI signals a failure".
+2. **Is it a known flake?** `grep <test-name> LEDGER.md`. If it is there, you are
+   done deciding: re-run, and **append a line** recording this occurrence.
+3. **Is it caused by your change?** If the failure is in what you touched, it is
+   not flakiness — fix it. Nothing gets logged here.
+4. **Is it new?** Append a line, and start a section in `ANALYSIS.md` with what you
+   know, even if that is only "seen once, no idea". An entry saying "attribution
+   open" is worth far more than silence, because the next person can tell it is
+   the second occurrence rather than the first.
+5. **Did you actually investigate it?** Then keep an evidence bundle before the
+   logs expire (below), and write down what you ruled out. What you eliminated is
+   usually more valuable later than what you suspected.
+
+The standing policy on *whether to chase* a flake at all is in `ANALYSIS.md` →
+"Policy: defer flakiness unless it's ours". The short version: unattributed
+flakiness is deferred, and a flaky test never becomes a GitHub issue.
+
+## When a flake is fixed
+
+Do not delete its history. Instead:
+
+- Leave every existing `LEDGER.md` line exactly where it is. They are the record
+  that it used to happen, and the dates are what let you tell "fixed" from
+  "dormant" later.
+- Move its section in `ANALYSIS.md` under "Fixed / dormant", and record **the
+  commit that fixed it** and the date. A fix with no sha is an assertion; a fix
+  with a sha is checkable.
+- Say what would count as confirmation, and prefer a query over a counter. "No
+  occurrences in the ledger after 2026-08-27" is something anyone can re-derive;
+  "clean runs since the fix: 2" is something that silently goes stale the moment
+  nobody increments it.
+
 ## Why this is a branch and not a file in the source tree
 
 Because recording an observation should be nearly free, and in the source tree it
@@ -45,6 +82,11 @@ is measured, not assumed: on 2026-09-29 a run from 2026-06-25 reported zero
 artifacts and returned a server error for its logs, while a run from 2026-08-18
 still had artifacts, expiring 2026-11-16. So a ledger line older than three months
 points at a run that still exists and tells you nothing.
+
+**Mind the clock.** If an occurrence matters and its run is approaching 90 days,
+pull the evidence *now* — afterwards there is nothing to pull. `gh api
+repos/SafirSDK/safir-sdk-core/actions/runs/<id>/artifacts --jq '.artifacts[] |
+"\(.name) expires \(.expires_at[0:10])"'` tells you how long you have.
 
 Keep a bundle when an occurrence was actually investigated, or when it is the first
 of something. A bundle should have a `README.md` with the run id, job id, commit
@@ -92,3 +134,20 @@ Do not check this branch out over a source working tree. Use a throwaway worktre
 Appends race the way any shared branch does. If the push is rejected, `git pull
 --rebase` and push again — the ledger is append-only, so a rebase of one added
 line never conflicts in a way that needs thought.
+
+## Things to know about this branch
+
+- **It is the only copy.** No CI guards it and nothing reviews it. It is in every
+  clone of the repository, which is decent insurance, but a force-push or a
+  "delete stale branches" sweep would take it. Branch protection is the fix if
+  that matters to you; it is not enabled today.
+- **`AGENTS.md` is referenced in `ANALYSIS.md` and does not live here.** It is on
+  `develop`: `git show origin/develop:AGENTS.md`. Same for any source path
+  mentioned in the analysis.
+- **Known gap:** nothing on `develop` points at this branch yet. Until
+  `TEST_STATUS.md` is removed and `AGENTS.md` gains a pointer, this branch is only
+  discoverable if you already know it exists.
+- **Appending could be automated.** A CI step could push an occurrence line on
+  failure using the built-in `GITHUB_TOKEN` with `contents: write` — no PAT
+  needed, since this is the same repository. Not built; noted because it is the
+  obvious next step if the manual discipline slips.

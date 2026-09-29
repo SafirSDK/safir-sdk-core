@@ -10,6 +10,30 @@ Where the text below says a flake is "catalogued below" or names "the table", th
 per-test counts it means now live in `LEDGER.md` — as an append-only log of
 occurrences, plus the historical aggregate counts as they stood when this moved.
 
+References to `AGENTS.md` and to source paths point at the code, which is not on
+this branch. Read them with `git show origin/develop:AGENTS.md` or on `develop` in
+the usual way.
+
+## Contents
+
+- [Policy: defer flakiness unless it's ours](#policy-defer-flakiness-unless-its-ours)
+- [Where flakiness is tracked: here, not in GitHub issues](#where-flakiness-is-tracked-here-not-in-github-issues)
+- [How CI signals a failure](#how-ci-signals-a-failure)
+  - [The Debug jobs opt out of all of that — and this may need softening](#the-debug-jobs-opt-out-of-all-of-that--and-this-may-need-softening)
+- [Where the counts stood when this moved](#where-the-counts-stood-when-this-moved)
+  - [Job-level / infra flakes (red job, not a test-case failure)](#job-level--infra-flakes-red-job-not-a-test-case-failure)
+  - [`run_restart_nodes_tests` hang (slow suite → TIMEOUT → red job)](#run_restart_nodes_tests-hang-slow-suite--timeout--red-job)
+  - [`run_light_nodes_smart_sync_tests` hang (Debug slow suite → TIMEOUT → red job)](#run_light_nodes_smart_sync_tests-hang-debug-slow-suite--timeout--red-job)
+  - [`215-huge_service` (+ the huge-message family)](#215-huge_service--the-huge-message-family)
+- [Errors reported through `syslog_output` and `safir_control.0.returncode`](#errors-reported-through-syslog_output-and-safir_control0returncode)
+  - [What has actually been reported this way](#what-has-actually-been-reported-this-way)
+  - [The #132 incident in full (overload → exclusion → node death)](#the-132-incident-in-full-overload--exclusion--node-death)
+- [Waiting instead of sleeping](#waiting-instead-of-sleeping)
+  - [The two pending-registration conversions (`155`, `353`), 2026-08-28](#the-two-pending-registration-conversions-155-353-2026-08-28)
+- [Fixed / dormant](#fixed--dormant)
+  - [`Communication_ResetTest` — FIXED 2026-06-30 (was Windows-only)](#communication_resettest--fixed-2026-06-30-was-windows-only)
+  - [`361-inject_update_and_delete_for_existing_entity` — dormant, race narrowed 2026-08-27](#361-inject_update_and_delete_for_existing_entity--dormant-race-narrowed-2026-08-27)
+
 ## Policy: defer flakiness unless it's ours
 
 **A single red CI run is usually a known flake, not your change.** The tests below
@@ -120,13 +144,21 @@ was **fixed on 2026-08-27**, so those counts are the historical record rather th
 a prediction. Until several full-matrix runs have gone by without it, treat its
 absence as unconfirmed rather than proven.
 
-**Clean full-matrix runs since the fix: 2** — runs 33163796206 and 33225373571
-(2026-08-28 and 2026-08-29), each 59 of 60 jobs green with one skipped, all 30
-dose legs and all 8 multicomputer legs included. Increment this when you see
-another; it is the only evidence that will turn "believed fixed" into "fixed".
-Two is still thin: at the historical 23-in-89 rate, two consecutive clean runs
-happen a bit better than half the time by chance alone. Somewhere around five
-starts being hard to explain away.
+**Is it actually fixed?** The durable form of that question is a ledger query, not
+a counter somebody has to remember to increment:
+
+    grep 215-huge_service LEDGER.md | awk '$1 > "2026-08-27"'
+
+Empty means it has not recurred since the fix. Known clean full-matrix runs since
+then: 33163796206 and 33225373571 (2026-08-28, 2026-08-29, each 59 of 60 jobs
+green with one skipped) and 36455996147 (2026-09-28, 64 jobs, 63 green, no
+failures) — all with the 30 dose legs and 8 multicomputer legs included.
+
+The statistical caveat still stands: at the historical 23-in-89 rate, three
+consecutive clean runs happen by chance perhaps a third of the time. Somewhere
+around five starts being hard to explain away. Note that this list was written as
+"increment this when you see another" and had already fallen a run behind within a
+month — which is the argument for deriving it from the ledger instead.
 
 `Communication_ResetTest` used to head the counts; it was **fixed on 2026-06-30**
 and is no longer flaky — see "Fixed / dormant" below before you re-diagnose it.
