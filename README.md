@@ -37,6 +37,31 @@ merge this branch with any other, and a careless merge cannot wipe the source
 tree. If a comparison view tells you these branches have "entirely different
 commit histories", that is working as intended.
 
+## Evidence
+
+`evidence/<date>-<run>-<short-name>/` holds what is worth keeping from an
+occurrence, because **GitHub deletes run logs and artifacts after 90 days.** That
+is measured, not assumed: on 2026-09-29 a run from 2026-06-25 reported zero
+artifacts and returned a server error for its logs, while a run from 2026-08-18
+still had artifacts, expiring 2026-11-16. So a ledger line older than three months
+points at a run that still exists and tells you nothing.
+
+Keep a bundle when an occurrence was actually investigated, or when it is the first
+of something. A bundle should have a `README.md` with the run id, job id, commit
+sha, platform and symptom, and then only the decisive material:
+
+- the junit for the failing case, if one exists;
+- the *relevant excerpt* of the job log, not the whole thing;
+- anything else that made the diagnosis, compressed if it is large.
+
+**Keep bundles small — tens of KB.** This is the same repository as the source
+code, so every object here is in every clone of safir-sdk-core, forever, for
+everyone. A few hundred KB per occurrence is affordable; a 50 MB log tarball is
+not, and git will never forget it. If the decisive evidence really is huge, keep
+the excerpt and record in the bundle README where the full thing was. Should the
+evidence ever outgrow that discipline, the escape hatch is to move `evidence/`
+into a repository of its own — the ledger format would not change, only the path.
+
 ## Reading it
 
 Without checking anything out, from a normal clone:

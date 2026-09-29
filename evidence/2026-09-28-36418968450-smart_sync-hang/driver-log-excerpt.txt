@@ -1,0 +1,287 @@
+2026-09-28T13:33:24.448295 :  Terminating safir_control with pid 8278
+2026-09-28T13:33:24.648633 :    Terminate successful
+2026-09-28T13:33:25.148847 : waiting for safir_web to die
+2026-09-28T13:33:25.649211 : Test run_light_nodes_keep_state_tests.two_normal_two_light_detach_reattach_light success: True
+2026-09-28T13:33:25.649250 : --- Finished: two_normal_two_light_detach_reattach_light ---
+2026-09-28T13:33:25.650614 : Wrote junit report /home/runner/work/safir-sdk-core/safir-sdk-core/slow_test_junit/run_light_nodes_keep_state_tests/run_light_nodes_keep_state_tests.junit.xml (4 cases, 0 failed)
+2026-09-28T13:33:25.704594 : ======================================================================
+2026-09-28T13:33:25.704641 : Running slow test: run_light_nodes_smart_sync_tests (timeout 1200 s)
+2026-09-28T13:33:25.704651 : ======================================================================
+2026-09-28T13:33:25.799217 : === Start: lightnode_switch_to_new_system ===
+2026-09-28T13:33:25.799243 : logdir: /home/runner/work/safir-sdk-core/safir-sdk-core/test_output/smart_sync/lightnode_switch_to_new_system
+2026-09-28T13:33:25.799278 : --- Launching node 9
+2026-09-28T13:33:25.800097 : Launched safir_control as pid 8575.
+2026-09-28T13:33:25.800674 : Launched dope_main as pid 8577.
+2026-09-28T13:33:25.800912 : Waiting for safir_control 8575 to be ready
+2026-09-28T13:33:36.007684 :  dose_main seems to be ready
+2026-09-28T13:33:36.008360 : Launched safir_web as pid 8636.
+2026-09-28T13:33:36.034262 : --- Node 9 is connected to the DOB
+2026-09-28T13:33:46.016879 : --- Node 9 is synced OK!
+2026-09-28T13:33:46.167939 : --- Launching node 1
+2026-09-28T13:33:46.168755 : Launched safir_control as pid 8647.
+2026-09-28T13:33:46.169346 : Launched dope_main as pid 8650.
+2026-09-28T13:33:46.173202 : Waiting for safir_control 8647 to be ready
+2026-09-28T13:33:56.379491 :  dose_main seems to be ready
+2026-09-28T13:33:56.380232 : Launched safir_web as pid 8709.
+2026-09-28T13:33:56.380543 : --- Launching node 5
+2026-09-28T13:33:56.381237 : Launched safir_control as pid 8711.
+2026-09-28T13:33:56.383145 : Launched safir_web as pid 8713.
+2026-09-28T13:34:01.391310 : --- Node 1 is connected to the DOB
+2026-09-28T13:34:06.384886 : --- Node 1 is synced OK!
+2026-09-28T13:34:26.693697 : --- Extended wait for PD to finish, wait time 40 sec, node_9
+2026-09-28T13:34:36.694332 : --- Node 9 is synced OK!
+2026-09-28T13:34:36.694373 : --- kill node5
+2026-09-28T13:34:36.694384 : Terminating all processes
+2026-09-28T13:34:36.694392 :  Terminating safir_control with pid 8711
+2026-09-28T13:34:36.894685 :    Terminate successful
+2026-09-28T13:34:37.394833 : waiting for safir_web to die
+2026-09-28T13:34:37.394946 : --- kill node1
+2026-09-28T13:34:37.394962 : Terminating all processes
+2026-09-28T13:34:37.394974 :  Terminating safir_control with pid 8647
+2026-09-28T13:34:37.595274 :    Terminate successful
+2026-09-28T13:34:38.095447 : waiting for safir_web to die
+2026-09-28T13:34:38.596612 : --- kill node9
+2026-09-28T13:34:38.596653 : Terminating all processes
+2026-09-28T13:34:38.596660 :  Terminating safir_control with pid 8575
+2026-09-28T13:34:38.897202 :    Terminate successful
+2026-09-28T13:34:39.397425 : waiting for safir_web to die
+2026-09-28T13:34:39.397553 : Test run_light_nodes_smart_sync_tests.lightnode_switch_to_new_system success: True
+2026-09-28T13:34:39.397567 : --- Finished: lightnode_switch_to_new_system ---
+2026-09-28T13:34:39.397853 : === Start: two_normal_one_light_detach_reattach_light ===
+2026-09-28T13:34:39.397880 : logdir: /home/runner/work/safir-sdk-core/safir-sdk-core/test_output/smart_sync/two_normal_one_light_detach_reattach_light
+2026-09-28T13:34:39.397942 : --- Launching node 1
+2026-09-28T13:34:39.398950 : Launched safir_control as pid 8789.
+2026-09-28T13:34:39.399492 : Launched dope_main as pid 8791.
+2026-09-28T13:34:39.403246 : Waiting for safir_control 8789 to be ready
+2026-09-28T13:34:49.609925 :  dose_main seems to be ready
+2026-09-28T13:34:49.610650 : Launched safir_web as pid 8850.
+2026-09-28T13:34:49.610939 : --- Launching node 2
+2026-09-28T13:34:49.611681 : Launched safir_control as pid 8852.
+2026-09-28T13:34:49.611853 : Waiting for safir_control 8852 to be ready
+2026-09-28T13:34:51.813145 :  dose_main seems to be ready
+2026-09-28T13:34:51.813839 : Launched safir_web as pid 8914.
+2026-09-28T13:34:51.814114 : --- Launching node 5
+2026-09-28T13:34:51.814782 : Launched safir_control as pid 8916.
+2026-09-28T13:34:51.815453 : Launched safir_web as pid 8918.
+2026-09-28T13:34:51.823903 : --- Node 1 is connected to the DOB
+2026-09-28T13:34:56.824409 : --- Node 2 is connected to the DOB
+2026-09-28T13:34:56.824911 : --- Node 5 is connected to the DOB
+2026-09-28T13:34:59.822555 : Node state received after 3 seconds
+2026-09-28T13:34:59.822598 : --- node5 is now attached
+2026-09-28T13:34:59.822631 : --- Node 1 is synced OK!
+2026-09-28T13:34:59.822652 : --- Node 2 is synced OK!
+2026-09-28T13:34:59.822668 : --- Node 5 is synced OK!
+2026-09-28T13:34:59.822676 : ---------- set_network_state=down -----------
+2026-09-28T13:35:05.977215 : Node state received after 6 seconds
+2026-09-28T13:35:05.977260 : --- node5 is now detached
+2026-09-28T13:35:10.980366 : --- Node 1 is synced OK!
+2026-09-28T13:35:10.980418 : --- Node 2 is synced OK!
+2026-09-28T13:35:10.980438 : --- Node 5 is synced OK!
+2026-09-28T13:35:10.980448 : ---------- set_network_state=up -----------
+2026-09-28T13:35:29.145546 : Node state received after 18 seconds
+2026-09-28T13:35:29.145584 : --- node5 is now attached again
+2026-09-28T13:35:34.148339 : --- Node 1 is synced OK!
+2026-09-28T13:35:34.148386 : --- Node 2 is synced OK!
+2026-09-28T13:35:34.148400 : --- Node 5 is synced OK!
+2026-09-28T13:35:34.149493 : --- kill node5
+2026-09-28T13:35:34.149517 : Terminating all processes
+2026-09-28T13:35:34.149528 :  Terminating safir_control with pid 8916
+2026-09-28T13:35:34.449890 :    Terminate successful
+2026-09-28T13:35:34.950032 : waiting for safir_web to die
+2026-09-28T13:35:34.950169 : --- kill node2
+2026-09-28T13:35:34.950188 : Terminating all processes
+2026-09-28T13:35:34.950199 :  Terminating safir_control with pid 8852
+2026-09-28T13:35:35.150417 :    Terminate successful
+2026-09-28T13:35:35.650545 : waiting for safir_web to die
+2026-09-28T13:35:35.650636 : --- kill node1
+2026-09-28T13:35:35.650643 : Terminating all processes
+2026-09-28T13:35:35.650650 :  Terminating safir_control with pid 8789
+2026-09-28T13:35:35.850967 :    Terminate successful
+2026-09-28T13:35:36.351207 : waiting for safir_web to die
+2026-09-28T13:35:36.852530 : Test run_light_nodes_smart_sync_tests.two_normal_one_light_detach_reattach_light success: True
+2026-09-28T13:35:36.852586 : --- Finished: two_normal_one_light_detach_reattach_light ---
+2026-09-28T13:35:36.852839 : === Start: two_normal_one_light_kill_one_normal_while_light_is_detached ===
+2026-09-28T13:35:36.852862 : logdir: /home/runner/work/safir-sdk-core/safir-sdk-core/test_output/smart_sync/two_normal_one_light_kill_one_normal_while_light_is_detached
+2026-09-28T13:35:36.852920 : --- Launching node 1
+2026-09-28T13:35:36.853699 : Launched safir_control as pid 9012.
+2026-09-28T13:35:36.854203 : Launched dope_main as pid 9014.
+2026-09-28T13:35:36.857580 : Waiting for safir_control 9012 to be ready
+2026-09-28T13:35:47.064113 :  dose_main seems to be ready
+2026-09-28T13:35:47.064749 : Launched safir_web as pid 9073.
+2026-09-28T13:35:47.065146 : --- Launching node 2
+2026-09-28T13:35:47.065783 : Launched safir_control as pid 9075.
+2026-09-28T13:35:47.065954 : Waiting for safir_control 9075 to be ready
+2026-09-28T13:35:49.467349 :  dose_main seems to be ready
+2026-09-28T13:35:49.467994 : Launched safir_web as pid 9138.
+2026-09-28T13:35:49.468326 : --- Launching node 5
+2026-09-28T13:35:49.468961 : Launched safir_control as pid 9140.
+2026-09-28T13:35:49.469598 : Launched safir_web as pid 9142.
+2026-09-28T13:35:49.475355 : --- Node 1 is connected to the DOB
+2026-09-28T13:35:54.476378 : --- Node 5 is connected to the DOB
+2026-09-28T13:35:54.476740 : --- Node 2 is connected to the DOB
+2026-09-28T13:35:57.474778 : Node state received after 3 seconds
+2026-09-28T13:35:57.474816 : --- node5 is now attached
+2026-09-28T13:35:57.474838 : --- Node 1 is synced OK!
+2026-09-28T13:35:57.474851 : --- Node 2 is synced OK!
+2026-09-28T13:35:57.474868 : --- Node 5 is synced OK!
+2026-09-28T13:35:57.474879 : ---------- set_network_state=down -----------
+2026-09-28T13:36:03.630156 : Node state received after 6 seconds
+2026-09-28T13:36:03.630192 : --- node5 is now detached
+2026-09-28T13:36:08.636121 : --- Node 1 is synced OK!
+2026-09-28T13:36:08.636182 : --- Node 2 is synced OK!
+2026-09-28T13:36:08.636197 : --- Node 5 is synced OK!
+2026-09-28T13:36:08.636202 : ---------- kill node 2 -----------
+2026-09-28T13:36:08.636209 : Terminating all processes
+2026-09-28T13:36:08.636221 :  Terminating safir_control with pid 9075
+2026-09-28T13:36:08.836453 :    Terminate successful
+2026-09-28T13:36:09.336584 : waiting for safir_web to die
+2026-09-28T13:36:24.349481 : --- Node 1 is synced OK!
+2026-09-28T13:36:24.349526 : --- Node 5 is synced OK!
+2026-09-28T13:36:24.349533 : ---------- set_network_state=up -----------
+2026-09-28T13:36:27.502230 : Node state received after 3 seconds
+2026-09-28T13:36:27.502268 : --- node5 is now attached again
+2026-09-28T13:36:32.505818 : --- Node 1 is synced OK!
+2026-09-28T13:36:32.505854 : --- Node 5 is synced OK!
+2026-09-28T13:36:32.507071 : --- kill node5
+2026-09-28T13:36:32.507166 : Terminating all processes
+2026-09-28T13:36:32.507183 :  Terminating safir_control with pid 9140
+2026-09-28T13:36:32.707402 :    Terminate successful
+2026-09-28T13:36:33.207523 : waiting for safir_web to die
+2026-09-28T13:36:33.207596 : --- kill node2
+2026-09-28T13:36:33.207606 : Terminating all processes
+2026-09-28T13:36:33.207613 :  Terminating safir_control with pid 9075
+2026-09-28T13:36:33.207623 :    Terminate successful
+2026-09-28T13:36:33.207643 : --- kill node1
+2026-09-28T13:36:33.207654 : Terminating all processes
+2026-09-28T13:36:33.207666 :  Terminating safir_control with pid 9012
+2026-09-28T13:36:33.508010 :    Terminate successful
+2026-09-28T13:36:34.008179 : waiting for safir_web to die
+2026-09-28T13:36:34.509516 : Test run_light_nodes_smart_sync_tests.two_normal_one_light_kill_one_normal_while_light_is_detached success: True
+2026-09-28T13:36:34.509563 : --- Finished: two_normal_one_light_kill_one_normal_while_light_is_detached ---
+2026-09-28T13:36:34.509843 : === Start: one_normal_two_light_detach_reattach_one_light_big_pool ===
+2026-09-28T13:36:34.509865 : logdir: /home/runner/work/safir-sdk-core/safir-sdk-core/test_output/smart_sync/one_normal_two_light_detach_reattach_one_light_big_pool
+2026-09-28T13:36:34.509921 : --- Launching node 1
+2026-09-28T13:36:34.511026 : Launched safir_control as pid 9226.
+2026-09-28T13:36:34.511516 : Launched dope_main as pid 9228.
+2026-09-28T13:36:34.515212 : Waiting for safir_control 9226 to be ready
+2026-09-28T13:36:44.721171 :  dose_main seems to be ready
+2026-09-28T13:36:44.721773 : Launched safir_web as pid 9291.
+2026-09-28T13:36:44.722039 : --- Launching node 5
+2026-09-28T13:36:44.722712 : Launched safir_control as pid 9293.
+2026-09-28T13:36:44.723365 : Launched safir_web as pid 9295.
+2026-09-28T13:36:44.725181 : --- Launching node 6
+2026-09-28T13:36:44.725738 : Launched safir_control as pid 9297.
+2026-09-28T13:36:44.726481 : Launched safir_web as pid 9299.
+Task was destroyed but it is pending!
+task: <Task pending name='Task-11' coro=<SafirApp._run() running at /usr/bin/run_light_nodes_smart_sync_tests:245> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-6' coro=<SafirApp._run() running at /usr/bin/run_light_nodes_smart_sync_tests:245> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-25' coro=<SafirApp._run() running at /usr/bin/run_light_nodes_smart_sync_tests:245> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+2026-09-28T13:36:44.781302 : --- Node 1 is connected to the DOB
+2026-09-28T13:36:49.785257 : --- Node 5 is connected to the DOB
+2026-09-28T13:36:49.785590 : --- Node 6 is connected to the DOB
+2026-09-28T13:36:52.778811 : Node state received after 3 seconds
+2026-09-28T13:36:55.779133 : Node state received after 6 seconds
+2026-09-28T13:36:55.779255 : --- node5 and node6 are now attached
+2026-09-28T13:37:15.784392 : --- Node 1 is synced OK!
+2026-09-28T13:37:15.785795 : --- Node 5 is synced OK!
+2026-09-28T13:37:15.786876 : --- Node 6 is synced OK!
+2026-09-28T13:37:15.786908 : ---------- set_network_state=down for node5 -----------
+2026-09-28T13:37:23.942086 : Node state received after 3 seconds
+2026-09-28T13:37:23.942154 : --- node5 is now detached
+2026-09-28T13:37:23.943954 : --- Node 1 is synced OK!
+2026-09-28T13:37:23.945175 : --- Node 5 is synced OK!
+2026-09-28T13:37:23.946154 : --- Node 6 is synced OK!
+2026-09-28T13:37:33.956181 : --- Node 1 is synced OK!
+2026-09-28T13:37:33.957655 : --- Node 5 is synced OK!
+2026-09-28T13:37:33.958781 : --- Node 6 is synced OK!
+2026-09-28T13:37:33.958815 : ---------- set_network_state=up for node5 -----------
+2026-09-28T13:37:52.122824 : Node state received after 18 seconds
+2026-09-28T13:37:52.122869 : --- node5 is now attached again
+2026-09-28T13:37:52.124353 : --- Node 1 is synced OK!
+2026-09-28T13:37:52.125569 : --- Node 5 is synced OK!
+2026-09-28T13:37:52.126571 : --- Node 6 is synced OK!
+2026-09-28T13:37:52.127941 : --- kill node6
+2026-09-28T13:37:52.127963 : Terminating all processes
+2026-09-28T13:37:52.127974 :  Terminating safir_control with pid 9297
+2026-09-28T13:37:59.436950 :    Terminate successful
+2026-09-28T13:37:59.437028 : --- kill node5
+2026-09-28T13:37:59.437040 : Terminating all processes
+2026-09-28T13:37:59.437050 :  Terminating safir_control with pid 9293
+2026-09-28T13:38:06.243786 :    Terminate successful
+2026-09-28T13:38:06.243861 : --- kill node1
+2026-09-28T13:38:06.243873 : Terminating all processes
+2026-09-28T13:38:06.243883 :  Terminating safir_control with pid 9226
+2026-09-28T13:38:08.446390 :    Terminate successful
+2026-09-28T13:38:08.946734 : Test run_light_nodes_smart_sync_tests.one_normal_two_light_detach_reattach_one_light_big_pool success: True
+2026-09-28T13:38:08.946775 : --- Finished: one_normal_two_light_detach_reattach_one_light_big_pool ---
+2026-09-28T13:38:08.949012 : === Start: one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications ===
+2026-09-28T13:38:08.949029 : logdir: /home/runner/work/safir-sdk-core/safir-sdk-core/test_output/smart_sync/one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications
+2026-09-28T13:38:08.949066 : --- Launching node 1
+2026-09-28T13:38:08.949851 : Launched safir_control as pid 9441.
+2026-09-28T13:38:08.950341 : Launched dope_main as pid 9443.
+2026-09-28T13:38:08.953584 : Waiting for safir_control 9441 to be ready
+2026-09-28T13:38:19.159448 :  dose_main seems to be ready
+2026-09-28T13:38:19.160004 : Launched safir_web as pid 9502.
+2026-09-28T13:38:19.160249 : --- Launching node 5
+2026-09-28T13:38:19.160841 : Launched safir_control as pid 9504.
+2026-09-28T13:38:19.161483 : Launched safir_web as pid 9506.
+2026-09-28T13:38:24.169540 : --- Node 1 is connected to the DOB
+2026-09-28T13:39:09.194087 : *** Failed to connect, Exception! uri= ws://localhost:16675
+2026-09-28T13:39:09.194164 : Multiple exceptions: [Errno 111] Connect call failed ('::1', 16675, 0, 0), [Errno 111] Connect call failed ('127.0.0.1', 16675)
+2026-09-28T13:48:24.619868 : *** wait_for_node_state timed out, dump pool
+2026-09-28T13:48:24.619911 : === Node: 5, safir_instance: 5 ===
+2026-09-28T13:48:24.619917 :   Registrations:
+2026-09-28T13:48:24.619926 :   Entities:
+2026-09-28T13:48:24.619932 : --------------
+2026-09-28T13:48:24.619954 : --- kill node5
+2026-09-28T13:48:24.619963 : Terminating all processes
+2026-09-28T13:48:24.619971 :  Terminating safir_control with pid 9504
+2026-09-28T13:53:25.713711 : *** 'run_light_nodes_smart_sync_tests' TIMED OUT after 1200.0 s (limit 1200 s) and was killed.
+2026-09-28T13:53:25.713767 : ======================================================================
+2026-09-28T13:53:25.713779 : Running slow test: run_restart_nodes_tests (timeout 1800 s)
+2026-09-28T13:53:25.713786 : ======================================================================
+2026-09-28T13:53:25.755728 : ============================================================
+2026-09-28T13:53:25.755749 : Running test case 'entity_updates_only'
+2026-09-28T13:53:25.755755 : ============================================================
+2026-09-28T13:53:25.755764 : Launching node 0
+2026-09-28T13:53:25.756400 : Launched safir_control as pid 9716.
+2026-09-28T13:53:25.756916 : Launched dope_main as pid 9718.
+2026-09-28T13:53:25.760019 : Waiting for safir_control 9716 to be ready
+2026-09-28T13:53:31.964622 :  dose_main seems to be ready
+2026-09-28T13:53:31.965423 : Launched WaitingStatesOwner_0 as pid 9772.
+2026-09-28T13:53:31.965853 : This system has incarnation -5618449875705007133
+2026-09-28T13:53:31.965881 : Launching node 1
+2026-09-28T13:53:31.966519 : Launched safir_control as pid 9774.
+2026-09-28T13:53:31.969450 : Launching node 2
+2026-09-28T13:53:31.970044 : Launched safir_control as pid 9777.
+2026-09-28T13:53:31.972949 : Launching node 3
+2026-09-28T13:53:31.975302 : Launched safir_control as pid 9780.
+2026-09-28T13:53:31.983861 : Launching node 4
+2026-09-28T14:14:35.839499 : ============================================================
+2026-09-28T14:14:35.839513 : *** SUCCESS: all communication test suites passed
+2026-09-28T14:14:35.896173 : ======================================================================
+2026-09-28T14:14:35.896197 : Slow test suite summary
+2026-09-28T14:14:35.896204 : ======================================================================
+2026-09-28T14:14:35.896221 :   run_system_picture_component_tests   OK      2326.8 s
+2026-09-28T14:14:35.896229 :   run_incarnation_and_control_tests    OK        53.6 s
+2026-09-28T14:14:35.896236 :   run_light_nodes_clear_state_tests    OK       351.1 s
+2026-09-28T14:14:35.896242 :   run_light_nodes_keep_state_tests     OK       303.0 s
+2026-09-28T14:14:35.896248 :   run_light_nodes_smart_sync_tests     TIMEOUT 1200.0 s
+2026-09-28T14:14:35.896254 :   run_restart_nodes_tests              OK       813.8 s
+2026-09-28T14:14:35.896259 :   run_lowmem_basic_operations_tests    OK        78.8 s
+2026-09-28T14:14:35.896273 :   run_dope_none_backend_test           OK        24.2 s
+2026-09-28T14:14:35.896284 :   run_dope_file_backend_test           OK        78.8 s
+2026-09-28T14:14:35.896296 :   run_tracer_backdoor_tests            OK       109.7 s
+2026-09-28T14:14:35.896306 :   run_election_handler_tests           OK        52.4 s
+2026-09-28T14:14:35.896317 :   run_communication_tests              OK       112.4 s
+2026-09-28T14:14:35.896352 : ======================================================================
+2026-09-28T14:14:35.896363 : JUnit reports written under /home/runner/work/safir-sdk-core/safir-sdk-core/slow_test_junit
+2026-09-28T14:14:35.896380 : *** ERROR: 1 of 12 slow test driver(s) failed to run: run_light_nodes_smart_sync_tests
+2026-09-28T14:14:35.907429 : Error: Slow test suite failed to run. Returncode = 2
+2026-09-28T14:14:36.086035 : Uninstalling packages: 
+2026-09-28T14:14:36.262841 :   safir-sdk-core
+2026-09-28T14:14:36.438450 :   safir-sdk-core-tools
+2026-09-28T14:14:36.802856 :   safir-sdk-core-testsuite
+[0;39;49m

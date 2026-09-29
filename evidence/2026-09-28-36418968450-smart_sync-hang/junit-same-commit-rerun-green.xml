@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<testsuite name="run_light_nodes_smart_sync_tests" tests="6" failures="0" time="402.439">
+  <testcase name="lightnode_switch_to_new_system" classname="run_light_nodes_smart_sync_tests" time="73.194"/>
+  <testcase name="two_normal_one_light_detach_reattach_light" classname="run_light_nodes_smart_sync_tests" time="61.155"/>
+  <testcase name="two_normal_one_light_kill_one_normal_while_light_is_detached" classname="run_light_nodes_smart_sync_tests" time="58.058"/>
+  <testcase name="one_normal_two_light_detach_reattach_one_light_big_pool" classname="run_light_nodes_smart_sync_tests" time="86.212"/>
+  <testcase name="one_normal_one_light_ensure_only_valid_requests_and_no_unnecessary_notifications" classname="run_light_nodes_smart_sync_tests" time="56.260"/>
+  <testcase name="lightnode_attaches_to_new_system_after_detached" classname="run_light_nodes_smart_sync_tests" time="67.560"/>
+</testsuite>
