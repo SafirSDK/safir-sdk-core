@@ -47,8 +47,10 @@ Without checking anything out, from a normal clone:
 
 Or through the API, which is convenient for tooling:
 
-    gh api repos/SafirSDK/safir-sdk-core/contents/LEDGER.md?ref=test-status \
+    gh api "repos/SafirSDK/safir-sdk-core/contents/LEDGER.md?ref=test-status" \
       --jq .content | base64 -d
+
+Quote the URL — an unquoted `?` is a glob character in zsh and the call fails.
 
 ## Appending to it
 
