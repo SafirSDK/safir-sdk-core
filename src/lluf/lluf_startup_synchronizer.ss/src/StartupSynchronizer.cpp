@@ -156,6 +156,21 @@ namespace
      * notices the latency, rare enough that a long legitimate wait costs nothing. */
     const std::chrono::milliseconds LockPollInterval(20);
 
+    /** How many times we retry a marker file operation before giving up.
+     *
+     * Unlike the users lock wait above, there is nothing legitimate that can make
+     * a plain file create or delete take any length of time, so a handful of
+     * attempts is enough. This exists purely to ride out the kind of
+     * fraction-of-a-second interference that antivirus, backup and indexing
+     * software are known to cause on Windows by briefly holding an incompatible
+     * handle open on a file we are touching. Boost.Interprocess uses the same
+     * shape of retry - 3 attempts, 250ms apart - for exactly this reason when it
+     * opens our two lock files, which is where these numbers come from. */
+    const int MaxMarkerAttempts = 3;
+
+    /** How long to wait between attempts at a marker file operation. */
+    const std::chrono::milliseconds MarkerRetryInterval(250);
+
     /** Suffixes of the three files.
      *
      * The two lock file names are historical and deliberately left alone: they
@@ -311,6 +326,29 @@ namespace
         MakeFileShared(path);
 
         return path;
+    }
+
+    /**
+     * Retry an operation a few times before giving up, to tolerate the kind of
+     * fraction-of-a-second interference described at MaxMarkerAttempts above.
+     * `attempt` must be safe to call more than once, and returns whether it
+     * succeeded.
+     */
+    template <class Operation>
+    bool RetryOnFailure(Operation attempt)
+    {
+        for (int i = 0; i < MaxMarkerAttempts; ++i)
+        {
+            if (attempt())
+            {
+                return true;
+            }
+            if (i + 1 < MaxMarkerAttempts)
+            {
+                std::this_thread::sleep_for(MarkerRetryInterval);
+            }
+        }
+        return false;
     }
 }
 
@@ -714,9 +752,18 @@ namespace Utilities
 
                         //Marker first: if we are killed inside Destroy(), the
                         //next process along has to create a fresh generation
-                        //rather than start using a half destroyed one.
-                        RemoveMarker();
-                        synchronized->Destroy();
+                        //rather than start using a half destroyed one. And if the
+                        //marker could not actually be removed - Windows antivirus
+                        //and backup software are known to hold a file briefly and
+                        //unpredictably - we must not destroy the resource while
+                        //something on disk still claims it exists: that is exactly
+                        //what would let a later process use what we just tore
+                        //down. Leaving it alone is no worse than losing the race
+                        //above, which is already a normal outcome.
+                        if (RemoveMarker())
+                        {
+                            synchronized->Destroy();
+                        }
                     }
                 }
             }
@@ -748,25 +795,47 @@ namespace Utilities
             return boost::filesystem::exists(m_markerFilePath);
         }
 
+        /**
+         * Create the marker, retrying a few times first. There is no safe way to
+         * give up gracefully here: Create() has already run and the resource
+         * genuinely exists, so failing to record that would make the next process
+         * along create it a second time. See MaxMarkerAttempts for why retrying is
+         * believed to be enough in practice.
+         */
         void CreateMarker()
         {
+            const bool created = RetryOnFailure([this]
             {
                 boost::filesystem::ofstream file(m_markerFilePath, std::ios::out | std::ios::trunc);
-                if (!file.good())
-                {
-                    std::ostringstream ostr;
-                    ostr << "Failed to create the marker file '" << m_markerFilePath.string()
-                         << "' for the shared resource '" << m_name << "'." << std::endl;
-                    throw std::logic_error(ostr.str());
-                }
+                return file.good();
+            });
+
+            if (!created)
+            {
+                std::ostringstream ostr;
+                ostr << "Failed to create the marker file '" << m_markerFilePath.string()
+                     << "' for the shared resource '" << m_name << "'." << std::endl;
+                throw std::logic_error(ostr.str());
             }
+
             MakeFileShared(m_markerFilePath);
         }
 
-        void RemoveMarker() noexcept
+        /**
+         * Remove the marker, retrying a few times first, and say whether it is
+         * actually gone. Unlike CreateMarker, a failure here does have a safe
+         * fallback: the caller must not proceed to destroy the resource while the
+         * marker still claims it exists, since that is exactly what would let a
+         * later process use something that is no longer there.
+         */
+        bool RemoveMarker() noexcept
         {
-            boost::system::error_code ec;
-            boost::filesystem::remove(m_markerFilePath, ec);
+            return RetryOnFailure([this]
+            {
+                boost::system::error_code ec;
+                boost::filesystem::remove(m_markerFilePath, ec);
+                return !MarkerExists();
+            });
         }
 
         std::mutex m_threadLock;

@@ -387,6 +387,59 @@ BOOST_AUTO_TEST_CASE(a_stale_marker_from_a_killed_generation_is_replaced)
     BOOST_CHECK_EQUAL(resource.Violations(), "");
 }
 
+BOOST_AUTO_TEST_CASE(a_marker_that_cannot_be_removed_leaves_the_resource_alone)
+{
+    //RemoveMarker used to be void and noexcept, discarding whatever remove()
+    //told it. A failed removal - which Windows antivirus or backup software can
+    //cause by briefly holding the file open - still let Release go on to call
+    //Destroy, leaving a marker on disk that falsely claimed an already destroyed
+    //resource was still valid.
+    //
+    //Replacing the marker file with a non-empty directory makes remove() fail
+    //for a structural reason (the directory is not empty) rather than a
+    //permissions one, so this works the same whether the test runs as root or
+    //not.
+    Resource resource("SS_UNIT_marker_wont_remove");
+    Instance instance(resource);
+
+    {
+        StartupSynchronizer ss(resource.Name().c_str());
+        ss.Start(&instance);
+        BOOST_REQUIRE(Exists(resource.Name(), CreatedMarkerSuffix));
+
+        const boost::filesystem::path markerPath = FilePath(resource.Name(), CreatedMarkerSuffix);
+        boost::filesystem::remove(markerPath);
+        boost::filesystem::create_directory(markerPath);
+        {
+            boost::filesystem::ofstream blocker(markerPath / "in_the_way");
+            BOOST_REQUIRE(blocker.good());
+        }
+
+        //ss goes out of scope here, which runs Release(). RemoveMarker has to
+        //fail - the directory is not empty - and Destroy must not run.
+    }
+
+    BOOST_CHECK_EQUAL(resource.Destroys(), 0);
+    BOOST_CHECK(resource.Alive());
+    BOOST_CHECK(Exists(resource.Name(), CreatedMarkerSuffix));
+    BOOST_CHECK_EQUAL(resource.Violations(), "");
+
+    //Clean up the obstruction and check that the protocol recovers: the next
+    //instance has to remove the now-empty-again marker and create a fresh
+    //generation, exactly as it would after a generation that was killed rather
+    //than shut down.
+    boost::filesystem::remove_all(FilePath(resource.Name(), CreatedMarkerSuffix));
+
+    Instance recovered(resource);
+    StartupSynchronizer ss(resource.Name().c_str());
+    ss.Start(&recovered);
+
+    BOOST_CHECK_EQUAL(resource.Creates(), 2);
+    BOOST_CHECK_EQUAL(resource.Uses(), 2);
+    BOOST_CHECK_EQUAL(resource.Abandoned(), 1);
+    BOOST_CHECK_EQUAL(resource.Violations(), "");
+}
+
 BOOST_AUTO_TEST_CASE(an_exception_from_create_propagates_and_leaves_nothing_behind)
 {
     //This used to abort the process: the failed Start left an internal lock
