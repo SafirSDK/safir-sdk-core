@@ -1,0 +1,25 @@
+=== Server_0 (master runner, local) ===
+MAIN: RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!
+MAIN: dose_main is waiting for persistence data!
+CTRL: Joined system with incarnation id 1686629993719003173
+CTRL: This node has id 999999
+MAIN: dose_main running...
+MAIN: dose_main persistence data is ready!
+
+=== Server_1 (slave container 'server-1', instance 2) ===
+MAIN: RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!
+MAIN: dose_main is waiting for persistence data!
+CTRL: Starting system with incarnation id 1686629993719003173
+CTRL: This node has id 888888
+MAIN: dose_main running...
+MAIN: dose_main persistence data is ready!
+
+=== Client_0 (slave container 'client-0', instance 3) ===
+CTRL: Attached to a new system that we have not seen before. IncarnationId=1686629993719003173
+CTRL: This node has id 77777
+MAIN: dose_main running...
+
+=== Client_1 (slave container 'client-1', instance 4) ===
+MAIN: dose_main running...
+CTRL: Attached to a new system that we have not seen before. IncarnationId=1686629993719003173
+CTRL: This node has id 66666

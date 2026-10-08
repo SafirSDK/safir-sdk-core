@@ -25,6 +25,7 @@ every source path mentioned here live with the code:
   - [Job-level / infra flakes (red job, not a test-case failure)](#job-level--infra-flakes-red-job-not-a-test-case-failure)
   - [`run_restart_nodes_tests` hang (slow suite → TIMEOUT → red job)](#run_restart_nodes_tests-hang-slow-suite--timeout--red-job)
   - [`run_light_nodes_smart_sync_tests` hang (Debug slow suite → TIMEOUT → red job)](#run_light_nodes_smart_sync_tests-hang-debug-slow-suite--timeout--red-job)
+  - [multicomputer sequencer hang, cross-node partners never activate (multicomputer-master/-slaves → TIMEOUT → red job)](#multicomputer-sequencer-hang-cross-node-partners-never-activate-multicomputer-master--slaves--timeout--red-job)
   - [`215-huge_service` (+ the huge-message family)](#215-huge_service--the-huge-message-family)
 - [Errors reported through `syslog_output` and `safir_control.0.returncode`](#errors-reported-through-syslog_output-and-safir_control0returncode)
   - [What has actually been reported this way](#what-has-actually-been-reported-this-way)
@@ -414,6 +415,82 @@ DebugCommandServer, and case 5 uses it four times), so a host without a route fo
 239.0.0.0/8 cannot run it at all — it aborts in the up-front precheck. With that in
 place, `gdb` on the stuck `safir_control` answers in seconds what CI can only hint
 at.
+
+### multicomputer sequencer hang, cross-node partners never activate (multicomputer-master/-slaves → TIMEOUT → red job)
+
+Seen once, run 36916554564 (`private/startup-synchronizer-review`, commit
+`a62ab20dc`), on the `ubuntu-noble-amd64` multicomputer pairing.
+`multicomputer-master-ubuntu-noble-amd64` and its matching
+`multicomputer-slaves-debian` job were both killed at exactly 55:18 elapsed —
+their shared `timeout-minutes: 55` budget, to the second on both sides, since the
+master sends slaves their STOP signal and a slave job only exits once the master
+does. Historically this pairing finishes in **18-20 minutes** (confirmed from two
+prior runs of this exact job on this branch); this run used the entire budget and
+was killed. Full detail, including the exact log lines and source citations behind
+every claim below, is in `evidence/2026-10-01-36916554564-multicomputer-sequencer-hang/`.
+
+**StartupSynchronizer is ruled out, on all four physical nodes, not just the
+master.** Three independent proofs, all in the evidence directory:
+
+- The master's own `temp/safir-sdk-core/lock/` directory, archived by the job
+  before it was killed, has `_FIRST`, `_SECOND` *and* `_CREATED` present for
+  `SAFIR_DOSE_INITIALIZATION`, `SAFIR_DOTS_INITIALIZATION` and `SAFIR_CONTROL_0`.
+- `safir_control.0.output.txt` from **all four nodes** (Server_0, Server_1,
+  Client_0, Client_1) shows `dose_main running...` and the **same incarnation id**
+  (`1686629993719003173`) — the DOB system itself certifying all four found each
+  other and formed one system.
+- Each of the five `dose_test_cpp.N` processes (one per partner, N=0..4, one per
+  physical node) reached `"cpp:N Started"`, which in `Executor`'s constructor
+  (`src/tests/dose_test.ss/cpp/Executor.cpp`) only prints after
+  `m_controlConnection.Open(...)` — a blocking connect to the *local* `dose_main` —
+  has already succeeded. That is only possible if `SAFIR_DOSE_INITIALIZATION` had
+  already completed on that node.
+
+**Where it actually stopped is one layer above all of that.** `"Activating"` only
+prints from `Executor::HandleSequencerState`, fired when a `DoseTest::Sequencer`
+entity arrives over a subscription the constructor already set up — and only if
+the sequencer (running on the master) has listed that partner. Partners 0 and 1
+(colocated with the sequencer on Server_0, so this traffic never leaves shared
+memory) activated within seconds; the master's log shows
+`"Partner 0 is activated!"` / `"Partner 1 is activated!"` and nothing more.
+Partners 2, 3, 4 (Server_1, Client_0, Client_1 — each requiring that traffic cross
+the WireGuard overlay) never printed `"Activating"`, and the master's sequencer
+never printed their activation either. Both directions of cross-node DOB entity
+traffic (partner → master announcing itself, master → partner activating it)
+failed to complete, while everything that stays on one node — DOB system
+formation, persistence, local connections — worked identically on all four. That
+isolates the failure to the distribution layer over the overlay, nothing
+`StartupSynchronizer` touches.
+
+**A concrete, checkable gap in what gets verified before the suite runs.** The
+`wireguard-overlay` action's own "Punch and verify the tunnel" step is deliberate
+about this exact class of problem — its comment reads *"Dob is UDP anyway, so a
+completed handshake is the signal that matters here"* — and gates on the
+WireGuard handshake rather than an ICMP reply precisely because ICMP can round-trip
+while UDP does not. But that check only covers the **transit tunnel** between the
+two runner hosts' `wg0` interfaces (`10.68.1.1` ↔ `10.68.1.2`). For the three slave
+containers specifically there is a *second*, unverified hop: traffic for
+`10.68.0.0/24` has to be forwarded from the slaves runner's `wg0` into the
+`safirnet` docker bridge (the `DOCKER-USER` iptables `ACCEPT` rules and
+`ip_forward=1` set up in "Route the wg tunnel into a docker bridge for the slave
+nodes"). The only check anywhere near that hop is the per-container
+`PROBE [$role]: ICMP to master ... PASS` line — ICMP, not UDP; container→master
+only, not the master→container direction DOB traffic from the sequencer actually
+needs; and a bare ping, not a datagram anywhere near the size that would expose
+the fragmentation risk the slaves job's own comment already names ("a single lost
+fragment drops the whole datagram"). A real UDP round-trip across the full
+path — master → bridge → each container IP, at a size comparable to an actual DOB
+datagram — run once before the suite starts, would turn this class of failure into
+a setup-time error in seconds instead of a 55-minute timeout. Nobody has written
+that check yet.
+
+**Why only this one pairing, and only this once:** the other three multicomputer
+pairings in the same run (`vs2026`, `vs2022`, `ubuntu-noble-arm64`) all succeeded —
+same day, same workflow, same `StartupSynchronizer` code — which is the shape of
+an intermittent fault in this one pairing's networking, not a systemic slow day or
+a code regression. Attribution to a specific root cause (dropped fragment, a
+transient Docker/iptables race, something else on the bridge) is open; nobody has
+reproduced it or dug further yet.
 
 ### `215-huge_service` (+ the huge-message family)
 

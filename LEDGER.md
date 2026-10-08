@@ -73,6 +73,7 @@ the junit at all: `run_restart_nodes_tests` (last seen 2026-08-23, run
     2026-08-26  32999608623  5283b3338  215-huge_service                               multicomputer dose (overlay)             backfilled; fixed 2026-08-27
     2026-09-28  36418968450  0d746768c  run_light_nodes_smart_sync_tests (hang)        Debug slow suite, ubuntu-noble-amd64     job-level TIMEOUT, no junit; attribution open; evidence/2026-09-28-36418968450-smart_sync-hang
     2026-09-28  36487125418  fffc43880  2007-lightnode_limited_entity_on_normal_node   multicomputer dose, ubuntu-noble-arm64   1 of 36 dose runs; job green, "Test results" Check red
+    2026-10-01  36916554564  a62ab20dc  multicomputer-tests (hang)                     multicomputer dose (overlay), ubuntu-noble-amd64   job-level TIMEOUT (55 min), no junit; StartupSynchronizer ruled out on all 4 nodes; evidence/2026-10-01-36916554564-multicomputer-sequencer-hang
 
 The shas for the backfilled rows were recovered from the run records on
 2026-09-29, while those still existed. Four of them are on

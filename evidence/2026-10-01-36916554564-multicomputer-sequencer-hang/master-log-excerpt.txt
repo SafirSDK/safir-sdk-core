@@ -1,0 +1,26 @@
+--- 23:00:00, right after the WireGuard tunnel verify step passed ---
+Waiting for the seed slave 10.68.0.2 ...
+
+[... gap: 23:00:00 -> 23:10:21, ~10 min of apt-get/package setup, nothing test-relevant ...]
+
+--- 23:10:34, the sequencer launches ---
+2026-10-01T23:10:34.509504 : Launching process dose_test_cpp.0 using command line dose_test_cpp 0
+2026-10-01T23:10:34.512840 : Launching process dose_test_dotnet.0 using command line dose_test_dotnet 0
+2026-10-01T23:10:34.515823 : Launching process dose_test_java.0 using command line java --enable-native-access=ALL-UNNAMED -jar /usr/bin/../share/java/safir-sdk-core/dose_test_java.jar 0
+2026-10-01T23:10:34.518482 : Launching process dose_test_cpp.1 using command line dose_test_cpp 1
+2026-10-01T23:10:34.522756 : Launching process dose_test_dotnet.1 using command line dose_test_dotnet 1
+2026-10-01T23:10:34.525901 : Launching process dose_test_java.1 using command line java --enable-native-access=ALL-UNNAMED -jar /usr/bin/../share/java/safir-sdk-core/dose_test_java.jar 1
+2026-10-01T23:10:34.529989 : ** Running test sequencer with languages set to cpp cpp cpp cpp cpp
+2026-10-01T23:10:34.530043 : ---- Output from dose_test_sequencer: ----
+2026-10-01T23:10:34.530061 : Launching process dose_test_sequencer using command line dose_test_sequencer -d /usr/bin/../share/safir-sdk-core/test_data/dose/testcases -l cpp cpp cpp cpp cpp --multinode
+Testcase range is 0 to 9999
+Sequencer: Started
+Languages: cpp cpp cpp cpp cpp Context: 0
+Partner 0 is activated!
+Partner 1 is activated!
+##[error]The operation was canceled.
+
+[... job cancelled here at 23:54:28, 55:18 after the job started (its
+ timeout-minutes: 55 budget). The 44 minutes between "Partner 1 is
+ activated!" and this cancellation produced ZERO further output from
+ dose_test_sequencer - no more Partner lines, no error, nothing. ...]

@@ -1,0 +1,49 @@
+From .github/actions/wireguard-overlay/action.yml, the 'Punch and verify
+the tunnel (Linux)' step - this is ALL the connectivity verification that
+exists before the multicomputer test suite launches:
+
+    - name: Punch and verify the tunnel (Linux)
+      if: ${{ runner.os == 'Linux' && inputs.verify-peer-ip != '' }}
+      shell: bash
+      env:
+        VERIFY_PEER_IP: ${{ inputs.verify-peer-ip }}
+      run: |
+        set -uo pipefail
+        # Pinging the peer's wg address drives the NAT punch (both peers do this
+        # concurrently). We gate on the actual WireGuard HANDSHAKE, not on an ICMP
+        # reply: the encrypted tunnel can be fully up and carrying traffic while
+        # ICMP echo between the transit /32s still doesn't round-trip. Dob is UDP
+        # anyway, so a completed handshake is the signal that matters here.
+        ok=0
+        for i in $(seq 1 90); do
+          ping -c1 -W1 "$VERIFY_PEER_IP" >/dev/null 2>&1 || true
+          hs="$(sudo wg show wg0 latest-handshakes | awk '{print $2}')"
+          if [ -n "$hs" ] && [ "$hs" != "0" ]; then
+            ok=1; echo "tunnel up: handshake registered (attempt $i, ts=$hs)"; break
+          fi
+          sleep 1
+        done
+        echo "=== wg show ==="; sudo wg show
+        if [ "$ok" != "1" ]; then
+          echo "WireGuard tunnel did not come up (no handshake with peer)"
+          exit 1
+
+---
+
+From .github/workflows/ci.yml, multicomputer-slaves job - the per-container
+probe, which is the ONLY check anywhere near the extra docker-bridge hop
+that the three slave containers sit behind:
+
+              -v "$PWD/run-$role":/work -w /work debian:13 \
+              bash -c "set -e
+                apt-get update -qq
+                apt-get install -y --no-install-recommends \
+                  sudo ca-certificates git iputils-ping netcat-openbsd \
+                  python3 python3-venv python3-pip python-is-python3 python3-distro python3-apt python3-websocket
+                git config --global --add safe.directory '*'
+                echo \"=== [$role] reachability probe to master ${MASTER_ADDR} ===\"
+                if ping -c3 -W2 ${MASTER_ADDR}; then
+                  echo \"PROBE [$role]: ICMP to master ${MASTER_ADDR} PASS\"
+                else
+                  echo \"PROBE [$role]: ICMP to master ${MASTER_ADDR} FAIL\"
+                fi

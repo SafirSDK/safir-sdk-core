@@ -1,0 +1,26 @@
+=== artifacts/master/dose_test_output/dose_test_cpp.0.output.txt ===
+Starting
+cpp:0 Started
+Activating (default context is 0)
+Opening ActionReceiver
+accepting connections on port 30000
+
+=== artifacts/master/dose_test_output/dose_test_cpp.1.output.txt ===
+Starting
+cpp:1 Started
+Activating (default context is 0)
+Opening ActionReceiver
+accepting connections on port 30001
+
+=== artifacts/slaves/run-server-1/dose_test_output/dose_test_cpp.2.output.txt ===
+Starting
+cpp:2 Started
+
+=== artifacts/slaves/run-client-0/dose_test_output/dose_test_cpp.3.output.txt ===
+Starting
+cpp:3 Started
+
+=== artifacts/slaves/run-client-1/dose_test_output/dose_test_cpp.4.output.txt ===
+Starting
+cpp:4 Started
+

@@ -1,0 +1,9 @@
+temp/safir-sdk-core/lock/SAFIR_CONTROL_0_0_CREATED
+temp/safir-sdk-core/lock/SAFIR_CONTROL_0_0_FIRST
+temp/safir-sdk-core/lock/SAFIR_CONTROL_0_0_SECOND
+temp/safir-sdk-core/lock/SAFIR_DOSE_INITIALIZATION_0_CREATED
+temp/safir-sdk-core/lock/SAFIR_DOSE_INITIALIZATION_0_FIRST
+temp/safir-sdk-core/lock/SAFIR_DOSE_INITIALIZATION_0_SECOND
+temp/safir-sdk-core/lock/SAFIR_DOTS_INITIALIZATION_0_CREATED
+temp/safir-sdk-core/lock/SAFIR_DOTS_INITIALIZATION_0_FIRST
+temp/safir-sdk-core/lock/SAFIR_DOTS_INITIALIZATION_0_SECOND
