@@ -142,13 +142,24 @@ a callback and an occurrence number and blocks the sequencer until the partner
 sees it, with a 60 s backstop. It is partner-scoped, so give it a `<Partner>` and
 no `<Consumer>`, and count occurrences per testcase, not per phase. Sleeps that
 exist to prove *nothing further* arrives are the legitimate remaining use. See
-TEST_STATUS.md → "Waiting instead of sleeping" for the semantics and the reasons
-they are what they are.
+the `test-status` branch's `ANALYSIS.md` (`git show
+origin/test-status:ANALYSIS.md`) → "Waiting instead of sleeping" for the
+semantics and the reasons they are what they are.
 
 Known intermittent test failures — which tests flake, why, and how to tell a
-flake from a regression — are catalogued in [TEST_STATUS.md](TEST_STATUS.md). A
-single red CI run is usually a known flake; check there before treating it as a
-regression.
+flake from a regression — are catalogued on the `test-status` branch, an orphan
+branch with no source code and no CI (pushing to it triggers none), kept
+exactly so that recording a flake is cheap. Read it without checking it out:
+
+    git fetch origin test-status
+    git show origin/test-status:LEDGER.md      # one line per occurrence
+    git show origin/test-status:ANALYSIS.md    # policy, theories, post-mortems
+
+or browse `LEDGER.md`/`ANALYSIS.md`/`README.md` at
+<https://github.com/SafirSDK/safir-sdk-core/tree/test-status>. Its own
+`AGENTS.md` and `README.md`, on that branch, cover how to append an occurrence
+and the full "CI went red, now what" workflow. A single red CI run is usually a
+known flake; check there before treating it as a regression.
 
 Each driver writes a JUnit report (`<driver>.junit.xml`, one `<testcase>` per
 named case) via the shared `JUnitReporter` in
@@ -801,8 +812,9 @@ downloads. This restored what the retired Jenkins pipeline archived as
   overwrite dialog that no runner can answer. Also pass `choco` an
   `--execution-timeout` well under its 2700s default so a hang costs minutes.
   The Linux exception: retry `update`+`install` as one unit, because a
-  stale-index 404 is not fixed by re-running `install`. See TEST_STATUS.md →
-  "Third-party package fetches" for the failures that prompted all this.
+  stale-index 404 is not fixed by re-running `install`. See the `test-status`
+  branch's `ANALYSIS.md` → "Third-party package fetches" for the failures that
+  prompted all this.
 
   Covered so far: `setup-build-env` (apt, choco, pip) and `setup-test-env` (apt,
   pip). **Still bare**, and worth wrapping if they ever bite: the four Debian
@@ -948,9 +960,10 @@ are deleting.
   failure only reddens the "Test results" check. This is deliberate — a failure
   here is a bug class nothing else in CI can see — but it is **provisional**, and
   it pulls against the flakiness-deferral policy, since these jobs run the same
-  flake-prone dose and slow suites as everything else. TEST_STATUS.md ("The Debug
-  jobs opt out of all of that") records the tradeoff and the ordered list of ways
-  to soften it. Soften it rather than sinking time into flake research.
+  flake-prone dose and slow suites as everything else. The `test-status` branch's
+  `ANALYSIS.md` ("The Debug jobs opt out of all of that") records the tradeoff
+  and the ordered list of ways to soften it. Soften it rather than sinking time
+  into flake research.
 
 **Known gap:** Debug is exercised on ubuntu-noble amd64 only. On Windows that
 leaves MSVC's checked iterators and debug CRT heap unexercised; on arm64 and
