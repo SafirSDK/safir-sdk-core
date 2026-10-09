@@ -537,6 +537,24 @@ job's `temp/safir-sdk-core/lock/` directory, archived before the kill, has
 direct confirmation that `CreateMarker()` ran and completed. Whatever dose_main is
 waiting on, it is not stuck in the synchronizer itself.
 
+**Every one of the 15 client processes is stuck at the identical relative
+point, with no variance.** All five `dose_test_cpp.N` show exactly `Starting`;
+all five `dose_test_dotnet.N` show exactly `Starting CrashReporter` /
+`Starting`; all five `dose_test_java.N` show exactly `Starting` /
+`Opening control connection`. Each language's next line in the clean run
+(`cpp:N Started`, `dotnet:N Started`, `Control connection opened successfully`)
+is the one that follows its own blocking connect to the local dose_main
+succeeding. Fifteen processes in three different language runtimes all stopping
+at that exact boundary, with not one exception, is a single shared cause, not
+fifteen independent ones.
+
+**Six other jobs on the same platform ran clean through the entire hang
+window.** `debian-trixie-amd64`, `standalone-debian-trixie-amd64-amd64-{java-cpp-dotnet-java-cpp,cpp-cpp-cpp-cpp-cpp}`,
+`multinode-debian-trixie-amd64-amd64-{dotnet-java-cpp-dotnet-java,java-cpp-dotnet-java-cpp,cpp-cpp-cpp-cpp-cpp}`
+all started and finished successfully between 15:58 and 16:27 - entirely inside
+this job's 16:03:50-17:04:30 span. Whatever this was, it was not a
+runner-pool-wide event at that time; it was specific to this one job.
+
 **What this does not establish:** why dope_main produced nothing. It could be
 stuck before its first `std::cout`, never scheduled by the runner at all, or
 something in between — the output file cannot distinguish those, and nothing else
@@ -700,6 +718,17 @@ artificially stopped, which is plausible at test teardown, but nobody has confir
 that is what happened here. Unclassified.
 
 **Recurred once more, post-ledger: 2026-10-08, run 37795274382, multinode `ubuntu-noble-amd64`, `dotnet-java-cpp-dotnet-java`** — a different platform and language combination than the original two, same signature (`TracerStatus` and `MirroredNodeInfo` stuck in `WaitingStates`). See `LEDGER.md`.
+
+For this occurrence specifically, **it was not at teardown.** The job's own log
+shows testcases running continuously through the warning's timestamp -
+`Running testcase: 1006` at 16:02:41, `1007` at 16:02:45, `1009` at 16:02:54,
+`1020`/`1100` seconds later - at the same steady ~2s cadence before and after
+16:02:43, with no stall. The job then ran to completion and passed. So the
+"plausible at test teardown" theory, which was speculation for the original two,
+is ruled out for this one: the system was mid-suite, running normally, and the
+warning cleared on its own without affecting anything downstream. That is
+consistent with "benign and self-resolving" rather than with anything that
+should be classified as graver than a warning.
 
 **Misrouted request (1).** Seen once, multinode `ubuntu-noble-amd64`,
 `dotnet-java-cpp-dotnet-java`. A request reached node 0's `dose_main` with neither

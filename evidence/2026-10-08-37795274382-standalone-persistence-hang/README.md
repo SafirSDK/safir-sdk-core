@@ -36,7 +36,12 @@ artifacts expire around 2027-01-06; the comparison run's (36345391363) around
 
 ## What this does and does not establish
 
-**Does:** the hang is narrowed to the dose_main ↔ dope_main persistence handoff,
+**Does:** all 15 client processes (5 each of cpp/dotnet/java) stop at the exact
+same relative point - immediately before their own connect to the local
+dose_main would succeed - with no exceptions, pointing at one shared cause
+rather than many. Six other jobs on the same platform ran clean, start to
+finish, entirely inside this job's hang window, which rules out a
+runner-pool-wide event at that time. The hang is narrowed to the dose_main ↔ dope_main persistence handoff,
 specifically the point where dose_main, having started and logged "waiting for
 persistence data!", should receive that data from dope_main and does not.
 `StartupSynchronizer` completed successfully on this node (all lock markers
