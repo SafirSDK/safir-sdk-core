@@ -1,0 +1,21 @@
+From the "Run dose tests (Linux)" step of standalone-debian-trixie-amd64-amd64-dotnet-java-cpp-dotnet-java,
+run 37795274382, job 113399891924. GitHub Actions' own per-line timestamp kept; the
+harness's own embedded timestamp (second column) is the one that matters.
+
+2026-10-08T16:04:50.2786692Z 2026-10-08T16:04:50.278221 : Launching process safir_control.0 using command line safir_control --force-id 999999
+2026-10-08T16:04:50.2801643Z 2026-10-08T16:04:50.279896 : Launching process dope_main.0 using command line dope_main
+2026-10-08T16:04:50.2820551Z 2026-10-08T16:04:50.281651 : Launching process foreach.0 using command line foreach
+2026-10-08T16:04:50.2850178Z 2026-10-08T16:04:50.283946 : Launching process safir_status.0 using command line safir_status
+2026-10-08T16:04:50.2865025Z 2026-10-08T16:04:50.286163 : Launching process dose_test_cpp.0 using command line dose_test_cpp 0
+2026-10-08T16:04:50.2889812Z 2026-10-08T16:04:50.288718 : Launching process dose_test_dotnet.0 using command line dose_test_dotnet 0
+2026-10-08T16:04:50.2913465Z 2026-10-08T16:04:50.290968 : Launching process dose_test_java.0 using command line java ... dose_test_java.jar 0
+[... dose_test_{cpp,dotnet,java}.{1,2,3,4} launch identically, all 15 with no errors ...]
+2026-10-08T16:04:50.4062395Z 2026-10-08T16:04:50.405732 : ** Running test sequencer with languages set to dotnet java cpp dotnet java
+2026-10-08T16:04:50.4067239Z 2026-10-08T16:04:50.405819 : Launching process dose_test_sequencer using command line dose_test_sequencer -d .../testcases -l dotnet java cpp dotnet java
+2026-10-08T16:04:50.7249437Z Testcase range is 0 to 9999
+2026-10-08T16:04:50.7252349Z Sequencer: Started
+
+                                        [ 59 minutes, 5 seconds of total silence ]
+
+2026-10-08T17:03:56.0810528Z context canceled
+2026-10-08T17:03:56.0937864Z ##[error]The operation was canceled.

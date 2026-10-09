@@ -1,0 +1,46 @@
+dose_test_output/safir_control.0.output.txt and dope_main.0.output.txt, this run
+(hung) against the same job on run 36345391363 (2026-09-27, this branch's content
+before the rebase onto the StartupSynchronizer rework - clean, 14 min).
+
+==== safir_control.0.output.txt - HUNG (run 37795274382) - stops here, 59 min, killed ====
+MAIN: RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!
+MAIN: dose_main is waiting for persistence data!
+CTRL: Starting system with incarnation id 396721978909506054
+CTRL: This node has id 999999
+
+==== safir_control.0.output.txt - CLEAN (run 36345391363) - full run, 14 min ====
+MAIN: RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!
+MAIN: dose_main is waiting for persistence data!
+CTRL: Starting system with incarnation id 3896728525818534110
+CTRL: This node has id 999999
+MAIN: dose_main running...
+MAIN: dose_main persistence data is ready!
+CTRL: Got signal 15 ... stop sequence initiated.
+MAIN: DOSE_MAIN: Exiting...
+CTRL: Exiting...
+
+The first four lines are identical in shape in both (only the incarnation id
+differs, as expected - it is random per run). The hung run never reaches
+"dose_main running..." / "persistence data is ready!", which is the signal that
+dope_main delivered its data.
+
+==== dope_main.0.output.txt - HUNG ====
+(0 bytes - completely empty, not even its own startup banner)
+
+==== dope_main.0.output.txt - CLEAN ====
+Dope is starting as new active persistence.
+
+==== dose_test_cpp.0.output.txt - HUNG (all five dose_test_cpp.N identical shape) ====
+Starting
+
+==== dose_test_cpp.0.output.txt - CLEAN ====
+Starting
+cpp:0 Started
+Got stop order
+Closing ActionReceiver
+Exiting
+
+cpp:N Started only prints after dose_test's Executor opens a connection to the
+*local* dose_main (Executor.cpp, in its constructor) succeeds. None of the five
+dose_test_cpp processes got that far in the hung run, consistent with dose_main
+itself never becoming ready while it waited on dope_main.

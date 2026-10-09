@@ -26,6 +26,7 @@ every source path mentioned here live with the code:
   - [`run_restart_nodes_tests` hang (slow suite → TIMEOUT → red job)](#run_restart_nodes_tests-hang-slow-suite--timeout--red-job)
   - [`run_light_nodes_smart_sync_tests` hang (Debug slow suite → TIMEOUT → red job)](#run_light_nodes_smart_sync_tests-hang-debug-slow-suite--timeout--red-job)
   - [multicomputer sequencer hang, cross-node partners never activate (multicomputer-master/-slaves → TIMEOUT → red job)](#multicomputer-sequencer-hang-cross-node-partners-never-activate-multicomputer-master--slaves--timeout--red-job)
+  - [dose_main waits on persistence that never arrives, standalone (standalone → TIMEOUT → red job)](#dose_main-waits-on-persistence-that-never-arrives-standalone-standalone--timeout--red-job)
   - [`215-huge_service` (+ the huge-message family)](#215-huge_service--the-huge-message-family)
 - [Errors reported through `syslog_output` and `safir_control.0.returncode`](#errors-reported-through-syslog_output-and-safir_control0returncode)
   - [What has actually been reported this way](#what-has-actually-been-reported-this-way)
@@ -492,6 +493,66 @@ a code regression. Attribution to a specific root cause (dropped fragment, a
 transient Docker/iptables race, something else on the bridge) is open; nobody has
 reproduced it or dug further yet.
 
+### dose_main waits on persistence that never arrives, standalone (standalone → TIMEOUT → red job)
+
+Seen once, run 37795274382 (`ce98a0586`, the tip of `develop` as of this writing —
+it landed in the push that merged the ubsan/tsan-fixes branch and, one commit
+below it, the StartupSynchronizer rework), on
+`standalone-debian-trixie-amd64-amd64-dotnet-java-cpp-dotnet-java`. Killed at
+exactly 59:06 elapsed against its 60-minute `timeout-minutes`. The same job, same
+platform, same language combination, ran clean in 14 minutes twice very recently:
+once on this branch's content before it was rebased onto the StartupSynchronizer
+rework (run 36345391363, 2026-09-27), and once on the StartupSynchronizer rework
+alone, the same morning as this run (37733780474, 2026-10-08 08:17). Only the
+combination of the two, in this run, has shown it. Full detail is in
+`evidence/2026-10-08-37795274382-standalone-persistence-hang/`.
+
+**Narrowed to the dose_main ↔ dope_main persistence handoff**, by diffing this
+run's `dose_test_output` artifact against the clean run's. `safir_control.0`
+(dose_main's own log) is identical for the first four lines in both — persistence
+test mode banner, "waiting for persistence data!", incarnation id, node id — and
+then diverges completely:
+
+- **Clean run** continues: `MAIN: dose_main running...` /
+  `MAIN: dose_main persistence data is ready!`, runs the suite, and ends with a
+  normal `Got signal 15 ... stop sequence initiated.` / `Exiting...` pair.
+- **This run** stops dead after `CTRL: This node has id 999999` and never prints
+  either of those two lines. `dope_main.0.output.txt` — the persistence
+  provider's own log — is **0 bytes**, against 44 bytes
+  (`Dope is starting as new active persistence.`) in the clean run. dope_main
+  never printed even its own first line, or did and it was never flushed/captured
+  before the kill; the two look identical from outside.
+
+This is consistent with, and does not contradict, the five `dose_test_cpp.N`
+processes all getting only as far as `Starting` and no further: per the method in
+the previous entry (`cpp:N Started` only prints after
+`m_controlConnection.Open(...)` to the *local* dose_main succeeds), none of them
+could get past that point while the local dose_main was itself still blocked
+waiting for dope_main.
+
+**StartupSynchronizer is ruled out, the same way as the previous entry.** The
+job's `temp/safir-sdk-core/lock/` directory, archived before the kill, has
+`_FIRST`, `_SECOND` *and* `_CREATED` present for all three of
+`SAFIR_DOSE_INITIALIZATION`, `SAFIR_DOTS_INITIALIZATION` and `SAFIR_CONTROL_0` —
+direct confirmation that `CreateMarker()` ran and completed. Whatever dose_main is
+waiting on, it is not stuck in the synchronizer itself.
+
+**What this does not establish:** why dope_main produced nothing. It could be
+stuck before its first `std::cout`, never scheduled by the runner at all, or
+something in between — the output file cannot distinguish those, and nothing else
+in this pipeline captures a dope_main-internal log. Attribution to the
+StartupSynchronizer rework, to something in the other branch that merged
+alongside it, or to plain bad luck on the runner is open; the only thing the
+timing supports is that neither half alone has ever shown this, which argues for
+*something* about the combination rather than ruling either half out on its own.
+
+**Deliberately not investigated further here:** this is one occurrence. Per the
+policy above, a single unattributed hang is recorded, not chased. If it recurs —
+especially on another standalone language combination, or back on
+`dotnet-java-cpp-dotnet-java` specifically — that is the point to open an issue,
+and the first thing worth adding is a way to see whether dope_main's process even
+started.
+
 ### `215-huge_service` (+ the huge-message family)
 
 Intermittent failure in the **multicomputer** dose suite over the WireGuard
@@ -637,6 +698,8 @@ on two consecutive checks. Both occurrences were the same job — multinode
 and `MirroredNodeInfo` states. The message says it can be ignored if the system was
 artificially stopped, which is plausible at test teardown, but nobody has confirmed
 that is what happened here. Unclassified.
+
+**Recurred once more, post-ledger: 2026-10-08, run 37795274382, multinode `ubuntu-noble-amd64`, `dotnet-java-cpp-dotnet-java`** — a different platform and language combination than the original two, same signature (`TracerStatus` and `MirroredNodeInfo` stuck in `WaitingStates`). See `LEDGER.md`.
 
 **Misrouted request (1).** Seen once, multinode `ubuntu-noble-amd64`,
 `dotnet-java-cpp-dotnet-java`. A request reached node 0's `dose_main` with neither

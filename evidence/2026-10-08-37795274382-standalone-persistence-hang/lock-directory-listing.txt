@@ -1,0 +1,14 @@
+temp/safir-sdk-core/lock/, as archived in the hung job's dose-output artifact.
+All nine files are present and all are empty (0 bytes) - they are markers, not
+content. _FIRST, _SECOND and _CREATED all present for all three names means
+CreateMarker() ran to completion for every one of them; see StartupSynchronizer.cpp.
+
+SAFIR_CONTROL_0_0_CREATED
+SAFIR_CONTROL_0_0_FIRST
+SAFIR_CONTROL_0_0_SECOND
+SAFIR_DOSE_INITIALIZATION_0_CREATED
+SAFIR_DOSE_INITIALIZATION_0_FIRST
+SAFIR_DOSE_INITIALIZATION_0_SECOND
+SAFIR_DOTS_INITIALIZATION_0_CREATED
+SAFIR_DOTS_INITIALIZATION_0_FIRST
+SAFIR_DOTS_INITIALIZATION_0_SECOND
