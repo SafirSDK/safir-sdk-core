@@ -149,9 +149,15 @@ line never conflicts in a way that needs thought.
   card for agents working *here*. The one `ANALYSIS.md` cites — build commands,
   architecture, the overlay notes — is the repository's, on `develop`:
   `git show origin/develop:AGENTS.md`. Same for any source path in the analysis.
-- **Known gap:** nothing on `develop` points at this branch yet. Until
-  `TEST_STATUS.md` is removed and `AGENTS.md` gains a pointer, this branch is only
-  discoverable if you already know it exists.
+- **No longer undiscoverable:** `TEST_STATUS.md` on `develop` was removed and
+  `AGENTS.md` gained four pointers here, 2026-10-09 (`6cc2efc67`). Before that,
+  this branch was only findable if you already knew it existed - which is also
+  why the StartupSynchronizer rework's own flake investigation
+  (`run_light_nodes_smart_sync_tests`) ended up written to the old
+  `TEST_STATUS.md` instead of here, even though it was done after this branch
+  started: nothing told the author otherwise. That entry is byte-identical in
+  both places, so nothing was lost - but it is the shape of mistake this gap
+  invited.
 - **Appending could be automated.** A CI step could push an occurrence line on
   failure using the built-in `GITHUB_TOKEN` with `contents: write` — no PAT
   needed, since this is the same repository. Not built; noted because it is the
