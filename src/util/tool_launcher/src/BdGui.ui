@@ -75,9 +75,9 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>command</tabstop>
   <tabstop>connectionName</tabstop>
   <tabstop>nodeName</tabstop>
+  <tabstop>command</tabstop>
  </tabstops>
  <resources/>
  <connections>

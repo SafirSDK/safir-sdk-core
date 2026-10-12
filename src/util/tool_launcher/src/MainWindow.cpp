@@ -272,6 +272,8 @@ void MainWindow::OnLaunchBdGuiPressed()
     ui.setupUi(&dlg);
     ui.buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
     connect(ui.command,&QLineEdit::textChanged,&dlg,[&ui](const QString& text){ui.buttonBox->button(QDialogButtonBox::Ok)->setDisabled(text.isEmpty());});
+    QWidget::setTabOrder(ui.command, ui.buttonBox->button(QDialogButtonBox::Ok));
+    QWidget::setTabOrder(ui.buttonBox->button(QDialogButtonBox::Ok), ui.buttonBox->button(QDialogButtonBox::Cancel));
     const auto result = dlg.exec();
     if (result != QDialog::Accepted)
     {
