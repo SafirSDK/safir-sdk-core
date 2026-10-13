@@ -816,14 +816,18 @@ downloads. This restored what the retired Jenkins pipeline archived as
   branch's `ANALYSIS.md` → "Third-party package fetches" for the failures that
   prompted all this.
 
-  Covered so far: `setup-build-env` (apt, choco, pip) and `setup-test-env` (apt,
-  pip). **Still bare**, and worth wrapping if they ever bite: the four Debian
+  Covered so far: `setup-build-env` (apt, choco, pip), `setup-test-env` (apt,
+  pip) and `wireguard-overlay`'s choco install of WireGuard. That last one has a
+  budget of only 300s, on purpose: a retry on one side of the overlay eats into
+  the peer's `peer-wait-minutes` on the other, which also has to absorb the
+  scheduling skew between the two jobs, so it rides out a blip and no more. It was
+  added after a 504 from community.chocolatey.org cost run 38429866975 its vs2022
+  pair. **Still bare**, and worth wrapping if they ever bite: the four Debian
   container bootstraps and the multicomputer slave container in `ci.yml` (they
   run *before* checkout, or inside a `docker run` string, so they cannot source
   the helper as-is), the docs-toolchain install in the `render-docs` job, and
-  `wireguard-overlay`'s apt/choco — that last one needs thought rather than a
-  copy-paste, since a long retry on one side of the overlay eats into the peer's
-  `peer-wait-minutes` on the other.
+  `wireguard-overlay`'s apt install on Linux, which wants the same short budget
+  for the same reason.
 - **The platform matrix is duplicated — keep every copy in sync.** GitHub
   Actions has no YAML anchors, so `build`, `build-examples`, `dose-tests`,
   `slow-tests`, `multicomputer-master` and `multicomputer-slaves` each spell out
@@ -931,7 +935,8 @@ case.
 When either job does not succeed, a "Dump network state" step prints the WireGuard
 state, interface and UDP counters, and on the slaves runner the `DOCKER-USER` rule
 counters and the conntrack table. It prints to the job log; there is no packet
-capture.
+capture. The step runs after any failure, including one before the overlay exists,
+so each command in it is allowed to fail and the step always exits 0.
 
 `FragmentSize` and the probe's size have to agree. If the multicomputer
 `Safir.Dob.NodeParameters.dou` changes it, pass the new value with `--sizes` (the

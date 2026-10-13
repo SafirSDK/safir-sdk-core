@@ -1095,6 +1095,11 @@ jobs:
       # What the network looked like when it went wrong. Nothing else records it,
       # and it is gone with the runner. !success() so that it also runs when the
       # job is killed by its timeout, which is how a hung suite ends.
+      #
+      # These steps run whatever it was that failed, so anything they look at may
+      # not exist: the first time they ran, WireGuard had not been installed. Every
+      # command has to be allowed to fail, and the step must not add a failure of
+      # its own to the job.
       - name: Dump network state (Linux)
         if: ${{ !success() && runner.os == 'Linux' }}
         shell: bash
@@ -1105,12 +1110,15 @@ jobs:
           ip route
           ss -lunp
           grep -E '^(Ip|Udp):' /proc/net/snmp
+          exit 0
 
       - name: Dump network state (Windows)
         if: ${{ !success() && runner.os == 'Windows' }}
         shell: pwsh
         run: |
-          & 'C:\Program Files\WireGuard\wg.exe' show
+          $ErrorActionPreference = 'Continue'
+          $wg = 'C:\Program Files\WireGuard\wg.exe'
+          if (Test-Path $wg) { & $wg show } else { Write-Host "WireGuard is not installed" }
           Get-NetAdapter | Format-Table Name, Status, MtuSize, LinkSpeed
           Get-NetAdapterStatistics | Format-List
           route print -4
@@ -1322,6 +1330,7 @@ jobs:
           for name in server-1 client-0 client-1; do
             docker exec "$name" sh -c 'cat /proc/net/dev; grep -E "^(Ip|Udp):" /proc/net/snmp'
           done
+          exit 0
 
       # Each slave wrote its output to its own run-<role>/dose_test_output (its
       # private /work mount). Those files are owned by the container's root user on

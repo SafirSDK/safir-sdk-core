@@ -76,12 +76,33 @@ runs:
 
     # choco install + wireguard.exe /installtunnelservice: the wintun driver and
     # tunnel service install fine with the GitHub Windows runner's admin rights.
+    #
+    # The install is retried, because community.chocolatey.org answers with a 504
+    # now and then (run 38429866975 lost a multicomputer pair to one). The budget
+    # is deliberately short, nothing like the 45 minutes the test jobs use
+    # elsewhere: every second spent here comes out of the window the peer job
+    # waits for our endpoint (peer-wait-minutes), which also has to absorb
+    # however much later than the peer this job was scheduled. Five minutes
+    # rides out a blip; for an outage it is better to fail and say so.
     - name: Install WireGuard for Windows
       if: runner.os == 'Windows'
-      shell: pwsh
+      shell: bash
+      env:
+        RETRY_BUDGET_SECONDS: "300"
       run: |
-        choco install wireguard -y --no-progress
-        & 'C:\Program Files\WireGuard\wg.exe' version
+        set -euo pipefail
+        source "${GITHUB_ACTION_PATH}/../retry.sh"
+        # See setup-build-env for why -f, and why only from the second attempt.
+        force_on_retry() { [ "${RETRY_ATTEMPT:-1}" -gt 1 ] && echo "-f"; }
+        # The install takes about 20s when nothing is wrong; do not let a hung
+        # one use up the whole budget on its own. Running wg.exe is part of the
+        # retried unit so that an install that reports success without having
+        # installed anything is retried too, whatever choco's exit code says.
+        install_wireguard() {
+          choco install wireguard -y --no-progress --execution-timeout 120 $(force_on_retry) &&
+            "/c/Program Files/WireGuard/wg.exe" version
+        }
+        retry "chocolatey package wireguard" install_wireguard
 
     # Shared: Git Bash on Windows runs this same script. wg.exe isn't on PATH on
     # Windows and the interpreter is `python` (not python3), so resolve both per OS.
