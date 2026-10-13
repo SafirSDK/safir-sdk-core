@@ -894,6 +894,49 @@ test. The first two bit on the 7.4.3-alpha4 run.
   and clear failure, but the only way to re-test that pair is to re-run the whole
   workflow.
 
+#### The UDP mesh probe (#619)
+
+Before the Dob is started on any node, both multicomputer jobs run
+`build/ci/udp_mesh_probe.py`: the master in its "Check UDP between all four nodes"
+step, each slave container right after its `apt-get`. Every node binds the Dob's
+own ports (30000 control, 40000 data) on the address the Dob will bind and
+exchanges datagrams with the others (every pair except Client_0 and Client_1, which
+are light nodes and never talk to each other), at 64 bytes and at 1392 - the
+multicomputer `FragmentSize`, so the largest datagram the Dob sends - with
+don't-fragment set. It pings each peer twice a second on every port and size, and a
+leg passes once ten of its pings have been answered. Each PASS line carries a loss
+figure, counted from the first answered ping to the tenth (pings before the first
+answer are the peer not being up yet, not loss), so `lost 0 of 10` is a clean leg
+and `lost 3 of 13` is one that passed over a lossy path. It replaced the master's "Wait for the seed slave" step, which
+on Linux amounted to a ping of one node.
+
+It exists to split one question: when the sequencer hangs waiting for partners
+(run 36916554564 did, for the whole 55 minutes), was it the overlay or the product?
+
+- **The probe fails:** the overlay. The job fails in that step within 8 minutes,
+  with one line per peer, port and size, and a sentence when the failure has a
+  recognisable shape (a node silent, only the large size failing, only one port).
+- **The probe passes and the suite then hangs:** the nodes could exchange Dob-sized
+  UDP on the Dob's ports seconds before it started, which points at the product.
+  It is not proof: the tunnel can still fail later.
+
+Two things to keep in mind when reading a result. Because the probe uses the real
+ports, it leaves conntrack entries on the slaves runner for the very flows the Dob
+then uses, so a fault that only bites the first packet of a flow is hidden by it
+rather than found. And each node judges only its own legs, so if the only leg that
+fails is between Server_1 and a client, on the bridge, the master passes, carries on
+and hangs on those containers' partners as before; look at the slaves job's log in that
+case.
+
+When either job does not succeed, a "Dump network state" step prints the WireGuard
+state, interface and UDP counters, and on the slaves runner the `DOCKER-USER` rule
+counters and the conntrack table. It prints to the job log; there is no packet
+capture.
+
+`FragmentSize` and the probe's size have to agree. If the multicomputer
+`Safir.Dob.NodeParameters.dou` changes it, pass the new value with `--sizes` (the
+default is in the script).
+
 #### Debug coverage (`build-debug` and friends)
 
 Every other job builds RelWithDebInfo, which defines `NDEBUG`. Three things

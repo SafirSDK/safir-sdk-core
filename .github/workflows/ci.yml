@@ -23,8 +23,9 @@ env:
   # Multicomputer overlay address plan (10.68.x.y so the existing 1*.*68.*.* .dou
   # bind pattern matches with NO config change). Each master/slaves pair is an
   # isolated point-to-point tunnel, so all four pairs reuse the same addresses
-  # without colliding. Consumed only by the multicomputer-master/-slaves jobs; the
-  # master needs just its own + the seed's address, the rest live on the slaves runner.
+  # without colliding. Consumed only by the multicomputer-master/-slaves jobs. The
+  # Dob on the master needs just its own + the seed's address and the rest live on
+  # the slaves runner, but the UDP mesh probe on every node is given all four.
   MASTER_ADDR: "10.68.1.1"
   SERVER_1_ADDR: "10.68.0.2"   # seed (core-multicomputer-test-server-1-slave)
   CLIENT_0_ADDR: "10.68.0.3"
@@ -1051,30 +1052,24 @@ jobs:
           Add-Content -Path "$env:WINDIR\System32\drivers\etc\hosts" `
             -Value "$env:SERVER_1_ADDR core-multicomputer-test-server-1-slave"
 
-      # Wait for the seed slave to be reachable before starting, so node discovery
-      # doesn't race the slave containers (apt-install) coming up. Git Bash runs
-      # this on Windows too; nc isn't there, so fall back to ping (OS-aware flags).
-      - name: Wait for the seed slave
+      # Before the Dob is started anywhere: check that this node and the three
+      # slave containers can exchange UDP with each other, on the Dob's own ports
+      # and at its largest datagram size (#619). All pairs except the two clients,
+      # which are light nodes and never talk to each other. The containers run the same
+      # script, see the slaves job. It also does what the "wait for the seed" step
+      # here used to do, since it keeps trying until the containers have come up
+      # (they have an apt-get to get through first) - and if they never do, it
+      # fails here naming the leg, where run_test.py would hang until the job
+      # timeout with no clear cause.
+      #
+      # The timeout counts against timeout-minutes together with the overlay's
+      # peer-wait-minutes and the ~20 min suite; keep it the same on both sides.
+      - name: Check UDP between all four nodes
         shell: bash
         run: |
-          set -uo pipefail
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            seed_up() { ping -n 1 -w 1000 "$1" >/dev/null 2>&1; }
-          else
-            seed_up() { nc -z -u -w1 "$1" 30000 2>/dev/null || ping -c1 -W1 "$1" >/dev/null 2>&1; }
-          fi
-          echo "Waiting for the seed slave ${SERVER_1_ADDR} ..."
-          for i in $(seq 1 100); do
-            if seed_up "${SERVER_1_ADDR}"; then
-              echo "seed reachable on attempt $i"
-              exit 0
-            fi
-            sleep 3
-          done
-          # Fail fast: if the seed never comes up, run_test.py would otherwise hang
-          # until the 30-min job timeout with no clear cause. Surface it here instead.
-          echo "Seed slave ${SERVER_1_ADDR} never became reachable"
-          exit 1
+          python build/ci/udp_mesh_probe.py --me "${MASTER_ADDR}" --timeout 480 \
+            --nodes "${MASTER_ADDR}" "${SERVER_1_ADDR}" "${CLIENT_0_ADDR}" "${CLIENT_1_ADDR}" \
+            --light-nodes "${CLIENT_0_ADDR}" "${CLIENT_1_ADDR}"
 
       # Same entrypoint as the standalone/multinode dose tests: run_test.py installs
       # the staged package and runs the suite. The slaves are started as containers
@@ -1096,6 +1091,33 @@ jobs:
           SAFIR_TEST_TEMP: ${{ github.workspace }}/temp
           SAFIR_TEST_LANGUAGES: cpp-cpp-cpp-cpp-cpp
         run: python build\ci\run_test.py --test multicomputer-tests
+
+      # What the network looked like when it went wrong. Nothing else records it,
+      # and it is gone with the runner. !success() so that it also runs when the
+      # job is killed by its timeout, which is how a hung suite ends.
+      - name: Dump network state (Linux)
+        if: ${{ !success() && runner.os == 'Linux' }}
+        shell: bash
+        run: |
+          set -x +e
+          sudo wg show
+          ip -s link show wg0
+          ip route
+          ss -lunp
+          grep -E '^(Ip|Udp):' /proc/net/snmp
+
+      - name: Dump network state (Windows)
+        if: ${{ !success() && runner.os == 'Windows' }}
+        shell: pwsh
+        run: |
+          & 'C:\Program Files\WireGuard\wg.exe' show
+          Get-NetAdapter | Format-Table Name, Status, MtuSize, LinkSpeed
+          Get-NetAdapterStatistics | Format-List
+          route print -4
+          netstat -s -p ip
+          netstat -s -p udp
+          netstat -ano -p udp
+          exit 0
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
@@ -1231,6 +1253,12 @@ jobs:
                 else
                   echo \"PROBE [$role]: ICMP to master ${MASTER_ADDR} FAIL\"
                 fi
+                # UDP to and from every other node, before the Dob is started; see
+                # the matching step in the master job. Failing here stops the
+                # container, which fails the job.
+                python3 build/ci/udp_mesh_probe.py --me $ip --timeout 480 \
+                  --nodes ${MASTER_ADDR} ${SERVER_1_ADDR} ${CLIENT_0_ADDR} ${CLIENT_1_ADDR} \
+                  --light-nodes ${CLIENT_0_ADDR} ${CLIENT_1_ADDR}
                 python3 -m venv --system-site-packages .venv
                 . .venv/bin/activate
                 python -m pip install --quiet --upgrade pip
@@ -1271,6 +1299,29 @@ jobs:
             if [ "$code" != "0" ]; then rc=1; fi
           done
           exit "$rc"
+
+      # See the matching step in the master job. This side has the forwarding hop
+      # between wg0 and the docker bridge, so the packet counters on the
+      # DOCKER-USER rules and the conntrack table are the interesting part.
+      - name: Dump network state
+        if: ${{ !success() }}
+        shell: bash
+        run: |
+          set -x +e
+          sudo wg show
+          ip -s link show wg0
+          ip route
+          sysctl net.ipv4.ip_forward
+          sudo iptables -vnL DOCKER-USER
+          sudo iptables -vnL FORWARD
+          sudo iptables -t nat -vnL POSTROUTING
+          sudo conntrack -L -p udp 2>/dev/null || sudo cat /proc/net/nf_conntrack
+          grep -E '^(Ip|Udp):' /proc/net/snmp
+          docker network inspect safirnet
+          docker ps -a
+          for name in server-1 client-0 client-1; do
+            docker exec "$name" sh -c 'cat /proc/net/dev; grep -E "^(Ip|Udp):" /proc/net/snmp'
+          done
 
       # Each slave wrote its output to its own run-<role>/dose_test_output (its
       # private /work mount). Those files are owned by the container's root user on
