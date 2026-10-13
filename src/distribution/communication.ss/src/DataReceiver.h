@@ -257,6 +257,14 @@ namespace Com
 
         bool ValidCrc(const char* buf, size_t size)
         {
+            //A datagram too short to hold a crc can not be valid, and anyone can send
+            //one. Without this check the size below wraps around and the crc is
+            //calculated over memory far beyond the receive buffer.
+            if (size < sizeof(uint32_t))
+            {
+                return false;
+            }
+
             boost::crc_32_type crc;
             crc.process_bytes(static_cast<const void*>(buf), size-sizeof(uint32_t));
             //The crc sits at the end of the datagram, so its offset is the message
