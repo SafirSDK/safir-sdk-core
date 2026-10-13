@@ -23,6 +23,8 @@
 ******************************************************************************/
 #pragma once
 
+#include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <memory>
 #include <functional>
@@ -76,6 +78,8 @@ namespace Com
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
             ,m_logPrefix(Parameters::LogPrefix + "DataReceiver - ")
+            ,m_unicastRetry(m_strand.context())
+            ,m_multicastRetry(m_strand.context())
         {
             m_unicastEndpoint = Resolver::StringToEndpoint(unicastAddress);
             if (!multicastAddress.empty())
@@ -145,6 +149,8 @@ namespace Com
                 m_running=false;
                 m_timer.cancel();
                 m_checkMcTimer.cancel();
+                m_unicastRetry.timer.cancel();
+                m_multicastRetry.timer.cancel();
                 ++m_runCount;
 
                 if (m_socket && m_socket->is_open())
@@ -179,6 +185,18 @@ namespace Com
 
         unsigned int m_runCount = 0;
         std::chrono::time_point<std::chrono::steady_clock> m_lastMcRecv;
+
+        //State for restarting a socket's read loop after a failed read, see HandleReceiveError.
+        static constexpr std::chrono::milliseconds MaxReadRetryDelay{1000};
+        struct ReadRetry
+        {
+            explicit ReadRetry(boost::asio::io_context& io) : timer(io) {}
+            boost::asio::steady_timer timer;
+            unsigned int failures = 0; //failed reads in a row
+            bool pending = false; //true while the timer is waiting to start a new read
+        };
+        ReadRetry m_unicastRetry;
+        ReadRetry m_multicastRetry;
         //Aligned because HandleReceive reads the datagram header straight out of
         //these through a CommonHeader*, and that needs int64_t alignment which a
         //plain char array does not promise. Adding a small member above them would
@@ -208,14 +226,19 @@ namespace Com
                     
                     return;
                 }
+                auto runCount = m_runCount; // make copy
                 if (error)
                 {
-                    std::cout<<m_logPrefix.c_str()<<"Read failed, error "<<error.message().c_str()<<std::endl;
-                    SEND_SYSTEM_LOG(Error, <<m_logPrefix.c_str()<<L"Read failed, error "<<error.message().c_str());
+                    boost::asio::post(m_strand, [this, runCount, error, buf, socket]
+                    {
+                        if (runCount == m_runCount)
+                        {
+                            HandleReceiveError(error, buf, socket);
+                        }
+                    });
                     return;
                 }
 
-                auto runCount = m_runCount; // make copy
                 boost::asio::post(m_strand, [this, runCount, bytesRecv, buf, socket]
                 {
                     if (runCount == m_runCount)
@@ -246,12 +269,60 @@ namespace Com
             return checksum==crc.checksum();
         }
 
+        //A failed read must not be the end of the read loop, since nothing else would
+        //ever start it again and the node would stay up but deaf on that socket.
+        //Retrying straight away is not an option either: an error that persists
+        //would then spin and flood the log. So the read is started again from a
+        //timer, with a delay that doubles for every failure in a row up to
+        //MaxReadRetryDelay, and only the first failure in a row goes to the system log.
+        void HandleReceiveError(const boost::system::error_code& error, char* buf, boost::asio::ip::udp::socket* socket)
+        {
+            if (!m_running)
+            {
+                return;
+            }
+
+            auto& retry = socket == m_multicastSocket.get() ? m_multicastRetry : m_unicastRetry;
+            ++retry.failures;
+            const auto delay = retry.failures > 7 ? MaxReadRetryDelay
+                                                  : std::min(MaxReadRetryDelay, std::chrono::milliseconds(10 << (retry.failures - 1)));
+
+            if (retry.failures == 1)
+            {
+                std::cout<<m_logPrefix.c_str()<<"Read failed, error "<<error.message().c_str()<<". Will keep retrying."<<std::endl;
+                SEND_SYSTEM_LOG(Error, <<m_logPrefix.c_str()<<L"Read failed, error "<<error.message().c_str()<<L". Will keep retrying.");
+            }
+            else
+            {
+                lllog(7)<<m_logPrefix.c_str()<<L"Read failed again, error "<<error.message().c_str()<<L". "<<retry.failures
+                        <<L" failures in a row, next retry in "<<delay.count()<<L" ms"<<std::endl;
+            }
+
+            retry.pending = true;
+            retry.timer.expires_after(delay);
+            retry.timer.async_wait(boost::asio::bind_executor(m_strand, [this, &retry, runCount = m_runCount, buf, socket](const boost::system::error_code& timerError)
+            {
+                retry.pending = false;
+                if (!timerError && m_running && runCount == m_runCount)
+                {
+                    AsyncReceive(buf, socket);
+                }
+            }));
+        }
+
         void HandleReceive(size_t bytesRecv, char* buf, boost::asio::ip::udp::socket* socket)
         {
             //if we have got at stop-order just return and dont start a new read
             if (!m_running)
             {
                 return;
+            }
+
+            auto& retry = socket == m_multicastSocket.get() ? m_multicastRetry : m_unicastRetry;
+            if (retry.failures != 0)
+            {
+                lllog(7)<<m_logPrefix.c_str()<<L"Read works again after "<<retry.failures<<L" failures in a row"<<std::endl;
+                retry.failures = 0;
             }
 
             bool receiverReady=true;
@@ -353,8 +424,11 @@ namespace Com
                         m_multicastSocket->set_option(boost::asio::ip::multicast::leave_group(m_multicastEndpoint.address().to_v4()), ec); //leave group
                         m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address().to_v4(), m_unicastEndpoint.address().to_v4()), ec); //join group on specific interface
 
-                        // start a new async_read
-                        boost::asio::post(m_strand, [this]{AsyncReceive(m_bufferMulticast, m_multicastSocket.get());});
+                        // start a new async_read, unless one is already on its way after a failed read
+                        if (!m_multicastRetry.pending)
+                        {
+                            boost::asio::post(m_strand, [this]{AsyncReceive(m_bufferMulticast, m_multicastSocket.get());});
+                        }
                     }
                 }
             }

@@ -529,6 +529,232 @@ private:
 };
 
 
+//------------------------------------------------------------------
+// Failed reads must not stop a DataReceiver
+//------------------------------------------------------------------
+// Runs a DataReceiver on real loopback sockets, with a reader that can make
+// reads fail.
+//  1. One read fails on each socket. Both must deliver datagrams again (#614).
+//  2. Every unicast read fails for a while. The receiver must keep retrying
+//     without spinning, and deliver again once reads work.
+// The multicast half is skipped on hosts where multicast does not work on loopback.
+class DataReceiverReadErrorTest
+{
+public:
+    static void Run()
+    {
+        std::wcout<<"DataReceiverReadErrorTest started"<<std::endl;
+
+        boost::asio::io_context io;
+        auto work = boost::asio::make_work_guard(io);
+        boost::thread_group threads;
+        for (int i = 0; i < 3; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
+        boost::asio::io_context::strand strand(io);
+
+        const auto loopback = boost::asio::ip::make_address("127.0.0.1");
+        const boost::asio::ip::udp::endpoint unicastEp(loopback, FreePort(io));
+        const boost::asio::ip::udp::endpoint multicastEp(boost::asio::ip::make_address("239.192.1.1"), FreePort(io));
+        unicastPort = unicastEp.port();
+
+        FailingDataReceiver receiver(strand,
+                                     Endpoint(unicastEp),
+                                     Endpoint(multicastEp),
+                                     [](const char* data, size_t size, bool multicast){return Recv(data, size, multicast);},
+                                     []{return true;});
+        receiver.Start();
+
+        boost::asio::ip::udp::socket sender(io, boost::asio::ip::udp::v4());
+        boost::system::error_code ignored;
+        sender.set_option(boost::asio::ip::multicast::outbound_interface(loopback.to_v4()), ignored);
+        sender.set_option(boost::asio::ip::multicast::enable_loopback(true), ignored);
+
+        int value = 0;
+        const auto sendBoth = [&]
+        {
+            ++value;
+            Send(sender, unicastEp, value);
+            Send(sender, multicastEp, value);
+        };
+
+        //Both read loops work to begin with. Multicast gets a couple of seconds to show up.
+        auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        const auto multicastDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+        while (Last(lastUnicast) == 0 || (Last(lastMulticast) == 0 && std::chrono::steady_clock::now() < multicastDeadline))
+        {
+            CHECKMSG(std::chrono::steady_clock::now() < deadline, "No unicast received before any error was injected");
+            sendBoth();
+            Wait(100);
+        }
+        const bool multicastWorks = Last(lastMulticast) != 0;
+        if (!multicastWorks)
+        {
+            std::wcout<<"No multicast on loopback on this host, testing unicast only"<<std::endl;
+        }
+        TRACELINE
+
+        //--------------------------
+        // A single failed read
+        //--------------------------
+        //The datagram that completes the failing read is lost.
+        failUnicast = true;
+        failMulticast = multicastWorks;
+        deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        while (failUnicast || failMulticast)
+        {
+            CHECKMSG(std::chrono::steady_clock::now() < deadline, "The read errors were never injected");
+            sendBoth();
+            Wait(100);
+        }
+        int lastBeforeError = value;
+        TRACELINE
+
+        deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        while (Last(lastUnicast) <= lastBeforeError || (multicastWorks && Last(lastMulticast) <= lastBeforeError))
+        {
+            CHECKMSG(std::chrono::steady_clock::now() < deadline, "Read loop is dead after a single read error (#614)");
+            sendBoth();
+            Wait(100);
+        }
+        TRACELINE
+
+        //--------------------------
+        // Reads that keep failing
+        //--------------------------
+        //The read that is already waiting on the socket is a real one, so it takes
+        //a datagram to get to the first read that fails.
+        unicastAttempts = 0;
+        unicastDown = true;
+        deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        while (unicastAttempts == 0)
+        {
+            CHECKMSG(std::chrono::steady_clock::now() < deadline, "No read was started while reads were failing");
+            sendBoth();
+            Wait(10);
+        }
+        Wait(3000);
+        const int attempts = unicastAttempts;
+        std::wcout<<"Read attempts in 3 seconds of failing reads: "<<attempts<<std::endl;
+        //The delay doubles from 10 ms to a second, so 3 seconds is 9 or 10 attempts.
+        CHECKMSG(attempts >= 5, "The receiver gave up or is retrying far too seldom");
+        CHECKMSG(attempts <= 20, "The receiver is retrying too often");
+        lastBeforeError = value;
+        unicastDown = false;
+        TRACELINE
+
+        deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        while (Last(lastUnicast) <= lastBeforeError)
+        {
+            CHECKMSG(std::chrono::steady_clock::now() < deadline, "Unicast read loop did not recover after a period of failing reads");
+            sendBoth();
+            Wait(100);
+        }
+        TRACELINE
+
+        receiver.Stop();
+        Wait(200);
+        sender.close();
+        work.reset();
+        threads.join_all();
+
+        std::wcout<<"DataReceiverReadErrorTest tests passed"<<std::endl;
+    }
+
+private:
+    static boost::mutex mutex;
+    static int lastUnicast;
+    static int lastMulticast;
+    static unsigned short unicastPort;
+    static std::atomic<bool> failUnicast; //fail the next unicast read that gets a datagram
+    static std::atomic<bool> failMulticast; //the same for multicast
+    static std::atomic<bool> unicastDown; //fail every unicast read at once
+    static std::atomic<int> unicastAttempts; //unicast reads started while unicastDown
+
+    //A SocketReader whose reads can be made to fail.
+    struct FailingReader : private Com::SocketReader
+    {
+        void AsyncReceive(char* buf,
+                          size_t bufSize,
+                          boost::asio::ip::udp::socket* socket,
+                          const std::function< void(const boost::system::error_code&, size_t) >& completionHandler)
+        {
+            const bool unicast = socket->local_endpoint().port() == unicastPort;
+            if (unicast && unicastDown)
+            {
+                ++unicastAttempts;
+                boost::asio::post(socket->get_executor(), [completionHandler]{completionHandler(boost::asio::error::no_buffer_space, 0);});
+                return;
+            }
+
+            auto& fail = unicast ? failUnicast : failMulticast;
+            Com::SocketReader::AsyncReceive(buf, bufSize, socket, [&fail, completionHandler](const boost::system::error_code& ec, size_t size)
+            {
+                if (!ec && fail.exchange(false))
+                {
+                    completionHandler(boost::asio::error::no_buffer_space, 0);
+                }
+                else
+                {
+                    completionHandler(ec, size);
+                }
+            });
+        }
+    };
+
+    typedef Com::DataReceiverType<FailingReader> FailingDataReceiver;
+
+    static unsigned short FreePort(boost::asio::io_context& io)
+    {
+        boost::asio::ip::udp::socket socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::make_address("127.0.0.1"), 0));
+        return socket.local_endpoint().port();
+    }
+
+    static std::string Endpoint(const boost::asio::ip::udp::endpoint& ep)
+    {
+        return ep.address().to_string() + ":" + boost::lexical_cast<std::string>(ep.port());
+    }
+
+    static void Send(boost::asio::ip::udp::socket& socket, const boost::asio::ip::udp::endpoint& to, int val)
+    {
+        char data[sizeof(int) + sizeof(uint32_t)];
+        memcpy(data, &val, sizeof(int));
+        boost::crc_32_type crc;
+        crc.process_bytes(static_cast<const void*>(data), sizeof(int));
+        const uint32_t checksum = crc.checksum();
+        memcpy(data + sizeof(int), &checksum, sizeof(checksum));
+        //A host without a multicast route refuses the send, and then there is just no multicast half.
+        boost::system::error_code ignored;
+        socket.send_to(boost::asio::buffer(data), to, 0, ignored);
+    }
+
+    static bool Recv(const char* data, size_t size, bool multicast)
+    {
+        CHECK(size == sizeof(int));
+        int val;
+        memcpy(&val, data, sizeof(int));
+        boost::mutex::scoped_lock lock(mutex);
+        (multicast ? lastMulticast : lastUnicast) = val;
+        return true;
+    }
+
+    static int Last(const int& last)
+    {
+        boost::mutex::scoped_lock lock(mutex);
+        return last;
+    }
+};
+
+boost::mutex DataReceiverReadErrorTest::mutex;
+int DataReceiverReadErrorTest::lastUnicast = 0;
+int DataReceiverReadErrorTest::lastMulticast = 0;
+unsigned short DataReceiverReadErrorTest::unicastPort = 0;
+std::atomic<bool> DataReceiverReadErrorTest::failUnicast(false);
+std::atomic<bool> DataReceiverReadErrorTest::failMulticast(false);
+std::atomic<bool> DataReceiverReadErrorTest::unicastDown(false);
+std::atomic<int> DataReceiverReadErrorTest::unicastAttempts(0);
+
 //--------------------------------
 // Start DataReceiverTest tests
 //--------------------------------
@@ -538,5 +764,6 @@ struct DataReceiverTest
     {
         DataReceiverTester::Run();
         DataReceiverSimulateNetworkUpDownTest().Run();
+        DataReceiverReadErrorTest::Run();
     }
 };
