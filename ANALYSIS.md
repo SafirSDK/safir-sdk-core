@@ -27,6 +27,7 @@ every source path mentioned here live with the code:
   - [`run_light_nodes_smart_sync_tests` hang (Debug slow suite → TIMEOUT → red job)](#run_light_nodes_smart_sync_tests-hang-debug-slow-suite--timeout--red-job)
   - [multicomputer sequencer hang, cross-node partners never activate (multicomputer-master/-slaves → TIMEOUT → red job)](#multicomputer-sequencer-hang-cross-node-partners-never-activate-multicomputer-master--slaves--timeout--red-job)
   - [dose_main waits on persistence that never arrives, standalone (standalone → TIMEOUT → red job)](#dose_main-waits-on-persistence-that-never-arrives-standalone-standalone--timeout--red-job)
+  - [`lowmem_basic_operations`, an operation that should be refused is not](#lowmem_basic_operations-an-operation-that-should-be-refused-is-not)
   - [`215-huge_service` (+ the huge-message family)](#215-huge_service--the-huge-message-family)
 - [Errors reported through `syslog_output` and `safir_control.0.returncode`](#errors-reported-through-syslog_output-and-safir_control0returncode)
   - [What has actually been reported this way](#what-has-actually-been-reported-this-way)
@@ -284,6 +285,28 @@ these so you don't hunt for a nonexistent test regression:
   What was *not* done: the packages are still fetched from third-party mirrors on
   every run. Caching or self-hosting them is the only thing that would make this
   independent of someone else's uptime; retrying just rides the outage out.
+- **The WireGuard install in the overlay action.** The same class of failure as
+  the one above, in a different place: `.github/actions/wireguard-overlay`
+  installs WireGuard on a Windows master with `choco install wireguard`, and that
+  install was not behind the retry wrapper. On run 38429866975 (2026-10-13,
+  `8647787fe`) community.chocolatey.org answered `504 (Gateway Timeout)`, and
+  `multicomputer-master-vs2022` failed in "Establish WireGuard overlay" about a
+  minute into the job. Its slaves job failed seconds later with "Peer job ... has
+  already completed without publishing an endpoint", which is the fast give-up
+  working as intended, not a second problem. The other three pairings were fine.
+
+  How to recognise it: both halves of one *Windows* pairing red within a minute or
+  two of starting, the master in the overlay step with a choco error and
+  `wg.exe ... is not recognized`. Nothing was tested, so it says nothing about the
+  code.
+
+  **Mitigated in 9f5f806de** (2026-10-13): the install is retried, but for five
+  minutes only, not the 45 the test jobs use elsewhere, because time spent there
+  comes out of the window the peer job waits for the endpoint. So unlike a red
+  "Set up build environment", **a red here can still be a short outage** - check
+  whether chocolatey was down for more than a few minutes before reading anything
+  into it. The Linux side's `apt-get install wireguard-tools` in the same action
+  is still not retried.
 - **A job timeout reports as `cancelled`, not `failure`.** GitHub kills a job that
   exceeds `timeout-minutes` with `##[error]The operation was canceled.`, so the
   *run* ends up "cancelled" and looks like somebody pressed the button. Check the
@@ -580,6 +603,46 @@ especially on another standalone language combination, or back on
 `dotnet-java-cpp-dotnet-java` specifically — that is the point to open an issue,
 and the first thing worth adding is a way to see whether dope_main's process even
 started.
+
+### `lowmem_basic_operations`, an operation that should be refused is not
+
+Seen once, run 38429866975 (`8647787fe`, `develop`), in `slow-tests-vs2026-amd64`.
+A test-case failure: the job stayed green and the "Test results" Check went red,
+1 of 600. The same test passed in the run's other five slow-suite jobs (the four
+other platforms and the Debug one).
+Evidence is in `evidence/2026-10-13-38429866975-lowmem-delete-not-refused/`.
+
+**What happened.** `basic_operations`
+(`src/tests/low_memory/basic_operations/basic_operations.cpp`) allocates shared
+memory until the Dob reports a given memory level, and at each level checks which
+operations are refused with `LowMemoryException`. It got as far as VeryLow: the
+update that should be refused there was refused, `CheckLevel(VeryLow)` passed, and
+then `DeleteLast(true)` - a Delete the test expects to be refused - succeeded. The
+test throws `std::logic_error("Expected failure")` in that case and exits 1, and
+the driver reports it as `A process died`.
+
+**Theory, unverified:** the level was no longer VeryLow by the time the Delete ran.
+The level is derived from the segment's free memory, and the test is not the only
+thing allocating and freeing in it; `dose_main` is working in the same segment.
+And the gap between the check and the Delete is not small: `CheckLevel` first
+compares the level, and then polls the `NodeInfo` entity for up to 12 seconds until
+it reports the same level, because that entity is only updated every 10 seconds.
+Only the first of those two checks is of the level as it is now. So seconds can
+pass between "the level is VeryLow" and the Delete, and anything freed in that time
+can lift the level across the threshold. The test sits exactly on the thresholds by
+design (`AllocateUntilLevel` stops at the first allocation that reaches the level),
+so it would take very little. The whole application ran for 11 seconds here.
+
+**Not established:** the memory level at the time of the Delete, or what freed
+memory. Nothing in the output shows it.
+
+**Ruled out:** the commit under test. `8647787fe` removes a finalizer from the
+dotnet dose test partner, and the commit before it only touches the multicomputer
+CI jobs; neither is in this test's path.
+
+If it recurs, the cheap next step is to make the test print the level on both
+sides of each operation it expects to be refused, and in particular after
+`CheckLevel` returns.
 
 ### `215-huge_service` (+ the huge-message family)
 

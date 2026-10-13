@@ -1,0 +1,46 @@
+2026-10-13T18:12:51.838145 : Running slow test: run_lowmem_basic_operations_tests (timeout 900 s)
+2026-10-13T18:12:51.838145 : ======================================================================
+2026-10-13T18:12:51.943357 : Launched safir_control as pid 2592.
+2026-10-13T18:12:51.945116 : Launched dope_main as pid 2720.
+2026-10-13T18:12:51.963038 : Waiting for safir_control 2592 to be ready
+2026-10-13T18:13:02.186275 :  dose_main seems to be ready
+2026-10-13T18:13:02.192066 : Launched basic_operations as pid 5576.
+2026-10-13T18:13:13.197671 :  - Process basic_operations exited with code 1
+2026-10-13T18:13:13.197671 :  - Output:
+ Created entity instance 0
+Created entity instance 1
+Created entity instance 2
+Created entity instance 3
+Created entity instance 4
+Created entity instance 5
+Caught LowMemoryException true
+Updated entity instance 0
+Caught LowMemoryException true
+Deleted entity instance 5
+Caught exception: Dynamic exception type: class std::logic_error
+std::exception::what: Expected failure
+
+
+2026-10-13T18:13:14.198403 : Terminating all processes
+2026-10-13T18:13:14.198403 :  Terminating safir_control with pid 2592
+2026-10-13T18:13:14.299160 :    Terminate successful
+2026-10-13T18:13:14.299160 : -- basic_operations returncode is 1  -----
+2026-10-13T18:13:14.299160 : Created entity instance 0
+Created entity instance 1
+Created entity instance 2
+Created entity instance 3
+Created entity instance 4
+Created entity instance 5
+Caught LowMemoryException true
+Updated entity instance 0
+Caught LowMemoryException true
+Deleted entity instance 5
+Caught exception: Dynamic exception type: class std::logic_error
+std::exception::what: Expected failure
+
+
+2026-10-13T18:13:14.299160 : ----------------------------------
+2026-10-13T18:13:14.819240 : Test run_lowmem_basic_operations_tests.lowmem_basic_operations success: False
+2026-10-13T18:13:14.819240 :  - lowmem_basic_operations failed!
+2026-10-13T18:13:14.819240 : Wrote junit report D:\a\safir-sdk-core\safir-sdk-core\slow_test_junit\run_lowmem_basic_operations_tests\run_lowmem_basic_operations_tests.junit.xml (1 cases, 1 failed)
+2026-10-13T18:13:14.884758 : *** 'run_lowmem_basic_operations_tests': 1 test case(s) failed (see junit report).
