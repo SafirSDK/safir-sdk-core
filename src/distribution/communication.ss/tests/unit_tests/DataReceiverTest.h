@@ -530,12 +530,14 @@ private:
 
 
 //------------------------------------------------------------------
-// Failed reads must not stop a DataReceiver
+// Bad datagrams and failed reads must not stop a DataReceiver
 //------------------------------------------------------------------
 // Runs a DataReceiver on real loopback sockets, with a reader that can make
 // reads fail.
-//  1. One read fails on each socket. Both must deliver datagrams again (#614).
-//  2. Every unicast read fails for a while. The receiver must keep retrying
+//  1. Datagrams too short to hold a crc arrive on each socket. They must be
+//     thrown away, and both sockets must go on delivering.
+//  2. One read fails on each socket. Both must deliver datagrams again (#614).
+//  3. Every unicast read fails for a while. The receiver must keep retrying
 //     without spinning, and deliver again once reads work.
 // The multicast half is skipped on hosts where multicast does not work on loopback.
 class DataReceiverReadErrorTest
@@ -595,6 +597,27 @@ public:
         }
         TRACELINE
 
+        //--------------------------------------------
+        // Datagrams too short to hold a crc
+        //--------------------------------------------
+        //These used to crash the receiver, so getting past this at all is most of the test.
+        int lastBeforeError = value;
+        for (size_t size = 0; size < sizeof(uint32_t); ++size)
+        {
+            const char data[sizeof(uint32_t)] = {};
+            boost::system::error_code ignoredError;
+            sender.send_to(boost::asio::buffer(data, size), unicastEp, 0, ignoredError);
+            sender.send_to(boost::asio::buffer(data, size), multicastEp, 0, ignoredError);
+        }
+        deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        while (Last(lastUnicast) <= lastBeforeError || (multicastWorks && Last(lastMulticast) <= lastBeforeError))
+        {
+            CHECKMSG(std::chrono::steady_clock::now() < deadline, "Nothing received after datagrams too short to hold a crc");
+            sendBoth();
+            Wait(100);
+        }
+        TRACELINE
+
         //--------------------------
         // A single failed read
         //--------------------------
@@ -608,7 +631,7 @@ public:
             sendBoth();
             Wait(100);
         }
-        int lastBeforeError = value;
+        lastBeforeError = value;
         TRACELINE
 
         deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
