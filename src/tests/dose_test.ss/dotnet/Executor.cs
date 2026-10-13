@@ -1082,16 +1082,15 @@ namespace dose_test_dotnet
             }
         }
 
+        // There is deliberately no finalizer that calls Close. At process exit the
+        // finalizers run after the runtime has shut the console streams down, and the
+        // WriteLine below then throws, which makes the process exit with 255.
+        // The socket is released by its own finalizer.
         public void Close()
         {
             System.Console.WriteLine("Closing ActionReceiver");
             if(m_socket!=null)
                 m_socket.Close();
-        }
-
-        ~ActionReceiver()
-        {
-            Close();
         }
      }
     #endregion
