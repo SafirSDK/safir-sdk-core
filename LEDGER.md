@@ -76,6 +76,7 @@ the junit at all: `run_restart_nodes_tests` (last seen 2026-08-23, run
     2026-10-01  36916554564  a62ab20dc  multicomputer-tests (hang)                     multicomputer dose (overlay), ubuntu-noble-amd64   job-level TIMEOUT (55 min), no junit; StartupSynchronizer ruled out on all 4 nodes; evidence/2026-10-01-36916554564-multicomputer-sequencer-hang
     2026-10-08  37795274382  ce98a0586  syslog_output (Stuck in WaitingStates)        multinode dose, ubuntu-noble-amd64, dotnet-java-cpp-dotnet-java   matches the known SanityCheck/WaitingStates warning, new platform/combo; see ANALYSIS.md
     2026-10-08  37795274382  ce98a0586  dose_main waiting for persistence (hang)      standalone dose, debian-trixie-amd64, dotnet-java-cpp-dotnet-java   job-level TIMEOUT (59 min), no junit; dope_main produced no output at all; StartupSynchronizer ruled out (all lock markers present); attribution open; evidence/2026-10-08-37795274382-standalone-persistence-hang
+    2026-10-13  38409610110  b6b100b7f  dose_test_dotnet.2.returncode                  Debug multinode dose, ubuntu-noble-amd64, java-cpp-dotnet-java-cpp   exit 255, all testcases passed; finalizer wrote to the console at process exit; test-code bug, FIXED same day in 8647787fe; evidence/2026-10-13-38409610110-dotnet-finalizer-exit-255
 
 The shas for the backfilled rows were recovered from the run records on
 2026-09-29, while those still existed. Four of them are on

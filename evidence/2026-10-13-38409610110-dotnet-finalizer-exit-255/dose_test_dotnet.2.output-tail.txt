@@ -1,0 +1,49 @@
+[... 4780 lines of normal testcase output omitted; every testcase passed ...]
+
+--------- Test  -----------
+Writing ok
+Consumer 0: OnRegistered:
+  Type      = DoseTest.LimitedEntity
+  HandlerId = RegisterEntityHandlerInjection-DoseTest.LimitedEntity
+
+Got action Reset
+Writing ok
+Got action Print
+==========================================================================
+TESTCASE 9999
+Description: Empty Test case
+Expectation: Nothing
+--------- Setup -----------
+Writing ok
+Got action Print
+--------- Test  -----------
+Writing ok
+Got action Reset
+Writing ok
+Error in reading header.
+Closing ActionReceiver
+Got stop order
+Performing extra checks
+Exiting
+
+Unhandled Exception:
+System.NotSupportedException: Stream does not support writing
+  at System.IO.FileStream.Write (System.Byte[] array, System.Int32 offset, System.Int32 count) [0x0007b] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.StreamWriter.Flush (System.Boolean flushStream, System.Boolean flushEncoder) [0x00095] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.StreamWriter.WriteSpan (System.ReadOnlySpan`1[T] buffer, System.Boolean appendNewLine) [0x0018c] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.StreamWriter.WriteLine (System.String value) [0x0000d] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.TextWriter+SyncTextWriter.WriteLine (System.String value) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at (wrapper synchronized) System.IO.TextWriter+SyncTextWriter.WriteLine(string)
+  at System.Console.WriteLine (System.String value) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at dose_test_dotnet.ActionReceiver.Close () [0x00000] in <ea6d117ae4a14368addc0e09b2f1777f>:0 
+  at dose_test_dotnet.ActionReceiver.Finalize () [0x00000] in <ea6d117ae4a14368addc0e09b2f1777f>:0 
+[ERROR] FATAL UNHANDLED EXCEPTION: System.NotSupportedException: Stream does not support writing
+  at System.IO.FileStream.Write (System.Byte[] array, System.Int32 offset, System.Int32 count) [0x0007b] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.StreamWriter.Flush (System.Boolean flushStream, System.Boolean flushEncoder) [0x00095] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.StreamWriter.WriteSpan (System.ReadOnlySpan`1[T] buffer, System.Boolean appendNewLine) [0x0018c] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.StreamWriter.WriteLine (System.String value) [0x0000d] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at System.IO.TextWriter+SyncTextWriter.WriteLine (System.String value) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at (wrapper synchronized) System.IO.TextWriter+SyncTextWriter.WriteLine(string)
+  at System.Console.WriteLine (System.String value) [0x00000] in <12b418a7818c4ca0893feeaaf67f1e7f>:0 
+  at dose_test_dotnet.ActionReceiver.Close () [0x00000] in <ea6d117ae4a14368addc0e09b2f1777f>:0 
+  at dose_test_dotnet.ActionReceiver.Finalize () [0x00000] in <ea6d117ae4a14368addc0e09b2f1777f>:0 

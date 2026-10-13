@@ -35,6 +35,7 @@ every source path mentioned here live with the code:
   - [The two pending-registration conversions (`155`, `353`), 2026-08-28](#the-two-pending-registration-conversions-155-353-2026-08-28)
 - [Fixed / dormant](#fixed--dormant)
   - [`Communication_ResetTest` — FIXED 2026-06-30 (was Windows-only)](#communication_resettest--fixed-2026-06-30-was-windows-only)
+  - [`dose_test_dotnet.N.returncode`, exit 255 from the `ActionReceiver` finalizer — FIXED 2026-10-13](#dose_test_dotnetnreturncode-exit-255-from-the-actionreceiver-finalizer--fixed-2026-10-13)
   - [`361-inject_update_and_delete_for_existing_entity` — dormant, race narrowed 2026-08-27](#361-inject_update_and_delete_for_existing_entity--dormant-race-narrowed-2026-08-27)
 
 ## Policy: defer flakiness unless it's ours
@@ -484,6 +485,15 @@ path — master → bridge → each container IP, at a size comparable to an act
 datagram — run once before the suite starts, would turn this class of failure into
 a setup-time error in seconds instead of a 55-minute timeout. Nobody has written
 that check yet.
+
+**Update 2026-10-13: that check now exists** (`b6b100b7f` on `develop`, issue #619,
+closed). Both multicomputer jobs run `build/ci/udp_mesh_probe.py` on all four nodes
+before the Dob is started, on the Dob's own ports and at `FragmentSize`. So on a
+recurrence, look at the probe first: if it failed, it was the overlay; if it passed
+and the suite still hung, that points at the product. It does not explain this
+occurrence. How to read a probe result, and its limits, is in the repository's
+`AGENTS.md` → "The UDP mesh probe (#619)". In its first two runs (38351872586 and
+38409610110, all four pairings each) every leg passed with no loss.
 
 **Why only this one pairing, and only this once:** the other three multicomputer
 pairings in the same run (`vs2026`, `vs2022`, `ubuntu-noble-arm64`) all succeeded —
@@ -983,6 +993,44 @@ been observed; #614 says a repro comes first.
 
 > The code-level line references above were accurate as of the 2026-06/07
 > investigation; verify against current source before acting on them.
+
+### `dose_test_dotnet.N.returncode`, exit 255 from the `ActionReceiver` finalizer — FIXED 2026-10-13
+
+Seen once, run 38409610110 (`b6b100b7f`, `develop`), in
+`debug-multinode-ubuntu-noble-amd64`: `dose_test_dotnet.2.returncode` failed
+because the partner exited with 255, while all testcases passed. It turned the
+whole run red only because the Debug jobs hard-fail on any test failure. Evidence
+is in `evidence/2026-10-13-38409610110-dotnet-finalizer-exit-255/`.
+
+**Cause: a bug in test code, not in the Dob.** `ActionReceiver` in
+`src/tests/dose_test.ss/dotnet/Executor.cs` had a finalizer that called `Close()`,
+and `Close()` starts with a `Console.WriteLine`. When the finalizer ran at process
+exit after mono had shut the console streams down, the write threw
+`System.NotSupportedException: Stream does not support writing`, and an unhandled
+exception in a finalizer ends the process with 255. Whether it happens depends on
+the order mono tears things down at exit, so it is a race and was always possible;
+any `dose_test_dotnet` partner in any dose suite could have hit it.
+
+**Fixed in 8647787fe** (2026-10-13) by removing the finalizer. `Close()` is still
+called explicitly and the socket is released by its own finalizer.
+
+**How to recognise it, and what to do if you see it again.** The signature is a
+`dose_test_dotnet.N.returncode` failure with return code 255 and, at the very end
+of `dose_test_dotnet.N.output.txt`, a stack trace through
+`ActionReceiver.Finalize()`. On a commit that contains 8647787fe that cannot be
+this bug: the finalizer no longer exists, so investigate it as new. On an older
+commit (a branch cut before 2026-10-13) it is this, and it says nothing about what
+that branch changed - rebase and move on.
+
+**Ruled out as having the same problem** when this was fixed: the Java partner's
+`ActionReceiver` has no finalizer or cleaner, and its `Cleaner` actions elsewhere
+only decrement a counter. The C++ partner's `~ActionReceiver()` also calls a
+`Close()` that writes to `std::wcout`, but it is a member of `Executor`, a local in
+`main`, so it is destroyed while the streams are alive. The other dotnet finalizers
+(`~Dispatcher`, `~StopHandler`, `~Consumer`) only decrement a counter.
+
+Confirmation is a ledger query: no `dose_test_dotnet.*returncode` line with a 255
+after 2026-10-13 on a commit containing the fix.
 
 ### `361-inject_update_and_delete_for_existing_entity` — dormant, race narrowed 2026-08-27
 

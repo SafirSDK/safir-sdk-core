@@ -1,0 +1,9 @@
+2026-10-13T14:38:02.196180 : Test dose_test_cpp.2.returncode  success: True
+2026-10-13T14:38:02.196292 : Test dose_test_dotnet.2.returncode  success: False
+2026-10-13T14:38:02.196302 :  - dose_test_dotnet.2.returncode failed!
+2026-10-13T14:38:02.196333 :  dose_test_dotnet.2 exited with returncode 255
+2026-10-13T14:38:02.196397 : Test dose_test_java.2.returncode  success: True
+2026-10-13T14:38:05.251622 : !! 1 testcases appear to have failed!
+276 testcases in 276 junit reports, 1 failed
+  FAILED (failure): dose_test.dose_test_dotnet.2.returncode
+##[error]Process completed with exit code 1.
