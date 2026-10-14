@@ -812,7 +812,14 @@ downloads. This restored what the retired Jenkins pipeline archived as
   overwrite dialog that no runner can answer. Also pass `choco` an
   `--execution-timeout` well under its 2700s default so a hang costs minutes.
   The Linux exception: retry `update`+`install` as one unit, because a
-  stale-index 404 is not fixed by re-running `install`. See the `test-status`
+  stale-index 404 is not fixed by re-running `install`.
+- **Do not trust `choco`'s exit code.** When community.chocolatey.org answers the
+  package lookup with a 504, `choco install` prints "Unable to find package" and
+  "installed 0/0 packages" and exits **0**, so a retry conditioned on the exit
+  code never fires. Run 38564161733 lost its vs2026 row that way, 50 minutes
+  later in `makensis`. Every retried choco unit must also check that the package
+  is really there: `setup-build-env` checks for its directory under the
+  chocolatey `lib` folder, `wireguard-overlay` runs `wg.exe`. See the `test-status`
   branch's `ANALYSIS.md` → "Third-party package fetches" for the failures that
   prompted all this.
 

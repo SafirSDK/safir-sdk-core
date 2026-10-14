@@ -185,8 +185,21 @@ runs:
         # install costs minutes rather than three quarters of an hour. The whole
         # batch installs in about 75s when nothing is wrong, so this is roughly
         # an order of magnitude of headroom for the slowest single package.
+        #
+        # choco's exit code cannot be trusted to say whether anything was
+        # installed. When community.chocolatey.org answers the package lookup
+        # with a 504, choco prints "Unable to find package" and "installed 0/0
+        # packages" and exits 0. Run 38564161733 lost its vs2026 row that way: the
+        # retry never fired, nsis was missing, and the build failed 50 minutes
+        # later in makensis. So an install only counts once the package's
+        # directory exists under the chocolatey lib folder.
+        choco_lib="$(cygpath -u "${ChocolateyInstall:-C:\ProgramData\chocolatey}")/lib"
         install_choco_package() {
-          choco install "$1" --no-progress -y --execution-timeout 600 $(force_on_retry)
+          choco install "$1" --no-progress -y --execution-timeout 600 $(force_on_retry) || return 1
+          [ -d "${choco_lib}/$1" ] && return 0
+          echo "choco reported success, but ${choco_lib}/$1 does not exist. It has:"
+          ls "${choco_lib}"
+          return 1
         }
 
         for package in nsis doxygen.install graphviz dia dejavufonts gzip asciidoctorj; do
