@@ -1264,7 +1264,7 @@ namespace SP
                         //find index to swap to last (that is the index that the current pair
                         //points to
                         int swapIndex = -1;
-                        for (int i = 0; m_allStatisticsMessage.node_info_size(); ++i)
+                        for (int i = 0; i < m_allStatisticsMessage.node_info_size(); ++i)
                         {
                             if (m_allStatisticsMessage.node_info(i).id() == id)
                             {
