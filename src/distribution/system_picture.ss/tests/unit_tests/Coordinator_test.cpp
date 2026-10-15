@@ -540,6 +540,54 @@ SystemStateMessage GetStateWithOneLightnode()
 }
 
 
+//A state from the elected coordinator that does not contain this node yet, which
+//is what the first state from a newly elected coordinator looks like before it has
+//received our raw data. The Coordinator is supposed to discard such a state.
+SystemStateMessage GetStateWithoutSelf()
+{
+    SystemStateMessage msg;
+    msg.set_elected_id(1001);
+    msg.set_election_id(100);
+    msg.set_is_detached(false);
+
+    auto node = msg.add_node_info();
+    node->set_name("remote1");
+    node->set_id(1001);
+    node->set_node_type_id(10);
+    node->set_control_address("remote1:control");
+    node->set_data_address("remote1:data");
+    node->set_is_dead(false);
+    return msg;
+}
+
+
+//An inconsistent state, in which remote2 is listed both as dead and as alive. No
+//correct coordinator produces this, but a state can come from another node, so the
+//Coordinator has sanity checks for it.
+SystemStateMessage GetStateWithANodeBothDeadAndAlive()
+{
+    SystemStateMessage msg;
+    msg.set_elected_id(1001);
+    msg.set_election_id(100);
+    msg.set_is_detached(false);
+
+    for (const auto& node: {std::make_tuple("remote1", 1001, false),
+                            std::make_tuple("myself", 1000, false),
+                            std::make_tuple("remote2", 1002, true),
+                            std::make_tuple("remote2", 1002, false)})
+    {
+        auto nodeInfo = msg.add_node_info();
+        nodeInfo->set_name(std::get<0>(node));
+        nodeInfo->set_id(std::get<1>(node));
+        nodeInfo->set_node_type_id(10);
+        nodeInfo->set_control_address("control");
+        nodeInfo->set_data_address("data");
+        nodeInfo->set_is_dead(std::get<2>(node));
+    }
+    return msg;
+}
+
+
 SystemStateMessage GetStateWithTwoNodes()
 {
     SystemStateMessage msg;
@@ -1300,6 +1348,38 @@ BOOST_AUTO_TEST_CASE( normal_and_two_lightnodes )
 
 }
 
+//A node that appears in the last state as both dead and alive is an inconsistency
+//that the Coordinator is supposed to catch. The exemption for nodes we're busy
+//resurrecting must not turn into an exemption for everything else.
+BOOST_AUTO_TEST_CASE( node_both_dead_and_alive_in_last_state )
+{
+    //take in the inconsistent state from the elected node 1001
+    ElectionHandlerStub::lastInstance->electedId = 1001;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1001,100);
+    rh.rawCb(GetRawWithOneNodeAndRemoteRaw({10,10}),RawChanges(RawChanges::NODES_CHANGED),cs);
+
+    auto state = GetStateWithANodeBothDeadAndAlive();
+    const size_t size = state.ByteSizeLong();
+    auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
+    state.SerializeWithCachedSizesToArray
+        (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+    coordinator.NewRemoteStatistics(1001,data,size);
+    ioContext.run();
+
+    //now get ourselves elected, so that we start producing states from that one
+    ElectionHandlerStub::lastInstance->electedId = 1000;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
+    rh.rawCb(GetRawWithOneNodeAndRemoteRaw({10,10}),RawChanges(RawChanges::NEW_REMOTE_STATISTICS),cs);
+
+    ioContext.restart();
+    BOOST_CHECK_EXCEPTION(ioContext.run(), std::logic_error,
+                          [](const std::logic_error& e)
+                          {
+                              return std::string(e.what()) ==
+                                  "Live node was already defined as dead in last state!";
+                          });
+}
+
 BOOST_AUTO_TEST_CASE( normal_and_two_lightnodes_invalid_dead )
 {
     //check that a lightnode cannot mark another lightnode as dead
@@ -1582,6 +1662,69 @@ BOOST_AUTO_TEST_CASE( detached_lightnode )
     BOOST_CHECK(!stateMessage.node_info(0).is_dead());
 
     BOOST_CHECK(rh.deadNodes.empty());
+}
+
+//A state that we discard must not leave any of its fields behind in our own state.
+//is_detached matters most: it is what tells the RawHandler's join validation that
+//this light node is allowed to adopt the new coordinator's incarnation id, so
+//clearing it on the strength of a rejected state stopped us reattaching.
+BOOST_AUTO_TEST_CASE( discarded_state_does_not_clear_detached )
+{
+    bool detached = false;
+    const auto readDetached = [this,&detached]
+                              {
+                                  boost::asio::dispatch(strand,
+                                                        [this,&detached]
+                                                        {detached = coordinator.IsDetached();});
+                                  ioContext.restart();
+                                  ioContext.run();
+                              };
+
+    //get ourselves into the detached state
+    ElectionHandlerStub::lastInstance->isLightNode = true;
+    ElectionHandlerStub::lastInstance->electedId = 1000;
+    ElectionHandlerStub::lastInstance->isDetached = true;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
+    rh.rawCb(GetRawDetachedLightnode(),RawChanges(RawChanges::NODES_CHANGED),cs);
+    readDetached();
+    BOOST_REQUIRE(detached);
+
+    //Node 1001 turns up and wins the election, so we accept its victory. It has not
+    //got our raw data yet, so its first system state does not contain us and we
+    //discard it.
+    ElectionHandlerStub::lastInstance->isDetached = false;
+    ElectionHandlerStub::lastInstance->electedId = 1001;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1001,101);
+
+    {
+        auto state = GetStateWithoutSelf();
+        const size_t size = state.ByteSizeLong();
+        auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
+        state.SerializeWithCachedSizesToArray
+            (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+        coordinator.NewRemoteStatistics(1001,data,size);
+        ioContext.restart();
+        ioContext.run();
+    }
+
+    //We discarded that state, so we have not attached to anything yet.
+    readDetached();
+    BOOST_CHECK(detached);
+
+    //And once node 1001 does send us a state that we are in, we attach.
+    {
+        auto state = GetStateWithOneLightnode();
+        const size_t size = state.ByteSizeLong();
+        auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
+        state.SerializeWithCachedSizesToArray
+            (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+        coordinator.NewRemoteStatistics(1001,data,size);
+        ioContext.restart();
+        ioContext.run();
+    }
+
+    readDetached();
+    BOOST_CHECK(!detached);
 }
 
 BOOST_AUTO_TEST_CASE( detach_and_reattach )
