@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014 (http://safirsdkcore.com)
+* Copyright Saab AB, 2014, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -72,7 +72,8 @@ namespace SP
         int m_flags;
     };
 
-    std::wostream& operator<<(std::wostream& out, const RawChanges& flags)
+    /** Output operator for RawChanges. */
+    static inline std::wostream& operator<<(std::wostream& out, const RawChanges& flags)
     {
         flags.Print(out);
         return out;

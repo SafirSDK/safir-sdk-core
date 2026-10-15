@@ -1173,7 +1173,6 @@ namespace SP
         std::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
 
         SystemStateMessage m_stateMessage;
-        std::atomic<bool> m_isDetached;
         std::map<int64_t,int> m_resurrectingNodes; //second is how many more raws need to be received before resurrect is complete
         const std::string m_name;
         const int64_t m_id;
