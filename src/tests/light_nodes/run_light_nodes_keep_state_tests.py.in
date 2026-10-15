@@ -73,6 +73,7 @@ def test_case(name):
 
 @contextmanager
 def launch_node(safir_instance, node_id):
+    env = None
     try:
         session_id = str(uuid.uuid4())
         os.environ["SAFIR_COM_NETWORK_SIMULATION"] = session_id # Enable network simulation
@@ -87,8 +88,11 @@ def launch_node(safir_instance, node_id):
         env.launchProcess("safir_web", SAFIR_WEB)
         yield env
     finally:
-        log("--- kill node" + str(node_id))
-        env.killprocs()
+        #env is None if the node failed to start, and then that error is the one to see
+        if env is not None:
+            log("--- kill node" + str(node_id))
+            env.killprocs(keep_syslog=True)
+            env.SaveOutput(os.environ["LLL_LOGDIR"], "node_" + str(node_id))
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -187,6 +191,10 @@ class SafirApp:
         self.registrations = dict()
         self.last_pool_update = time.time()
         self.stopped = False
+        self.requests_sent = 0
+        self.responses_received = 0
+        self.last_response_id = None
+        self.last_message_time = None
         self._setup_dob()
         self.task = asyncio.create_task(self._run())
 
@@ -216,8 +224,18 @@ class SafirApp:
         self.dump_pool()
         raise AssertionError("app" + str(self.node_id) +" did not get NodeInfo.State='" + state +"' within " + str(timeout) + " seconds. Current NodeInfo: " + str(self.entities.get(nodeInfoEntityId)))
 
+    #The pool in dump_pool is what this client has seen through its subscriptions, so
+    #also show how far it got: requests stuck here, requests never answered, or all
+    #answered and subscription callbacks that stopped coming.
+    def log_progress(self):
+        since = "never" if self.last_message_time is None else "%.1f s ago" % (time.time() - self.last_message_time)
+        log(f"  Client: sent {self.requests_sent} requests, {self.sendQueue.qsize()} still queued, "
+            f"{self.responses_received} responses (last id {self.last_response_id}), "
+            f"last message from safir_web {since}")
+
     def dump_pool(self):
         log("=== Node: " + str(self.node_id) + ", safir_instance: " + str(self.safir_instance) + " ===")
+        self.log_progress()
         log("  Registrations:")
         for val in dict_to_sorted_list(self.registrations):
             log("    " + val)
@@ -252,7 +270,11 @@ class SafirApp:
         async for message in self.ws:
             try:
                 msg = json.loads(message)
+                self.last_message_time = time.time()
                 callback = method(msg)
+                if callback is None: # a response to one of our requests
+                    self.responses_received += 1
+                    self.last_response_id = msg.get("id")
                 if callback in ["onNewEntity", "onUpdatedEntity"] and not ignore_type(msg):
                     self.last_pool_update = time.time()
                     entity_id = dou_type(msg) + ":" + str(instance_id(msg))
@@ -287,6 +309,7 @@ class SafirApp:
             self.sendQueue.task_done()
             if msg is not None:
                 await self.ws.send(msg)
+                self.requests_sent += 1
             else:
                 await self.ws.close()
                 return
