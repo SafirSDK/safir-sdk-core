@@ -127,6 +127,10 @@ def handler_id(msg):
 def entity(msg):
     return msg["params"]["entity"]
 
+# The text of a websockets exception says what happened (e.g. "keepalive ping timeout"), its repr does not
+def describe(e):
+    return type(e).__name__ + ": " + str(e)
+
 # Some types we just ignore since they are hard to predict in the test cases
 def ignore_type(msg):
     return dou_type(msg) in ["Safir.Dob.ProcessInfo", "Safir.Dob.PersistentDataStatus"]
@@ -156,6 +160,7 @@ async def check_pool(app, expected_registrations, expected_entities):
     pool_timestamp = app.last_pool_update
     num_tries = 0
     while pool_timestamp < app.last_pool_update or num_tries < 60:
+        app.check_connection()
         num_tries = num_tries +1
         pool_timestamp = app.last_pool_update
         if _check():
@@ -195,6 +200,8 @@ class SafirApp:
         self.responses_received = 0
         self.last_response_id = None
         self.last_message_time = None
+        self.connected = False
+        self.connection_error = None
         self._setup_dob()
         self.task = asyncio.create_task(self._run())
 
@@ -215,6 +222,7 @@ class SafirApp:
         while t < timeout:
             t = t + 3
             await asyncio.sleep(3)
+            self.check_connection()
             nodeInfo = self.entities.get(nodeInfoEntityId)
             if nodeInfo is not None and state in nodeInfo:
                 log(f"Node state received after {t} seconds")
@@ -224,6 +232,13 @@ class SafirApp:
         self.dump_pool()
         raise AssertionError("app" + str(self.node_id) +" did not get NodeInfo.State='" + state +"' within " + str(timeout) + " seconds. Current NodeInfo: " + str(self.entities.get(nodeInfoEntityId)))
 
+    def check_connection(self):
+        if self.connection_error is not None:
+            log("*** node_" + str(self.node_id) + " has no connection to safir_web, dump pool")
+            self.dump_pool()
+            raise AssertionError("app" + str(self.node_id) + " has no connection to safir_web: " +
+                                 describe(self.connection_error))
+
     #The pool in dump_pool is what this client has seen through its subscriptions, so
     #also show how far it got: requests stuck here, requests never answered, or all
     #answered and subscription callbacks that stopped coming.
@@ -232,6 +247,8 @@ class SafirApp:
         log(f"  Client: sent {self.requests_sent} requests, {self.sendQueue.qsize()} still queued, "
             f"{self.responses_received} responses (last id {self.last_response_id}), "
             f"last message from safir_web {since}")
+        if self.connection_error is not None:
+            log("  Client: no connection to safir_web: " + describe(self.connection_error))
 
     def dump_pool(self):
         log("=== Node: " + str(self.node_id) + ", safir_instance: " + str(self.safir_instance) + " ===")
@@ -251,6 +268,7 @@ class SafirApp:
                 async with websockets.connect(uri) as ws:
                     self.ws = ws
                     log("--- Node " + str(self.node_id) + " is connected to the DOB")
+                    self.connected = True
                     await asyncio.gather(self._reader(), self._sender())
                     break;
             except ConnectionRefusedError as e:
@@ -258,13 +276,22 @@ class SafirApp:
                 if connectTry == 9:
                     log("*** Failed to connect, ConnectionRefusedError! uri= " + uri)
                     log(e)
-                    raise
+                    self.connection_error = e
+                    return
             except Exception as e:
+                if self.connected:
+                    #The Dob connection behind the websocket is gone, and with it everything this
+                    #client registered and owned, so its view of the pool can not come back to what
+                    #the test expects. Fail the test case with the cause rather than wait it out.
+                    self.connection_error = e
+                    log("*** node_" + str(self.node_id) + " lost its connection to safir_web: " + describe(e))
+                    return
                 await asyncio.sleep(5)
                 if connectTry == 9:
                     log("*** Failed to connect, Exception! uri= " + uri)
                     log(e)
-                    raise
+                    self.connection_error = e
+                    return
 
     async def _reader(self):
         async for message in self.ws:
