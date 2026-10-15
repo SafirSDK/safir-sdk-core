@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014 (http://safirsdkcore.com)
+* Copyright Saab AB, 2014, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -679,7 +679,7 @@ public:
 
     void ForceElection()
     {
-
+        ++forceElectionCount;
     }
 
     void Stop()
@@ -693,6 +693,7 @@ public:
     bool isLightNode = false;
     bool stopped = false;
     bool nodesChangedCalled = false;
+    int forceElectionCount = 0;
 
     const std::function<void(const int64_t nodeId,
                              const int64_t electionId)> electionCompleteCallback;
@@ -1487,6 +1488,60 @@ BOOST_AUTO_TEST_CASE( two_normal_nodes_and_two_lightnodes_with_partial_connectiv
     }
 
 
+}
+
+//The coordinator forces a reelection when it has failed 60 state updates in a row,
+//to get itself unstuck. Separate short bursts of failures must not add up to that.
+BOOST_AUTO_TEST_CASE( failed_state_updates_are_consecutive )
+{
+    //Drive UpdateMyState without any new raw data, which fails the prerequisites
+    //for as long as remote1 has sent us no raw data of its own.
+    const auto failRepeatedly = [this](const int times)
+                                {
+                                    for (int i = 0; i < times; ++i)
+                                    {
+                                        coordinator.PerformOnStateMessage([](std::unique_ptr<char []>,
+                                                                             const size_t){},
+                                                                          true);
+                                        ioContext.restart();
+                                        ioContext.run();
+                                    }
+                                };
+
+    ElectionHandlerStub::lastInstance->electedId = 1000;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
+
+    //first burst of failures
+    rh.rawCb(GetRawWithOneNode({10,10}),RawChanges(RawChanges::NODES_CHANGED),cs);
+    ioContext.run();
+    failRepeatedly(34);
+    BOOST_CHECK_EQUAL(ElectionHandlerStub::lastInstance->forceElectionCount,0);
+
+    //one successful state update in between
+    rh.rawCb(GetRawWithOneNodeAndRemoteRaw({10,10}),RawChanges(RawChanges::NEW_REMOTE_STATISTICS),cs);
+    bool stateWasProduced = false;
+    coordinator.PerformOnStateMessage([&stateWasProduced](std::unique_ptr<char []>,
+                                                          const size_t)
+                                      {
+                                          stateWasProduced = true;
+                                      },
+                                      true);
+    ioContext.restart();
+    ioContext.run();
+    BOOST_REQUIRE(stateWasProduced);
+
+    //second burst of failures
+    rh.rawCb(GetRawWithOneNode({10,10}),RawChanges(RawChanges::NEW_REMOTE_STATISTICS),cs);
+    ioContext.restart();
+    ioContext.run();
+    failRepeatedly(34);
+
+    //Neither burst came anywhere near 60 failures in a row.
+    BOOST_CHECK_EQUAL(ElectionHandlerStub::lastInstance->forceElectionCount,0);
+
+    //But a long enough unbroken run of failures still does force a reelection.
+    failRepeatedly(30);
+    BOOST_CHECK_EQUAL(ElectionHandlerStub::lastInstance->forceElectionCount,1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

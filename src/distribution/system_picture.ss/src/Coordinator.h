@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -722,6 +722,12 @@ namespace SP
                 }
                 return false;
             }
+
+            //The count above is meant to detect being stuck, i.e. consecutive failures,
+            //so getting past the prerequisites clears it. Without this, short bursts of
+            //failures from unrelated events (a new node whose raw data we are waiting
+            //for, say) add up over time until any single failure forces a reelection.
+            m_failedStateUpdates = 0;
 
             lllog(9) << m_logPrefix << "Passed all checks, looking for dead nodes that "
                      << "I need to exclude before updating my state\n";
