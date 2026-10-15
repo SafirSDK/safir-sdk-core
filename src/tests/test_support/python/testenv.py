@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import subprocess, sys, time, signal, shutil
+import subprocess, sys, os, time, signal, shutil
 import syslog_server
 from threading import Thread
 from queue import Queue, Empty
@@ -164,7 +164,10 @@ class TestEnv:
         except OSError:
             pass
 
-    def killprocs(self):
+    def killprocs(self, keep_syslog=False):
+        """Stop all processes, safir_control first. Stopping the syslog server
+        throws away what it has received and not yet handed out, unless keep_syslog
+        is set, in which case it is kept for Syslog() and SaveOutput()."""
         log("Terminating all processes")
         self.__kill("safir_control", self.safir_control, timeout=360)
 
@@ -184,7 +187,9 @@ class TestEnv:
                 log("----------------------------------")
 
         if self.start_syslog_server == True:
-            self.syslog.stop()
+            data = self.syslog.stop()
+            if keep_syslog:
+                self.syslog_output.append(data)
 
     def Syslog(self):
         if self.start_syslog_server == True:
@@ -200,6 +205,18 @@ class TestEnv:
         except Empty:
             pass
         return "\n".join(output) + "\n"
+
+    def SaveOutput(self, directory, prefix):
+        """Write the output of every process, and the syslog if this env runs the
+        syslog server, to <prefix>.<name>.txt files in directory. Call it after
+        killprocs, when the output is complete."""
+        os.makedirs(directory, exist_ok=True)
+        files = {name: self.Output(name) for name in self.__procs}
+        if self.start_syslog_server == True:
+            files["syslog"] = "".join(self.syslog_output)
+        for name, content in files.items():
+            with open(os.path.join(directory, f"{prefix}.{name}.txt"), "w", encoding="utf-8") as f:
+                f.write(content)
 
     def WaitForOutput(self, name, expected_output):
         while True:
