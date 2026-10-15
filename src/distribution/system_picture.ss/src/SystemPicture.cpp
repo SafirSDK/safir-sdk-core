@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012 (http://safirsdkcore.com)
+* Copyright Saab AB, 2012, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -135,18 +135,14 @@ namespace SP
                                                               lllog(6) << m_logPrefix << "validateJoinSystemCallback incarnationIdChanged = "
                                                                        << std::boolalpha << incarnationIdChanged << ", detached = "
                                                                        << detached << std::endl;
-                                                              if (detached && incarnationIdChanged)
-                                                              {
-                                                                  return validateJoinSystemCallback(incarnationId);
-                                                              }
-                                                              else if (incarnationIdChanged)
+                                                              //Only a detached node is allowed
+                                                              //to move to another incarnation.
+                                                              if (incarnationIdChanged && !detached)
                                                               {
                                                                   return false;
                                                               }
-                                                              else
-                                                              {
-                                                                  return validateJoinSystemCallback(incarnationId);
-                                                              }
+
+                                                              return validateJoinSystemCallback(incarnationId);
                                                           },
                                                           validateFormSystemCallback))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(m_logPrefix,
