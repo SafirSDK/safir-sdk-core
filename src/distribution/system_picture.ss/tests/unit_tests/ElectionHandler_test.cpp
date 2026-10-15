@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2014, 2022, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -356,6 +356,25 @@ struct Node
 
 };
 
+//Hand an election message straight to a node's data receiver, bypassing the
+//Connector. Used to deliver messages from nodes that the receiver does not (yet)
+//know about, which the Connector cannot express.
+void SendElectionMessage(Communication& comm,
+                         const int64_t from,
+                         const ElectionAction action,
+                         const int64_t electionId)
+{
+    ElectionMessage message;
+    message.set_action(action);
+    message.set_election_id(electionId);
+
+    const auto size = message.ByteSizeLong();
+    char* const data = comm.allocator(size);
+    message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data));
+
+    comm.receiveDataCb(from, 10, data, size);
+}
+
 template <int64_t ownNodeType>
 struct Fixture
 {
@@ -507,6 +526,47 @@ struct Fixture
 };
 
 BOOST_FIXTURE_TEST_SUITE( self_is_normal, Fixture<10> )
+
+//Communication starts delivering data from a new node before it tells us that the
+//node exists, and the NewNode notification reaches us two posted hops later, on a
+//different strand. So an election message can arrive before we have any statistics
+//at all, and we have to cope with that rather than walking an invalid RawStatistics.
+BOOST_AUTO_TEST_CASE( election_message_before_first_nodes_changed )
+{
+    SendElectionMessage(nodes.at(0)->comm, 20, VICTORY, 4711);
+
+    //Stop before running, so that the alone timeout doesn't elapse and elect us
+    //instead. Stop is posted after the message above, so the message is handled first.
+    nodes.at(0)->eh->Stop();
+    RunIoService();
+
+    //We handled the VICTORY from node 20, even though we hadn't heard about node 20.
+    BOOST_CHECK(nodes.at(0)->eh->IsElected(20));
+    BOOST_CHECK_EQUAL(nodes.at(0)->electedNode, 20);
+    BOOST_CHECK_EQUAL(nodes.at(0)->electionId, 4711);
+}
+
+//A node that we do have statistics for and that we have marked as dead is a
+//different matter: we must not accept its victory. That has always worked, and has
+//to keep working now that an unknown node no longer gets the same treatment.
+BOOST_AUTO_TEST_CASE( victory_from_dead_node_is_not_accepted )
+{
+    AddNode();
+    SendNodesChanged(true);
+    RemoveNode(1);
+    SendNodesChanged(true);
+
+    //Node 1 has a higher id than we do, so we would accept this victory if we had not
+    //marked the node as dead.
+    BOOST_REQUIRE_GT(nodes.at(1)->id, nodes.at(0)->id);
+    SendElectionMessage(nodes.at(0)->comm, nodes.at(1)->id, VICTORY, 4711);
+
+    nodes.at(0)->eh->Stop();
+    RunIoService();
+
+    BOOST_CHECK(!nodes.at(0)->eh->IsElected(nodes.at(1)->id));
+    BOOST_CHECK_NE(nodes.at(0)->electionId, 4711);
+}
 
 BOOST_AUTO_TEST_CASE( start_stop )
 {

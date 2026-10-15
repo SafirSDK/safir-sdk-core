@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2013, 2022 (http://safirsdkcore.com)
+* Copyright Saab AB, 2013, 2022, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -438,8 +438,11 @@ namespace SP
 
             boost::asio::dispatch(m_strand, [this,message, from, nodeTypeId]
             {
+                //Look the sender up in our statistics, to find out whether we have
+                //marked it as dead.
                 bool found = false;
-                for (int i = 0; i < m_lastStatistics.Size(); ++i)
+                const int numNodes = m_lastStatistics.Valid() ? m_lastStatistics.Size() : 0;
+                for (int i = 0; i < numNodes; ++i)
                 {
                     if (m_lastStatistics.Id(i) == from)
                     {
@@ -447,14 +450,12 @@ namespace SP
 
                         if (m_lastStatistics.IsDead(i) && !m_isLightNode)
                         {
-#if 1 
                             if (message.action() == VICTORY)
                             {
                                 lllog(5) << m_logPrefix << "Got VICTORY from a node that is dead! Starting an election!" << std::endl;
                                 StartElection();
                             }
                             else
-#endif
                             {
                                 lllog(5) << m_logPrefix << "Got ElectionMessage from a node that is dead! Discarding!" << std::endl;
                             }
@@ -467,15 +468,22 @@ namespace SP
 
                 if (!found)
                 {
-                    //this would indicate a threading error.
-                    SEND_SYSTEM_LOG(Alert,
-                                    << "Got ElectionMessage ("
-                                    << ToString(message.action())
-                                    << ", "
-                                    << message.election_id()
-                                    << ") from an unknown node with id " << from);
-
-                    throw std::logic_error("Got ElectionMessage from a node that I dont know about!");
+                    //We can get here perfectly legitimately, so this is not an error.
+                    //Communication starts delivering data from a new node before it
+                    //invokes its NewNode callback, and that callback reaches us two
+                    //posted hops later (RawHandler posts a RawChanged callback, which
+                    //the Coordinator turns into a NodesChanged call on us), from a
+                    //different strand. So an election message can overtake the node it
+                    //came from, and until the very first NodesChanged m_lastStatistics
+                    //is not even valid. A node that we haven't heard about cannot be one
+                    //that we have marked as dead, so we handle the message as if the
+                    //node is alive, which it is.
+                    lllog(4) << m_logPrefix << "Got ElectionMessage ("
+                             << ToString(message.action())
+                             << ", "
+                             << message.election_id()
+                             << ") from node " << from << ", which I haven't heard about yet. "
+                             << "Handling it as if that node is alive." << std::endl;
                 }
 
                 switch (message.action())
