@@ -282,6 +282,24 @@ these so you don't hunt for a nonexistent test regression:
   index still advertised, so retrying `install` alone would ask for the same
   missing filename every time.
 
+  **For choco that was not true until 2026-10-14.** When community.chocolatey.org
+  answers the package lookup with a 504, `choco install` prints "Unable to find
+  package" and "installed 0/0 packages" and **exits 0**, so the wrapper saw a
+  success and never retried. Run 38564161733 (`9f5f806de`) lost its `vs2026-amd64`
+  row that way: `nsis` was never installed, and the build failed 50 minutes later
+  with `FileNotFoundError` when starting `makensis`. Because the downstream jobs
+  depend on the `build` matrix as a whole, one failed row skipped every dose,
+  slow-test, example and multicomputer job **on every platform** - the run tested
+  nothing but ctest. **Fixed in 5de1f153e**: an install only counts once the
+  package's directory exists under the chocolatey `lib` folder; otherwise the
+  folder is listed and the install retried. Confirmed in run 38625294386, where
+  all seven packages passed the check on the first attempt on both Windows rows.
+
+  How to recognise the old failure, on a commit before 5de1f153e: a Windows
+  "Build and package" that fails on a missing tool late in the build, with
+  `installed 0/0 packages` and a 504 in its "Set up build environment" step. On a
+  later commit, a choco 504 shows as retries in that step instead.
+
   What was *not* done: the packages are still fetched from third-party mirrors on
   every run. Caching or self-hosting them is the only thing that would make this
   independent of someone else's uptime; retrying just rides the outage out.
@@ -305,7 +323,9 @@ these so you don't hunt for a nonexistent test regression:
   comes out of the window the peer job waits for the endpoint. So unlike a red
   "Set up build environment", **a red here can still be a short outage** - check
   whether chocolatey was down for more than a few minutes before reading anything
-  into it. The Linux side's `apt-get install wireguard-tools` in the same action
+  into it. The choco exit-0 problem described in the bullet above does not get
+  past this one: running `wg.exe` is part of each attempt, so an install that
+  installed nothing counts as failed. First clean run with it: 38625294386. The Linux side's `apt-get install wireguard-tools` in the same action
   is still not retried.
 - **A job timeout reports as `cancelled`, not `failure`.** GitHub kills a job that
   exceeds `timeout-minutes` with `##[error]The operation was canceled.`, so the

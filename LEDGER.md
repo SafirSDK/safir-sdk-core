@@ -79,6 +79,7 @@ the junit at all: `run_restart_nodes_tests` (last seen 2026-08-23, run
     2026-10-13  38409610110  b6b100b7f  dose_test_dotnet.2.returncode                  Debug multinode dose, ubuntu-noble-amd64, java-cpp-dotnet-java-cpp   exit 255, all testcases passed; finalizer wrote to the console at process exit; test-code bug, FIXED same day in 8647787fe; evidence/2026-10-13-38409610110-dotnet-finalizer-exit-255
     2026-10-13  38429866975  8647787fe  wireguard-overlay: choco install wireguard     multicomputer pair, vs2022                job-level failure in ~1 min; 504 from community.chocolatey.org, slaves gave up at once as designed; other 3 pairs fine; install now retried (9f5f806de)
     2026-10-13  38429866975  8647787fe  lowmem_basic_operations                        slow suite, vs2026-amd64                  Delete at VeryLow expected to be refused, went through ("Expected failure"); first sighting, attribution open; evidence/2026-10-13-38429866975-lowmem-delete-not-refused
+    2026-10-14  38564161733  9f5f806de  build: choco install nsis (exit 0 on 504)     build, vs2026-amd64                       choco exited 0 on a 504, retry never fired; makensis missing 50 min later; whole test wave skipped on all platforms; FIXED in 5de1f153e
 
 The shas for the backfilled rows were recovered from the run records on
 2026-09-29, while those still existed. Four of them are on
