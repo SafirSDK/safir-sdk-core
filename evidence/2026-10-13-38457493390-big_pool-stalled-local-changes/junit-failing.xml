@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<testsuite name="run_light_nodes_keep_state_tests" tests="4" failures="1" time="818.719">
+  <testcase name="one_normal_one_light_detach_reattach_light_changed_entities" classname="run_light_nodes_keep_state_tests" time="54.247"/>
+  <testcase name="one_normal_one_light_detach_reattach_light_changed_registrations" classname="run_light_nodes_keep_state_tests" time="54.249"/>
+  <testcase name="one_normal_one_light_detach_reattach_light_big_pool" classname="run_light_nodes_keep_state_tests" time="654.171">
+    <failure message="Failed"><![CDATA[Traceback (most recent call last):
+  File "/usr/bin/run_light_nodes_keep_state_tests", line 63, in test_case
+    yield
+  File "/usr/bin/run_light_nodes_keep_state_tests", line 500, in one_normal_one_light_detach_reattach_light_big_pool
+    await check_pool(app1, changedRegGlobal, changedEntGlobal)
+  File "/usr/bin/run_light_nodes_keep_state_tests", line 172, in check_pool
+    raise AssertionError("Incorrect pool")
+AssertionError: Incorrect pool
+]]></failure>
+  </testcase>
+  <testcase name="two_normal_two_light_detach_reattach_light" classname="run_light_nodes_keep_state_tests" time="56.052"/>
+</testsuite>

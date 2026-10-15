@@ -1,0 +1,318 @@
+2026-10-13T21:17:32.188770 : ======================================================================
+2026-10-13T21:17:32.188798 : Running slow test: run_light_nodes_keep_state_tests (timeout 1200 s)
+2026-10-13T21:17:32.188803 : ======================================================================
+2026-10-13T21:17:32.272211 : === Start: one_normal_one_light_detach_reattach_light_changed_entities ===
+2026-10-13T21:17:32.272257 : --- Launching node 1
+2026-10-13T21:17:32.272838 : Launched safir_control as pid 8039.
+2026-10-13T21:17:32.273370 : Launched dope_main as pid 8041.
+2026-10-13T21:17:32.277193 : Waiting for safir_control 8039 to be ready
+2026-10-13T21:17:42.483022 :  dose_main seems to be ready
+2026-10-13T21:17:42.483610 : Launched safir_web as pid 8100.
+2026-10-13T21:17:42.483870 : --- Launching node 5
+2026-10-13T21:17:42.484412 : Launched safir_control as pid 8102.
+2026-10-13T21:17:42.485017 : Launched safir_web as pid 8104.
+2026-10-13T21:17:42.520950 : --- Node 1 is connected to the DOB
+2026-10-13T21:17:42.564789 : --- node_1 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:17:42.564832 : --- node_1 onRegistered: DoseTest.GlobalEntity:DEFAULT_HANDLER
+2026-10-13T21:17:46.428547 : --- node_1 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:17:47.522334 : --- Node 5 is connected to the DOB
+2026-10-13T21:17:47.538630 : --- node_1 onRegistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:17:47.564800 : --- node_5 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:17:47.564838 : --- node_5 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:17:47.564852 : --- node_5 onRegistered: DoseTest.GlobalEntity:DEFAULT_HANDLER
+2026-10-13T21:17:47.564873 : --- node_5 onRegistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:17:50.490990 : Node state received after 3 seconds
+2026-10-13T21:17:50.491023 : --- node5 is now attached
+2026-10-13T21:17:56.569373 : --- node_1 onUnregistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:17:56.575717 : --- node_1 onUnregistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:17:56.644889 : Node state received after 6 seconds
+2026-10-13T21:17:56.644916 : --- node5 is now detached
+2026-10-13T21:18:19.422932 : --- node_1 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:18:19.426196 : --- node_1 onRegistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:18:19.812561 : Node state received after 18 seconds
+2026-10-13T21:18:19.812610 : --- node5 is now attached again
+2026-10-13T21:18:24.816959 : --- kill node5
+2026-10-13T21:18:24.816992 : Terminating all processes
+2026-10-13T21:18:24.817003 :  Terminating safir_control with pid 8102
+2026-10-13T21:18:24.917127 :    Terminate successful
+2026-10-13T21:18:25.417248 : waiting for safir_web to die
+2026-10-13T21:18:25.417337 : --- kill node1
+2026-10-13T21:18:25.417345 : Terminating all processes
+2026-10-13T21:18:25.417352 :  Terminating safir_control with pid 8039
+2026-10-13T21:18:25.517487 :    Terminate successful
+2026-10-13T21:18:26.017630 : waiting for safir_web to die
+2026-10-13T21:18:26.518771 : Test run_light_nodes_keep_state_tests.one_normal_one_light_detach_reattach_light_changed_entities success: True
+2026-10-13T21:18:26.518815 : --- Finished: one_normal_one_light_detach_reattach_light_changed_entities ---
+2026-10-13T21:18:26.519033 : === Start: one_normal_one_light_detach_reattach_light_changed_registrations ===
+2026-10-13T21:18:26.519098 : --- Launching node 1
+2026-10-13T21:18:26.519816 : Launched safir_control as pid 8181.
+2026-10-13T21:18:26.520256 : Launched dope_main as pid 8183.
+2026-10-13T21:18:26.523129 : Waiting for safir_control 8181 to be ready
+2026-10-13T21:18:36.729080 :  dose_main seems to be ready
+2026-10-13T21:18:36.729614 : Launched safir_web as pid 8242.
+2026-10-13T21:18:36.729883 : --- Launching node 5
+2026-10-13T21:18:36.730459 : Launched safir_control as pid 8244.
+2026-10-13T21:18:36.731193 : Launched safir_web as pid 8246.
+2026-10-13T21:18:41.739287 : --- Node 1 is connected to the DOB
+2026-10-13T21:18:41.739354 : --- Node 5 is connected to the DOB
+2026-10-13T21:18:41.782871 : --- node_5 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:18:41.782907 : --- node_5 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:18:41.783045 : --- node_5 onRegistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:18:41.783074 : --- node_5 onRegistered: DoseTest.LimitedService:app5
+2026-10-13T21:18:41.783086 : --- node_5 onRegistered: DoseTest.GlobalEntity:DEFAULT_HANDLER
+2026-10-13T21:18:41.783098 : --- node_5 onRegistered: DoseTest.GlobalService:app1
+2026-10-13T21:18:41.783224 : --- node_1 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:18:41.783235 : --- node_1 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:18:41.783279 : --- node_1 onRegistered: DoseTest.GlobalEntity:DEFAULT_HANDLER
+2026-10-13T21:18:41.783293 : --- node_1 onRegistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:18:41.783310 : --- node_1 onRegistered: DoseTest.GlobalService:app1
+2026-10-13T21:18:41.783323 : --- node_1 onRegistered: DoseTest.LimitedService:app5
+2026-10-13T21:18:44.738376 : Node state received after 3 seconds
+2026-10-13T21:18:44.738412 : --- node5 is now attached
+2026-10-13T21:18:50.813477 : --- node_1 onUnregistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:18:50.814428 : --- node_1 onUnregistered: DoseTest.LimitedService:app5
+2026-10-13T21:18:50.817321 : --- node_1 onUnregistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:18:50.892507 : Node state received after 6 seconds
+2026-10-13T21:18:50.892535 : --- node5 is now detached
+2026-10-13T21:18:50.896225 : --- node_5 onUnregistered: DoseTest.LimitedService:app5
+2026-10-13T21:18:50.896499 : --- node_1 onUnregistered: DoseTest.GlobalService:app1
+2026-10-13T21:18:50.898741 : --- node_5 onRegistered: DoseTest.LimitedEntity2:DEFAULT_HANDLER
+2026-10-13T21:18:50.898808 : --- node_5 onRegistered: DoseTest.LimitedService:updatedApp5
+2026-10-13T21:18:50.898863 : --- node_1 onRegistered: DoseTest.GlobalEntity2:DEFAULT_HANDLER
+2026-10-13T21:18:50.898954 : --- node_1 onRegistered: DoseTest.GlobalService:updatedApp1
+2026-10-13T21:19:13.618658 : --- node_5 onUnregistered: DoseTest.GlobalService:app1
+2026-10-13T21:19:13.633214 : --- node_5 onRegistered: DoseTest.GlobalEntity2:DEFAULT_HANDLER
+2026-10-13T21:19:13.635007 : --- node_5 onRegistered: DoseTest.GlobalService:updatedApp1
+2026-10-13T21:19:13.648757 : --- node_1 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:19:13.651693 : --- node_1 onRegistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:19:13.655480 : --- node_1 onRegistered: DoseTest.LimitedEntity2:DEFAULT_HANDLER
+2026-10-13T21:19:13.658731 : --- node_1 onRegistered: DoseTest.LimitedService:updatedApp5
+2026-10-13T21:19:14.059959 : Node state received after 18 seconds
+2026-10-13T21:19:14.059995 : --- node5 is now attached again
+2026-10-13T21:19:19.065955 : --- kill node5
+2026-10-13T21:19:19.065991 : Terminating all processes
+2026-10-13T21:19:19.065999 :  Terminating safir_control with pid 8244
+2026-10-13T21:19:19.166132 :    Terminate successful
+2026-10-13T21:19:19.666250 : waiting for safir_web to die
+2026-10-13T21:19:19.666328 : --- kill node1
+2026-10-13T21:19:19.666335 : Terminating all processes
+2026-10-13T21:19:19.666340 :  Terminating safir_control with pid 8181
+2026-10-13T21:19:19.766500 :    Terminate successful
+2026-10-13T21:19:20.266665 : waiting for safir_web to die
+2026-10-13T21:19:20.767769 : Test run_light_nodes_keep_state_tests.one_normal_one_light_detach_reattach_light_changed_registrations success: True
+2026-10-13T21:19:20.767815 : --- Finished: one_normal_one_light_detach_reattach_light_changed_registrations ---
+2026-10-13T21:19:20.767982 : === Start: one_normal_one_light_detach_reattach_light_big_pool ===
+2026-10-13T21:19:20.768022 : --- Launching node 1
+2026-10-13T21:19:20.768658 : Launched safir_control as pid 8330.
+2026-10-13T21:19:20.769177 : Launched dope_main as pid 8332.
+2026-10-13T21:19:20.771981 : Waiting for safir_control 8330 to be ready
+2026-10-13T21:19:30.977636 :  dose_main seems to be ready
+2026-10-13T21:19:30.978140 : Launched safir_web as pid 8391.
+2026-10-13T21:19:30.978418 : --- Launching node 5
+2026-10-13T21:19:30.978968 : Launched safir_control as pid 8393.
+2026-10-13T21:19:30.979472 : Launched safir_web as pid 8395.
+2026-10-13T21:19:31.002021 : --- Node 1 is connected to the DOB
+2026-10-13T21:19:31.080219 : --- node_1 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:19:31.080262 : --- node_1 onRegistered: DoseTest.GlobalEntity:DEFAULT_HANDLER
+2026-10-13T21:19:31.080281 : --- node_1 onRegistered: DoseTest.GlobalService:app1
+2026-10-13T21:19:35.880951 : --- node_1 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:19:36.004769 : --- Node 5 is connected to the DOB
+2026-10-13T21:19:41.679949 : --- node_1 onRegistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:19:41.680002 : --- node_1 onRegistered: DoseTest.LimitedService:app5
+2026-10-13T21:19:43.083090 : --- node_5 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:19:43.085125 : --- node_5 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:19:43.091151 : --- node_5 onRegistered: DoseTest.GlobalEntity:DEFAULT_HANDLER
+2026-10-13T21:19:43.127568 : --- node_5 onRegistered: DoseTest.GlobalService:app1
+2026-10-13T21:19:43.134633 : --- node_5 onRegistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:19:43.141983 : --- node_5 onRegistered: DoseTest.LimitedService:app5
+2026-10-13T21:19:48.002332 : Node state received after 12 seconds
+2026-10-13T21:19:48.002382 : --- node5 is now attached
+2026-10-13T21:20:01.140615 : --- node_1 onUnregistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:20:04.160046 : Node state received after 6 seconds
+2026-10-13T21:20:04.160085 : --- node5 is now detached
+2026-10-13T21:20:04.240551 : --- node_1 onUnregistered: DoseTest.GlobalService:app1
+2026-10-13T21:20:04.240641 : --- node_1 onRegistered: DoseTest.GlobalEntity2:DEFAULT_HANDLER
+2026-10-13T21:20:04.240697 : --- node_1 onRegistered: DoseTest.GlobalService:updatedApp1
+2026-10-13T21:20:04.243595 : --- node_5 onUnregistered: DoseTest.LimitedService:app5
+2026-10-13T21:20:04.284553 : --- node_5 onRegistered: DoseTest.LimitedEntity2:DEFAULT_HANDLER
+2026-10-13T21:20:04.284594 : --- node_5 onRegistered: DoseTest.LimitedService:updatedApp5
+2026-10-13T21:20:04.706297 : --- node_1 onUnregistered: DoseTest.LimitedEntity:DEFAULT_HANDLER
+2026-10-13T21:20:04.708381 : --- node_1 onUnregistered: DoseTest.LimitedService:app5
+2026-10-13T21:20:29.176854 : --- Extended wait for PD to finish, wait time 40 sec
+2026-10-13T21:20:39.177832 : --- Extended wait for PD to finish, wait time 50 sec
+2026-10-13T21:20:46.011286 : --- Node 1 is connected to the DOB
+2026-10-13T21:20:49.182081 : --- Extended wait for PD to finish, wait time 60 sec
+2026-10-13T21:20:59.183896 : --- Extended wait for PD to finish, wait time 70 sec
+2026-10-13T21:21:09.187000 : --- Extended wait for PD to finish, wait time 80 sec
+2026-10-13T21:21:19.191936 : --- Extended wait for PD to finish, wait time 90 sec
+2026-10-13T21:21:29.196077 : --- Extended wait for PD to finish, wait time 100 sec
+2026-10-13T21:21:39.199046 : --- Extended wait for PD to finish, wait time 110 sec
+2026-10-13T21:21:49.204070 : --- Extended wait for PD to finish, wait time 120 sec
+2026-10-13T21:21:59.208299 : --- Extended wait for PD to finish, wait time 130 sec
+2026-10-13T21:22:09.211072 : --- Extended wait for PD to finish, wait time 140 sec
+2026-10-13T21:22:19.215223 : --- Extended wait for PD to finish, wait time 150 sec
+2026-10-13T21:22:29.220138 : --- Extended wait for PD to finish, wait time 160 sec
+2026-10-13T21:22:39.223022 : --- Extended wait for PD to finish, wait time 170 sec
+2026-10-13T21:22:49.226178 : --- Extended wait for PD to finish, wait time 180 sec
+2026-10-13T21:22:59.230319 : --- Extended wait for PD to finish, wait time 190 sec
+2026-10-13T21:23:09.233216 : --- Extended wait for PD to finish, wait time 200 sec
+2026-10-13T21:23:19.237812 : --- Extended wait for PD to finish, wait time 210 sec
+2026-10-13T21:23:29.242529 : --- Extended wait for PD to finish, wait time 220 sec
+2026-10-13T21:23:39.245346 : --- Extended wait for PD to finish, wait time 230 sec
+2026-10-13T21:23:49.250294 : --- Extended wait for PD to finish, wait time 240 sec
+2026-10-13T21:23:59.255082 : --- Extended wait for PD to finish, wait time 250 sec
+2026-10-13T21:24:09.257381 : --- Extended wait for PD to finish, wait time 260 sec
+2026-10-13T21:24:19.262306 : --- Extended wait for PD to finish, wait time 270 sec
+2026-10-13T21:24:29.266679 : --- Extended wait for PD to finish, wait time 280 sec
+2026-10-13T21:24:39.269635 : --- Extended wait for PD to finish, wait time 290 sec
+2026-10-13T21:24:49.274516 : --- Extended wait for PD to finish, wait time 300 sec
+2026-10-13T21:24:59.278666 : --- Extended wait for PD to finish, wait time 310 sec
+2026-10-13T21:25:09.281058 : --- Extended wait for PD to finish, wait time 320 sec
+2026-10-13T21:25:19.285533 : --- Extended wait for PD to finish, wait time 330 sec
+2026-10-13T21:25:29.289918 : --- Extended wait for PD to finish, wait time 340 sec
+2026-10-13T21:25:39.292678 : --- Extended wait for PD to finish, wait time 350 sec
+2026-10-13T21:25:49.297326 : --- Extended wait for PD to finish, wait time 360 sec
+2026-10-13T21:25:59.301813 : --- Extended wait for PD to finish, wait time 370 sec
+2026-10-13T21:26:09.303612 : --- Extended wait for PD to finish, wait time 380 sec
+2026-10-13T21:26:19.307692 : --- Extended wait for PD to finish, wait time 390 sec
+2026-10-13T21:26:29.312170 : --- Extended wait for PD to finish, wait time 400 sec
+2026-10-13T21:26:39.314997 : --- Extended wait for PD to finish, wait time 410 sec
+2026-10-13T21:26:49.319739 : --- Extended wait for PD to finish, wait time 420 sec
+2026-10-13T21:26:59.323238 : --- Extended wait for PD to finish, wait time 430 sec
+2026-10-13T21:27:09.325967 : --- Extended wait for PD to finish, wait time 440 sec
+2026-10-13T21:27:19.330830 : --- Extended wait for PD to finish, wait time 450 sec
+2026-10-13T21:27:29.335065 : --- Extended wait for PD to finish, wait time 460 sec
+2026-10-13T21:27:39.337870 : --- Extended wait for PD to finish, wait time 470 sec
+2026-10-13T21:27:49.341980 : --- Extended wait for PD to finish, wait time 480 sec
+2026-10-13T21:27:59.346107 : --- Extended wait for PD to finish, wait time 490 sec
+2026-10-13T21:28:09.349042 : --- Extended wait for PD to finish, wait time 500 sec
+2026-10-13T21:28:19.353497 : --- Extended wait for PD to finish, wait time 510 sec
+2026-10-13T21:28:29.358018 : --- Extended wait for PD to finish, wait time 520 sec
+2026-10-13T21:28:39.361115 : --- Extended wait for PD to finish, wait time 530 sec
+2026-10-13T21:28:49.365949 : --- Extended wait for PD to finish, wait time 540 sec
+2026-10-13T21:28:59.370164 : --- Extended wait for PD to finish, wait time 550 sec
+2026-10-13T21:29:09.373191 : --- Extended wait for PD to finish, wait time 560 sec
+2026-10-13T21:29:19.377390 : --- Extended wait for PD to finish, wait time 570 sec
+2026-10-13T21:29:29.381623 : --- Extended wait for PD to finish, wait time 580 sec
+2026-10-13T21:29:39.383644 : --- Extended wait for PD to finish, wait time 590 sec
+2026-10-13T21:29:49.388181 : --- Extended wait for PD to finish, wait time 600 sec
+2026-10-13T21:29:59.392440 : --- Extended wait for PD to finish, wait time 610 sec
+2026-10-13T21:30:09.394673 : *** ERROR: Incorrect pool on node 1, safir_instance: 1
+2026-10-13T21:30:09.394710 : === Node: 1, safir_instance: 1 ===
+2026-10-13T21:30:09.394717 :   Registrations:
+2026-10-13T21:30:09.394733 :     DoseTest.GlobalEntity2:DEFAULT_HANDLER - Registered
+2026-10-13T21:30:09.394737 :     DoseTest.GlobalEntity:DEFAULT_HANDLER - Registered
+2026-10-13T21:30:09.394742 :     DoseTest.GlobalService:updatedApp1 - Registered
+2026-10-13T21:30:09.394745 :     Safir.Dob.NodeInfo:1 - Registered
+2026-10-13T21:30:09.394750 :   Entities:
+[... 8000 entity lines of the pool dump left out here; see README.md for what they contained ...]
+2026-10-13T21:30:09.432866 :     Safir.Dob.NodeInfo:1 - {"_DouType": "Safir.Dob.NodeInfo", "NodeName": "NormalOne", "IpAddress": "127.0.0.1", "NodeType": "Server", "State": "Normal", "MemoryLevel": "Normal"}
+2026-10-13T21:30:09.432978 : --------------
+2026-10-13T21:30:09.432988 :   Expected registrations:
+2026-10-13T21:30:09.432998 :     Safir.Dob.NodeInfo:1 - Registered
+2026-10-13T21:30:09.433004 :     DoseTest.GlobalEntity:DEFAULT_HANDLER - Registered
+2026-10-13T21:30:09.433014 :     DoseTest.GlobalEntity2:DEFAULT_HANDLER - Registered
+2026-10-13T21:30:09.433021 :     DoseTest.GlobalService:updatedApp1 - Registered
+2026-10-13T21:30:09.433027 :   Expected entities:
+2026-10-13T21:30:09.433035 : Number of expected entities: 8001
+2026-10-13T21:30:09.433053 : --- kill node5
+2026-10-13T21:30:09.433062 : Terminating all processes
+2026-10-13T21:30:09.433070 :  Terminating safir_control with pid 8393
+2026-10-13T21:30:13.736390 :    Terminate successful
+2026-10-13T21:30:13.736454 : --- kill node1
+2026-10-13T21:30:13.736462 : Terminating all processes
+2026-10-13T21:30:13.736468 :  Terminating safir_control with pid 8330
+2026-10-13T21:30:13.936689 :    Terminate successful
+2026-10-13T21:30:14.436855 : waiting for safir_web to die
+ERROR:root:Got exception
+Traceback (most recent call last):
+  File "/usr/bin/run_light_nodes_keep_state_tests", line 63, in test_case
+    yield
+  File "/usr/bin/run_light_nodes_keep_state_tests", line 500, in one_normal_one_light_detach_reattach_light_big_pool
+    await check_pool(app1, changedRegGlobal, changedEntGlobal)
+  File "/usr/bin/run_light_nodes_keep_state_tests", line 172, in check_pool
+    raise AssertionError("Incorrect pool")
+AssertionError: Incorrect pool
+2026-10-13T21:30:14.939158 : Incorrect pool
+2026-10-13T21:30:14.939181 : *** Test failed: one_normal_one_light_detach_reattach_light_big_pool
+2026-10-13T21:30:14.939191 : Test run_light_nodes_keep_state_tests.one_normal_one_light_detach_reattach_light_big_pool success: False
+2026-10-13T21:30:14.939198 :  - one_normal_one_light_detach_reattach_light_big_pool failed!
+2026-10-13T21:30:14.939205 : --- Finished: one_normal_one_light_detach_reattach_light_big_pool ---
+2026-10-13T21:30:14.939305 : === Start: two_normal_two_light_detach_reattach_light ===
+2026-10-13T21:30:14.939340 : --- Launching node 1
+2026-10-13T21:30:14.939893 : Launched safir_control as pid 8517.
+2026-10-13T21:30:14.940436 : Launched dope_main as pid 8519.
+2026-10-13T21:30:14.943161 : Waiting for safir_control 8517 to be ready
+2026-10-13T21:30:25.148113 :  dose_main seems to be ready
+2026-10-13T21:30:25.148665 : Launched safir_web as pid 8579.
+2026-10-13T21:30:25.148899 : --- Launching node 2
+2026-10-13T21:30:25.149467 : Launched safir_control as pid 8581.
+2026-10-13T21:30:25.149685 : Waiting for safir_control 8581 to be ready
+2026-10-13T21:30:28.351190 :  dose_main seems to be ready
+2026-10-13T21:30:28.351701 : Launched safir_web as pid 8644.
+2026-10-13T21:30:28.351937 : --- Launching node 5
+2026-10-13T21:30:28.352494 : Launched safir_control as pid 8646.
+2026-10-13T21:30:28.353067 : Launched safir_web as pid 8648.
+2026-10-13T21:30:28.353455 : --- Launching node 6
+2026-10-13T21:30:28.354028 : Launched safir_control as pid 8650.
+2026-10-13T21:30:28.355432 : Launched safir_web as pid 8652.
+2026-10-13T21:30:28.365096 : --- Node 1 is connected to the DOB
+2026-10-13T21:30:28.410204 : --- node_1 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:30:28.410232 : --- node_1 onRegistered: Safir.Dob.NodeInfo:2
+2026-10-13T21:30:30.249321 : --- node_1 onRegistered: Safir.Dob.NodeInfo:6
+2026-10-13T21:30:32.252434 : --- node_1 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:30:33.365557 : --- Node 2 is connected to the DOB
+2026-10-13T21:30:33.365859 : --- Node 6 is connected to the DOB
+2026-10-13T21:30:33.365907 : --- Node 5 is connected to the DOB
+2026-10-13T21:30:33.409921 : --- node_2 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:30:33.409959 : --- node_2 onRegistered: Safir.Dob.NodeInfo:2
+2026-10-13T21:30:33.409971 : --- node_2 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:30:33.409982 : --- node_2 onRegistered: Safir.Dob.NodeInfo:6
+2026-10-13T21:30:33.410108 : --- node_6 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:30:33.410125 : --- node_6 onRegistered: Safir.Dob.NodeInfo:2
+2026-10-13T21:30:33.410140 : --- node_6 onRegistered: Safir.Dob.NodeInfo:6
+2026-10-13T21:30:33.410212 : --- node_5 onRegistered: Safir.Dob.NodeInfo:1
+2026-10-13T21:30:33.410221 : --- node_5 onRegistered: Safir.Dob.NodeInfo:2
+2026-10-13T21:30:33.410227 : --- node_5 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:30:36.362370 : Node state received after 3 seconds
+2026-10-13T21:30:36.362413 : Node state received after 3 seconds
+2026-10-13T21:30:36.362439 : --- node5 and node6 are now attached
+2026-10-13T21:30:41.434255 : --- node_2 onUnregistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:30:41.728677 : --- node_2 onUnregistered: Safir.Dob.NodeInfo:6
+2026-10-13T21:30:42.230877 : --- node_1 onUnregistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:30:42.238460 : --- node_1 onUnregistered: Safir.Dob.NodeInfo:6
+2026-10-13T21:30:44.667015 : Node state received after 3 seconds
+2026-10-13T21:30:44.667060 : Node state received after 3 seconds
+2026-10-13T21:30:44.667092 : --- node5 and node6 are now detached
+2026-10-13T21:31:05.253455 : --- node_1 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:31:05.265153 : --- node_1 onRegistered: Safir.Dob.NodeInfo:6
+2026-10-13T21:31:05.327034 : --- node_2 onRegistered: Safir.Dob.NodeInfo:5
+2026-10-13T21:31:05.353983 : --- node_2 onRegistered: Safir.Dob.NodeInfo:6
+2026-10-13T21:31:07.987136 : Node state received after 18 seconds
+2026-10-13T21:31:07.987179 : Node state received after 18 seconds
+2026-10-13T21:31:07.987208 : --- node5 and node6 are now attached again
+2026-10-13T21:31:07.989316 : --- kill node6
+2026-10-13T21:31:07.989342 : Terminating all processes
+2026-10-13T21:31:07.989350 :  Terminating safir_control with pid 8650
+2026-10-13T21:31:08.189567 :    Terminate successful
+2026-10-13T21:31:08.689681 : waiting for safir_web to die
+2026-10-13T21:31:08.689766 : --- kill node5
+2026-10-13T21:31:08.689774 : Terminating all processes
+2026-10-13T21:31:08.689781 :  Terminating safir_control with pid 8646
+2026-10-13T21:31:08.789917 :    Terminate successful
+2026-10-13T21:31:09.290035 : waiting for safir_web to die
+2026-10-13T21:31:09.290110 : --- kill node2
+2026-10-13T21:31:09.290119 : Terminating all processes
+2026-10-13T21:31:09.290125 :  Terminating safir_control with pid 8581
+2026-10-13T21:31:09.390241 :    Terminate successful
+2026-10-13T21:31:09.890383 : waiting for safir_web to die
+2026-10-13T21:31:09.890486 : --- kill node1
+2026-10-13T21:31:09.890495 : Terminating all processes
+2026-10-13T21:31:09.890503 :  Terminating safir_control with pid 8517
+2026-10-13T21:31:09.990631 :    Terminate successful
+2026-10-13T21:31:10.490755 : waiting for safir_web to die
+2026-10-13T21:31:10.991757 : Test run_light_nodes_keep_state_tests.two_normal_two_light_detach_reattach_light success: True
+2026-10-13T21:31:10.991799 : --- Finished: two_normal_two_light_detach_reattach_light ---
+2026-10-13T21:31:10.993285 : Wrote junit report /home/runner/work/safir-sdk-core/safir-sdk-core/slow_test_junit/run_light_nodes_keep_state_tests/run_light_nodes_keep_state_tests.junit.xml (4 cases, 1 failed)
+2026-10-13T21:31:10.993305 : *** Failed:  one_normal_one_light_detach_reattach_light_big_pool
+2026-10-13T21:31:11.050539 : *** 'run_light_nodes_keep_state_tests': 1 test case(s) failed (see junit report).

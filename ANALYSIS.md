@@ -28,6 +28,7 @@ every source path mentioned here live with the code:
   - [multicomputer sequencer hang, cross-node partners never activate (multicomputer-master/-slaves → TIMEOUT → red job)](#multicomputer-sequencer-hang-cross-node-partners-never-activate-multicomputer-master--slaves--timeout--red-job)
   - [dose_main waits on persistence that never arrives, standalone (standalone → TIMEOUT → red job)](#dose_main-waits-on-persistence-that-never-arrives-standalone-standalone--timeout--red-job)
   - [`lowmem_basic_operations`, an operation that should be refused is not](#lowmem_basic_operations-an-operation-that-should-be-refused-is-not)
+  - [`one_normal_one_light_detach_reattach_light_big_pool`, the client's view of the pool freezes after a reconnect](#one_normal_one_light_detach_reattach_light_big_pool-the-clients-view-of-the-pool-freezes-after-a-reconnect)
   - [`215-huge_service` (+ the huge-message family)](#215-huge_service--the-huge-message-family)
 - [Errors reported through `syslog_output` and `safir_control.0.returncode`](#errors-reported-through-syslog_output-and-safir_control0returncode)
   - [What has actually been reported this way](#what-has-actually-been-reported-this-way)
@@ -663,6 +664,62 @@ CI jobs; neither is in this test's path.
 If it recurs, the cheap next step is to make the test print the level on both
 sides of each operation it expects to be refused, and in particular after
 `CheckLevel` returns.
+
+### `one_normal_one_light_detach_reattach_light_big_pool`, the client's view of the pool freezes after a reconnect
+
+Seen once, run 38457493390 (`f057b8974`, `private/datareceiver-read-robustness`),
+in `debug-slow-tests-ubuntu-noble-amd64`. A test-case failure, and since it was the
+Debug job, a red job. The same driver passed 4/4 on all five release platforms in
+the same run, and the Debug slow job passed in the six runs before it and the
+develop run after it (38625294386).
+Evidence is in `evidence/2026-10-13-38457493390-big_pool-stalled-local-changes/`.
+
+**What happened.** With node 5 (light) detached, the test sends node 1 a few
+registration changes and then about 6000 entity changes through its `safir_web`
+connection, sleeps 5 s, and waits up to 600 s for node 1's pool to show them. It
+never did. The client had seen the registration changes and the updates of
+`GlobalEntity` 4001-5685 in order, and nothing after that: not the rest of the
+updates, none of the 2000 deletes, none of the 2000 creates.
+
+**The likely mechanism is in the test, not the Dob.** 42 s after the changes went
+out, the log has a second `--- Node 1 is connected to the DOB`. It is the only
+reconnect in the ten keep-state and smart-sync cases in that job. `SafirApp._run` swallows any
+exception from the connection, waits 5 s and connects again, without logging
+anything. In the keep-state and smart-sync drivers it does **not** send `open` or
+the subscriptions again on the new connection — `_setup_dob` queued them once, in
+the constructor, and they were consumed on the first one. So after a reconnect the
+client sits on a websocket with no Dob connection and no subscriptions, and its
+view of the pool can never change again. That matches the dump exactly: a clean
+cut at one point in the stream rather than scattered losses. The clear-state driver
+calls `_setup_dob` on every connection, so it does not have this problem.
+
+**Why the connection dropped is not established.** The obvious candidate is the
+websockets client's keepalive: `websockets.connect` sends a ping every 20 s and
+closes the connection if no pong comes back within 20 s. A Debug `safir_web` busy
+with thousands of requests not answering pings for 20 s fits the timing, but
+nothing in the log shows it. It could as well be `safir_web` closing the
+connection, or crashing and being restarted; its output was not kept.
+
+**Not established:** whether node 1's real pool was correct. If the mechanism above
+is right it was, and only the client stopped looking, but the client is the only
+witness.
+
+**Ruled out, mostly:** the branch under test. It changed `DataReceiver` in
+communication (a failed read is retried, and datagrams too short for a crc are
+dropped). Neither path runs unless a socket read fails or a short datagram arrives,
+and the stall was on node 1 with its network up, in requests from its own local
+client. The node output that would show the branch's "Read failed" line was not
+kept, so this rests on the reasoning rather than on the log.
+
+**Related, probably:** the `run_light_nodes_smart_sync_tests` hang above, also in
+the Debug slow job, also with nothing kept from the nodes.
+
+If it recurs: `private/light-node-test-diagnostics` (7cca4772f) keeps every node's
+output and the syslog under `test_output/`, and starts each pool dump with how many
+requests the client sent and how many were answered. A response count that stops
+short together with a reconnect would confirm the mechanism. The cheap fix
+regardless is to make `SafirApp` log a lost connection, and either re-run
+`_setup_dob` on a reconnect or fail the case outright.
 
 ### `215-huge_service` (+ the huge-message family)
 
