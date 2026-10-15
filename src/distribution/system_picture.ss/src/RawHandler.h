@@ -121,7 +121,13 @@ namespace SP
                         const bool master,
                         const std::function<bool (const int64_t incarnationId,
                                                   const bool incarnationIdChanged)>& validateJoinSystemCallback,
-                        const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback)
+                        const std::function<bool (const int64_t incarnationId)>& validateFormSystemCallback,
+                        //How long a node has to have been dead before we throw its
+                        //node_info away and remember it in more_dead_nodes instead.
+                        //Zero, the default, means use the normal five minutes. Only
+                        //tests pass anything else, since they cannot wait that long.
+                        const std::chrono::steady_clock::duration& clearDeadNodeTimeout =
+                            std::chrono::steady_clock::duration::zero())
         SAFIR_GCC_VISIBILITY_BUG_WORKAROUND
             : m_logPrefix(logPrefix)
             , m_strand(strand)
@@ -134,6 +140,7 @@ namespace SP
             , m_master(master)
             , m_validateJoinSystemCallback(validateJoinSystemCallback)
             , m_validateFormSystemCallback(validateFormSystemCallback)
+            , m_clearDeadNodeTimeout(CalculateClearDeadNodeTimeout(clearDeadNodeTimeout))
             , m_stopped(false)
         {
             //data channel on are not allowed to mark themselves as dead.
@@ -818,6 +825,18 @@ namespace SP
         }
 
     private:
+        /** How long a node has to have been dead before we forget the details about it. */
+        static std::chrono::steady_clock::duration
+        CalculateClearDeadNodeTimeout(const std::chrono::steady_clock::duration& clearDeadNodeTimeout)
+        {
+            if (clearDeadNodeTimeout > std::chrono::steady_clock::duration::zero())
+            {
+                return clearDeadNodeTimeout;
+            }
+
+            return std::chrono::minutes(5);
+        }
+
         static std::chrono::steady_clock::duration
         CalculateDeadCheckPeriod(const std::map<int64_t,NodeType>& nodeTypes)
         {
@@ -1198,9 +1217,9 @@ namespace SP
         {
             const auto now = std::chrono::steady_clock::now();
 
-            const auto clearThreshold = now - std::chrono::minutes(5);
+            const auto clearThreshold = now - m_clearDeadNodeTimeout;
 
-            bool somethingChanged = false;
+            int changes = 0;
 
             for (auto pair = m_nodeTable.cbegin(); pair != m_nodeTable.cend(); ++pair)
             {
@@ -1239,7 +1258,7 @@ namespace SP
 
                     m_communication.ExcludeNode(id);
 
-                    somethingChanged = true;
+                    changes |= RawChanges::NODES_CHANGED;
                 }
                 else if (node.nodeInfo->is_dead() &&
                          lastAnyReceiveTime < clearThreshold)
@@ -1292,7 +1311,15 @@ namespace SP
                         lllog(8) << m_logPrefix << "Added " << id << " to more_dead_nodes since "
                                   "it has been dead for a long time." << std::endl;
                     }
-                    //node was already dead, so no need to set somethingChanged
+
+                    //The node was already dead, so the set of nodes we are talking to
+                    //has not changed, which is why this is not NODES_CHANGED (that would
+                    //make the Coordinator run an election for a node that died five
+                    //minutes ago). But the raw data did change, it has lost a node_info
+                    //and gained a more_dead_nodes entry, and the Coordinator puts
+                    //more_dead_nodes into the system state. So our users do need to hear
+                    //about it.
+                    changes |= RawChanges::METADATA_CHANGED;
 
                     //we've just modified the table that we're looping through, so
                     //we can't continue the loop. Post another call to this function
@@ -1303,9 +1330,9 @@ namespace SP
                 }
             }
 
-            if (somethingChanged)
+            if (changes != 0)
             {
-                PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED), nullptr);
+                PostRawChangedCallback(RawChanges(changes), nullptr);
             }
         }
 
@@ -1363,6 +1390,7 @@ namespace SP
         const std::function<bool (const int64_t incarnationId,
                                   const bool incarnationIdChanged)> m_validateJoinSystemCallback;
         const std::function<bool (const int64_t incarnationId)> m_validateFormSystemCallback;
+        const std::chrono::steady_clock::duration m_clearDeadNodeTimeout;
 
         std::atomic<bool> m_stopped;
     };

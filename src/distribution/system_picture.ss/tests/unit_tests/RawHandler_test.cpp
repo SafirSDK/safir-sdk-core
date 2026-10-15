@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014 (http://safirsdkcore.com)
+* Copyright Saab AB, 2014, 2026 (http://safirsdkcore.com)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -145,7 +145,10 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool setIncarnation)
     return msg;
 }
 
-template <int64_t ownNodeType>
+//clearDeadNodeTimeoutMs is how long a node has to have been dead before the
+//RawHandler throws away its node_info. Zero leaves the production value (five
+//minutes) in place, which is what all but one of the tests want.
+template <int64_t ownNodeType, int clearDeadNodeTimeoutMs = 0>
 struct Fixture
 {
     Fixture()
@@ -158,7 +161,8 @@ struct Fixture
                                                       [this](const int64_t id, const bool /*incarnationIdChanged*/)
                                                       {return ValidateJoinSystem(id);},
                                                       [this](const int64_t id)
-                                                      {return ValidateFormSystem(id);}));
+                                                      {return ValidateFormSystem(id);},
+                                                      std::chrono::milliseconds(clearDeadNodeTimeoutMs)));
         BOOST_TEST_MESSAGE( "setup fixture" );
     }
 
@@ -1634,6 +1638,62 @@ BOOST_AUTO_TEST_CASE( join_and_rejoin_system_callback)
     BOOST_REQUIRE_EQUAL(formSystemIncarnations.size(), 0U);
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()
+
+//A dead node keeps its node_info for five minutes before we forget the details and
+//remember only the id, in more_dead_nodes. Five minutes is too long to wait for in a
+//test, so this suite runs with a much shorter one. (The typedef is needed because the
+//comma in the template argument list would otherwise split the macro's arguments.)
+typedef Fixture<10, 700> ShortClearDeadNodeTimeoutFixture;
+
+BOOST_FIXTURE_TEST_SUITE( clear_long_dead_nodes, ShortClearDeadNodeTimeoutFixture )
+
+//Forgetting a long dead node changes the raw data: it loses a node_info and gains a
+//more_dead_nodes entry, and the Coordinator puts more_dead_nodes into the system
+//state. So our users have to be told about it.
+BOOST_AUTO_TEST_CASE( clearing_is_notified )
+{
+    int numCallbacks = 0;
+    int lastSize = -1;
+    std::set<int64_t> lastMoreDeadNodeIds;
+
+    rh->AddRawChangedCallback(strand.wrap([&](const RawStatistics& statistics,
+                                              const RawChanges&,
+                                              std::shared_ptr<void>)
+    {
+        ++numCallbacks;
+        lastSize = statistics.Size();
+        lastMoreDeadNodeIds.clear();
+        for (int i = 0; i < statistics.MoreDeadNodesSize(); ++i)
+        {
+            lastMoreDeadNodeIds.insert(statistics.MoreDeadNodes(i));
+        }
+    }));
+
+    //Three nodes, so that clearing them has to shuffle node_info around. Send enough
+    //packets from each that we're no longer extra tolerant towards them, which gets
+    //them declared dead after one deadTimeout rather than two.
+    for (const int64_t id: {11, 12, 13})
+    {
+        comm.newNodeCb("asdf",id,10,"asdffff","asdfqqqq", false);
+        for (int i = 0; i < 11; ++i)
+        {
+            comm.gotReceiveFromCb(id,false,false);
+        }
+    }
+
+    //CheckDeadNodes runs on a periodic timer, so stop on a deadline rather than on a
+    //condition. That way a missing notification fails the test instead of hanging it.
+    boost::asio::steady_timer deadline(ioContext, std::chrono::milliseconds(2000));
+    deadline.async_wait(strand.wrap([this](const boost::system::error_code&){rh->Stop();}));
+
+    BOOST_CHECK_NO_THROW(ioContext.run());
+
+    BOOST_CHECK_GT(numCallbacks, 0);
+    BOOST_CHECK_EQUAL(lastSize, 0);
+    BOOST_CHECK((lastMoreDeadNodeIds == std::set<int64_t>{11, 12, 13}));
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 
