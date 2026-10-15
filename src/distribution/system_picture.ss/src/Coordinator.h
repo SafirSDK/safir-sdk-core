@@ -278,20 +278,28 @@ namespace SP
                 const bool firstMessage = m_stateMessage.election_id() == 0;
 
                 lllog (7) << m_logPrefix << "Got new SystemState from node " << from << std::endl;
-                m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+
+                //Parse into a temporary rather than straight into m_stateMessage. Some
+                //of the checks below discard the state, and a discarded state must not
+                //leave any of its fields behind in ours. is_detached in particular: it
+                //decides whether a light node is allowed to adopt another incarnation
+                //(see validateJoinSystemCallback in SystemPicture.cpp), and taking that
+                //value from a state we rejected made a light node refuse to reattach.
+                SystemStateMessage newState;
+                newState.ParseFromArray(data.get(),static_cast<int>(size));
 
                 //do some sanity checks
-                if (m_stateMessage.election_id() == 0 ||
+                if (newState.election_id() == 0 ||
                     m_ownElectionId != 0)
                 {
                     SEND_SYSTEM_LOG(Alert,
                                     << "Got a State message with election id "
-                                    << m_stateMessage.election_id() <<
+                                    << newState.election_id() <<
                                     " while m_ownElectionId was " << m_ownElectionId);
                     throw std::logic_error("Incorrect ElectionIds!");
                 }
 
-                if (m_stateMessage.is_detached())
+                if (newState.is_detached())
                 {
                     SEND_SYSTEM_LOG(Alert,
                                     << "Got a State message from " << from << " which claims to be a detached node");
@@ -302,18 +310,19 @@ namespace SP
                 //or a bug in UpdateMyState where a node has been marked as dead but
                 //not excluded.
                 bool foundSelf = false;
-                for (int i = 0; i < m_stateMessage.node_info_size(); ++i)
+                for (int i = 0; i < newState.node_info_size(); ++i)
                 {
-                    if (m_stateMessage.node_info(i).id() == m_id)
+                    if (newState.node_info(i).id() == m_id)
                     {
                         foundSelf = true;
-                        const bool isDead = m_stateMessage.node_info(i).is_dead();
+                        const bool isDead = newState.node_info(i).is_dead();
                         if (isDead && m_electionHandler->IsLightNode())
                         {
                             lllog (4) << m_logPrefix << "This state says that we are dead, hopefully "
                                       << "that is from before we were resurrected, so ignoring it"<< std::endl;
                             //This state may contain information about us before we were resurrected, so we ignore it.
-                            //This is done by setting the state to an invalid mode.
+                            //We keep our own state, but mark it as invalid, since we no
+                            //longer have a state that we trust.
                             m_stateMessage.set_election_id(0);
                             return;
                         }
@@ -336,10 +345,14 @@ namespace SP
                     }
 
                     //This state does not contain ourselves, so we ignore it.
-                    //This is done by setting the state to an invalid mode.
+                    //We keep our own state, but mark it as invalid, since we no longer
+                    //have a state that we trust.
                     m_stateMessage.set_election_id(0);
                     return;
                 }
+
+                //The state passed all the checks, so it is now our state.
+                m_stateMessage.Swap(&newState);
 
                 const auto deadNodes = GetDeadNodes(m_logPrefix, m_stateMessage);
 
@@ -855,8 +868,10 @@ namespace SP
                     }
 
                     //check that it's not in dead nodes! (This is just a sanity check, really)
+                    //A node that we're resurrecting is allowed to appear as both, since
+                    //we flip it from dead to alive in the loop further up.
                     if (lastDeadNodes.find(m_stateMessage.node_info(i).id()) != lastDeadNodes.end() &&
-                        m_resurrectingNodes.find(m_stateMessage.node_info(i).id()) != m_resurrectingNodes.end())
+                        m_resurrectingNodes.find(m_stateMessage.node_info(i).id()) == m_resurrectingNodes.end())
                     {
                         LogStateInconsistency("live node was already defined as dead",
                                               m_stateMessage.node_info(i).id());
