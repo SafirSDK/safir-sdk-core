@@ -701,7 +701,20 @@ def test_one_normal_one_light_disconnect_reconnect(args):
     return node1.returncode == 0 and node2.returncode == 0
 
 def test_one_normal_one_light_disconnect_sleep_reconnect(args):
-    #This tests the more_dead_nodes thing in RawHandler
+    #Exercises the more_dead_nodes path in RawHandler: node 2 stays away for
+    #longer than the five minutes after which node 1 throws away its node_info
+    #and remembers only the id, and then reattaches.
+    #
+    #Note what this does and does not check. The expectations below are the same
+    #as test_one_normal_one_light_disconnect_reconnect's, and a SystemState
+    #carries no more_dead_nodes field (see SystemState::ToJson), so nothing here
+    #can distinguish node 1 having cleared node 2 from node 1 not having done
+    #so. What it does cover is that reattaching still works afterwards, and that
+    #neither node falls over. The RawHandler side of it is covered properly by
+    #RawHandler_test's clear_long_dead_nodes suite, which injects a short
+    #timeout instead of waiting.
+    #
+    #The sleep costs seven minutes, about a fifth of this driver's runtime.
     with closing(Node(args,1,light_node = False, multicast = False)) as node1,\
          closing(Node(args,2,light_node = True, multicast = False, seeds = 1)) as node2:
         state1 = '''{"elected_id": 1, "is_detached": false, "nodes": [{"name": "node_001", "is_dead": false, "id": 1, "node_type_id": 1},
@@ -2095,6 +2108,14 @@ TEST_CASES = (
     "move_lightnode_to_other_system",
     "one_normal_one_light_kill_on_reconnect",
     "one_normal_one_light_disconnect_sleep_reconnect",
+    #Flaky, so left out. It was added in 06b5fda9d and commented out three days
+    #later in f0ae7637e without a reason being recorded. Measured again on
+    #2026-11-10: it failed 1 run in 3, node 3 ending on a state that has the
+    #light node either in or out depending on whether node 5 manages to reattach
+    #before the case finishes. That race is what the three levels of
+    #try/except Failure in the test body are trying (and failing) to absorb. The
+    #scenario itself is still covered by move_lightnode_to_other_system, which
+    #is not flaky, so this is kept only in case the fast variant is worth fixing.
     #"move_lightnode_to_other_system_fast",
 )
 
