@@ -56,6 +56,16 @@ FORMATTER = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 class Failure(Exception):
     pass
 
+
+class NodeDied(Exception):
+    """A node's output stream closed, i.e. the process exited.
+
+    Deliberately not a Failure: wait_for_states retries a Failure against the
+    next permutation of the expected states, and that is pointless once the node
+    is gone. Worse, the retry used to block forever on an empty queue, so a node
+    that died mid-test hung the whole driver until its 2 hour cap instead of
+    failing the one case."""
+
 #pylint: disable=line-too-long
 
 def permutations(states):
@@ -211,12 +221,22 @@ class Node():
     def __compare_states(state, expected):
         return state == expected
 
-    def wait_for_form(self, allowed_states=[]):
+    def __get_ctrl(self, what):
+        """Take the next item off the ctrl queue, failing cleanly if the node has
+        exited. Without the None check the callers below index into it and raise
+        TypeError, which is a confusing way to be told that a node died."""
+        data = self.ctrl_queue.get()
+        if data is None:
+            raise NodeDied(f"Node {self.node_id} exited while we were waiting for a {what} statement "
+                           f"(returncode {self.proc.returncode})")
+        return data
+
+    def wait_for_form(self, allowed_states=()):
         log(f"  Node {self.node_id} waiting for form")
         allowed_states = [json.loads(x) for x in allowed_states]
         try:
             while True:
-                data = self.ctrl_queue.get()
+                data = self.__get_ctrl("form")
                 if data not in allowed_states:
                     break
             if data["form"] == 0:
@@ -230,7 +250,7 @@ class Node():
         log(f"  Node {self.node_id} waiting for join")
         try:
             while True:
-                data = self.ctrl_queue.get()
+                data = self.__get_ctrl("join")
                 if allow_detached_states and "is_detached" in data and data["is_detached"] == True:
                     self.ctrl_states.append(data)
                 else:
@@ -246,18 +266,15 @@ class Node():
             log(f"Node {self.node_id} expected a join statement, but got \n{data}")
         raise Failure("Got unexpected state")
 
-    def wait_for_join_or_form(self, allowed_states=[]):
+    def wait_for_join_or_form(self, allowed_states=()):
         allowed_states = [json.loads(x) for x in allowed_states]
         while True:
-            data = self.ctrl_queue.get()
+            data = self.__get_ctrl("form or join")
             if data in allowed_states:
                 self.ctrl_states.append(data)
             else:
                 break
-        if data is None:
-            log(f"Node {self.node_id} expected a form or join statement, but got a None!", self.proc.returncode)
-            raise Failure("Got unexpected state")
-        elif "form" in data or "join" in data:
+        if "form" in data or "join" in data:
             return data
         else:
             log(f"Node {self.node_id} expected a form or join statement, but got \n{data}")
@@ -340,8 +357,9 @@ class Node():
 
             while True:
                 state = queue.get()
-                if state is not None:
-                    states.append(state)
+                if state is None:
+                    raise NodeDied(f"Node {node_id} exited while we were waiting for state {expected}")
+                states.append(state)
                 if Node.__compare_states(state, expected):
                     found = True
                     if len(expected_states) == 0:
