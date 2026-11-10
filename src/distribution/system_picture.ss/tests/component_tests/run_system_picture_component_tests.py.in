@@ -2118,11 +2118,18 @@ def main():
 
     args = parse_arguments()
 
-    check_multicast_loopback()
+    if args.test_case == "all":
+        testcases = TEST_CASES
+    else:
+        testcases = (args.test_case, )
+
+    #Only the multicast cases need multicast loopback, so don't refuse to run a
+    #single unicast case on a host that hasn't got it.
+    if any("multicast" in case or "mixedcast" in case for case in testcases):
+        check_multicast_loopback()
 
     rmdir("test_output")
     mkdir("test_output")
-    olddir = os.getcwd()
     os.chdir("test_output")
 
     #Set up to use our own test configuration. The last part of the path is
@@ -2130,10 +2137,6 @@ def main():
     os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(
         install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@", "system_picture", "config")
 
-    if args.test_case == "all":
-        testcases = TEST_CASES
-    else:
-        testcases = (args.test_case, )
     reporter = JUnitReporter("run_system_picture_component_tests")
     try:
         for testcase in testcases:
