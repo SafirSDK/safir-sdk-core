@@ -309,7 +309,7 @@ public:
         m_communication->Start();
 
         //run ioservice in four threads, to increase likelyhood of detecting threading bugs
-        for (int i = 0; i < 1; ++i)
+        for (int i = 0; i < 4; ++i)
         {
             m_threads.create_thread([this]
             {
