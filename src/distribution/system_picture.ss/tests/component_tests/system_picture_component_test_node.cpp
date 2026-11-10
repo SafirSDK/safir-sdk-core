@@ -174,7 +174,6 @@ public:
     bool isLightNode = false;
     bool onlyControl = false;
     std::vector<int> seeds;
-    int revolutions;
     int64_t nodeType;
 private:
 
@@ -202,8 +201,7 @@ class Common
 {
 public:
     Common(const std::int64_t id, const std::string& logPrefix)
-        : m_success(true)
-        , m_work(boost::asio::make_work_guard(m_ioContext))
+        : m_work(boost::asio::make_work_guard(m_ioContext))
         , m_id(id)
         , m_logPrefix(logPrefix + ": ")
     {
@@ -326,8 +324,6 @@ public:
                     }
                     quick_exit(1);
                 }
-                //m_success.exchange(false);
-                //logerr << m_logPrefix << "Thread exiting due to failure" << std::endl;
             });
         }
     }
@@ -342,13 +338,7 @@ protected:
         m_threads.join_all();
     }
 
-    bool SuccessCommon() const
-    {
-        return !m_work.owns_work() && m_success;
-    }
-
     virtual ~Common() = default;
-    std::atomic<bool> m_success;
     boost::thread_group m_threads;
 
     boost::asio::io_context m_ioContext;
@@ -370,11 +360,9 @@ class Control: public Common
 {
 public:
     explicit Control(const ProgramOptions& options,
-                     const std::int64_t id,
-                     const std::function<void()>& stopFcn)
+                     const std::int64_t id)
         : Common(id, "Control")
         , m_strand(m_ioContext)
-        , m_stopFcn(stopFcn)
     {
         m_communication.reset(new Safir::Dob::Internal::Com::Communication
                               (Safir::Dob::Internal::Com::controlModeTag,
@@ -423,10 +411,6 @@ public:
     {
         StopCommon();
     }
-    bool Success() const
-    {
-        return SuccessCommon();
-    }
 protected:
 
     bool CheckJoinSystem(const int64_t incarnationId)
@@ -447,8 +431,6 @@ protected:
     }
 
     boost::asio::io_context::strand m_strand;
-
-    const std::function<void()> m_stopFcn;
 };
 
 
@@ -539,6 +521,8 @@ public:
 
     }
 
+    //Stop throws if we never got the data we were expecting, which is this
+    //half's real verdict. main() lets that escape, so the node exits non-zero.
     void Stop()
     {
         m_sendTimer.cancel();
@@ -548,10 +532,6 @@ public:
         CheckNoExpectedData();
     }
 
-    bool Success() const
-    {
-        return SuccessCommon() && m_timerStopped && m_expectDataFrom.empty();
-    }
 private:
     void CheckNoExpectedData()
     {
@@ -691,7 +671,6 @@ int main(int argc, char * argv[])
         logerr << "Starting node '" << options.name << "' as node type " << options.nodeType << std::endl;
 
         boost::asio::io_context ioContext;
-        boost::asio::io_context::strand strand(ioContext);
         auto work = boost::asio::make_work_guard(ioContext);
         boost::asio::signal_set signalSet(ioContext);
 
@@ -720,42 +699,9 @@ int main(int argc, char * argv[])
         std::unique_ptr<Control> control;
         std::unique_ptr<Main> main;
 
-        std::function<void()> stopFunc;
-        stopFunc = [&]()
-        {
-            if (control == nullptr || main == nullptr)
-            {
-                return;
-            }
-
-            control->Stop();
-            main->Stop();
-
-            if (!control->Success())
-            {
-                logerr << "Control failed!" << std::endl;
-            }
-            if (!main->Success())
-            {
-                logerr << "Main failed!" << std::endl;
-            }
-
-            if (!control->Success() || !main->Success())
-            {
-                throw std::runtime_error("Control or main failed");
-            }
-            control.reset();
-            main.reset();
-
-            logerr << "Going to reset work and cancel the signalSet" << std::endl;
-            work.reset();
-            signalSet.cancel();
-            logerr << "Done. ioContext should stop running now" << std::endl;
-        };
-
         const auto id = options.nodeId;
 
-        control.reset(new Control(options, id, strand.wrap(stopFunc)));
+        control.reset(new Control(options, id));
 
         main.reset(new Main(options, id));
 
