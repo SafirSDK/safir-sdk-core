@@ -1214,6 +1214,56 @@ private feature branch and never merged to `master` at all. Note also that
 predates the working automation, so the first release actually cut this way was
 `7.4.3-alpha2`.
 
+### The Linux `qt` Conan stub, and ConanCenter revision drift
+
+On Linux, Qt comes from the distro, but `qt-advanced-docking-system` requires
+`qt` through Conan. `build/conan-recipes/qt-system/conanfile.py` squares that
+circle: a recipe named `qt`, versioned from `pkg-config --modversion Qt6Core`,
+packaging nothing. `CMakeLists.txt` exports it into the Conan cache on every
+UNIX configure, so the require resolves locally instead of building Qt from
+source. Windows uses the real ConanCenter `qt` and never touches the stub.
+
+**A stub recipe has to track what consumers read off the real recipe, and
+Conan has no graceful degradation here:** asking for an option a recipe does
+not declare raises, it does not yield `None`, and `options.get_safe()` only
+saves the caller when the caller bothered to use it. This has already broken
+the build once. ConanCenter published a new *recipe revision* of
+`qt-advanced-docking-system/4.5.0` on 2026-11-04
+(`caf4ad0227259cb58fceea443b3a9dce` → `f45fe2b0766a4a30dff2aca7d3283e61`,
+same version, no pin to protect us) whose `validate()` reads `qt`'s `gui`,
+`widgets` and `with_x11`. Every Linux job in run 42792268045 died in
+`conan install` with `option 'gui' doesn't exist / Possible options are []`,
+before compiling a line; Windows was green throughout. The stub now declares
+those three options, defaulting to True — they are inert, nothing reads them.
+Add the fourth the same way when it appears.
+
+Two things make this fail *later* than it should, which is worth knowing
+before you chase a phantom difference between branches. Conan resolves an
+unpinned reference from the cache without consulting the remote, so a machine
+or a CI cache that already holds the old revision keeps building happily while
+a cold one fails; and the CI Conan cache is keyed on `hashFiles('conanfile.py')`
+with a prefix fallback, so the switch can land on one branch days before
+another. A green run from last week says nothing about today.
+
+To reproduce (or to test a stub change) without a full tree build, pin the
+revision in a scratch recipe and let `validate()` run under a throwaway cache:
+
+```
+CONAN_HOME=/tmp/conan-x conan profile detect
+CONAN_HOME=/tmp/conan-x conan export build/conan-recipes/qt-system
+# scratch conanfile.py requiring qt-advanced-docking-system/4.5.0#<revision> and qt/[>=6.4]
+CONAN_HOME=/tmp/conan-x conan graph info . --profile:host=build/conan-profiles/linux-system-qt \
+    -s compiler.cppstd=20
+```
+
+`graph info` runs `validate()` in "Computing necessary packages", so it fails
+in seconds. Note that the docking system's binary is always built from source
+on Linux: its `package_id` depends on our local `qt`, so no ConanCenter binary
+can ever match it. Declaring options on the stub did *not* change that
+`package_id` (`1cf5f18e675866efae4daa33031c7b8fead8e64d` both before and
+after), so cached docking-system binaries survive stub edits; a new *recipe
+revision* upstream does rebuild it once.
+
 ### Shared Library ABI Classification
 
 Every non-imported `SHARED` library defined in the tree must be classified by
