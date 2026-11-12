@@ -36,6 +36,7 @@
 #endif
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)

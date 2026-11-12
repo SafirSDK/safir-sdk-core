@@ -31,6 +31,7 @@
 #include <Safir/Dob/Internal/LeveledLock.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

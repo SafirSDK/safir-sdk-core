@@ -30,6 +30,7 @@
 #include <vector>
 #include <boost/function.hpp>
 #include "ActionSender.h"
+#include <boost/core/noncopyable.hpp>
 
 typedef std::vector<std::string> Languages;
 

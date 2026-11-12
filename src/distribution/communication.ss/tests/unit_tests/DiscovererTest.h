@@ -24,6 +24,7 @@
 #pragma once
 
 #include "fwd.h"
+#include <boost/lexical_cast.hpp>
 
 //------------------------------------------------
 // Test that discover is sent to seeds

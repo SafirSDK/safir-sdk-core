@@ -27,6 +27,7 @@
 
 #include <Safir/Dob/Connection.h>
 #include "../common/StatisticsCollection.h"
+#include <boost/core/noncopyable.hpp>
 
 class Reader:
     private boost::noncopyable

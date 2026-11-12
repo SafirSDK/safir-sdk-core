@@ -28,6 +28,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <Safir/Dob/CallbackId.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

@@ -33,6 +33,7 @@
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
 
 #include "PoolHandler.h"
+#include <boost/lexical_cast.hpp>
 
 namespace Safir
 {

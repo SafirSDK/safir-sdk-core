@@ -47,6 +47,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

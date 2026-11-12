@@ -31,6 +31,7 @@
 #include "StateDistributor.h"
 #include "PersistHandler.h"
 #include "NodeInfoHandler.h"
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

@@ -32,6 +32,7 @@
 #endif
 
 #include <boost/thread.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)

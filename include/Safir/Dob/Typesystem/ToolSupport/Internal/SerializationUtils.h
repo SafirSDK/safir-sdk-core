@@ -42,6 +42,7 @@
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/classic_string_cast.h>
+#include <boost/lexical_cast.hpp>
 
 namespace Safir
 {

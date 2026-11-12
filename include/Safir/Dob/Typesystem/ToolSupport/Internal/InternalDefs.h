@@ -72,10 +72,15 @@ namespace Internal
     static const Size OFFSET_MEMBER_LENGTH         =  sizeof(Offset); //4
     static const Size DYNAMIC_MEMBER_SIZE          =  sizeof(Offset) + sizeof(Size); //8
 
-    BOOST_STATIC_ASSERT(sizeof(char) == 1);
-    BOOST_STATIC_ASSERT(sizeof(Offset) == 4);
-    BOOST_STATIC_ASSERT(sizeof(Size) == 4);
-    BOOST_STATIC_ASSERT(sizeof(Offset) <= sizeof(DotsC_Float64)); //this is to ensure that an offset can fit into a hashedId member.
+    //Plain static_assert, not BOOST_STATIC_ASSERT: the macro was only ever
+    //reaching this header by accident, pulled in transitively by
+    //boost/lexical_cast.hpp, and Boost 1.91 stopped including it there. The
+    //language has had the keyword since C++11 and this tree is on C++20, so
+    //there is nothing to gain by including boost/static_assert.hpp instead.
+    static_assert(sizeof(char) == 1);
+    static_assert(sizeof(Offset) == 4);
+    static_assert(sizeof(Size) == 4);
+    static_assert(sizeof(Offset) <= sizeof(DotsC_Float64)); //this is to ensure that an offset can fit into a hashedId member.
 
     inline bool operator ==(const DotsC_EntityId& left, const DotsC_EntityId& right)
     {

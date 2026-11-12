@@ -30,6 +30,7 @@
 #include <Safir/Dob/Internal/MessageType.h>
 #include <Safir/Dob/Internal/ConsumerId.h>
 #include <Safir/Utilities/Internal/Atomic.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

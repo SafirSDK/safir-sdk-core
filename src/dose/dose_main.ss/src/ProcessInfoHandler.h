@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/ProcessMonitor.h>
 #include <atomic>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

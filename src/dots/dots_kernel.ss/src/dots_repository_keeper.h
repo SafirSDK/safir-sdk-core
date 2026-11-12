@@ -27,6 +27,7 @@
 #include <boost/filesystem.hpp>
 #include <Safir/Utilities/StartupSynchronizer.h>
 #include "dots_shm_repository.h"
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

@@ -34,6 +34,7 @@
 #include <Safir/Dob/Internal/PendingRegistration.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Utilities/Internal/Atomic.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

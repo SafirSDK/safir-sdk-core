@@ -34,6 +34,7 @@
 #include <Safir/Dob/Internal/DistributionData.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/Internal/DistributionScopeReader.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

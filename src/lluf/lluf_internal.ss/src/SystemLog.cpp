@@ -46,6 +46,7 @@
 #endif
 
 #include <iostream>
+#include <boost/lexical_cast.hpp>
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 

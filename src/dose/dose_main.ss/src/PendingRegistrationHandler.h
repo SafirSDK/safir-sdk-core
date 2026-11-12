@@ -37,6 +37,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

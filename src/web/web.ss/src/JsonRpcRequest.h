@@ -31,6 +31,7 @@
 #include "RequestErrorException.h"
 #include "JsonRpcId.h"
 #include "JsonHelpers.h"
+#include <boost/lexical_cast.hpp>
 
 namespace rj = rapidjson;
 namespace ts = Safir::Dob::Typesystem;

@@ -32,6 +32,7 @@
 #include "TracerStatusHandler.h"
 
 #include <boost/asio.hpp>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

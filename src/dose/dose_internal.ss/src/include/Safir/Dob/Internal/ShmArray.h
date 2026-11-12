@@ -27,6 +27,7 @@
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <boost/utility.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

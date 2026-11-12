@@ -25,6 +25,7 @@
 #define __DOTS_INTERNAL_ELEMENT_PARSER_DEFS_H__
 
 #include "ElementParserBase.h"
+#include <boost/mpl/vector.hpp>
 
 /**
  * This file defines the schema for dou- and dom-files.

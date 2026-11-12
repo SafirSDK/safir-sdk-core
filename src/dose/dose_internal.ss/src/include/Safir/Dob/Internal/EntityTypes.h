@@ -37,6 +37,7 @@
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Dob/Internal/SmartSyncState.h>
+#include <boost/core/noncopyable.hpp>
 
 
 namespace Safir

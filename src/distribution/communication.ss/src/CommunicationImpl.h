@@ -43,6 +43,7 @@
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
  #pragma warning (pop)

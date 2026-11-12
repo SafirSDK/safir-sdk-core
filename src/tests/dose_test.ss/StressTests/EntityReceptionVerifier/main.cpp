@@ -37,6 +37,7 @@
 #include <Safir/Dob/NotOpenException.h>
 
 #include <Safir/Dob/OverflowException.h>
+#include <boost/lexical_cast.hpp>
 
 int main(int argc, char* argv[])
 {

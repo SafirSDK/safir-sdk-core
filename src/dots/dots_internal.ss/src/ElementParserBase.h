@@ -31,9 +31,11 @@
 #include <assert.h>
 #include <algorithm>
 #include <boost/mpl/at.hpp>
+#include <boost/mpl/size.hpp>
 #include <boost/mpl/vector.hpp>
 #include "ParseAlgorithms.h"
 #include "OccurrenceRules.h"
+#include <boost/mpl/int.hpp>
 
 //------------------------------------------------------------------------------------
 // Implementation of the xml-parser engine.

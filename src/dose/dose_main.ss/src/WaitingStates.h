@@ -25,6 +25,7 @@
 
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/DistributionData.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

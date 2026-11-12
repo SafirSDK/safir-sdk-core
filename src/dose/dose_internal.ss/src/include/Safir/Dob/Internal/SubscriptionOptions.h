@@ -25,6 +25,7 @@
 #define __SUBSCRIPTIONOPTIONS_H__
 
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

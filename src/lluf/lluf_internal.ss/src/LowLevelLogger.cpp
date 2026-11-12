@@ -43,6 +43,7 @@
 
 #include <iomanip>
 #include <fstream>
+#include <boost/core/noncopyable.hpp>
 
 namespace //anonymous namespace for internal functions
 {

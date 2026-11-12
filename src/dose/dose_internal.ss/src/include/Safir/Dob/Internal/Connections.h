@@ -34,6 +34,7 @@
 #include <Safir/Dob/Internal/ConnectRequest.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

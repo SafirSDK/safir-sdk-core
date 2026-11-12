@@ -30,6 +30,7 @@
 #endif
 
 #include <boost/thread.hpp>
+#include <boost/lexical_cast.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)

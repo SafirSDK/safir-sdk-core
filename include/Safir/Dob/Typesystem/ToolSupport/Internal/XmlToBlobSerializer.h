@@ -36,6 +36,7 @@
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/UglyXmlToBlobSerializer.h>
+#include <boost/lexical_cast.hpp>
 
 namespace Safir
 {

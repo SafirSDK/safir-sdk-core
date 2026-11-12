@@ -43,6 +43,8 @@
 #include <boost/asio.hpp>
 #include <boost/crc.hpp>
 #include <boost/thread.hpp>
+#include <boost/core/noncopyable.hpp>
+#include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

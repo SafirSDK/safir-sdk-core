@@ -50,6 +50,7 @@
 #include <iostream>
 #include <clocale>
 #include "OdbcHelper.h"
+#include <boost/lexical_cast.hpp>
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 const bool USE_CHAR_OPERATIONS_FOR_TEXT_COLUMNS = false;

@@ -27,6 +27,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/NodeParameters.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

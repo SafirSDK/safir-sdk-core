@@ -28,6 +28,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 #include "ParseState.h"
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

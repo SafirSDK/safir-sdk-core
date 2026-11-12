@@ -42,6 +42,7 @@
 
 #include <Safir/Application/BackdoorCommand.h>
 #include <iostream>
+#include <boost/core/noncopyable.hpp>
 
 const std::chrono::steady_clock::duration EXIT_TIMER_DELAY(std::chrono::milliseconds(100));
 

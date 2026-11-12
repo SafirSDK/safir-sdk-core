@@ -44,7 +44,7 @@ if (NOT TARGET Qt::Widgets)
   return()
 endif()
 
-find_package(qt6advanceddocking CONFIG REQUIRED)
+find_package(qtadvanceddocking-qt6 CONFIG REQUIRED)
 
 QT_WRAP_UI(ui_headers ${ui})
 QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
@@ -63,7 +63,7 @@ TARGET_LINK_LIBRARIES(safir_tracer_viewer PRIVATE
   communication
   control_utils
   dose_cpp
-  ads::qt6advanceddocking
+  ads::qtadvanceddocking-qt6
   Boost::regex
   Qt::Svg
   Qt::Widgets

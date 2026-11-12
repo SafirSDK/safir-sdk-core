@@ -42,6 +42,7 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/random/ranlux.hpp>
+#include <boost/static_assert.hpp>
 
 //and enable the warnings again
 #if defined _MSC_VER

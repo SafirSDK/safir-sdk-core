@@ -42,6 +42,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

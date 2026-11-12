@@ -1105,6 +1105,13 @@ Releases are cut by **pushing a version tag**; the `release` job in
 `['[0-9]*.[0-9]*.[0-9]*']`, which matches both bare (`7.4.3`) and suffixed
 (`7.4.3-alpha4`) versions.
 
+**Before the bump, step up the dependency pins.** Conan dependencies are frozen
+between releases and move only here — the how-to, including what to do about Qt,
+is "Dependency Pins, and Stepping Them Up" below. Do it as its own commit ahead
+of the version bump, so that a dependency change and a release bump are never
+the same commit and a bisect can tell them apart. For an alpha it is optional;
+for a stable release it is not.
+
 **Manual steps** (all of them; nothing else needs editing for a PATCH/SUFFIX
 bump):
 
@@ -1214,6 +1221,169 @@ private feature branch and never merged to `master` at all. Note also that
 predates the working automation, so the first release actually cut this way was
 `7.4.3-alpha2`.
 
+### Dependency Pins, and Stepping Them Up
+
+**Every direct requirement in `conanfile.py` names an exact version and an exact
+recipe revision, and they move only when a release is cut.** A given Safir
+commit therefore builds against a dependency graph that cannot shift under it,
+and "which protobuf was in 7.4.3" has an answer.
+
+The reason is that a version number is not a pin. ConanCenter republishes
+recipes for versions that shipped long ago, and nothing in our tree sees it.
+Two runs a month apart, both green, both from the same unpinned `conanfile.py`:
+
+| ref | 2026-10-14 | 2026-11-10 | moved |
+|---|---|---|---|
+| `qt/6.8.3` | `#df4192f9…` | `#6ef0549c…` | recipe revision |
+| `boost/1.86.0` | `#0f502927…` | `#78bd5be4…` | recipe revision |
+| `qt-advanced-docking-system/4.5.0` | `#caf4ad02…` | `#f45fe2b0…` | recipe revision |
+| `zlib` | 1.3.2 | **1.4** | version (transitive) |
+| `libpng` | 1.6.58 | 1.6.59 | version (transitive) |
+
+The docking system one broke every Linux build (next section). The `zlib` one
+shipped a new zlib into the Windows installer and nobody decided it. All of the
+2026-11-04 revisions landed in a single ConanCenter-wide republish.
+
+Two deliberate non-pins. **Linux `qt`** stays the range `[>=6.4]` because it
+resolves to our own stub, whose version comes from `pkg-config` and so differs
+per distro (6.4.2 on Noble, 6.8.2 on Trixie) — no single version can name both.
+**Windows `qt`** used to be `[>=6.8 <6.9]` and is now pinned exactly; picking up
+a Qt patch mid-cycle meant a silent from-source Qt rebuild, since our trimmed
+options match no ConanCenter binary.
+
+**The step-up, at release time.** Ask what is available:
+
+```bash
+for p in rapidjson sentry-breakpad protobuf abseil qt-advanced-docking-system boost qt; do
+    conan list "$p/*#latest" -r conancenter
+done
+```
+
+That prints every version with its newest revision and a date, which separates
+the two decisions. A **new revision of the version we already pin** is normally
+a packaging fix and cheap to take. A **new version** is a real upgrade and
+wants judgement. For Qt, judgement means the LTS question: ConanCenter happily
+lists non-LTS series (6.10 and 6.12 are both there today), so decide from
+qt.io's release schedule which series is the current LTS rather than from the
+largest number — and before moving Qt's minor, read "Windows installer size"
+below, where the ICU import and the `qtimezonelocale` CLDR tables are what a
+minor bump actually costs.
+
+Check a pin resolves before pushing. Neither command builds anything, and the
+Windows one runs fine on Linux because it only resolves recipes — but **give
+the Windows check a throwaway `CONAN_HOME`**, and read the warning below
+before you skip that:
+
+```bash
+conan graph info . -pr:h build/conan-profiles/linux-system-qt -pr:b default -s compiler.cppstd=20
+
+CONAN_HOME=$(mktemp -d) conan graph info . -pr:h build/conan-profiles/windows-qt -pr:b default \
+    -s:h os=Windows -s:h arch=x86_64 -s:h build_type=Release -s:h compiler=msvc \
+    -s:h compiler.version=194 -s:h compiler.runtime=dynamic -s:h compiler.cppstd=20
+```
+
+**Why the throwaway home: a real `qt` recipe in the cache hijacks the Linux
+build.** Linux resolves `qt/[>=6.4]`, a range, and Conan picks the highest
+version that satisfies it from the cache. Normally the only candidate is the
+6.4.2/6.8.2 stub, so the stub wins. The Windows check downloads the *real*
+ConanCenter `qt` recipes into whatever cache it runs against, and from then on
+the range prefers one of those — a Linux configure then resolves `qt/6.8.3` and
+sets about building Qt from source instead of using the distro's. Observed, not
+theoretical. A fresh `CONAN_HOME` for the Windows check avoids it; if you have
+already done it, `conan remove "qt/6.8.3"` (or whichever real version appeared)
+puts the stub back in charge.
+
+`Missing packages: …` and a long `Skipped binaries` list in the Windows output
+are expected, not errors: no ConanCenter binary matches our trimmed Qt options,
+so CI builds those from source anyway. Then push and let the matrix run — a bad
+revision fails in `conan install`, in the first few minutes of every Linux job,
+not three hours into a test leg.
+
+**What the pins do not cover: transitive ranges.** `zlib`, `libpng`, `pcre2`,
+`harfbuzz` and friends arrive through ranges inside *Qt's* recipe, and pinning
+our own requirements does nothing about them — hence `zlib` 1.3.2 → 1.4 above.
+Only a lockfile freezes a whole graph, and a single committed `conan.lock`
+cannot express the per-distro stub `qt`: it would need the `qt` entries stripped
+out, `--lockfile-partial` wired into the conan args, generation per platform,
+and it adds a stale-lock failure mode that will land on whoever next adds a
+dependency. **Decision: no action taken.** Revisit if transitive drift ever
+actually breaks a release rather than merely being untidy.
+
+**What was in a given build** is recoverable without any of that, because the
+resolved graph with revisions is printed in every job log:
+
+```bash
+gh run view --job <job-id> --log \
+  | grep -hoE '[a-z0-9_-]+/[0-9a-zA-Z.~_-]+#[0-9a-f]{32}' | sort -u
+```
+
+Keep the output if a release depends on it; CI artifacts and logs expire.
+
+One ageing caveat, **unverified**: ConanCenter clearly retains old *recipe*
+revisions (`conan list "qt/6.8.3#*" -r conancenter` lists eight, back to May
+2026), so a pin cannot rot away. Whether it retains old *binaries* indefinitely
+is unknown. If a long-unbumped dependency suddenly starts building from source
+instead of downloading, that is the likely explanation — a slow build, not a
+broken one.
+
+### Boost 1.91 and the shared-memory smart pointers
+
+**The step-up from Boost 1.86.0 to 1.91.0 was attempted on 2026-11-11 and
+abandoned; tracked as #622.** Not because of the pin or the recipe - those were all solved -
+but because Boost.Interprocess no longer tolerates how
+`src/dose/dose_internal.ss/src/include/Safir/Dob/Internal/SharedMemoryObject.h`
+builds its shared-memory smart pointers. **Decision: no action taken; the
+pin stays at 1.86.0.** When someone picks this up, it wants its own branch
+and a real review, not a seat in a dependency bump.
+
+Linux cannot see any of this. Linux links the distro's `libboost-all-dev`
+(1.83 on Noble) and only Windows takes Boost from Conan, so every obstacle
+below cost a full Windows CI round of roughly 1h50m to discover - six of
+them. Budget accordingly, and read this list before spending the first one.
+
+**Already fixed and kept on `develop`** - these are correct on 1.83 too, so
+they are not waiting for the upgrade:
+- `SafirLoadBoost.cmake` no longer asks for a `system` component. Boost.System
+  has been header-only since 1.69 and 1.91's recipe stopped listing it as a
+  module, so a `REQUIRED` find_package naming it fails outright. Nothing links
+  `Boost::system` and nothing reads `Boost_LIBRARIES`.
+- 62 files gained the Boost header they actually use. 1.91 trimmed transitive
+  includes; `BOOST_STATIC_ASSERT` had been arriving via `boost/lexical_cast.hpp`
+  and `boost::mpl::size` via `boost/mpl/at.hpp`, among others.
+
+**Solved, but reverted with the pin** - redo these when you retry:
+- `boost/*:without_serialization=True` has to come off. b2 gets an explicit
+  `--with-<module>` allow list that omits serialization, yet builds
+  `boost_serialization` and `boost_wserialization` anyway, transitively; the
+  1.91 module table attributes them to nothing enabled (`graph`,
+  `graph_parallel`, `mpi`, `wave` are their only dependents and all are off),
+  so `package_info()` raises "These libraries were built, but were not used in
+  any boost module".
+- `boost/*:without_cobalt=True` has to go on. `cobalt_io_ssl` is a module whose
+  only dependency is `cobalt`, it has no option of its own, and the recipe
+  offers no OpenSSL option - so its library is expected whenever cobalt is on,
+  while b2 skips building it without OpenSSL. **Boost 1.91.0 cannot be packaged
+  with cobalt enabled and no OpenSSL by anyone.** We use no Cobalt.
+
+**The actual blocker.** With all of the above in place, MSVC fails inside Boost:
+
+```
+boost/interprocess/segment_manager.hpp(765): error C2070: 'T': illegal sizeof operand
+boost/move/detail/type_traits.hpp(1141): error C2714: alignof(void) is not allowed
+  <- SharedMemoryObject.h(195)   interprocess::deleter<T, segment_manager>
+  <- SubscriptionOptions.h(55)   interprocess::shared_ptr<...>
+```
+
+1.91's `shared_ptr` instantiates our `my_allocator` and `my_deleter` with
+`void`, and both reach `sizeof(T)`/`alignof(T)` through Interprocess. Inert
+`void` specialisations are the obvious shape of a fix **and are only safe if
+Boost never calls through those instantiations** - if it does, the consequence
+is memory silently not freed in shared memory, across processes. Establish
+which it is before writing the specialisations.
+
+This will stop being optional: when the distros ship Boost 1.91, the Linux
+builds hit the same wall with no pin to hide behind.
+
 ### The Linux `qt` Conan stub, and ConanCenter revision drift
 
 On Linux, Qt comes from the distro, but `qt-advanced-docking-system` requires
@@ -1230,7 +1400,7 @@ saves the caller when the caller bothered to use it. This has already broken
 the build once. ConanCenter published a new *recipe revision* of
 `qt-advanced-docking-system/4.5.0` on 2026-11-04
 (`caf4ad0227259cb58fceea443b3a9dce` → `f45fe2b0766a4a30dff2aca7d3283e61`,
-same version, no pin to protect us) whose `validate()` reads `qt`'s `gui`,
+same version, and at the time nothing pinned it) whose `validate()` reads `qt`'s `gui`,
 `widgets` and `with_x11`. Every Linux job in run 42792268045 died in
 `conan install` with `option 'gui' doesn't exist / Possible options are []`,
 before compiling a line; Windows was green throughout. The stub now declares
@@ -1243,7 +1413,11 @@ unpinned reference from the cache without consulting the remote, so a machine
 or a CI cache that already holds the old revision keeps building happily while
 a cold one fails; and the CI Conan cache is keyed on `hashFiles('conanfile.py')`
 with a prefix fallback, so the switch can land on one branch days before
-another. A green run from last week says nothing about today.
+another. A green run from last week says nothing about today. Direct
+requirements now carry recipe revisions (see "Dependency Pins, and Stepping
+Them Up" above), which removes this particular surprise — but it returns the
+moment you bump the docking system's pin, so re-read its `validate()` against
+the stub when you do.
 
 To reproduce (or to test a stub change) without a full tree build, pin the
 revision in a scratch recipe and let `validate()` run under a throwaway cache:
@@ -1302,8 +1476,9 @@ Qt ≥ 6.9 (7.4.2 used 6.10.1) links the ICU that ships *in Windows* — 1703 ad
 `icu.dll` beside them, it did not replace them. So nothing needs bundling, and
 `find <installer> -iname '*icu*'` correctly returns nothing. The only
 consequence is a Windows 10 1703+ floor. Qt is currently pinned to the 6.8 LTS
-(`qt/[>=6.8 <6.9]`) which does not import ICU at all; if that pin is ever
-raised, expect the import to reappear — and expect ~3.6 MB per GUI binary of
+(`qt/6.8.3`, exactly — see "Dependency Pins, and Stepping Them Up") which does
+not import ICU at all; if that pin is ever raised to a newer series, expect the
+import to reappear — and expect ~3.6 MB per GUI binary of
 `qtimezonelocale.cpp.obj` CLDR tables to come back with it, which is where the
 6 × 4 MB of `.exe` growth in 7.4.2 came from.
 

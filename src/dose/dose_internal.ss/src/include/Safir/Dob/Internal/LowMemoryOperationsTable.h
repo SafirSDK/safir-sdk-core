@@ -27,6 +27,7 @@
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/MemoryLevel.h>
 #include <Safir/Dob/Typesystem/Defs.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

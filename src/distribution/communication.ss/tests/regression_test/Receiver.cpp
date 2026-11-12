@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "Receiver.h"
+#include <boost/lexical_cast.hpp>
 
 Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_context& ioContext, int64_t nodeId, int64_t nodeType)
     :m_timerInclude(ioContext)

@@ -120,7 +120,7 @@ if (NOT TARGET Qt::Widgets)
   return()
 endif()
 
-find_package(qt6advanceddocking CONFIG REQUIRED)
+find_package(qtadvanceddocking-qt6 CONFIG REQUIRED)
 
 QT_WRAP_UI(ui_headers ${ui})
 QT_WRAP_CPP(moc_sources ${widget_headers} ${QT_WRAP_CPP_OPTIONS})
@@ -143,7 +143,7 @@ TARGET_LINK_LIBRARIES(sate PRIVATE
   dots_cpp
   dose_internal
   dose_cpp
-  ads::qt6advanceddocking
+  ads::qtadvanceddocking-qt6
   Qt::WebSockets
   Qt::Svg
   Qt::Widgets)

@@ -12,6 +12,13 @@ else()
   set(Boost_USE_STATIC_LIBS ON)
 endif()
 
+#No `system` component here. Boost.System has been header-only since 1.69,
+#and Boost 1.91's Conan recipe stopped listing it as a module at all, so
+#asking for it fails the whole find_package with "required COMPONENT
+#'system' not found" on Windows. Nothing in the tree links Boost::system -
+#the error_code machinery is header-only for us, see
+#BOOST_ERROR_CODE_HEADER_ONLY below - so the component was already
+#vestigial. The other eight are still modules in 1.91.
 find_package(Boost
   COMPONENTS
   regex
@@ -20,7 +27,6 @@ find_package(Boost
   program_options
   filesystem
   thread
-  system
   random
   unit_test_framework
   REQUIRED)

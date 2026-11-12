@@ -39,6 +39,7 @@
 #include <memory>
 #include <set>
 #include <thread>
+#include <boost/static_assert.hpp>
 
 
 

@@ -34,6 +34,7 @@
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include "dou_diff_helper.h"
+#include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)

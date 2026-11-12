@@ -38,6 +38,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/chrono.hpp>
 #include <boost/asio.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)

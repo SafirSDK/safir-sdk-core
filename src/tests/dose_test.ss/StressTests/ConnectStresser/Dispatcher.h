@@ -27,6 +27,7 @@
 
 #include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Dob/Connection.h>
+#include <boost/core/noncopyable.hpp>
 
 
 class Dispatcher:

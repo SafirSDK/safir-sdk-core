@@ -32,6 +32,7 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <Safir/Dob/Internal/ConsumerQueueContainer.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
+#include <boost/core/noncopyable.hpp>
 
 namespace Safir
 {

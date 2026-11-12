@@ -42,6 +42,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
+#include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
 #pragma warning( pop )

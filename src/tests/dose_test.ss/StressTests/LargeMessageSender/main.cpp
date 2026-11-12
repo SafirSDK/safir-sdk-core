@@ -35,6 +35,7 @@
 #include <iostream>
 #include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Utilities/AsioDispatcher.h>
+#include <boost/core/noncopyable.hpp>
 
 
 
