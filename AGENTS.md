@@ -1262,12 +1262,33 @@ done
 That prints every version with its newest revision and a date, which separates
 the two decisions. A **new revision of the version we already pin** is normally
 a packaging fix and cheap to take. A **new version** is a real upgrade and
-wants judgement. For Qt, judgement means the LTS question: ConanCenter happily
-lists non-LTS series (6.10 and 6.12 are both there today), so decide from
-qt.io's release schedule which series is the current LTS rather than from the
-largest number — and before moving Qt's minor, read "Windows installer size"
-below, where the ICU import and the `qtimezonelocale` CLDR tables are what a
-minor bump actually costs.
+wants judgement. For Qt, judgement means the LTS question, and it has a trap
+in it. ConanCenter lists non-LTS series alongside LTS ones, so the largest
+number is not the answer; **the LTS lineage is 6.2, 6.5, 6.8, 6.12** — every
+fourth minor, one every two years, five years of maintenance — and qt.io's
+release schedule is where to confirm it, not the version list.
+
+The trap is that **an LTS series stops receiving public patches long before
+its LTS period ends.** Open-source users get the normal six-month cycle;
+patch releases after that are a commercial-licence benefit. Qt 6.8's
+open-source support ended 2025-04-02, which is the real reason ConanCenter's
+newest 6.8 is 6.8.3 and always will be — not a packaging gap. So "we are on
+the LTS" is not by itself a statement about being patched: check whether the
+series is still in open-source support, or accept shipping a frozen Qt.
+(The EOL dates come from endoflife.date; qt.io's own release post confirms
+the LTS designation and the five-year period but says nothing about
+open-source patch availability, so treat the exact date as well-sourced
+rather than vendor-confirmed.)
+
+Before moving Qt's minor, read "Windows installer size" below, where the ICU
+import and the `qtimezonelocale` CLDR tables are what a minor bump costs. Note
+also that the per-submodule options are version-sensitive: the recipe adds one
+option per submodule and then `rm_safe`s any that are absent from that
+version's module tree, so a profile naming a submodule that has since gone
+away fails the whole resolve. `qtwebengine` went that way in 6.12 and its line
+is gone from `build/conan-profiles/windows-qt`. Leaving a submodule unset is
+equivalent to False - submodule options carry no default and the recipe treats
+unset as not requested.
 
 Check a pin resolves before pushing. Neither command builds anything, and the
 Windows one runs fine on Linux because it only resolves recipes — but **give
@@ -1475,12 +1496,18 @@ Qt ≥ 6.9 (7.4.2 used 6.10.1) links the ICU that ships *in Windows* — 1703 ad
 `icuuc.dll`/`icuin.dll` as system DLLs and 1903 only *added* the combined
 `icu.dll` beside them, it did not replace them. So nothing needs bundling, and
 `find <installer> -iname '*icu*'` correctly returns nothing. The only
-consequence is a Windows 10 1703+ floor. Qt is currently pinned to the 6.8 LTS
-(`qt/6.8.3`, exactly — see "Dependency Pins, and Stepping Them Up") which does
-not import ICU at all; if that pin is ever raised to a newer series, expect the
-import to reappear — and expect ~3.6 MB per GUI binary of
-`qtimezonelocale.cpp.obj` CLDR tables to come back with it, which is where the
-6 × 4 MB of `.exe` growth in 7.4.2 came from.
+consequence is a Windows 10 1703+ floor.
+
+**Expect that import to be present again.** The pin moved from the 6.8 LTS to
+`qt/6.12.0` (see "Dependency Pins, and Stepping Them Up"), and 6.8 was the
+series that did *not* import ICU. With a ≥ 6.9 Qt, `icuuc.dll` in the imports
+is correct, and ~3.6 MB per GUI binary of `qtimezonelocale.cpp.obj` CLDR
+tables comes back with it — that is where the 6 × 4 MB of `.exe` growth in
+7.4.2 came from. So a Windows installer noticeably larger than the
+7.4.3-alpha4 figures above is the expected consequence of this pin, not a
+regression to hunt. What would be a real finding is an ICU *file* in the
+installer: `find <installer> -iname '*icu*'` must still return nothing, since
+the system ICU is linked rather than bundled.
 
 ### Debian `-dbg` package size: dwz, not the conan Release split
 

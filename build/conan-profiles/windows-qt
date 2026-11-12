@@ -55,7 +55,11 @@ qt/*:qtserialport=False
 qt/*:qtsvg=True
 qt/*:qtvirtualkeyboard=False
 qt/*:qtwebchannel=False
-qt/*:qtwebengine=False
+# No qtwebengine line. It is absent from the recipe's module tree for 6.12,
+# which makes config_options() rm_safe the option - and setting an option a
+# recipe does not declare is a hard error, not a no-op. Leaving it unset is
+# equivalent anyway: a submodule option carries no default, and the recipe
+# treats unset as not requested.
 qt/*:qtwebsockets=True
 qt/*:qtwebview=False
 qt/*:gui=True

@@ -110,15 +110,19 @@ class SafirSdkCoreConan(ConanFile):
             # shared-memory smart pointers" in AGENTS.md before trying again.
             self.requires("boost/1.86.0#78bd5be42f6cee6c859efae8352346c7")
             if not dual_abi_only:
-                # The Qt LTS we ship on Windows. This used to be the range
-                # [>=6.8 <6.9], which tracked the newest 6.8 patch by itself -
-                # and since our trimmed options mean no ConanCenter binary ever
-                # matches, a patch arriving mid-cycle silently bought a
-                # from-source Qt rebuild and a different shipped Qt. Moving to
-                # the next LTS series is now a release-time decision; which
-                # series that is comes from qt.io, not from the ConanCenter
-                # version list, which carries non-LTS versions too.
-                self.requires("qt/6.8.3#6ef0549c5ab025900d94d9ce4c6da6c0")
+                # The Qt LTS we ship on Windows, pinned exactly rather than as
+                # a range: our trimmed options mean no ConanCenter binary ever
+                # matches, so a patch arriving mid-cycle silently bought a
+                # from-source Qt rebuild and a different shipped Qt.
+                #
+                # 6.12 is the current LTS (released 2026-09-30, five years of
+                # maintenance; the lineage is 6.2, 6.5, 6.8, 6.12). We were on
+                # 6.8, whose open-source support ended 2025-04-02 - which is
+                # why ConanCenter has no 6.8.4 and never will. Moving series is
+                # a release-time decision and the answer comes from qt.io's
+                # schedule, not from the ConanCenter version list, which
+                # carries non-LTS series too.
+                self.requires("qt/6.12.0#83ca3c12d96835edd74659f7cfca30be")
         elif not dual_abi_only:
             # The one requirement that cannot carry a pin, by construction.
             # On Linux this resolves to build/conan-recipes/qt-system, a local
