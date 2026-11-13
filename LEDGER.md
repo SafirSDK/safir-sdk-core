@@ -81,6 +81,7 @@ the junit at all: `run_restart_nodes_tests` (last seen 2026-08-23, run
     2026-10-13  38429866975  8647787fe  lowmem_basic_operations                        slow suite, vs2026-amd64                  Delete at VeryLow expected to be refused, went through ("Expected failure"); first sighting, attribution open; evidence/2026-10-13-38429866975-lowmem-delete-not-refused
     2026-10-14  38564161733  9f5f806de  build: choco install nsis (exit 0 on 504)     build, vs2026-amd64                       choco exited 0 on a 504, retry never fired; makensis missing 50 min later; whole test wave skipped on all platforms; FIXED in 5de1f153e
     2026-10-13  38457493390  f057b8974  one_normal_one_light_detach_reattach_light_big_pool  Debug slow suite (keep-state), ubuntu-noble-amd64  Incorrect pool on node 1 after 610 s; client reconnected mid-batch and never re-subscribed (test harness); why the websocket dropped is open; evidence/2026-10-13-38457493390-big_pool-stalled-local-changes
+    2026-11-12  43278363828  3c93e49e0  syslog_output (Stuck in WaitingStates)        multicomputer dose, vs2022               1 of 36 dose runs, 1 of 10914 test runs; job green, "Test results" Check red; same <132> warning as 2026-10-08 (TracerStatus + MirroredNodeInfo, a node still Attaching), new suite/platform for it; seen on the Qt 6.12 LTS branch, which dose_test does not link Qt from
 
 The shas for the backfilled rows were recovered from the run records on
 2026-09-29, while those still existed. Four of them are on
