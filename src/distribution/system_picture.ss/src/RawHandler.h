@@ -715,7 +715,8 @@ namespace SP
          * Tell the RawHandler that this light node should forget everything about other nodes
          * since it is no longer connected to anything.
          *
-         * This will fail on non-light nodes or if some node is alive.
+         * This will fail on non-light nodes. If some node is alive it does nothing, see
+         * below.
          */
         void SetNodeIsDetached()
         {
@@ -732,12 +733,22 @@ namespace SP
                                       return;
                                   }
 
+                                  //The Coordinator decides to detach from the last RawChanged
+                                  //callback it has handled, and a node may have come (back) to
+                                  //life since that callback was posted. Clearing a live node
+                                  //would be wrong, but so is crashing on a stale view. The
+                                  //NODES_CHANGED callback for that node is already on its way,
+                                  //and will start an election. If that node is lost again
+                                  //before we attach to it, the Coordinator sees a detached
+                                  //node whose nodes are all dead and calls us again.
                                   for (const auto& node: m_nodeTable)
                                   {
                                       if (!node.second.nodeInfo->is_dead())
                                       {
-                                          throw std::logic_error("SetNodeIsDetached was called when"
-                                                                 "there was a node that is alive!");
+                                          lllog(4) << m_logPrefix << "SetNodeIsDetached: Node "
+                                                   << node.first << " is alive, so not clearing node tables."
+                                                   << std::endl;
+                                          return;
                                       }
                                   }
                                   lllog(4) << m_logPrefix << "SetNodeIsDetached: Clearing node tables" << std::endl;

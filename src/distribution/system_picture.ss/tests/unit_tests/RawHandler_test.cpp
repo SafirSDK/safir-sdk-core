@@ -1529,6 +1529,35 @@ BOOST_AUTO_TEST_CASE( reconnect_node_when_self_is_lightnode )
 }
 
 
+//The Coordinator decides to detach from a snapshot of our statistics, and a node can
+//have come back to life since that snapshot was taken. SetNodeIsDetached must then
+//leave everything alone, rather than clear a live node or crash.
+BOOST_AUTO_TEST_CASE( set_node_is_detached_with_live_node )
+{
+    comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq", false);
+    rh->FormSystem(54321);
+    rh->SetNodeIsDetached();
+
+    bool checked = false;
+    rh->PerformOnAllStatisticsMessage([&](const std::unique_ptr<char[]>& data,
+                                          const size_t size)
+                                     {
+                                         auto msg = Safir::make_unique<RawStatisticsMessage>();
+                                         msg->ParseFromArray(data.get(),static_cast<int>(size));
+                                         auto statistics = RawStatisticsCreator::Create(std::move(msg));
+                                         checked = true;
+
+                                         BOOST_REQUIRE_EQUAL(statistics.Size(), 1);
+                                         BOOST_CHECK_EQUAL(statistics.Id(0), 11);
+                                         BOOST_CHECK(!statistics.IsDead(0));
+                                         BOOST_CHECK_EQUAL(statistics.IncarnationId(), 54321);
+                                     });
+    rh->Stop();
+    BOOST_CHECK_NO_THROW(ioContext.run());
+    BOOST_CHECK(checked);
+}
+
+
 BOOST_AUTO_TEST_CASE( join_and_rejoin_system_callback)
 {
     bool stop = false;
