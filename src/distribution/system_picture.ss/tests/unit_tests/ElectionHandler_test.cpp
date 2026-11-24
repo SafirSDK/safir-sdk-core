@@ -527,28 +527,26 @@ struct Fixture
 
 BOOST_FIXTURE_TEST_SUITE( self_is_normal, Fixture<10> )
 
-//Communication starts delivering data from a new node before it tells us that the
-//node exists, and the NewNode notification reaches us two posted hops later, on a
-//different strand. So an election message can arrive before we have any statistics
-//at all, and we have to cope with that rather than walking an invalid RawStatistics.
-BOOST_AUTO_TEST_CASE( election_message_before_first_nodes_changed )
+//Communication does not deliver data from a node until RawHandler has included it,
+//which is after we have been told about the node, so a normal node treats an
+//election message from a node it doesn't know as the broken invariant it is. It
+//must fail loudly, not walk an invalid RawStatistics, and not carry on and form a
+//system of its own.
+BOOST_AUTO_TEST_CASE( election_message_from_unknown_node_throws )
 {
-    SendElectionMessage(nodes.at(0)->comm, 20, VICTORY, 4711);
+    SendElectionMessage(nodes.at(0)->comm, 20, INQUIRY, 4711);
 
     //Stop before running, so that the alone timeout doesn't elapse and elect us
     //instead. Stop is posted after the message above, so the message is handled first.
     nodes.at(0)->eh->Stop();
-    RunIoService();
+    BOOST_CHECK_THROW(RunIoService(), std::logic_error);
 
-    //We handled the VICTORY from node 20, even though we hadn't heard about node 20.
-    BOOST_CHECK(nodes.at(0)->eh->IsElected(20));
-    BOOST_CHECK_EQUAL(nodes.at(0)->electedNode, 20);
-    BOOST_CHECK_EQUAL(nodes.at(0)->electionId, 4711);
+    BOOST_CHECK(!nodes.at(0)->eh->IsElected());
+    BOOST_CHECK_EQUAL(nodes.at(0)->incarnationId, 0);
 }
 
 //A node that we do have statistics for and that we have marked as dead is a
-//different matter: we must not accept its victory. That has always worked, and has
-//to keep working now that an unknown node no longer gets the same treatment.
+//different matter: we must not accept its victory.
 BOOST_AUTO_TEST_CASE( victory_from_dead_node_is_not_accepted )
 {
     AddNode();
@@ -940,6 +938,25 @@ BOOST_AUTO_TEST_SUITE_END()
 
 
 BOOST_FIXTURE_TEST_SUITE( self_is_light, Fixture<15> )
+
+//A light node throws its statistics away when everyone else is dead, so unlike a
+//normal node it can get an election message from a node that is not in them. That
+//must not crash it, and since a light node never starts an election because of a
+//message, handling the message as if the sender is alive is safe.
+BOOST_AUTO_TEST_CASE( election_message_from_unknown_node )
+{
+    SendElectionMessage(nodes.at(0)->comm, 20, VICTORY, 4711);
+
+    //Stop before running, so that the alone timeout doesn't elapse and elect us
+    //instead. Stop is posted after the message above, so the message is handled first.
+    nodes.at(0)->eh->Stop();
+    RunIoService();
+
+    BOOST_CHECK(nodes.at(0)->eh->IsElected(20));
+    BOOST_CHECK_EQUAL(nodes.at(0)->electedNode, 20);
+    BOOST_CHECK_EQUAL(nodes.at(0)->electionId, 4711);
+    BOOST_CHECK_EQUAL(nodes.at(0)->incarnationId, 0);
+}
 
 BOOST_AUTO_TEST_CASE( elect_self )
 {

@@ -468,21 +468,35 @@ namespace SP
 
                 if (!found)
                 {
-                    //We can get here perfectly legitimately, so this is not an error.
-                    //Communication starts delivering data from a new node before it
-                    //invokes its NewNode callback, and that callback reaches us two
-                    //posted hops later (RawHandler posts a RawChanged callback, which
-                    //the Coordinator turns into a NodesChanged call on us), from a
-                    //different strand. So an election message can overtake the node it
-                    //came from, and until the very first NodesChanged m_lastStatistics
-                    //is not even valid. A node that we haven't heard about cannot be one
-                    //that we have marked as dead, so we handle the message as if the
-                    //node is alive, which it is.
+                    //On a normal node this cannot happen. Communication drops data from
+                    //a new node until it has been included, and RawHandler only includes
+                    //it once every RawChanged callback for that node has completed, and
+                    //that includes our NodesChanged handling of it. So the sender must
+                    //be in m_lastStatistics, and if it is not, something is broken.
+                    //Carrying on is not safe either: with no valid statistics an INQUIRY
+                    //or a usurping VICTORY would make StartElection elect us and form a
+                    //new incarnation, splitting the system without a sound.
+                    if (!m_isLightNode)
+                    {
+                        SEND_SYSTEM_LOG(Alert,
+                                        << "Got ElectionMessage ("
+                                        << ToString(message.action())
+                                        << ", "
+                                        << message.election_id()
+                                        << ") from an unknown node with id " << from);
+
+                        throw std::logic_error("Got ElectionMessage from a node that I dont know about!");
+                    }
+
+                    //A light node, on the other hand, throws its statistics away when
+                    //everyone else is dead (see StartElection), so the sender can be
+                    //missing from them. Light nodes never start an election because of
+                    //a message, so we can handle it as if the node is alive.
                     lllog(4) << m_logPrefix << "Got ElectionMessage ("
                              << ToString(message.action())
                              << ", "
                              << message.election_id()
-                             << ") from node " << from << ", which I haven't heard about yet. "
+                             << ") from node " << from << ", which is not in my statistics. "
                              << "Handling it as if that node is alive." << std::endl;
                 }
 
