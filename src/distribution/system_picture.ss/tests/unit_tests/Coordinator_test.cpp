@@ -86,6 +86,29 @@ RawStatistics GetRawDetachedLightnode()
     return RawStatisticsCreator::Create(std::move(msg));
 }
 
+//A light node whose only other node, its coordinator, has died. The incarnation id
+//is the one that the dead coordinator's system has.
+RawStatistics GetRawLightnodeWithDeadCoordinator()
+{
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
+
+    msg->set_name("myself");
+    msg->set_id(1000);
+    msg->set_node_type_id(15);
+    msg->set_election_id(101);
+    msg->set_incarnation_id(2000);
+
+    auto node = msg->add_node_info();
+
+    node->set_name("remote1");
+    node->set_id(1001);
+    node->set_node_type_id(10);
+    node->set_control_address("remote1:control");
+    node->set_data_address("remote1:data");
+    node->set_is_dead(true);
+
+    return RawStatisticsCreator::Create(std::move(msg));
+}
 
 RawStatistics GetRawWithTwoNodes()
 {
@@ -669,7 +692,7 @@ public:
 
     void SetNodeIsDetached()
     {
-
+        ++setNodeIsDetachedCount;
     }
 
     StatisticsCallback rawCb;
@@ -677,6 +700,7 @@ public:
     int64_t electedId = 0;
     int64_t electionId = 0;
     std::set<int64_t> deadNodes;
+    int setNodeIsDetachedCount = 0;
 };
 
 
@@ -1725,6 +1749,67 @@ BOOST_AUTO_TEST_CASE( discarded_state_does_not_clear_detached )
 
     readDetached();
     BOOST_CHECK(!detached);
+}
+
+//The other side of the test above: since a discarded state leaves us detached, a
+//light node that loses the coordinator it was attaching to, before accepting any
+//state from it, has to clean out what the RawHandler has adopted from that
+//coordinator (its incarnation id and its node) just as if it was becoming detached.
+BOOST_AUTO_TEST_CASE( abandoned_attach_is_cleaned_out )
+{
+    bool detached = false;
+    const auto readDetached = [this,&detached]
+                              {
+                                  boost::asio::dispatch(strand,
+                                                        [this,&detached]
+                                                        {detached = coordinator.IsDetached();});
+                                  ioContext.restart();
+                                  ioContext.run();
+                              };
+
+    //get ourselves into the detached state
+    ElectionHandlerStub::lastInstance->isLightNode = true;
+    ElectionHandlerStub::lastInstance->electedId = 1000;
+    ElectionHandlerStub::lastInstance->isDetached = true;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
+    rh.rawCb(GetRawDetachedLightnode(),RawChanges(RawChanges::NODES_CHANGED),cs);
+    readDetached();
+    BOOST_REQUIRE(detached);
+    const auto cleanOutsBefore = rh.setNodeIsDetachedCount;
+
+    //Node 1001 wins the election, and its first state does not contain us, so we
+    //discard it and stay detached.
+    ElectionHandlerStub::lastInstance->isDetached = false;
+    ElectionHandlerStub::lastInstance->electedId = 1001;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1001,101);
+
+    {
+        auto state = GetStateWithoutSelf();
+        const size_t size = state.ByteSizeLong();
+        auto data = Safir::Utilities::Internal::SharedCharArray(new char[size]);
+        state.SerializeWithCachedSizesToArray
+            (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+        coordinator.NewRemoteStatistics(1001,data,size);
+        ioContext.restart();
+        ioContext.run();
+    }
+
+    readDetached();
+    BOOST_REQUIRE(detached);
+
+    //Then node 1001 dies, before we have accepted any state from it, and we elect
+    //ourselves again. Our raw data still has node 1001 in it, and its incarnation id.
+    ElectionHandlerStub::lastInstance->isDetached = true;
+    ElectionHandlerStub::lastInstance->electedId = 1000;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,102);
+    rh.rawCb(GetRawLightnodeWithDeadCoordinator(),RawChanges(RawChanges::NODES_CHANGED),cs);
+    ioContext.restart();
+    ioContext.run();
+
+    //So the RawHandler must have been told to clean that out.
+    BOOST_CHECK_GT(rh.setNodeIsDetachedCount, cleanOutsBefore);
+    readDetached();
+    BOOST_CHECK(detached);
 }
 
 BOOST_AUTO_TEST_CASE( detach_and_reattach )

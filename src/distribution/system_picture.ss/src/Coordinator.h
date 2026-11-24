@@ -790,8 +790,18 @@ namespace SP
             m_stateMessage.set_elected_id(m_id);
             m_stateMessage.set_election_id(m_ownElectionId);
 
+            //A light node that was on its way to attach can lose its coordinator before
+            //it has accepted a state from it. We never stopped being detached then, since
+            //we only take is_detached from states that we accept, but the RawHandler has
+            //already adopted the coordinator's incarnation and still holds the now dead
+            //nodes. That needs the same clean out as becoming detached, or we stay in the
+            //dead coordinator's incarnation instead of forming one of our own.
+            const bool abandonedAttach = IsDetached() &&
+                m_lastStatistics.Size() != 0 &&
+                m_lastStatistics.IsEveryoneElseDead();
+
             // if we're becoming detached we need to clear out all the nodes from state
-            if (!IsDetached() && m_electionHandler->IsElectionDetached())
+            if ((!IsDetached() || abandonedAttach) && m_electionHandler->IsElectionDetached())
             {
                 lllog(6) << m_logPrefix << "Becoming detached, clearing node info from state" <<std::endl;
                 m_stateMessage.clear_node_info();
