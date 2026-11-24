@@ -124,6 +124,7 @@ namespace SP
             , m_ownElectionId(0)
             , m_rawHandler(rawHandler)
             , m_failedStateUpdates(0)
+            , m_detachedIncarnationId(0)
         {
             m_electionHandler.reset(new ElectionHandlerT(m_logPrefix,
                                                          m_strand,
@@ -796,7 +797,12 @@ namespace SP
             //already adopted the coordinator's incarnation and still holds the now dead
             //nodes. That needs the same clean out as becoming detached, or we stay in the
             //dead coordinator's incarnation instead of forming one of our own.
+            //Dead nodes alone are not enough to go on: a node that turns up and goes away
+            //again without us ever joining it leaves a dead node behind too, and then our
+            //own incarnation is still the right one and must be kept. So it has to be
+            //the incarnation that has changed.
             const bool abandonedAttach = IsDetached() &&
+                m_lastStatistics.IncarnationId() != m_detachedIncarnationId &&
                 m_lastStatistics.Size() != 0 &&
                 m_lastStatistics.IsEveryoneElseDead();
 
@@ -1145,6 +1151,11 @@ namespace SP
                 throw std::logic_error("A detached SystemState message should only have one node in it");
             }
 
+            if (m_stateMessage.is_detached())
+            {
+                m_detachedIncarnationId = m_lastStatistics.IncarnationId();
+            }
+
             lllog(9) << m_logPrefix << "A new SystemState has been produced\n";
             if (logState)
             {
@@ -1194,6 +1205,10 @@ namespace SP
         RawHandlerT& m_rawHandler;
 
         int m_failedStateUpdates;
+
+        //The incarnation id that we had when we last produced a detached state, i.e.
+        //the one that we formed ourselves. See abandonedAttach in UpdateMyState.
+        int64_t m_detachedIncarnationId;
     };
 
     //forward declarations

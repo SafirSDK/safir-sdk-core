@@ -86,9 +86,8 @@ RawStatistics GetRawDetachedLightnode()
     return RawStatisticsCreator::Create(std::move(msg));
 }
 
-//A light node whose only other node, its coordinator, has died. The incarnation id
-//is the one that the dead coordinator's system has.
-RawStatistics GetRawLightnodeWithDeadCoordinator()
+//A light node whose only other node has died, with the given incarnation id.
+RawStatistics GetRawLightnodeWithDeadNode(const int64_t incarnationId)
 {
     auto msg = Safir::make_unique<RawStatisticsMessage>();
 
@@ -96,7 +95,7 @@ RawStatistics GetRawLightnodeWithDeadCoordinator()
     msg->set_id(1000);
     msg->set_node_type_id(15);
     msg->set_election_id(101);
-    msg->set_incarnation_id(2000);
+    msg->set_incarnation_id(incarnationId);
 
     auto node = msg->add_node_info();
 
@@ -843,6 +842,24 @@ struct Fixture
     RawHandlerStub rh;
 
     CoordinatorBasic<CommunicationStub, RawHandlerStub, ElectionHandlerStub> coordinator;
+
+    //Have the coordinator produce its own state, which must be a detached one.
+    void ProduceDetachedState()
+    {
+        bool callbackCalled = false;
+        SystemStateMessage stateMessage;
+        coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
+                                                                          const size_t size)
+                                          {
+                                              callbackCalled = true;
+                                              stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+                                          },
+                                          true);
+        ioContext.restart();
+        ioContext.run();
+        BOOST_REQUIRE(callbackCalled);
+        BOOST_REQUIRE(stateMessage.is_detached());
+    }
 };
 
 BOOST_FIXTURE_TEST_SUITE( self_is_normal, Fixture<10> )
@@ -1767,12 +1784,14 @@ BOOST_AUTO_TEST_CASE( abandoned_attach_is_cleaned_out )
                                   ioContext.run();
                               };
 
-    //get ourselves into the detached state
+    //get ourselves into the detached state, in incarnation 1000, and produce a
+    //detached state there
     ElectionHandlerStub::lastInstance->isLightNode = true;
     ElectionHandlerStub::lastInstance->electedId = 1000;
     ElectionHandlerStub::lastInstance->isDetached = true;
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
     rh.rawCb(GetRawDetachedLightnode(),RawChanges(RawChanges::NODES_CHANGED),cs);
+    ProduceDetachedState();
     readDetached();
     BOOST_REQUIRE(detached);
     const auto cleanOutsBefore = rh.setNodeIsDetachedCount;
@@ -1802,7 +1821,7 @@ BOOST_AUTO_TEST_CASE( abandoned_attach_is_cleaned_out )
     ElectionHandlerStub::lastInstance->isDetached = true;
     ElectionHandlerStub::lastInstance->electedId = 1000;
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,102);
-    rh.rawCb(GetRawLightnodeWithDeadCoordinator(),RawChanges(RawChanges::NODES_CHANGED),cs);
+    rh.rawCb(GetRawLightnodeWithDeadNode(2000),RawChanges(RawChanges::NODES_CHANGED),cs);
     ioContext.restart();
     ioContext.run();
 
@@ -1810,6 +1829,29 @@ BOOST_AUTO_TEST_CASE( abandoned_attach_is_cleaned_out )
     BOOST_CHECK_GT(rh.setNodeIsDetachedCount, cleanOutsBefore);
     readDetached();
     BOOST_CHECK(detached);
+}
+
+//But a node that turns up and goes away again without us ever joining it leaves a
+//dead node behind as well. Our incarnation is still the one we formed when we
+//detached, and it must be kept: clearing it would make us form a new one for no
+//reason. run_system_picture_component_tests' disconnect_sleep_reconnect caught that.
+BOOST_AUTO_TEST_CASE( detached_node_keeps_own_incarnation_when_a_node_comes_and_goes )
+{
+    //get ourselves into the detached state, in incarnation 1000, and produce a
+    //detached state there
+    ElectionHandlerStub::lastInstance->isLightNode = true;
+    ElectionHandlerStub::lastInstance->electedId = 1000;
+    ElectionHandlerStub::lastInstance->isDetached = true;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
+    rh.rawCb(GetRawDetachedLightnode(),RawChanges(RawChanges::NODES_CHANGED),cs);
+    ProduceDetachedState();
+    const auto cleanOutsBefore = rh.setNodeIsDetachedCount;
+
+    //Node 1001 has come and gone again, and we are still in our own incarnation.
+    rh.rawCb(GetRawLightnodeWithDeadNode(1000),RawChanges(RawChanges::NODES_CHANGED),cs);
+    ProduceDetachedState();
+
+    BOOST_CHECK_EQUAL(rh.setNodeIsDetachedCount, cleanOutsBefore);
 }
 
 BOOST_AUTO_TEST_CASE( detach_and_reattach )
