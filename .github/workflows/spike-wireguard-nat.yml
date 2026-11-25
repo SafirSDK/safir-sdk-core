@@ -9,13 +9,12 @@
 #
 # This runs only the overlay, on the same runner types as ci.yml's multicomputer
 # pairs, several pairs at once so that failures turn up in one run, and in a few
-# minutes instead of the full CI's hours. It runs on push to spike/** only, which
-# ci.yml does not trigger on.
+# minutes instead of the full CI's hours.
 name: spike-wireguard-nat
 
+# Manual only now (Actions tab or `gh workflow run`), so that pushes for the
+# other spike workflows don't start twelve pairs as well.
 on:
-  push:
-    branches: ['spike/**']
   workflow_dispatch:
 
 permissions:
