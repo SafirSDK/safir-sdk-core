@@ -28,7 +28,7 @@ of the arm64 pair on attempt 2, with the echoed step scripts left out.
   so on) and still got a handshake on the first try.
 - **Not the code under test.** No Safir process had started.
 
-## Theory, not verified
+## Theory (confirmed 2026-11-25, see below)
 
 Both sides send handshakes to the peer's STUN-mapped address and nothing ever
 arrives. That fits a NAT with endpoint-dependent mapping on one or both runners:
@@ -37,3 +37,11 @@ server, so the punched hole is in the wrong place. `stun.py` asks a single serve
 so it cannot tell such a NAT from a friendly one. Checking would take a second
 STUN query to a different server address from the same local port, and comparing
 the two mapped ports.
+
+## Confirmed
+
+Spike run 45668480745 did exactly that check on 12 pairs: every pair with an
+endpoint-dependent side failed, both pairs with two endpoint-independent sides came
+up, and every endpoint-dependent runner had an AWS EC2 public address. The same
+holds for the slaves in the runs above (3.42.157.111 and 3.41.210.122 are AWS).
+`spike-45668480745.md` has the table.

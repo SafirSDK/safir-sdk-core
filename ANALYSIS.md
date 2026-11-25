@@ -340,12 +340,22 @@ these so you don't hunt for a nonexistent test regression:
   It looks like develop's AGENTS.md → "Known multicomputer overlay failure modes"
   third bullet, but it is not that: that one was a re-run picking up a dead
   runner's rendezvous artifact, and here the keys and endpoints each side
-  configured are the peer's current ones, on first attempts too. Port
-  translation by the NAT is not the difference either, since passing pairs show
-  it as well. The working theory, **unverified**, is endpoint-dependent NAT
-  mapping on some runners, which `stun.py`'s single query cannot detect. What
-  was ruled out and how to check the theory is in
-  `evidence/2026-11-24-45454575691-wireguard-no-handshake`.
+  configured are the peer's current ones, on first attempts too.
+
+  **Diagnosis, confirmed 2026-11-25:** some `ubuntu-24.04` runners now come
+  from AWS EC2 (us-east-1, us-west-2) instead of Azure, and their NAT maps
+  endpoint-dependently: a second STUN server sees a different public port for
+  the same local port, so the endpoint each side publishes is not the one the
+  peer's packets arrive from. Spike run 45668480745 (`spike/wireguard-nat`, 12
+  pairs) failed on every pair with an AWS side, 10 of 10, and came up on both
+  pairs where both sides were Azure. The failing CI runs fit: their slaves were
+  at AWS addresses (3.42.157.111, 3.41.210.122) and the passing run's were not.
+  Table in `evidence/2026-11-24-45454575691-wireguard-no-handshake/spike-45668480745.md`.
+  So the 2026-11-13..16 onset is GitHub adding AWS capacity, which also
+  explains why it is neither branch nor platform specific: the slaves side is
+  always `ubuntu-24.04`, and it is that side that most often lands on AWS.
+  stun.py's docstring claim that "GitHub-hosted (Azure) runners punch cleanly"
+  is no longer true of the pool as a whole.
 
   **It is getting worse, and it is not our change.** A full re-run of 45454575691
   (attempt 3) failed this way on **all four** pairs, while every other job passed.
@@ -355,13 +365,12 @@ these so you don't hunt for a nonexistent test regression:
   being 45418635225. `.github/actions/wireguard-overlay` has not changed since
   9f5f806de (2026-10-13), and runner image ubuntu-24.04 20261111.635 both passed
   (45418635225) and failed (45454575691), so neither the action nor the image
-  version explains the onset. Something outside the repository changed between
-  2026-11-13 and 2026-11-16, most likely in how the runners' NAT treats UDP.
+  version explains the onset.
 
   What to do with a red one: re-run. `rerun --failed` is sound when both halves
   of the pair failed, which they do, but it can fail again, as the arm64 pair did
-  and as a full re-run did. Nothing has been done about the cause; checking the
-  NAT theory in the evidence bundle is the next step.
+  and as a full re-run did: a re-run only helps if both runners it gets are on
+  Azure. No fix has been chosen yet; the work is on `spike/wireguard-nat`.
 - **A job timeout reports as `cancelled`, not `failure`.** GitHub kills a job that
   exceeds `timeout-minutes` with `##[error]The operation was canceled.`, so the
   *run* ends up "cancelled" and looks like somebody pressed the button. Check the
