@@ -88,6 +88,41 @@ def bind(port):
         return None
 
 
+def check_mapping(sock, port, first_host, mapped):
+    """Ask a second server, at a different address, for the mapping of the same socket.
+
+    Purely diagnostic. The punch only works if the NAT gives our source port the
+    same public port whoever we talk to (endpoint-independent mapping), because
+    the mapping we publish is the one the STUN server saw, not the one the peer
+    will see. A NAT that maps per destination looks exactly like a friendly one
+    to a single query, so compare two, and say so plainly in the log when they
+    disagree. Nothing here changes what we print or return.
+    """
+    try:
+        first_ip = socket.gethostbyname(first_host)
+    except (socket.gaierror, OSError):
+        return
+    for host, sport in DEFAULT_SERVERS:
+        try:
+            if socket.gethostbyname(host) == first_ip:
+                continue
+            other = query(sock, host, sport)
+        except (socket.gaierror, OSError) as exc:
+            sys.stderr.write(f"NAT mapping check: STUN {host}:{sport} failed: {exc}\n")
+            continue
+        if not other:
+            continue
+        if other == mapped:
+            sys.stderr.write(f"NAT mapping check: {host}:{sport} also maps local port {port} "
+                             f"to {other} - endpoint-independent mapping, the punch can work\n")
+        else:
+            sys.stderr.write(f"NAT mapping check: {first_host} saw {mapped} but {host}:{sport} saw "
+                             f"{other} for local port {port} - ENDPOINT-DEPENDENT mapping, the "
+                             f"peer will not reach the endpoint we publish\n")
+        return
+    sys.stderr.write("NAT mapping check: no second STUN server at a different address answered\n")
+
+
 def discover(port):
     """Return the public endpoint for <port>, or None if this port is unusable."""
     sock = bind(port)
@@ -102,6 +137,7 @@ def discover(port):
                 continue
             if mapped:
                 sys.stderr.write(f"STUN mapping from {host}:{sport} on local port {port}\n")
+                check_mapping(sock, port, host, mapped)
                 return mapped
             sys.stderr.write(f"STUN {host}:{sport} gave no mapped address\n")
         return None
