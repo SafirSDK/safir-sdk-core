@@ -12,9 +12,9 @@
 # minutes instead of the full CI's hours.
 name: spike-wireguard-nat
 
-# Manual only now (Actions tab or `gh workflow run`), so that pushes for the
-# other spike workflows don't start twelve pairs as well.
 on:
+  push:
+    branches: ['spike/**']
   workflow_dispatch:
 
 permissions:

@@ -7,9 +7,9 @@
 # and collects one line per job into a single artifact, nat-survey.
 name: spike-nat-survey
 
+# Done (run 45707752715). workflow_dispatch only works for workflows on the
+# default branch, so in practice this no longer runs; kept for reference.
 on:
-  push:
-    branches: ['spike/**']
   workflow_dispatch:
 
 permissions:
