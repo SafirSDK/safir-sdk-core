@@ -347,9 +347,21 @@ these so you don't hunt for a nonexistent test regression:
   was ruled out and how to check the theory is in
   `evidence/2026-11-24-45454575691-wireguard-no-handshake`.
 
+  **It is getting worse, and it is not our change.** A full re-run of 45454575691
+  (attempt 3) failed this way on **all four** pairs, while every other job passed.
+  Runs 44033602459 and 44033602338 on two other branches, with other shas, were
+  hit on 2026-11-17 too. Every run with multicomputer legs from 2026-11-11 to
+  2026-11-13 was clean; from 2026-11-16 on, 4 of 5 runs were hit, the exception
+  being 45418635225. `.github/actions/wireguard-overlay` has not changed since
+  9f5f806de (2026-10-13), and runner image ubuntu-24.04 20261111.635 both passed
+  (45418635225) and failed (45454575691), so neither the action nor the image
+  version explains the onset. Something outside the repository changed between
+  2026-11-13 and 2026-11-16, most likely in how the runners' NAT treats UDP.
+
   What to do with a red one: re-run. `rerun --failed` is sound when both halves
-  of the pair failed, which they do, but it can fail again, as the arm64 pair did.
-  Nothing has been done about the cause.
+  of the pair failed, which they do, but it can fail again, as the arm64 pair did
+  and as a full re-run did. Nothing has been done about the cause; checking the
+  NAT theory in the evidence bundle is the next step.
 - **A job timeout reports as `cancelled`, not `failure`.** GitHub kills a job that
   exceeds `timeout-minutes` with `##[error]The operation was canceled.`, so the
   *run* ends up "cancelled" and looks like somebody pressed the button. Check the

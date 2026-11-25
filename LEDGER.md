@@ -85,6 +85,8 @@ the junit at all: `run_restart_nodes_tests` (last seen 2026-08-23, run
     2026-11-13  43411330435  3c93e49e0  syslog_output (Stuck in WaitingStates)        multicomputer dose, ubuntu-noble-amd64   1 of 36 dose runs; job green, "Test results" Check red; the SAME sha as 43278363828 the day before, which failed this test on vs2022 instead - so the platform is not a property of the failure, and the Qt 6.12 bump in that sha is not a cause
     2026-11-16  43832118965  83b685b4e  wireguard-overlay: no handshake (0 B received)  multicomputer pairs, vs2022 + vs2026      2 of 4 pairs, first attempt; both halves of each pair red in "Establish WireGuard overlay" ~3 min in, nothing tested; the other 2 pairs fine
     2026-11-24  45454575691  466882bd7  wireguard-overlay: no handshake (0 B received)  multicomputer pairs, vs2022 + ubuntu-noble-arm64  2 of 4 pairs on attempt 1; rerun --failed: vs2022 passed, arm64 pair failed the same way again; keys and endpoints exchanged correctly, so not the stale-rendezvous mode; evidence/2026-11-24-45454575691-wireguard-no-handshake
+    2026-11-17  44033602459  51ba9fd28  wireguard-overlay: no handshake (0 B received)  multicomputer pairs, ubuntu-noble-amd64  1 of 4 pairs; private/light-node-test-diagnostics; found afterwards while checking whether the 2026-11-24 failures were branch-specific (they are not)
+    2026-11-17  44033602338  1970817c7  wireguard-overlay: no handshake (0 B received)  multicomputer pairs, ubuntu-noble-amd64 + ubuntu-noble-arm64  2 of 4 pairs; private/datareceiver-read-robustness; started the same minute as 44033602459, so the two competed for runners
 
 The shas for the backfilled rows were recovered from the run records on
 2026-09-29, while those still existed. Four of them are on
