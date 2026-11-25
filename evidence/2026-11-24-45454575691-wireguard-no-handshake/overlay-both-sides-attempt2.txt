@@ -1,0 +1,124 @@
+== multicomputer-master-ubuntu-noble-arm64, run 45454575691 attempt 2, job 138789734371
+== (job log timestamps stripped; the echoed step scripts are omitted, see .github/actions/wireguard-overlay at 466882bd7)
+##[start-action display=Generate keys and discover public endpoint via STUN;id=__self_3.__run_4]
+##[group]Run set -euo pipefail
+Public key: 26OyiqwuO2IM+PhrIet11+3MWW+fz2sUWLyGKjiQlhk=
+STUN mapping from stun.l.google.com:19302 on local port 31820
+Mapped (public) endpoint: 52.250.245.96:13312 (local UDP port 31820)
+endpoint.txt: 26OyiqwuO2IM+PhrIet11+3MWW+fz2sUWLyGKjiQlhk= 52.250.245.96:13312
+##[end-action id=__self_3.__run_4;outcome=success;conclusion=success;duration_ms=57]
+##[start-action display=Publish my endpoint;id=__self_3.__actions_upload-artifact]
+##[group]Run actions/upload-artifact@v6
+Artifact endpoint-master-ubuntu-noble-arm64-attempt2.zip successfully finalized. Artifact ID 14965838482
+Artifact endpoint-master-ubuntu-noble-arm64-attempt2 has been successfully uploaded! Final size is 205 bytes. Artifact ID is 14965838482
+Artifact download URL: https://github.com/SafirSDK/safir-sdk-core/actions/runs/45454575691/artifacts/14965838482
+##[end-action id=__self_3.__actions_upload-artifact;outcome=success;conclusion=success;duration_ms=1496]
+##[start-action display=Fetch peer endpoint (poll until the other job has published);id=__self_3.__run_5]
+##[group]Run set -uo pipefail
+Found endpoint-slaves-ubuntu-noble-arm64-attempt2 on attempt 1
+Peer endpoint:
+3n6519EtVVNcP9RxY6ZObov3NIfQkRKw0tEqe5l/rWs= 3.41.210.122:59657
+##[end-action id=__self_3.__run_5;outcome=success;conclusion=success;duration_ms=1405]
+##[start-action display=Bring up the WireGuard tunnel (Linux);id=__self_3.__run_6]
+##[group]Run set -euo pipefail
+Peer pubkey=3n6519EtVVNcP9RxY6ZObov3NIfQkRKw0tEqe5l/rWs= endpoint=3.41.210.122:59657 listen-port=31820
+=== wg show ===
+interface: wg0
+  public key: 26OyiqwuO2IM+PhrIet11+3MWW+fz2sUWLyGKjiQlhk=
+  private key: (hidden)
+  listening port: 31820
+
+peer: 3n6519EtVVNcP9RxY6ZObov3NIfQkRKw0tEqe5l/rWs=
+  endpoint: 3.41.210.122:59657
+  allowed ips: 10.68.0.0/16
+  transfer: 0 B received, 148 B sent
+  persistent keepalive: every 25 seconds
+=== ip route ===
+default via 10.1.0.1 dev eth0 proto dhcp src 10.1.0.10 metric 100 
+10.1.0.0/20 dev eth0 proto kernel scope link src 10.1.0.10 metric 100 
+10.1.0.1 dev eth0 proto dhcp scope link src 10.1.0.10 metric 100 
+10.68.0.0/16 dev wg0 scope link 
+168.63.129.16 via 10.1.0.1 dev eth0 proto dhcp src 10.1.0.10 metric 100 
+169.254.169.254 via 10.1.0.1 dev eth0 proto dhcp src 10.1.0.10 metric 100 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
+##[end-action id=__self_3.__run_6;outcome=success;conclusion=success;duration_ms=222]
+##[start-action display=Write wg0.conf (Windows);id=__self_3.__run_7]
+##[end-action id=__self_3.__run_7;outcome=skipped;conclusion=skipped;duration_ms=0]
+##[start-action display=Install the WireGuard tunnel service (Windows);id=__self_3.__run_8]
+##[end-action id=__self_3.__run_8;outcome=skipped;conclusion=skipped;duration_ms=0]
+##[start-action display=Punch and verify the tunnel (Linux);id=__self_3.__run_9]
+##[group]Run set -uo pipefail
+=== wg show ===
+interface: wg0
+  public key: 26OyiqwuO2IM+PhrIet11+3MWW+fz2sUWLyGKjiQlhk=
+  private key: (hidden)
+  listening port: 31820
+
+peer: 3n6519EtVVNcP9RxY6ZObov3NIfQkRKw0tEqe5l/rWs=
+  endpoint: 3.41.210.122:59657
+  allowed ips: 10.68.0.0/16
+  transfer: 0 B received, 4.91 KiB sent
+  persistent keepalive: every 25 seconds
+WireGuard tunnel did not come up (no handshake with peer)
+
+== multicomputer-slaves-debian (for ubuntu-noble-arm64 master), run 45454575691 attempt 2, job 138789733824
+##[start-action display=Generate keys and discover public endpoint via STUN;id=__self_2.__run_4]
+##[group]Run set -euo pipefail
+Public key: 3n6519EtVVNcP9RxY6ZObov3NIfQkRKw0tEqe5l/rWs=
+STUN mapping from stun.l.google.com:19302 on local port 31820
+Mapped (public) endpoint: 3.41.210.122:59657 (local UDP port 31820)
+endpoint.txt: 3n6519EtVVNcP9RxY6ZObov3NIfQkRKw0tEqe5l/rWs= 3.41.210.122:59657
+##[end-action id=__self_2.__run_4;outcome=success;conclusion=success;duration_ms=40]
+##[start-action display=Publish my endpoint;id=__self_2.__actions_upload-artifact]
+##[group]Run actions/upload-artifact@v6
+Artifact endpoint-slaves-ubuntu-noble-arm64-attempt2.zip successfully finalized. Artifact ID 14965079728
+Artifact endpoint-slaves-ubuntu-noble-arm64-attempt2 has been successfully uploaded! Final size is 204 bytes. Artifact ID is 14965079728
+Artifact download URL: https://github.com/SafirSDK/safir-sdk-core/actions/runs/45454575691/artifacts/14965079728
+##[end-action id=__self_2.__actions_upload-artifact;outcome=success;conclusion=success;duration_ms=855]
+##[start-action display=Fetch peer endpoint (poll until the other job has published);id=__self_2.__run_5]
+##[group]Run set -uo pipefail
+peer endpoint not ready yet (attempt 1, peer job in_progress, 24m left) ...
+Found endpoint-master-ubuntu-noble-arm64-attempt2 on attempt 2
+Peer endpoint:
+26OyiqwuO2IM+PhrIet11+3MWW+fz2sUWLyGKjiQlhk= 52.250.245.96:13312
+##[end-action id=__self_2.__run_5;outcome=success;conclusion=success;duration_ms=16205]
+##[start-action display=Bring up the WireGuard tunnel (Linux);id=__self_2.__run_6]
+##[group]Run set -euo pipefail
+Peer pubkey=26OyiqwuO2IM+PhrIet11+3MWW+fz2sUWLyGKjiQlhk= endpoint=52.250.245.96:13312 listen-port=31820
+=== wg show ===
+interface: wg0
+  public key: 3n6519EtVVNcP9RxY6ZObov3NIfQkRKw0tEqe5l/rWs=
+  private key: (hidden)
+  listening port: 31820
+
+peer: 26OyiqwuO2IM+PhrIet11+3MWW+fz2sUWLyGKjiQlhk=
+  endpoint: 52.250.245.96:13312
+  allowed ips: 10.68.1.1/32
+  transfer: 0 B received, 148 B sent
+  persistent keepalive: every 25 seconds
+=== ip route ===
+default via 10.0.128.1 dev enp39s0 proto dhcp src 10.0.132.186 metric 100 
+10.0.0.2 via 10.0.128.1 dev enp39s0 proto dhcp src 10.0.132.186 metric 100 
+10.0.128.0/20 dev enp39s0 proto kernel scope link src 10.0.132.186 metric 100 
+10.0.128.1 dev enp39s0 proto dhcp scope link src 10.0.132.186 metric 100 
+10.68.1.1 dev wg0 scope link 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
+##[end-action id=__self_2.__run_6;outcome=success;conclusion=success;duration_ms=52]
+##[start-action display=Write wg0.conf (Windows);id=__self_2.__run_7]
+##[end-action id=__self_2.__run_7;outcome=skipped;conclusion=skipped;duration_ms=0]
+##[start-action display=Install the WireGuard tunnel service (Windows);id=__self_2.__run_8]
+##[end-action id=__self_2.__run_8;outcome=skipped;conclusion=skipped;duration_ms=0]
+##[start-action display=Punch and verify the tunnel (Linux);id=__self_2.__run_9]
+##[group]Run set -uo pipefail
+=== wg show ===
+interface: wg0
+  public key: 3n6519EtVVNcP9RxY6ZObov3NIfQkRKw0tEqe5l/rWs=
+  private key: (hidden)
+  listening port: 31820
+
+peer: 26OyiqwuO2IM+PhrIet11+3MWW+fz2sUWLyGKjiQlhk=
+  endpoint: 52.250.245.96:13312
+  allowed ips: 10.68.1.1/32
+  transfer: 0 B received, 4.91 KiB sent
+  persistent keepalive: every 25 seconds
+WireGuard tunnel did not come up (no handshake with peer)

@@ -328,6 +328,28 @@ these so you don't hunt for a nonexistent test regression:
   past this one: running `wg.exe` is part of each attempt, so an install that
   installed nothing counts as failed. First clean run with it: 38625294386. The Linux side's `apt-get install wireguard-tools` in the same action
   is still not retried.
+- **WireGuard handshake never completes, `0 B received` on both sides.** Both
+  halves of a multicomputer pairing fail in "Establish WireGuard overlay" about
+  three minutes in, with `WireGuard tunnel did not come up (no handshake with
+  peer)` and `wg show` reporting nothing received on either side. Nothing is
+  tested, so it says nothing about the code. Seen on runs 43832118965 (vs2022 and
+  vs2026 pairs, first attempt) and 45454575691 (vs2022 and arm64 pairs on attempt
+  1, the arm64 pair again on a `rerun --failed`), so it is neither rare nor tied
+  to one platform.
+
+  It looks like develop's AGENTS.md → "Known multicomputer overlay failure modes"
+  third bullet, but it is not that: that one was a re-run picking up a dead
+  runner's rendezvous artifact, and here the keys and endpoints each side
+  configured are the peer's current ones, on first attempts too. Port
+  translation by the NAT is not the difference either, since passing pairs show
+  it as well. The working theory, **unverified**, is endpoint-dependent NAT
+  mapping on some runners, which `stun.py`'s single query cannot detect. What
+  was ruled out and how to check the theory is in
+  `evidence/2026-11-24-45454575691-wireguard-no-handshake`.
+
+  What to do with a red one: re-run. `rerun --failed` is sound when both halves
+  of the pair failed, which they do, but it can fail again, as the arm64 pair did.
+  Nothing has been done about the cause.
 - **A job timeout reports as `cancelled`, not `failure`.** GitHub kills a job that
   exceeds `timeout-minutes` with `##[error]The operation was canceled.`, so the
   *run* ends up "cancelled" and looks like somebody pressed the button. Check the
