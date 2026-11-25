@@ -1,0 +1,91 @@
+# THROWAWAY SPIKE - do not merge to develop.
+#
+# Since mid-November 2026 the multicomputer pairs in ci.yml often fail to bring up
+# their WireGuard tunnel: both sides send handshakes to the other's STUN-mapped
+# endpoint and receive nothing ("0 B received"). See the test-status branch,
+# ANALYSIS.md -> "WireGuard handshake never completes". The working theory is a
+# NAT with endpoint-dependent mapping on some runners, which stun.py now checks
+# for by asking a second STUN server ("NAT mapping check:" in the log).
+#
+# This runs only the overlay, on the same runner types as ci.yml's multicomputer
+# pairs, several pairs at once so that failures turn up in one run, and in a few
+# minutes instead of the full CI's hours. It runs on push to spike/** only, which
+# ci.yml does not trigger on.
+name: spike-wireguard-nat
+
+on:
+  push:
+    branches: ['spike/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  MASTER_ADDR: 10.68.1.1
+
+jobs:
+  master:
+    name: nat-master-${{ matrix.platform }}-${{ matrix.rep }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        rep: [1, 2, 3]
+        platform: [ubuntu-noble-amd64, ubuntu-noble-arm64, vs2022, vs2026]
+        include:
+          - platform: ubuntu-noble-amd64
+            runner: ubuntu-24.04
+          - platform: ubuntu-noble-arm64
+            runner: ubuntu-24.04-arm
+          - platform: vs2022
+            runner: windows-2022
+          - platform: vs2026
+            runner: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Establish WireGuard overlay (master side)
+        uses: ./.github/actions/wireguard-overlay
+        with:
+          my-role: master-${{ matrix.platform }}-${{ matrix.rep }}
+          peer-role: slaves-${{ matrix.platform }}-${{ matrix.rep }}
+          wg-address: ${{ env.MASTER_ADDR }}/32
+          peer-allowed-ips: 10.68.0.0/16
+          verify-peer-ip: 10.68.1.2
+          github-token: ${{ github.token }}
+          peer-job-name: nat-slaves (for ${{ matrix.platform }}-${{ matrix.rep }})
+
+  slaves:
+    name: nat-slaves (for ${{ matrix.platform }}-${{ matrix.rep }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        rep: [1, 2, 3]
+        platform: [ubuntu-noble-amd64, ubuntu-noble-arm64, vs2022, vs2026]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Establish WireGuard overlay (slaves side)
+        uses: ./.github/actions/wireguard-overlay
+        with:
+          my-role: slaves-${{ matrix.platform }}-${{ matrix.rep }}
+          peer-role: master-${{ matrix.platform }}-${{ matrix.rep }}
+          wg-address: "10.68.1.2/32"
+          peer-allowed-ips: ${{ env.MASTER_ADDR }}/32
+          verify-peer-ip: ${{ env.MASTER_ADDR }}
+          github-token: ${{ github.token }}
+          peer-job-name: nat-master-${{ matrix.platform }}-${{ matrix.rep }}
