@@ -128,20 +128,25 @@ runs:
         "$WG" genkey > priv.key
         "$WG" pubkey < priv.key > pub.key
         echo "Public key: $(cat pub.key)"
-        # stun.py prints "<public-ip>:<public-port> <local-port>": it walks the
-        # candidate ports and reports which one it managed to bind, so WireGuard
-        # is configured to listen on that same port rather than on a fixed guess.
+        # stun.py prints "<public-ip>:<public-port> <local-port> <nat>": it walks
+        # the candidate ports and reports which one it managed to bind, so
+        # WireGuard is configured to listen on that same port rather than on a
+        # fixed guess, and whether our NAT maps endpoint-independently (see the
+        # punch step below for why that matters).
         # Command substitution, not process substitution: under `set -e` this
         # aborts the step if stun.py exits non-zero (a `read < <(...)` would
         # silently succeed with empty values and configure a broken tunnel).
         stun_out="$("$PY" "$GITHUB_ACTION_PATH/stun.py" "$WG_PORTS")"
-        read -r mapped chosen_port <<< "$stun_out"
-        echo "Mapped (public) endpoint: $mapped (local UDP port $chosen_port)"
+        read -r mapped chosen_port nat <<< "$stun_out"
+        echo "Mapped (public) endpoint: $mapped (local UDP port $chosen_port, NAT mapping $nat)"
         # Handed to the tunnel steps through a file rather than GITHUB_ENV: the
         # value never leaves this action, and writing to GITHUB_ENV trips
         # zizmor's github-env audit for no benefit here.
         echo "$chosen_port" > wg_port.txt
-        echo "$(cat pub.key) $mapped" > endpoint.txt
+        echo "$nat" > nat.txt
+        # The NAT kind travels with the endpoint so that both sides can make the
+        # same decision in the punch step without any further exchange.
+        echo "$(cat pub.key) $mapped $nat" > endpoint.txt
         echo "endpoint.txt: $(cat endpoint.txt)"
 
     # The run ATTEMPT is part of the name, not decoration. Artifacts are scoped to
@@ -239,6 +244,72 @@ runs:
         echo "Timed out after ${PEER_WAIT_MINUTES}m waiting for peer endpoint" \
              "(peer job status: ${status:-unknown})"
         exit 1
+
+    # The plain punch below needs both NATs to map endpoint-independently, so
+    # that the endpoint each side published is the one the other side's traffic
+    # actually arrives from. Since late 2026 GitHub runs some Linux runners on AWS,
+    # whose NAT gateway maps per destination with a random port, and one such side
+    # is enough to break it: both sides send handshakes and receive nothing.
+    # (Windows runners are not affected; see GitHub's 2026-10-28 changelog,
+    # "GitHub Actions adds multi-cloud compute", and the test-status branch's
+    # ANALYSIS.md, "WireGuard handshake never completes".)
+    #
+    # - Neither side endpoint-dependent: nothing to do here.
+    # - One side: punch.py finds a working port pair by the birthday paradox, and
+    #   the tunnel steps below use it - the hard side listens on the local port
+    #   that got through, the easy side sends to the public port it came from.
+    # - Both sides: no direct path can realistically be found (Tailscale puts it
+    #   at 28 minutes of probing for 99.9%), so fail now, saying why, instead of
+    #   timing out in the handshake wait three minutes later.
+    # Both sides reach the same conclusion from the same two endpoint files.
+    - name: Punch through an endpoint-dependent NAT, if either side is behind one
+      shell: bash
+      env:
+        MY_ROLE: ${{ inputs.my-role }}
+        PEER_ROLE: ${{ inputs.peer-role }}
+      run: |
+        set -euo pipefail
+        if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
+        my_nat="$(cat nat.txt)"
+        # An endpoint published by an older version of this action has no third
+        # field; treat it like an unknown NAT, i.e. try the plain punch.
+        peer_nat="$(awk '{print $3}' peer/endpoint.txt)"
+        peer_nat="${peer_nat:-unknown}"
+        echo "NAT mapping: mine $my_nat, peer's $peer_nat"
+
+        if [ "$my_nat" = dependent ] && [ "$peer_nat" = dependent ]; then
+          echo "::error::Both runners are behind a NAT with endpoint-dependent mapping" \
+               "(GitHub's AWS-hosted Linux runners are), and no direct WireGuard tunnel" \
+               "can be punched between two of them. This is the runner placement, not the" \
+               "code under test: re-run the pair."
+          exit 1
+        elif [ "$my_nat" = dependent ]; then
+          role=hard
+        elif [ "$peer_nat" = dependent ]; then
+          role=easy
+        else
+          echo "No endpoint-dependent NAT on either side; the plain punch will do."
+          exit 0
+        fi
+
+        # Both sides must use the same token, and nothing from another pair or an
+        # earlier attempt may match it. The roles are sorted so that both sides
+        # build the same string.
+        token="$(printf '%s\n' "$MY_ROLE" "$PEER_ROLE" | sort | tr '\n' '-')${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+        peer_endpoint="$(awk '{print $2}' peer/endpoint.txt)"
+        peer_ip="${peer_endpoint%:*}"
+        peer_port="${peer_endpoint##*:}"
+        echo "Punching as the $role side (token $token)"
+        if [ "$role" = hard ]; then
+          local_port="$("$PY" "$GITHUB_ACTION_PATH/punch.py" hard "$peer_ip" "$peer_port" "$token")"
+          echo "WireGuard will listen on local port $local_port, the one that got through"
+          echo "$local_port" > wg_port.txt
+        else
+          hard_endpoint="$("$PY" "$GITHUB_ACTION_PATH/punch.py" easy "$(cat wg_port.txt)" "$peer_ip" "$token")"
+          echo "WireGuard will send to $hard_endpoint, the port that got through"
+          awk -v ep="$hard_endpoint" '{ $2 = ep; print }' peer/endpoint.txt > peer/endpoint.new
+          mv peer/endpoint.new peer/endpoint.txt
+        fi
 
     - name: Bring up the WireGuard tunnel (Linux)
       if: runner.os == 'Linux'
