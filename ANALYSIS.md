@@ -367,6 +367,51 @@ these so you don't hunt for a nonexistent test regression:
   (45418635225) and failed (45454575691), so neither the action nor the image
   version explains the onset.
 
+  **Which labels, and what GitHub says.** Spike run 45707752715 probed 10
+  runners per label (2026-11-25): `ubuntu-24.04` and `ubuntu-latest` landed on
+  AWS 3 of 10 times each; `ubuntu-22.04`, `ubuntu-24.04-arm`, `windows-2022` and
+  `windows-2025-vs2026` never did. NAT type and cloud matched on all 60 probes.
+  The share swings: the pair spike the day before had 10 of 12 `ubuntu-24.04`
+  slaves runners on AWS. GitHub announced this on 2026-10-28 ("GitHub Actions
+  adds multi-cloud compute to improve reliability", github.blog changelog):
+  standard 2- and 4-core Linux runners may run on AWS; Windows and runners with
+  private networking are excluded; Free, Pro and Team plans get it
+  automatically, with no opt-out and no way to pin a job to Azure. Arm64 and
+  22.04 are not excluded in writing, so their clean survey is probably only how
+  far the rollout has got - moving the slaves to `ubuntu-22.04` would buy time,
+  not fix it. The announcement says nothing about NAT; its only networking note
+  is about IP allowlists.
+
+  **Has anyone else hit it?** Not that we found (searched 2026-11-26). The only
+  related report is actions/runner-images#15347, mangled `/etc/hosts` on AWS
+  runners, whose log header shows how to tell: the "Runner Image Provisioner"
+  group prints `Cloud: AWS`. Tailscale documents the NAT itself ("NAT traversal
+  improvements, pt. 2: cloud environments", 2025): the AWS NAT gateway is
+  "always symmetric. Each connection gets a randomized source port,
+  per-destination", and two peers behind it "almost never" get a direct tunnel.
+  Runners still have no IPv6 (actions/runner-images#668), so that is no way
+  around it either.
+
+  **What can be done, and what was chosen.** From Tailscale's "How NAT traversal
+  works" (2020):
+  - One endpoint-dependent side: the birthday-paradox punch. The hard side opens
+    256 sockets towards the easy side's endpoint, each getting its own random
+    public port; the easy side probes random ports on the hard side's IP. 1024
+    probes give a 98% chance, 2048 give 99.9%, about 20 s at 100 probes/s. The
+    easy side's probes are also what open its own port-restricted filter, so it
+    fits the Azure side here. **Being implemented** on `spike/wireguard-nat`
+    (punch.py in the overlay action), together with a fail-fast that publishes
+    each side's NAT type and stops at once when both are hard.
+  - Both sides endpoint-dependent: not punchable in practice (0.01% after 20 s,
+    28 minutes for 99.9%). Only the `ubuntu-noble-amd64` pairing can get two AWS
+    sides, since the other masters are Windows or arm64. Options: keep that
+    master off AWS (noble in a container on a non-AWS host), one-runner
+    topology, or a re-run when the fail-fast trips. Not decided.
+  - A relay is what everyone uses for hard-to-hard, but needs an account or a
+    server of our own. Carrying WireGuard over `wstunnel` through an accountless
+    Cloudflare quick tunnel was considered and not pursued: unverified,
+    TCP-encapsulated, and a third-party free service.
+
   What to do with a red one: re-run. `rerun --failed` is sound when both halves
   of the pair failed, which they do, but it can fail again, as the arm64 pair did
   and as a full re-run did: a re-run only helps if both runners it gets are on
