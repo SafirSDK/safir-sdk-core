@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Dependency-free STUN (RFC 5389) client, bound to a fixed UDP source port.
 
-Prints "<public-ip>:<public-port> <local-port>": the endpoint the outside world
-maps our source port to, plus the local port we actually bound. We bind to the
-SAME port WireGuard will listen on so the NAT mapping we learn is the one the
-peer will actually see. On a cone NAT WireGuard reuses this mapping (the punch
-works); on a symmetric NAT the mapping differs per destination and the punch
-fails - in practice GitHub-hosted (Azure) runners punch cleanly.
+Prints "<public-ip>:<public-port> <local-port> <nat>": the endpoint the outside
+world maps our source port to, the local port we actually bound, and what kind
+of NAT we are behind. We bind to the SAME port WireGuard will listen on so the
+NAT mapping we learn is the one the peer will actually see. On a cone NAT
+WireGuard reuses this mapping and a plain punch works; on a symmetric NAT the
+mapping differs per destination, so the endpoint we learn is not the one the
+peer will see. <nat> is "independent" or "dependent" (endpoint-independent or
+-dependent mapping, found by asking a second STUN server at another address), or
+"unknown" if no second server answered. GitHub's Azure runners are independent;
+the runners it has hosted on AWS since late 2026 are dependent, and the overlay
+action has to punch differently when one side is (see punch.py).
 
 Several candidate local ports may be given, tried in order. This matters on
 Windows runners: a port inside the dynamic range (49152-65535 by default) can be
@@ -88,8 +93,44 @@ def bind(port):
         return None
 
 
+def check_mapping(sock, port, first_host, mapped):
+    """Ask a second server, at a different address, for the mapping of the same socket.
+
+    A plain punch only works if the NAT gives our source port the same public
+    port whoever we talk to (endpoint-independent mapping), because the mapping
+    we publish is the one the STUN server saw, not the one the peer will see. A
+    NAT that maps per destination looks exactly like a friendly one to a single
+    query, so compare two, say so plainly in the log when they disagree, and
+    return "independent", "dependent" or "unknown".
+    """
+    try:
+        first_ip = socket.gethostbyname(first_host)
+    except (socket.gaierror, OSError):
+        return "unknown"
+    for host, sport in DEFAULT_SERVERS:
+        try:
+            if socket.gethostbyname(host) == first_ip:
+                continue
+            other = query(sock, host, sport)
+        except (socket.gaierror, OSError) as exc:
+            sys.stderr.write(f"NAT mapping check: STUN {host}:{sport} failed: {exc}\n")
+            continue
+        if not other:
+            continue
+        if other == mapped:
+            sys.stderr.write(f"NAT mapping check: {host}:{sport} also maps local port {port} "
+                             f"to {other} - endpoint-independent mapping\n")
+            return "independent"
+        sys.stderr.write(f"NAT mapping check: {first_host} saw {mapped} but {host}:{sport} saw "
+                         f"{other} for local port {port} - ENDPOINT-DEPENDENT mapping, the "
+                         f"peer will not reach the endpoint we publish\n")
+        return "dependent"
+    sys.stderr.write("NAT mapping check: no second STUN server at a different address answered\n")
+    return "unknown"
+
+
 def discover(port):
-    """Return the public endpoint for <port>, or None if this port is unusable."""
+    """Return (public endpoint, NAT kind) for <port>, or None if this port is unusable."""
     sock = bind(port)
     if sock is None:
         return None
@@ -102,7 +143,7 @@ def discover(port):
                 continue
             if mapped:
                 sys.stderr.write(f"STUN mapping from {host}:{sport} on local port {port}\n")
-                return mapped
+                return mapped, check_mapping(sock, port, host, mapped)
             sys.stderr.write(f"STUN {host}:{sport} gave no mapped address\n")
         return None
     finally:
@@ -112,7 +153,8 @@ def discover(port):
 for candidate in PORTS:
     result = discover(candidate)
     if result:
-        print(f"{result} {candidate}")
+        mapped, nat = result
+        print(f"{mapped} {candidate} {nat}")
         sys.exit(0)
     sys.stderr.write(f"local port {candidate} yielded no mapping, trying the next one\n")
 

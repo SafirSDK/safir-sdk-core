@@ -866,9 +866,9 @@ downloads. This restored what the retired Jenkins pipeline archived as
 
 #### Known multicomputer overlay failure modes
 
-All three of these are mitigated in `.github/actions/wireguard-overlay`; the
-symptoms are worth recognising because none of them implicates the code under
-test. The first two bit on the 7.4.3-alpha4 run.
+All four of these are handled in `.github/actions/wireguard-overlay` (the last
+one only partly); the symptoms are worth recognising because none of them
+implicates the code under test. The first two bit on the 7.4.3-alpha4 run.
 
 - **`Timed out waiting for peer endpoint`** — scheduling skew, as above. The wait
   is now a wall-clock window (`peer-wait-minutes`, default 25) instead of a fixed
@@ -904,6 +904,35 @@ test. The first two bit on the 7.4.3-alpha4 run.
   already completed without publishing an endpoint" rather than hanging — a fast
   and clear failure, but the only way to re-test that pair is to re-run the whole
   workflow.
+- **Both sides report `0 B received`, on a first attempt, since mid-November
+  2026** — not the re-run problem above: the keys and endpoints are the peer's
+  current ones. Since 2026-10-28 GitHub runs some standard Linux runners on AWS
+  ("GitHub Actions adds multi-cloud compute", github.blog changelog; automatic on
+  Free and Team plans, no opt-out, Windows excluded). The AWS NAT gateway maps
+  **endpoint-dependently** with a random public port per destination, so the
+  endpoint such a runner publishes is not the one its traffic arrives from, and
+  the Azure side drops it. One AWS side breaks a plain punch; in practice it is
+  usually the `ubuntu-24.04` slaves runner. You can tell from the job log: the
+  "Runner Image Provisioner" group prints `Cloud: AWS`, and stun.py logs a
+  `NAT mapping check:` line saying `ENDPOINT-DEPENDENT`.
+
+  stun.py now asks a second STUN server to classify the NAT, each side publishes
+  the result with its endpoint, and the action decides:
+  - neither side endpoint-dependent: the plain punch, unchanged;
+  - one side: `punch.py` finds a working port pair with the birthday-paradox
+    technique from Tailscale's "How NAT traversal works" (256 sockets on the hard
+    side, random probes from the easy side; seconds, not minutes), and WireGuard
+    is pointed at that pair;
+  - both sides: the step fails at once with `::error::Both runners are behind a
+    NAT with endpoint-dependent mapping`. No direct path can realistically be
+    punched between two AWS runners, so this is **not fixed**, only made quick
+    and legible; re-run the pair. Only the `ubuntu-noble-amd64` pairing can get
+    there, since the other masters are Windows or arm64, which were not on AWS
+    when this was written - but arm64 is not excluded in GitHub's announcement,
+    so that may change.
+
+  The full investigation (label survey, spike runs, what was ruled out) is on
+  the test-status branch, `ANALYSIS.md` → "WireGuard handshake never completes".
 
 #### The UDP mesh probe (#619)
 
