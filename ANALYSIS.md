@@ -399,9 +399,13 @@ these so you don't hunt for a nonexistent test regression:
     public port; the easy side probes random ports on the hard side's IP. 1024
     probes give a 98% chance, 2048 give 99.9%, about 20 s at 100 probes/s. The
     easy side's probes are also what open its own port-restricted filter, so it
-    fits the Azure side here. **Being implemented** on `spike/wireguard-nat`
-    (punch.py in the overlay action), together with a fail-fast that publishes
-    each side's NAT type and stops at once when both are hard.
+    fits the Azure side here. **Implemented and working** (punch.py in the
+    overlay action, on `private/wireguard-nat-punch`, commit 065af2a21), with a
+    fail-fast that publishes each side's NAT type and stops at once when both
+    are hard. Spike runs 45720997026, 45764312825, 45764354203 and 45764395527
+    (48 pairs): all 19 pairs with one AWS side came up through the punch in 0.1
+    to 15 s, where 10 of 10 had failed without it; the 2 pairs with two AWS
+    sides, both `ubuntu-noble-amd64`, stopped in 34 to 93 s with the new error.
   - Both sides endpoint-dependent: not punchable in practice (0.01% after 20 s,
     28 minutes for 99.9%). Only the `ubuntu-noble-amd64` pairing can get two AWS
     sides, since the other masters are Windows or arm64. Options: keep that
@@ -415,7 +419,12 @@ these so you don't hunt for a nonexistent test regression:
   What to do with a red one: re-run. `rerun --failed` is sound when both halves
   of the pair failed, which they do, but it can fail again, as the arm64 pair did
   and as a full re-run did: a re-run only helps if both runners it gets are on
-  Azure. No fix has been chosen yet; the work is on `spike/wireguard-nat`.
+  Azure. Once the punch (065af2a21) is on develop, only a pair with **two** AWS
+  sides can still fail, and it says so in its own `::error::` line ("Both
+  runners are behind a NAT with endpoint-dependent mapping") within a minute or
+  two; re-running that pair is then the right call. If the old symptom (both
+  sides `0 B received` after the handshake wait) turns up on a branch that has
+  the punch, it is something new.
 - **A job timeout reports as `cancelled`, not `failure`.** GitHub kills a job that
   exceeds `timeout-minutes` with `##[error]The operation was canceled.`, so the
   *run* ends up "cancelled" and looks like somebody pressed the button. Check the
